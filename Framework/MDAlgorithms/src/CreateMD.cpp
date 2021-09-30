@@ -454,7 +454,7 @@ CreateMD::single_run(const Mantid::API::MatrixWorkspace_sptr &input_workspace, c
     addSampleLog(input_workspace, "psi", psi);
     setGoniometer(input_workspace);
 
-    return convertToMD(input_workspace, emode, in_place, filebackend_filename, filebackend, std::move(out_mdws));
+    return convertToMD(input_workspace, emode, in_place, filebackend_filename, filebackend, out_mdws);
   }
 }
 

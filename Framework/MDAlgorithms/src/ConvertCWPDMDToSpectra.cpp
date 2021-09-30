@@ -232,7 +232,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
-  binMD(std::move(monitorws), unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
+  binMD(monitorws, unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
 
   // Normalize by division
   double maxmonitorcounts = 0;

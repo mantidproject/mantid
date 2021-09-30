@@ -29,7 +29,7 @@ Message::Message() : QObject(), m_text(), m_priority(Priority::PRIO_NOTICE), m_s
  * string if no script applicable
  */
 Message::Message(QString text, Priority priority, const QString &scriptPath)
-    : QObject(), m_text(std::move(text)), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
+    : QObject(), m_text(std::move(text)), m_priority(priority), m_scriptPath(scriptPath) {}
 
 /**
  * @param text A std::string containing the message text
@@ -38,7 +38,7 @@ Message::Message(QString text, Priority priority, const QString &scriptPath)
  * string if no script applicable
  */
 Message::Message(const std::string &text, Priority priority, const QString &scriptPath)
-    : QObject(), m_text(QString::fromStdString(text)), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
+    : QObject(), m_text(QString::fromStdString(text)), m_priority(priority), m_scriptPath(scriptPath) {}
 
 /**
  * @param text A c-style string containing the message text
@@ -47,7 +47,7 @@ Message::Message(const std::string &text, Priority priority, const QString &scri
  * string if no script applicable
  */
 Message::Message(const char *text, Priority priority, const QString &scriptPath)
-    : QObject(), m_text(text), m_priority(priority), m_scriptPath(std::move(scriptPath)) {}
+    : QObject(), m_text(text), m_priority(priority), m_scriptPath(scriptPath) {}
 
 /**
  * Construct a message from another object

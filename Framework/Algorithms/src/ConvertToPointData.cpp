@@ -51,7 +51,7 @@ size_t ConvertToPointData::getNewXSize(const std::size_t ySize) const { return y
  */
 Kernel::cow_ptr<HistogramData::HistogramX>
 ConvertToPointData::calculateXPoints(Kernel::cow_ptr<HistogramData::HistogramX> inputX) const {
-  return HistogramData::Points(HistogramData::BinEdges(std::move(inputX))).cowData();
+  return HistogramData::Points(HistogramData::BinEdges(inputX)).cowData();
 }
 } // namespace Algorithms
 } // namespace Mantid

@@ -590,7 +590,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
  */
 double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws, const double prominence) {
   std::vector<double> peak_x, peak_y, peak_e;
-  calculatePeakWidthAtHalfHeight(std::move(monitor_ws), prominence, peak_x, peak_y, peak_e);
+  calculatePeakWidthAtHalfHeight(monitor_ws, prominence, peak_x, peak_y, peak_e);
 
   // Area
   double area(0.0), dummy(0.0);

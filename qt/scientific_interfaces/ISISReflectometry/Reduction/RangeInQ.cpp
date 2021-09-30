@@ -13,7 +13,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 RangeInQ::RangeInQ(boost::optional<double> min, boost::optional<double> step, boost::optional<double> max)
-    : m_min(std::move(min)), m_step(std::move(step)), m_max(std::move(max)) {
+    : m_min(min), m_step(step), m_max(max) {
   assert(!(m_min.is_initialized() && m_max.is_initialized() && m_max < m_min));
 }
 

@@ -31,9 +31,8 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, S
                        // cppcheck-suppress passedByValue
                        LookupTable lookupTable)
     : m_analysisMode(analysisMode), m_reductionType(reductionType), m_summationType(summationType),
-      m_includePartialBins(includePartialBins), m_debug(debug),
-      m_backgroundSubtraction(std::move(backgroundSubtraction)),
-      m_polarizationCorrections(std::move(polarizationCorrections)), m_floodCorrections(std::move(floodCorrections)),
+      m_includePartialBins(includePartialBins), m_debug(debug), m_backgroundSubtraction(backgroundSubtraction),
+      m_polarizationCorrections(polarizationCorrections), m_floodCorrections(std::move(floodCorrections)),
       m_transmissionStitchOptions(std::move(transmissionStitchOptions)),
       m_stitchParameters(std::move(stitchParameters)), m_lookupTable(std::move(lookupTable)) {}
 

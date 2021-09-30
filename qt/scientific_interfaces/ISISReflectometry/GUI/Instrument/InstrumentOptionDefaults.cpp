@@ -51,7 +51,7 @@ Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto detectorCorrections = DetectorCorrections(defaults.getBoolOrTrue("CorrectDetectors", "CorrectDetectors"),
                                                  detectorCorrectionTypeFromString(detectorCorrectionString));
 
-  return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
+  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections);
 }
 } // unnamed namespace
 

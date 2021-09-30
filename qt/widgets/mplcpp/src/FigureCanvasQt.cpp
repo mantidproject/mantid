@@ -47,7 +47,7 @@ Python::Object createPyCanvas(const int subplotspec, const QString &projection) 
 
   if (subplotspec > 0)
     fig.addSubPlot(subplotspec, projection);
-  return createPyCanvasFromFigure(std::move(fig));
+  return createPyCanvasFromFigure(fig);
 }
 } // namespace
 

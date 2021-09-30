@@ -443,7 +443,7 @@ double FitOneSinglePeak::fitPeakFunction(const API::IPeakFunction_sptr &peakfunc
 
   m_sstream << "Function (to fit): " << peakfunc->asString() << "  From " << startx << "  to " << endx << ".\n";
 
-  double goodness = fitFunctionSD(peakfunc, std::move(dataws), wsindex, startx, endx);
+  double goodness = fitFunctionSD(peakfunc, dataws, wsindex, startx, endx);
 
   return goodness;
 }

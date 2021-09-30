@@ -210,7 +210,7 @@ double PoldiTruncateData::getMinimumExtraTimeValue(size_t calculatedBinCount) {
 MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(const MatrixWorkspace_sptr &workspace) {
   double maximumXValue = getMaximumTimeValue(getCalculatedBinCount());
 
-  return getWorkspaceBelowX(std::move(workspace), maximumXValue);
+  return getWorkspaceBelowX(workspace, maximumXValue);
 }
 
 /** Returns a MatrixWorkspace with all extra counts
@@ -235,7 +235,7 @@ MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(const MatrixWorkspac
  */
 MatrixWorkspace_sptr PoldiTruncateData::getExtraCountsWorkspace(const MatrixWorkspace_sptr &workspace) {
   double minimumXValue = getMinimumExtraTimeValue(getCalculatedBinCount());
-  MatrixWorkspace_sptr croppedOutput = getWorkspaceAboveX(std::move(workspace), minimumXValue);
+  MatrixWorkspace_sptr croppedOutput = getWorkspaceAboveX(workspace, minimumXValue);
 
   return getSummedSpectra(croppedOutput);
 }
@@ -247,7 +247,7 @@ MatrixWorkspace_sptr PoldiTruncateData::getExtraCountsWorkspace(const MatrixWork
  *  @return MatrixWorkspace cropped to values with x < specified limit.
  */
 MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceBelowX(const MatrixWorkspace_sptr &workspace, double x) {
-  Algorithm_sptr crop = getCropAlgorithmForWorkspace(std::move(workspace));
+  Algorithm_sptr crop = getCropAlgorithmForWorkspace(workspace);
   crop->setProperty("XMax", x);
 
   return getOutputWorkspace(crop);
@@ -261,7 +261,7 @@ MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceBelowX(const MatrixWorkspace
  *  @return MatrixWorkspace cropped to values with x >= specified limit.
  */
 MatrixWorkspace_sptr PoldiTruncateData::getWorkspaceAboveX(const MatrixWorkspace_sptr &workspace, double x) {
-  Algorithm_sptr crop = getCropAlgorithmForWorkspace(std::move(workspace));
+  Algorithm_sptr crop = getCropAlgorithmForWorkspace(workspace);
   crop->setProperty("Xmin", x);
 
   return getOutputWorkspace(crop);

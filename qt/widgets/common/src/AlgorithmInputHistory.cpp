@@ -24,7 +24,7 @@ using namespace MantidQt::API;
  * Constructor
  */
 AbstractAlgorithmInputHistory::AbstractAlgorithmInputHistory(const QString &settingsGroup)
-    : m_lastInput(), m_previousDirectory(""), m_algorithmsGroup(std::move(settingsGroup)), m_dirKey("LastDirectory") {
+    : m_lastInput(), m_previousDirectory(""), m_algorithmsGroup(settingsGroup), m_dirKey("LastDirectory") {
   // Fill the stored map from the QSettings information
   load();
 }

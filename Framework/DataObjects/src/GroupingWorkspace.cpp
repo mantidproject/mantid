@@ -33,8 +33,7 @@ GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors,
  * @param inst :: input instrument that is the base for this workspace
  * @return created GroupingWorkspace
  */
-GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst)
-    : SpecialWorkspace2D(std::move(inst)) {}
+GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
 //----------------------------------------------------------------------------------------------
 /** Fill a map with key = detector ID, value = group number

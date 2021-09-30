@@ -17,8 +17,7 @@ LookupRow::LookupRow(boost::optional<double> theta,
                      boost::optional<double> scaleFactor,
                      boost::optional<ProcessingInstructions> processingInstructions,
                      boost::optional<ProcessingInstructions> backgroundProcessingInstructions)
-    : m_theta(std::move(theta)), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
-      m_scaleFactor(std::move(scaleFactor)),
+    : m_theta(theta), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(qRange), m_scaleFactor(scaleFactor),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
       m_processingInstructions(std::move(processingInstructions)),
       m_backgroundProcessingInstructions(std::move(backgroundProcessingInstructions)) {}

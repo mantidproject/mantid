@@ -273,13 +273,13 @@ MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
                                                 const MatrixWorkspace_sptr &resolutionWorkspace,
                                                 const std::string &rebinParams) {
   workspace = normalizedFourierTransform(workspace, rebinParams);
-  return divide(workspace, std::move(resolutionWorkspace));
+  return divide(workspace, resolutionWorkspace);
 }
 
 MatrixWorkspace_sptr CalculateIqt::doSimulation(MatrixWorkspace_sptr sample, const MatrixWorkspace_sptr &resolution,
                                                 const std::string &rebinParams, MersenneTwister &mTwister) {
   auto simulatedWorkspace = randomizeWorkspaceWithinError(std::move(sample), mTwister);
-  return calculateIqt(simulatedWorkspace, std::move(resolution), rebinParams);
+  return calculateIqt(simulatedWorkspace, resolution, rebinParams);
 }
 
 MatrixWorkspace_sptr

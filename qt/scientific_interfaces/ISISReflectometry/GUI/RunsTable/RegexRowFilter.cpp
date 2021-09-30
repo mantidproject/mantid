@@ -14,7 +14,7 @@ using MantidQt::MantidWidgets::Batch::IJobTreeView;
 using MantidQt::MantidWidgets::Batch::RowLocation;
 
 RegexFilter::RegexFilter(const boost::regex &regex, IJobTreeView const &view, ReductionJobs const &jobs)
-    : m_filter(std::move(regex)), m_view(view), m_jobs(jobs) {}
+    : m_filter(regex), m_view(view), m_jobs(jobs) {}
 
 bool RegexFilter::rowMeetsCriteria(RowLocation const &location) const {
   if (location.isRoot()) {

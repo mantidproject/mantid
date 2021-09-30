@@ -17,7 +17,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView *view)
-    : m_view(std::move(view)), m_adapter(std::make_unique<ADSAdapter>()) {}
+    : m_view(view), m_adapter(std::make_unique<ADSAdapter>()) {}
 
 WorkspacePresenter::~WorkspacePresenter() {}
 

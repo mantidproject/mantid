@@ -36,7 +36,7 @@ double readInstrumentParameter(const std::string &parameter, const API::MatrixWo
  * Return the detector ID corresponding to the [x,y] pixel coordinates.
  */
 int getDetectorFromPixel(const int &pixel_x, const int &pixel_y, const API::MatrixWorkspace_sptr &dataWS) {
-  int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", std::move(dataWS)));
+  int ny_pixels = static_cast<int>(readInstrumentParameter("number-of-y-pixels", dataWS));
   return ny_pixels * pixel_x + pixel_y;
 }
 
@@ -76,7 +76,7 @@ void getPixelFromCoordinate(const double &x, const double &y, const API::MatrixW
  * of real-space coordinates (0,0).
  */
 void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS, double &pixel_x, double &pixel_y) {
-  getPixelFromCoordinate(0.0, 0.0, std::move(dataWS), pixel_x, pixel_y);
+  getPixelFromCoordinate(0.0, 0.0, dataWS, pixel_x, pixel_y);
 }
 
 } // namespace EQSANSInstrument

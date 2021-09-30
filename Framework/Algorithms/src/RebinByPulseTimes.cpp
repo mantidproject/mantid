@@ -62,8 +62,8 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspa
     outputWS->setSharedX(i, x);
 
     // Copy the data over.
-    outputWS->mutableY(i) = std::move(y_data);
-    outputWS->mutableE(i) = std::move(e_data);
+    outputWS->mutableY(i) = y_data;
+    outputWS->mutableE(i) = e_data;
 
     // Report progress
     prog.report(name());

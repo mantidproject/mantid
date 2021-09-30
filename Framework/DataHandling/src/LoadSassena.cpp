@@ -155,7 +155,7 @@ HistogramData::Points LoadSassena::loadQvectors(const hid_t &h5file, const API::
 
   ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer"); // Set the Units
 
-  this->registerWorkspace(std::move(gws), wsName, ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
+  this->registerWorkspace(gws, wsName, ws, "X-axis: origin of Q-vectors; Y-axis: tip of Q-vectors");
   return HistogramData::Points(std::move(qvmod));
 }
 
@@ -202,8 +202,7 @@ void LoadSassena::loadFQ(const hid_t &h5file, const API::WorkspaceGroup_sptr &gw
   // Set the Units
   ws->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("MomentumTransfer");
 
-  this->registerWorkspace(std::move(gws), wsName, ws,
-                          "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
+  this->registerWorkspace(gws, wsName, ws, "X-axis: Q-vector modulus; Y-axis: intermediate structure factor");
 }
 
 /**

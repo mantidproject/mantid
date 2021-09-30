@@ -38,7 +38,7 @@ GridDetectorPixel::GridDetectorPixel(const GridDetectorPixel *base, const Parame
 GridDetectorPixel::GridDetectorPixel(const std::string &name, int id, const std::shared_ptr<IObject> &shape,
                                      IComponent *parent, const GridDetector *panel, size_t col, size_t row,
                                      size_t layer)
-    : Detector(name, id, std::move(shape), parent), m_panel(panel), m_col(col), m_row(row), m_layer(layer) {
+    : Detector(name, id, shape, parent), m_panel(panel), m_col(col), m_row(row), m_layer(layer) {
   if (!m_panel)
     throw std::runtime_error("GridDetectorPixel::ctor(): pixel " + name + " has no valid GridDetector parent.");
 }

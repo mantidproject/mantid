@@ -79,7 +79,7 @@ void ALFCustomInstrumentView::setupAnalysisPane(MantidWidgets::IPlotFitAnalysisP
   BaseCustomInstrumentView::setupInstrumentAnalysisSplitters(analysis->getQWidget());
 }
 
-void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(std::move(wsName)); }
+void ALFCustomInstrumentView::addSpectrum(const std::string &wsName) { m_analysisPane->addSpectrum(wsName); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

@@ -96,7 +96,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getPeakCollectionsFromInp
   TableWorkspace_sptr peakTable = std::dynamic_pointer_cast<TableWorkspace>(peakWorkspace);
   if (peakTable) {
     try {
-      peakCollections.emplace_back(getPeakCollection(std::move(peakTable)));
+      peakCollections.emplace_back(getPeakCollection(peakTable));
     } catch (const std::runtime_error &) {
       // do nothing
     }
@@ -113,7 +113,7 @@ std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getPeakCollectionsFromInp
 
       if (peakTable) {
         try {
-          peakCollections.emplace_back(getPeakCollection(std::move(peakTable)));
+          peakCollections.emplace_back(getPeakCollection(peakTable));
         } catch (const std::runtime_error &) {
           // do nothing
         }

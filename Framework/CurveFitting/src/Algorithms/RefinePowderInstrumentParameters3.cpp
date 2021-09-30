@@ -801,7 +801,7 @@ double RefinePowderInstrumentParameters3::calculateFunctionError(const IFunction
   double chi2;
   string fitstatus;
   const std::string minimizer = "Levenberg-MarquardtMD";
-  bool fitOK = doFitFunction(function, std::move(dataws), wsindex, minimizer, 0, chi2, fitstatus);
+  bool fitOK = doFitFunction(function, dataws, wsindex, minimizer, 0, chi2, fitstatus);
 
   if (!fitOK) {
     g_log.warning() << "Fit by " << minimizer << " with 0 iterations failed, with reason: " << fitstatus << "\n";

@@ -977,7 +977,7 @@ double LeBailFunction::getPeakParameter(std::vector<int> hkl, const std::string 
 
   IPowderDiffPeakFunction_sptr peak = fiter->second;
 
-  double parvalue = getPeakParameterValue(peak, std::move(parname));
+  double parvalue = getPeakParameterValue(peak, parname);
 
   return parvalue;
 }
@@ -995,7 +995,7 @@ double LeBailFunction::getPeakParameter(size_t index, const std::string &parname
   }
 
   IPowderDiffPeakFunction_sptr peak = m_vecPeaks[index];
-  double value = getPeakParameterValue(peak, std::move(parname));
+  double value = getPeakParameterValue(peak, parname);
 
   return value;
 }

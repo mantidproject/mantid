@@ -251,7 +251,7 @@ void SINQHMListener::readHMData(const IMDHistoWorkspace_sptr &ws) {
    * why....
    */
   idx = reinterpret_cast<coord_t *>(malloc(rank * sizeof(coord_t)));
-  recurseDim(data, std::move(ws), 0, idx);
+  recurseDim(data, ws, 0, idx);
 
   free(data);
   free(idx);

@@ -44,7 +44,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IR
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false),
-      m_jobRunner(new BatchJobRunner(std::move(model))) {
+      m_jobRunner(new BatchJobRunner(model)) {
 
   m_view->subscribe(this);
 

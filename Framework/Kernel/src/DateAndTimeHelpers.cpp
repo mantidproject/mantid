@@ -93,7 +93,7 @@ Types::Core::DateAndTime averageSorted(const std::vector<Types::Core::DateAndTim
   const int64_t first = times.begin()->totalNanoseconds();
   int64_t total =
       std::accumulate(times.begin(), times.end(), int64_t{0}, [first](int64_t a, const Types::Core::DateAndTime time) {
-        return std::move(a) + (time.totalNanoseconds() - first);
+        return a + (time.totalNanoseconds() - first);
       });
 
   double avg = static_cast<double>(total) / static_cast<double>(times.size());

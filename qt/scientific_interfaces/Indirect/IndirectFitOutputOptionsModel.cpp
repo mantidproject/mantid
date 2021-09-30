@@ -78,7 +78,7 @@ std::vector<std::string> extractParameterNames(const MatrixWorkspace_sptr &works
 }
 
 std::vector<std::string> extractParameterNames(const Workspace_sptr &workspace) {
-  return extractParameterNames(convertToMatrixWorkspace(std::move(workspace)));
+  return extractParameterNames(convertToMatrixWorkspace(workspace));
 }
 
 IAlgorithm_sptr saveNexusProcessedAlgorithm(const Workspace_sptr &workspace, std::string const &filename) {
@@ -310,7 +310,7 @@ void IndirectFitOutputOptionsModel::replaceFitResult(std::string const &inputNam
 void IndirectFitOutputOptionsModel::replaceFitResult(const MatrixWorkspace_sptr &inputWorkspace,
                                                      const MatrixWorkspace_sptr &singleFitWorkspace,
                                                      std::string const &outputName) {
-  auto const replaceAlg = replaceAlgorithm(std::move(inputWorkspace), std::move(singleFitWorkspace), outputName);
+  auto const replaceAlg = replaceAlgorithm(inputWorkspace, singleFitWorkspace, outputName);
   replaceAlg->execute();
   setOutputAsResultWorkspace(replaceAlg);
 }

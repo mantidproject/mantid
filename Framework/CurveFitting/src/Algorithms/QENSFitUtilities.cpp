@@ -51,7 +51,7 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit, IAlgorithm_sptr renameAlgorit
   };
 
   auto renamer = [&](const Workspace_sptr &workspace, const std::string &name) {
-    renameWorkspace(renameAlgorithm, std::move(workspace), name);
+    renameWorkspace(renameAlgorithm, workspace, name);
     renamerProg.report("Renamed workspace in group.");
   };
   renameWorkspacesWith(outputGroup, getName, renamer);

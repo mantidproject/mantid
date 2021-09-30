@@ -67,7 +67,7 @@ void IndirectFitDataPresenter::updateDataInTable() { m_tablePresenter->updateTab
 
 DataForParameterEstimationCollection
 IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
-  return m_model->getDataForParameterEstimation(std::move(selector));
+  return m_model->getDataForParameterEstimation(selector);
 }
 
 UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &validator) {

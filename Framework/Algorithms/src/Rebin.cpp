@@ -180,8 +180,8 @@ void Rebin::exec() {
         el.generateHistogram(XValues_new.rawData(), y_data, e_data);
 
         // Copy the data over.
-        outputWS->mutableY(i) = std::move(y_data);
-        outputWS->mutableE(i) = std::move(e_data);
+        outputWS->mutableY(i) = y_data;
+        outputWS->mutableE(i) = e_data;
 
         // Report progress
         prog.report(name());

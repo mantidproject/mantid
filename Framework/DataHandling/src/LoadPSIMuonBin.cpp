@@ -596,7 +596,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(DataObjects::Workspace2D_s
     const bool isSpace = name.find_first_not_of(" ") == std::string::npos;
     std::string label = isSpace ? "group_" + std::to_string(i + 1) : m_header.labelsOfHistograms[i];
 
-    addToSampleLog("Label Spectra " + std::to_string(i), std::move(label), outputWorkspace);
+    addToSampleLog("Label Spectra " + std::to_string(i), label, outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);

@@ -34,7 +34,7 @@ void showAsValid(QDoubleSpinBox &spinBox) { spinBox.setStyleSheet(""); }
 QtInstrumentView::QtInstrumentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent)
     : QWidget(parent) {
   initLayout();
-  registerSettingsWidgets(std::move(algorithmForTooltips));
+  registerSettingsWidgets(algorithmForTooltips);
 }
 
 void QtInstrumentView::subscribe(InstrumentViewSubscriber *notifyee) { m_notifyee = notifyee; }
@@ -110,7 +110,7 @@ void QtInstrumentView::enableDetectorCorrectionType() { m_ui.detectorCorrectionT
 void QtInstrumentView::disableDetectorCorrectionType() { m_ui.detectorCorrectionTypeComboBox->setEnabled(false); }
 
 void QtInstrumentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
-  registerInstrumentSettingsWidgets(std::move(alg));
+  registerInstrumentSettingsWidgets(alg);
 }
 
 void QtInstrumentView::registerInstrumentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {

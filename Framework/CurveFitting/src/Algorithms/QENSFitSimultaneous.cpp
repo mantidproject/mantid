@@ -511,7 +511,7 @@ void QENSFitSimultaneous::extractMembers(const WorkspaceGroup_sptr &resultGroupW
     workspaceNames.emplace_back(name);
   }
 
-  auto extractAlgorithm = extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
+  auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 

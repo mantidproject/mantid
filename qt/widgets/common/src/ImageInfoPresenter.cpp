@@ -18,9 +18,7 @@ namespace MantidWidgets {
  * Constructor
  * @param view A pointer to a view object that displays the information
  */
-ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_view(std::move(view)) {
-  m_view->setRowCount(2);
-}
+ImageInfoPresenter::ImageInfoPresenter(IImageInfoWidget *view) : m_model(), m_view(view) { m_view->setRowCount(2); }
 
 /**
  * @param x X position on an image of the workspace

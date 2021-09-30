@@ -164,11 +164,11 @@ void MantidWebServiceAPIHelper::clearSessionCookies() { g_cookies.clear(); }
 // POST
 void MantidWebServiceAPIHelper::initGetRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath,
                                                const std::string &queryString) const {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, std::move(extraPath), std::move(queryString));
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, extraPath, queryString);
 }
 
 void MantidWebServiceAPIHelper::initPostRequest(Poco::Net::HTTPRequest &req, const std::string &extraPath) const {
-  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, std::move(extraPath));
+  return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
 }
 
 void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,

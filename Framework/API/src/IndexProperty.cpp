@@ -17,8 +17,8 @@ namespace Mantid {
 namespace API {
 IndexProperty::IndexProperty(const std::string &name, const IWorkspaceProperty &workspaceProp,
                              const IndexTypeProperty &indexTypeProp, const Kernel::IValidator_sptr &validator)
-    : ArrayProperty(name, "", std::move(validator)), m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp),
-      m_indices(0), m_indicesExtracted(false) {}
+    : ArrayProperty(name, "", validator), m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp), m_indices(0),
+      m_indicesExtracted(false) {}
 
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }
 

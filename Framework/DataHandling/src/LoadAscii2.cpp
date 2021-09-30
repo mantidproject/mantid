@@ -202,7 +202,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
               // trim the strings
               boost::trim(name);
               boost::trim(type);
-              ws->addColumn(std::move(type), std::move(name));
+              ws->addColumn(type, name);
               itName++;
               itTypes++;
             }

@@ -20,8 +20,8 @@ Row::Row( // cppcheck-suppress passedByValue
     ReductionOptionsMap reductionOptions,
     // cppcheck-suppress passedByValue
     ReductionWorkspaces reducedWorkspaceNames)
-    : Item(), m_runNumbers(std::move(runNumbers)), m_theta(std::move(theta)), m_qRange(std::move(qRange)),
-      m_qRangeOutput(), m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
+    : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(qRange), m_qRangeOutput(),
+      m_scaleFactor(scaleFactor), m_transmissionRuns(std::move(transmissionRuns)),
       m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
@@ -51,7 +51,7 @@ void Row::setOutputNames(std::vector<std::string> const &outputNames) {
   m_reducedWorkspaceNames.setOutputNames(outputNames[0], outputNames[1], outputNames[2]);
 }
 
-void Row::setOutputQRange(RangeInQ qRange) { m_qRangeOutput = std::move(qRange); }
+void Row::setOutputQRange(RangeInQ qRange) { m_qRangeOutput = qRange; }
 
 void Row::resetOutputs() {
   m_reducedWorkspaceNames.resetOutputNames();

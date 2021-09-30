@@ -328,10 +328,9 @@ API::MatrixWorkspace_sptr ReflectometrySumInQ::constructIvsLamWS(const API::Matr
   // Construct the histogram with these X values. Y and E values are zero.
   const HistogramData::BinEdges bins(numBins + 1, HistogramData::LinearGenerator(wavelengthRange.min, binWidth));
   const HistogramData::Counts counts(numBins, 0.);
-  const HistogramData::Histogram modelHistogram(std::move(bins), std::move(counts));
+  const HistogramData::Histogram modelHistogram(bins, counts);
   // Create the output workspace
-  API::MatrixWorkspace_sptr outputWS =
-      DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1, std::move(modelHistogram));
+  API::MatrixWorkspace_sptr outputWS = DataObjects::create<DataObjects::Workspace2D>(detectorWS, 1, modelHistogram);
 
   // Set the detector IDs and specturm number from the twoThetaR detector.
   const auto &thetaSpec = detectorWS.getSpectrum(refAngles.referenceWSIndex);

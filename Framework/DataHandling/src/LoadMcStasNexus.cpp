@@ -160,7 +160,7 @@ void LoadMcStasNexus::exec() {
       ws->setYUnit(axis2Name);
       ws->replaceAxis(1, std::move(axis2));
 
-      ws->mutableX(0) = std::move(axis1Values);
+      ws->mutableX(0) = axis1Values;
 
       for (size_t wsIndex = 0; wsIndex < axis2Length; ++wsIndex) {
         auto &dataY = ws->mutableY(wsIndex);

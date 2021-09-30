@@ -159,7 +159,7 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBound
   Workspace2D_sptr out = create2DWorkspaceBinned(nhist, numBoundaries);
   for (int workspaceIndex = 0; workspaceIndex < nhist; workspaceIndex++) {
     std::vector<double> yValues(numBoundaries, static_cast<double>(workspaceIndex));
-    out->mutableY(workspaceIndex) = std::move(yValues);
+    out->mutableY(workspaceIndex) = yValues;
   }
 
   return out;
@@ -863,7 +863,7 @@ void displayDataY(const MatrixWorkspace_const_sptr &ws) {
     std::cout << '\n';
   }
 }
-void displayData(const MatrixWorkspace_const_sptr &ws) { displayDataX(std::move(ws)); }
+void displayData(const MatrixWorkspace_const_sptr &ws) { displayDataX(ws); }
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
@@ -1009,7 +1009,7 @@ Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(const std::vector<d
     for (size_t i = 0; i <= numBins; i++) {
       E_transfer.emplace_back(Emin + static_cast<double>(i) * dE);
     }
-    ws->mutableX(j) = std::move(E_transfer);
+    ws->mutableX(j) = E_transfer;
   }
 
   // set axis, correspondent to the X-values

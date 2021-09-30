@@ -195,7 +195,7 @@ void XrayAbsorptionCorrection::exec() {
       yData[i] = totalFactor;
     }
   }
-  setProperty("OutputWorkspace", std::move(outputWS));
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Algorithms

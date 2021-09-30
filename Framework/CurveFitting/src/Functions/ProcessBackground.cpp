@@ -799,7 +799,7 @@ void ProcessBackground::removePeaks() {
  */
 void RemovePeaks::setup(const TableWorkspace_sptr &peaktablews) {
   // Parse table workspace
-  parsePeakTableWorkspace(std::move(peaktablews), m_vecPeakCentre, m_vecPeakFWHM);
+  parsePeakTableWorkspace(peaktablews, m_vecPeakCentre, m_vecPeakFWHM);
 
   // Check
   if (m_vecPeakCentre.size() != m_vecPeakFWHM.size())

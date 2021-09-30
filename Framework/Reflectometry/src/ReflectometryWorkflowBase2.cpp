@@ -816,7 +816,7 @@ void ReflectometryWorkflowBase2::convertProcessingInstructions(const Instrument_
     m_processingInstructionsWorkspaceIndex =
         convertProcessingInstructionsToWorkspaceIndices(m_processingInstructions, inputWS);
   } else {
-    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(std::move(instrument), inputWS);
+    m_processingInstructionsWorkspaceIndex = findProcessingInstructions(instrument, inputWS);
     m_processingInstructions =
         convertProcessingInstructionsToSpectrumNumbers(m_processingInstructionsWorkspaceIndex, inputWS);
   }

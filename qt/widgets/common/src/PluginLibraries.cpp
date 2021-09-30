@@ -41,7 +41,7 @@ std::string qtPluginPathFromCfg(const std::string &key) {
  * %V to specify the Qt version
  * @return The number of libraries successfully loaded
  */
-int loadPluginsFromCfgPath(const std::string &key) { return loadPluginsFromPath(qtPluginPathFromCfg(std::move(key))); }
+int loadPluginsFromCfgPath(const std::string &key) { return loadPluginsFromPath(qtPluginPathFromCfg(key)); }
 
 /**
  * Load all plugins from the path specified.

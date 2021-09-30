@@ -153,7 +153,7 @@ void PSIBackgroundSubtraction::calculateBackgroundUsingFit(MatrixWorkspace_sptr 
   // Create background workspace
   auto wsAlg = createChildAlgorithm("CreateWorkspace", 0.7, 1.0);
   wsAlg->setProperty<std::vector<double>>("DataX", std::vector<double>(2, 0.0));
-  wsAlg->setProperty<std::vector<double>>("DataY", std::move(backgroundValues));
+  wsAlg->setProperty<std::vector<double>>("DataY", backgroundValues);
   wsAlg->setProperty<int>("NSpec", static_cast<int>(numberOfHistograms));
   wsAlg->execute();
   MatrixWorkspace_sptr backgroundWS = wsAlg->getProperty("OutputWorkspace");

@@ -1377,7 +1377,7 @@ void IntegratePeakTimeSlices::SetUpData(MatrixWorkspace_sptr &Data, MatrixWorksp
     m_NeighborIDs[1] = 2;
     neighborRadius = NeighborhoodRadiusDivPeakRadius * NewRadius;
     CentNghbr = CentPos;
-    getNeighborPixIDs(std::move(comp), CentPos, neighborRadius, m_NeighborIDs);
+    getNeighborPixIDs(comp, CentPos, neighborRadius, m_NeighborIDs);
 
   } else // big enough neighborhood so
     neighborRadius -= DD;

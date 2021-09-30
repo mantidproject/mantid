@@ -1035,7 +1035,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
     LeanElasticPeak peak;
     peak.setGoniometerMatrix(goniometer.getR());
     peak.setRunNumber(peakWS->getRunNumber());
-    peakWS->addPeak(std::move(peak));
+    peakWS->addPeak(peak);
   }
 
   for (const auto &str : columnNames) {

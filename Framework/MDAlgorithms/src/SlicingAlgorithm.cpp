@@ -845,7 +845,7 @@ SlicingAlgorithm::createMDFrameForNonAxisAligned(const std::string &units,
   auto indicesWithProjection = getIndicesWithProjection(basisVector, oldBasis);
 
   // Extract MDFrame
-  return extractMDFrameForNonAxisAligned(indicesWithProjection, std::move(units));
+  return extractMDFrameForNonAxisAligned(indicesWithProjection, units);
 }
 
 std::vector<Mantid::Kernel::VMD> SlicingAlgorithm::getOldBasis(size_t dimension) const {

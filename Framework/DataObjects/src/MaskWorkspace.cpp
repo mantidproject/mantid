@@ -54,7 +54,7 @@ MaskWorkspace::MaskWorkspace(std::size_t numvectors) {
  * @return MaskWorkspace
  */
 MaskWorkspace::MaskWorkspace(const Mantid::Geometry::Instrument_const_sptr &instrument, const bool includeMonitors)
-    : SpecialWorkspace2D(std::move(instrument), includeMonitors) {
+    : SpecialWorkspace2D(instrument, includeMonitors) {
   this->clearMask();
 }
 

@@ -24,7 +24,7 @@ ScopedWorkspace::ScopedWorkspace() : m_name(generateUniqueName()) {}
 /**
  * Workspace constructor
  */
-ScopedWorkspace::ScopedWorkspace(const Workspace_sptr &ws) : m_name(generateUniqueName()) { set(std::move(ws)); }
+ScopedWorkspace::ScopedWorkspace(const Workspace_sptr &ws) : m_name(generateUniqueName()) { set(ws); }
 
 //----------------------------------------------------------------------------------------------
 /**

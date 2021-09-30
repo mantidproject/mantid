@@ -772,7 +772,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file, API::Co
     return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << '\n';
-  saveMatrix<coord_t>(file, std::move(entry_name), matrix, ::NeXus::FLOAT32, transform->id());
+  saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32, transform->id());
 }
 
 /**

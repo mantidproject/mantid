@@ -212,15 +212,15 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 }
 
 WorkspaceGroup_sptr getOutputResult(const IAlgorithm_sptr &algorithm) {
-  return getWorkspaceOutput<WorkspaceGroup>(std::move(algorithm), "OutputWorkspace");
+  return getWorkspaceOutput<WorkspaceGroup>(algorithm, "OutputWorkspace");
 }
 
 ITableWorkspace_sptr getOutputParameters(const IAlgorithm_sptr &algorithm) {
-  return getWorkspaceOutput<ITableWorkspace>(std::move(algorithm), "OutputParameterWorkspace");
+  return getWorkspaceOutput<ITableWorkspace>(algorithm, "OutputParameterWorkspace");
 }
 
 WorkspaceGroup_sptr getOutputGroup(const IAlgorithm_sptr &algorithm) {
-  return getWorkspaceOutput<WorkspaceGroup>(std::move(algorithm), "OutputWorkspaceGroup");
+  return getWorkspaceOutput<WorkspaceGroup>(algorithm, "OutputWorkspaceGroup");
 }
 
 void addFitProperties(Mantid::API::IAlgorithm &algorithm, const Mantid::API::IFunction_sptr &function,
@@ -534,13 +534,13 @@ Mantid::API::IAlgorithm_sptr IndirectFittingModel::simultaneousFitAlgorithm() co
 
 IAlgorithm_sptr IndirectFittingModel::createSequentialFit(const IFunction_sptr &function) const {
   const auto input = constructInputString(m_fitDataModel.get());
-  return createSequentialFit(std::move(function), input);
+  return createSequentialFit(function, input);
 }
 
 IAlgorithm_sptr IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
                                                           const std::string &input) const {
   auto fitAlgorithm = sequentialFitAlgorithm();
-  addFitProperties(*fitAlgorithm, std::move(function), getResultXAxisUnit());
+  addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("LogName", getResultLogName());

@@ -130,7 +130,7 @@ MatrixWorkspace_sptr medianWorkspaceGlobal(const MatrixWorkspace_sptr &ws) {
     std::copy(spectrum.cbegin(), spectrum.cend(), std::back_inserter(allY));
   }
   auto &y = out->mutableY(0);
-  y = std::vector<double>(1, median(std::move(allY)));
+  y = std::vector<double>(1, median(allY));
   return out;
 }
 
@@ -431,7 +431,7 @@ void Stitch::scale(const MatrixWorkspace_sptr &wsToMatch, const MatrixWorkspace_
   scaler->setPropertyValue("OutputWorkspace", wsToScale->getName());
   scaler->execute();
 
-  recordScaleFactor(std::move(scaleFactorsWorkspace), median, wsToScale, inputs);
+  recordScaleFactor(scaleFactorsWorkspace, median, wsToScale, inputs);
 }
 
 /**

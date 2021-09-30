@@ -276,7 +276,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectra(const API::Matri
 API::MatrixWorkspace_sptr CalculateTransmission::fit(const API::MatrixWorkspace_sptr &raw,
                                                      const std::vector<double> &rebinParams,
                                                      const std::string &fitMethod) {
-  MatrixWorkspace_sptr output = this->extractSpectra(std::move(raw), std::vector<size_t>(1, 0));
+  MatrixWorkspace_sptr output = this->extractSpectra(raw, std::vector<size_t>(1, 0));
 
   Progress progress(this, m_done, 1.0, 4);
   progress.report("CalculateTransmission: Performing fit");

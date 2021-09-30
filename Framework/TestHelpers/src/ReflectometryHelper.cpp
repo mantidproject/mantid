@@ -119,7 +119,7 @@ std::vector<MatrixWorkspace_sptr> retrieveOutWS(std::string const &name) {
 
 void applyPolarizationEfficiencies(const WorkspaceGroup_sptr &ws) {
 
-  auto wss = groupToVector(std::move(ws));
+  auto wss = groupToVector(ws);
   auto Rpp = wss[0];
   auto Rpa = wss[1];
   auto Rap = wss[2];

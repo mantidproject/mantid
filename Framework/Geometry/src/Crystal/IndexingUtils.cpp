@@ -2312,7 +2312,7 @@ int IndexingUtils::CalculateMillerIndices(const DblMatrix &UB, const std::vector
       count++;
       ave_error += hkl.hklError();
     }
-    miller_indices.emplace_back(std::move(hkl));
+    miller_indices.emplace_back(hkl);
   }
 
   if (count > 0) {

@@ -319,8 +319,7 @@ void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 }
 
 void ConvFitModel::setParameterNameChanges(const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
-  m_parameterNameChanges =
-      constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.is_initialized());
+  m_parameterNameChanges = constructParameterNameChanges(model, backgroundIndex, m_temperature.is_initialized());
 }
 
 std::vector<std::pair<std::string, size_t>> ConvFitModel::getResolutionsForFit() const {
