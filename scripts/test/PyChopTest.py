@@ -266,6 +266,16 @@ class PyChopGuiTests(unittest.TestCase):
             self.window.calc_callback()
             setS2.assert_called()
 
+    def test_plot_flux_ei(self):
+        # Tests that Hyspec routines are only called when the instrument is Hyspec
+        with patch.object(self.window, 'plot_flux_ei') as plot_flux_ei:
+            self.window.widgets['EiEdit']['Edit'].text = mock.MagicMock(return_value='')
+            self.window.calc_callback()
+            plot_flux_ei.assert_not_called()
+            self.window.widgets['EiEdit']['Edit'].text = mock.MagicMock(return_value=120)
+            self.window.calc_callback()
+            plot_flux_ei.assert_called()
+
 
 if __name__ == "__main__":
     unittest.main()

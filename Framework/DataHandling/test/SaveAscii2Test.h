@@ -114,7 +114,7 @@ public:
     SaveAscii2 save;
     initSaveAscii2(save);
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
-    TS_ASSERT_THROWS_ANYTHING(save.execute());
+    TS_ASSERT_THROWS_NOTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
   }
 

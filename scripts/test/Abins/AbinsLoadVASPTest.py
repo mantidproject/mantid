@@ -13,7 +13,7 @@ from abins.input import VASPLoader
 class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
     def tearDown(self):
         # Remove ref files from .check() calls
-        abins.test_helpers.remove_output_files(list_of_names=["LoadVASP"])
+        abins.test_helpers.remove_output_files(list_of_names=["_LoadVASP"])
 
     def test_non_existing_file(self):
         with self.assertRaises(IOError):
@@ -43,3 +43,7 @@ class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
     # IBRION=6 including optimisation steps
     def test_xml_finitedisplacement(self):
         self.check(name='ozone_LoadVASP', loader=VASPLoader)
+
+    # IBRION=5 including frozen atoms
+    def test_xml_frozenatoms(self):
+        self.check(name='methane_surface_LoadVASP', loader=VASPLoader)

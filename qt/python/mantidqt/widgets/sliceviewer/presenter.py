@@ -22,6 +22,7 @@ from .view import SliceViewerView
 from .adsobsever import SliceViewerADSObserver
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from ..observers.observing_presenter import ObservingPresenter
+from ...interfacemanager import InterfaceManager
 
 
 class SliceViewer(ObservingPresenter):
@@ -64,6 +65,8 @@ class SliceViewer(ObservingPresenter):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
+        self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
+
         self.refresh_view()
 
         # Start the GUI with zoom selected.
@@ -71,6 +74,16 @@ class SliceViewer(ObservingPresenter):
 
         self.ads_observer = SliceViewerADSObserver(self.replace_workspace, self.rename_workspace,
                                                    self.ADS_cleared, self.delete_workspace)
+
+        # simulate clicking on the home button, which will force all signal and slot connections
+        # properly set.
+        # NOTE: Some part of the connections are not set in the correct, resulting in a strange behavior
+        #       where the colorbar and view is not updated with switch between different scales.
+        #       This is a ducktape fix and should be revisited once we have a better way to do this.
+        # NOTE: This workaround solve the problem, but it leads to a failure in
+        #       projectroot.qt.python.mantidqt_qt5.test_sliceviewer_presenter.test_sliceviewer_presenter
+        #       Given that this issue is not of high priority, we are leaving it as is for now.
+        # self.show_all_data_requested()
 
     def new_plot_MDH(self, dimensions_transposing=False, dimensions_changing=False):
         """
@@ -91,18 +104,6 @@ class SliceViewer(ObservingPresenter):
         """
         data_view = self.view.data_view
         limits = data_view.get_axes_limits()
-
-        if limits is not None:
-            # view limits are in orthogonal frame. transform to nonorthogonal
-            # model frame
-            if data_view.nonorthogonal_mode:
-                xlim, ylim = limits
-                inv_tr = data_view.nonortho_transform.inv_tr
-                # viewing axis y not aligned with plot axis
-                xmin_p, ymax_p = inv_tr(xlim[0], ylim[1])
-                xmax_p, ymin_p = inv_tr(xlim[1], ylim[0])
-                xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
-                limits = [xlim, ylim]
 
         # The value at the i'th index of this tells us that the axis with that value (0 or 1) will display dimension i
         dimension_indices = self.view.dimensions.get_states()
@@ -154,12 +155,23 @@ class SliceViewer(ObservingPresenter):
     def get_sliceinfo(self):
         """Returns a SliceInfo object describing the current slice"""
         dimensions = self.view.data_view.dimensions
-        return SliceInfo(frame=self.model.get_frame(),
-                         point=dimensions.get_slicepoint(),
-                         transpose=dimensions.transpose,
-                         range=dimensions.get_slicerange(),
-                         qflags=dimensions.qflags,
-                         nonortho_transform=self.view.data_view.nonortho_transform)
+        sliceinfo = SliceInfo(frame=self.model.get_frame(),
+                              point=dimensions.get_slicepoint(),
+                              transpose=dimensions.transpose,
+                              range=dimensions.get_slicerange(),
+                              qflags=dimensions.qflags,
+                              nonortho_transform=self.view.data_view.nonortho_transform)
+        # NOTE THIS IS A TEMPORARY FIX FOR RELEASE 6.2
+        # We want to remove circular dependence of transform between model, data_view and slice_info
+        # which could be done by removing transform from slice_info and always getting from model
+        try:
+            # try to update transform from model - but don't update transform in view as this will perform non-orthog
+            # transform on transpose of non-orthog axes without clicking button
+            sliceinfo.set_transform(self.model.create_nonorthogonal_transform(sliceinfo))
+        except Exception:
+            # not possible to make transform - should be raised as RuntimeError but playing it safe for this temp fix
+            pass
+        return sliceinfo
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -400,7 +412,7 @@ class SliceViewer(ObservingPresenter):
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
             self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-            self.view.delayed_refresh()
+            self.refresh_view()
         except ValueError as err:
             self._close_view_with_message(
                 f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
@@ -415,17 +427,24 @@ class SliceViewer(ObservingPresenter):
         # the meantime, so check it still exists. See github issue #30406 for detail.
         if sip.isdeleted(self.view):
             return
+
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
-        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
-        self.new_plot()
+        ws = self.model._get_ws()
+        ws.readLock()
+        try:
+            self.view.data_view.image_info_widget.setWorkspace(ws)
+            self.new_plot()
+        finally:
+            ws.unlock()
 
     def rename_workspace(self, old_name, new_name):
-        if str(self.model._get_ws()) == old_name:
+        if self.model.get_ws_name() == old_name:
+            self.model.set_ws_name(new_name)
             self.view.emit_rename(self.model.get_title(new_name))
 
     def delete_workspace(self, ws_name):
-        if ws_name == str(self.model._ws):
+        if ws_name == self.model.get_ws_name():
             self.view.emit_close()
 
     def ADS_cleared(self):
@@ -502,3 +521,6 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def action_open_help_window(self):
+        InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')

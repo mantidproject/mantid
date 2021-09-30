@@ -10,15 +10,10 @@ from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QMenu
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
-from matplotlib.backends.qt_compat import is_pyqt5
+from mantidqt.MPLwidgets import FigureCanvas
 from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
-
-if is_pyqt5():
-    from matplotlib.backends.backend_qt5agg import FigureCanvas
-else:
-    from matplotlib.backends.backend_qt4agg import FigureCanvas
 
 Ui_plot, _ = load_ui(__file__, "plot_widget.ui")
 
@@ -65,7 +60,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         qmenu = self.fit_browser.getFitMenu()
         qmenu.removeAction([qact for qact in qmenu.actions() if qact.text() == "Sequential Fit"][0])
         # hide unnecessary properties of browser
-        hide_props = ['StartX', 'EndX', 'Minimizer', 'Cost function', 'Max Iterations', 'Output',
+        hide_props = ['Minimizer', 'Cost function', 'Max Iterations', 'Output',
                       'Ignore invalid data', 'Peak Radius', 'Plot Composite Members',
                       'Convolve Composite Members', 'Show Parameter Errors', 'Evaluate Function As']
         self.fit_browser.removePropertiesFromSettingsBrowser(hide_props)
@@ -147,8 +142,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def update_browser(self, status, func_str, setup_name):
         self.fit_browser.fitResultsChanged.emit(status)
+        self.fit_browser.changeWindowTitle.emit(status)
         # update browser with output function and save setup if successful
-        if "success" in status:
+        if "success" in status.lower():
             self.fit_browser.loadFunction(func_str)
             self.fit_browser.save_current_setup(setup_name)
 

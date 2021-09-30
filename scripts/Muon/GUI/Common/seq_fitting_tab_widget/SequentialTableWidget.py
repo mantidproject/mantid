@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableView import QSequentialTableView
-from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import QSequentialTableModel
+from Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, GROUP_COLUMN,
+                                                                          RUN_COLUMN, WORKSPACE_COLUMN)
 from Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
 
@@ -27,6 +28,15 @@ class SequentialTableWidget(object):
     def block_signals(self, state):
         self._view.blockSignals(state)
 
+    def hide_workspace_column(self):
+        self._view.hideColumn(WORKSPACE_COLUMN)
+
+    def hide_run_column(self):
+        self._view.hideColumn(RUN_COLUMN)
+
+    def hide_group_column(self):
+        self._view.hideColumn(GROUP_COLUMN)
+
     def get_number_of_fits(self):
         return self._model.number_of_fits
 
@@ -44,15 +54,21 @@ class SequentialTableWidget(object):
         self.block_signals(False)
         self._view.resizeColumnsToContents()
 
+    def set_parameter_values_for_column(self, column, parameter_value):
+        self.block_signals(True)
+        self._model.set_fit_parameter_values_for_column(column, parameter_value)
+        self.block_signals(False)
+        self._view.resizeColumnsToContents()
+
     def set_fit_quality(self, row, quality, chi_squared):
         self.block_signals(True)
         quality = self.get_shortened_fit_status(quality)
         self._model.set_fit_quality(row, quality, chi_squared)
         self.block_signals(False)
 
-    def set_fit_workspaces(self, runs, group_and_pairs):
+    def set_fit_workspaces(self, workspace_names, runs, group_and_pairs):
         self.block_signals(True)
-        self._model.set_fit_workspaces(runs, group_and_pairs)
+        self._model.set_fit_workspaces(workspace_names, runs, group_and_pairs)
         self.block_signals(False)
 
     def set_selection_to_last_row(self):
@@ -76,6 +92,9 @@ class SequentialTableWidget(object):
         for model in rowSelectionModels:
             rows += [model.row()]
         return rows
+
+    def get_workspace_names_from_row(self, row):
+        return self._model.get_workspace_name_information(row)
 
     def get_workspace_info_from_row(self, row):
         if row > self._model.rowCount():

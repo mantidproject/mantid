@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.load_utils as utils
-import os
 import unittest
 
 from mantid import simpleapi
@@ -81,14 +80,26 @@ class MuonFileUtilsTest(unittest.TestCase):
         self.assertEqual(run, 22725)
         ConfigService.Instance().setString("default.facility", " ")
 
-    def test_load_workspace_from_filename_for_file_path(self):
-        filename = 'PSI' + os.sep + 'run_1529_templs0.mon'
-        inputs = {
-              "DeadTimeTable": "__notUsed",
-              "DetectorGroupingTable": "__notUsed"}
+    def test_create_load_alg_for_nxs_files(self):
+        filename = "EMU00019489.nxs"
+        inputs = {}
 
-        alg, _ = utils.create_load_algorithm(filename, inputs)
-        self.assertTrue(filename in alg.getProperty("Filename").value)
+        alg, psi_data = utils.create_load_algorithm(filename, inputs)
+        self.assertFalse(psi_data)
+
+    def test_create_load_alg_for_nxs_v2_files(self):
+        filename = "EMU00102347.nxs_v2"
+        inputs = {}
+
+        alg, psi_data = utils.create_load_algorithm(filename, inputs)
+        self.assertFalse(psi_data)
+
+    def test_create_load_alg_for_bin_files(self):
+        filename = "deltat_tdc_dolly_1529.bin"
+        inputs = {}
+
+        alg, psi_data = utils.create_load_algorithm(filename, inputs)
+        self.assertTrue(psi_data)
 
     @mock.patch('Muon.GUI.Common.utilities.load_utils.CloneWorkspace')
     def test_combine_loaded_runs_for_psi_data(self, clone_mock):

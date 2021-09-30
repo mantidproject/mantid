@@ -220,6 +220,9 @@ private:
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
+  template <typename T>
+  T filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
+                       Mantid::Types::Core::DateAndTime &stopTime);
 
   /// Load a spectra mapping from the given file
   std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
@@ -534,7 +537,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
   }
 
   // do the actual work
-  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadInstrument");
+  auto loadInst = alg->createChildAlgorithm("LoadInstrument");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   bool executionSuccessful(true);
@@ -573,7 +576,7 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
       pmap.get(localWorkspace->getInstrument()->getComponentID(), "det-pos-source");
   std::string value = updateDets->value<std::string>();
   if (value.substr(0, 8) == "datafile") {
-    Mantid::API::IAlgorithm_sptr updateInst = alg->createChildAlgorithm("UpdateInstrumentFromFile");
+    auto updateInst = alg->createChildAlgorithm("UpdateInstrumentFromFile");
     updateInst->setProperty<Mantid::API::MatrixWorkspace_sptr>("Workspace", localWorkspace);
     updateInst->setPropertyValue("Filename", nexusfilename);
     if (value == "datafile-ignore-phi") {
@@ -767,7 +770,7 @@ bool LoadEventNexus::runLoadIDFFromNexus(const std::string &nexusfilename, T loc
     return false;
   }
 
-  Mantid::API::IAlgorithm_sptr loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
+  auto loadInst = alg->createChildAlgorithm("LoadIDFFromNexus");
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   try {

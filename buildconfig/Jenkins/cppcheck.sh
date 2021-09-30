@@ -4,7 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 # If errors slip through to master this can be used to set a non-zero
 # allowed count while those errors are dealt with. This avoids breaking all
 # builds for all developers
-ALLOWED_ERRORS_COUNT=1204
+ALLOWED_ERRORS_COUNT=1200
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     # This relies on the fact pull requests use pull/$PR-NAME
@@ -42,9 +42,9 @@ cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-r
 
 # Mark build as passed or failed
 errors_count=$(grep -c '</error>' cppcheck.xml)
-if [ $errors_count -gt ${ALLOWED_ERRORS_COUNT} ]; then
-  echo "CppCheck found ${ALLOWED_ERRORS_COUNT} errors."
-  echo "See CppCheck link on the job page for more detail."
+if [ $errors_count -ne ${ALLOWED_ERRORS_COUNT} ]; then
+  echo "CppCheck found ${errors_count} errors."
+  echo "See CppCheck link on the job page for more detail, or adjust the count."
   exit 1
 else
   echo "CppCheck found no errors"

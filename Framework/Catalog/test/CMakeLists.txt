@@ -7,9 +7,9 @@ if(CXXTEST_FOUND)
   # The actual test suite
   cxxtest_add_test(CatalogTest ${TEST_FILES})
   target_link_libraries(CatalogTest
-                        LINK_PRIVATE
-                        ${MANTIDLIBS}
-                        Catalog)
+                        PRIVATE
+                        Mantid::Catalog
+                        gmock)
   add_dependencies(FrameworkTests CatalogTest)
 
   # Add to the 'FrameworkTests' group in VS

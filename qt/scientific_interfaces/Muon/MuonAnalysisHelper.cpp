@@ -1059,7 +1059,7 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
 
 /**
  * Get the colors corresponding to their position in the workspace list.
- * Used in fittings table on results table tab.
+ * Used in fittings table on results tab.
  *
  * New color if:
  * - different model used for fit

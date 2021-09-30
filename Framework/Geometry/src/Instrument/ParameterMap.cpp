@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -339,28 +339,23 @@ void ParameterMap::clearParametersByName(const std::string &name, const ICompone
  * @param comp :: A pointer to the component that this parameter is attached to
  * @param name :: The name of the parameter
  * @param value :: The parameter's value
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameters
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameters memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::add(const std::string &type, const IComponent *comp, const std::string &name,
-                       const std::string &value, const std::string *const pDescription) {
-  auto param = ParameterFactory::create(type, name);
+                       const std::string &value, const std::string *const pDescription, const std::string &pVisible) {
+  auto param = ParameterFactory::create(type, name, pVisible);
   param->fromString(value);
   this->add(comp, param, pDescription);
 }
 
 /** Method for adding/replacing a parameter providing shared pointer to it.
  * @param comp :: A pointer to the component that this parameter is attached to
- * @param par  :: a shared pointer to existing parameter. The ParameterMap
- * stores share pointer and increment ref count to it
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameters
- * memory
+ * @param par  :: a shared pointer to existing parameter. The ParameterMap stores share pointer and increment ref count
+ * to it
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameters memory
  */
 void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> &par,
                        const std::string *const pDescription) {
@@ -401,11 +396,8 @@ void ParameterMap::add(const IComponent *comp, const std::shared_ptr<Parameter> 
  * @param comp :: Component
  * @param name :: name of the parameter
  * @param value :: value
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameters
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameters memory
  */
 void ParameterMap::addPositionCoordinate(const IComponent *comp, const std::string &name, const double value,
                                          const std::string *const pDescription) {
@@ -450,11 +442,8 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp, const std::stri
  * @param comp :: Component
  * @param name :: Parameter name
  * @param deg :: Parameter value in degrees
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
  */
 void ParameterMap::addRotationParam(const IComponent *comp, const std::string &name, const double deg,
                                     const std::string *const pDescription) {
@@ -506,15 +495,13 @@ void ParameterMap::addRotationParam(const IComponent *comp, const std::string &n
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a string
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addDouble(const IComponent *comp, const std::string &name, const std::string &value,
-                             const std::string *const pDescription) {
-  add(pDouble(), comp, name, value, pDescription);
+                             const std::string *const pDescription, const std::string &pVisible) {
+  add(pDouble(), comp, name, value, pDescription, pVisible);
 }
 
 /**
@@ -522,15 +509,13 @@ void ParameterMap::addDouble(const IComponent *comp, const std::string &name, co
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a double
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addDouble(const IComponent *comp, const std::string &name, double value,
-                             const std::string *const pDescription) {
-  add(pDouble(), comp, name, value, pDescription);
+                             const std::string *const pDescription, const std::string &pVisible) {
+  add(pDouble(), comp, name, value, pDescription, pVisible);
 }
 
 /**
@@ -538,15 +523,13 @@ void ParameterMap::addDouble(const IComponent *comp, const std::string &name, do
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a string
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameters
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameters memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addInt(const IComponent *comp, const std::string &name, const std::string &value,
-                          const std::string *const pDescription) {
-  add(pInt(), comp, name, value, pDescription);
+                          const std::string *const pDescription, const std::string &pVisible) {
+  add(pInt(), comp, name, value, pDescription, pVisible);
 }
 
 /**
@@ -554,15 +537,13 @@ void ParameterMap::addInt(const IComponent *comp, const std::string &name, const
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as an int
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameters
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameters memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addInt(const IComponent *comp, const std::string &name, int value,
-                          const std::string *const pDescription) {
-  add(pInt(), comp, name, value, pDescription);
+                          const std::string *const pDescription, const std::string &pVisible) {
+  add(pInt(), comp, name, value, pDescription, pVisible);
 }
 
 /**
@@ -570,30 +551,26 @@ void ParameterMap::addInt(const IComponent *comp, const std::string &name, int v
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a string
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameters
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameters memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addBool(const IComponent *comp, const std::string &name, const std::string &value,
-                           const std::string *const pDescription) {
-  add(pBool(), comp, name, value, pDescription);
+                           const std::string *const pDescription, const std::string &pVisible) {
+  add(pBool(), comp, name, value, pDescription, pVisible);
 }
 /**
  * Adds a bool value to the parameter map.
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a bool
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addBool(const IComponent *comp, const std::string &name, bool value,
-                           const std::string *const pDescription) {
-  add(pBool(), comp, name, value, pDescription);
+                           const std::string *const pDescription, const std::string &pVisible) {
+  add(pBool(), comp, name, value, pDescription, pVisible);
 }
 
 /** Force adding masking information. ONLY FOR INTERNAL USE by class Instrument.
@@ -628,15 +605,13 @@ void ParameterMap::forceUnsafeSetMasked(const IComponent *comp, bool value) {
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
+ * @param pVisible :: Whether the parameter should be visible in InstrumentViewer
  */
 void ParameterMap::addString(const IComponent *comp, const std::string &name, const std::string &value,
-                             const std::string *const pDescription) {
-  add<std::string>(pString(), comp, name, value, pDescription);
+                             const std::string *const pDescription, const std::string &pVisible) {
+  add<std::string>(pString(), comp, name, value, pDescription, pVisible);
 }
 
 /**
@@ -644,11 +619,8 @@ void ParameterMap::addString(const IComponent *comp, const std::string &name, co
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a string
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
  */
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const std::string &value,
                           const std::string *const pDescription) {
@@ -661,11 +633,8 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a V3D
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
  */
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const V3D &value,
                           const std::string *const pDescription) {
@@ -678,11 +647,8 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name, const
  * @param comp :: Component to which the new parameter is related
  * @param name :: Name for the new parameter
  * @param value :: Parameter value as a Quat
- * @param pDescription :: a pointer (may be NULL) to a string, containing
- * parameter's
- * description. If provided, the contents of the string is copied to the
- * parameter's
- * memory
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's description. If provided, the
+ * contents of the string is copied to the parameter's memory
  */
 void ParameterMap::addQuat(const IComponent *comp, const std::string &name, const Quat &value,
                            const std::string *const pDescription) {
@@ -695,9 +661,7 @@ void ParameterMap::addQuat(const IComponent *comp, const std::string &name, cons
  * @param comp :: The component to be searched
  * @param name :: The name of the parameter
  * @param type :: The type of the component as a string
- * @returns A boolean indicating if the map contains the named parameter. If the
- * type is given then
- * this must also match
+ * @returns A boolean indicating if the map contains the named parameter. If the type is given then this must also match
  */
 bool ParameterMap::contains(const IComponent *comp, const std::string &name, const std::string &type) const {
   return contains(comp, name.c_str(), type.c_str());
@@ -755,8 +719,7 @@ bool ParameterMap::contains(const IComponent *comp, const Parameter &parameter) 
  * @param comp :: Component to which parameter is related
  * @param name :: Parameter name
  * @param type :: An optional type string
- * @returns The named parameter of the given type if it exists or a NULL shared
- * pointer if not
+ * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
  */
 Parameter_sptr ParameterMap::get(const IComponent *comp, const std::string &name, const std::string &type) const {
   return get(comp, name.c_str(), type.c_str());
@@ -767,8 +730,7 @@ Parameter_sptr ParameterMap::get(const IComponent *comp, const std::string &name
  * @param comp :: Component to which parameter is related
  * @param name :: Parameter name
  * @param type :: An optional type string
- * @returns The named parameter of the given type if it exists or a NULL shared
- * pointer if not
+ * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
  */
 std::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp, const char *name, const char *type) const {
   checkIsNotMaskingParameter(name);
@@ -782,7 +744,7 @@ std::shared_ptr<Parameter> ParameterMap::get(const IComponent *comp, const char 
   return result;
 }
 
-/**Return an iterator pointing to a named parameter of a given type.
+/** Return an iterator pointing to a named parameter of a given type.
  * @param comp :: Component to which parameter is related
  * @param name :: Parameter name
  * @param type :: An optional type string. If empty, any type is returned
@@ -811,7 +773,7 @@ component_map_it ParameterMap::positionOf(const IComponent *comp, const char *na
   return result;
 }
 
-/**Return a const iterator pointing to a named parameter of a given type.
+/** Return a const iterator pointing to a named parameter of a given type.
  * @param comp :: Component to which parameter is related
  * @param name :: Parameter name
  * @param type :: An optional type string. If empty, any type is returned
@@ -980,7 +942,8 @@ std::string ParameterMap::asString() const {
         out << comp->getFullName(); // Use full path name to ensure unambiguous
                                     // naming
       }
-      out << ';' << p->type() << ';' << p->name() << ';' << p->asString() << '|';
+      const auto paramVisible = "visible:" + std::string(p->visible() == 1 ? "true" : "false");
+      out << ';' << p->type() << ';' << p->name() << ';' << p->asString() << ';' << paramVisible << '|';
     }
   }
   return out.str();
@@ -1079,8 +1042,9 @@ const std::vector<std::string> &ParameterMap::getParameterFilenames() const { re
 void ParameterMap::addParameterFilename(const std::string &filename) { m_parameterFileNames.emplace_back(filename); }
 
 /// Wrapper for ParameterFactory::create to avoid include in header
-std::shared_ptr<Parameter> ParameterMap::create(const std::string &className, const std::string &name) const {
-  return ParameterFactory::create(className, name);
+std::shared_ptr<Parameter> ParameterMap::create(const std::string &className, const std::string &name,
+                                                const std::string &visible) const {
+  return ParameterFactory::create(className, name, visible);
 }
 
 /** Only for use by ExperimentInfo. Returns returns true if this instrument

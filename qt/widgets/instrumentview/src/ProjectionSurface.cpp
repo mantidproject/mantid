@@ -10,8 +10,8 @@
 #include "MantidQtWidgets/Common/TSVSerialiser.h"
 #endif
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/GLDisplay.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
-#include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 
 #include "MantidAPI/Axis.h"
@@ -46,19 +46,15 @@ namespace MantidWidgets {
  * instrument
  */
 ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
-    : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr),
-      m_viewRect(), m_selectRect(), m_interactionMode(MoveMode),
-      m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
-      m_showPeakLabels(false), m_showPeakRelativeIntensity(false),
-      m_peakShapesStyle(0), m_viewChanged(true), m_redrawPicking(true) {
+    : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr), m_viewRect(), m_selectRect(),
+      m_interactionMode(MoveMode), m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
+      m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
+      m_redrawPicking(true) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
-  connect(&m_maskShapes, SIGNAL(shapeSelected()), this,
-          SIGNAL(shapeSelected()));
-  connect(&m_maskShapes, SIGNAL(shapesDeselected()), this,
-          SIGNAL(shapesDeselected()));
-  connect(&m_maskShapes, SIGNAL(shapesRemoved()), this,
-          SIGNAL(shapesRemoved()));
+  connect(&m_maskShapes, SIGNAL(shapeSelected()), this, SIGNAL(shapeSelected()));
+  connect(&m_maskShapes, SIGNAL(shapesDeselected()), this, SIGNAL(shapesDeselected()));
+  connect(&m_maskShapes, SIGNAL(shapesRemoved()), this, SIGNAL(shapesRemoved()));
   connect(&m_maskShapes, SIGNAL(shapeChanged()), this, SIGNAL(shapeChanged()));
   connect(&m_maskShapes, SIGNAL(cleared()), this, SIGNAL(shapesCleared()));
 
@@ -67,81 +63,56 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
   setInputController(PickSingleMode, pickController);
   setInputController(PickTubeMode, pickController);
   setInputController(AddPeakMode, pickController);
-  connect(pickController, SIGNAL(pickPointAt(int, int)), this,
-          SLOT(pickComponentAt(int, int)));
-  connect(pickController, SIGNAL(touchPointAt(int, int)), this,
-          SLOT(touchComponentAt(int, int)));
+  connect(pickController, SIGNAL(pickPointAt(int, int)), this, SLOT(pickComponentAt(int, int)));
+  connect(pickController, SIGNAL(touchPointAt(int, int)), this, SLOT(touchComponentAt(int, int)));
 
   // create and connect the mask drawing input controller
   InputControllerDrawShape *drawController = new InputControllerDrawShape(this);
   setInputController(DrawRegularMode, drawController);
-  connect(drawController, SIGNAL(addShape(QString, int, int, QColor, QColor)),
-          &m_maskShapes, SLOT(addShape(QString, int, int, QColor, QColor)));
-  connect(this, SIGNAL(signalToStartCreatingShape2D(QString, QColor, QColor)),
-          drawController, SLOT(startCreatingShape2D(QString, QColor, QColor)));
-  connect(drawController, SIGNAL(moveRightBottomTo(int, int)), &m_maskShapes,
-          SLOT(moveRightBottomTo(int, int)));
-  connect(drawController, SIGNAL(selectAt(int, int)), &m_maskShapes,
-          SLOT(selectShapeOrControlPointAt(int, int)));
-  connect(drawController, SIGNAL(selectCtrlAt(int, int)), &m_maskShapes,
-          SLOT(addToSelectionShapeAt(int, int)));
-  connect(drawController, SIGNAL(moveBy(int, int)), &m_maskShapes,
-          SLOT(moveShapeOrControlPointBy(int, int)));
-  connect(drawController, SIGNAL(touchPointAt(int, int)), &m_maskShapes,
-          SLOT(touchShapeOrControlPointAt(int, int)));
-  connect(drawController, SIGNAL(removeSelectedShapes()), &m_maskShapes,
-          SLOT(removeSelectedShapes()));
-  connect(drawController, SIGNAL(deselectAll()), &m_maskShapes,
-          SLOT(deselectAll()));
-  connect(drawController, SIGNAL(restoreOverrideCursor()), &m_maskShapes,
-          SLOT(restoreOverrideCursor()));
-  connect(drawController, SIGNAL(setSelection(QRect)), this,
-          SLOT(setSelectionRect(QRect)));
-  connect(drawController, SIGNAL(finishSelection(QRect)), this,
-          SLOT(selectMultipleMasks(QRect)));
-  connect(drawController, SIGNAL(finishSelection(QRect)), this,
-          SIGNAL(shapeChangeFinished()));
-  connect(drawController, SIGNAL(copySelectedShapes()), &m_maskShapes,
-          SLOT(copySelectedShapes()));
-  connect(drawController, SIGNAL(pasteCopiedShapes()), &m_maskShapes,
-          SLOT(pasteCopiedShapes()));
+  connect(drawController, SIGNAL(addShape(QString, int, int, QColor, QColor)), &m_maskShapes,
+          SLOT(addShape(QString, int, int, QColor, QColor)));
+  connect(this, SIGNAL(signalToStartCreatingShape2D(QString, QColor, QColor)), drawController,
+          SLOT(startCreatingShape2D(QString, QColor, QColor)));
+  connect(drawController, SIGNAL(moveRightBottomTo(int, int)), &m_maskShapes, SLOT(moveRightBottomTo(int, int)));
+  connect(drawController, SIGNAL(selectAt(int, int)), &m_maskShapes, SLOT(selectShapeOrControlPointAt(int, int)));
+  connect(drawController, SIGNAL(selectCtrlAt(int, int)), &m_maskShapes, SLOT(addToSelectionShapeAt(int, int)));
+  connect(drawController, SIGNAL(moveBy(int, int)), &m_maskShapes, SLOT(moveShapeOrControlPointBy(int, int)));
+  connect(drawController, SIGNAL(touchPointAt(int, int)), &m_maskShapes, SLOT(touchShapeOrControlPointAt(int, int)));
+  connect(drawController, SIGNAL(removeSelectedShapes()), &m_maskShapes, SLOT(removeSelectedShapes()));
+  connect(drawController, SIGNAL(deselectAll()), &m_maskShapes, SLOT(deselectAll()));
+  connect(drawController, SIGNAL(restoreOverrideCursor()), &m_maskShapes, SLOT(restoreOverrideCursor()));
+  connect(drawController, SIGNAL(setSelection(QRect)), this, SLOT(setSelectionRect(QRect)));
+  connect(drawController, SIGNAL(finishSelection(QRect)), this, SLOT(selectMultipleMasks(QRect)));
+  connect(drawController, SIGNAL(finishSelection(QRect)), this, SIGNAL(shapeChangeFinished()));
+  connect(drawController, SIGNAL(copySelectedShapes()), &m_maskShapes, SLOT(copySelectedShapes()));
+  connect(drawController, SIGNAL(pasteCopiedShapes()), &m_maskShapes, SLOT(pasteCopiedShapes()));
 
-  InputControllerDrawAndErase *freeDrawController =
-      new InputControllerDrawAndErase(this);
+  InputControllerDrawAndErase *freeDrawController = new InputControllerDrawAndErase(this);
   setInputController(DrawFreeMode, freeDrawController);
-  connect(this, SIGNAL(signalToStartCreatingFreeShape(QColor, QColor)),
-          freeDrawController, SLOT(startCreatingShape2D(QColor, QColor)));
-  connect(freeDrawController,
-          SIGNAL(addShape(const QPolygonF &, QColor, QColor)), &m_maskShapes,
+  connect(this, SIGNAL(signalToStartCreatingFreeShape(QColor, QColor)), freeDrawController,
+          SLOT(startCreatingShape2D(QColor, QColor)));
+  connect(freeDrawController, SIGNAL(addShape(const QPolygonF &, QColor, QColor)), &m_maskShapes,
           SLOT(addFreeShape(const QPolygonF &, QColor, QColor)));
-  connect(freeDrawController, SIGNAL(draw(const QPolygonF &)), &m_maskShapes,
-          SLOT(drawFree(const QPolygonF &)));
-  connect(freeDrawController, SIGNAL(erase(const QPolygonF &)), &m_maskShapes,
-          SLOT(eraseFree(const QPolygonF &)));
+  connect(freeDrawController, SIGNAL(draw(const QPolygonF &)), &m_maskShapes, SLOT(drawFree(const QPolygonF &)));
+  connect(freeDrawController, SIGNAL(erase(const QPolygonF &)), &m_maskShapes, SLOT(eraseFree(const QPolygonF &)));
 
   // create and connect the peak eraser controller
   auto eraseIcon = new QPixmap(":/PickTools/eraser.png");
-  InputControllerSelection *eraseController =
-      new InputControllerSelection(this, eraseIcon);
+  InputControllerSelection *eraseController = new InputControllerSelection(this, eraseIcon);
   setInputController(ErasePeakMode, eraseController);
-  connect(eraseController, SIGNAL(selection(QRect)), this,
-          SLOT(erasePeaks(QRect)));
+  connect(eraseController, SIGNAL(selection(QRect)), this, SLOT(erasePeaks(QRect)));
 
   // create and connect the peak compare controller
   auto selectIcon = new QPixmap(":/PickTools/selection-pointer.png");
-  InputControllerSelection *compareController =
-      new InputControllerSelection(this, selectIcon);
+  InputControllerSelection *compareController = new InputControllerSelection(this, selectIcon);
   setInputController(ComparePeakMode, compareController);
-  connect(compareController, SIGNAL(selection(QRect)), this,
-          SLOT(comparePeaks(QRect)));
+  connect(compareController, SIGNAL(selection(QRect)), this, SLOT(comparePeaks(QRect)));
 
   // create and connect the peak alignment controller
   auto alignIcon = new QPixmap(":/PickTools/selection-pointer.png");
-  InputControllerSelection *alignController =
-      new InputControllerSelection(this, alignIcon);
+  InputControllerSelection *alignController = new InputControllerSelection(this, alignIcon);
   setInputController(AlignPeakMode, alignController);
-  connect(alignController, SIGNAL(selection(QRect)), this,
-          SLOT(alignPeaks(QRect)));
+  connect(alignController, SIGNAL(selection(QRect)), this, SLOT(alignPeaks(QRect)));
 }
 
 ProjectionSurface::~ProjectionSurface() {
@@ -186,11 +157,9 @@ void ProjectionSurface::clear() {
  * Draw the surface on an OpenGL widget
  * @param widget :: A widget to draw on.
  */
-void ProjectionSurface::draw(MantidGLWidget *widget) const {
-  if (m_viewChanged &&
-      (m_redrawPicking || m_interactionMode == PickSingleMode ||
-       m_interactionMode == PickTubeMode ||
-       m_interactionMode == DrawRegularMode)) {
+void ProjectionSurface::draw(GLDisplay *widget) const {
+  if (m_viewChanged && (m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode ||
+                        m_interactionMode == DrawRegularMode)) {
     draw(widget, true);
     m_redrawPicking = false;
   }
@@ -205,11 +174,10 @@ void ProjectionSurface::draw(MantidGLWidget *widget) const {
  * @param widget :: A widget to draw on.
  * @param picking :: Picking / normal drawing switch.
  */
-void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
+void ProjectionSurface::draw(GLDisplay *widget, bool picking) const {
   QImage **image = picking ? &m_pickImage : &m_viewImage;
 
-  if (!*image || (*image)->width() != widget->width() ||
-      (*image)->height() != widget->height()) {
+  if (!*image || (*image)->width() != widget->width() || (*image)->height() != widget->height()) {
     m_viewChanged = true;
   }
 
@@ -245,8 +213,7 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
     painter.end();
     // Discard any error generated here
     GLuint ecode = glGetError();
-    OpenGLError::logDebug()
-        << "Discarding OpenGL error: " << gluErrorString(ecode);
+    OpenGLError::logDebug() << "Discarding OpenGL error: " << gluErrorString(ecode);
   }
 }
 
@@ -256,20 +223,16 @@ void ProjectionSurface::draw(MantidGLWidget *widget, bool picking) const {
  */
 void ProjectionSurface::drawSimple(QWidget *widget) const {
   if (m_viewChanged) {
-    if (!m_viewImage || m_viewImage->width() != widget->width() ||
-        m_viewImage->height() != widget->height()) {
+    if (!m_viewImage || m_viewImage->width() != widget->width() || m_viewImage->height() != widget->height()) {
       if (m_viewImage)
         delete m_viewImage;
-      m_viewImage =
-          new QImage(widget->width(), widget->height(), QImage::Format_RGB32);
+      m_viewImage = new QImage(widget->width(), widget->height(), QImage::Format_RGB32);
       if (m_pickImage)
         delete m_pickImage;
-      m_pickImage =
-          new QImage(widget->width(), widget->height(), QImage::Format_RGB32);
+      m_pickImage = new QImage(widget->width(), widget->height(), QImage::Format_RGB32);
     }
 
-    if (m_redrawPicking || m_interactionMode == PickSingleMode ||
-        m_interactionMode == PickTubeMode) {
+    if (m_redrawPicking || m_interactionMode == PickSingleMode || m_interactionMode == PickTubeMode) {
       drawSimpleToImage(m_pickImage, true);
       m_redrawPicking = false;
     }
@@ -297,36 +260,21 @@ void ProjectionSurface::resize(int /*unused*/, int /*unused*/) { updateView(); }
  * @param image :: Image to draw on.
  * @param picking :: If true draw a picking image.
  */
-void ProjectionSurface::drawSimpleToImage(QImage * /*unused*/,
-                                          bool /*unused*/) const {}
+void ProjectionSurface::drawSimpleToImage(QImage * /*unused*/, bool /*unused*/) const {}
 
-void ProjectionSurface::mousePressEvent(QMouseEvent *e) {
-  getController()->mousePressEvent(e);
-}
+void ProjectionSurface::mousePressEvent(QMouseEvent *e) { getController()->mousePressEvent(e); }
 
-void ProjectionSurface::mouseMoveEvent(QMouseEvent *e) {
-  getController()->mouseMoveEvent(e);
-}
+void ProjectionSurface::mouseMoveEvent(QMouseEvent *e) { getController()->mouseMoveEvent(e); }
 
-void ProjectionSurface::mouseReleaseEvent(QMouseEvent *e) {
-  getController()->mouseReleaseEvent(e);
-}
+void ProjectionSurface::mouseReleaseEvent(QMouseEvent *e) { getController()->mouseReleaseEvent(e); }
 
-void ProjectionSurface::wheelEvent(QWheelEvent *e) {
-  getController()->wheelEvent(e);
-}
+void ProjectionSurface::wheelEvent(QWheelEvent *e) { getController()->wheelEvent(e); }
 
-void ProjectionSurface::keyPressEvent(QKeyEvent *e) {
-  getController()->keyPressEvent(e);
-}
+void ProjectionSurface::keyPressEvent(QKeyEvent *e) { getController()->keyPressEvent(e); }
 
-void ProjectionSurface::enterEvent(QEvent *e) {
-  getController()->enterEvent(e);
-}
+void ProjectionSurface::enterEvent(QEvent *e) { getController()->enterEvent(e); }
 
-void ProjectionSurface::leaveEvent(QEvent *e) {
-  getController()->leaveEvent(e);
-}
+void ProjectionSurface::leaveEvent(QEvent *e) { getController()->leaveEvent(e); }
 
 /**
  * Update the view of the surface at the next redraw.
@@ -412,9 +360,7 @@ RectF ProjectionSurface::selectionRectUV() const {
   return RectF(QPointF(x_min, y_min), QPointF(x_max, y_max));
 }
 
-bool ProjectionSurface::hasSelection() const {
-  return !m_selectRect.isNull() && m_selectRect.width() > 0;
-}
+bool ProjectionSurface::hasSelection() const { return !m_selectRect.isNull() && m_selectRect.width() > 0; }
 
 void ProjectionSurface::colorMapChanged() {
   this->changeColorMap();
@@ -456,9 +402,7 @@ int ProjectionSurface::getDetectorID(int x, int y) const {
 }
 
 //------------------------------------------------------------------------------
-size_t ProjectionSurface::getDetector(int x, int y) const {
-  return getPickID(x, y);
-}
+size_t ProjectionSurface::getDetector(int x, int y) const { return getPickID(x, y); }
 
 /**
  * Return info text for interactions common to all surfaces.
@@ -523,8 +467,7 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
  * the list.
  * @param controller :: A pointer to the controller to be set.
  */
-void ProjectionSurface::setInputController(int mode,
-                                           InputController *controller) {
+void ProjectionSurface::setInputController(int mode, InputController *controller) {
   m_inputControllers[mode] = controller;
 }
 
@@ -534,14 +477,11 @@ void ProjectionSurface::setInputController(int mode,
  */
 void ProjectionSurface::setPeakVisibility() const {
   if (hasPeakOverlays()) {
-    Mantid::Kernel::Unit_sptr unit =
-        m_instrActor->getWorkspace()->getAxis(0)->unit();
+    Mantid::Kernel::Unit_sptr unit = m_instrActor->getWorkspace()->getAxis(0)->unit();
     QString unitID = QString::fromStdString(unit->unitID());
     double xmin = m_instrActor->minBinValue();
     double xmax = m_instrActor->maxBinValue();
-    foreach (PeakOverlay *po, m_peakShapes) {
-      po->setPeakVisibility(xmin, xmax, unitID);
-    }
+    foreach (PeakOverlay *po, m_peakShapes) { po->setPeakVisibility(xmin, xmax, unitID); }
   }
 }
 
@@ -558,8 +498,7 @@ bool ProjectionSurface::peakVisibleAtPoint(const QPointF &point) const {
     po->selectAtXY(point);
     auto markers = po->getSelectedPeakMarkers();
     bool visible =
-        std::any_of(markers.begin(), markers.end(),
-                    [](PeakMarker2D *marker) { return marker->isVisible(); });
+        std::any_of(markers.begin(), markers.end(), [](PeakMarker2D *marker) { return marker->isVisible(); });
     if (visible) {
       return true;
     }
@@ -664,42 +603,33 @@ void ProjectionSurface::drawPeakAlignmentMarkers(QPainter &painter) const {
 InputController *ProjectionSurface::getController() const {
   InputController *controller = m_inputControllers[m_interactionMode];
   if (!controller) {
-    throw std::logic_error(
-        "Input controller doesn't exist for current interaction mode.");
+    throw std::logic_error("Input controller doesn't exist for current interaction mode.");
   }
   return controller;
 }
 
-void ProjectionSurface::freezeRotation(bool freeze) {
-  getController()->freezeRotation(freeze);
-}
+void ProjectionSurface::freezeRotation(bool freeze) { getController()->freezeRotation(freeze); }
 
 // --- Shape2D manipulation --- //
 
-void ProjectionSurface::startCreatingShape2D(const QString &type,
-                                             const QColor &borderColor,
-                                             const QColor &fillColor) {
+void ProjectionSurface::startCreatingShape2D(const QString &type, const QColor &borderColor, const QColor &fillColor) {
   emit signalToStartCreatingShape2D(type, borderColor, fillColor);
 }
 
-void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor,
-                                               const QColor &fillColor) {
+void ProjectionSurface::startCreatingFreeShape(const QColor &borderColor, const QColor &fillColor) {
   emit signalToStartCreatingFreeShape(borderColor, fillColor);
 }
 
 /**
  * Save shapes drawn on the view to a table workspace
  */
-void ProjectionSurface::saveShapesToTableWorkspace() {
-  m_maskShapes.saveToTableWorkspace();
-}
+void ProjectionSurface::saveShapesToTableWorkspace() { m_maskShapes.saveToTableWorkspace(); }
 
 /**
  * Load shapes from a table workspace on to the view.
  * @param ws :: table workspace to load shapes from
  */
-void ProjectionSurface::loadShapesFromTableWorkspace(
-    const Mantid::API::ITableWorkspace_const_sptr &ws) {
+void ProjectionSurface::loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws) {
   m_maskShapes.loadFromTableWorkspace(std::move(ws));
 }
 
@@ -718,8 +648,7 @@ QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
 /**
  * Get peaks workspace for manually editing.
  */
-std::shared_ptr<Mantid::API::IPeaksWorkspace>
-ProjectionSurface::getEditPeaksWorkspace() const {
+std::shared_ptr<Mantid::API::IPeaksWorkspace> ProjectionSurface::getEditPeaksWorkspace() const {
   if (!m_peakShapes.isEmpty()) {
     return m_peakShapes.last()->getPeaksWorkspace();
   }
@@ -730,8 +659,7 @@ ProjectionSurface::getEditPeaksWorkspace() const {
  * Remove an overlay if its peaks workspace is deleted.
  * @param ws :: Shared pointer to the deleted peaks workspace.
  */
-void ProjectionSurface::deletePeaksWorkspace(
-    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws) {
+void ProjectionSurface::deletePeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws) {
   const int npeaks = m_peakShapes.size();
   for (int i = 0; i < npeaks; ++i) {
     if (m_peakShapes[i]->getPeaksWorkspace() == ws) {
@@ -787,8 +715,7 @@ void ProjectionSurface::clearComparisonPeaks() {
  */
 void ProjectionSurface::setPeakLabelPrecision(int n) {
   if (n < 1) {
-    QMessageBox::critical(nullptr, "Mantid - Error",
-                          "Precision must be a positive number");
+    QMessageBox::critical(nullptr, "Mantid - Error", "Precision must be a positive number");
     return;
   }
   m_peakLabelPrecision = n;
@@ -881,19 +808,15 @@ void ProjectionSurface::erasePeaks(const QRect &rect) {
       if (!peak)
         continue;
 
-      if ((!m_selectedPeaks.first.empty() &&
-           m_selectedPeaks.first.front() == peak) ||
-          (!m_selectedPeaks.second.empty() &&
-           m_selectedPeaks.second.front() == peak)) {
+      if ((!m_selectedPeaks.first.empty() && m_selectedPeaks.first.front() == peak) ||
+          (!m_selectedPeaks.second.empty() && m_selectedPeaks.second.front() == peak)) {
         clearComparisonPeaks();
       }
 
       // check if erased peak matches one of our alignment peaks
-      auto result = std::find_if(m_selectedAlignmentPlane.cbegin(),
-                                 m_selectedAlignmentPlane.cend(),
-                                 [peak](const std::pair<V3D, QPointF> &item) {
-                                   return item.first == peak->getQSampleFrame();
-                                 });
+      auto result =
+          std::find_if(m_selectedAlignmentPlane.cbegin(), m_selectedAlignmentPlane.cend(),
+                       [peak](const std::pair<V3D, QPointF> &item) { return item.first == peak->getQSampleFrame(); });
 
       if (result != m_selectedAlignmentPlane.cend()) {
         clearAlignmentPlane();
@@ -935,8 +858,7 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
     // Two peaks have now been selected
     m_selectedPeaks.second = peaks;
     m_selectedMarkers.second = origin;
-  } else if (!m_selectedPeaks.first.empty() &&
-             !m_selectedPeaks.second.empty()) {
+  } else if (!m_selectedPeaks.first.empty() && !m_selectedPeaks.second.empty()) {
     // Two peaks have already been selected. Clear the pair and store
     // the new peak as the first entry
     m_selectedPeaks.first = peaks;
@@ -975,11 +897,9 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
   if (m_selectedAlignmentPlane.size() < 2) {
     // check Q value is not already in the plane list
     // We only want unique vectors to define the plane
-    const auto result = std::find_if(
-        m_selectedAlignmentPlane.cbegin(), m_selectedAlignmentPlane.cend(),
-        [peak](const std::pair<V3D, QPointF> &item) {
-          return item.first == peak->getQSampleFrame();
-        });
+    const auto result =
+        std::find_if(m_selectedAlignmentPlane.cbegin(), m_selectedAlignmentPlane.cend(),
+                     [peak](const std::pair<V3D, QPointF> &item) { return item.first == peak->getQSampleFrame(); });
 
     if (result == m_selectedAlignmentPlane.cend()) {
       m_selectedAlignmentPlane.emplace_back(peak->getQSampleFrame(), origin);
@@ -991,10 +911,8 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
   if (m_selectedAlignmentPlane.size() >= 2 && m_selectedAlignmentPeak.first) {
     // create vector V3Ds for the plane
     std::vector<Mantid::Kernel::V3D> qValues;
-    std::transform(
-        m_selectedAlignmentPlane.begin(), m_selectedAlignmentPlane.end(),
-        std::back_inserter(qValues),
-        [](const std::pair<V3D, QPointF> &item) { return item.first; });
+    std::transform(m_selectedAlignmentPlane.begin(), m_selectedAlignmentPlane.end(), std::back_inserter(qValues),
+                   [](const std::pair<V3D, QPointF> &item) { return item.first; });
     emit alignPeaks(qValues, m_selectedAlignmentPeak.first);
   }
 }
@@ -1010,9 +928,7 @@ void ProjectionSurface::enableLighting(bool on) { m_isLightingOn = on; }
  */
 QStringList ProjectionSurface::getPeaksWorkspaceNames() const {
   QStringList names;
-  foreach (PeakOverlay *po, m_peakShapes) {
-    names << QString::fromStdString(po->getPeaksWorkspace()->getName());
-  }
+  foreach (PeakOverlay *po, m_peakShapes) { names << QString::fromStdString(po->getPeaksWorkspace()->getName()); }
   return names;
 }
 
@@ -1054,14 +970,11 @@ void ProjectionSurface::loadFromProject(const std::string &lines) {
     // make vector of pairs <V3D, QPointF>
     std::transform(qValues.begin(), qValues.end(), alignmentPoints.begin(),
                    std::back_inserter(m_selectedAlignmentPlane),
-                   [](Mantid::Kernel::V3D qValue, QPointF origin) {
-                     return std::make_pair(qValue, origin);
-                   });
+                   [](Mantid::Kernel::V3D qValue, QPointF origin) { return std::make_pair(qValue, origin); });
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "ProjectionSurface::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("ProjectionSurface::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -1084,8 +997,7 @@ std::string ProjectionSurface::saveToProject() const {
   tsv.writeSection("AlignmentInfo", alignmentInfo.outputLines());
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "ProjectionSurface::loadsaveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("ProjectionSurface::loadsaveToProject() not implemented for Qt >= 5");
 #endif
 }
 

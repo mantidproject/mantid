@@ -18,8 +18,6 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidCurveFitting/Algorithms/ConvolutionFit.h"
-#include "MantidCurveFitting/Algorithms/QENSFitSequential.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -29,14 +27,11 @@
 #include "ParameterEstimation.h"
 
 using namespace Mantid::API;
-using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
-
-using ConvolutionFitSequential = Algorithms::ConvolutionFit<Algorithms::QENSFitSequential>;
 
 namespace {
 TableWorkspace_sptr createTableWorkspace(std::size_t const &size) { return std::make_shared<TableWorkspace>(size); }
@@ -68,7 +63,7 @@ public:
   MOCK_METHOD1(updateParameterEstimationData, void(DataForParameterEstimationCollection &&data));
   MOCK_METHOD0(estimateFunctionParameters, void());
   MOCK_METHOD1(setBackgroundA0, void(double value));
-  MOCK_METHOD2(setResolution, void(std::string const &name, TableDatasetIndex const &index));
+  MOCK_METHOD2(setResolution, void(std::string const &name, WorkspaceID const &index));
   MOCK_METHOD1(setResolution, void(const std::vector<std::pair<std::string, size_t>> &fitResolutions));
   MOCK_METHOD1(setQValues, void(const std::vector<double> &qValues));
   // protected Slots
@@ -96,7 +91,7 @@ public:
     m_browser = std::make_unique<IndirectFitPropertyBrowser>();
     m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(nullptr, FittingMode::SEQUENTIAL_AND_SIMULTANEOUS);
     m_browser->init();
-    m_templateBrowser = std::make_unique<MockFunctionTemplateBrowser>();
+    m_templateBrowser = std::make_unique<NiceMock<MockFunctionTemplateBrowser>>();
     EXPECT_CALL(*m_templateBrowser, createBrowser());
     EXPECT_CALL(*m_templateBrowser, createProperties());
     m_browser->setFunctionTemplateBrowser(m_templateBrowser.get());
@@ -263,7 +258,7 @@ public:
     int nData = 2;
     QList<FunctionModelDataset> datasets;
     for (auto i = 0u; i < 2; ++i) {
-      TableDatasetIndex index{i};
+      WorkspaceID workspaceID{i};
 
       auto const name = "wsName" + std::to_string(i);
       datasets.append(FunctionModelDataset(QString::fromStdString(name), FunctionModelSpectra("0")));

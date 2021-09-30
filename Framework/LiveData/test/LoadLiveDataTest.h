@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidTestHelpers/FacilityHelper.h"
 #include "TestGroupDataListener.h"
@@ -26,6 +26,29 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+class FakeInOutPropertyAlgorithm : public API::Algorithm {
+public:
+  static constexpr auto Name = "FakeInOutPropertyAlgorithm";
+  static constexpr int Version = 1;
+  static constexpr auto MarkerLogName = "LiveDataMarker";
+  static constexpr int MarkerLogValue = 1;
+
+  const std::string name() const override { return Name; }
+  const std::string summary() const override { return "Fake algorithm for testing"; }
+  int version() const override { return Version; }
+  const std::string category() const override { return ""; }
+  void init() override {
+    declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("Workspace", "", Direction::InOut),
+                    "The name of the InOut workspace");
+  }
+  void exec() override {
+    MatrixWorkspace_sptr workspaceInplace = getProperty("Workspace");
+    // add a log that we have been called
+    auto &run = workspaceInplace->mutableRun();
+    run.addProperty(MarkerLogName, MarkerLogValue);
+  }
+};
+
 class LoadLiveDataTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -33,11 +56,15 @@ public:
   static LoadLiveDataTest *createSuite() { return new LoadLiveDataTest(); }
   static void destroySuite(LoadLiveDataTest *suite) { delete suite; }
 
-  void setUp() override {
+  LoadLiveDataTest() {
     FrameworkManager::Instance();
-    AnalysisDataService::Instance().clear();
+    AlgorithmFactory::Instance().subscribe<FakeInOutPropertyAlgorithm>();
     ConfigService::Instance().setString("testdatalistener.reset_after", "0");
   }
+
+  ~LoadLiveDataTest() { AlgorithmFactory::Instance().unsubscribe(FakeInOutPropertyAlgorithm::Name, 1); }
+
+  void setUp() override { AnalysisDataService::Instance().clear(); }
 
   void test_Init() {
     LoadLiveData alg;
@@ -231,9 +258,8 @@ public:
     TS_ASSERT(ws->monitorWorkspace());
   }
 
-  //--------------------------------------------------------------------------------------------
   /** Do PostProcessing */
-  void test_PostProcessing() {
+  void test_PostProcessing_When_Algorithm_Has_Separate_Input_And_Output_Properties() {
     // No chunk processing, but PostProcessing
     EventWorkspace_sptr ws = doExec<EventWorkspace>("Replace", "", "", "Rebin", "Params=40e3, 1e3, 60e3");
     EventWorkspace_sptr ws_accum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
@@ -251,6 +277,23 @@ public:
     TS_ASSERT_EQUALS(ws->blocksize(), 20);
     TS_ASSERT_DELTA(ws->dataX(0)[0], 40e3, 1e-4);
     TS_ASSERT_EQUALS(AnalysisDataService::Instance().size(), 2);
+  }
+
+  void test_PostProcessing_When_Algorithm_Has_Single_InOut_Property() {
+    // No chunk processing, but PostProcessing
+    auto ws = doExec<EventWorkspace>("Replace", "", "", FakeInOutPropertyAlgorithm::Name, "");
+    auto wsAccum = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("fake_accum");
+    TS_ASSERT(ws)
+    TS_ASSERT(wsAccum)
+
+    // The accumulated workspace is affected as it is in/out.
+    const auto &wsAccumRun = wsAccum->run();
+    TS_ASSERT_EQUALS(true, wsAccumRun.hasProperty(FakeInOutPropertyAlgorithm::MarkerLogName));
+
+    // The post-processed workspace: Check that fake algorithm was called
+    const auto &wsRun = ws->run();
+    TS_ASSERT_EQUALS(FakeInOutPropertyAlgorithm::MarkerLogValue,
+                     wsRun.getPropertyValueAsType<int>(FakeInOutPropertyAlgorithm::MarkerLogName));
   }
 
   //--------------------------------------------------------------------------------------------

@@ -350,6 +350,19 @@ public:
     TS_ASSERT_DELTA(comp1.getDistance(comp2), 14.1421, 0.001);
   }
 
+  void testGetParameterVisibile() {
+    V3D origin(0, 0, 0);
+
+    Component comp("origin", origin);
+    ParameterMap_sptr pmap(new ParameterMap());
+    pmap->addString(&comp, "Hidden string parameter", "hidden values", nullptr, "false");
+    pmap->addDouble(&comp, "Hidden double parameter", 0.0, nullptr, "false");
+    auto names = comp.getParameterNames();
+    for (auto name : names) {
+      TS_ASSERT_EQUALS(comp.getParameterVisible(name, false), false);
+    }
+  }
+
   void testType() {
     Component comp;
     TS_ASSERT_EQUALS(comp.type(), "LogicalComponent");

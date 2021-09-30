@@ -179,7 +179,6 @@ endfunction()
 
 # Find python interpreter
 set(MINIMUM_PYTHON_VERSION 3.6)
-set(Python3_ROOT_DIR $ENV{CONDA_PREFIX})
 find_package(
   Python ${MINIMUM_PYTHON_VERSION} REQUIRED COMPONENTS Interpreter Development
                                                        NumPy

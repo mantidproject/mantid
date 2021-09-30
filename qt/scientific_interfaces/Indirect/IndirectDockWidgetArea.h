@@ -8,7 +8,6 @@
 #include "IndirectFitDataView.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFitPropertyBrowser.h"
-#include "ui_IndirectDockWidgetArea.h"
 
 #include <QMainWindow>
 #include <QObject>
@@ -23,7 +22,6 @@ class IndirectDockWidgetArea : public QMainWindow {
 public:
   IndirectDockWidgetArea(QWidget *parent = nullptr);
   virtual ~IndirectDockWidgetArea(){};
-  std::unique_ptr<Ui::IndirectDockWidgetArea> m_uiForm;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser;
   IndirectFitDataView *m_fitDataView;
   IndirectFitPlotView *m_fitPlotView;

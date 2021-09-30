@@ -88,19 +88,11 @@ useful in the Workbench.
 
 The first import is::
 
-    from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-This provides some compatibility between scripts that are written in Python 2
-and scripts written in Python 3. Notably all print statements must now use
-braces.
-
-The second::
-
     from mantid.simpleapi import *
 
 This provides access to Mantid's set of algorithms from within the your scripts.
 
-Finally::
+The second is::
 
     import matplotlib.pyplot as plt
     import numpy as np
@@ -114,7 +106,7 @@ Matplotlib with Mantid see
 `NumPy <https://docs.scipy.org/doc/numpy/user/quickstart.html>`_ is
 ubiquitous within scientific computing in Python and its data structures can be
 used within Mantid. For a short introduction to NumPy see Mantid's
-`Numpy Introduction <https://www.mantidproject.org/Numpy_Introduction>`__.
+:ref:`Numpy Introduction <NumPyIntroduction>`.
 
 Editor Status
 -------------

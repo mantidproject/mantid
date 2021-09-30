@@ -28,7 +28,7 @@ public:
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     // Test if the name metadata line is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[2], "      \"name\" : \"Mantid Notebook\"")
+    TS_ASSERT_EQUALS(notebookLines[3], "  \"name\" : \"Mantid Notebook\"")
   }
 
   void test_markdownCell() {
@@ -40,9 +40,9 @@ public:
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     // Test if the markdown cell is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[1], "   \"cell_type\" : \"markdown\",")
+    TS_ASSERT_EQUALS(notebookLines[1], " \"cell_type\" : \"markdown\",")
     // Test if the test_data string is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[3], "   \"source\" : \"" + test_data + "\"")
+    TS_ASSERT_EQUALS(notebookLines[3], " \"source\" : \"" + test_data + "\"")
   }
 
   void test_codeCell() {
@@ -54,8 +54,8 @@ public:
     boost::split(notebookLines, notebookText, boost::is_any_of("\n"));
 
     // Test if the code cell is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[1], "   \"cell_type\" : \"code\",")
+    TS_ASSERT_EQUALS(notebookLines[1], " \"cell_type\" : \"code\",")
     // Test if the test_data string is present in the output notebook text
-    TS_ASSERT_EQUALS(notebookLines[3], "   \"input\" : \"" + test_data + "\",")
+    TS_ASSERT_EQUALS(notebookLines[3], " \"input\" : \"" + test_data + "\",")
   }
 };

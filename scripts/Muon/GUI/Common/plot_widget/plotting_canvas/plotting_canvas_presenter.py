@@ -12,9 +12,7 @@ from Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWi
 from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
 from mantid import AnalysisDataService
 from mantidqt.utils.observer_pattern import GenericObserver
-
-Y_MIN = -9.9e9
-Y_MAX = 9.9e9
+import numpy as np
 
 
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
@@ -56,11 +54,11 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Replot a workspace in the plot with a different error_state"""
         self._view.replot_workspace_with_error_state(workspace_name, error_state)
 
-    def convert_plot_to_tiled_plot(self, keys, tiled_by):
+    def convert_plot_to_tiled_plot(self, keys):
         """Converts the current plot into a tiled plot specified by the keys and tiled by type
         In then replots the existing data on the new tiles"""
         workspaces, indices = self._view.plotted_workspaces_and_indices
-        self.create_tiled_plot(keys, tiled_by)
+        self.create_tiled_plot(keys)
         self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
 
     def convert_plot_to_single_plot(self):
@@ -74,9 +72,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._context.clear_subplots()
         self._options_presenter.clear_subplots()
 
-    def create_tiled_plot(self, keys, tiled_by):
+    def create_tiled_plot(self, keys):
         """Creates a blank tiled plot specified by the keys and tiled by type"""
-        self._model.update_tiled_axis_map(keys, tiled_by)
+        self._model.update_tiled_axis_map(keys)
         self.clear_subplots()
         num_axes = len(keys) if len(keys) > 0 else 1
         self._view.create_new_plot_canvas(num_axes)
@@ -136,6 +134,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             autoscale = True
         self._set_axes_limits_and_titles(autoscale)
 
+    def should_update_all(self, selected_subplots):
+        all = len(selected_subplots)==1 and self._options_presenter.get_selection_index()==0
+        return len(selected_subplots) > 1 or all
+
     def _set_axes_limits_and_titles(self, autoscale):
         xlims = self._context.default_xlims
         ylims = self._context.default_ylims
@@ -154,6 +156,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._update_quick_edit_widget()
         self._view.redraw_figure()
 
+    def set_x_ticks(self, x_ticks=None):
+        self._view.set_x_ticks(x_ticks)
+
+    def set_y_ticks(self, y_ticks=None):
+        self._view.set_y_ticks(y_ticks)
+
     """ Quick edit"""
     def _setup_quick_edit_widget(self):
         self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
@@ -163,6 +171,13 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
         self.range_changed_observer = GenericObserver(self.update_range)
         self._view.add_range_changed_subscriber(self.range_changed_observer)
+        self.set_quickedit_from_context()
+
+    def set_quickedit_from_context(self):
+        self._options_presenter.set_autoscale(self._context.get_autoscale_all)
+        self._options_presenter.set_errors(self._context.get_error_all)
+        self._options_presenter.set_plot_x_range(self._context.get_xlim_all)
+        self._options_presenter.set_plot_y_range(self._context.get_ylim_all)
 
     def _handle_subplot_changed_in_quick_edit_widget(self):
         selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
@@ -175,7 +190,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         autoscale = self._context.get_autoscale_state(selected_subplots[0])
         error = self._context.get_error_state(selected_subplots[0])
         # if all
-        if len(selected_subplots) > 1:
+        if self.should_update_all(selected_subplots):
             xlim = self._context.get_xlim_all
             ylim = self._context.get_ylim_all
             autoscale = self._context.get_autoscale_all
@@ -204,6 +219,17 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         else:
             return [], [] # no subplots are available
 
+    def set_subplot_selection(self, selection):
+        selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
+        index = 0
+        if selection[0] in selected_subplots:
+            # index 0 is all and should never be a subplot name
+            # the selected subplots are the list of subplots (excludes all option)
+            # so manually add one to the index
+            index = selected_subplots.index(selection[0]) + 1
+        self._options_presenter.set_selection_by_index(index)
+        self._handle_subplot_changed_in_quick_edit_widget()
+
     def _get_axes_limits_from_quick_edit_widget(self):
         xlims = self._options_presenter.get_plot_x_range()
         ylims = self._options_presenter.get_plot_y_range()
@@ -215,7 +241,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     """x or y range changed"""
     def _handle_xlim_changed_in_quick_edit_options(self, xlims):
         selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
-        if len(selected_subplots) > 1:
+        if self.should_update_all(selected_subplots):
             self._context.update_xlim_all(xlims)
         for subplot, index in zip(selected_subplots, indices):
             self._view.set_axis_xlimits(index, xlims)
@@ -226,7 +252,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _handle_ylim_changed_in_quick_edit_options(self, ylims):
         selected_subplots, indices = self._get_selected_subplots_from_quick_edit_widget()
-        if len(selected_subplots) > 1:
+        if self.should_update_all(selected_subplots):
             self._context.update_ylim_all(ylims)
         for subplot, index in zip(selected_subplots, indices):
             self._view.set_axis_ylimits(index, ylims)
@@ -243,6 +269,11 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Sets the x range of all the plots"""
         self._options_presenter.set_plot_x_range(range)
         self._handle_xlim_changed_in_quick_edit_options(range)
+
+    def set_plot_y_range(self, range):
+        """Sets the x range of all the plots"""
+        self._options_presenter.set_plot_y_range(range)
+        self._handle_ylim_changed_in_quick_edit_options(range)
 
     def _update_quick_edit_widget(self):
         self._update_quick_widget_subplots_menu()
@@ -301,6 +332,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.set_autoscale(state)
         if state:
             self._options_presenter.disable_yaxis_changer()
+            self.force_autoscale()
         else:
             self._options_presenter.enable_yaxis_changer()
 
@@ -310,30 +342,55 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         state = self._options_presenter.autoscale
         for plot in selected_subplots:
             self._context.update_autoscale_state(plot, state)
-        if len(selected_subplots) > 1:
+        if self.should_update_all(selected_subplots):
             self._context.set_autoscale_all(state)
         if not state:
             self._options_presenter.enable_yaxis_changer()
             return
-        # get min and max
-        ymin = Y_MIN
-        ymax = Y_MAX
+        self.force_autoscale()
+        self._options_presenter.disable_yaxis_changer()
+
+    def _get_y_limits_for_subplot(self, global_limits, y_list, plot):
+        if self._context.settings.is_condensed:
+            # global min and max
+            return global_limits
+        else:
+            # local min and max
+            return y_list[plot]
+
+    def update_y_limits_of_subplots(self, y_limits_list, selected_subplots, axes):
+        # these are seperate to make it easier for debugging if it ever breaks
+        if len(selected_subplots)==0:
+            return
+        elif len(selected_subplots) != len(y_limits_list):
+            return
+        elif len(selected_subplots) != len(axes):
+            return
+        # get max and min across all plots
+        y_mins = [y_limits_list[plot][0] for plot in selected_subplots]
+        y_maxs = [y_limits_list[plot][1] for plot in selected_subplots]
+        global_limits = [np.amin(y_mins), np.amax(y_maxs)]
+
+        for axis_num, plot in zip(axes, selected_subplots):
+            y_limits = self._get_y_limits_for_subplot(global_limits, y_limits_list, plot)
+            self._context.update_ylim(plot, y_limits)
+            self._view.set_axis_ylimits(axis_num, y_limits)
+        if self.should_update_all(selected_subplots):
+            self._context.update_ylim_all(global_limits)
+        # either have multiple plots -> global limits or 1 plot (global = plot limits)
+        self._options_presenter.set_plot_y_range(global_limits)
+        self._view.redraw_figure()
+
+    def force_autoscale(self):
+        selected_subplots, axes = self._get_selected_subplots_from_quick_edit_widget()
+        # get min and max for each subplot
+        y_limits_list = {}
         for axis_num, plot in zip(axes, selected_subplots):
             self._view.autoscale_selected_y_axis(axis_num)
             _, _, y_min, y_max = self._view.get_axis_limits(axis_num)
-            if y_min > ymin:
-                ymin = y_min
-            if y_max < ymax:
-                ymax = y_max
+            y_limits_list[plot] = [y_min, y_max]
         # update y vales
-        for plot in selected_subplots:
-            self._context.update_ylim(plot, [ymin, ymax])
-        if len(selected_subplots) > 1:
-            self._context.update_ylim_all([ymin, ymax])
-
-        self._options_presenter.set_plot_y_range([ymin, ymax])
-        self._options_presenter.disable_yaxis_changer()
-        self._view.redraw_figure()
+        self.update_y_limits_of_subplots(y_limits_list, selected_subplots, axes)
 
     def autoscale_y_axes(self):
         """Autoscales all y-axes in the figure using the existing x axis"""
@@ -350,7 +407,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         state = self._options_presenter.get_errors()
         plotted_workspaces, plot_indices = self._view.plotted_workspaces_and_indices
 
-        if len(selected_subplots) > 1:
+        if self.should_update_all(selected_subplots):
             self._context.set_error_all(state)
 
         for plot in selected_subplots:

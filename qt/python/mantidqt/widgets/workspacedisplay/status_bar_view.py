@@ -17,8 +17,10 @@ class StatusBarView(QMainWindow, ObservingView):
     rename_signal = Signal(str)
     replace_signal = Signal(str, Workspace)
 
-    def __init__(self, parent, central_widget, name, window_width=600, window_height=400, presenter=None):
+    def __init__(self, parent, central_widget, name, window_width=600, window_height=400, window_flags=Qt.Window, presenter=None):
         super(StatusBarView, self).__init__(parent)
+
+        self.setWindowFlags(window_flags)
 
         self.presenter = presenter
         self.setCentralWidget(central_widget)

@@ -32,7 +32,7 @@ public:
   }
 
   void test_load_gss_txt() {
-    API::IAlgorithm_sptr loader = createAlgorithm();
+    auto loader = createAlgorithm();
     loader->setPropertyValue("Filename", "gss.txt");
     loader->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(loader->execute());
@@ -73,7 +73,7 @@ public:
                       "   115213.79731        3.00000000        0.00000000\n"
                       "   115217.66873        5.00000000        0.00000000\n";
     ScopedFile file(gss, "gss_large_x.txt");
-    API::IAlgorithm_sptr loader = createAlgorithm();
+    auto loader = createAlgorithm();
     loader->setPropertyValue("Filename", file.getFileName());
     TS_ASSERT(loader->execute());
     TS_ASSERT_EQUALS(loader->isExecuted(), true);
@@ -101,7 +101,7 @@ public:
   }
 
   void test_load_gss_ExtendedHeader_gsa() {
-    API::IAlgorithm_sptr loader = createAlgorithm();
+    auto loader = createAlgorithm();
     loader->setPropertyValue("Filename", "gss-ExtendedHeader.gsa");
     TS_ASSERT(loader->execute())
     // Check a few things in the workspace
@@ -140,27 +140,27 @@ public:
   }
 
   void test_fails_gracefully_if_passed_wrong_filetype() {
-    API::IAlgorithm_sptr loader = createAlgorithm();
+    auto loader = createAlgorithm();
     loader->setPropertyValue("Filename", "argus0026287.nxs");
     // Throws different exception type on different platforms!
     TS_ASSERT_THROWS_ANYTHING(loader->execute())
 
-    API::IAlgorithm_sptr loader2 = createAlgorithm();
+    auto loader2 = createAlgorithm();
     loader2->setPropertyValue("Filename", "AsciiExample.txt");
     TS_ASSERT_THROWS(loader2->execute(), const std::out_of_range &)
 
-    API::IAlgorithm_sptr loader3 = createAlgorithm();
+    auto loader3 = createAlgorithm();
     loader3->setPropertyValue("Filename", "CSP79590.raw");
     TS_ASSERT_THROWS(loader3->execute(), const std::out_of_range &)
 
-    API::IAlgorithm_sptr loader4 = createAlgorithm();
+    auto loader4 = createAlgorithm();
     loader4->setPropertyValue("Filename", "VULCAN_2916_neutron0_event.dat");
     TS_ASSERT_THROWS(loader4->execute(), const std::out_of_range &)
   }
 
 private:
   API::IAlgorithm_sptr createAlgorithm() {
-    API::IAlgorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged("LoadGSS");
+    auto alg = API::AlgorithmManager::Instance().createUnmanaged("LoadGSS");
     alg->initialize();
     alg->setChild(true);
     alg->setPropertyValue("OutputWorkspace", "fakeName");

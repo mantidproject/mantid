@@ -88,6 +88,8 @@ public:
     const auto &pmap = fileBacked->constInstrumentParameters();
 
     TS_ASSERT(pmap.size() > 0);
+    for (auto param : pmap)
+      TS_ASSERT_EQUALS((param.second)->visible(), true);
   }
 
   void test_sample() {

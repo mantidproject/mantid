@@ -181,6 +181,19 @@ private:
     TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540", filteredLogEndTime.toSimpleString());
   }
 
+  void validate_pulse_time_sorting(EventWorkspace_sptr eventWS) {
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
+      auto eventList = eventWS->getSpectrum(i);
+      if (eventList.getSortType() == DataObjects::PULSETIME_SORT) {
+        std::vector<DateAndTime> pulsetimes;
+        for (auto &event : eventList.getEvents()) {
+          pulsetimes.emplace_back(event.pulseTime());
+        }
+        TS_ASSERT(std::is_sorted(pulsetimes.cbegin(), pulsetimes.cend()));
+      }
+    }
+  }
+
 public:
   void test_load_event_nexus_v20_ess() {
     const std::string file = "V20_ESS_example.nxs";
@@ -219,6 +232,8 @@ public:
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
+
+    validate_pulse_time_sorting(eventWS);
   }
 
   void test_load_event_nexus_v20_ess_integration_2018() {
@@ -241,6 +256,8 @@ public:
                        (300 * 300) + 2) // Two monitors
       TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
       TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
+
+      validate_pulse_time_sorting(eventWS);
     }
   }
 
@@ -391,7 +408,7 @@ public:
 
     // Longer, more thorough test
     if (false) {
-      IAlgorithm_sptr load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
+      auto load = AlgorithmManager::Instance().create("LoadEventPreNexus", 1);
       load->setPropertyValue("OutputWorkspace", "cncs_pre");
       load->setPropertyValue("EventFilename", "CNCS_7860_neutron_event.dat");
       load->setPropertyValue("PulseidFilename", "CNCS_7860_pulseid.dat");

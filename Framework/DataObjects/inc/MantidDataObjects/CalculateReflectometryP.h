@@ -22,14 +22,14 @@ public:
   /**
    * Constructor
    */
-  CalculateReflectometryP() : m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
+  CalculateReflectometryP(int version) : CalculateReflectometry(version), m_sin_theta_i(0.0), m_sin_theta_f(0.0) {}
 
   /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) override { m_sin_theta_i = sin(to_radians_factor * thetaIncident); }
+  void updateThetaIncident(double thetaIncident) override { m_sin_theta_i = sin(to_radians_factor * thetaIncident); }
 
   /**
    Setter for the final theta value require for the calculation. Internally
@@ -37,6 +37,17 @@ public:
    @param thetaFinal: final theta value in degrees
    */
   void setThetaFinal(double thetaFinal) override { m_sin_theta_f = sin(to_radians_factor * thetaFinal); }
+
+  /**
+   Set the final theta value from the detector twoTheta angle.
+   @param twoTheta: detector twoTheta value in degrees
+   */
+  void setTwoTheta(double twoTheta) override {
+    if (m_version == 1)
+      setThetaFinal(twoTheta);
+    else
+      setThetaFinal(twoTheta - m_theta_i);
+  }
 
   /**
    Executes the calculation to determine PSum
@@ -61,14 +72,14 @@ public:
   }
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper,
                                              double thetaLower) override {
-    setThetaFinal(thetaLower);
+    setTwoTheta(thetaLower);
     auto dim1UpperRightVertex = calculateDim1(lamLower);
     auto dim0LowerLeftVertex = calculateDim0(lamUpper);
     // UPPER LEFT VERTEX
     const Mantid::Kernel::V2D secondVertex(calculateDim0(lamUpper), // highest qx
                                            calculateDim1(lamLower));
 
-    setThetaFinal(thetaUpper);
+    setTwoTheta(thetaUpper);
     const Mantid::Kernel::V2D firstVertex(dim0LowerLeftVertex,
                                           calculateDim1(lamUpper)); // lowest qz
 

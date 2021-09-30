@@ -26,6 +26,8 @@ public:
 
   void updateSelectedSpectra() override;
 
+  std::string getFileName() const;
+
 private slots:
   void selectAllSpectra(int state);
   void workspaceChanged(const QString &workspaceName);

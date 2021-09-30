@@ -16,13 +16,30 @@ TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
 MAXENT_STR = 'MaxEnt'
+PERIOD_STR = "_period_"
+RECONSTRUCTED_SPECTRA='_reconstructed_spectra'
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
     if multi_period:
-        return _base_run_name(instrument, run) + "_raw_data" + "_period_" + period + workspace_suffix
+        return _base_run_name(instrument, run) + "_raw_data" + PERIOD_STR + period + workspace_suffix
     else:
         return _base_run_name(instrument, run) + "_raw_data" + workspace_suffix
+
+
+def get_run_number_from_raw_name(workspace_name, instrument):
+    start = len(instrument)
+    end = workspace_name.find("_")
+    return workspace_name[start:end]
+
+
+def get_period_from_raw_name(workspace_name, suffix):
+    if PERIOD_STR in workspace_name:
+        index_start = workspace_name.find(PERIOD_STR)+len(PERIOD_STR)
+        index_end = workspace_name.find(suffix)
+        # remove the trailing underscore
+        return PERIOD_STR[:-1]+ workspace_name[index_start:index_end]
+    return ""
 
 
 def get_deadtime_data_workspace_name(instrument, run, workspace_suffix=' MA'):
@@ -134,8 +151,11 @@ def get_raw_data_directory(context, run):
         return context.data_context._base_run_name(run) + " Raw Data" + context.workspace_suffix + "/"
 
 
-def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group):
-    workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
+def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group, new_name=""):
+    if new_name:
+        workspace_name = raw_workspace.replace('_raw_data', '; ' + new_name)
+    else:
+        workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
     workspace_name += '; ' + forward_group + '; ' + backward_group
     return workspace_name
 
@@ -176,8 +196,8 @@ def get_fft_workspace_name(input_workspace, imaginary_input_workspace):
         return 'FFT; Re ' + input_workspace
 
 
-def get_maxent_workspace_name(input_workspace):
-    return input_workspace + "".join(['; ', MAXENT_STR])
+def get_maxent_workspace_name(input_workspace, method):
+    return input_workspace + "".join(['; by ',method, '; ', MAXENT_STR])
 
 
 def get_fft_component_from_workspace_name(input_workspace):
@@ -257,17 +277,32 @@ def get_fit_function_name_from_workspace(workspace_name):
 
 
 def create_multi_domain_fitted_workspace_name(input_workspace, function_name):
-    directory = input_workspace + '; Fitted;' + function_name + '/'
     name = input_workspace + '+ ...; Fitted;' + function_name
+    directory = name + '/'
 
     return name, directory
 
 
 def create_parameter_table_name(input_workspace_name, function_name):
     directory = input_workspace_name + '; Fitted;' + function_name + '/'
-    name = input_workspace_name + '; Fitted Parameters;' + function_name
+    name = input_workspace_name + '; Fitted;' + function_name + '; Parameters'
 
     return name, directory
+
+
+def create_covariance_matrix_name(input_workspace_name, function_name):
+    directory = input_workspace_name + '; Fitted;' + function_name + '/'
+    name = input_workspace_name + '; Fitted;' + function_name + '; Normalised Covariance Matrix'
+
+    return name, directory
+
+
+def create_model_fitting_parameter_combination_name(result_table_name, x_parameter, y_parameter):
+    return result_table_name + "; " + y_parameter + " vs " + x_parameter
+
+
+def create_model_fitting_parameters_group_name(results_table_name):
+    return results_table_name + "; Parameter Combinations"
 
 
 def remove_rebin_from_name(name):

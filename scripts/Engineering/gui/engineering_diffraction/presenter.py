@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from Engineering.common import path_handling
+from Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from .tabs.common import CalibrationObserver
-from .tabs.common.path_handling import get_run_number_from_path
 from .tabs.calibration.model import CalibrationModel
 from .tabs.calibration.view import CalibrationView
 from .tabs.calibration.presenter import CalibrationPresenter
@@ -18,6 +19,7 @@ from .tabs.fitting.presenter import FittingPresenter
 from .settings.settings_model import SettingsModel
 from .settings.settings_view import SettingsView
 from .settings.settings_presenter import SettingsPresenter
+from .settings.settings_helper import get_setting, set_setting
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.observer_pattern import GenericObservable
@@ -30,6 +32,7 @@ class EngineeringDiffractionPresenter(object):
         self.fitting_presenter = None
         self.settings_presenter = None
 
+        self.doc_folder = "diffraction"
         self.doc = "Engineering Diffraction"
 
         # Setup observers
@@ -79,16 +82,27 @@ class EngineeringDiffractionPresenter(object):
 
     def handle_close(self):
         self.fitting_presenter.data_widget.ads_observer.unsubscribe()
+        self.fitting_presenter.data_widget.view.saveSettings()
         self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
     def open_help_window(self):
-        InterfaceManager().showCustomInterfaceHelp(self.doc)
+        InterfaceManager().showCustomInterfaceHelp(self.doc, self.doc_folder)
 
     def open_settings(self):
         self.settings_presenter.show()
 
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
-        van_no = get_run_number_from_path(calibration.get_vanadium(), instrument)
-        sample_no = get_run_number_from_path(calibration.get_sample(), instrument)
-        self.statusbar_observable.notify_subscribers(f"V: {van_no}, CeO2: {sample_no}, Instrument: {instrument}")
+        sample_no = path_handling.get_run_number_from_path(calibration.get_sample(), instrument)
+        self.statusbar_observable.notify_subscribers(f"CeO2: {sample_no}, Instrument: {instrument}")
+
+    @staticmethod
+    def get_saved_rb_number() -> str:
+        rb_number = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                output_settings.ENGINEERING_PREFIX, "rb_number")
+        return rb_number
+
+    @staticmethod
+    def set_saved_rb_number(rb_number) -> None:
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                    output_settings.ENGINEERING_PREFIX, "rb_number", rb_number)

@@ -54,6 +54,8 @@ FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<
   connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
   connect(m_presenter.get(), SIGNAL(parameterChanged(const QString &, const QString &)), this,
           SIGNAL(parameterChanged(const QString &, const QString &)));
+  connect(m_presenter.get(), SIGNAL(attributeChanged(const QString &)), this,
+          SIGNAL(attributeChanged(const QString &)));
 }
 
 /**

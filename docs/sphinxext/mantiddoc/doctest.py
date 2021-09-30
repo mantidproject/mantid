@@ -322,7 +322,7 @@ class DocTestOutputParser(object):
         """
         fullname = self.__extract_fullname(results[0])
         if not results[1].startswith("-"):
-            raise ValueError("Invalid second line of output: '%s'. " \
+            raise ValueError("Invalid second line of output: '%s'. "
                              "Expected a title underline."
                              % text[1])
         results = results[2:]  # trim off top two lines of header information

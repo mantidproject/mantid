@@ -93,6 +93,7 @@ class MainWindow(QMainWindow):
         self.messagedisplay = None
         self.ipythonconsole = None
         self.workspacewidget = None
+        self.workspacecalculator = None
         self.editor = None
         self.algorithm_selector = None
         self.plot_selector = None
@@ -190,6 +191,11 @@ class MainWindow(QMainWindow):
         # set the link between the algorithm and workspace widget
         self.algorithm_selector.algorithm_selector.set_get_selected_workspace_fn(
             self.workspacewidget.workspacewidget.getSelectedWorkspaceNames)
+
+        from workbench.plugins.workspacecalculatorwidget import WorkspaceCalculatorWidget
+        self.workspacecalculator = WorkspaceCalculatorWidget(self)
+        self.workspacecalculator.register_plugin()
+        self.widgets.append(self.workspacecalculator)
 
         # Set up the project, recovery and interface manager objects
         self.project = Project(GlobalFigureManager, find_all_windows_that_are_savable)
@@ -493,7 +499,7 @@ class MainWindow(QMainWindow):
         editor = self.editor
         algorithm_selector = self.algorithm_selector
         plot_selector = self.plot_selector
-
+        workspacecalculator = self.workspacecalculator
         # If more than two rows are needed in a column,
         # arrange_layout function needs to be revisited.
         # In the first column, there are three widgets in two rows
@@ -503,7 +509,7 @@ class MainWindow(QMainWindow):
                 # column 0
                 [[workspacewidget], [algorithm_selector, plot_selector]],
                 # column 1
-                [[editor, ipython]],
+                [[editor, ipython], [workspacecalculator]],
                 # column 2
                 [[memorywidget], [logmessages]]
             ],
@@ -589,6 +595,9 @@ class MainWindow(QMainWindow):
 
             if self.interface_manager is not None:
                 self.interface_manager.closeHelpWindow()
+
+            if self.workspacecalculator is not None:
+                self.workspacecalculator.view.closeEvent(event)
 
             event.accept()
         else:
