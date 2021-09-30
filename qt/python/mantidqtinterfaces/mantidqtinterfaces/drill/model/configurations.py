@@ -73,6 +73,25 @@ class RundexSettings(object):
             }
     GROUPED_COLUMNS = {
             SANS_MULTI: [
+                "SampleRunsD1",
+                "SampleRunsD2",
+                "SampleRunsD3",
+                "SampleRunsD4",
+                "SampleRunsD5",
+                "DarkCurrentRuns",
+                "EmptyBeamRuns",
+                "FluxRuns",
+                "EmptyContainerRuns",
+                "SampleTrRunsW1",
+                "SampleTrRunsW2",
+                "TrDarkCurrentRuns",
+                "ContainerTrRuns",
+                "TrEmptyBeamRuns",
+                "BeamStopMasks",
+                "FlatFields",
+                "Solvents",
+                "SampleThickness",
+                "SampleNames",
                 ]
             }
 
