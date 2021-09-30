@@ -15,9 +15,9 @@ from mantidqtinterfaces.Muon.GUI.Common.calculate_pair_and_group import calculat
     estimate_group_asymmetry_data, run_pre_processing
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime, \
-    run_minus, run_crop_workspace
+    run_minus, run_crop_workspace, run_create_workspace, run_convert_to_points, run_convert_to_histogram, run_divide
 import mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming as wsName
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition

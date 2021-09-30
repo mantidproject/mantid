@@ -176,10 +176,6 @@ class MuonGroupPairContext(object):
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
-        self.clear_phasequads()
-
-    def clear_phasequads(self):
-        self._phasequad = []
 
     def clear_groups(self):
         self._groups = []

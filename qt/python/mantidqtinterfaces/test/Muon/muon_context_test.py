@@ -604,11 +604,11 @@ class MuonContextTest(unittest.TestCase):
         self.context._get_bin_width.assert_called_once_with(name)
         self.context._average_by_bin_widths.assert_called_once_with(name,0.1)
 
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_convert_to_histogram')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_convert_to_points')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_create_workspace')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.run_divide')
-    @mock.patch('Muon.GUI.Common.contexts.muon_context.delete_ws')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context.run_convert_to_histogram')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context.run_convert_to_points')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context.run_create_workspace')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context.run_divide')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context.delete_ws')
     def test_average_by_bin_widths(self, delete, divide, create, points, histo):
         self.context._get_x_data = mock.Mock(return_value = [0,1,3,4,6])
         divide.side_effect = divide_side_effect
