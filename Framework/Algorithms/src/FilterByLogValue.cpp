@@ -54,7 +54,7 @@ void FilterByLogValue::init() {
   types[1] = LEFT;
   declareProperty("LogBoundary", types[0], std::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of "
-                  "the time window for which log criteria re satisfied, or left (beginning) of time window boundary. "
+                  "the time window for which log criteria are satisfied, or left (beginning) of time window boundary. "
                   "This value must be set to Left if the sample log is recorded upon changing,"
                   "which applies to most of the sample environment devices in SNS.");
 
