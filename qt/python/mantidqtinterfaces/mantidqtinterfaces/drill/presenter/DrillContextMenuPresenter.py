@@ -38,9 +38,13 @@ class DrillContextMenuPresenter:
         self._menu.setPresenter(self)
 
         # fill the menu
-        allColumns, _ = self._samplesModel.getColumnHeaderData()
+        allColumns = self._view.columns
         hiddenColumns = self._view.table.getHiddenColumns()
-        groups = self._samplesModel.getSamplesGroups().keys()
+        groups = list()
+        sampleGroupNames = self._samplesModel.getSampleGroups().keys()
+        for name in sampleGroupNames:
+            if name is not None and name not in groups:
+                groups.append(name)
         self._menu.setColumns(allColumns, hiddenColumns)
         self._menu.setGroups(groups)
 
