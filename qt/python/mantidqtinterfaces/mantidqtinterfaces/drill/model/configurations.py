@@ -29,6 +29,7 @@ class RundexSettings(object):
     # acquisition modes
     SANS_ACQ =     "SANS"
     SANS_PSCAN =   "Sample scan"
+    SANS_MULTI =   "SANS multiProcess"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
@@ -51,7 +52,7 @@ class RundexSettings(object):
 
     # correspondance between instrument and acquisition mode
     ACQUISITION_MODES = {
-            D11:    [SANS_ACQ],
+            D11:    [SANS_ACQ, SANS_MULTI],
             D11B:    [SANS_ACQ],
             D16:    [SANS_ACQ, SANS_PSCAN],
             D22:    [SANS_ACQ],
@@ -143,6 +144,7 @@ class RundexSettings(object):
     ALGORITHM = {
             SANS_ACQ:     "SANSILLAutoProcess",
             SANS_PSCAN:   "SANSILLParameterScan",
+            SANS_MULTI:   "SANSILLMultiProcess",
             REFL_POL:     "ReflectometryILLAutoProcess",
             REFL_NPOL:    "ReflectometryILLAutoProcess",
             POWDER_DSCAN: "PowderILLDetectorScan",
