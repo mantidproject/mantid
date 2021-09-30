@@ -50,7 +50,7 @@ class ErrorReporterPresenter(object):
     def do_not_share(self, continue_working=True):
         self.error_log.notice("No information shared")
         self._handle_exit(continue_working)
-        if not self._view.saveContactInfoCheckbox.checkState():
+        if not self._view.rememberContactInfoCheckbox.checkState():
             self.empty_contact_info_file()
         return -1
 
@@ -59,7 +59,7 @@ class ErrorReporterPresenter(object):
         status = self._send_report_to_server(share_identifiable=False, uptime=uptime, text_box=text_box)
         self.error_log.notice("Sent non-identifiable information")
         self._handle_exit(continue_working)
-        if not self._view.saveContactInfoCheckbox.checkState():
+        if not self._view.rememberContactInfoCheckbox.checkState():
             self.empty_contact_info_file()
         return status
 
@@ -73,7 +73,7 @@ class ErrorReporterPresenter(object):
         self.error_log.notice("Sent full information")
         self._handle_exit(continue_working)
 
-        if self._view.saveContactInfoCheckbox.checkState():
+        if self._view.rememberContactInfoCheckbox.checkState():
             if new_name != self._view.saved_name or new_email != self._view.saved_email:
                 with open(self._view.contact_info_file_path, 'w') as file:
                     file.writelines(["NAME = ", new_name, '\n', "EMAIL = ", new_email])

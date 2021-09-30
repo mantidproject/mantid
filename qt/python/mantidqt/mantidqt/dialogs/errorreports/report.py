@@ -89,12 +89,14 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             with open(self.contact_info_file_path, 'r') as file:
                 lines = file.readlines()
             if lines:
-                saved_name, saved_email = [line.strip().split('\n')[0] for line in lines]
-                if saved_name[7:] or saved_email[8:]:
-                    self.input_name_line_edit.setText(saved_name[7:])
-                    self.input_email_line_edit.setText(saved_email[8:])
+                name_line, email_line = [line.strip().split('\n')[0] for line in lines]
+                self.saved_name = name_line[7:]
+                self.saved_email = email_line[8:]
+                if self.saved_name or self.saved_email:
+                    self.input_name_line_edit.setText(self.saved_name)
+                    self.input_email_line_edit.setText(self.saved_email)
                     self.nonIDShareButton.setEnabled(True)
-                    self.saveContactInfoCheckbox.setChecked(True)
+                    self.rememberContactInfoCheckbox.setChecked(True)
 
     def quit(self):
         self.quit_signal.emit()
