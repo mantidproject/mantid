@@ -550,7 +550,7 @@ void FunctionModel::updateGlobals() {
   }
 }
 
-void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
+void FunctionModel::setResolutionFromWorkspace(const IFunction_sptr &fun) {
   auto n = fun->getNumberDomains();
   if (n > 1) {
     for (size_t index = 0; index < n; index++) {
@@ -567,7 +567,7 @@ void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
   }
 }
 
-void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun, MatrixWorkspace_sptr workspace) {
+void FunctionModel::setResolutionFromWorkspace(const IFunction_sptr &fun, const MatrixWorkspace_sptr &workspace) {
   auto inst = workspace->getInstrument();
   auto analyser = inst->getStringParameter("analyser");
   if (!analyser.empty()) {

@@ -24,7 +24,7 @@ namespace {
 std::vector<std::string> namesOfFacilitiesWithICAT() {
   const auto &config = Kernel::ConfigService::Instance();
 
-  const auto facilityDoesNotHaveICAT = [&](std::string name) {
+  const auto facilityDoesNotHaveICAT = [&](const std::string &name) {
     return config.getFacility(name).catalogInfo().soapEndPoint().empty();
   };
 

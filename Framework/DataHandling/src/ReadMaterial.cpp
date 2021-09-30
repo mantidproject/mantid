@@ -4,8 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/ReadMaterial.h"
+#include <utility>
+
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Material.h"
 
 namespace Mantid {
@@ -180,8 +182,8 @@ void ReadMaterial::setScatteringInfo(double coherentXSection, double incoherentX
   builder.setIncoherentXSection(incoherentXSection);   // in barns
   builder.setAbsorptionXSection(attenuationXSection);  // in barns
   builder.setTotalScatterXSection(scatteringXSection); // in barns
-  builder.setAttenuationProfileFilename(attenuationProfileFileName);
-  builder.setXRayAttenuationProfileFilename(xRayAttenuationProfileFileName);
+  builder.setAttenuationProfileFilename(std::move(attenuationProfileFileName));
+  builder.setXRayAttenuationProfileFilename(std::move(xRayAttenuationProfileFileName));
 }
 
 bool ReadMaterial::isEmpty(const double toCheck) { return std::abs((toCheck - EMPTY_DBL()) / (EMPTY_DBL())) < 1e-8; }

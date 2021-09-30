@@ -58,7 +58,7 @@ public:
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
   void setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument, Poco::XML::Element *pRootElem,
-                         Kernel::ProgressBase *progress = nullptr, std::string requestedDate = std::string());
+                         Kernel::ProgressBase *progress = nullptr, const std::string &requestedDate = std::string());
 
   std::string getMangledName();
 
@@ -162,7 +162,7 @@ private:
 
   /// Set parameter/logfile info (if any) associated with component
   void setLogfile(const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
-                  InstrumentParameterCache &logfileCache, std::string requestedDate = std::string());
+                  InstrumentParameterCache &logfileCache, const std::string &requestedDate = std::string());
 
   /// Parse position of facing element to V3D
   Kernel::V3D parseFacingElementToV3D(Poco::XML::Element *pElem);

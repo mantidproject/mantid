@@ -567,9 +567,9 @@ void MDNorm::exec() {
   this->setProperty("OutputWorkspace", out);
 }
 
-inline API::IMDWorkspace_sptr MDNorm::divideMD(API::IMDHistoWorkspace_sptr lhs, API::IMDHistoWorkspace_sptr rhs,
-                                               const std::string &outputwsname, const double &startProgress,
-                                               const double &endProgress) {
+inline API::IMDWorkspace_sptr MDNorm::divideMD(const API::IMDHistoWorkspace_sptr &lhs,
+                                               const API::IMDHistoWorkspace_sptr &rhs, const std::string &outputwsname,
+                                               const double &startProgress, const double &endProgress) {
   auto divideMD = createChildAlgorithm("DivideMD", startProgress, endProgress);
   divideMD->setProperty("LHSWorkspace", lhs);
   divideMD->setProperty("RHSWorkspace", rhs);
@@ -1047,7 +1047,7 @@ inline void MDNorm::determineBasisVector(const size_t &qindex, const std::string
  * @param outputMDHWS :: MDHistoWorkspace to set unit to
  */
 inline void MDNorm::setQUnit(const std::vector<size_t> &qDimensionIndices,
-                             Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS) {
+                             const Mantid::DataObjects::MDHistoWorkspace_sptr &outputMDHWS) {
   Mantid::Geometry::MDFrameArgument argument(Mantid::Geometry::HKL::HKLName, Mantid::Kernel::Units::Symbol::RLU);
   auto mdFrameFactory = Mantid::Geometry::makeMDFrameFactoryChain();
   Mantid::Geometry::MDFrame_uptr hklFrame = mdFrameFactory->create(argument);

@@ -207,7 +207,7 @@ double PoldiTruncateData::getMinimumExtraTimeValue(size_t calculatedBinCount) {
  *  @return Workspace with exactly as many time bins as expected for the
  *experiment parameters.
  */
-MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(const MatrixWorkspace_sptr &workspace) {
   double maximumXValue = getMaximumTimeValue(getCalculatedBinCount());
 
   return getWorkspaceBelowX(std::move(workspace), maximumXValue);
@@ -233,7 +233,7 @@ MatrixWorkspace_sptr PoldiTruncateData::getCroppedWorkspace(MatrixWorkspace_sptr
  *  @param workspace :: Raw POLDI data.
  *  @return MatrixWorkspace with summed extra counts.
  */
-MatrixWorkspace_sptr PoldiTruncateData::getExtraCountsWorkspace(MatrixWorkspace_sptr workspace) {
+MatrixWorkspace_sptr PoldiTruncateData::getExtraCountsWorkspace(const MatrixWorkspace_sptr &workspace) {
   double minimumXValue = getMinimumExtraTimeValue(getCalculatedBinCount());
   MatrixWorkspace_sptr croppedOutput = getWorkspaceAboveX(std::move(workspace), minimumXValue);
 

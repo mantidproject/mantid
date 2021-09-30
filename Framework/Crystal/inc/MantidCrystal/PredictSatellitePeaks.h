@@ -52,7 +52,7 @@ private:
   std::shared_ptr<Geometry::IPeak> createPeakForOutputWorkspace(Kernel::Matrix<double> const &goniometer,
                                                                 Kernel::V3D const &satellite_hkl);
 
-  void addPeakToOutputWorkspace(std::shared_ptr<Geometry::IPeak> iPeak,
+  void addPeakToOutputWorkspace(const std::shared_ptr<Geometry::IPeak> &iPeak,
                                 Kernel::Matrix<double> const &peak_goniometer_matrix, Kernel::V3D const &hkl,
                                 Kernel::V3D const &satelliteHKL, int const RunNumber,
                                 std::vector<std::vector<int>> &AlreadyDonePeaks, Kernel::V3D const &mnp);

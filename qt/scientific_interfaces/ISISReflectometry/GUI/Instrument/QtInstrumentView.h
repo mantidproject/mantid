@@ -23,7 +23,7 @@ ISIS Reflectometry interface.
 class MANTIDQT_ISISREFLECTOMETRY_DLL QtInstrumentView : public QWidget, public IInstrumentView {
   Q_OBJECT
 public:
-  QtInstrumentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent = nullptr);
+  QtInstrumentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent = nullptr);
   void subscribe(InstrumentViewSubscriber *notifyee) override;
   void connectInstrumentSettingsWidgets() override;
   void disconnectInstrumentSettingsWidgets() override;

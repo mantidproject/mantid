@@ -207,7 +207,7 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumb
 /**
  * Fucntion to add a single string as a sample log to a workspace
  */
-void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string logString,
+void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string &logString,
                                    DataObjects::Workspace2D_sptr &ws) {
   auto alg = createSampleLogAlgorithm(ws);
   alg->setProperty("LogType", "String");

@@ -52,7 +52,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
   updateParameterOptions(dialog, parameter);
 }
 
-void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameter) {
+void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameter) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
   setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")

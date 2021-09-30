@@ -5,13 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAlgorithms/Stitch.h"
+#include <utility>
+
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
+#include "MantidAlgorithms/Stitch.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
@@ -48,7 +50,7 @@ std::pair<double, double> getInterval(const MatrixWorkspace &ws) {
  * @param ws2 : input workspace 2
  * @return true if ws1 is less than ws2 in terms of its x-interval
  */
-bool compareInterval(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) {
+bool compareInterval(const MatrixWorkspace_sptr &ws1, const MatrixWorkspace_sptr &ws2) {
   const auto minmax1 = getInterval(*ws1);
   const auto minmax2 = getInterval(*ws2);
   if (minmax1.first < minmax2.first) {
@@ -67,7 +69,7 @@ bool compareInterval(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr 
  * @return the x-axis covered by both
  * @throw runtime error if there is no overlap
  */
-std::pair<double, double> getOverlap(const MatrixWorkspace_sptr ws1, const MatrixWorkspace_sptr ws2) {
+std::pair<double, double> getOverlap(const MatrixWorkspace_sptr &ws1, const MatrixWorkspace_sptr &ws2) {
   const auto minmax1 = getInterval(*ws1);
   const auto minmax2 = getInterval(*ws2);
   if (minmax1.second < minmax2.first || minmax2.second < minmax1.first) {
@@ -102,7 +104,7 @@ double median(const std::vector<double> &vec) {
  * @param ws : the input workspace
  * @return a new workspace representing the medians, single count if global is requested
  */
-MatrixWorkspace_sptr medianWorkspaceLocal(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr medianWorkspaceLocal(const MatrixWorkspace_sptr &ws) {
   const size_t nSpectra = ws->getNumberHistograms();
   MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
   PARALLEL_FOR_IF(threadSafe(*ws, *out))
@@ -119,7 +121,7 @@ MatrixWorkspace_sptr medianWorkspaceLocal(MatrixWorkspace_sptr ws) {
  * @param ws : the input workspace
  * @return a new workspace representing the medians, single count if global is requested
  */
-MatrixWorkspace_sptr medianWorkspaceGlobal(MatrixWorkspace_sptr ws) {
+MatrixWorkspace_sptr medianWorkspaceGlobal(const MatrixWorkspace_sptr &ws) {
   MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   std::vector<double> allY;
   allY.reserve(ws->getNumberHistograms() * ws->blocksize());
@@ -383,7 +385,7 @@ MatrixWorkspace_sptr Stitch::merge(const std::vector<std::string> &inputs) {
  * @param scaleFactorsWorkspace: the workspace where calculated scale factors will be stored
  * @param inputs: the name of the input workspace list (needed only to store the scale factor at right index)
  */
-void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScale,
+void Stitch::scale(const MatrixWorkspace_sptr &wsToMatch, const MatrixWorkspace_sptr &wsToScale,
                    Mantid::API::MatrixWorkspace_sptr scaleFactorsWorkspace, const std::vector<std::string> &inputs) {
   const auto overlap = getOverlap(wsToMatch, wsToScale);
   auto cropper = createChildAlgorithm("CropWorkspaceRagged");
@@ -429,7 +431,7 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
   scaler->setPropertyValue("OutputWorkspace", wsToScale->getName());
   scaler->execute();
 
-  recordScaleFactor(scaleFactorsWorkspace, median, wsToScale, inputs);
+  recordScaleFactor(std::move(scaleFactorsWorkspace), median, wsToScale, inputs);
 }
 
 /**
@@ -440,9 +442,9 @@ void Stitch::scale(MatrixWorkspace_sptr wsToMatch, MatrixWorkspace_sptr wsToScal
  * @param scaledWorkspace: the workspace that was scaled
  * @param inputs: the list of the workspace names used to store the factors at the right index
  */
-void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWorkspace,
-                               Mantid::API::MatrixWorkspace_sptr medianWorkspace,
-                               Mantid::API::MatrixWorkspace_sptr scaledWorkspace,
+void Stitch::recordScaleFactor(const Mantid::API::MatrixWorkspace_sptr &scaleFactorWorkspace,
+                               const Mantid::API::MatrixWorkspace_sptr &medianWorkspace,
+                               const Mantid::API::MatrixWorkspace_sptr &scaledWorkspace,
                                const std::vector<std::string> &inputs) {
   const auto it = std::find(inputs.cbegin(), inputs.cend(), scaledWorkspace->getName());
   const size_t index = std::distance(inputs.cbegin(), it);
@@ -461,7 +463,7 @@ void Stitch::recordScaleFactor(Mantid::API::MatrixWorkspace_sptr scaleFactorWork
  * @param scaleFactorsWorkspace: the workspace to store the scale factors to
  */
 void Stitch::scaleManual(const std::vector<std::string> &inputs, const std::vector<double> &scaleFactors,
-                         MatrixWorkspace_sptr scaleFactorsWorkspace) {
+                         const MatrixWorkspace_sptr &scaleFactorsWorkspace) {
   auto &outputFactors = scaleFactorsWorkspace->mutableY(0);
   auto progress = std::make_unique<Progress>(this, 0.0, 1.0, inputs.size());
   PARALLEL_FOR_IF(threadSafe(*scaleFactorsWorkspace))

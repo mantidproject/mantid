@@ -2379,7 +2379,7 @@ size_t LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspec
  *
  * @param local_workspace :: the workspace containing logs to be filtered
  */
-void LoadNexusProcessed::applyLogFiltering(Mantid::API::Workspace_sptr local_workspace) {
+void LoadNexusProcessed::applyLogFiltering(const Mantid::API::Workspace_sptr &local_workspace) {
   auto mWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(local_workspace);
   if (mWorkspace) {
     auto run = mWorkspace->run();

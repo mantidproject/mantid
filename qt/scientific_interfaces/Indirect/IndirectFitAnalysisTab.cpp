@@ -310,7 +310,8 @@ void IndirectFitAnalysisTab::updateParameterValues(const std::unordered_map<std:
   }
 }
 
-void IndirectFitAnalysisTab::updateFitBrowserParameterValues(std::unordered_map<std::string, ParameterValue> params) {
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues(
+    const std::unordered_map<std::string, ParameterValue> &params) {
   IFunction_sptr fun = m_fittingModel->getFitFunction();
   if (fun) {
     for (auto pair : params) {

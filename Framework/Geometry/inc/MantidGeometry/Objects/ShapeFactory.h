@@ -127,7 +127,7 @@ private:
   Poco::XML::Element *getOptionalShapeElement(Poco::XML::Element *pElem, const std::string &name);
   double getDoubleAttribute(Poco::XML::Element *pElem, const std::string &name);
   Kernel::V3D parsePosition(Poco::XML::Element *pElem);
-  void createGeometryHandler(Poco::XML::Element *, std::shared_ptr<CSGObject>);
+  void createGeometryHandler(Poco::XML::Element *, const std::shared_ptr<CSGObject> &);
 
   Kernel::Matrix<double> m_gonioRotateMatrix = Kernel::Matrix<double>(3, 3, 1);
   Kernel::Matrix<double> m_rotateAllMatrix = Kernel::Matrix<double>(3, 3, 1);

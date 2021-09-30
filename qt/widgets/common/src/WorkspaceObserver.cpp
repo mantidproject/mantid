@@ -18,17 +18,17 @@ namespace API {
 //---------------------------------------------------------------------------
 // Observer callback
 //---------------------------------------------------------------------------
-void ObserverCallback::handlePreDelete(const std::string &name, Mantid::API::Workspace_sptr workspace) {
+void ObserverCallback::handlePreDelete(const std::string &name, const Mantid::API::Workspace_sptr &workspace) {
   m_observer->preDeleteHandle(name, std::move(workspace));
 }
 
 void ObserverCallback::handlePostDelete(const std::string &name) { m_observer->postDeleteHandle(name); }
 
-void ObserverCallback::handleAdd(const std::string &name, Mantid::API::Workspace_sptr workspace) {
+void ObserverCallback::handleAdd(const std::string &name, const Mantid::API::Workspace_sptr &workspace) {
   m_observer->addHandle(name, std::move(workspace));
 }
 
-void ObserverCallback::handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace) {
+void ObserverCallback::handleAfterReplace(const std::string &name, const Mantid::API::Workspace_sptr &workspace) {
   m_observer->afterReplaceHandle(name, std::move(workspace));
 }
 

@@ -600,7 +600,7 @@ void Run::calculateAverageGoniometerMatrix() {
  * Calculate the goniometer matrixes from logs
  * @param goniometer goniometer with axes names to use
  */
-void Run::calculateGoniometerMatrices(Geometry::Goniometer goniometer) {
+void Run::calculateGoniometerMatrices(const Geometry::Goniometer &goniometer) {
   if (goniometer.getNumberAxes() == 0)
     throw std::runtime_error("Run::calculateGoniometerMatrices must include axes for goniometer");
 

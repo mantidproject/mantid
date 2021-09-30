@@ -1530,7 +1530,7 @@ std::shared_ptr<CSGObject> ShapeFactory::createHexahedralShape(double xlb, doubl
 }
 
 /// create a special geometry handler for the known finite primitives
-void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, std::shared_ptr<CSGObject> Obj) {
+void ShapeFactory::createGeometryHandler(Poco::XML::Element *pElem, const std::shared_ptr<CSGObject> &Obj) {
 
   auto geomHandler = std::make_shared<GeometryHandler>(Obj);
   detail::ShapeInfo shapeInfo;

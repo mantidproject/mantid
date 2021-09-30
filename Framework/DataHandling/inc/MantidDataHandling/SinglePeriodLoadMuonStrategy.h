@@ -14,7 +14,7 @@ namespace DataHandling {
 class SinglePeriodLoadMuonStrategy : public LoadMuonStrategy {
 public:
   // Constructor
-  SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
+  SinglePeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string &filename,
                                LoadMuonNexusV2NexusHelper &nexusLoader, DataObjects::Workspace2D &workspace,
                                int entryNumber, bool isFileMultiPeriod);
   // Loads the muon log data

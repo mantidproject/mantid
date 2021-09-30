@@ -58,13 +58,13 @@ signals:
 
 private slots:
   /// Pre Delete slot
-  void handlePreDelete(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void handlePreDelete(const std::string &name, const Mantid::API::Workspace_sptr &workspace);
   /// Post Delete slot
   void handlePostDelete(const std::string &name);
   /// Add slot
-  void handleAdd(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void handleAdd(const std::string &name, const Mantid::API::Workspace_sptr &workspace);
   /// Replace slot
-  void handleAfterReplace(const std::string &name, Mantid::API::Workspace_sptr workspace);
+  void handleAfterReplace(const std::string &name, const Mantid::API::Workspace_sptr &workspace);
   /// Rename slot
   void handleRename(const std::string &oldName, const std::string &newName);
   /// Clear slot

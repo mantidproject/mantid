@@ -361,7 +361,7 @@ void PlotPeakByLogValue::finaliseOutputWorkspaces(bool createFitOutput,
 }
 
 void PlotPeakByLogValue::appendTableRow(
-    bool isDataName, ITableWorkspace_sptr &result, const IFunction_sptr ifun, const InputSpectraToFit &data,
+    bool isDataName, ITableWorkspace_sptr &result, const IFunction_sptr &ifun, const InputSpectraToFit &data,
     double logValue, double chi2) const { // Extract the fitted parameters and put them into the result table
   TableRow row = result->appendRow();
   if (isDataName) {
@@ -401,8 +401,8 @@ void PlotPeakByLogValue::appendTableRow(
   row << chi2;
 }
 
-ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &logName, const IFunction_sptr ifunSingle,
-                                                            bool &isDataName) {
+ITableWorkspace_sptr PlotPeakByLogValue::createResultsTable(const std::string &logName,
+                                                            const IFunction_sptr &ifunSingle, bool &isDataName) {
   ITableWorkspace_sptr result = WorkspaceFactory::Instance().createTable("TableWorkspace");
   if (logName == "SourceName") {
     result->addColumn("str", "SourceName");

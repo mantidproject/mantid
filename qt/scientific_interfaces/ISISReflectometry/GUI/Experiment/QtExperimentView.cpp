@@ -79,7 +79,7 @@ void QtExperimentView::subscribe(ExperimentViewSubscriber *notifyee) { m_notifye
 /**
 Initialise the Interface
 */
-void QtExperimentView::initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
+void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")), m_ui.optionsTable);
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemoveLookupRowRequested()));

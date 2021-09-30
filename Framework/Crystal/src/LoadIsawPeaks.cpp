@@ -253,7 +253,7 @@ std::string LoadIsawPeaks::readHeader(const PeaksWorkspace_sptr &outWS, std::ifs
  * @return the Peak the Peak object created
  */
 DataObjects::Peak LoadIsawPeaks::readPeak(const PeaksWorkspace_sptr &outWS, std::string &lastStr, std::ifstream &in,
-                                          int &seqNum, std::string bankName, double qSign) {
+                                          int &seqNum, const std::string &bankName, double qSign) {
   double h;
   double k;
   double l;

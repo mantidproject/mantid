@@ -75,14 +75,14 @@ ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorith
   return resultsTable;
 }
 
-SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(ITableWorkspace_sptr resultsTable) {
+SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITableWorkspace_sptr &resultsTable) {
   if (requiresICat())
     return convertICatResultsTableToSearchResults(resultsTable);
   else
     return convertJournalResultsTableToSearchResults(resultsTable);
 }
 
-SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(ITableWorkspace_sptr tableWorkspace) {
+SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(const ITableWorkspace_sptr &tableWorkspace) {
   auto searchResults = SearchResults();
   searchResults.reserve(tableWorkspace->rowCount());
 
@@ -105,7 +105,7 @@ SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(ITableWo
   return searchResults;
 }
 
-SearchResults QtCatalogSearcher::convertJournalResultsTableToSearchResults(ITableWorkspace_sptr tableWorkspace) {
+SearchResults QtCatalogSearcher::convertJournalResultsTableToSearchResults(const ITableWorkspace_sptr &tableWorkspace) {
   auto searchResults = SearchResults();
   searchResults.reserve(tableWorkspace->rowCount());
 

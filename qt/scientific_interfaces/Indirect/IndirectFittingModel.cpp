@@ -532,7 +532,7 @@ Mantid::API::IAlgorithm_sptr IndirectFittingModel::simultaneousFitAlgorithm() co
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 
-IAlgorithm_sptr IndirectFittingModel::createSequentialFit(IFunction_sptr function) const {
+IAlgorithm_sptr IndirectFittingModel::createSequentialFit(const IFunction_sptr &function) const {
   const auto input = constructInputString(m_fitDataModel.get());
   return createSequentialFit(std::move(function), input);
 }

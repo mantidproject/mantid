@@ -24,18 +24,14 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 BaseCustomInstrumentModel::BaseCustomInstrumentModel()
-    : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"),
-      m_wsName("testData") {}
+    : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"), m_wsName("testData") {}
 
-BaseCustomInstrumentModel::BaseCustomInstrumentModel(
-    const std::string &tmpName, const std::string instrumentName,
-    const std::string wsName)
-    : m_currentRun(0), m_tmpName(tmpName), m_instrumentName(instrumentName),
-      m_wsName(wsName) {}
+BaseCustomInstrumentModel::BaseCustomInstrumentModel(const std::string &tmpName, const std::string &instrumentName,
+                                                     const std::string &wsName)
+    : m_currentRun(0), m_tmpName(tmpName), m_instrumentName(instrumentName), m_wsName(wsName) {}
 
 void BaseCustomInstrumentModel::loadEmptyInstrument() {
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("LoadEmptyInstrument");
   alg->initialize();
   alg->setProperty("OutputWorkspace", m_wsName);
   alg->setProperty("InstrumentName", m_instrumentName);
@@ -47,15 +43,13 @@ void BaseCustomInstrumentModel::loadEmptyInstrument() {
  * @param name:: string name for  data
  * @return std::pair<int,std::string>:: the run number and status
  */
-std::pair<int, std::string>
-BaseCustomInstrumentModel::loadData(const std::string &name) {
+std::pair<int, std::string> BaseCustomInstrumentModel::loadData(const std::string &name) {
   auto alg = AlgorithmManager::Instance().create("Load");
   alg->initialize();
   alg->setProperty("Filename", name);
   alg->setProperty("OutputWorkspace", m_wsName);
   alg->execute();
-  auto ws =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
+  auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
   int runNumber = ws->getRunNumber();
 
   std::string message = "success";
@@ -63,29 +57,22 @@ BaseCustomInstrumentModel::loadData(const std::string &name) {
   return std::make_pair(runNumber, message);
 }
 
-void BaseCustomInstrumentModel::rename() {
-  AnalysisDataService::Instance().rename(m_tmpName, m_wsName);
-}
-void BaseCustomInstrumentModel::remove() {
-  AnalysisDataService::Instance().remove(m_tmpName);
-}
+void BaseCustomInstrumentModel::rename() { AnalysisDataService::Instance().rename(m_tmpName, m_wsName); }
+void BaseCustomInstrumentModel::remove() { AnalysisDataService::Instance().remove(m_tmpName); }
 
 std::string BaseCustomInstrumentModel::dataFileName() { return m_wsName; }
 
 int BaseCustomInstrumentModel::currentRun() {
   try {
 
-    auto ws =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName);
     return ws->getRunNumber();
   } catch (...) {
     return ERRORCODE;
   }
 }
 
-bool BaseCustomInstrumentModel::isErrorCode(const int run) {
-  return (run == ERRORCODE);
-}
+bool BaseCustomInstrumentModel::isErrorCode(const int run) { return (run == ERRORCODE); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

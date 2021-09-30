@@ -98,7 +98,7 @@ private:
   bool setupSampleLogs(const API::MatrixWorkspace_sptr &outws);
 
   /// Load instrument
-  void loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename);
+  void loadInstrument(const API::MatrixWorkspace_sptr &matrixws, const std::string &idffilename);
 
   /// Get wavelength from workspace
   bool getHB3AWavelength(const API::MatrixWorkspace_sptr &dataws, double &wavelength);

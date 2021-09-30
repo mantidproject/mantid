@@ -8,7 +8,7 @@ namespace {
 constexpr int HISTOGRAM_INDEX{0};
 }
 
-WorkspaceBoundingBox::WorkspaceBoundingBox(API::MatrixWorkspace_const_sptr workspace) : m_workspace(workspace) {
+WorkspaceBoundingBox::WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace) : m_workspace(workspace) {
   if (m_workspace->y(0).size() != 1)
     throw std::runtime_error("This object only works with integrated workspaces");
 
