@@ -31,6 +31,7 @@
       <parameter name="logbook_default_parameters" type="string" visible="false">
 	<value val="SampleDescription:/entry0/experiment_identifier:s,
 		    StartTime:/entry0/start_time:s,
+		    Gamma:/entry0/instrument/Gamma/value:f,
 		    TotalTime:/entry0/duration:f,
 		    Attenuator:/entry0/instrument/attenuator/attenuation_value:f" />
       </parameter>
