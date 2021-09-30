@@ -44,12 +44,12 @@ the range, then all events will be kept.
    fast log filtering.
 
 
-For SNS Users
-#############
+Logs that only record changes
+#############################
 
 In SNS, most of the sample environment devices record values upon changing.
-Therefore, the **LogBoundary** value shall set to **Left** but not **Centre**.
-And in this case, **TimeTolerance** is ignored.
+Therefore, the ``LogBoundary`` value shall set to ``Left`` but not ``Centre``.
+And in this case, ``TimeTolerance`` is ignored.
 
 Please check with the instrument scientist to confirm how the sample log values are recorded.
 
@@ -60,6 +60,7 @@ Here is an example how the time splitter works with the a motor's position.
         For this SNAP run, the user wants to filter events with motor (BL3:Mot:Hexa:MotZ) position
         at value equal to 6.65 with tolerance as 0.1.
         The red curve shows the boundary of the time splitters (i.e., event filters).
+
 
 
 PulseFilter (e.g. for Veto Pulses)
@@ -97,6 +98,34 @@ rejected. For example, this call will filter out veto pulses:
 .. testcode:: VetoPulseTime
 
    ws = FilterByLogValue(ws, LogName="veto_pulse_time", PulseFilter="1")
+
+
+
+Time Tolerance, Log Boundary and Pulse Filter
+#############################################
+
+How ``TimeTolerance`` is applied to event filtering is highly correlated to
+the setup of property ``LogBoundary`` and ``PulseFilter``.
+
+- If ``PulseFilter`` is true, a notch of width ``2 * TimeTolerance`` is centered at each log time.
+  Neutron events in this notch will not be used.
+
+- If ``PulseFilter`` is false and ``LogBoundary`` is ``Left``, ``TimeTolerance`` is ignored in the algorithm.
+
+- If ``PulseFilter`` is false and ``LogBoundary`` is set to ``Centre``,
+  assuming the log entries are
+  ``(t0, v0), (t1, v1), (t2, v2), (t3, v3), ... (t_n, v_n) ...``.
+
+  - If there is a log entry ``(t_i, v_i)`` is between ``MinimumValue`` and ``MaximumValue``,
+    while ``v_{i-1}`` and ``v_{i+1}`` are not in the desired log value range,
+    all events between ``t_i - TimeTolerance`` and ``t_i + TimeTolerance)`` are kept.
+
+  - If there are several consecutive log entries that have values in the desired log value range,
+    such as ``(t_i, v_i), ..., (t_j, v_j)``,
+    events between ``t_i - TimeTolerance`` and ``t_j + TimToleranc`` are kept.
+
+  A good value is 1/2 your measurement interval if the intervals are constant.
+
 
 
 Comparing with GenerateEventsFilter/FilterEvents
@@ -139,12 +168,12 @@ For sample,
 
 
 
-The OutputWorkspace with name *Chop52100_0* output from :ref:`FilterEvents <algm-FilterEvents>` is equivalent to *52100_hexaZ_L*
-from *FilterByLogValue*.
+The OutputWorkspace with name ``Chop52100_0`` output from :ref:`FilterEvents <algm-FilterEvents>` is equivalent to ``52100_hexaZ_L``
+from ``FilterByLogValue``.
 
 Here is the comparison between FilterByLogValue and :ref:`GenerateEventsFilter<algm-GenerateEventsFilter>`/:ref:`FilterEvents<algm-FilterEvents>`.
 
-1. *FilterByLogValue* can only filter events at the resolution of neutron pulse.
+1. ``FilterByLogValue`` can only filter events at the resolution of neutron pulse.
 
    - If the start time *t_s* of a splitter is inside a pulse, then all the events inside that pulse but before *t_s*
      will be included in the filtered workspace.
@@ -152,7 +181,7 @@ Here is the comparison between FilterByLogValue and :ref:`GenerateEventsFilter<a
      will be excluded in the filtered workspace.
    - :ref:`FilterEvents<algm-FilterEvents>` is able to do the filtering precisely to include events only within time range [*t_s*, *t_e*).
 
-2. *FilterByLogValue* can only filter events around only **one** log value, while
+2. ``FilterByLogValue`` can only filter events around only ``one`` log value, while
    :ref:`GenerateEventsFilter<algm-GenerateEventsFilter>`/:ref:`FilterEvents<algm-FilterEvents>`
    combination can filter events against a series of log values.
 

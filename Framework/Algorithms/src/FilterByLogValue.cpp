@@ -47,25 +47,15 @@ void FilterByLogValue::init() {
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("TimeTolerance", 0.0, min,
-                  "Tolerance, in seconds, for the event times to keep. \n"
-                  "(1) If PulseFilter is true, a notch of width 2*TimeTolerance is centered at each log "
-                  "time. Neutron events in this notch will not be used.\n"
-                  "(2) If PulseFilter is false and LogBoundary is 'Left', TimeTolerance is ignored.\n"
-                  "(3) If PulseFilter is false and LogBoundary is 'Centre', "
-                  "for a single log value at time T when LogBoundary is set to Center"
-                  ", all events between "
-                  "(T-TimeTolerance) and (T+TimeTolerance) are kept."
-                  "If there are several consecutive log values matching the "
-                  "filter, events between (T0-TimeTolerance) and (Tf+TimTolerance) are "
-                  "kept."
-                  "A good value is 1/2 your measurement interval if the intervals are constant.");
+                  "Tolerance, in seconds, for the event times to keep. How TimeTolerance is applied is highly "
+                  "correlated to LogBoundary and PulseFilter.  Check the help or algorithm documents for details.");
 
   std::vector<std::string> types(2);
   types[0] = CENTRE;
   types[1] = LEFT;
   declareProperty("LogBoundary", types[0], std::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of "
-                  "the time, or left (beginning) of boundary. "
+                  "the time window for which log criteria re satisfied, or left (beginning) of time window boundary. "
                   "This value must be set to Left if the sample log is recorded upon changing,"
                   "which applies to most of the sample environment devices in SNS.");
 
