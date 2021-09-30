@@ -381,6 +381,9 @@ class AlignComponents(PythonAlgorithm):
         else:
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
+        # mapping from component-info index (or detector-info index) to detector-ID
+        self.ci2id = api.mtd[wks_name].detectorInfo().detectorIDs()
+
         # Make a dictionary of what options are being refined for sample/source. No rotation.
         for translation_option in self._optionsList[:3]:
             self._optionsDict[translation_option] = self.getProperty(translation_option).value
@@ -452,14 +455,14 @@ class AlignComponents(PythonAlgorithm):
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
         for component in components:
-            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
-            firstDetID = self._getFirstDetID(comp)
+            firstDetID, lastDetID = self._firstAndLastDetID(component, api.mtd[wks_name].componentInfo())
+
             firstIndex = detID.index(firstDetID)  # a row index in the input TOFS table
-            lastDetID = self._getLastDetID(comp)
             lastIndex = detID.index(lastDetID)  # a row index in the input TOFS table
             if lastDetID - firstDetID != lastIndex - firstIndex:
                 raise RuntimeError("TOFS detid doesn't match instrument")
 
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)
             eulerAngles: List[float] = comp.getRotation().getEulerAngles(self._eulerConvention)
 
             logger.notice("Working on " + comp.getFullName() + " Starting position is " + str(comp.getPos())
@@ -530,6 +533,7 @@ class AlignComponents(PythonAlgorithm):
                 displacements_table.addRow([component] + component_displacements)
 
             # Need to grab the component object again, as things have changed
+            comp = api.mtd[wks_name].getInstrument().getComponentByName(component)  # adjusted component
             logger.notice("Finished " + comp.getFullName() + " Final position is " + str(comp.getPos())
                           + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
@@ -623,30 +627,37 @@ class AlignComponents(PythonAlgorithm):
         # calculate the fractional peak center deviations, then sum their absolute values
         return np.sum(np.abs((peaks_d - self.peaks_ref) / self.peaks_ref))
 
-    def _getFirstDetID(self, component):
+    def _unique_name(self, component, component_info):
+        r"""Given the full name (or part of the full name) of a component, find the part
+        of the name that is unique in the whole instrument.
+
+        Example: the unique name for 'CORELLI/A row/bank1/sixteenpack' is 'bank1'. There's only
+        one 'bank1' in the whole instrument
+
+        @param str component: (partial) full name of the component assembly
+        @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
+        @return str: the unique name
         """
-        recursive search to find first detID of a component
+        name_parts = sorted(component.split('/'), reverse=True)
+        for part in name_parts:
+            if component_info.uniqueName(part):
+                return part
+        raise RuntimeError('Could not find a unique name for {component}')
 
-        @param component :: reference to a detector component object
-
-        @returns detector ID (``int``) of the first detector in the component
+    def _firstAndLastDetID(self, component, component_info):
+        r"""first and last detector ID's in a component
+        @param str component: name of the component assembly
+        @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
+        @return tuple: firt and last detector ID's
         """
-        if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
-            return component.getID()
-        else:
-            return self._getFirstDetID(component[0])
-
-    def _getLastDetID(self, component):
-        """
-        recursive search to find last detID of a component
-
-        @param component :: reference to a detector component object
-
-        @returns detector ID (`int`) of the last detector in the component        """
-        if component.type() == 'DetectorComponent' or component.type() == 'GridDetectorPixel':
-            return component.getID()
-        else:
-            return self._getLastDetID(component[component.nelements() - 1])
+        unique_name = self._unique_name(component, component_info)
+        index = component_info.indexOfAny(unique_name)  # component-info index
+        # component-info indexes for all detector pixels in this components
+        index_all = sorted(component_info.detectorsInSubtree(index))
+        # find the detector-ID for the first and last component-info indexes
+        first, last = self.ci2id[index_all[0]], self.ci2id[index_all[-1]]
+        logger.debug(f'First and last detectorID for {component} are {first}, {last}')
+        return first, last
 
     def _mapOptions(self, inX):
         """
