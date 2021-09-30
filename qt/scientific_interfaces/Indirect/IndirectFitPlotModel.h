@@ -6,12 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFittingModel.h"
-
+#include "IndirectFitData.h"
+#include "IndirectFitOutput.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <boost/optional.hpp>

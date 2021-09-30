@@ -7,10 +7,9 @@
 #pragma once
 
 #include "IAddWorkspaceDialog.h"
-#include "IIndirectFitDataView.h"
+#include "IndirectFitDataModel.h"
 #include "IndirectFitDataView.h"
-#include "IndirectFittingModel.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
+#include "ParameterEstimation.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"

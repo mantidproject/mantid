@@ -7,12 +7,13 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndirectFittingModel.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "ParameterEstimation.h"
 
 #include <QDockWidget>
 #include <QList>

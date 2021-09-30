@@ -10,7 +10,6 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "ParameterEstimation.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

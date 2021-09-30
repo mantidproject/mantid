@@ -27,7 +27,7 @@ QENS Fit class structure
 The ideal structure for the interface should include MVP for each defined section. As part of the refactor the old
 IndirectFittingModel has been broken up, the IndirectFitData and IndirectFitPlot all previously used the same instance
 of the fitting model, now communication is handled with signals through the presenters and they each have their own.
-Some objects are shared between models, but as a design rule only one obect should ever make changes to it e.g. the
+Some objects are shared between models, but as a design rule only one object should ever make changes to it e.g. the
 IndirectFitData which is controlled by IndirectFitDataModel, but is sometimes read by IndirectFitPlot.
 
 The IndirectFitPlotModel also contains a pointer to the active fit function and the IndirectFitOutput from the

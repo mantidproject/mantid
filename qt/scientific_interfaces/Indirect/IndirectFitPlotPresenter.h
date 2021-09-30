@@ -6,15 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
-
 #include "IndirectFitPlotModel.h"
-//#include "MantidAPI/IFunction_fwd.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "IndirectFitPlotView.h"
 
-#include "IIndirectFitPlotView.h"
+#include "DllConfig.h"
 #include "LazyAsyncRunner.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

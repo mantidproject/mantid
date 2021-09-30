@@ -6,12 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitDataModel.h"
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataModel.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
-#include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
