@@ -382,7 +382,6 @@ class AlignComponents(PythonAlgorithm):
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
         # mapping from component-info index (or detector-info index) to detector-ID
-        self.component_info = api.mtd[wks_name].componentInfo()
         self.ci2id = api.mtd[wks_name].detectorInfo().detectorIDs()
 
         # Make a dictionary of what options are being refined for sample/source. No rotation.
@@ -456,8 +455,9 @@ class AlignComponents(PythonAlgorithm):
 
         prog = Progress(self, start=0, end=1, nreports=len(components))
         for component in components:
+            firstDetID, lastDetID = self._firstAndLastDetID(component, api.mtd[wks_name].componentInfo())
+            logger.debug(f'{component}, firstDetID = {firstDetID}, lastDetID = {lastDetID}')
 
-            firstDetID, lastDetID = self._firstAndLastDetID(component)
             firstIndex = detID.index(firstDetID)  # a row index in the input TOFS table
             lastIndex = detID.index(lastDetID)  # a row index in the input TOFS table
             if lastDetID - firstDetID != lastIndex - firstIndex:
@@ -628,7 +628,7 @@ class AlignComponents(PythonAlgorithm):
         # calculate the fractional peak center deviations, then sum their absolute values
         return np.sum(np.abs((peaks_d - self.peaks_ref) / self.peaks_ref))
 
-    def _unique_name(self, component):
+    def _unique_name(self, component, component_info):
         r"""Given the full name (or part of the full name) of a component, find the part
         of the name that is unique in the whole instrument.
 
@@ -636,23 +636,25 @@ class AlignComponents(PythonAlgorithm):
         one 'bank1' in the whole instrument
 
         @param str component: (partial) full name of the component assembly
+        @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
         @return str: the unique name
         """
         name_parts = sorted(component.split('/'), reverse=True)
         for part in name_parts:
-            if self.component_info.uniqueName(part):
+            if component_info.uniqueName(part):
                 return part
         raise RuntimeError('Could not find a unique name for {component}')
 
-    def _firstAndLastDetID(self, component):
+    def _firstAndLastDetID(self, component, component_info):
         r"""first and last detector ID's in a component
         @param str component: name of the component assembly
+        @param mantid.geometry.componentInfo component_info: object holding information for the instrument components
         @return tuple: firt and last detector ID's
         """
-        unique_name = self._unique_name(component)
-        index = self.component_info.indexOfAny(unique_name)  # component-info index
+        unique_name = self._unique_name(component, component_info)
+        index = component_info.indexOfAny(unique_name)  # component-info index
         # component-info indexes for all detector pixels in this components
-        index_all = sorted(self.component_info.detectorsInSubtree(index))
+        index_all = sorted(component_info.detectorsInSubtree(index))
         # find the detector-ID for the first and last component-info indexes
         first, last = self.ci2id[index_all[0]], self.ci2id[index_all[-1]]
         logger.debug(f'First and last detectorID for {component} are {first}, {last}')
