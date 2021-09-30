@@ -371,10 +371,6 @@ target_include_directories(
 
 # Set the name of the generated library
 set_target_properties(MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms COMPILE_DEFINITIONS IN_MANTID_MDALGORITHMS)
-# set /bigobj for vc due to intensive templating
-if(MSVC)
-  set_target_properties(MDAlgorithms PROPERTIES COMPILE_FLAGS "/bigobj")
-endif()
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(MDAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
