@@ -4,7 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 # If errors slip through to master this can be used to set a non-zero
 # allowed count while those errors are dealt with. This avoids breaking all
 # builds for all developers
-ALLOWED_ERRORS_COUNT=1067
+ALLOWED_ERRORS_COUNT=1066
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     # This relies on the fact pull requests use pull/$PR-NAME
