@@ -221,6 +221,10 @@ class SuperplotPresenter:
         """
         self._model.normalise(checked)
         self._update_plot(True)
+        figure = self._canvas.figure
+        axes = figure.gca()
+        axes.relim()
+        axes.autoscale()
 
     def on_drop(self, name):
         """
