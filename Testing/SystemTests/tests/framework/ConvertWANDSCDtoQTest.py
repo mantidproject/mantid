@@ -141,10 +141,8 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
 
         # ---
 
-        data = LoadMD(Filename='/HFIR/HB2C/shared/WANDscripts/test_data/data.nxs')
-
-        LoadIsawUB(InputWorkspace='data',
-                    Filename='/HFIR/HB2C/shared/WANDscripts/test_data/data.mat')
+        data = LoadMD(Filename='HB2C_WANDSCD_data.nxs')
+        SetGoniometer('data', Axis0='s1,0,1,0,1', Average=False)
 
         ConvertHFIRSCDtoMDE(data,
                             Wavelength=wavelength,
@@ -161,17 +159,11 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
                                     S1Offset=angleOffset,
                                     BinningDim1='-1,1,1')
 
-        tableQ = FindPeaksMD(InputWorkspace=Q,
-                                PeakDistanceThreshold=0.2,
-                                MaxPeaks=20,
-                                DensityThresholdFactor=10000,
-                                OutputType='LeanElasticPeak')
+        tableQ = FindPeaksMD(InputWorkspace=Q, PeakDistanceThreshold=2,
+                             CalculateGoniometerForCW=True, Wavelength=1.488)
 
-        tableQrot = FindPeaksMD(InputWorkspace=Qrot,
-                                PeakDistanceThreshold=0.2,
-                                MaxPeaks=20,
-                                DensityThresholdFactor=10000,
-                                OutputType='LeanElasticPeak')
+        tableQrot = FindPeaksMD(InputWorkspace=Qrot, PeakDistanceThreshold=2,
+                                CalculateGoniometerForCW=True, Wavelength=1.488)
 
         self.assertEqual(tableQrot.getNumberPeaks(),tableQ.getNumberPeaks())
 
