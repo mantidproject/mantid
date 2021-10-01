@@ -77,6 +77,7 @@ class DrillPresenter:
                 )
         self.model.processingDone.connect(self.onProcessingDone)
         self.model.newSample.connect(self.onNewSample)
+        self.model.newMode.connect(self.onNewMode)
 
         self._syncViewHeader()
         if self._resetTable():
@@ -325,6 +326,18 @@ class DrillPresenter:
         self._syncViewHeader()
         if self._resetTable():
             self.model.addSample(0)
+
+    def onNewMode(self, instrument, acquisitionMode):
+        """
+        Triggered when the instrument and/or acquisition mode changed in the
+        model.
+
+        Args:
+            instrument (str): name of the instrument
+            acquisitionMode (str): name of the acquisition mode
+        """
+        self._syncViewHeader()
+        self._resetTable()
 
     def onLoad(self):
         """

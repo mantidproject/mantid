@@ -90,6 +90,15 @@ class DrillModel(QObject):
     """
     newSample = Signal(DrillSample)
 
+
+    """
+    Sent when instrument and/or acquisition mode changed.
+    Args:
+        str: name of the instrument
+        str: name of the acquisition mode
+    """
+    newMode = Signal(str, str)
+
     def __init__(self):
         super(DrillModel, self).__init__()
         self.instrument = None
@@ -188,6 +197,7 @@ class DrillModel(QObject):
         self.exportModel = DrillExportModel(self.acquisitionMode)
         self._initController()
         self._initProcessingParameters()
+        self.newMode.emit(self.instrument, self.acquisitionMode)
 
     def getAcquisitionMode(self):
         """
