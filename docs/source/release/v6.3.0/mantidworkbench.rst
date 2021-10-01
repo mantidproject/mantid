@@ -14,6 +14,7 @@ New and Improved
     :width: 500px
     :align: center
 - The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
+- The algorithm browser has been tidied to reduce the number of single algorithm categories.
 
 Bugfixes
 --------
