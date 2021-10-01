@@ -12,7 +12,7 @@ def load_features():
     # this allows for a mangled config
     try:
         feature_list=attempt_load()
-    except:
+    except ValueError:
         return {}
     return feature_list
 
