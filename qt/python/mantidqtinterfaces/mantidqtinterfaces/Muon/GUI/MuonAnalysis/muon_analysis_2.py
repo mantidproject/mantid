@@ -34,8 +34,8 @@ from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_widget im
 from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget import MuonAnalysisPlotWidget
 from mantidqtinterfaces.Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
-from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import addModelAnalysis
-from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import addRawPlots
+from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelAnalysis
+from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
 
@@ -128,8 +128,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
-        self.add_model_analysis = addModelAnalysis(self, feature_dict)
-        self.add_raw_plots = addRawPlots(self, feature_dict)
+        self.add_model_analysis = AddModelAnalysis(self, feature_dict)
+        self.add_raw_plots = AddRawPlots(self, feature_dict)
 
         self.setup_tabs()
         self.plot_widget.insert_plot_panes()
@@ -178,8 +178,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.setup_counts_calculation_finished_notifier()
 
         self.setup_asymmetry_pair_and_diff_calculations_finished_notifier()
-
-        self.setup_results_notifier()
 
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)

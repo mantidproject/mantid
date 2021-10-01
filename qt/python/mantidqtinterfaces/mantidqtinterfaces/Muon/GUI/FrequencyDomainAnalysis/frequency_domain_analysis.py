@@ -40,8 +40,8 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget im
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.frequency_analysis_plot_widget import FrequencyAnalysisPlotWidget
 from mantidqtinterfaces.Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
-from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import addModelAnalysis
-from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import addRawPlots
+from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelAnalysis
+from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
 
@@ -135,8 +135,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
-        self.add_model_analysis = addModelAnalysis(self, feature_dict)
-        self.add_raw_plots = addRawPlots(self, feature_dict)
+        self.add_model_analysis = AddModelAnalysis(self, feature_dict)
+        self.add_raw_plots = AddRawPlots(self, feature_dict)
 
         self.setup_tabs()
         self.plot_widget.insert_plot_panes()

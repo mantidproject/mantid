@@ -4,14 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Muon.GUI.Common.features.add_feature import addFeature
+from mantidqtinterfaces.Muon.GUI.Common.features.add_feature import AddFeature
 
 
 RAWPLOTS = "raw_plots"
 ADD = 1
 
 
-class addRawPlots(addFeature):
+class AddRawPlots(AddFeature):
     """
     Add model analysis to the GUI
     """

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Muon.GUI.Common.features.add_feature import addFeature
+from mantidqtinterfaces.Muon.GUI.Common.features.add_feature import AddFeature
 from mantidqtinterfaces.Muon.GUI.Common.model_fitting_tab_widget.model_fitting_tab_widget import ModelFittingTabWidget
 
 
@@ -13,7 +13,7 @@ TABONLY = 1
 TABANDPLOT = 2
 
 
-class addModelAnalysis(addFeature):
+class AddModelAnalysis(AddFeature):
     """
     Add model analysis to the GUI
     """
