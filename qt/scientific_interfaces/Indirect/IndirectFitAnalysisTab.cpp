@@ -86,8 +86,8 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
           SLOT(tableStartXChanged(double, WorkspaceID, WorkspaceIndex)));
   connect(m_dataPresenter.get(), SIGNAL(endXChanged(double, WorkspaceID, WorkspaceIndex)), this,
           SLOT(tableEndXChanged(double, WorkspaceID, WorkspaceIndex)));
-  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(startXChanged(double)));
-  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(endXChanged(double)));
+  connect(m_dataPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(handleStartXChanged(double)));
+  connect(m_dataPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(handleEndXChanged(double)));
 
   connect(m_dataPresenter.get(), SIGNAL(singleResolutionLoaded()), this, SLOT(respondToSingleResolutionLoaded()));
   connect(m_dataPresenter.get(), SIGNAL(dataChanged()), this, SLOT(respondToDataChanged()));
@@ -99,8 +99,9 @@ void IndirectFitAnalysisTab::connectDataPresenter() {
 void IndirectFitAnalysisTab::connectPlotPresenter() {
   connect(m_plotPresenter.get(), SIGNAL(fitSingleSpectrum(WorkspaceID, WorkspaceIndex)), this,
           SLOT(singleFit(WorkspaceID, WorkspaceIndex)));
-  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(updateDataInTable()));
-  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(updateDataInTable()));
+  connect(m_plotPresenter.get(), SIGNAL(startXChanged(double)), this, SLOT(handleStartXChanged(double)));
+  connect(m_plotPresenter.get(), SIGNAL(endXChanged(double)), this, SLOT(handleEndXChanged(double)));
+
   connect(m_plotPresenter.get(), SIGNAL(selectedFitDataChanged(WorkspaceID)), this,
           SLOT(respondToPlotSpectrumChanged()));
   connect(m_plotPresenter.get(), SIGNAL(plotSpectrumChanged()), this, SLOT(respondToPlotSpectrumChanged()));
@@ -117,7 +118,10 @@ void IndirectFitAnalysisTab::setFitDataPresenter(std::unique_ptr<IndirectFitData
 }
 
 void IndirectFitAnalysisTab::setPlotView(IIndirectFitPlotView *view) {
-  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(m_fittingModel.get(), view);
+  m_plotPresenter = std::make_unique<IndirectFitPlotPresenter>(view);
+  m_plotPresenter->setFittingData(m_dataPresenter->getFittingData());
+  m_plotPresenter->setFitOutput(m_fittingModel->getFitOutput());
+  m_plotPresenter->updatePlots();
 }
 
 void IndirectFitAnalysisTab::setOutputOptionsView(IIndirectFitOutputOptionsView *view) {
@@ -164,9 +168,11 @@ void IndirectFitAnalysisTab::setResolutionFBSuffixes(const QStringList &suffices
   m_dataPresenter->setResolutionFBSuffices(suffices);
 }
 
-WorkspaceID IndirectFitAnalysisTab::getSelectedDataIndex() const { return m_plotPresenter->getSelectedDataIndex(); }
+WorkspaceID IndirectFitAnalysisTab::getSelectedDataIndex() const { return m_plotPresenter->getActiveWorkspaceID(); }
 
-WorkspaceIndex IndirectFitAnalysisTab::getSelectedSpectrum() const { return m_plotPresenter->getSelectedSpectrum(); }
+WorkspaceIndex IndirectFitAnalysisTab::getSelectedSpectrum() const {
+  return m_plotPresenter->getActiveWorkspaceIndex();
+}
 
 bool IndirectFitAnalysisTab::isRangeCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   return m_plotPresenter->isCurrentlySelected(workspaceID, spectrum);
@@ -189,30 +195,24 @@ size_t IndirectFitAnalysisTab::getNumberOfCustomFunctions(const std::string &fun
 
 void IndirectFitAnalysisTab::setModelFitFunction() {
   auto func = m_fitPropertyBrowser->getFitFunction();
+  m_plotPresenter->setFitFunction(func);
   m_fittingModel->setFitFunction(func);
 }
 
 void IndirectFitAnalysisTab::setModelStartX(double startX) {
   const auto dataIndex = getSelectedDataIndex();
-  if (m_fittingModel->getNumberOfWorkspaces() > dataIndex) {
-    m_fittingModel->setStartX(startX, dataIndex, getSelectedSpectrum());
-  }
+  m_dataPresenter->setStartX(startX, dataIndex, getSelectedSpectrum());
 }
 
 void IndirectFitAnalysisTab::setModelEndX(double endX) {
   const auto dataIndex = getSelectedDataIndex();
-  if (m_fittingModel->getNumberOfWorkspaces() > dataIndex) {
-    m_fittingModel->setEndX(endX, dataIndex, getSelectedSpectrum());
-  }
+  m_dataPresenter->setStartX(endX, dataIndex, getSelectedSpectrum());
 }
-
-void IndirectFitAnalysisTab::updateDataInTable() { m_dataPresenter->updateTableFromModel(); }
 
 void IndirectFitAnalysisTab::tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setStartX(startX);
     m_plotPresenter->updateGuess();
-    m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrum());
   }
 }
 
@@ -220,22 +220,23 @@ void IndirectFitAnalysisTab::tableEndXChanged(double endX, WorkspaceID workspace
   if (isRangeCurrentlySelected(workspaceID, spectrum)) {
     m_plotPresenter->setEndX(endX);
     m_plotPresenter->updateGuess();
-    m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex(), m_plotPresenter->getSelectedSpectrum());
   }
 }
 
-void IndirectFitAnalysisTab::startXChanged(double startX) {
+void IndirectFitAnalysisTab::handleStartXChanged(double startX) {
   m_plotPresenter->setStartX(startX);
-  m_fittingModel->setStartX(startX, m_plotPresenter->getSelectedDataIndex());
+  m_dataPresenter->setStartX(startX, m_plotPresenter->getActiveWorkspaceID());
   updateParameterEstimationData();
   m_plotPresenter->updateGuess();
+  m_dataPresenter->updateTableFromModel();
 }
 
-void IndirectFitAnalysisTab::endXChanged(double endX) {
+void IndirectFitAnalysisTab::handleEndXChanged(double endX) {
   m_plotPresenter->setEndX(endX);
-  m_fittingModel->setEndX(endX, m_plotPresenter->getSelectedDataIndex());
+  m_dataPresenter->setEndX(endX, m_plotPresenter->getActiveWorkspaceID());
   updateParameterEstimationData();
   m_plotPresenter->updateGuess();
+  m_dataPresenter->updateTableFromModel();
 }
 
 /**
@@ -442,7 +443,7 @@ void IndirectFitAnalysisTab::executeFit() {
     setRunIsRunning(true);
     enableFitButtons(false);
     enableOutputOptions(false);
-    runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+    runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
   }
 }
 
@@ -453,8 +454,6 @@ bool IndirectFitAnalysisTab::validate() {
   const auto invalidFunction = m_fittingModel->isInvalidFunction();
   if (invalidFunction)
     validator.addErrorMessage(QString::fromStdString(*invalidFunction));
-  if (m_fittingModel->getNumberOfWorkspaces() == WorkspaceID{0})
-    validator.addErrorMessage(QString::fromStdString("No data has been selected for a fit."));
 
   const auto error = validator.generateErrorMessage();
   emit showMessageBox(error);
@@ -469,7 +468,7 @@ void IndirectFitAnalysisTab::run() {
   enableFitButtons(false);
   enableOutputOptions(false);
   m_fittingModel->setFittingMode(m_fitPropertyBrowser->getFittingMode());
-  runFitAlgorithm(m_fittingModel->getFittingAlgorithm());
+  runFitAlgorithm(m_fittingModel->getFittingAlgorithm(m_fittingModel->getFittingMode()));
 }
 
 /**
@@ -520,7 +519,7 @@ void IndirectFitAnalysisTab::setPDFWorkspace(std::string const &workspaceName) {
 
 void IndirectFitAnalysisTab::updateParameterEstimationData() {
   m_fitPropertyBrowser->updateParameterEstimationData(
-      m_fittingModel->getDataForParameterEstimation(getEstimationDataSelector()));
+      m_dataPresenter->getDataForParameterEstimation(getEstimationDataSelector()));
   const bool isFit = m_fittingModel->isPreviouslyFit(getSelectedDataIndex(), getSelectedSpectrum());
   // If we haven't fit the data yet we may update the guess
   if (!isFit) {
@@ -585,11 +584,11 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
   QList<FunctionModelDataset> datasets;
 
-  for (auto i = 0u; i < m_fittingModel->getNumberOfWorkspaces().value; ++i) {
+  for (auto i = 0u; i < m_dataPresenter->getNumberOfWorkspaces().value; ++i) {
     WorkspaceID workspaceID{i};
 
     auto const name = m_fittingModel->getWorkspace(workspaceID)->getName();
-    datasets.append(FunctionModelDataset(QString::fromStdString(name), m_fittingModel->getSpectra(workspaceID)));
+    datasets.append(FunctionModelDataset(QString::fromStdString(name), m_dataPresenter->getSpectra(workspaceID)));
   }
   return datasets;
 }
@@ -597,7 +596,7 @@ QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(static_cast<int>(m_dataPresenter->getNumberOfDomains()),
                                                   getDatasets(), m_dataPresenter->getQValuesForData(),
-                                                  m_fittingModel->getResolutionsForFit());
+                                                  m_dataPresenter->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFitFunction());
 }
 
@@ -633,14 +632,16 @@ void IndirectFitAnalysisTab::respondToDataChanged() {
 void IndirectFitAnalysisTab::respondToDataAdded(IAddWorkspaceDialog const *dialog) {
   addDataToModel(dialog);
   updateDataReferences();
-  m_plotPresenter->appendLastDataToSelection();
+  auto displayNames = m_dataPresenter->createDisplayNames();
+  m_plotPresenter->appendLastDataToSelection(displayNames);
   updateParameterEstimationData();
 }
 
 void IndirectFitAnalysisTab::respondToDataRemoved() {
   m_fittingModel->removeDefaultParameters();
   updateDataReferences();
-  m_plotPresenter->updateDataSelection();
+  auto displayNames = m_dataPresenter->createDisplayNames();
+  m_plotPresenter->updateDataSelection(displayNames);
   updateParameterEstimationData();
 }
 
@@ -649,12 +650,14 @@ void IndirectFitAnalysisTab::respondToPlotSpectrumChanged() {
   m_fitPropertyBrowser->setCurrentDataset(index);
 }
 
-void IndirectFitAnalysisTab::respondToFwhmChanged(double) {
+void IndirectFitAnalysisTab::respondToFwhmChanged(double fwhm) {
+  m_fittingModel->setFWHM(fwhm, m_plotPresenter->getActiveWorkspaceID());
   updateFitBrowserParameterValues();
   m_plotPresenter->updateGuess();
 }
 
 void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
+  m_fittingModel->setBackground(value, m_plotPresenter->getActiveWorkspaceID());
   m_fitPropertyBrowser->setBackgroundA0(value);
   setModelFitFunction();
   m_plotPresenter->updateGuess();

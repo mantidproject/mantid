@@ -52,7 +52,7 @@ set(
         IndirectFitPlotView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFittingModel.cpp
-        IndirectFitOutputModel.cpp
+        IndirectFitOutput.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
         IndirectFunctionBrowser/ConvTemplateBrowser.cpp
@@ -187,7 +187,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
-        IndirectFitOutputModel.h
+        IndirectFitOutput.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h

@@ -6,14 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DllConfig.h"
-
 #include "IndirectFitPlotModel.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
+#include "IndirectFitPlotView.h"
 
-#include "IIndirectFitPlotView.h"
+#include "DllConfig.h"
 #include "LazyAsyncRunner.h"
+#include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,15 +22,18 @@ class MANTIDQT_INDIRECT_DLL IndirectFitPlotPresenter : public QObject {
   Q_OBJECT
 
 public:
-  IndirectFitPlotPresenter(IndirectFittingModel *model, IIndirectFitPlotView *view);
+  IndirectFitPlotPresenter(IIndirectFitPlotView *view);
 
   void watchADS(bool watch);
 
-  WorkspaceID getSelectedDataIndex() const;
-  WorkspaceIndex getSelectedSpectrum() const;
+  WorkspaceID getActiveWorkspaceID() const;
+  WorkspaceIndex getActiveWorkspaceIndex() const;
   FitDomainIndex getSelectedDomainIndex() const;
   bool isCurrentlySelected(WorkspaceID workspaceID, WorkspaceIndex spectrum) const;
 
+  void setFittingData(std::vector<IndirectFitData> *fittingData);
+  void setFitOutput(IIndirectFitOutput *fitOutput);
+  void setFitFunction(Mantid::API::MultiDomainFunction_sptr function);
   void setFitSingleSpectrumIsFitting(bool fitting);
   void setFitSingleSpectrumEnabled(bool enable);
 
@@ -41,21 +42,20 @@ public:
 public slots:
   void setStartX(double /*startX*/);
   void setEndX(double /*endX*/);
+  void setActiveSpectrum(WorkspaceIndex spectrum);
   void updatePlotSpectrum(WorkspaceIndex spectrum);
   void updateRangeSelectors();
-  void appendLastDataToSelection();
-  void updateSelectedDataName();
-  void updateDataSelection();
+  void appendLastDataToSelection(std::vector<std::string> displayNames);
+  void updateDataSelection(std::vector<std::string> displayNames);
   void updateAvailableSpectra();
   void updatePlots();
   void updateFit();
   void updateGuess();
   void updateGuessAvailability();
+
   void enablePlotGuessInSeparateWindow();
   void disablePlotGuessInSeparateWindow();
   void disableSpectrumPlotSelection();
-  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
-  void setActiveSpectrum(WorkspaceIndex spectrum);
 
 signals:
   void selectedFitDataChanged(WorkspaceID /*_t1*/);
@@ -67,10 +67,6 @@ signals:
   void backgroundChanged(double /*_t1*/);
 
 private slots:
-  void setModelStartX(double value);
-  void setModelEndX(double value);
-  void setModelHWHM(double minimum, double maximum);
-  void setModelBackground(double background);
   void setActiveIndex(WorkspaceID workspaceID);
   void setHWHMMaximum(double minimum);
   void setHWHMMinimum(double maximum);
@@ -80,6 +76,7 @@ private slots:
   void emitFitSingleSpectrum();
   void emitFWHMChanged(double minimum, double maximum);
   void handleSelectedFitDataChanged(WorkspaceID workspaceID);
+  void handlePlotSpectrumChanged(WorkspaceIndex spectrum);
 
 private:
   void disableAllDataSelection();
@@ -89,9 +86,6 @@ private:
   void plotFit(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotFit(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
   void plotDifference(Mantid::API::MatrixWorkspace_sptr workspace, WorkspaceIndex spectrum);
-  void clearInput();
-  void clearFit();
-  void clearDifference();
   void plotGuess(Mantid::API::MatrixWorkspace_sptr workspace);
   void plotGuessInSeparateWindow(const Mantid::API::MatrixWorkspace_sptr &workspace);
   void plotLines();

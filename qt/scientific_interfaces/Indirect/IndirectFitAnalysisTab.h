@@ -6,12 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitDataModel.h"
 #include "IndirectDataAnalysisTab.h"
-#include "IndirectFitDataModel.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
-#include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
@@ -111,11 +108,10 @@ protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double endX);
-  void updateDataInTable();
   void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
-  void startXChanged(double startX);
-  void endXChanged(double endX);
+  void handleStartXChanged(double startX);
+  void handleEndXChanged(double endX);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);

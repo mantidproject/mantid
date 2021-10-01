@@ -43,6 +43,8 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model,
 
 IndirectFitDataPresenter::~IndirectFitDataPresenter() { observeReplace(false); }
 
+std::vector<IndirectFitData> *IndirectFitDataPresenter::getFittingData() { return m_model->getFittingData(); }
+
 IIndirectFitDataView const *IndirectFitDataPresenter::getView() const { return m_view; }
 
 void IndirectFitDataPresenter::addWorkspace(const std::string &workspaceName, const std::string &spectra) {
@@ -62,6 +64,31 @@ void IndirectFitDataPresenter::setResolutionWSSuffices(const QStringList &suffix
 void IndirectFitDataPresenter::setResolutionFBSuffices(const QStringList &suffixes) {
   m_fbResolutionSuffixes = suffixes;
 }
+
+void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setStartX(startX, workspaceID);
+  }
+}
+
+void IndirectFitDataPresenter::setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setStartX(startX, workspaceID, spectrum);
+  }
+}
+
+void IndirectFitDataPresenter::setEndX(double endX, WorkspaceID workspaceID) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setEndX(endX, workspaceID);
+  }
+}
+
+void IndirectFitDataPresenter::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
+  if (m_model->getNumberOfWorkspaces() > workspaceID) {
+    m_model->setEndX(endX, workspaceID, spectrum);
+  }
+}
+
 std::vector<std::pair<std::string, size_t>> IndirectFitDataPresenter::getResolutionsForFit() const {
   return m_model->getResolutionsForFit();
 }
@@ -120,7 +147,28 @@ void IndirectFitDataPresenter::updateTableFromModel() {
   }
 }
 
-size_t IndirectFitDataPresenter::getNumberOfDomains() { return m_model->getNumberOfDomains(); }
+WorkspaceID IndirectFitDataPresenter::getNumberOfWorkspaces() const { return m_model->getNumberOfWorkspaces(); }
+
+size_t IndirectFitDataPresenter::getNumberOfDomains() const { return m_model->getNumberOfDomains(); }
+
+FunctionModelSpectra IndirectFitDataPresenter::getSpectra(WorkspaceID workspaceID) const {
+  return m_model->getSpectra(workspaceID);
+}
+
+DataForParameterEstimationCollection
+IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
+  DataForParameterEstimationCollection dataCollection;
+  for (auto i = WorkspaceID{0}; i < m_model->getNumberOfWorkspaces(); ++i) {
+    auto const ws = m_model->getWorkspace(i);
+    for (const auto &spectrum : m_model->getSpectra(i)) {
+      auto const &x = ws->readX(spectrum.value);
+      auto const &y = ws->readY(spectrum.value);
+      auto range = m_model->getFittingRange(i, spectrum);
+      dataCollection.emplace_back(selector(x, y, range));
+    }
+  }
+  return dataCollection;
+}
 
 std::vector<double> IndirectFitDataPresenter::getQValuesForData() const { return m_model->getQValuesForData(); }
 
@@ -181,6 +229,14 @@ void IndirectFitDataPresenter::removeSelectedData() {
     m_model->removeDataByIndex(FitDomainIndex(item->row()));
   }
   updateTableFromModel();
+}
+
+std::vector<std::string> IndirectFitDataPresenter::createDisplayNames() const {
+  std::vector<std::string> displayNames;
+  for (auto i = WorkspaceID(0); i < m_model->getNumberOfWorkspaces(); i++) {
+    displayNames.push_back(m_model->createDisplayName(i));
+  }
+  return displayNames;
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA
