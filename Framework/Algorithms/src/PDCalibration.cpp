@@ -533,7 +533,7 @@ void PDCalibration::exec() {
   // Scan the table containing the fit parameters for every peak, retrieve the
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
-  // cppcheck-suppress syntaxError
+
    PRAGMA_OMP(parallel for schedule(dynamic, 1))
    for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
      PARALLEL_START_INTERUPT_REGION

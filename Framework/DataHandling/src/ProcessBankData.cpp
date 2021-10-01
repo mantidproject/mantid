@@ -104,12 +104,12 @@ void ProcessBankData::run() { // override {
 
   // Default pulse time (if none are found)
   const bool pulsetimesincreasing =
-      std::is_sorted(thisBankPulseTimes->pulseTimes, thisBankPulseTimes->pulseTimes + thisBankPulseTimes->numPulses);
+      std::is_sorted(thisBankPulseTimes->pulseTimes.cbegin(), thisBankPulseTimes->pulseTimes.cend());
   if (!std::is_sorted(event_index->cbegin(), event_index->cend()))
     throw std::runtime_error("Event index is not sorted");
 
   // And there are this many pulses
-  const auto NUM_PULSES = thisBankPulseTimes->numPulses;
+  const auto NUM_PULSES = thisBankPulseTimes->pulseTimes.size();
   prog->report(entry_name + ": filling events");
 
   // Will we need to compress?

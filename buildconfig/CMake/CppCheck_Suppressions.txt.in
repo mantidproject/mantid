@@ -11,6 +11,10 @@ noExplicitConstructor
 // Hide warnings about shadowed members for inheritance. Typically "m_log" with Algorithm
 duplInheritedMember
 
+// Hide unused functions, cppcheck does not consider headers, so many Qt overrides
+// called by Qt will be marked as unused
+unusedFunction
+
 // We have some potentially uninitialized member vars but too many to fix at the moment
 uninitMemberVar
 
@@ -20,44 +24,16 @@ noConstructor
 // Pre-processor Directives, such as #error, which are upstream anyway
 preprocessorErrorDirective
 
-// ---------- cppcheck 1.90 Transition -------
-unmatchedSuppression
-
-// If-init not supported
-syntaxError:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp
-
-// --- To be added back ------
-//cstyleCase:*${CMAKE_SOURCE_DIR}/MantidPlot
-
-// A large number of copying instead of pass by ref were picked up by clang-tidy, but around 200 remain
-//passedByValue
-
 // Cppcheck struggles with some inheritance chains, some of these might be true though
 unusedPrivateFunction
-
-// Nice to have, not need to have at the moment
-//useInitializationList
-
-// Libs we have in-source
-// *:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/*
-
 // ---------- Individual suppressions -----------------
 
-pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.cpp
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
 
-// Macro expansion means this is incorrectly flagged on Unix
-redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp
-
-// Ref binding means Cppcheck can't see these are used
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MaskBinsIf.cpp
-
 // the mru-list is intentionally not altered
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:309
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:*
 // false positives from checking a second time using a mutex for multi-threading
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:950
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1016
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1046
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:*
 
 // --------- Missing copy assignment / constructors -------------------
 // We don't want more creeping in so just mark these one by one
@@ -92,8 +68,3 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
-
-// Libs we have in-source
-*:${CMAKE_SOURCE_DIR}/Framework/ICat/src/GSoap/*
-*:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat3/GSoapGenerated/*
-*:${CMAKE_SOURCE_DIR}/Framework/ICat/src/ICat4/GSoapGenerated/*
