@@ -407,8 +407,8 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDaveGrp.cpp:1
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexusIndexSetup.cpp:59
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexusIndexSetup.cpp:175
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadANSTOEventFile.h:132
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:977
-constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:977
+constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
+constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:103
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:114
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:230

@@ -164,32 +164,6 @@ void LoadFITS::exec() {
   doLoadFiles(paths, outWSName, loadAsRectImg, binSize, noiseThresh);
 }
 
-/**
- * Load header(s) from FITS file(s) into FITSInfo header
- * struct(s). This is usually the first step when loading FITS files
- * into workspaces or anything else. In the simplest case, paths has
- * only one string and only one header struct is added in
- * headers. When loading multiple files, the parameters firstIndex and
- * lastIndex make it possible to load the headers individually or by
- * groups.
- *
- * @param paths File name(s)
- * @param headers Vector where to store the header struct(s)
- *
- * @param firstIndex index of the first header to read, set to 0 to
- * start reading headers from the first file.
- *
- * @param lastIndex index of the last header to read
- *
- * @throws std::runtime_error if issues are found in the headers
- */
-void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths, std::vector<FITSInfo> &headers, size_t firstIndex,
-                             size_t lastIndex) {
-  for (size_t i = firstIndex; i <= lastIndex && i < headers.size(); ++i) {
-    loadHeader(paths[i], headers[i]);
-  }
-}
-
 void LoadFITS::loadHeader(const std::string &filePath, FITSInfo &header) {
   header.extension = "";
   header.filePath = filePath;
@@ -447,7 +421,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths, const std::str
     wsGroup->setTitle(outWSName);
   }
 
-  size_t totalWS = headers.size();
+  const size_t totalWS = headers.size();
   // Create a progress reporting object
   API::Progress progress(this, 0.0, 1.0, totalWS + 1);
   progress.report(0, "Loading file(s) into workspace(s)");

@@ -62,10 +62,6 @@ private:
   /// Execution code
   void exec() override;
 
-  /// Load a block of FITS header(s) at once
-  void doLoadHeaders(const std::vector<std::string> &paths, std::vector<FITSInfo> &headers, size_t firstIndex,
-                     size_t lastIndex);
-
   /// Load the FITS header(s) from one fits file into a struct
   void loadHeader(const std::string &filePath, FITSInfo &header);
 
