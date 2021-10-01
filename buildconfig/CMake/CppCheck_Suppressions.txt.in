@@ -574,9 +574,9 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1466
 redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:1014
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:514
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:1062
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:830
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1166
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1167
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:834
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1170
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:1171
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GravitySANSHelper.cpp:25
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetDetectorOffsets.cpp:294
