@@ -31,8 +31,7 @@
 #include <map>
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 const std::map<std::string, std::string> MONTHS{{"JAN", "01"}, {"FEB", "02"}, {"MAR", "03"}, {"APR", "04"},
@@ -846,5 +845,4 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

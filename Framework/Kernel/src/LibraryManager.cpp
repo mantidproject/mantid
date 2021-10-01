@@ -15,8 +15,7 @@
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 /// static logger
 Logger g_log("LibraryManager");
@@ -146,5 +145,4 @@ int LibraryManagerImpl::openLibrary(const Poco::File &filepath, const std::strin
     return 0;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

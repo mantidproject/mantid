@@ -27,8 +27,7 @@ using Mantid::HistogramData::HistogramE;
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RemoveBackground)
@@ -299,5 +298,4 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, Histogram
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -15,8 +15,7 @@
 #include <QMessageBox>
 #include <limits>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -170,5 +169,4 @@ void AddWorkspaceDialog::handleOKClicked() {
   emit okClicked(!m_uiForm.ckKeepOpen->isChecked());
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

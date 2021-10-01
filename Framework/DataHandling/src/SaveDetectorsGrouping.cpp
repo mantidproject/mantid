@@ -26,8 +26,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Poco::XML;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(SaveDetectorsGrouping)
 
@@ -230,5 +229,4 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
   ofs.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

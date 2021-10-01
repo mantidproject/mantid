@@ -9,8 +9,7 @@
 #include <memory>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor
  * @param otherPropName :: Name of the OTHER property that we will check.
@@ -122,5 +121,4 @@ bool VisibleWhenProperty::isVisible(const IPropertyManager *algo) const {
  */
 IPropertySettings *VisibleWhenProperty::clone() const { return new VisibleWhenProperty(*this); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

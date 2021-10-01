@@ -10,9 +10,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace API;
 
@@ -343,6 +341,4 @@ void CrystalFieldPhysPropControl::function(const API::FunctionDomain & /*domain*
   throw Kernel::Exception::NotImplementedError("This method is intentionally not implemented.");
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

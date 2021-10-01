@@ -229,9 +229,7 @@ void addEISFToTable(ITableWorkspace_sptr &tableWs) {
 }
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -332,6 +330,4 @@ using ConvolutionFitSimultaneous = ConvolutionFit<QENSFitSimultaneous>;
 DECLARE_ALGORITHM(ConvolutionFitSequential)
 DECLARE_ALGORITHM(ConvolutionFitSimultaneous)
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

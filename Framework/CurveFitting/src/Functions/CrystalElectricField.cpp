@@ -14,9 +14,7 @@
 #include <array>
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 namespace {
 
@@ -1009,6 +1007,4 @@ void calculateMagneticMomentMatrix(const ComplexFortranMatrix &ev, const std::ve
   mumat *= gj;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

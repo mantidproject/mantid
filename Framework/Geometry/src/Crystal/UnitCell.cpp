@@ -15,8 +15,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
@@ -912,5 +911,4 @@ UnitCell strToUnitCell(const std::string &unitCellString) {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

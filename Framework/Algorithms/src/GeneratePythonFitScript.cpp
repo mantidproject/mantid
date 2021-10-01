@@ -88,8 +88,7 @@ std::string getFileContents(std::string const &filename) {
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(GeneratePythonFitScript)
 
@@ -293,5 +292,4 @@ void GeneratePythonFitScript::savePythonScript(std::string const &filepath, std:
   file.close();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

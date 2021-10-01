@@ -138,8 +138,7 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
 }
 } // anonymous namespace
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /** Rebins data according to a new set of bin edges.
  * @param input :: input histogram data to be rebinned.
@@ -159,5 +158,4 @@ Histogram rebin(const Histogram &input, const BinEdges &binEdges) {
     throw std::runtime_error("YMode must be defined for input histogram.");
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

@@ -7,8 +7,7 @@
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -55,5 +54,4 @@ bool QLab::isSameType(const MDFrame &frame) const {
   return isSameType;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

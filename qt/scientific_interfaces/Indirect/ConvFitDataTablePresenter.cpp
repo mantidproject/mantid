@@ -23,9 +23,7 @@ QStringList convFitHeaders() {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitDataTablePresenter::ConvFitDataTablePresenter(ConvFitModel *model, QTableWidget *dataTable)
     : IndirectFitDataTablePresenter(model->getFitDataModel(), dataTable, convFitHeaders()) {
@@ -53,6 +51,4 @@ void ConvFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
   setCell(std::move(cell), row, 1);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -10,8 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 
@@ -120,5 +119,4 @@ double RRFMuon::unitConversionFactor(const std::string &uin, const std::string &
     throw std::runtime_error("X units must be in microseconds");
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

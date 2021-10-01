@@ -13,8 +13,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RefRoi)
@@ -215,5 +214,4 @@ void RefRoi::extract2D() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

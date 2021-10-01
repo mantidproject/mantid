@@ -8,9 +8,7 @@
 
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /// Import and return the backend module for this version of Qt
 Python::Object backendModule() {
@@ -20,6 +18,4 @@ Python::Object backendModule() {
   return Python::NewRef(PyImport_ImportModule(MPL_QT_BACKEND));
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

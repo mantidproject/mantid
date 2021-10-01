@@ -13,8 +13,7 @@
 
 using namespace Mantid;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 WorkspacePresenter::WorkspacePresenter(IWorkspaceDockView *view)
     : m_view(view), m_adapter(std::make_unique<ADSAdapter>()) {}
@@ -337,5 +336,4 @@ void WorkspacePresenter::workspacesCleared() { m_view->clearView(); }
 /// Update the view by publishing the ADS contents.
 void WorkspacePresenter::updateView() { m_view->updateTree(m_adapter->topLevelItems()); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

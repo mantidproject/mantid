@@ -11,13 +11,11 @@
 #include <tuple>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
-    IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
-    : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view),
-      m_model(model), m_currentName("") {
+PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
+                                                           PlotFitAnalysisPaneModel *model)
+    : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
 
   m_fitObserver = new VoidObserver();
   m_updateEstimateObserver = new VoidObserver();
@@ -25,10 +23,8 @@ PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
   m_view->observeFitButton(m_fitObserver);
   m_view->observeUpdateEstimateButton(m_updateEstimateObserver);
 
-  std::function<void()> fitBinder =
-      std::bind(&PlotFitAnalysisPanePresenter::doFit, this);
-  std::function<void()> updateEstimateBinder =
-      std::bind(&PlotFitAnalysisPanePresenter::updateEstimate, this);
+  std::function<void()> fitBinder = std::bind(&PlotFitAnalysisPanePresenter::doFit, this);
+  std::function<void()> updateEstimateBinder = std::bind(&PlotFitAnalysisPanePresenter::updateEstimate, this);
 
   m_fitObserver->setSlot(fitBinder);
   m_updateEstimateObserver->setSlot(updateEstimateBinder);
@@ -45,8 +41,7 @@ void PlotFitAnalysisPanePresenter::doFit() {
     }
     m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
   } else {
-    m_view->displayWarning(
-        "Need to have extracted a data and selected a function to fit");
+    m_view->displayWarning("Need to have extracted a data and selected a function to fit");
   }
 }
 
@@ -57,16 +52,13 @@ void PlotFitAnalysisPanePresenter::updateEstimateAfterExtraction() {
 
 void PlotFitAnalysisPanePresenter::updateEstimate() {
   if (!m_currentName.empty()) {
-    m_view->updateFunction(
-        m_model->calculateEstimate(m_currentName, m_view->getRange()));
+    m_view->updateFunction(m_model->calculateEstimate(m_currentName, m_view->getRange()));
   } else {
-    m_view->displayWarning(
-        "Could not update estimate: data has not been extracted.");
+    m_view->displayWarning("Could not update estimate: data has not been extracted.");
   }
 }
 
-void PlotFitAnalysisPanePresenter::addFunction(
-    Mantid::API::IFunction_sptr func) {
+void PlotFitAnalysisPanePresenter::addFunction(Mantid::API::IFunction_sptr func) {
   m_view->addFunction(std::move(func));
 }
 
@@ -75,5 +67,4 @@ void PlotFitAnalysisPanePresenter::addSpectrum(const std::string &wsName) {
   m_view->addSpectrum(wsName);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

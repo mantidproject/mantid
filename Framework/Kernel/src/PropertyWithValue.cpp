@@ -13,8 +13,7 @@
 
 #include <NeXusFile.hpp>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 #define PROPERTYWITHVALUE_SAVEPROPERTY(type)                                                                           \
   template <> void PropertyWithValue<type>::saveProperty(::NeXus::File *file) {                                        \
@@ -96,5 +95,4 @@ template class PropertyWithValue<std::vector<int32_t>>;
 
 template class PropertyWithValue<std::string>;
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

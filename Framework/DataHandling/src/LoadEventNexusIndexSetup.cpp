@@ -20,8 +20,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Indexing;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 void setupConsistentSpectrumNumbers(IndexInfo &filtered, const std::vector<detid_t> &detIDs) {
@@ -186,5 +185,4 @@ IndexInfo LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) 
   return indexInfo;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

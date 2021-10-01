@@ -17,8 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /** Constructor
  */
@@ -46,5 +45,4 @@ Correction TimeAtSampleStrategyElastic::calculate(const size_t &workspace_index)
   return Correction(0., scale);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

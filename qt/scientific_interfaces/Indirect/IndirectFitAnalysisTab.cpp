@@ -39,9 +39,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 /**
  * @param functionName  The name of the function.
@@ -664,6 +662,4 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
   emit functionChanged();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -21,9 +21,7 @@ namespace {
 Mantid::Kernel::Logger g_log("DiffRotDiscreteCircle");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(DiffRotDiscreteCircle)
 
@@ -77,6 +75,4 @@ void DiffRotDiscreteCircle::init() {
   this->applyTies();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

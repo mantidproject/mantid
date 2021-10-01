@@ -32,8 +32,7 @@
 using std::size_t;
 using std::string;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 /// static logger object
 Logger g_log("Memory");
@@ -567,5 +566,4 @@ template DLLExport string memToString<uint64_t>(const uint64_t);
 // To initialize the static class variable.
 std::mutex MemoryStats::mutexMemory;
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

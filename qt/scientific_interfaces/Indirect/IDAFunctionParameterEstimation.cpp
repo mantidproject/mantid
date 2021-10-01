@@ -8,9 +8,7 @@
 #include "MantidAPI/IFunction.h"
 
 #include <math.h>
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 // Add function name and estimation function to the stored function map.
 void IDAFunctionParameterEstimation::addParameterEstimationFunction(std::string name, EstimationFunction function) {
@@ -29,6 +27,4 @@ void IDAFunctionParameterEstimation::estimateFunctionParameters(::Mantid::API::I
   }
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

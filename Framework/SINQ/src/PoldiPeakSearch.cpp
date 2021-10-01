@@ -30,8 +30,7 @@
 
 #include "MantidKernel/MultiThreaded.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 DECLARE_ALGORITHM(PoldiPeakSearch)
 
@@ -601,5 +600,4 @@ void PoldiPeakSearch::exec() {
   setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

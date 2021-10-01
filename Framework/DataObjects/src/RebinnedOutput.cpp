@@ -12,8 +12,7 @@
 #include <iterator>
 #include <sstream>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 DECLARE_WORKSPACE(RebinnedOutput)
 
@@ -187,5 +186,4 @@ void RebinnedOutput::unfinalize() {
   m_finalized = false;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

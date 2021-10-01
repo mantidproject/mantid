@@ -24,8 +24,7 @@
 #include <memory>
 #include <numeric>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 std::shared_ptr<const std::unordered_map<detid_t, size_t>> makeDetIdToIndexMap(const std::vector<detid_t> &detIds) {
@@ -406,5 +405,4 @@ InstrumentVisitor::makeWrappers(const Instrument &instrument, ParameterMap *pmap
   visitor.walkInstrument();
   return visitor.makeWrappers();
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -15,9 +15,7 @@
 #include <sstream>
 #include <vector>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace API;
 using namespace CurveFitting;
@@ -345,6 +343,4 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName, const API::IFun
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

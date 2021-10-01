@@ -15,8 +15,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace;
@@ -258,5 +257,4 @@ void SaveDiffCal::exec() {
   file.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

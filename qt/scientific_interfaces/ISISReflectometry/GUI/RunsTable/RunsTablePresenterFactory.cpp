@@ -9,9 +9,7 @@
 #include "RunsTablePresenter.h"
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 RunsTablePresenterFactory::RunsTablePresenterFactory(std::vector<std::string> instruments, double thetaTolerance,
                                                      Plotter plotter)
@@ -20,6 +18,4 @@ RunsTablePresenterFactory::RunsTablePresenterFactory(std::vector<std::string> in
 std::unique_ptr<IRunsTablePresenter> RunsTablePresenterFactory::operator()(IRunsTableView *view) const {
   return std::make_unique<RunsTablePresenter>(view, m_instruments, m_thetaTolerance, ReductionJobs(), m_plotter);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

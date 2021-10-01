@@ -18,8 +18,7 @@
 
 using file_holder_type = std::unique_ptr<::NeXus::File>;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("MDBoxFlatTree");
@@ -800,5 +799,4 @@ void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matr
   }
   file->closeData();
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

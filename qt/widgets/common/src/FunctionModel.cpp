@@ -20,8 +20,7 @@ namespace {
 Mantid::Kernel::Logger g_log("FitFunction");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 
@@ -611,5 +610,4 @@ QString FunctionModel::setBackgroundA0(double value) {
   return QString::fromStdString(foundName);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -11,8 +11,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/regex.hpp>
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 GeneralFrame *GeneralFrameFactory::createRaw(const MDFrameArgument &argument) const {
   using namespace Mantid::Kernel;
@@ -95,5 +94,4 @@ MDFrameFactory_uptr makeMDFrameFactoryChain() {
   return first;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

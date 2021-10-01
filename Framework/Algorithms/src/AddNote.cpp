@@ -11,8 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "boost/date_time/local_time/posix_time_zone.hpp"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -131,5 +130,4 @@ void AddNote::createOrUpdate(API::Run &run, const std::string &name) {
   createOrUpdateValue(run, name, time, value);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

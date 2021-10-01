@@ -9,8 +9,7 @@
 #include "MantidQtIcons/CharIconEngine.h"
 #include "MantidQtIcons/CharIconPainter.h"
 
-namespace MantidQt {
-namespace Icons {
+namespace MantidQt::Icons {
 
 CharIconEngine::CharIconEngine(IconicFont *iconic, CharIconPainter *painter,
                                const QList<QHash<QString, QVariant>> &options)
@@ -30,5 +29,4 @@ QPixmap CharIconEngine::pixmap(const QSize &size, QIcon::Mode mode, QIcon::State
 
 QIconEngine *CharIconEngine::clone() const { return new CharIconEngine(m_iconic, m_painter, m_options); }
 
-} // namespace Icons
-} // namespace MantidQt
+} // namespace MantidQt::Icons

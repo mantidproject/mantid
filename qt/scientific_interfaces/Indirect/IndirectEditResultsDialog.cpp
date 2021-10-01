@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectEditResultsDialog.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectEditResultsDialog::IndirectEditResultsDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
@@ -49,6 +47,4 @@ void IndirectEditResultsDialog::setReplaceFitResultEnabled(bool enable) {
   m_uiForm.pbReplaceFitResult->setEnabled(enable);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

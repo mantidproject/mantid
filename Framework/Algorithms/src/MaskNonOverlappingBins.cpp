@@ -85,8 +85,7 @@ void maskBinsWithinLimits(Mantid::API::MatrixWorkspace &ws, size_t const histogr
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(MaskNonOverlappingBins)
 
 /// Algorithms name for identification. @see Algorithm::name
@@ -223,5 +222,4 @@ void MaskNonOverlappingBins::processNonRagged(API::MatrixWorkspace const &inputW
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

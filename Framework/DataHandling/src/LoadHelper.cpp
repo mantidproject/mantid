@@ -19,8 +19,7 @@
 
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -462,5 +461,4 @@ V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws, const 
   return pos;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

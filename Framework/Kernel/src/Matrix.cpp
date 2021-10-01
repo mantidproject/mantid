@@ -15,9 +15,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-
-namespace Kernel {
+namespace Mantid::Kernel {
 //
 #define fabs(x) std::fabs((x)*1.0)
 
@@ -1697,5 +1695,4 @@ template MANTID_KERNEL_DLL std::istream &operator>>(std::istream &, IntMatrix &)
 template MANTID_KERNEL_DLL void fillFromStream(std::istream &, IntMatrix &, const char);
 ///\endcond TEMPLATE
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/RowLocationAdapter.h"
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 RowLocationAdapter::RowLocationAdapter(QStandardItemModel const &model) : m_model(model) {}
 
@@ -56,6 +54,4 @@ QModelIndexForMainModel RowLocationAdapter::indexAt(RowLocation const &location,
                              "row location which does not exist.");
   }
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

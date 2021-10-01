@@ -43,9 +43,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -387,6 +385,4 @@ TopoDS_Shape Cone::createShape() {
   return BRepPrimAPI_MakeCone(gpA, 0.0, 1000.0 / tan(acos(cangle * M_PI / 180.0)), 1000.0, 2.0 * M_PI).Shape();
 }
 #endif
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

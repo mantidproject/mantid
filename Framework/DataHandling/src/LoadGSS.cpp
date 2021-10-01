@@ -31,8 +31,7 @@ using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadGSS)
 
@@ -540,6 +539,4 @@ void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, co
     paramMap.addDouble(detector->getComponentID(), "DIFC", difcs[i]);
   }
 }
-} // namespace DataHandling
-
-} // namespace Mantid
+} // namespace Mantid::DataHandling

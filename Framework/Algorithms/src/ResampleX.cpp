@@ -16,8 +16,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace API;
 using namespace DataObjects;
 using namespace Kernel;
@@ -488,5 +487,4 @@ void ResampleX::exec() {
   } // end if (inputeventWS != NULL)
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

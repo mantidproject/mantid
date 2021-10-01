@@ -64,8 +64,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::MuonAlgorithmHelper;
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyMuonDetectorGrouping)
@@ -418,5 +417,4 @@ void ApplyMuonDetectorGrouping::setMuonProcessAlgorithmProperties(IAlgorithm &al
 // Allow WorkspaceGroup property to function correctly.
 bool ApplyMuonDetectorGrouping::checkGroups() { return false; }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

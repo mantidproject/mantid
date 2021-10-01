@@ -13,9 +13,7 @@
 #include "MantidGeometry/muParser_Silent.h"
 #include <boost/tokenizer.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -124,6 +122,4 @@ void UserFunction::functionDeriv(const API::FunctionDomain &domain, API::Jacobia
   calNumericalDeriv(domain, jacobian);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

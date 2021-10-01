@@ -36,9 +36,7 @@ using Mantid::Geometry::IndexingUtils;
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(OptimizeCrystalPlacement)
 
@@ -451,6 +449,4 @@ void OptimizeCrystalPlacement::exec() {
 
 } // exec
 
-} // namespace Crystal
-
-} // namespace Mantid
+} // namespace Mantid::Crystal

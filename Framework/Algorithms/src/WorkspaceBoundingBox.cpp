@@ -1,8 +1,7 @@
 #include "MantidAlgorithms/WorkspaceBoundingBox.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace {
 constexpr int HISTOGRAM_INDEX{0};
@@ -176,5 +175,4 @@ bool WorkspaceBoundingBox::containsPoint(double x, double y) {
   return (x <= this->xMax && x >= this->xMin && y <= yMax && y >= yMin);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

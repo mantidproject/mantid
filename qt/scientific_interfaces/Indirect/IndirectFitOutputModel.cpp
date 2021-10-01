@@ -74,9 +74,7 @@ extractParametersFromTable(Mantid::API::ITableWorkspace_sptr tableWs) {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitOutputModel::IndirectFitOutputModel() {}
 
@@ -144,6 +142,4 @@ void IndirectFitOutputModel::addSingleOutput(const Mantid::API::WorkspaceGroup_s
   m_resultGroup = resultGroup;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

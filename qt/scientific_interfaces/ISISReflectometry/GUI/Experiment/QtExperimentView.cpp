@@ -13,9 +13,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 // Changing the palette for spin boxes doesn't work but we can
@@ -696,6 +694,4 @@ void QtExperimentView::setStitchOptions(std::string const &stitchOptions) {
 void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
                           std::vector<MissingInstrumentParameterValue> const &missingValues);
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

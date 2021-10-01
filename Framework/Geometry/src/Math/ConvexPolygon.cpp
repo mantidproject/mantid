@@ -16,8 +16,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::V2D;
 
@@ -240,5 +239,4 @@ std::ostream &operator<<(std::ostream &os, const ConvexPolygon &polygon) {
   return os;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

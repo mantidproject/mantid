@@ -15,8 +15,7 @@
 #include <cmath>
 #include <limits>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Initialize with defaults.
@@ -537,5 +536,4 @@ std::string Viewport::saveToProject() const {
 
   return tsv.outputLines();
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

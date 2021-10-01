@@ -7,10 +7,7 @@
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-namespace MantidQt {
-namespace Widgets {
-namespace Common {
-namespace Python {
+namespace MantidQt::Widgets::Common::Python {
 
 Python::Dict qHashToDict(const KwArgs &hash) {
   auto mod = PyImport_ImportModule("qtpy.QtCore");
@@ -55,7 +52,4 @@ Python::Dict qHashToDict(const KwArgs &hash) {
   return d;
 }
 
-} // namespace Python
-} // namespace Common
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::Common::Python

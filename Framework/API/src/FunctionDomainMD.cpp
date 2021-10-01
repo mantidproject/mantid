@@ -12,8 +12,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Create a domain form a IMDWorkspace.
@@ -70,5 +69,4 @@ const IMDIterator *FunctionDomainMD::getNextIterator() const {
 /// Returns the pointer to the original workspace
 IMDWorkspace_const_sptr FunctionDomainMD::getWorkspace() const { return m_workspace; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -19,8 +19,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 namespace {
 Kernel::Logger g_log("MultiDomainCreator");
@@ -151,5 +150,4 @@ std::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
   return outWS;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

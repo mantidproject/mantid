@@ -25,16 +25,12 @@
 #include <QPushButton>
 #include <QRadioButton>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-InstrumentWidgetEncoder::InstrumentWidgetEncoder()
-    : m_projectPath(""), m_saveMask(true) {}
+InstrumentWidgetEncoder::InstrumentWidgetEncoder() : m_projectPath(""), m_saveMask(true) {}
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
-                                const QString &projectPath,
-                                const bool saveMask) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encode(const InstrumentWidget &obj, const QString &projectPath,
+                                                        const bool saveMask) {
   QMap<QString, QVariant> map;
   // there is no reference to the workspace if it is being replaced, so return
   // the empty map
@@ -55,17 +51,14 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
 
     map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
-    map.insert(QString("surface"),
-               QVariant(this->encodeSurface(obj.getSurface())));
-    map.insert(QString("actor"),
-               QVariant(this->encodeActor(obj.m_instrumentActor)));
+    map.insert(QString("surface"), QVariant(this->encodeSurface(obj.getSurface())));
+    map.insert(QString("actor"), QVariant(this->encodeActor(obj.m_instrumentActor)));
     map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
   }
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeTabs(const InstrumentWidget &obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeTabs(const InstrumentWidget &obj) {
   QMap<QString, QVariant> tabs;
 
   tabs.insert(QString("maskTab"), QVariant(encodeMaskTab(obj.m_maskTab)));
@@ -76,8 +69,7 @@ InstrumentWidgetEncoder::encodeTabs(const InstrumentWidget &obj) {
   return tabs;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
   auto index = tab->m_instrumentTree->currentIndex();
   auto model = index.model();
 
@@ -99,42 +91,33 @@ InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRenderTab(const InstrumentWidgetRenderTab *tab) {
   QMap<QString, QVariant> map;
   map.insert(QString("axesView"), QVariant(tab->mAxisCombo->currentIndex()));
   map.insert(QString("autoScaling"), QVariant(tab->m_autoscaling->isChecked()));
   map.insert(QString("displayAxes"), QVariant(tab->m_displayAxes->isChecked()));
   map.insert(QString("flipView"), QVariant(tab->m_flipCheckBox->isChecked()));
-  map.insert(QString("displayDetectorsOnly"),
-             QVariant(tab->m_displayDetectorsOnly->isChecked()));
-  map.insert(QString("displayWireframe"),
-             QVariant(tab->m_wireframe->isChecked()));
-  map.insert(QString("displayLighting"),
-             QVariant(tab->m_lighting->isChecked()));
+  map.insert(QString("displayDetectorsOnly"), QVariant(tab->m_displayDetectorsOnly->isChecked()));
+  map.insert(QString("displayWireframe"), QVariant(tab->m_wireframe->isChecked()));
+  map.insert(QString("displayLighting"), QVariant(tab->m_lighting->isChecked()));
   map.insert(QString("useOpenGL"), QVariant(tab->m_GLView->isChecked()));
-  map.insert(QString("useUCorrection"),
-             QVariant(tab->m_UCorrection->isChecked()));
+  map.insert(QString("useUCorrection"), QVariant(tab->m_UCorrection->isChecked()));
 
   const auto surface = tab->getSurface();
   map.insert(QString("showLabels"), QVariant(surface->getShowPeakRowsFlag()));
   map.insert(QString("showRows"), QVariant(surface->getShowPeakRowsFlag()));
-  map.insert(QString("labelPrecision"),
-             QVariant(surface->getPeakLabelPrecision()));
-  map.insert(QString("showRelativeIntensity"),
-             QVariant(surface->getShowPeakRelativeIntensityFlag()));
+  map.insert(QString("labelPrecision"), QVariant(surface->getPeakLabelPrecision()));
+  map.insert(QString("showRelativeIntensity"), QVariant(surface->getShowPeakRelativeIntensityFlag()));
 
   const auto colorBar = encodeColorBar(tab->m_colorBarWidget);
   map.insert(QString("colorBar"), QVariant(colorBar));
 
-  map.insert(QString("freezeRotation"),
-             QVariant(tab->m_freezeRotation->isChecked()));
+  map.insert(QString("freezeRotation"), QVariant(tab->m_freezeRotation->isChecked()));
 
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorBar(
-    MantidQt::MantidWidgets::ColorBar *bar) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorBar(MantidQt::MantidWidgets::ColorBar *bar) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("scaleType"), QVariant(bar->getScaleType()));
@@ -146,40 +129,30 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encodeColorBar(
 }
 
 // This is the tab labelled draw
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
   QMap<QString, QVariant> map;
   QMap<QString, QVariant> activeTools;
   QMap<QString, QVariant> activeType;
 
   activeTools.insert(QString("moveButton"), QVariant(tab->m_move->isChecked()));
-  activeTools.insert(QString("pointerButton"),
-                     QVariant(tab->m_pointer->isChecked()));
-  activeTools.insert(QString("ellipseButton"),
-                     QVariant(tab->m_ellipse->isChecked()));
-  activeTools.insert(QString("ringEllipseButton"),
-                     QVariant(tab->m_ring_ellipse->isChecked()));
-  activeTools.insert(QString("ringRectangleButton"),
-                     QVariant(tab->m_ring_rectangle->isChecked()));
-  activeTools.insert(QString("freeDrawButton"),
-                     QVariant(tab->m_free_draw->isChecked()));
-  activeTools.insert(QString("pixelButton"),
-                     QVariant(tab->m_pixel->isChecked()));
+  activeTools.insert(QString("pointerButton"), QVariant(tab->m_pointer->isChecked()));
+  activeTools.insert(QString("ellipseButton"), QVariant(tab->m_ellipse->isChecked()));
+  activeTools.insert(QString("ringEllipseButton"), QVariant(tab->m_ring_ellipse->isChecked()));
+  activeTools.insert(QString("ringRectangleButton"), QVariant(tab->m_ring_rectangle->isChecked()));
+  activeTools.insert(QString("freeDrawButton"), QVariant(tab->m_free_draw->isChecked()));
+  activeTools.insert(QString("pixelButton"), QVariant(tab->m_pixel->isChecked()));
   activeTools.insert(QString("tubeButton"), QVariant(tab->m_tube->isChecked()));
   map.insert(QString("activeTools"), QVariant(activeTools));
 
-  activeType.insert(QString("maskingOn"),
-                    QVariant(tab->m_masking_on->isChecked()));
-  activeType.insert(QString("groupingOn"),
-                    QVariant(tab->m_grouping_on->isChecked()));
+  activeType.insert(QString("maskingOn"), QVariant(tab->m_masking_on->isChecked()));
+  activeType.insert(QString("groupingOn"), QVariant(tab->m_grouping_on->isChecked()));
   activeType.insert(QString("roiOn"), QVariant(tab->m_roi_on->isChecked()));
   map.insert(QString("activeType"), QVariant(activeType));
 
   if (m_saveMask) {
     // Save the masks applied to view but not saved to a workspace
     auto wsName = tab->m_instrWidget->getWorkspaceName() + "MaskView.xml";
-    bool success =
-        tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
+    bool success = tab->saveMaskViewToProject(wsName.toStdString(), m_projectPath);
     map.insert(QString("maskWorkspaceSaved"), QVariant(success));
     if (success) {
       map.insert(QString("maskWorkspaceName"), QVariant(wsName));
@@ -191,8 +164,7 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
   QMap<QString, QVariant> map;
 
   // Save whether a button is active or not
@@ -200,10 +172,8 @@ InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
   map.insert(QString("edit"), QVariant(tab->m_edit->isChecked()));
   map.insert(QString("ellipse"), QVariant(tab->m_ellipse->isChecked()));
   map.insert(QString("rectangle"), QVariant(tab->m_rectangle->isChecked()));
-  map.insert(QString("ringEllipse"),
-             QVariant(tab->m_ring_ellipse->isChecked()));
-  map.insert(QString("ringRectangle"),
-             QVariant(tab->m_ring_rectangle->isChecked()));
+  map.insert(QString("ringEllipse"), QVariant(tab->m_ring_ellipse->isChecked()));
+  map.insert(QString("ringRectangle"), QVariant(tab->m_ring_rectangle->isChecked()));
   map.insert(QString("freeDraw"), QVariant(tab->m_free_draw->isChecked()));
   map.insert(QString("one"), QVariant(tab->m_one->isChecked()));
   map.insert(QString("tube"), QVariant(tab->m_tube->isChecked()));
@@ -213,19 +183,16 @@ InstrumentWidgetEncoder::encodePickTab(const InstrumentWidgetPickTab *tab) {
   return map;
 }
 
-QMap<QString, QVariant> InstrumentWidgetEncoder::encodeActor(
-    const std::unique_ptr<InstrumentActor> &obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeActor(const std::unique_ptr<InstrumentActor> &obj) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("fileName"), QVariant(obj->getCurrentColorMap()));
-  map.insert(QString("binMasks"),
-             QVariant(this->encodeMaskBinsData(obj->m_maskBinsData)));
+  map.insert(QString("binMasks"), QVariant(this->encodeMaskBinsData(obj->m_maskBinsData)));
 
   return map;
 }
 
-QList<QVariant>
-InstrumentWidgetEncoder::encodeMaskBinsData(const MaskBinsData &obj) {
+QList<QVariant> InstrumentWidgetEncoder::encodeMaskBinsData(const MaskBinsData &obj) {
   QList<QVariant> list;
 
   for (const auto &binMask : obj.m_masks) {
@@ -235,8 +202,7 @@ InstrumentWidgetEncoder::encodeMaskBinsData(const MaskBinsData &obj) {
   return list;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeBinMask(const BinMask &obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeBinMask(const BinMask &obj) {
   QMap<QString, QVariant> map;
 
   QList<QVariant> range;
@@ -254,38 +220,31 @@ InstrumentWidgetEncoder::encodeBinMask(const BinMask &obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
   QMap<QString, QVariant> map;
 
   auto projection3D = std::dynamic_pointer_cast<Projection3D>(obj);
   if (projection3D) {
     map.insert(QString("projection3DSuccess"), QVariant(true));
-    map.insert(QString("projection3D"),
-               QVariant(this->encodeProjection3D(*projection3D)));
+    map.insert(QString("projection3D"), QVariant(this->encodeProjection3D(*projection3D)));
   } else {
     map.insert(QString("projection3DSuccess"), QVariant(false));
   }
 
   map.insert(QString("backgroundColor"), QVariant(obj->m_backgroundColor));
-  map.insert(QString("shapes"),
-             QVariant(this->encodeMaskShapes(obj->m_maskShapes)));
-  map.insert(QString("alignmentInfo"),
-             QVariant(this->encodeAlignmentInfo(obj)));
+  map.insert(QString("shapes"), QVariant(this->encodeMaskShapes(obj->m_maskShapes)));
+  map.insert(QString("alignmentInfo"), QVariant(this->encodeAlignmentInfo(obj)));
 
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeProjection3D(const Projection3D &obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeProjection3D(const Projection3D &obj) {
   QMap<QString, QVariant> map;
-  map.insert(QString("viewport"),
-             QVariant(this->encodeViewPort(obj.m_viewport)));
+  map.insert(QString("viewport"), QVariant(this->encodeViewPort(obj.m_viewport)));
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeViewPort(const Viewport &obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeViewPort(const Viewport &obj) {
   QMap<QString, QVariant> map;
   QMap<QString, QVariant> translationMap;
 
@@ -304,8 +263,7 @@ InstrumentWidgetEncoder::encodeViewPort(const Viewport &obj) {
   return map;
 }
 
-QList<QVariant>
-InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
+QList<QVariant> InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
   QList<QVariant> list;
 
   for (const auto &shape : obj.m_shapes) {
@@ -315,8 +273,7 @@ InstrumentWidgetEncoder::encodeMaskShapes(const Shape2DCollection &obj) {
   return list;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("properties"), QVariant(this->encodeShapeProperties(obj)));
@@ -342,8 +299,7 @@ InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
     subShapeMap = this->encodeEllipse(static_cast<const Shape2DEllipse *>(obj));
     map.insert(QString("type"), QVariant(QString("ellipse")));
   } else if (obj->type() == "rectangle") {
-    subShapeMap =
-        this->encodeRectangle(static_cast<const Shape2DRectangle *>(obj));
+    subShapeMap = this->encodeRectangle(static_cast<const Shape2DRectangle *>(obj));
     map.insert(QString("type"), QVariant(QString("rectangle")));
   } else if (obj->type() == "ring") {
     subShapeMap = this->encodeRing(static_cast<const Shape2DRing *>(obj));
@@ -363,8 +319,7 @@ InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeEllipse(const Shape2DEllipse *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeEllipse(const Shape2DEllipse *obj) {
   const double radius1 = obj->getDouble("radius1");
   const double radius2 = obj->getDouble("radius2");
   const auto centre = obj->getPoint("centre");
@@ -381,8 +336,7 @@ InstrumentWidgetEncoder::encodeEllipse(const Shape2DEllipse *obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeRectangle(const Shape2DRectangle *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRectangle(const Shape2DRectangle *obj) {
   const auto x0 = obj->m_boundingRect.x0();
   const auto x1 = obj->m_boundingRect.x1();
   const auto y0 = obj->m_boundingRect.y0();
@@ -400,8 +354,7 @@ InstrumentWidgetEncoder::encodeRectangle(const Shape2DRectangle *obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
   const auto xWidth = obj->getDouble("xwidth");
   const auto yWidth = obj->getDouble("ywidth");
   auto baseShape = obj->getOuterShape()->clone();
@@ -414,8 +367,7 @@ InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
   const auto outerRadius = obj->getDouble("outerRadius");
   const auto innerRadius = obj->getDouble("innerRadius");
   const auto startAngle = obj->getDouble("startAngle") * M_PI / 180;
@@ -434,8 +386,7 @@ InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeFree(const Shape2DFree *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeFree(const Shape2DFree *obj) {
   const auto polygon = obj->m_polygon;
 
   QList<QVariant> parameters;
@@ -452,8 +403,7 @@ InstrumentWidgetEncoder::encodeFree(const Shape2DFree *obj) {
   return map;
 }
 
-QMap<QString, QVariant>
-InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D *obj) {
+QMap<QString, QVariant> InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D *obj) {
   QMap<QString, QVariant> map;
 
   map.insert(QString("scalable"), QVariant(obj->m_scalable));
@@ -464,8 +414,7 @@ InstrumentWidgetEncoder::encodeShapeProperties(const Shape2D *obj) {
   return map;
 }
 
-QList<QVariant> InstrumentWidgetEncoder::encodeAlignmentInfo(
-    const ProjectionSurface_sptr &obj) {
+QList<QVariant> InstrumentWidgetEncoder::encodeAlignmentInfo(const ProjectionSurface_sptr &obj) {
   QList<QVariant> list;
 
   for (const auto &item : obj->m_selectedAlignmentPlane) {
@@ -484,5 +433,4 @@ QList<QVariant> InstrumentWidgetEncoder::encodeAlignmentInfo(
 
   return list;
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

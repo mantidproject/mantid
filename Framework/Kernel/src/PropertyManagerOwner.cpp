@@ -14,8 +14,7 @@
 #include <algorithm>
 #include <json/json.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 // Get a reference to the logger
 Logger g_log("PropertyManagerOwner");
@@ -259,5 +258,4 @@ void PropertyManagerOwner::clear() { m_properties->clear(); }
  */
 void PropertyManagerOwner::afterPropertySet(const std::string &name) { m_properties->afterPropertySet(name); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

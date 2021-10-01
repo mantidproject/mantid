@@ -22,8 +22,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSassena)
 
@@ -397,5 +396,4 @@ void LoadSassena::exec() {
   H5Fclose(h5file);
 } // end of LoadSassena::exec()
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

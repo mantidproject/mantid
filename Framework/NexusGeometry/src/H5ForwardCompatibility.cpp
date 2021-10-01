@@ -8,10 +8,7 @@
 #include <cstring> //memset.
 #include <string>
 
-namespace Mantid {
-namespace NexusGeometry {
-
-namespace H5ForwardCompatibility {
+namespace Mantid::NexusGeometry::H5ForwardCompatibility {
 
 /*
  * Function "getObjName"
@@ -64,7 +61,4 @@ std::string getObjName(const H5::H5Object &obj) {
   return (obj_name);
 }
 
-} // namespace H5ForwardCompatibility
-
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry::H5ForwardCompatibility

@@ -8,8 +8,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 void renameWorkspacesWith(const WorkspaceGroup_sptr &groupWorkspace,
                           std::function<std::string(std::size_t)> const &getName,
@@ -57,5 +56,4 @@ void renameWorkspacesInQENSFit(Algorithm *qensFit, IAlgorithm_sptr renameAlgorit
   renameWorkspacesWith(outputGroup, getName, renamer);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

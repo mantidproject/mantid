@@ -11,8 +11,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /** Scales data in histogram by constant (non-negative) factor.
  *
@@ -149,5 +148,4 @@ Histogram operator*(Histogram histogram, const Histogram &other) { return histog
 /// Divides data from two Histograms, propagating uncertainties.
 Histogram operator/(Histogram histogram, const Histogram &other) { return histogram /= other; }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

@@ -20,8 +20,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SumEventsByLogValue)
 
@@ -417,5 +416,4 @@ template <typename T> void SumEventsByLogValue::createBinnedOutput(const Kernel:
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

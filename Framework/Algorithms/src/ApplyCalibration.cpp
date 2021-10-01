@@ -12,8 +12,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace {
 Kernel::Logger logger("ApplyCalibration");
@@ -124,5 +123,4 @@ void ApplyCalibration::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

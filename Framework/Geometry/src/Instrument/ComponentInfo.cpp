@@ -18,8 +18,7 @@
 #include <iterator>
 #include <string>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 /**
@@ -441,5 +440,4 @@ const ComponentInfoConstIt ComponentInfo::cbegin() { return ComponentInfoConstIt
 
 const ComponentInfoConstIt ComponentInfo::cend() { return ComponentInfoConstIt(*this, size(), size()); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

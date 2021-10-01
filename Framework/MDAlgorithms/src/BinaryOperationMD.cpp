@@ -22,8 +22,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BinaryOperationMD::name() const { return "BinaryOperationMD"; }
@@ -187,5 +186,4 @@ void BinaryOperationMD::exec() {
   setProperty("OutputWorkspace", m_out);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -29,8 +29,7 @@
 #include <gsl/gsl_linalg.h>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
@@ -977,5 +976,4 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec, size_
   } // Next spectrum if concatenated
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -20,8 +20,7 @@ namespace {
 Mantid::Kernel::Logger g_log("DensityOfStates");
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DensityOfStates::DensityOfStates(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
@@ -263,5 +262,4 @@ void DensityOfStates::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(e
 
 void DensityOfStates::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

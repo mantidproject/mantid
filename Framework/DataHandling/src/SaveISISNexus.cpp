@@ -30,8 +30,7 @@
 #include <map>
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveISISNexus)
@@ -1046,5 +1045,4 @@ void SaveISISNexus::write_vpb() {
   saveFloat("RVPB", &m_isisRaw.ivpb, 64);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

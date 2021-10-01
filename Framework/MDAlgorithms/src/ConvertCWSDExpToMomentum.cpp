@@ -25,8 +25,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_ALGORITHM(ConvertCWSDExpToMomentum)
 
@@ -656,5 +655,4 @@ void ConvertCWSDExpToMomentum::removeBackground(const API::MatrixWorkspace_sptr 
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

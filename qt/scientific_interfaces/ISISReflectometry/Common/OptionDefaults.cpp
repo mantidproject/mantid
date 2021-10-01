@@ -10,9 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 OptionDefaults::OptionDefaults(Mantid::Geometry::Instrument_const_sptr instrument)
     : m_instrument(std::move(instrument)) {
@@ -49,6 +47,4 @@ std::string OptionDefaults::getStringOrEmpty(std::string const &propertyName, st
 std::string OptionDefaults::getString(std::string const &propertyName, std::string const &parameterName) const {
   return getValue<std::string>(propertyName, parameterName);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -19,8 +19,7 @@
 
 #include "boost/math/distributions.hpp"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using Kernel::ThreadPool;
 using Kernel::ThreadSchedulerFIFO;
@@ -444,5 +443,4 @@ detid_t FakeMD::pickDetectorID() {
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

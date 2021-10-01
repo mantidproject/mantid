@@ -19,8 +19,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 bool CompositeImplicitFunction::addFunction(const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction) {
   bool bSuccess = false;
@@ -88,5 +87,4 @@ bool CompositeImplicitFunction::isPointContained(const std::vector<coord_t> &coo
   }
   return evalResult;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

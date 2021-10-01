@@ -12,8 +12,7 @@
 
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Creates a QtSignalChannel. This channel receives
@@ -53,5 +52,4 @@ void QtSignalChannel::setGlobalLogLevel(int priority) {
   using Mantid::Kernel::Logger;
   Logger::setLevelForAll(priority);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

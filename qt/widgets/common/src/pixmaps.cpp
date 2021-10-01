@@ -17,8 +17,7 @@
 #include <stdexcept>
 
 
-namespace MantidQt{
-namespace API{
+namespace MantidQt::API{
 
 //==================================================================================
 // xpms from other spots in the files
@@ -13008,5 +13007,4 @@ QPixmap getQPixmap(const std::string &name)
 
 }
 
-}
 }

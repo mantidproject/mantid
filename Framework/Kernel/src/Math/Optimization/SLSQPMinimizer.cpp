@@ -6,10 +6,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
-
-namespace Math {
+namespace Mantid::Kernel::Math {
 namespace {
 ///@cond
 // Forward-declaration of minimizer
@@ -2941,6 +2938,4 @@ L40:
 
 } // namespace
 
-} // namespace Math
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::Math

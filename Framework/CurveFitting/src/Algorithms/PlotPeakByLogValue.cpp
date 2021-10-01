@@ -39,9 +39,7 @@ namespace {
 Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -570,6 +568,4 @@ std::vector<std::string> PlotPeakByLogValue::getExclude(const size_t numSpectra)
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -65,8 +65,7 @@ using LiveDataPostProcessingAlgInputHistory =
 } // namespace
 
 // Add this class to the list of specialised dialogs in this namespace
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 DECLARE_DIALOG(StartLiveDataDialog)
 
 // Initialize static members
@@ -501,5 +500,4 @@ void StartLiveDataDialog::updateConnectionDetails(const QString &connection) {
   ui.edtConnAddress->setText(address);
   ui.edtConnAddress->home(false); // display long lines from beginning, not end
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

@@ -28,8 +28,7 @@ using namespace Mantid::API;
 
 using namespace Poco::XML;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(SaveMask)
 
@@ -172,5 +171,4 @@ void SaveMask::exec() {
   ofs.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

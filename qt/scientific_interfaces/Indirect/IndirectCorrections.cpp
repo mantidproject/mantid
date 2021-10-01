@@ -10,8 +10,7 @@
 #include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectCorrections)
 
 IndirectCorrections::IndirectCorrections(QWidget *parent)
@@ -118,5 +117,4 @@ void IndirectCorrections::exportTabPython() {
 
 std::string IndirectCorrections::documentationPage() const { return "Indirect Corrections"; }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

@@ -15,8 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinByPulseTimes)
@@ -90,5 +89,4 @@ uint64_t RebinByPulseTimes::getMinX(Mantid::API::IEventWorkspace_sptr ws) const 
   return ws->getPulseTimeMin().totalNanoseconds();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

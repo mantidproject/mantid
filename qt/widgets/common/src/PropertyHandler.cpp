@@ -36,8 +36,7 @@ const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
 inline bool variableIsPrefixed(const std::string &name) { return std::regex_match(name, PREFIX_REGEX); }
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // Constructor
 PropertyHandler::PropertyHandler(const Mantid::API::IFunction_sptr &fun, Mantid::API::CompositeFunction_sptr parent,
@@ -1561,5 +1560,4 @@ void PropertyHandler::setFunctionWorkspace() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

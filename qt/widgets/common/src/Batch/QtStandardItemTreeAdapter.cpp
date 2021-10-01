@@ -12,9 +12,7 @@
 #include "MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h"
 #include "MantidQtWidgets/Common/Batch/StrictQModelIndices.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 QtStandardItemTreeModelAdapter::QtStandardItemTreeModelAdapter(QStandardItemModel &model, Cell emptyCellStyle)
     : m_model(model), m_emptyCellStyle(std::move(emptyCellStyle)) {}
@@ -124,6 +122,4 @@ QStandardItem *modelItemFromIndex(QStandardItemModel &model, QModelIndexForMainM
   } else
     return model.invisibleRootItem();
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

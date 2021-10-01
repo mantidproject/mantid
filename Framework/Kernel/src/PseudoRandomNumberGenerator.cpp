@@ -9,8 +9,7 @@
 //-------------------------------------------------------------------
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// Default constructor setting the dimension to 1
 PseudoRandomNumberGenerator::PseudoRandomNumberGenerator() : NDRandomNumberGenerator(1) {}
@@ -20,5 +19,4 @@ PseudoRandomNumberGenerator::PseudoRandomNumberGenerator() : NDRandomNumberGener
  * compatible with the NDRandomNumberGenerator interface
  */
 void PseudoRandomNumberGenerator::generateNextPoint() { cacheGeneratedValue(0, this->nextValue()); }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -10,8 +10,7 @@
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// Static logger
 Kernel::Logger g_log("DeprecatedAlgorithm");
@@ -85,5 +84,4 @@ std::string DeprecatedAlgorithm::deprecationMsg(const IAlgorithm *algo) {
 
   return msg.str();
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

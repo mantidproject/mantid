@@ -26,8 +26,7 @@ extern "C" {
 }
 
 using namespace Mantid::DataObjects;
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace std;
 using Mantid::Kernel::DblMatrix;
@@ -1193,6 +1192,4 @@ std::tuple<double, double, double> Integrate3DEvents::calculateRadiusFactors(con
   return std::make_tuple(r1, r2, r3);
 }
 
-} // namespace MDAlgorithms
-
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

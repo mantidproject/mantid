@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 class MDGeometryNotificationHelper {
 public:
@@ -522,5 +521,4 @@ size_t MDGeometry::getNumberTransformsToOriginal() const { return m_transforms_T
  */
 size_t MDGeometry::getNumberTransformsFromOriginal() const { return m_transforms_FromOriginal.size(); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

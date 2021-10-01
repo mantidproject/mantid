@@ -111,9 +111,7 @@ inline void adjustRange(std::pair<double, double> &range) {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace Mantid::API;
 
@@ -418,6 +416,4 @@ void IndirectFitPlotModel::deleteWorkspace(const std::string &name) const {
   deleteWorkspaceAlg->execute();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

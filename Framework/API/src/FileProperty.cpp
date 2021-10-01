@@ -21,9 +21,7 @@
 //#include <cstdlib>
 #include <iterator>
 
-namespace Mantid {
-
-namespace API {
+namespace Mantid::API {
 
 using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::DirectoryValidator;
@@ -401,5 +399,4 @@ std::string FileProperty::setSaveProperty(const std::string &propValue) {
   }
   return errorMsg;
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

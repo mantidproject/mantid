@@ -33,8 +33,7 @@
 #include <iomanip>
 #include <memory>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 using namespace Kernel;
 using namespace API;
 
@@ -243,5 +242,4 @@ std::string CatalogDownloadDataFiles::saveFiletoDisk(std::istream &rs, const std
 std::string CatalogDownloadDataFiles::testDownload(const std::string &URL, const std::string &fileName) {
   return doDownloadandSavetoLocalDrive(URL, fileName);
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

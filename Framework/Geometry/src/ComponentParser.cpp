@@ -8,8 +8,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /** @return the top-level component created */
 Component *ComponentParser::getComponent() {
@@ -79,5 +78,4 @@ void ComponentParser::endElement(const Poco::XML::XMLString & /*uri*/, const Poc
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -18,8 +18,7 @@
 using Mantid::API::Algorithm_sptr;
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //----------------------
 // Public member functions
@@ -160,5 +159,4 @@ QString ProcessingAlgoWidget::getScriptText() { return ui.editor->text(); }
 /// Set the script editor text
 void ProcessingAlgoWidget::setScriptText(const QString &text) { ui.editor->setText(text); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -10,9 +10,7 @@
 #include <iterator>
 #include <vector>
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 std::ostream &operator<<(std::ostream &OX, const RotaryCounter &A)
 /**
   Output stream assesor
@@ -188,5 +186,4 @@ void RotaryCounter::write(std::ostream &OX) const
   copy(RC.begin(), RC.end() - 1, std::ostream_iterator<int>(OX, ":"));
   OX << RC.back() << " ";
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

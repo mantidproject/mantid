@@ -49,8 +49,7 @@ using namespace Mantid::Geometry;
 using Mantid::HistogramData::Histogram;
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace {
 namespace PropertyNames {
@@ -2100,5 +2099,4 @@ std::string FitPeaks::getPeakHeightParameterName(const API::IPeakFunction_const_
 
 DECLARE_ALGORITHM(FitPeaks)
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

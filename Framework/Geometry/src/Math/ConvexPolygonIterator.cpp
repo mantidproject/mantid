@@ -11,8 +11,7 @@
 #include "MantidGeometry/Math/PolygonEdge.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //-----------------------------------------------------------------------------
 // Public member functions
@@ -48,5 +47,4 @@ PolygonEdge ConvexPolygon::Iterator::edge() const { return PolygonEdge(**this, m
 /// @return The next index, taking into account cycling back after npoints()
 size_t ConvexPolygon::Iterator::nextIndex() const { return (m_index + 1) % m_polygon.npoints(); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

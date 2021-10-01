@@ -22,8 +22,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadInstrument)
 
@@ -270,5 +269,4 @@ void LoadInstrument::runLoadParameterFile(const std::shared_ptr<API::MatrixWorks
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

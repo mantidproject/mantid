@@ -15,8 +15,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 /// static logger object
 Kernel::Logger g_log("FitParameter");
@@ -216,5 +215,4 @@ std::istream &operator>>(std::istream &in, FitParameter &f) {
 
   return in;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

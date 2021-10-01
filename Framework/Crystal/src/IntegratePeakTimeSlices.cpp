@@ -34,8 +34,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace std;
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
@@ -2511,6 +2510,5 @@ double DataModeHandler::CalcSampleIntensityMultiplier(const double *params) cons
   return r;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal
 // Attr indicies

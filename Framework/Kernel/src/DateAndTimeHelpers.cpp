@@ -27,9 +27,7 @@ std::tuple<bool, size_t, std::string> isARGUSDateTime(const std::string &date) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Kernel {
-namespace DateAndTimeHelpers {
+namespace Mantid::Kernel::DateAndTimeHelpers {
 // Initialize the logger
 Logger g_log("DateAndTime");
 
@@ -127,6 +125,4 @@ Types::Core::DateAndTime averageSorted(const std::vector<Types::Core::DateAndTim
   return times.front() + static_cast<int64_t>(totalValue / totalWeight);
 }
 
-} // namespace DateAndTimeHelpers
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::DateAndTimeHelpers

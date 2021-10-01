@@ -12,8 +12,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("SplittersWorkspace");
@@ -65,13 +64,11 @@ bool SplittersWorkspace::removeSplitter(size_t index) {
   return removed;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::SplittersWorkspace_sptr
@@ -101,6 +98,5 @@ IPropertyManager::getValue<Mantid::DataObjects::SplittersWorkspace_const_sptr>(c
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 ///\endcond

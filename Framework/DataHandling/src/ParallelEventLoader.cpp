@@ -12,8 +12,7 @@
 #include "MantidTypes/Event/TofEvent.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /// Return offset between global spectrum index and detector ID for given banks.
 std::vector<int32_t> bankOffsets(const API::ExperimentInfo &ws, const std::string &filename,
@@ -112,5 +111,4 @@ void ParallelEventLoader::loadMultiProcess(DataObjects::EventWorkspace &ws, cons
   Parallel::IO::EventLoader::load(filename, groupName, bankNames, offsets, eventLists, precalcEvents);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -11,8 +11,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_ALGORITHM(WeightedMeanMD)
 
@@ -80,5 +79,4 @@ void WeightedMeanMD::execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr 
 /// Run the algorithm on a MDEventWorkspace
 void WeightedMeanMD::execEvent() { throw std::runtime_error(this->name() + " can only be run on a MDHistoWorkspace."); }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -9,8 +9,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using std::size_t;
 
@@ -63,5 +62,4 @@ specnum_t Axis::spectraNo(const std::size_t &index) const {
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

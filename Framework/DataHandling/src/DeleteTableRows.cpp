@@ -16,8 +16,7 @@
 #include <functional>
 #include <set>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(DeleteTableRows)
 
@@ -54,5 +53,4 @@ void DeleteTableRows::exec() {
   setProperty("TableWorkspace", tw);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -23,8 +23,7 @@
 #include "strings.h"
 #endif
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Quat;
 using Kernel::V3D;
 
@@ -1124,5 +1123,4 @@ void ParameterMap::setInstrument(const Instrument *instrument) {
   std::tie(m_componentInfo, m_detectorInfo) = m_instrument->makeBeamline(*this);
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

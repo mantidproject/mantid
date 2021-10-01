@@ -21,8 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(QueryMDWorkspace)
@@ -246,5 +245,4 @@ void QueryMDWorkspace::exec() {
   CALL_MDEVENT_FUNCTION(this->getBoxData, input);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

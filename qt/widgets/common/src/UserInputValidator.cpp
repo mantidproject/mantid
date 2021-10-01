@@ -44,8 +44,7 @@ boost::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const
 
 } // anonymous namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 UserInputValidator::UserInputValidator() : m_errorMessages(), m_error(false) {}
 
 /**
@@ -435,5 +434,4 @@ void UserInputValidator::setErrorLabel(QLabel *errorLabel, bool valid) {
   // Only show the label if input is invalid
   errorLabel->setVisible(!valid);
 }
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

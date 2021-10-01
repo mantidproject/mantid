@@ -49,9 +49,7 @@ using namespace Mantid::HistogramData;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
 
@@ -1144,6 +1142,4 @@ DataObjects::TableWorkspace_sptr RefinePowderInstrumentParameters::genOutputInst
   return newtablews;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

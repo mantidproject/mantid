@@ -16,8 +16,7 @@
 #include <limits>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -1464,5 +1463,4 @@ double timeConversionValue(const std::string &input_unit, const std::string &out
 
 } // namespace Units
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

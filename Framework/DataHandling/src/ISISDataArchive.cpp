@@ -17,8 +17,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISDataArchive");
@@ -133,5 +132,4 @@ bool ISISDataArchive::fileExists(const std::string &path) const {
   return false;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

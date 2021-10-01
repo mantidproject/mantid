@@ -20,8 +20,7 @@ void toLower(std::string &name) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadMuonLog)
@@ -157,5 +156,4 @@ bool LoadMuonLog::isDateTimeString(const std::string &str) {
   return false;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

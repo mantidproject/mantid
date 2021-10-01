@@ -28,8 +28,7 @@
 #include <numeric>
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFT)
@@ -398,5 +397,4 @@ double FFT::getPhaseShift(const HistogramData::Points &xPoints) {
   return shift;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

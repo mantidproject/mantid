@@ -21,8 +21,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace RemoteJobManagers {
+namespace Mantid::RemoteJobManagers {
 
 std::vector<Poco::Net::HTTPCookie> MantidWebServiceAPIHelper::g_cookies;
 
@@ -222,5 +221,4 @@ Poco::Net::NameValueCollection MantidWebServiceAPIHelper::getCookies() const {
   return nvc;
 }
 
-} // end of namespace RemoteJobManagers
-} // end of namespace Mantid
+} // namespace Mantid::RemoteJobManagers

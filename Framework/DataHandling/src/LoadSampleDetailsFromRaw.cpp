@@ -16,8 +16,7 @@
 #include "LoadRaw/isisraw2.h"
 #include <cstdio> //MG: Required for gcc 4.4
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -70,5 +69,4 @@ void LoadSampleDetailsFromRaw::exec() {
   progress(1.);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

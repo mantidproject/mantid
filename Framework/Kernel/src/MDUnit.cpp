@@ -9,8 +9,7 @@
 #include <boost/regex.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 bool MDUnit::operator==(const MDUnit &other) const {
   return typeid(*this) == typeid(other) && this->canConvertTo(other);
@@ -96,5 +95,4 @@ LabelUnit *LabelUnit::clone() const { return new LabelUnit(m_unitLabel); }
 // End RLU
 //----------------------------------------------------------------------------------------------
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

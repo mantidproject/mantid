@@ -15,8 +15,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor
 ComplexVector::ComplexVector() {
@@ -171,5 +170,4 @@ std::ostream &operator<<(std::ostream &ostr, const ComplexVector &v) {
   return ostr;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

@@ -63,8 +63,7 @@ SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
 }
 } // namespace
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /*
  * Create a Gaussian kernel. The returned kernel is a 1D vector,
@@ -506,5 +505,4 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
   return product;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

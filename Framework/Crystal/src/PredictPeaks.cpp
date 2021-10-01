@@ -30,8 +30,7 @@
 #include <fstream>
 using Mantid::Kernel::EnabledWhenProperty;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PredictPeaks)
@@ -675,5 +674,4 @@ void PredictPeaks::setReferenceFrameAndBeamDirection() {
   m_refBeamDir = m_refFrame->vecPointingAlongBeam();
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

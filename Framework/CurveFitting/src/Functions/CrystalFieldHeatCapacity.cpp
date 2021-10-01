@@ -17,9 +17,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 namespace {
 
@@ -89,6 +87,4 @@ CrystalFieldHeatCapacityCalculation::CrystalFieldHeatCapacityCalculation()
 // Sets the eigenvectors / values directly
 void CrystalFieldHeatCapacityCalculation::setEnergy(const DoubleFortranVector &en) { m_en = en; }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

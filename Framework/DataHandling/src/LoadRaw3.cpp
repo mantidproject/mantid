@@ -24,8 +24,7 @@
 #include <cstdio> //Required for gcc 4.4
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadRaw3)
 
 using namespace Kernel;
@@ -508,5 +507,4 @@ bool LoadRaw3::isMonitor(const std::vector<specnum_t> &monitorIndexes, specnum_t
   return (find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum) != monitorIndexes.end());
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

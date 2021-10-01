@@ -9,8 +9,7 @@
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 namespace {
 void checkStorageMode(const IndexInfo &indexInfo) {
@@ -58,5 +57,4 @@ IndexInfo extract(const IndexInfo &source, const size_t minIndex, const size_t m
   return result;
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

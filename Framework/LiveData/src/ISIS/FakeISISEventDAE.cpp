@@ -19,8 +19,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISEventDAE)
 
@@ -207,5 +206,4 @@ void FakeISISEventDAE::exec() {
   socket.close();
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

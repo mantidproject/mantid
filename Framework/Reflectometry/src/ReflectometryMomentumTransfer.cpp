@@ -71,8 +71,7 @@ double fromLogs(const Mantid::API::Run &run, const std::string &entry) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ReflectometryMomentumTransfer)
@@ -388,5 +387,4 @@ double ReflectometryMomentumTransfer::wavelengthResolutionSquared(const Setup &s
   return pow<2>(partialResolution) + pow<2>(widthResolution);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

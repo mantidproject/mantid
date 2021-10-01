@@ -31,8 +31,7 @@ namespace {
 Mantid::Kernel::Logger g_log("Function Browser");
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -303,5 +302,4 @@ void FunctionBrowser::hideGlobalCheckbox() { m_presenter->hideGlobals(); }
 
 void FunctionBrowser::showGlobalCheckbox() { m_presenter->showGlobals(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -60,9 +60,7 @@ using namespace Mantid::CurveFitting::Constraints;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(FitPowderDiffPeaks)
 
@@ -3115,6 +3113,4 @@ size_t findMaxValue(const MatrixWorkspace_sptr &dataws, size_t wsindex, double l
   return imax;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

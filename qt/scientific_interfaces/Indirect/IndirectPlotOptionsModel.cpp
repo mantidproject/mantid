@@ -110,8 +110,7 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
     boost::optional<std::map<std::string, std::string>> const &availableActions)
@@ -240,5 +239,4 @@ boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::s
 
 std::map<std::string, std::string> IndirectPlotOptionsModel::availableActions() const { return m_actions; }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

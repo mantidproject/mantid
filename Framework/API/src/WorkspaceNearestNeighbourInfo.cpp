@@ -9,8 +9,7 @@
 #include "MantidAPI/WorkspaceNearestNeighbours.h"
 #include "MantidGeometry/IDetector.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Creates WorkspaceNearestNeighbourInfo.
  *
@@ -77,5 +76,4 @@ std::map<specnum_t, Kernel::V3D> WorkspaceNearestNeighbourInfo::getNeighboursExa
   return m_nearestNeighbours->neighbours(spec);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

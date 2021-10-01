@@ -12,8 +12,7 @@
 
 using Mantid::Kernel::IValidator_sptr;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Clone the current state
@@ -35,5 +34,4 @@ std::string OrientedLatticeValidator::checkValidity(const ExperimentInfo_sptr &i
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

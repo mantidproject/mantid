@@ -12,8 +12,7 @@
 
 namespace Mantid {
 using Kernel::V3D;
-namespace Geometry {
-namespace detail {
+namespace Geometry::detail {
 ShapeInfo::ShapeInfo()
     : m_points(), m_radius(0), m_height(0), m_innerRadius(0), m_shape(ShapeInfo::GeometryShape::NOSHAPE) {}
 
@@ -150,6 +149,5 @@ std::ostream &operator<<(std::ostream &os, const ShapeInfo::GeometryShape shape)
   return os;
 }
 
-} // namespace detail
-} // namespace Geometry
+} // namespace Geometry::detail
 } // namespace Mantid

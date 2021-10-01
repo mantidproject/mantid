@@ -7,9 +7,7 @@
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <ostream>
 #include <utility>
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 Cell::Cell(std::string contentText, std::string backgroundColor, int borderThickness, std::string borderColor,
            int borderOpacity, bool isEditable)
@@ -99,6 +97,4 @@ std::vector<Cell> paddedCellsToWidth(std::vector<Cell> const &cells, Cell const 
     paddedCells.emplace_back(paddingCell);
   return paddedCells;
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

@@ -60,8 +60,7 @@ std::string repeatAndJoin(const std::string &str, const std::string &delim, cons
 }
 } // Anonymous namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register with the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadSESANS)
@@ -348,5 +347,4 @@ API::MatrixWorkspace_sptr LoadSESANS::makeWorkspace(ColumnMap columns) {
   return newWorkspace;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

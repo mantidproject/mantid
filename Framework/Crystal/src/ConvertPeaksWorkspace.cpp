@@ -16,8 +16,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -170,5 +169,4 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(const IPeaksWorks
   return outpws;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

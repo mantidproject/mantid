@@ -10,8 +10,7 @@
 #include "MantidKernel/Timer.h"
 #include <QApplication>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // Key for the "Notifications.Enabled" option
 const std::string NotificationService::NOTIFICATIONS_ENABLED_KEY = "Notifications.Enabled";
@@ -74,5 +73,4 @@ bool NotificationService::isEnabled() {
 
 bool NotificationService::isSupportedByOS() { return QSystemTrayIcon::supportsMessages(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

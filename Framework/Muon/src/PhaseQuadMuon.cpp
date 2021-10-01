@@ -40,8 +40,7 @@ template <typename T1, typename T2> int findName(const T1 &patterns, const T2 &n
 double ASYMM_ERROR = 999.0;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 
@@ -330,5 +329,4 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
 
   return ows;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

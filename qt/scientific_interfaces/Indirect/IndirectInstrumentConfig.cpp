@@ -20,8 +20,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IndirectInstrumentConfig");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent)
     : API::MantidWidget(parent), m_algRunner(), m_disabledInstruments(), m_removeDiffraction(false),
@@ -365,5 +364,4 @@ void IndirectInstrumentConfig::filterDisabledInstruments() {
   }
 }
 
-} /* namespace MantidWidgets */
-} /* namespace MantidQt */
+} // namespace MantidQt::MantidWidgets

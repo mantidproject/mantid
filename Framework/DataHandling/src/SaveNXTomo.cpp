@@ -25,8 +25,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNXTomo)
 
@@ -455,5 +454,4 @@ void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &worksp
   nxFile.closeData();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

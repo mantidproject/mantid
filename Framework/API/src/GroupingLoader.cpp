@@ -20,8 +20,7 @@
 
 using namespace Poco::XML;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor without field direction
@@ -269,5 +268,4 @@ ITableWorkspace_sptr Grouping::toTable() const {
  */
 Grouping::~Grouping() = default;
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

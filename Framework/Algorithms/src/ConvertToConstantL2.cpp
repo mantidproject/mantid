@@ -21,8 +21,7 @@
 #include <boost/format.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -175,5 +174,4 @@ double ConvertToConstantL2::calculateTOF(double distance) {
   return distance / velocity;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

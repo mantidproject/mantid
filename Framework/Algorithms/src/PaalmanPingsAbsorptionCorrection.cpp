@@ -25,8 +25,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PaalmanPingsAbsorptionCorrection)
@@ -458,5 +457,4 @@ void PaalmanPingsAbsorptionCorrection::doIntegration(double &integral, double &c
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

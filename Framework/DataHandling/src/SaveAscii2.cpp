@@ -26,8 +26,7 @@
 #include <fstream>
 #include <set>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveAscii2)
 
@@ -549,5 +548,4 @@ void SaveAscii2::writeFileHeader(const std::vector<std::string> &logList, std::o
   outputFile << '\n';
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

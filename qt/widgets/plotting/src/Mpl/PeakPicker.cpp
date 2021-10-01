@@ -11,8 +11,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::Widgets::MplCpp;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 PeakPicker::PeakPicker(PreviewPlot *plot, const QColor &colour)
     : QObject(), m_plot(plot), m_peak(nullptr),
@@ -79,5 +78,4 @@ void PeakPicker::handleMouseUp(const QPoint &point) {
 
 void PeakPicker::redrawMarker() { m_peakMarker->redraw(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

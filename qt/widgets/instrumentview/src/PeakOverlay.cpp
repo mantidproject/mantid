@@ -20,8 +20,7 @@ namespace {
 Mantid::Kernel::Logger g_log("PeakOverlay");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 
@@ -31,8 +30,7 @@ QList<PeakMarker2D::Style> PeakOverlay::g_defaultStyles;
 PeakHKL::PeakHKL(PeakMarker2D *m, const QRectF &trect, bool sr)
     : p(m->origin()), rect(trect),
       // rectTopLeft(m->getLabelRect().topLeft()),
-      h(m->getH()), k(m->getK()), l(m->getL()), nh(true), nk(true), nl(true),
-      showRows(sr) {
+      h(m->getH()), k(m->getK()), l(m->getL()), nh(true), nk(true), nl(true), showRows(sr) {
   rows.append(m->getRow());
 }
 
@@ -88,8 +86,8 @@ void PeakHKL::draw(QPainter &painter, int prec) {
 }
 
 void PeakHKL::print() const {
-  std::cerr << "     " << p.x() << ' ' << p.y() << '(' << h << ',' << k << ','
-            << l << ")(" << nh << ',' << nk << ',' << nl << ')' << '\n';
+  std::cerr << "     " << p.x() << ' ' << p.y() << '(' << h << ',' << k << ',' << l << ")(" << nh << ',' << nk << ','
+            << nl << ')' << '\n';
 }
 
 /**
@@ -113,8 +111,7 @@ QString PeakHKL::formatNumber(double h, int prec) {
 }
 
 /// Extract minimum and maximum intensity from peaks workspace for scaling.
-void AbstractIntensityScale::setPeaksWorkspace(
-    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
+void AbstractIntensityScale::setPeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws) {
   m_maxIntensity = 0.0;
   m_minIntensity = 0.0;
 
@@ -128,8 +125,7 @@ void AbstractIntensityScale::setPeaksWorkspace(
       intensities.emplace_back(pws->getPeak(i).getIntensity());
     }
 
-    auto minMaxIntensity =
-        std::minmax_element(intensities.begin(), intensities.end());
+    auto minMaxIntensity = std::minmax_element(intensities.begin(), intensities.end());
 
     if (peakCount > 0) {
       m_maxIntensity = *minMaxIntensity.second;
@@ -141,14 +137,13 @@ void AbstractIntensityScale::setPeaksWorkspace(
 /// Returns the scaled style by intensity. Only size is changed, the other
 /// properties are kept the same. If the max intensity is 0 or less, the
 /// style is returned as it is.
-PeakMarker2D::Style QualitativeIntensityScale::getScaledMarker(
-    double intensity, const PeakMarker2D::Style &baseStyle) const {
+PeakMarker2D::Style QualitativeIntensityScale::getScaledMarker(double intensity,
+                                                               const PeakMarker2D::Style &baseStyle) const {
   if (m_maxIntensity <= 0.0) {
     return baseStyle;
   }
 
-  return PeakMarker2D::Style(baseStyle.symbol, baseStyle.color,
-                             3 * getIntensityLevel(intensity) + 1);
+  return PeakMarker2D::Style(baseStyle.symbol, baseStyle.color, 3 * getIntensityLevel(intensity) + 1);
 }
 
 /**
@@ -165,28 +160,22 @@ PeakMarker2D::Style QualitativeIntensityScale::getScaledMarker(
  */
 int QualitativeIntensityScale::getIntensityLevel(double intensity) const {
   auto intensityGreaterThan =
-      std::lower_bound(m_intensityLevels.cbegin(), m_intensityLevels.cend(),
-                       intensity / m_maxIntensity);
+      std::lower_bound(m_intensityLevels.cbegin(), m_intensityLevels.cend(), intensity / m_maxIntensity);
 
   // For weak peaks below first intensity
   if (intensityGreaterThan == m_intensityLevels.cend()) {
     return 0;
   }
 
-  return static_cast<int>(
-             std::distance(m_intensityLevels.cbegin(), intensityGreaterThan)) +
-         1;
+  return static_cast<int>(std::distance(m_intensityLevels.cbegin(), intensityGreaterThan)) + 1;
 }
 
 /**---------------------------------------------------------------------
  * Constructor
  */
-PeakOverlay::PeakOverlay(
-    UnwrappedSurface *surface,
-    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
-    : Shape2DCollection(), m_peaksWorkspace(pws), m_surface(surface),
-      m_precision(6), m_showRows(true), m_showLabels(true),
-      m_peakIntensityScale(std::make_unique<QualitativeIntensityScale>(pws)) {
+PeakOverlay::PeakOverlay(UnwrappedSurface *surface, const std::shared_ptr<Mantid::API::IPeaksWorkspace> &pws)
+    : Shape2DCollection(), m_peaksWorkspace(pws), m_surface(surface), m_precision(6), m_showRows(true),
+      m_showLabels(true), m_peakIntensityScale(std::make_unique<QualitativeIntensityScale>(pws)) {
 
   if (g_defaultStyles.isEmpty()) {
     g_defaultStyles << PeakMarker2D::Style(PeakMarker2D::Circle, Qt::red);
@@ -212,8 +201,7 @@ void PeakOverlay::removeShapes(const QList<Shape2D *> &shapeList) {
   }
 
   // Run the DeleteTableRows algorithm to delete the peak.
-  auto alg =
-      Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows", -1);
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRows", -1);
   alg->setPropertyValue("TableWorkspace", m_peaksWorkspace->getName());
   alg->setProperty("Rows", rows);
   emit executeAlgorithm(alg);
@@ -261,9 +249,7 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style &style) {
     m_surface->project(pos, u, v, uscale, vscale);
 
     // Create a peak marker at this position
-    PeakMarker2D *r = new PeakMarker2D(
-        *this, u, v,
-        m_peakIntensityScale->getScaledMarker(peak.getIntensity(), style));
+    PeakMarker2D *r = new PeakMarker2D(*this, u, v, m_peakIntensityScale->getScaledMarker(peak.getIntensity(), style));
     r->setPeak(peak, i);
     addMarker(r);
   }
@@ -331,25 +317,19 @@ void PeakOverlay::draw(QPainter &painter) const {
  * @param detID :: A detector ID for which markers are to be returned.
  * @return :: A list of zero ot more markers.
  */
-QList<PeakMarker2D *> PeakOverlay::getMarkersWithID(int detID) const {
-  return m_det2marker.values(detID);
-}
+QList<PeakMarker2D *> PeakOverlay::getMarkersWithID(int detID) const { return m_det2marker.values(detID); }
 
 /**---------------------------------------------------------------------
  * Return the total number of peaks.
  */
-int PeakOverlay::getNumberPeaks() const {
-  return m_peaksWorkspace->getNumberPeaks();
-}
+int PeakOverlay::getNumberPeaks() const { return m_peaksWorkspace->getNumberPeaks(); }
 
 /** ---------------------------------------------------------------------
  * Return the i-th peak.
  * @param i :: Peak index.
  * @return A reference to the peak.
  */
-Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) {
-  return m_peaksWorkspace->getPeak(i);
-}
+Mantid::Geometry::IPeak &PeakOverlay::getPeak(int i) { return m_peaksWorkspace->getPeak(i); }
 
 QList<PeakMarker2D *> PeakOverlay::getSelectedPeakMarkers() {
   QList<PeakMarker2D *> peaks;
@@ -365,11 +345,9 @@ QList<PeakMarker2D *> PeakOverlay::getSelectedPeakMarkers() {
 /// Sets the scaler that is used to determine the size of peak markers.
 void PeakOverlay::setShowRelativeIntensityFlag(bool yes) {
   if (yes) {
-    m_peakIntensityScale =
-        std::make_unique<QualitativeIntensityScale>(m_peaksWorkspace);
+    m_peakIntensityScale = std::make_unique<QualitativeIntensityScale>(m_peaksWorkspace);
   } else {
-    m_peakIntensityScale =
-        std::make_unique<DefaultIntensityScale>(m_peaksWorkspace);
+    m_peakIntensityScale = std::make_unique<DefaultIntensityScale>(m_peaksWorkspace);
   }
 
   recreateMarkers(getCurrentStyle());
@@ -385,8 +363,7 @@ PeakMarker2D::Style PeakOverlay::getCurrentStyle() const {
 
   auto currentStyle = m_det2marker.begin().value()->getStyle();
 
-  return PeakMarker2D::Style(currentStyle.symbol, currentStyle.color,
-                             baseStyle.size);
+  return PeakMarker2D::Style(currentStyle.symbol, currentStyle.color, baseStyle.size);
 }
 
 /** ---------------------------------------------------------------------
@@ -394,8 +371,7 @@ PeakMarker2D::Style PeakOverlay::getCurrentStyle() const {
  * @param wsName :: The name of the modified workspace.
  * @param ws :: The shared pointer to the modified workspace.
  */
-void PeakOverlay::afterReplaceHandle(const std::string &wsName,
-                                     const Mantid::API::Workspace_sptr &ws) {
+void PeakOverlay::afterReplaceHandle(const std::string &wsName, const Mantid::API::Workspace_sptr &ws) {
   Q_UNUSED(wsName);
   auto peaksWS = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(ws);
   if (peaksWS && peaksWS == m_peaksWorkspace && m_surface) {
@@ -429,8 +405,7 @@ PeakMarker2D::Style PeakOverlay::getDefaultStyle(int index) {
  * @param units :: Units of the x - array in the underlying workspace:
  *     "TOF", "dSpacing", or "Wavelength".
  */
-void PeakOverlay::setPeakVisibility(double xmin, double xmax,
-                                    const QString &units) {
+void PeakOverlay::setPeakVisibility(double xmin, double xmax, const QString &units) {
   enum XUnits { Unknown, TOF, dSpacing, Wavelength };
   XUnits xUnits = Unknown;
   if (units == "TOF")
@@ -464,5 +439,4 @@ void PeakOverlay::setPeakVisibility(double xmin, double xmax,
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

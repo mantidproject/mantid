@@ -27,8 +27,7 @@
 
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 using namespace Geometry;
@@ -510,5 +509,4 @@ void LoadILLPolarizedDiffraction::sortPolarisations() {
   m_outputWorkspaceGroup = sortedGroup;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

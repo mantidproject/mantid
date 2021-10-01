@@ -6,13 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/InstrumentDataService.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /**
  * Default constructor
  */
 InstrumentDataServiceImpl::InstrumentDataServiceImpl()
     : Mantid::Kernel::DataService<Mantid::Geometry::Instrument>("InstrumentDataService") {}
 
-} // Namespace API
-} // Namespace Mantid
+} // namespace Mantid::API

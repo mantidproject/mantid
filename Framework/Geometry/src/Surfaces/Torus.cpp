@@ -42,9 +42,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Tolerance;
 using Kernel::V3D;
 
@@ -327,6 +325,4 @@ TopoDS_Shape Torus::createShape() {
 }
 #endif
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

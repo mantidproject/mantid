@@ -20,8 +20,7 @@ const int ERRORCODE = -999;
 }
 
 using namespace Mantid::API;
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 BaseCustomInstrumentModel::BaseCustomInstrumentModel()
     : m_currentRun(0), m_tmpName("tmp"), m_instrumentName("MUSR"), m_wsName("testData") {}
@@ -75,5 +74,4 @@ int BaseCustomInstrumentModel::currentRun() {
 
 bool BaseCustomInstrumentModel::isErrorCode(const int run) { return (run == ERRORCODE); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

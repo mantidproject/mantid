@@ -12,8 +12,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectorsInShape)
 
@@ -81,5 +80,4 @@ void MaskDetectorsInShape::runMaskDetectors(const API::MatrixWorkspace_sptr &wor
   progress(1);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -13,9 +13,7 @@ using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 Python::Object newFigure(bool tightLayout = true) {
@@ -150,6 +148,4 @@ Python::Object Figure::colorbar(const ScalarMappable &mappable, const Axes &cax,
   return Python::NewRef(PyObject_Call(attr.ptr(), args.ptr(), kwargs.ptr()));
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

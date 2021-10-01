@@ -236,8 +236,7 @@ std::map<detid_t, int> makeGroupingByCustomString(const Instrument_const_sptr &i
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateGroupingWorkspace)
@@ -720,5 +719,4 @@ Instrument_const_sptr CreateGroupingWorkspace::getInstrument() {
   return instrument;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

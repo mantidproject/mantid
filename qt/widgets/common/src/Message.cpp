@@ -11,8 +11,7 @@
 
 #include "MantidQtWidgets/Common/Message.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 //-----------------------------------------------------------------------------------
 // Public member functions
 //-----------------------------------------------------------------------------------
@@ -64,5 +63,4 @@ Message &Message::operator=(const Message &msg) {
   m_scriptPath = msg.scriptPath();
   return *this;
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

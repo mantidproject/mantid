@@ -9,10 +9,7 @@
 #include <limits>
 #include <string>
 
-namespace Mantid {
-namespace Geometry {
-
-namespace MeshObjectCommon {
+namespace Mantid::Geometry::MeshObjectCommon {
 /**
  * getVertices converts vector Kernel::V3D to vector doubles. 3x size of input.
  * ordered x,y,z,x,y,z...
@@ -266,6 +263,4 @@ void getBoundingBox(const std::vector<Kernel::V3D> &vertices, BoundingBox &cache
   zmin = bb.zMin();
 }
 
-} // namespace MeshObjectCommon
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::MeshObjectCommon

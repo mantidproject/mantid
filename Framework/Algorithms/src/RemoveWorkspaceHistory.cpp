@@ -11,8 +11,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RemoveWorkspaceHistory)
@@ -45,5 +44,4 @@ void RemoveWorkspaceHistory::exec() {
   ws->history().clearHistory();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

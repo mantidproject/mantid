@@ -17,8 +17,7 @@
 #include <Poco/XML/XMLException.h>
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /** Create a dimension object from the provided XML string.
  *  @param dimensionXMLString The XML string
@@ -131,5 +130,4 @@ IMDDimension_sptr createDimension(const std::string &dimensionXMLString, int nBi
   return dimension;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

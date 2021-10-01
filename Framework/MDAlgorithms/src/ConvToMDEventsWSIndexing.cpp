@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 size_t ConvToMDEventsWSIndexing::initialize(const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                                             bool ignoreZeros) {
@@ -36,5 +35,4 @@ void ConvToMDEventsWSIndexing::appendEventsFromInputWS<2>(API::Progress *pProgre
 void ConvToMDEventsWSIndexing::appendEventsFromInputWS(API::Progress *pProgress, const API::BoxController_sptr &bc) {
   appendEventsFromInputWS<8>(pProgress, bc);
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

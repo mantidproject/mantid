@@ -13,8 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateTransmissionWorkspaceAuto2)
@@ -102,5 +101,4 @@ void CreateTransmissionWorkspaceAuto2::exec() {
   setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

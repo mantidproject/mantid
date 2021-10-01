@@ -10,8 +10,7 @@
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 IObjComponent::IObjComponent() { handle = std::make_unique<GeometryHandler>(this); }
 
@@ -55,5 +54,4 @@ IObjComponent &IObjComponent::operator=(const IObjComponent &rhs) {
   }
   return *this;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

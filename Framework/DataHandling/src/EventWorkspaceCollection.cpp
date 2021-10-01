@@ -20,8 +20,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
@@ -258,5 +257,4 @@ bool EventWorkspaceCollection::threadSafe() const {
   return true;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

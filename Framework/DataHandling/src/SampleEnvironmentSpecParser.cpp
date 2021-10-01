@@ -50,8 +50,7 @@ std::string COMPONENTSTLFILE_TAG = "stlfile";
 std::string SAMPLESTLFILE_TAG = "samplestlfile";
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 
@@ -458,5 +457,4 @@ std::shared_ptr<Geometry::IObject> SampleEnvironmentSpecParser::parseComponent(E
   return comp;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

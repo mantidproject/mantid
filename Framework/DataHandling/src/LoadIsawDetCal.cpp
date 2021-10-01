@@ -31,8 +31,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(LoadIsawDetCal)
@@ -477,5 +476,4 @@ void LoadIsawDetCal::applyScalings(Workspace_sptr &ws,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

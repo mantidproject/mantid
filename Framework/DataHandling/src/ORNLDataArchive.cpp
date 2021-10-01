@@ -44,8 +44,7 @@ const static std::string NOT_FOUND("");
 Mantid::Kernel::Logger g_log("ORNLDataArchive");
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ARCHIVESEARCH(ORNLDataArchive, ORNLDataSearch)
 DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
@@ -198,5 +197,4 @@ std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenam
 
 void ORNLDataArchive::setONCat(ONCat_uptr oncat) { m_oncat = std::move(oncat); }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -9,8 +9,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /**
   @param  inst         Instrument
@@ -55,5 +54,4 @@ bool edgePixel(const Mantid::Geometry::Instrument_const_sptr &inst, const std::s
   }
   return false;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

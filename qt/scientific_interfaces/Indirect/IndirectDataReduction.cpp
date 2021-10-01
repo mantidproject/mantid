@@ -36,8 +36,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReduction");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectDataReduction)
 
 IndirectDataReduction::IndirectDataReduction(QWidget *parent)
@@ -460,5 +459,4 @@ void IndirectDataReduction::filterUiForFacility(const QString &facility) {
   m_uiForm.iicInstrumentConfiguration->setDisabledInstruments(disabledInstruments);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

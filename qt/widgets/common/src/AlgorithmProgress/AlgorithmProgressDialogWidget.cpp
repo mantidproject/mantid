@@ -15,8 +15,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(QWidget *parent, AlgorithmProgressModel &model)
     : QDialog(parent), m_tree{new QTreeWidget(this)}, m_presenter{std::make_unique<AlgorithmProgressDialogPresenter>(
@@ -84,5 +83,4 @@ void AlgorithmProgressDialogWidget::closeEvent(QCloseEvent *event) {
   QDialog::closeEvent(event);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

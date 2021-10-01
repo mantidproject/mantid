@@ -9,8 +9,7 @@
 #include "MantidDataHandling/DataBlock.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // -------------------------------------------------------------
 // DataBlock Generator
@@ -79,5 +78,4 @@ void DataBlockGenerator::next() { ++(*this); }
 bool DataBlockGenerator::isDone() { return !m_currentIntervalIndex; }
 
 specnum_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

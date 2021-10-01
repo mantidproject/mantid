@@ -24,8 +24,7 @@
 using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 /// static logger
 Kernel::Logger g_log("vtkGeometryCacheReader");
@@ -163,5 +162,4 @@ void vtkGeometryCacheReader::readTriangles(Poco::XML::Element *pEle, int noOfTri
   }
   // Read from binary otherwise
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

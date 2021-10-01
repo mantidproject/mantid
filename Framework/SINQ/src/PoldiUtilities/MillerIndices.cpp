@@ -9,8 +9,7 @@
 #include "boost/format.hpp"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 MillerIndices::MillerIndices(int h, int k, int l)
     : m_h(h), m_k(k), m_l(l), m_asVector(3),
@@ -65,5 +64,4 @@ void MillerIndices::populateVector() {
   m_asVector[1] = m_k;
   m_asVector[2] = m_l;
 }
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

@@ -13,8 +13,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor with normal and point
@@ -256,5 +255,4 @@ MDPlane &MDPlane::operator=(const MDPlane &other) {
  */
 MDPlane::~MDPlane() { delete[] m_normal; }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

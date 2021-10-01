@@ -15,8 +15,7 @@
 #include <fstream>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 //------------------------------------------------------------------------------
 // Anonyomous
@@ -177,5 +176,4 @@ SampleEnvironmentSpec_uptr SampleEnvironmentSpecFileFinder::parseSpec(const std:
   return parser.parse(name, filename, reader);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -8,8 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/EqualBinsChecker.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Constructor - sets properties
@@ -37,5 +36,4 @@ std::string EqualBinSizesValidator::checkValidity(const MatrixWorkspace_sptr &va
   return checker.validate();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

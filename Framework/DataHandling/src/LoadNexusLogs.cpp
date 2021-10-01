@@ -23,8 +23,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexusLogs)
 
@@ -978,5 +977,4 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
   file.closeGroup();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

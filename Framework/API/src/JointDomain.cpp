@@ -10,8 +10,7 @@
 #include "MantidAPI/JointDomain.h"
 #include <numeric>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /// Return the overall size the domain which is a sum of sizes of the
 /// member domains.
 size_t JointDomain::size() const {
@@ -31,5 +30,4 @@ const FunctionDomain &JointDomain::getDomain(size_t i) const { return *m_domains
  */
 void JointDomain::addDomain(const FunctionDomain_sptr &domain) { m_domains.emplace_back(domain); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

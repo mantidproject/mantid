@@ -19,8 +19,7 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -266,5 +265,4 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(dou
   return pws;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

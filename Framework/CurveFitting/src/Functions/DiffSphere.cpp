@@ -26,9 +26,7 @@ namespace {
 Mantid::Kernel::Logger g_log("DiffSphere");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(DiffSphere)
 
@@ -84,6 +82,4 @@ void DiffSphere::init() {
   this->applyTies();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

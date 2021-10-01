@@ -15,8 +15,7 @@
 using std::size_t;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
@@ -90,13 +89,11 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_sptr
@@ -126,7 +123,6 @@ IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(co
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

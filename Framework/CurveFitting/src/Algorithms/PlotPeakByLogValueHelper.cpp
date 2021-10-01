@@ -18,9 +18,7 @@ namespace {
 Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 // Ideally this would use boost::try_lexical_cast in order to avoid too many
 // exceptions
@@ -245,6 +243,4 @@ boost::optional<API::Workspace_sptr> getWorkspace(const std::string &workspaceNa
   return {};
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

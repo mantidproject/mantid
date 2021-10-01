@@ -15,8 +15,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractPolarizationEfficiencies)
 
@@ -144,5 +143,4 @@ void ExtractPolarizationEfficiencies::exec() {
   setProperty("CorrectionOption", option);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -9,8 +9,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "gsl/gsl_errno.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor with required relative precision argument. The default is 1e-8.
  *  See also PeakFunctionIntegrator::setRequiredRelativePrecision.
@@ -207,5 +206,4 @@ double gsl_peak_wrapper(double x, void *parameters) {
 
   return y;
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

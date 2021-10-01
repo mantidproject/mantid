@@ -12,9 +12,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
 
@@ -307,6 +305,4 @@ void BatchJobRunner::notifyAllWorkspacesDeleted() {
 
 bool BatchJobRunner::getProcessPartial() const { return m_processPartial; }
 bool BatchJobRunner::getProcessAll() const { return m_processAll && !m_isAutoreducing; }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

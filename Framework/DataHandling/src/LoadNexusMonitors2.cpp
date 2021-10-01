@@ -41,8 +41,7 @@ using Mantid::HistogramData::Histogram;
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyWithValue;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadNexusMonitors2)
@@ -733,5 +732,4 @@ void LoadNexusMonitors2::readHistoMonitorEntry(::NeXus::File &file, size_t ws_in
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

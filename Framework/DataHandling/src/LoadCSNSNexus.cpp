@@ -18,8 +18,7 @@
 #include "MantidKernel/UnitFactory.h"
 /************************/
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -462,5 +461,4 @@ void LoadCSNSNexus::exec() {
     setProperty("OutputWorkspace", ws_hist);
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

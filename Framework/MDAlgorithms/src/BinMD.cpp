@@ -23,8 +23,7 @@
 #include "MantidKernel/Utils.h"
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(BinMD)
@@ -427,5 +426,4 @@ void BinMD::exec() {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(outWS));
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -15,8 +15,7 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -172,5 +171,4 @@ void ChopData::exec() {
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

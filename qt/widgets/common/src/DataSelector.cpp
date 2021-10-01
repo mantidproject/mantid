@@ -57,8 +57,7 @@ void loadFile(std::string const &filename, std::string const &workspaceName) {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
     : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true) {
@@ -454,5 +453,4 @@ void DataSelector::dragEnterEvent(QDragEnterEvent *de) {
     de->acceptProposedAction();
 }
 
-} /* namespace MantidWidgets */
-} /* namespace MantidQt */
+} // namespace MantidQt::MantidWidgets

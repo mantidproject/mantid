@@ -8,8 +8,7 @@
 
 #include "MantidKernel/MDAxisValidator.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -58,5 +57,4 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
   return invalidProperties;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

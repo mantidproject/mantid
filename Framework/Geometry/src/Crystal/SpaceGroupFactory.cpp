@@ -19,8 +19,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Free function that tries to parse the given list of symmetry operations and
 /// returns true if successfull.
@@ -816,5 +815,4 @@ DECLARE_TRANSFORMED_SPACE_GROUP(228, "F d -3 c :2", "F d -3 c | x+3/8,y+3/8,z+3/
 DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
 DECLARE_GENERATED_SPACE_GROUP(230, "I a -3 d", "-x+1/2,-y,z+1/2; -x,y+1/2,-z+1/2; z,x,y; y+3/4,x+1/4,-z+1/4; -x,-y,-z")
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -19,8 +19,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PreprocessDetectorsToMD)
 
@@ -436,5 +435,4 @@ double PreprocessDetectorsToMD::getEi(const API::MatrixWorkspace_const_sptr &inp
 
   return Efi;
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

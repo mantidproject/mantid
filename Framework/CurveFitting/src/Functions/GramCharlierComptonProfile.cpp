@@ -19,9 +19,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 // Register into factory
@@ -424,6 +422,4 @@ void GramCharlierComptonProfile::cacheYSpaceValues(const HistogramData::Points &
                                   // vector
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -7,9 +7,7 @@
 #include "TransmissionRunPair.h"
 #include <boost/algorithm/string/join.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 TransmissionRunPair::TransmissionRunPair() : m_firstTransmissionRunNumbers(), m_secondTransmissionRunNumbers() {}
 
@@ -50,6 +48,4 @@ bool operator==(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs) 
 
 bool operator!=(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs) { return !(lhs == rhs); }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

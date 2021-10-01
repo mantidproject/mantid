@@ -10,8 +10,7 @@
 #include "MantidDataHandling/ReadMaterial.h"
 #include "MantidKernel/Material.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /**
  * Validate the parameters to build the material from, this returns
@@ -187,5 +186,4 @@ void ReadMaterial::setScatteringInfo(double coherentXSection, double incoherentX
 }
 
 bool ReadMaterial::isEmpty(const double toCheck) { return std::abs((toCheck - EMPTY_DBL()) / (EMPTY_DBL())) < 1e-8; }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

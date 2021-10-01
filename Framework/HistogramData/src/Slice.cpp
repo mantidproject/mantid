@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/Slice.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Returns a slice of histogram between given begin and end indices.
 Histogram slice(const Histogram &histogram, const size_t begin, const size_t end) {
@@ -33,5 +32,4 @@ Histogram slice(const Histogram &histogram, const size_t begin, const size_t end
   return sliced;
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

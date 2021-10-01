@@ -11,8 +11,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 ADSAdapter::ADSAdapter()
     : m_addObserver(*this, &ADSAdapter::handleAddWorkspace),
@@ -115,5 +114,4 @@ void ADSAdapter::handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotificatio
   presenter->notifyFromWorkspaceProvider(WorkspaceProviderNotifiable::Flag::WorkspaceGroupUpdated);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

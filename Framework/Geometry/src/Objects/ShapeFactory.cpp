@@ -40,8 +40,7 @@ using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -1673,5 +1672,4 @@ std::string ShapeFactory::addGoniometerTag(const Kernel::Matrix<double> &rotateM
 
   return xml;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

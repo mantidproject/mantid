@@ -9,8 +9,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ChangePulsetime)
@@ -76,5 +75,4 @@ void ChangePulsetime::exec() {
   setProperty("OutputWorkspace", out_ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

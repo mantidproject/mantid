@@ -61,8 +61,7 @@ bool isASCII(const std::string &str) {
 
 } // anonymous namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /**
  * Alternative constructor with action
  *
@@ -421,5 +420,4 @@ std::string MultipleFileProperty::setValueAsMultipleFiles(const std::string &pro
   return SUCCESS;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

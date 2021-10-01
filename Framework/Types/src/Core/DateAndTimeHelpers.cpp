@@ -8,10 +8,7 @@
 
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace Types {
-namespace Core {
-namespace DateAndTimeHelpers {
+namespace Mantid::Types::Core::DateAndTimeHelpers {
 /** Check if a string is in ISO8601 format.
  *
  * @param date :: string to check
@@ -40,7 +37,4 @@ bool stringIsPosix(const std::string &date) {
   static const boost::regex format(R"(^\d{4}-[A-Z][a-z]{2}-[0-3]\d\s[0-2]\d:[0-5]\d:\d{2}(.\d+)?$)");
   return boost::regex_match(date, format);
 }
-} // namespace DateAndTimeHelpers
-} // namespace Core
-} // namespace Types
-} // namespace Mantid
+} // namespace Mantid::Types::Core::DateAndTimeHelpers

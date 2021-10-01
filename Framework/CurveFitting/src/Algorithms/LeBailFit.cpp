@@ -49,9 +49,7 @@ using Mantid::HistogramData::HistogramY;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 const Rfactor badR(DBL_MAX, DBL_MAX);
 
@@ -2235,6 +2233,4 @@ void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR, const string
   ofile.close();
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

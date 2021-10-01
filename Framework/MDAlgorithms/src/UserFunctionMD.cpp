@@ -13,8 +13,7 @@
 
 #include <boost/tokenizer.hpp>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Subscribe the function into the factory.
 DECLARE_FUNCTION(UserFunctionMD)
@@ -148,5 +147,4 @@ void UserFunctionMD::setFormula() {
   m_parser.SetExpr(m_formula);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

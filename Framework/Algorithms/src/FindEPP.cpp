@@ -11,8 +11,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -198,5 +197,4 @@ void FindEPP::initWorkspace() {
   m_outWS->setRowCount(numberSpectra);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -7,8 +7,7 @@
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidAPI/IMDIterator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -28,5 +27,4 @@ bool HardThresholdBackground::isBackground(Mantid::API::IMDIterator *iterator) c
   return signal <= m_thresholdSignal || std::isnan(signal);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

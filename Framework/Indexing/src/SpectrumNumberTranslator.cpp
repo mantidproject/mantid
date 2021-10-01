@@ -8,8 +8,7 @@
 
 #include "MantidIndexing/SpectrumNumberTranslator.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 namespace {
 // Helpers for accessing vectors of tuples used as a map. Lookup is by first
@@ -185,5 +184,4 @@ SpectrumNumberTranslator::spectrumNumbers(const std::vector<GlobalSpectrumIndex>
   return spectrumNumbers;
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

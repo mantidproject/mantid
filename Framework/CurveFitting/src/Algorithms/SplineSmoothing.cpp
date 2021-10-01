@@ -16,9 +16,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SplineSmoothing)
@@ -381,6 +379,4 @@ void SplineSmoothing::selectSmoothingPoints(const MatrixWorkspace &inputWorkspac
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

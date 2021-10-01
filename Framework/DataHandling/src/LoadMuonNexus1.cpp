@@ -44,8 +44,7 @@
 #include <cmath>
 #include <limits>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
@@ -921,5 +920,4 @@ int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

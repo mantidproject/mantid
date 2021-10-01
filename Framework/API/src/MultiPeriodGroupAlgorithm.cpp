@@ -10,8 +10,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -75,5 +74,4 @@ bool MultiPeriodGroupAlgorithm::processGroups() {
   return result;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

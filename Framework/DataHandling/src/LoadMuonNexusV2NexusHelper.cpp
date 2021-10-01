@@ -22,8 +22,7 @@ template <typename type> std::string convertVectorToString(const std::vector<typ
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace NeXusEntry {
 const std::string GOODFRAMES{"good_frames"};
@@ -290,5 +289,4 @@ std::string LoadMuonNexusV2NexusHelper::getPeriodTotalCounts(const int &numPerio
   return convertVectorToString(countsVector);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

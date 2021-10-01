@@ -25,8 +25,7 @@ using namespace Mantid::Kernel;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(FixGSASInstrumentFile)
 
@@ -102,5 +101,4 @@ void FixGSASInstrumentFile::exec() {
   ofile.close();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -26,8 +26,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadIsawSpectrum)
@@ -289,5 +288,4 @@ Geometry::Instrument_const_sptr LoadIsawSpectrum::getInstrument3Ways(Algorithm *
   return inst;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

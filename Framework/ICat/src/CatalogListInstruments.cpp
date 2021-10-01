@@ -8,8 +8,7 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 
 DECLARE_ALGORITHM(CatalogListInstruments)
 
@@ -28,5 +27,4 @@ void CatalogListInstruments::exec() {
   API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInstruments(instruments);
   setProperty("InstrumentList", instruments);
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

@@ -49,8 +49,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus2)
 
@@ -1307,5 +1306,4 @@ void LoadEventPreNexus2::processInvestigationInputs() {
     m_dbOpNumPulses = 0;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -15,8 +15,7 @@
 
 using namespace MantidQt::API;
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(SortTableWorkspaceDialog)
@@ -243,5 +242,4 @@ void SortTableWorkspaceDialog::removeColumn() {
   m_form.btnAddColumn->setEnabled(true);
 }
 
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

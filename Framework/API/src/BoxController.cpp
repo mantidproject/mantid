@@ -27,8 +27,7 @@ using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::convert;
 using Mantid::Kernel::VectorHelper::splitStringIntoVector;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //-----------------------------------------------------------------------------------
 /** create new box controller from the existing one. Drops file-based state if
@@ -287,6 +286,4 @@ void BoxController::setFileBacked(const std::shared_ptr<IBoxControllerIO> &newFi
   this->m_fileIO = newFileIO;
 }
 
-} // namespace API
-
-} // namespace Mantid
+} // namespace Mantid::API

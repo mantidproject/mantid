@@ -10,8 +10,7 @@
 #include "MantidKernel/V3D.h"
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;
 
 /**
@@ -680,5 +679,4 @@ std::vector<double> ReducedCell::norm_vals(const ReducedCell &info) const {
  */
 Kernel::DblMatrix ReducedCell::GetTransformation() { return transform; }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

@@ -24,8 +24,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 namespace {
 // ---------- Template deduction of the event type
 // --------------------------------
@@ -881,5 +880,4 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
   return result;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -8,8 +8,7 @@
 
 #include "MantidGeometry/ICompAssembly.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 PoldiBasicChopper::PoldiBasicChopper()
     : m_slitPositions(), m_distanceFromSample(0.0),
@@ -74,6 +73,4 @@ void PoldiBasicChopper::initializeVariableParameters(double rotationSpeed) {
 }
 
 double PoldiBasicChopper::slitPositionToTimeFraction(double slitPosition) { return slitPosition * m_cycleTime; }
-} // namespace Poldi
-// namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

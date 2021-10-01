@@ -15,9 +15,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
@@ -1347,6 +1345,4 @@ void TrustRegionMinimizer::calculateStep(const DoubleFortranMatrix &J, const Dou
  */
 double TrustRegionMinimizer::costFunctionVal() { return m_leastSquares->val(); }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

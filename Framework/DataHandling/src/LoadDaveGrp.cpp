@@ -18,8 +18,7 @@
 
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadDaveGrp)
 
 LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0) {}
@@ -244,5 +243,4 @@ void LoadDaveGrp::getData(const API::MatrixWorkspace_sptr &workspace) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

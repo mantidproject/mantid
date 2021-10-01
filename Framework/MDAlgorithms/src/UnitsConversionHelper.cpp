@@ -12,8 +12,7 @@
 
 using Mantid::Kernel::UnitParams;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** establish and initialize proper units conversion from input to output units
 @param UnitsFrom -- the ID of the units, which have to be converted from
@@ -381,5 +380,4 @@ UnitsConversionHelper::UnitsConversionHelper()
       m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_DIFA(0.), m_DIFC(0.), m_TZERO(0.), m_pTwoThetas(nullptr),
       m_pL2s(nullptr), m_pEfixedArray(nullptr), m_pDIFAs(nullptr), m_pDIFCs(nullptr), m_pTZEROs(nullptr) {}
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

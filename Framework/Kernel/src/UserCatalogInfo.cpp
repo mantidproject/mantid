@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/UserCatalogInfo.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 UserCatalogInfo::UserCatalogInfo(const ICatalogInfo &catInfo, const CatalogConfigService &catalogConfigService)
     : m_catInfo(catInfo.clone()), m_mountPoint(catalogConfigService.preferredMountPoint()) {}
@@ -46,5 +45,4 @@ const std::string UserCatalogInfo::linuxPrefix() const {
 
 UserCatalogInfo *UserCatalogInfo::clone() const { return new UserCatalogInfo(*this); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

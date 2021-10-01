@@ -14,12 +14,10 @@
 
 #include <vector>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Add a range of x values for bin masking.
-void MaskBinsData::addXRange(double start, double end,
-                             const std::vector<size_t> &indices) {
+void MaskBinsData::addXRange(double start, double end, const std::vector<size_t> &indices) {
   BinMask range(start, end);
   range.spectra = indices;
   m_masks.append(range);
@@ -31,9 +29,8 @@ void MaskBinsData::mask(const std::string &wsName) const {
   for (const auto &mask : m_masks) {
     auto &spectra = mask.spectra;
     std::vector<int64_t> spectraList(spectra.size());
-    std::transform(
-        spectra.cbegin(), spectra.cend(), spectraList.begin(),
-        [](const size_t spec) -> int { return static_cast<int>(spec); });
+    std::transform(spectra.cbegin(), spectra.cend(), spectraList.begin(),
+                   [](const size_t spec) -> int { return static_cast<int>(spec); });
     auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskBins", -1);
     alg->setPropertyValue("InputWorkspace", wsName);
     alg->setPropertyValue("OutputWorkspace", wsName);
@@ -53,9 +50,8 @@ bool MaskBinsData::isEmpty() const { return m_masks.isEmpty(); }
 /// @param spectraIntgrs :: An in/out vector with integrated spectra. On input
 /// it must contain
 ///   integrals from workspace for all its spectra.
-void MaskBinsData::subtractIntegratedSpectra(
-    const Mantid::API::MatrixWorkspace &workspace,
-    std::vector<double> &spectraIntgrs) const {
+void MaskBinsData::subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace,
+                                             std::vector<double> &spectraIntgrs) const {
   for (const auto &mask : m_masks) {
     std::vector<double> subtract;
     workspace.getIntegratedSpectra(subtract, mask.start, mask.end, false);
@@ -94,8 +90,7 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "MaskBinsData::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("MaskBinsData::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -116,10 +111,8 @@ std::string MaskBinsData::saveToProject() const {
   }
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "MaskBinsData::saveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("MaskBinsData::saveToProject() not implemented for Qt >= 5");
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

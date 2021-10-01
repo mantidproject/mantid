@@ -26,8 +26,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using boost::regex;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /**
 Functor to compute the product of the set.
@@ -219,5 +218,4 @@ std::vector<std::string> ImportMDHistoWorkspaceBase::parseNames(const std::strin
   return names_result;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

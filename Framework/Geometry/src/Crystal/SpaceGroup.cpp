@@ -9,8 +9,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -113,5 +112,4 @@ std::ostream &operator<<(std::ostream &stream, const SpaceGroup &self) {
   return stream;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

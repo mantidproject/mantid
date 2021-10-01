@@ -16,9 +16,7 @@
 #include "MantidKernel/Strings.h"
 #include <algorithm>
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 
 LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt, const Kernel::V3D &uVec)
     : ATrack(Pt, uVec)
@@ -112,6 +110,4 @@ void LineIntersectVisit::procTrack()
   std::transform(PtOut.begin(), PtOut.end(), DOut.begin(), std::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
 }
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

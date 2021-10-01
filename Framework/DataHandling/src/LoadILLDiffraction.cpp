@@ -28,8 +28,7 @@
 #include <nexus/napi.h>
 #include <numeric>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 using namespace Geometry;
@@ -897,5 +896,4 @@ void LoadILLDiffraction::convertAxisAndTranspose() {
   m_outWorkspace = transposed;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

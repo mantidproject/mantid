@@ -33,8 +33,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Indexing;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /*Anonomous namespace */
 namespace {
@@ -1227,5 +1226,4 @@ void ReflectometryReductionOne2::verifySpectrumMaps(const MatrixWorkspace_const_
     g_log.warning(message);
   }
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

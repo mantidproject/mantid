@@ -7,8 +7,7 @@
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
 #include <QProgressBar>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressPresenterBase::AlgorithmProgressPresenterBase(QObject *parent) : QObject(parent) {
   const auto connection = Qt::QueuedConnection;
@@ -85,5 +84,4 @@ void AlgorithmProgressPresenterBase::updateProgressBar(Mantid::API::AlgorithmID 
                                                        const int progressPrecision) {
   emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg), estimatedTime, progressPrecision);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

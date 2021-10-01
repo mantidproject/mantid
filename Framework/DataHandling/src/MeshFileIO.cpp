@@ -7,8 +7,7 @@
 #include "MantidDataHandling/MeshFileIO.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /**
  * Rotates the environment by a generated matrix
@@ -58,5 +57,4 @@ Kernel::V3D MeshFileIO::createScaledV3D(double xVal, double yVal, double zVal) {
   return Kernel::V3D(double(xVal), double(yVal), double(zVal));
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

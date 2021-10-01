@@ -30,9 +30,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Cylinder");
 }
@@ -438,6 +436,4 @@ TopoDS_Shape Cylinder::createShape() {
   return BRepPrimAPI_MakeCylinder(gpA, m_radius, 1000.0, 2.0 * M_PI).Solid();
 }
 #endif
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

@@ -19,8 +19,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Constructor
 GSLVector::GSLVector() : m_data(1), m_view(gsl_vector_view_array(m_data.data(), 1)) {}
@@ -283,5 +282,4 @@ std::ostream &operator<<(std::ostream &ostr, const GSLVector &v) {
   return ostr;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

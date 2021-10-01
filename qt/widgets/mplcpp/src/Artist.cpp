@@ -12,9 +12,7 @@ using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * @brief Create an Artist instance around an existing matplotlib Artist
@@ -37,6 +35,4 @@ void Artist::set(const Python::Dict &kwargs) {
  */
 void Artist::remove() { callMethodNoCheck<void>(pyobj(), "remove"); }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

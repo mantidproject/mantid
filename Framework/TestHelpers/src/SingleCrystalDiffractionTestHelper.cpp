@@ -32,8 +32,7 @@ using Geometry::IPeak_uptr;
 using namespace Mantid::Kernel;
 using Mantid::Types::Event::TofEvent;
 
-namespace Mantid {
-namespace SingleCrystalDiffractionTestHelper {
+namespace Mantid::SingleCrystalDiffractionTestHelper {
 
 void WorkspaceBuilder::setNumPixels(const int numPixels) {
   m_numPixels = numPixels;
@@ -256,5 +255,4 @@ void WorkspaceBuilder::rebinWorkspace() {
   rebinAlg->execute();
   m_workspace = rebinAlg->getProperty("OutputWorkspace");
 }
-} // namespace SingleCrystalDiffractionTestHelper
-} // namespace Mantid
+} // namespace Mantid::SingleCrystalDiffractionTestHelper

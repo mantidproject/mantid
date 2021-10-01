@@ -12,10 +12,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
-namespace Impl {
+namespace Mantid::PythonInterface::Converters::Impl {
 
 PyObject *func_PyArray_IterNew(PyArrayObject *arr) { return PyArray_IterNew(reinterpret_cast<PyObject *>(arr)); }
 
@@ -46,7 +43,4 @@ PyArray_Descr *func_PyArray_Descr(const char *datadescr) {
 
   return descr;
 }
-} // namespace Impl
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters::Impl

@@ -20,8 +20,7 @@ template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 class ImplClusterRegister {
 public:
@@ -189,5 +188,4 @@ ClusterRegister::MapCluster ClusterRegister::clusters(std::vector<DisjointElemen
   return temp;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

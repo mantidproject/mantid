@@ -37,9 +37,7 @@ using Mantid::Geometry::IndexingUtils;
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(SetCrystalLocation)
 
@@ -72,6 +70,4 @@ void SetCrystalLocation::exec() {
   setProperty("OutputWorkspace", outEvents);
 } // exec
 
-} // namespace Crystal
-
-} // namespace Mantid
+} // namespace Mantid::Crystal

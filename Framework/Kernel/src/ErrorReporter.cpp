@@ -20,8 +20,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 /// static logger
@@ -141,5 +140,4 @@ int ErrorReporter::sendReport(const std::string &message, const std::string &url
   return status;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

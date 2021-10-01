@@ -20,8 +20,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Property.h"
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(ConvertTableToMatrixWorkspaceDialog)
 
@@ -119,5 +118,4 @@ void ConvertTableToMatrixWorkspaceDialog::initLayout() {
           SLOT(fillColumnNames(const QString &)));
   fillColumnNames(m_form.cbInputWorkspace->currentText());
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

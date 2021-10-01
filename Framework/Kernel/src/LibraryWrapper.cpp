@@ -7,8 +7,7 @@
 #include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/DllOpen.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Move constructor
@@ -50,5 +49,4 @@ bool LibraryWrapper::openLibrary(const std::string &filepath) {
   return true;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

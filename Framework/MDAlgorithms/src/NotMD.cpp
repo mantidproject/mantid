@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(NotMD)
@@ -42,5 +41,4 @@ void NotMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 /// NotMD::Run the algorithm with a MDHistoWorkspace
 void NotMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) { out->operatorNot(); }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

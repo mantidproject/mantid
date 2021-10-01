@@ -240,8 +240,7 @@ std::pair<double, double> twoThetasFromTable(const Mantid::detid_t detID, const 
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Setup typedef for later use
 using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
 using DetConstPtr = Geometry::IDetector_const_sptr;
@@ -598,5 +597,4 @@ void SofQWNormalisedPolygon::initAngularCachesTable(const MatrixWorkspace &works
     }
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

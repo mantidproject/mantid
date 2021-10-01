@@ -7,8 +7,7 @@
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/MDUnit.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 const std::string QSample::QSampleName = "QSample";
 
@@ -46,5 +45,4 @@ bool QSample::isSameType(const MDFrame &frame) const {
   return isSameType;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

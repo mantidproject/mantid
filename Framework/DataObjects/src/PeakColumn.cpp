@@ -15,8 +15,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("PeakColumn");
@@ -352,5 +351,4 @@ template <class T> void PeakColumn<T>::setPeakHKLOrRunNumber(const size_t index,
 template class PeakColumn<Peak>;
 template class PeakColumn<LeanElasticPeak>;
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

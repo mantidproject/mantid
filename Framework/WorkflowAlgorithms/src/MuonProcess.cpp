@@ -27,8 +27,7 @@ namespace {
 bool isOne(int i) { return (i == 1); }
 } // namespace
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -424,5 +423,4 @@ std::string MuonProcess::buildErrorString(const std::vector<int> &invalidPeriods
   return message.str();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

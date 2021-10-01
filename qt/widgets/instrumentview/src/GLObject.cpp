@@ -13,8 +13,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/InstrumentView/GLObject.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 int icount;
 
 GLObject::GLObject(bool withDisplayList, std::string name) : mName(std::move(name)), mChanged(true) {
@@ -77,5 +76,4 @@ void GLObject::define() const {}
 void GLObject::setName(const std::string &name) { mName = name; }
 std::string GLObject::getName() const { return mName; }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -7,8 +7,7 @@
 #include "MantidTestHelpers/MultiDomainFunctionHelper.h"
 #include "MantidTestHelpers/FakeObjects.h"
 
-namespace Mantid {
-namespace TestHelpers {
+namespace Mantid::TestHelpers {
 
 MultiDomainFunctionTest_Function::MultiDomainFunctionTest_Function()
     : Mantid::API::IFunction1D(), Mantid::API::ParamFunction() {
@@ -145,5 +144,4 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3() {
 
   return ws3;
 }
-} // namespace TestHelpers
-} // namespace Mantid
+} // namespace Mantid::TestHelpers

@@ -11,8 +11,7 @@
 
 using Mantid::Kernel::IValidator_sptr;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *
@@ -41,5 +40,4 @@ std::string MDFrameValidator::checkValidity(const IMDWorkspace_sptr &workspace) 
   return "";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -13,8 +13,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 // static logger
 Kernel::Logger g_log("DetectorGroup");
@@ -460,5 +459,4 @@ size_t DetectorGroup::registerContents(class ComponentVisitor & /*component*/) c
                            "instrument. On-the-fly only.");
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

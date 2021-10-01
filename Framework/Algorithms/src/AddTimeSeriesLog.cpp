@@ -12,8 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace API;
 using namespace Kernel;
 
@@ -133,5 +132,4 @@ void AddTimeSeriesLog::createOrUpdate(API::Run &run, const std::string &name) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

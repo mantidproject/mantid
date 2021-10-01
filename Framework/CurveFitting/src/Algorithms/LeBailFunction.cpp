@@ -26,9 +26,7 @@ using namespace std;
 
 const double NEG_DBL_MAX(-1. * DBL_MAX);
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 namespace {
 const double PEAKRANGECONSTANT = 5.0;
 
@@ -1056,6 +1054,4 @@ double LeBailFunction::getPeakMaximumValue(std::vector<int> hkl, const std::vect
   return maxvalue;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

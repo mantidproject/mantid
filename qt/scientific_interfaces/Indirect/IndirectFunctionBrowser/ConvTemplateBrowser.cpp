@@ -22,9 +22,7 @@
 
 #include <limits>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 namespace {
 
@@ -340,6 +338,4 @@ void ConvTemplateBrowser::intChanged(QtProperty *prop) {
     m_presenter.setSubType(SubTypeIndex::Lorentzian, m_intManager->value(prop));
   }
 }
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

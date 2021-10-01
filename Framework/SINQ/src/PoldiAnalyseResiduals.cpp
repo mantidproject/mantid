@@ -13,8 +13,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Kernel;
 using namespace API;
@@ -229,5 +228,4 @@ void PoldiAnalyseResiduals::exec() {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(sum));
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

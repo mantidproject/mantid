@@ -36,8 +36,7 @@ constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DiscusMultipleScatteringCorrection)
@@ -816,5 +815,4 @@ void DiscusMultipleScatteringCorrection::setWorkspaceName(const API::MatrixWorks
   API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

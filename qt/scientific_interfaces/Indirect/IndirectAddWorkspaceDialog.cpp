@@ -65,9 +65,7 @@ const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
 const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
@@ -135,6 +133,4 @@ std::string IndirectAddWorkspaceDialog::getFileName() const {
   return m_uiForm.dsWorkspace->getFullFilePath().toStdString();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

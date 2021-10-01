@@ -10,9 +10,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -162,6 +160,4 @@ SimpleChebfun &SimpleChebfun::operator+=(const ChebfunFunctionType &fun) {
   return *this;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

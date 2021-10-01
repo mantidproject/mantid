@@ -34,8 +34,7 @@
 #include <iostream>
 #include <utility>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -1623,5 +1622,4 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
                  << "END of profiling objective func along L1 and T0\n";
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

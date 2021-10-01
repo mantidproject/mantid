@@ -26,8 +26,7 @@ int PHASE_ROW = 2;
 double ASYMM_ERROR = 999.0;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace DataObjects;
@@ -552,5 +551,4 @@ void CalMuonDetectorPhases::reportProgress(const int thisSpectrum, const int tot
   this->progress(proportionDone, progMessage.str());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

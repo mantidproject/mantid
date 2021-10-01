@@ -25,9 +25,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ElasticDiffSphere");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(ElasticDiffSphere)
 
@@ -68,6 +66,4 @@ double ElasticDiffSphere::HeightPrefactor() const {
   return pow(3 * boost::math::sph_bessel(1, Q * R) / (Q * R), 2);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -17,8 +17,7 @@
 
 #include <memory>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -144,5 +143,4 @@ void RebinByTimeBase::exec() {
   doHistogramming(inWS, outputWS, XValues_new, OutXValues_scaled, prog);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

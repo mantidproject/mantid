@@ -8,8 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Begins listening to notifications from the global ConfigService.
  */
@@ -68,5 +67,4 @@ void ConfigObserver::notifyValueChanged(const std::string &name, const std::stri
 void ConfigObserver::notifyValueChanged(ConfigValChangeNotification_ptr notification) {
   notifyValueChanged(notification->key(), notification->curValue(), notification->preValue());
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

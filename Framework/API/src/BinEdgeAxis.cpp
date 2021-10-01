@@ -8,8 +8,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -97,5 +96,4 @@ std::string BinEdgeAxis::label(const std::size_t &index) const {
   }
   return formatLabel(((*this)(index) + (*this)(index + 1)) / 2);
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

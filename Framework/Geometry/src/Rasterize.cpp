@@ -10,8 +10,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include <array>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Geometry::CSGObject;
 using Kernel::V3D;
@@ -355,5 +354,4 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, c
 }
 
 } // namespace Rasterize
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

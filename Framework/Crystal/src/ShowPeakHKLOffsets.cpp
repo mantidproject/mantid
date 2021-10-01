@@ -27,9 +27,7 @@ using Mantid::Kernel::V3D;
  *  Created on: May 13, 2013
  *      Author: ruth
  */
-namespace Mantid {
-
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(ShowPeakHKLOffsets)
 
@@ -101,5 +99,4 @@ void ShowPeakHKLOffsets::exec() {
   setProperty("HKLIntegerOffsets", Res);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

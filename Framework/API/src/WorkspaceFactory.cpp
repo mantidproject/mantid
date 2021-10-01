@@ -16,8 +16,7 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ConfigService.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceFactory");
@@ -202,5 +201,4 @@ IPeaksWorkspace_sptr WorkspaceFactoryImpl::createPeaks(const std::string &classN
   return ws;
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API

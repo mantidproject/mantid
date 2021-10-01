@@ -11,8 +11,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 FuncMinimizerFactoryImpl::FuncMinimizerFactoryImpl() : Kernel::DynamicFactory<IFuncMinimizer>() {
   // we need to make sure the library manager has been loaded before we
@@ -61,5 +60,4 @@ std::shared_ptr<IFuncMinimizer> FuncMinimizerFactoryImpl::createMinimizer(const 
   return minimizer;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

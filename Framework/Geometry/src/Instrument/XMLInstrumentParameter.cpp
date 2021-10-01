@@ -19,8 +19,7 @@
 #include <fstream>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger g_log("XMLInstrumentParameter");
 }
@@ -202,5 +201,4 @@ double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logD
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

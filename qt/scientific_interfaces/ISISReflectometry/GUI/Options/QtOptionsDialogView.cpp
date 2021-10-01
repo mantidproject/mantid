@@ -10,9 +10,7 @@
 #include <QCloseEvent>
 #include <QPushButton>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 QtOptionsDialogView::QtOptionsDialogView(QWidget *parent) {
   Q_UNUSED(parent);
@@ -122,6 +120,4 @@ void QtOptionsDialogView::closeEvent(QCloseEvent *event) {
 
 void QtOptionsDialogView::show() { QDialog::exec(); }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

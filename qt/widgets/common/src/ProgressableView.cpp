@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ProgressableView.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 bool ProgressableView::isPercentageIndicator() const { return m_style == Style::PERCENTAGE; }
 
@@ -32,5 +31,4 @@ void ProgressableView::setAsEndlessIndicator() {
   if (m_style == Style::ENDLESS)
     setProgressRange(0, 0);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

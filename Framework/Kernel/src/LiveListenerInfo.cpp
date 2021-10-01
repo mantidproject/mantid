@@ -17,8 +17,7 @@
 #include <ostream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 // static logger object
 Logger g_log("InstrumentInfo");
@@ -83,5 +82,4 @@ std::ostream &operator<<(std::ostream &buffer, const LiveListenerInfo &listener)
   return buffer;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

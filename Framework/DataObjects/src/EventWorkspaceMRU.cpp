@@ -7,8 +7,7 @@
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 EventWorkspaceMRU::~EventWorkspaceMRU() {
   // Make sure you free up the memory in the MRUs
@@ -166,5 +165,4 @@ size_t EventWorkspaceMRU::MRUSize() const {
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

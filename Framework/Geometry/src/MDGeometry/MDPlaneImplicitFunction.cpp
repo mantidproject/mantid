@@ -17,8 +17,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 MDPlaneImplicitFunction::MDPlaneImplicitFunction() : MDImplicitFunction() {}
 
@@ -139,5 +138,4 @@ void MDPlaneImplicitFunction::checkOrigin() {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

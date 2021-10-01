@@ -33,9 +33,7 @@ Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double m
 
 } // namespace
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * @brief Create a RangeMarker instance
@@ -182,6 +180,4 @@ bool RangeMarker::isMoving() {
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

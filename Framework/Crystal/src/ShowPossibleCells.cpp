@@ -14,8 +14,7 @@
 #include "MantidGeometry/Crystal/ScalarUtils.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ShowPossibleCells)
 
@@ -83,5 +82,4 @@ void ShowPossibleCells::exec() {
   this->setProperty("NumberOfCells", static_cast<int>(num_cells));
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

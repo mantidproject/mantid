@@ -17,8 +17,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMDMinMaxLocal)
@@ -176,5 +175,4 @@ void ConvertToMDMinMaxLocal::findMinMaxValues(MDWSDescription &WSDescription, MD
     }
   }
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

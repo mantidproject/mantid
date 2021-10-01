@@ -9,8 +9,7 @@
 
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 LabelUnit *LabelUnitFactory::createRaw(const std::string &unitString) const {
   return new LabelUnit(UnitLabel(unitString));
@@ -60,5 +59,4 @@ MDUnitFactory_uptr makeMDUnitFactoryChain() {
   return first;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

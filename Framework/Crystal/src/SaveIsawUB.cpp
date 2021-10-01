@@ -15,8 +15,7 @@
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::DblMatrix;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawUB)
@@ -200,5 +199,4 @@ void SaveIsawUB::exec() {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

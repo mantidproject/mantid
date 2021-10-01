@@ -16,8 +16,7 @@
 #include "MantidIndexing/SpectrumIndexSet.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -147,5 +146,4 @@ MatrixWorkspace_sptr RemoveSpectra::copySpectraFromInputToOutput(MatrixWorkspace
   MatrixWorkspace_sptr outputWS = extractSpectra->getProperty("OutputWorkspace");
   return outputWS;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

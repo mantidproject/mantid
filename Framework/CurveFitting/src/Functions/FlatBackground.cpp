@@ -12,9 +12,7 @@ using namespace Mantid::Kernel;
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 DECLARE_FUNCTION(FlatBackground)
@@ -91,6 +89,4 @@ void FlatBackground::histogramDerivative1D(Jacobian *jacobian, double left, cons
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

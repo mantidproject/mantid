@@ -47,9 +47,7 @@ bool isDifferenceLargerThanTolerance(const double angle1, const double angle2, c
 using namespace boost;
 using Mantid::Kernel::UnitFactory;
 
-namespace Mantid {
-namespace Crystal {
-namespace FindSXPeaksHelper {
+namespace Mantid::Crystal::FindSXPeaksHelper {
 
 Mantid::Kernel::Logger g_log("FindSXPeaksHelper");
 
@@ -686,6 +684,4 @@ bool AbsoluteCompareStrategy::compare(const SXPeak &lhs, const SXPeak &rhs) cons
   return lhs.compare(rhs, m_xUnitResolution, m_phiResolution, m_twoThetaResolution, m_units);
 }
 
-} // namespace FindSXPeaksHelper
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal::FindSXPeaksHelper

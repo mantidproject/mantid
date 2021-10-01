@@ -21,8 +21,7 @@
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::toString;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::DblMatrix;
 using Kernel::Quat;
 using Kernel::V3D;
@@ -342,5 +341,4 @@ void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
   recalculateR();
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/FilterByXValue.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FilterByXValue)
 
@@ -117,5 +116,4 @@ void FilterByXValue::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

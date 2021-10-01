@@ -21,8 +21,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IndirectTransmissionCalc");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 IndirectTransmissionCalc::IndirectTransmissionCalc(QWidget *parent) : IndirectToolsTab(parent) {
   m_uiForm.setupUi(parent);
 
@@ -141,5 +140,4 @@ void IndirectTransmissionCalc::setRunIsRunning(bool running) {
 
 void IndirectTransmissionCalc::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

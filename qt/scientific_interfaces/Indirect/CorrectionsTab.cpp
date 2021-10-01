@@ -12,8 +12,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 /**
  * Constructor.
  *
@@ -149,5 +148,4 @@ void CorrectionsTab::displayInvalidWorkspaceTypeError(const std::string &workspa
   emit showMessageBox(errorMessage);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

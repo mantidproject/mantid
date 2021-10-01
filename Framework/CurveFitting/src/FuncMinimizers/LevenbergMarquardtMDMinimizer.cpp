@@ -19,9 +19,7 @@
 #include <cmath>
 #include <gsl/gsl_blas.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 namespace {
 /// static logger object
 Kernel::Logger g_log("LevenbergMarquardMD");
@@ -284,6 +282,4 @@ double LevenbergMarquardtMDMinimizer::costFunctionVal() {
   return m_costFunction->val();
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

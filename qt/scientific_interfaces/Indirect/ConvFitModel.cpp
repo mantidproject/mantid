@@ -207,9 +207,7 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
 
@@ -326,6 +324,4 @@ std::vector<std::pair<std::string, size_t>> ConvFitModel::getResolutionsForFit()
   return m_fitDataModel->getResolutionsForFit();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

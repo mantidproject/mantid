@@ -12,8 +12,7 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * @param manager :: A property manager which has information about the data
@@ -76,5 +75,4 @@ void IDomainCreator::initFunction(API::IFunction_sptr function) {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

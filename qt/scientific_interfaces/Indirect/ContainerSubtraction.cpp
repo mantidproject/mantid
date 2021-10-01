@@ -23,8 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ContainerSubtraction");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
@@ -537,5 +536,4 @@ void ContainerSubtraction::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

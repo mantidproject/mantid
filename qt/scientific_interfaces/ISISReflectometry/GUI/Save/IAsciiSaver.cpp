@@ -7,9 +7,7 @@
 #include "IAsciiSaver.h"
 
 #include <utility>
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 InvalidSavePath::InvalidSavePath(std::string const &path)
     : std::runtime_error("The path" + path + "does not exist or is not a directory."), m_path(path) {}
 
@@ -29,6 +27,4 @@ bool FileFormatOptions::shouldIncludeQResolution() const { return m_includeQReso
 std::string const &FileFormatOptions::separator() const { return m_separator; }
 std::string const &FileFormatOptions::prefix() const { return m_prefix; }
 NamedFormat FileFormatOptions::format() const { return m_format; }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

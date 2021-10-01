@@ -7,8 +7,7 @@
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  * @param mustNotBeDistribution :: Flag indicating whether the check is that
@@ -40,5 +39,4 @@ std::string RawCountValidator::checkValidity(const MatrixWorkspace_sptr &value) 
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

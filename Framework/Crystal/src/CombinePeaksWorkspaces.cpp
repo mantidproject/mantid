@@ -14,8 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CombinePeaksWorkspaces)
 
@@ -169,5 +168,4 @@ void CombinePeaksWorkspaces::exec() {
   setProperty("OutputWorkspace", output);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -11,8 +11,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *
@@ -58,5 +57,4 @@ std::string WorkspaceUnitValidator::checkValidity(const MatrixWorkspace_sptr &va
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

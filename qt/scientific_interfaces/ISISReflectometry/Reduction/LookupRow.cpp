@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "LookupRow.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupRow::LookupRow(boost::optional<double> theta,
                      // cppcheck-suppress passedByValue
@@ -74,6 +72,4 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
     result[9] = *lookupRow.backgroundProcessingInstructions();
   return result;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

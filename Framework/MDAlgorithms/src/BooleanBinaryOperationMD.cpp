@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -56,5 +55,4 @@ void BooleanBinaryOperationMD::execHistoScalar(Mantid::DataObjects::MDHistoWorks
   throw std::runtime_error("Cannot perform the " + this->name() + " operation on a WorkspaceSingleValue.");
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

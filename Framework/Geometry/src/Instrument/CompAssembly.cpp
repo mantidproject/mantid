@@ -16,8 +16,7 @@
 #include <ostream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::Quat;
 using Kernel::V3D;
@@ -499,5 +498,4 @@ std::ostream &operator<<(std::ostream &os, const CompAssembly &ass) {
   return os;
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

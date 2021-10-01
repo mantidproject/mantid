@@ -52,8 +52,7 @@ const int64_t TOLERANCE(1000000); // splitter time tolerance in nano-second.
 /// m_splitterGroup
 const uint32_t UNDEFINED_SPLITTING_TARGET(0);
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(FilterEvents)
 
@@ -1939,5 +1938,4 @@ std::vector<std::string> FilterEvents::getTimeSeriesLogNames() {
   return lognames;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -14,8 +14,7 @@
 #include <iostream>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 // We only need a single NullStream object
 Poco::NullOutputStream NULL_STREAM;
@@ -414,5 +413,4 @@ void Logger::setLevelOffset(int level) { m_levelOffset = level; }
  */ /// Gets the Logger's log offset level.
 int Logger::getLevelOffset() const { return m_levelOffset; }
 
-} // namespace Kernel
-} // Namespace Mantid
+} // namespace Mantid::Kernel

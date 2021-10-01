@@ -22,8 +22,7 @@
 #include <fstream>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace Mantid::API;
@@ -381,5 +380,4 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

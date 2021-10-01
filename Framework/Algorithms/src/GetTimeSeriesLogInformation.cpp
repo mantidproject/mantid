@@ -26,8 +26,7 @@ using Mantid::Types::Core::DateAndTime;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(GetTimeSeriesLogInformation)
 
@@ -521,5 +520,4 @@ void GetTimeSeriesLogInformation::checkLogValueChanging(vector<DateAndTime> time
   g_log.debug() << ss.str();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

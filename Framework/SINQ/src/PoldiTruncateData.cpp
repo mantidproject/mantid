@@ -10,8 +10,7 @@
 #include "MantidSINQ/PoldiTruncateData.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Kernel;
 using namespace API;
@@ -325,5 +324,4 @@ MatrixWorkspace_sptr PoldiTruncateData::getSummedSpectra(const MatrixWorkspace_s
   return getOutputWorkspace(sumSpectra);
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

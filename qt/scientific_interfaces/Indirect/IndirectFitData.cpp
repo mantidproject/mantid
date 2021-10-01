@@ -170,9 +170,7 @@ std::string createExcludeRegionString(std::string regionString) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
     : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
@@ -336,6 +334,4 @@ IndirectFitData &IndirectFitData::combine(IndirectFitData const &fitData) {
   return *this;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

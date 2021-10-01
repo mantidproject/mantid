@@ -26,8 +26,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace ::NeXus;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SNSAppendGeometryToNexus)
@@ -392,5 +391,4 @@ bool SNSAppendGeometryToNexus::runLoadNexusLogs(const std::string &nexusFileName
 
   return executionSuccessful;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -25,9 +25,7 @@ QAbstractItemView::EditTriggers getEditTriggers() {
 }
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 JobTreeView::JobTreeView(QStringList const &columnHeadings, Cell const &emptyCellStyle, QWidget *parent)
     : QTreeView(parent), m_notifyee(nullptr), m_mainModel(0, columnHeadings.size(), this),
@@ -566,6 +564,4 @@ QModelIndex JobTreeView::applyNavigationResult(QtTreeCursorNavigationResult cons
 
 int JobTreeView::currentColumn() const { return currentIndex().column(); }
 
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

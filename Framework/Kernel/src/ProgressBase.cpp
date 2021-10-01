@@ -10,8 +10,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor
@@ -209,5 +208,4 @@ double ProgressBase::getEstimatedTime() const {
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

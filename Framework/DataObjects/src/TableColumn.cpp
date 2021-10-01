@@ -8,8 +8,7 @@
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 DECLARE_TABLECOLUMN(int, int)
 DECLARE_TABLECOLUMN(uint32_t, uint)
@@ -21,5 +20,4 @@ DECLARE_TABLECOLUMN(API::Boolean, bool)
 DECLARE_TABLECOLUMN(std::string, str)
 DECLARE_TABLECOLUMN(Mantid::Kernel::V3D, V3D)
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

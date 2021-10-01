@@ -71,8 +71,7 @@ QIcon plotTiledIcon() {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsView::IndirectPlotOptionsView(QWidget *parent)
     : API::MantidWidget(parent), m_suggestionsModel(std::make_unique<QStringListModel>(indicesSuggestions())),
@@ -260,5 +259,4 @@ void IndirectPlotOptionsView::displayWarning(QString const &message) {
   QMessageBox::warning(parentWidget(), "Mantid - Warning", message);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

@@ -15,8 +15,7 @@
 
 #include <limits>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -108,5 +107,4 @@ MatrixWorkspace_sptr LoadISISPolarizationEfficiencies::createEfficiencies(std::v
   return outWS;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

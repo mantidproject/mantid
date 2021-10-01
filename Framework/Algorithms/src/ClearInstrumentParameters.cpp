@@ -9,8 +9,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ClearInstrumentParameters)
@@ -53,5 +52,4 @@ void ClearInstrumentParameters::exec() {
   ws->setInstrument(instrument->baseInstrument());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

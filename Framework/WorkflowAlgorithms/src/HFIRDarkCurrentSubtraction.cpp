@@ -15,8 +15,7 @@
 #include "Poco/Path.h"
 #include "Poco/String.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRDarkCurrentSubtraction)
@@ -160,5 +159,4 @@ double HFIRDarkCurrentSubtraction::getCountingTime(const MatrixWorkspace_sptr &i
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

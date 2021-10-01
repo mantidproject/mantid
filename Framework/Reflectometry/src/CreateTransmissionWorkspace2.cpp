@@ -16,8 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateTransmissionWorkspace2)
@@ -294,5 +293,4 @@ void CreateTransmissionWorkspace2::setOutputWorkspace(const API::MatrixWorkspace
   setPropertyValue("OutputWorkspace", outputName);
   setProperty("OutputWorkspace", ws);
 }
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

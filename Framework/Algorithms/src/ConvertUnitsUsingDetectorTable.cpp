@@ -24,8 +24,7 @@
 #include <cfloat>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -252,5 +251,4 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_
   return outputWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

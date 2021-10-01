@@ -45,8 +45,7 @@ int defaultMinimizerIndex() {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 FitScriptOptionsBrowser::FitScriptOptionsBrowser(QWidget *parent)
     : QWidget(parent), m_fittingMode(nullptr), m_maxIterations(nullptr), m_minimizer(nullptr), m_costFunction(nullptr),
@@ -259,5 +258,4 @@ FittingMode FitScriptOptionsBrowser::getFittingMode() const {
   return static_cast<FittingMode>(m_enumManager->value(m_fittingMode));
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

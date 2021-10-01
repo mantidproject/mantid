@@ -186,9 +186,7 @@ boost::optional<std::vector<std::size_t>> getSpectrum(const FqFitParameters &par
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
 
@@ -353,6 +351,4 @@ bool FqFitModel::allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &wor
   return true;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

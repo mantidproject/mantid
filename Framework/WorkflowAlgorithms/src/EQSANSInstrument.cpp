@@ -14,9 +14,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
-namespace EQSANSInstrument {
+namespace Mantid::WorkflowAlgorithms::EQSANSInstrument {
 /**
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
@@ -79,6 +77,4 @@ void getDefaultBeamCenter(const API::MatrixWorkspace_sptr &dataWS, double &pixel
   getPixelFromCoordinate(0.0, 0.0, dataWS, pixel_x, pixel_y);
 }
 
-} // namespace EQSANSInstrument
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms::EQSANSInstrument

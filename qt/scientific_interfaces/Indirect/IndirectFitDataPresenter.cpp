@@ -10,9 +10,7 @@
 
 #include "IndirectAddWorkspaceDialog.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
@@ -116,6 +114,4 @@ void IndirectFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog)
 
 void IndirectFitDataPresenter::displayWarning(const std::string &warning) { m_view->displayWarning(warning); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -7,9 +7,7 @@
 #include "MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h"
 #include "MantidQtWidgets/Common/Batch/QtBasicNavigation.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 QtTreeCursorNavigation::QtTreeCursorNavigation(QAbstractItemModel const *model) : m_model(model) {}
 
@@ -80,6 +78,4 @@ QModelIndex QtTreeCursorNavigation::nextCellOnThisRow(QModelIndex const &index) 
 bool QtTreeCursorNavigation::isNotLastCellOnThisRow(QModelIndex const &index) const { return hasCellOnTheRight(index); }
 
 bool QtTreeCursorNavigation::isNotLastRowInThisNode(QModelIndex const &index) const { return hasRowBelow(index); }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

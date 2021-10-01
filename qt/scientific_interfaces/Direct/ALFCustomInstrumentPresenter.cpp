@@ -13,8 +13,7 @@
 #include <functional>
 #include <tuple>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALFCustomInstrumentPresenter::ALFCustomInstrumentPresenter(IALFCustomInstrumentView *view,
                                                            IALFCustomInstrumentModel *model,
@@ -97,5 +96,4 @@ void ALFCustomInstrumentPresenter::averageTube() {
   m_analysisPane->addSpectrum(WSName);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

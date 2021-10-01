@@ -15,8 +15,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StripPeaks)
@@ -266,5 +265,4 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(const API::MatrixWorkspace_con
   return outputWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

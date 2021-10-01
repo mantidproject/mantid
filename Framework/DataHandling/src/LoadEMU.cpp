@@ -38,8 +38,7 @@
 #include <fstream>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 
@@ -1264,5 +1263,4 @@ void LoadEMUTar::exec() {
 DECLARE_FILELOADER_ALGORITHM(LoadEMUTar)
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadEMUHdf)
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

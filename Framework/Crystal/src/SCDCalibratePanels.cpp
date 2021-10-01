@@ -38,8 +38,7 @@ using namespace std;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
@@ -707,5 +706,4 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

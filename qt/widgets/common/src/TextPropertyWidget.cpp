@@ -10,8 +10,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -59,5 +58,4 @@ QString TextPropertyWidget::getValue() const { return m_textbox->text(); }
  * @param value :: string representation of the value */
 void TextPropertyWidget::setValueImpl(const QString &value) { m_textbox->setText(value); }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

@@ -9,9 +9,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 
-namespace Mantid {
-
-namespace API {
+namespace Mantid::API {
 
 void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &componentInfo,
                                                   Geometry::ComponentID componentId, const double scaleX,
@@ -34,5 +32,4 @@ void applyRectangularDetectorScaleToComponentInfo(Geometry::ComponentInfo &compo
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

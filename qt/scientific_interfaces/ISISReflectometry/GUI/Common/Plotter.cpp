@@ -20,9 +20,7 @@
 using namespace MantidQt::Widgets::MplCpp;
 #endif
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 Plotter::Plotter(IPythonRunner *pythonRunner) : m_pythonRunner(pythonRunner) {}
@@ -81,6 +79,4 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) cons
 void Plotter::runPython(const std::string &pythonCode) const { m_pythonRunner->runPythonAlgorithm(pythonCode); }
 #endif
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

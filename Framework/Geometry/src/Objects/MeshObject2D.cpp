@@ -16,8 +16,7 @@
 #include <numeric>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace CoplanarChecks {
 bool sufficientPoints(const std::vector<Kernel::V3D> &vertices) {
@@ -424,5 +423,4 @@ void MeshObject2D::initDraw() const {
   m_handler->initialize();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

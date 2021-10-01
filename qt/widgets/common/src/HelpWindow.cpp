@@ -16,8 +16,7 @@
 #include <QWidget>
 #include <boost/lexical_cast.hpp>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("HelpWindow");
@@ -132,5 +131,4 @@ void HelpWindow::showCustomInterface(QWidget *parent, const QString &name, const
   }
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

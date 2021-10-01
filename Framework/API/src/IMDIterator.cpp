@@ -9,8 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IMDIterator.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Default constructor */
 IMDIterator::IMDIterator() : m_normalization(Mantid::API::VolumeNormalization) {}
@@ -25,5 +24,4 @@ void IMDIterator::setNormalization(Mantid::API::MDNormalization normalization) {
  */
 Mantid::API::MDNormalization IMDIterator::getNormalization() const { return m_normalization; }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

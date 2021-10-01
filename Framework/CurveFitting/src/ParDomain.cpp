@@ -10,8 +10,7 @@
 #include "MantidCurveFitting/ParDomain.h"
 #include "MantidKernel/MultiThreaded.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /**
  * Create and return i-th domain and i-th values, (i-1)th domain is released.
@@ -81,5 +80,4 @@ void ParDomain::additiveCostFunctionValDerivHessian(const CostFunctions::CostFun
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

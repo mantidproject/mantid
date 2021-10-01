@@ -32,8 +32,7 @@
 using boost::algorithm::split;
 using Mantid::Kernel::EnvironmentHistory;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("WorkspaceHistory");
@@ -459,5 +458,4 @@ bool WorkspaceHistory::operator==(const WorkspaceHistory &otherHistory) const {
   return m_algorithms == otherHistory.m_algorithms;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

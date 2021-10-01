@@ -20,8 +20,7 @@
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyWithValue;
@@ -214,5 +213,4 @@ void ApplyDiffCal::exec() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

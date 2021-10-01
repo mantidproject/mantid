@@ -7,13 +7,11 @@
 
 #include "MantidAPI/IJournal.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 IJournal::~IJournal() = default;
 
 IJournal::IJournal(IJournal &&rhs) = default;
 
 IJournal &IJournal::operator=(IJournal &&rhs) = default;
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

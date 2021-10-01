@@ -11,8 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <cctype>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 /**
  * Gets the most recently modified valid Nexus file in the same directory as the
@@ -96,5 +95,4 @@ bool ALCLatestFileFinder::isValid(const std::string &path) const {
   return valid;
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

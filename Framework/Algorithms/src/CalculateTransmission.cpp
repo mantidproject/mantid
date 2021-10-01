@@ -27,8 +27,7 @@
 #include <boost/lexical_cast.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -466,5 +465,4 @@ void CalculateTransmission::logIfNotMonitor(const API::MatrixWorkspace_sptr &sam
     g_log.information(message + "direct workspace.");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

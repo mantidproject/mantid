@@ -26,8 +26,7 @@
 
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(OptimizeLatticeForCellType)
 
@@ -233,5 +232,4 @@ API::ILatticeFunction_sptr OptimizeLatticeForCellType::getLatticeFunction(const 
   return latticeFunction;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

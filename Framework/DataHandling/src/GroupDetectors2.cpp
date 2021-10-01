@@ -29,8 +29,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GroupDetectors2)
 
@@ -1162,5 +1161,4 @@ std::map<std::string, std::string> GroupDetectors2::validateInputs() {
 
   return errors;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

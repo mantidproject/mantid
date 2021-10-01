@@ -7,9 +7,7 @@
 #include "Slicing.h"
 #include <vector>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 UniformSlicingByTime::UniformSlicingByTime(double secondsPerSlice) : m_secondsPerSlice(secondsPerSlice) {}
 
@@ -92,6 +90,4 @@ std::ostream &operator<<(std::ostream &os, SlicingByEventLog const &slicing) {
   }
   return os;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

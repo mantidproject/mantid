@@ -12,9 +12,7 @@
 #include "MantidParallel/IO/EventsListsShmemManager.h"
 #include "MantidTypes/Event/TofEvent.h"
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
+namespace Mantid::Parallel::IO {
 
 EventsListsShmemManager::EventsListsShmemManager(std::string segmentName, std::string elName)
     : m_segmentName(std::move(segmentName)), m_chunksName(std::move(elName)), m_chunks(nullptr) {
@@ -63,6 +61,4 @@ std::ostream &operator<<(std::ostream &os, const EventsListsShmemManager &manage
 
 const VoidAllocator &EventsListsShmemManager::alloc() const { return *m_allocatorInstance.get(); }
 
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO

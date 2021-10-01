@@ -23,8 +23,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using Kernel::Property;
 using Kernel::PropertyHistories;
@@ -289,5 +288,4 @@ void AlgorithmHistory::saveNexus(::NeXus::File *file, int &algCount) const {
   }
   file->closeGroup();
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

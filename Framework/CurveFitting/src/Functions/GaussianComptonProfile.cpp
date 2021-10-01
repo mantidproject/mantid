@@ -12,9 +12,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 DECLARE_FUNCTION(GaussianComptonProfile)
@@ -105,6 +103,4 @@ void GaussianComptonProfile::massProfile(double *result, const size_t nData, con
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

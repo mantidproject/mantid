@@ -18,9 +18,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
 bool runHasCorrectInstrument(std::string const &run, std::string const &instrument) {
@@ -261,6 +259,4 @@ ISearchModel &QtCatalogSearcher::results() const { return m_view->mutableSearchR
  * given then we use the journal file search instead so ICat is not required.
  */
 bool QtCatalogSearcher::requiresICat() const { return searchCriteria().cycle.empty(); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

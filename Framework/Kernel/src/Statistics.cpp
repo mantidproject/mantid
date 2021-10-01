@@ -19,8 +19,7 @@
 #include <cmath>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 Logger logger("Statistics");
 }
@@ -439,5 +438,4 @@ INSTANTIATE(unsigned int)
 INSTANTIATE(unsigned long)
 INSTANTIATE(unsigned long long)
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

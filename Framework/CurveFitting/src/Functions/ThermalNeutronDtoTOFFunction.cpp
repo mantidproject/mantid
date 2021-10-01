@@ -15,9 +15,7 @@ using namespace Mantid::API;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -124,6 +122,4 @@ void ThermalNeutronDtoTOFFunction::functionDerivLocal(API::Jacobian * /*unused*/
                                                        "ThermalNeutronDtoTOFFunction.");
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

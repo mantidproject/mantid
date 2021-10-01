@@ -10,8 +10,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using namespace Geometry;
 
 /** Initialize the function providing it the workspace
@@ -33,5 +32,4 @@ void IFunctionMW::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace>
  */
 std::shared_ptr<const API::MatrixWorkspace> IFunctionMW::getMatrixWorkspace() const { return m_workspace.lock(); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

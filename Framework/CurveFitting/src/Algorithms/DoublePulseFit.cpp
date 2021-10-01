@@ -27,9 +27,7 @@
 
 using namespace Mantid::CurveFitting::Functions;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 void setMultiDataProperties(const Mantid::API::IAlgorithm &fittingAlgorithm, Mantid::API::IAlgorithm &fit,
                             const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &suffix) {
@@ -342,6 +340,4 @@ void DoublePulseFit::createOutput(const Mantid::API::IAlgorithm_sptr &fitAlg,
   setProperty("Function", extractedFunction);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

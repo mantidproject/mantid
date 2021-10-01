@@ -25,8 +25,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::Matrix;
 using Kernel::V3D;
@@ -861,5 +860,4 @@ std::ostream &operator<<(std::ostream &os, const GridDetector &ass) {
   return os;
 }
 
-} // Namespace Geometry
-} // Namespace Mantid
+} // namespace Mantid::Geometry

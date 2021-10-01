@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("KafkaEventListener");
 }
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 DECLARE_LISTENER(KafkaEventListener)
 
@@ -134,5 +133,4 @@ int KafkaEventListener::runNumber() const { return (m_decoder ? m_decoder->runNu
 
 /// @copydoc ILiveListener::dataReset
 bool KafkaEventListener::dataReset() { return (m_decoder ? m_decoder->dataReset() : false); }
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

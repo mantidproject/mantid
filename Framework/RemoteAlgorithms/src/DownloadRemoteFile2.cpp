@@ -12,8 +12,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MaskedProperty.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DownloadRemoteFile2)
@@ -60,5 +59,4 @@ void DownloadRemoteFile2::exec() {
   g_log.information() << "Downloaded '" << remote << "' to '" << local << "'\n";
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

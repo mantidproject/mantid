@@ -14,8 +14,7 @@
 #include <numeric>
 #include <set>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GroupDetectors)
 
@@ -105,5 +104,4 @@ void GroupDetectors::exec() {
   firstSpectrum.setHistogram(outputHisto);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

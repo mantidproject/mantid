@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction1DSpectrum.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 Kernel::Logger IFunction1DSpectrum::g_log("IFunction1DSpectrum");
 
@@ -33,5 +32,4 @@ void IFunction1DSpectrum::functionDeriv1DSpectrum(const FunctionDomain1DSpectrum
   calNumericalDeriv(domain, jacobian);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

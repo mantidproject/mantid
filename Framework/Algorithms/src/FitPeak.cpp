@@ -44,8 +44,7 @@ using namespace std;
 
 const double MAGICNUMBER = 2.0;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 //----------------------------------------------------------------------------------------------
 /** Constructor for FitOneSinglePeak
  */
@@ -1565,5 +1564,4 @@ TableWorkspace_sptr FitPeak::genOutputTableWS(const IPeakFunction_sptr &peakfunc
   return outtablews;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

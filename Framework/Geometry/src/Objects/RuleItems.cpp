@@ -50,9 +50,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::V3D;
 
 Intersection::Intersection(std::unique_ptr<Rule> Ix, std::unique_ptr<Rule> Iy)
@@ -1608,6 +1606,4 @@ TopoDS_Shape CompGrp::analyze() {
 
 TopoDS_Shape BoolValue::analyze() { return TopoDS_Shape(); }
 #endif
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

@@ -71,8 +71,7 @@ QString toFunctionIndex(MantidQt::MantidWidgets::FitDomainIndex index) {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * FitScriptGeneratorDataTable class methods.
@@ -345,5 +344,4 @@ void CustomItemDelegate::paint(QPainter *painter, QStyleOptionViewItem const &op
   QStyledItemDelegate::paint(painter, opt, index);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

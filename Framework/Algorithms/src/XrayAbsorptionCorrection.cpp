@@ -29,8 +29,7 @@ constexpr double ConversionFrom_cm_to_m = 0.01;
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(XrayAbsorptionCorrection)
 
@@ -198,5 +197,4 @@ void XrayAbsorptionCorrection::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

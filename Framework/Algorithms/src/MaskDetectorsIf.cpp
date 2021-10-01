@@ -16,8 +16,7 @@
 #include <iomanip>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectorsIf)
@@ -222,5 +221,4 @@ void MaskDetectorsIf::createNewCalFile() {
   oldf.close();
   newf.close();
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

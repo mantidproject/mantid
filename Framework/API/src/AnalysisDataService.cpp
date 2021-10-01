@@ -9,8 +9,7 @@
 #include <iterator>
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //-------------------------------------------------------------------------
 // Nested class methods
@@ -372,5 +371,4 @@ void AnalysisDataServiceImpl::verifyName(const std::string &name, const std::sha
   }
 }
 
-} // Namespace API
-} // Namespace Mantid
+} // namespace Mantid::API

@@ -16,8 +16,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -286,5 +285,4 @@ bool MatrixWorkspaceMDIterator::isWithinBounds(const size_t /*index*/) const {
   throw std::runtime_error("MatrixWorkspaceMDIterator does not implement isWithinBounds");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -8,8 +8,7 @@
 #include "MantidAlgorithms/ApplyInstrumentToPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(ApplyInstrumentToPeaks)
 
@@ -67,5 +66,4 @@ void ApplyInstrumentToPeaks::exec() {
 
   setProperty("OutputWorkspace", outputWS);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

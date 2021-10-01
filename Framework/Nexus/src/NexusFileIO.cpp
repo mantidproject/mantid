@@ -31,8 +31,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace NeXus {
+namespace Mantid::NeXus {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -1235,5 +1234,4 @@ NexusFileIO::~NexusFileIO() {
   // this->closeNexusFile();
 }
 
-} // namespace NeXus
-} // namespace Mantid
+} // namespace Mantid::NeXus

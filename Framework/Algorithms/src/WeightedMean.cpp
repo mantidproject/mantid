@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/WeightedMean.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Algorithm must be declared
 DECLARE_ALGORITHM(WeightedMean)
@@ -94,5 +93,4 @@ void WeightedMean::performBinaryOperation(const HistogramData::Histogram &lhs, c
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -34,8 +34,7 @@
 
 using namespace std;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1009,5 +1008,4 @@ void LoadSpiceXML2DDet::loadInstrument(const API::MatrixWorkspace_sptr &matrixws
     g_log.error("Unable to load instrument to output workspace");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

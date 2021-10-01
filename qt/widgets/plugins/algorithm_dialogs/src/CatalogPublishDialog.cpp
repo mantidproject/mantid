@@ -17,8 +17,7 @@
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 DECLARE_DIALOG(CatalogPublishDialog)
 
 /**
@@ -164,5 +163,4 @@ void CatalogPublishDialog::accept() {
     AlgorithmDialog::accept();
   }
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

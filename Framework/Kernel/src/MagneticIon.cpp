@@ -14,8 +14,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace Mantid {
-namespace PhysicalConstants {
+namespace Mantid::PhysicalConstants {
 /// Default Constructor
 MagneticIon::MagneticIon() : symbol(""), charge(0), j0(8, 0.0), j2(8, 0.0), j4(8, 0.0), j6(8, 0.0), g(0.) {}
 
@@ -1054,5 +1053,4 @@ std::vector<std::string> getMagneticIonList() {
   return keys;
 }
 
-} // namespace PhysicalConstants
-} // namespace Mantid
+} // namespace Mantid::PhysicalConstants

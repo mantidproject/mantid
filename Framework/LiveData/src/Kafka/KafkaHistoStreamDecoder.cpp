@@ -43,8 +43,7 @@ const std::string HISTO_MESSAGE_ID = "hs00";
 
 using namespace HistoSchema;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -273,5 +272,4 @@ void KafkaHistoStreamDecoder::sampleDataFromMessage(const std::string & /*buffer
                                                "sample environment messages.");
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

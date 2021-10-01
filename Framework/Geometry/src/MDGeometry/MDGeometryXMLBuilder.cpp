@@ -19,8 +19,7 @@
 #include <boost/format.hpp>
 #include <boost/functional/hash.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /**
  Add an ordinary dimension.
@@ -282,5 +281,4 @@ template <typename CheckDimensionPolicy> MDGeometryBuilderXML<CheckDimensionPoli
 template class MDGeometryBuilderXML<StrictDimensionPolicy>;
 // Create a builder that applies no blocking/checking.
 template class MDGeometryBuilderXML<NoDimensionPolicy>;
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

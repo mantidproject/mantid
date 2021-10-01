@@ -29,8 +29,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using namespace Geometry;
 
 /// init logger
@@ -117,5 +116,4 @@ void IFunction1D::histogramDerivative1D(Jacobian *jacobian, double left, const d
   throw Kernel::Exception::NotImplementedError("Integration is not implemented for this function.");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("InstrumentSelector");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 using namespace Mantid::Kernel;
 
 /**
@@ -246,5 +245,4 @@ void InstrumentSelector::filterByTechniquesAtFacility(const QStringList &techniq
   emit instrumentListUpdated();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

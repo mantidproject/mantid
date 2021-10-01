@@ -20,8 +20,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 
@@ -659,5 +658,4 @@ void Run::copyGoniometers(const Run &other) {
     m_goniometers.emplace_back(std::move(new_goniometer));
   }
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

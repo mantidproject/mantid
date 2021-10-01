@@ -10,9 +10,7 @@
 
 #include <boost/math/special_functions/hermite.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(GramCharlier)
 
@@ -72,6 +70,4 @@ void GramCharlier::function1D(double *out, const double *x, const size_t n) cons
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

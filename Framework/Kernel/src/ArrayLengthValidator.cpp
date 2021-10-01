@@ -11,8 +11,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** No arg constructor
@@ -172,5 +171,4 @@ template class ArrayLengthValidator<std::string>;
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
 template class ArrayLengthValidator<long>;
 #endif
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

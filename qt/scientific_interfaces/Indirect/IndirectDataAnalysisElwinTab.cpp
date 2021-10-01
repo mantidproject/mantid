@@ -147,9 +147,7 @@ QStringList getSampleFBSuffices() {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataTableModel>()) {
   m_uiForm.setupUi(parent);
@@ -970,6 +968,4 @@ void IndirectDataAnalysisElwinTab::checkLoadedFiles() {
   }
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

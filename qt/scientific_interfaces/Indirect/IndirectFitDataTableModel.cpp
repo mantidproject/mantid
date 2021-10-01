@@ -27,9 +27,7 @@ bool equivalentWorkspaces(const Mantid::API::MatrixWorkspace_const_sptr &lhs,
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataTableModel::IndirectFitDataTableModel()
     : m_fittingDataMultiple(std::make_unique<std::vector<IndirectFitData>>()),
@@ -328,6 +326,4 @@ std::pair<WorkspaceID, WorkspaceIndex> IndirectFitDataTableModel::getSubIndices(
   throw std::runtime_error("Failed to find workspace and spectrum index for fit domain.");
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -8,8 +8,7 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiDetectorDecorator.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Geometry;
 
@@ -86,5 +85,4 @@ std::pair<double, double> PoldiDetectorDecorator::qLimits(double lambdaMin, doub
 
 void PoldiDetectorDecorator::detectorSetHook() {}
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

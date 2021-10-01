@@ -11,8 +11,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /*
   There are some strict parameters that the function arguements must adhere to.
@@ -80,5 +79,4 @@ void Citation::saveNexus(::NeXus::File *file, const std::string &group) {
   file->closeGroup();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

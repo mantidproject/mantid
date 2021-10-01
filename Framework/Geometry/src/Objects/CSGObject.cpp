@@ -377,8 +377,7 @@ double sphereSolidAngle(const V3D &observer, const std::vector<V3D> &vectors, co
 }
 } // namespace
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 Kernel::Logger logger("CSGObject");
@@ -2193,5 +2192,4 @@ void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vecto
 */
 std::string CSGObject::getShapeXML() const { return this->m_shapeXML; }
 
-} // NAMESPACE Geometry
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

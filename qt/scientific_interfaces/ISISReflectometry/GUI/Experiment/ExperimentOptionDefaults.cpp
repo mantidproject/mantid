@@ -13,9 +13,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Experiment.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 // unnamed namespace
 namespace {
@@ -103,6 +101,4 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
 Experiment ExperimentOptionDefaults::get(Mantid::Geometry::Instrument_const_sptr instrument) {
   return getExperimentDefaults(instrument);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

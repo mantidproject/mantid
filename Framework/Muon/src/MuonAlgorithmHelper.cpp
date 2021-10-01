@@ -19,8 +19,7 @@
 
 #include <vector>
 
-namespace Mantid {
-namespace MuonAlgorithmHelper {
+namespace Mantid::MuonAlgorithmHelper {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -585,5 +584,4 @@ bool isAlphanumericOrUnderscore(char character) {
   return (isalpha(character) || isdigit(character) || (character == '_'));
 }
 
-} // namespace MuonAlgorithmHelper
-} // namespace Mantid
+} // namespace Mantid::MuonAlgorithmHelper

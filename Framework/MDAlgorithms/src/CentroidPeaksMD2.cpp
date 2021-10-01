@@ -15,8 +15,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CentroidPeaksMD2)
@@ -156,5 +155,4 @@ void CentroidPeaksMD2::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

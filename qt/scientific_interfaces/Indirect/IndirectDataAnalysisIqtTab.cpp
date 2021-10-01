@@ -133,9 +133,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
@@ -546,6 +544,4 @@ void IndirectDataAnalysisIqtTab::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

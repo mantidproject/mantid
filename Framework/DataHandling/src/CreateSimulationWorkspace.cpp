@@ -71,8 +71,7 @@ StartAndEndTime getStartAndEndTimesFromNexusFile(const std::string &filename,
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CreateSimulationWorkspace)
@@ -407,5 +406,4 @@ void CreateSimulationWorkspace::setStartDate(const API::MatrixWorkspace_sptr &wo
   run.setStartAndEndTime(startTime, endTime);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

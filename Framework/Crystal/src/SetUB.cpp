@@ -16,8 +16,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Geometry::OrientedLattice;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetUB)
@@ -141,5 +140,4 @@ void SetUB::exec() {
   this->setProperty("Workspace", ws);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

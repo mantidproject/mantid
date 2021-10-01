@@ -28,9 +28,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IsoRotDiff");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(IsoRotDiff)
 
@@ -86,6 +84,4 @@ void IsoRotDiff::init() {
   this->applyTies();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

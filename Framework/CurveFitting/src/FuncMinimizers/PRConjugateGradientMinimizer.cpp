@@ -14,9 +14,7 @@
 
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 
 // clang-format off
 ///@cond nodoc
@@ -30,6 +28,4 @@ const gsl_multimin_fdfminimizer_type *PRConjugateGradientMinimizer::getGSLMinimi
   return gsl_multimin_fdfminimizer_conjugate_pr;
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

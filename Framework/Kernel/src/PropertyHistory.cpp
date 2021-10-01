@@ -18,8 +18,7 @@
 #include <ostream>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// Constructor
 PropertyHistory::PropertyHistory(std::string name, std::string value, std::string type, const bool isdefault,
@@ -91,5 +90,4 @@ bool PropertyHistory::isEmptyDefault() const {
   return emptyDefault;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

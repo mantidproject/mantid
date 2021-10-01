@@ -12,8 +12,7 @@
 #include <boost/algorithm/string.hpp>
 #include <strstream>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Verify that the matrix does not contain elements with abs(element) > 1 and
 /// has an acceptable number of non-zero elements.
@@ -142,5 +141,4 @@ bool SymmetryOperationSymbolParser::isValidMatrixRow(const int *element, size_t 
   return nulls > 0 && nulls < 3;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

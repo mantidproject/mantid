@@ -37,8 +37,7 @@ const std::string RUN_STOP_MESSAGE_ID = "6s4t";
 const std::chrono::seconds MAX_LATENCY(1);
 } // namespace
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 // -----------------------------------------------------------------------------
 // Public members
 // -----------------------------------------------------------------------------
@@ -506,6 +505,4 @@ int IKafkaStreamDecoder::runNumber() const noexcept {
 
   return std::atoi(m_runId.c_str());
 }
-} // namespace LiveData
-
-} // namespace Mantid
+} // namespace Mantid::LiveData
