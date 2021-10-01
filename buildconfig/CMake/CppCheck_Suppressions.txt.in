@@ -30,11 +30,6 @@ unusedPrivateFunction
 
 pureVirtualCall:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectBayesTab.h
 
-// the mru-list is intentionally not altered
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:*
-// false positives from checking a second time using a mutex for multi-threading
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:*
-
 // --------- Missing copy assignment / constructors -------------------
 // We don't want more creeping in so just mark these one by one
 
