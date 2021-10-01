@@ -233,6 +233,7 @@ public:
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
 
+    // this file contains events that are sorted in pulse time order
     validate_pulse_time_sorting(eventWS);
   }
 
@@ -257,8 +258,31 @@ public:
       TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
       TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
 
+      // this file contains events that aren't sorted in pulse time order but the event lists per spectra are sorted
       validate_pulse_time_sorting(eventWS);
     }
+  }
+
+  void test_load_event_nexus_POLARIS() {
+    const std::string file = "POLARIS00130512.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 19268117);
+    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(), 3008);
+    TS_ASSERT_DELTA(eventWS->getTofMin(), 0., 1.0e-3);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 19994.945, 1.0e-3);
+
+    // this file contains events that aren't sorted in pulse time order, even per spectra
+    validate_pulse_time_sorting(eventWS);
   }
 
   void test_NumberOfBins() {
