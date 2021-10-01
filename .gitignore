@@ -106,7 +106,7 @@ build/
 .builds
 *.egg-info/
 Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h
-qt/python/mantidqt/resources.py
+qt/python/mantidqt/mantidqt/resources.py
 qt/applications/workbench/workbench/app/resources.py
 
 # Visual C++ cache files
