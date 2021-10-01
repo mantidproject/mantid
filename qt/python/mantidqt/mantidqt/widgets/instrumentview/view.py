@@ -100,7 +100,7 @@ class InstrumentView(QWidget, ObservingView):
             for child in children:
                 child.close()
             self.presenter.close(self.name)
-        super(InstrumentView, self).closeEvent(event)
+        super(QWidget, self).closeEvent(event)
 
     @Slot()
     def _run_close(self):
