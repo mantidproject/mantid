@@ -10,8 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 Kernel::Logger g_log("DeprecatedAlias");
@@ -58,5 +57,4 @@ std::string DeprecatedAlias::deprecationMessage(const IAlgorithm *algo) {
   return msg.str();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

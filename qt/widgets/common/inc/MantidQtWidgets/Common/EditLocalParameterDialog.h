@@ -30,7 +30,7 @@ class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public MantidQt::API
 public:
   EditLocalParameterDialog(QWidget *parent, const QString &parName, const QStringList &datasetNames,
                            const QStringList &datasetDomainNames, const QList<double> &values, const QList<bool> &fixes,
-                           const QStringList &ties, const QStringList &constraints);
+                           QStringList ties, QStringList constraints);
 
   QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;

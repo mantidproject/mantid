@@ -37,10 +37,9 @@ namespace MantidQt::MantidWidgets {
 EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const QString &parName,
                                                    const QStringList &datasetNames,
                                                    const QStringList &datasetDomainNames, const QList<double> &values,
-                                                   const QList<bool> &fixes, const QStringList &ties,
-                                                   const QStringList &constraints)
-    : MantidDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes), m_ties(ties),
-      m_constraints(constraints) {
+                                                   const QList<bool> &fixes, QStringList ties, QStringList constraints)
+    : MantidDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes), m_ties(std::move(ties)),
+      m_constraints(std::move(constraints)) {
   assert(values.size() == datasetDomainNames.size());
   assert(fixes.size() == datasetDomainNames.size());
   assert(ties.size() == datasetDomainNames.size());

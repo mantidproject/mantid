@@ -499,5 +499,4 @@ V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws, const 
   return pos;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling
