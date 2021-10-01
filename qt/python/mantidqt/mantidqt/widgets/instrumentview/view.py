@@ -91,6 +91,12 @@ class InstrumentView(QWidget, ObservingView):
             new_window_name = new_ws_name
         self.widget.replaceWorkspace(new_ws_name, new_window_name)
 
+    def is_thread_running(self):
+        return self.widget.isThreadRunning()
+
+    def wait(self):
+        return self.widget.waitForThread()
+
     def closeEvent(self, event):
         # ordering of close events is different depending on
         # whether workspace is deleted or window is closed

@@ -184,6 +184,10 @@ public:
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; }
   /// Determine if the workspace requires an integration bar
   bool isIntegrable();
+  /// Whether the background instrument actor loading thead is running
+  bool isThreadRunning() const;
+  /// Block until thread is finished
+  void waitForThread() const;
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -370,7 +374,7 @@ private:
 
   std::unique_ptr<IMessageHandler> m_messageHandler;
 
-  QThread m_thread;
+  mutable QThread m_thread;
   bool m_autoscaling;
   double m_scaleMin;
   double m_scaleMax;

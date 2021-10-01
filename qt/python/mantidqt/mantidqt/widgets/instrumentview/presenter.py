@@ -76,6 +76,12 @@ class InstrumentViewPresenter(ObservingPresenter):
         """
         self.container.set_range(min_x, max_x)
 
+    def is_thread_running(self):
+        return self.container.is_thread_running()
+
+    def wait(self):
+        self.container.wait()
+
     def close(self, workspace_name):
         """
         extend close()

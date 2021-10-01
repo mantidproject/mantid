@@ -479,6 +479,20 @@ bool InstrumentWidget::isIntegrable() {
 }
 
 /**
+ * Returns whether the background thread creating the InstrumentActor is still executing
+ */
+bool InstrumentWidget::isThreadRunning() const { return m_thread.isRunning(); }
+
+/**
+ * Blocks until the background InstrumentActor setup thread is finished
+ */
+void InstrumentWidget::waitForThread() const {
+  if (isThreadRunning()) {
+    m_thread.wait();
+  }
+}
+
+/**
  * Update the info text displayed at the bottom of the window.
  */
 void InstrumentWidget::updateInfoText(const QString &text) {
