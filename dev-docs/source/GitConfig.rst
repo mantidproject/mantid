@@ -133,10 +133,10 @@ You may find the following aliases helpful. You can also add your own.
            lg = log --pretty=concise
            # Pretty log showing as a graph
            lgg = log --pretty=concise --graph
-           # Pretty log showing only the commits on the current branch i.e. since master
-           lgm = log --pretty=concise master..
-           # Show all of the files changed on the current branch i.e. since master
-           lfc = "!f() { git log --name-only --format= master.. | sort | uniq;  }; f"
+           # Pretty log showing only the commits on the current branch i.e. since main
+           lgm = log --pretty=concise main..
+           # Show all of the files changed on the current branch i.e. since main
+           lfc = "!f() { git log --name-only --format= main.. | sort | uniq;  }; f"
 
            # Show commit details with file names only
            sh = show --stat --pretty=detail

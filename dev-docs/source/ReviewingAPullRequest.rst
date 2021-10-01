@@ -4,7 +4,7 @@
 Reviewing a Pull Request
 ========================
 
-An important step in our :ref:`development workflow <GitWorkflow>` is the testing of individual issues/tickets after the development on them is complete, and before the code is merges into the master branch. Developers pick one from `the list <https://github.com/mantidproject/mantid/pulls>`_ of completed issues and perform a number of verification steps on it. The mechanics of testing a pull request (e.g. the git commands to use) are described :ref:`here <GitWorkflow>`. This page is concerned with the aspects that should be considered in deciding whether a pull request should be recommended to merge or sent back to the developer for further work. *There should be very little reluctance to reopen a ticket even for minor issues.*
+An important step in our :ref:`development workflow <GitWorkflow>` is the testing of individual issues/tickets after the development on them is complete, and before the code is merges into the main branch. Developers pick one from `the list <https://github.com/mantidproject/mantid/pulls>`_ of completed issues and perform a number of verification steps on it. The mechanics of testing a pull request (e.g. the git commands to use) are described :ref:`here <GitWorkflow>`. This page is concerned with the aspects that should be considered in deciding whether a pull request should be recommended to merge or sent back to the developer for further work. *There should be very little reluctance to reopen a ticket even for minor issues.*
 
 Code Review
 ===========
