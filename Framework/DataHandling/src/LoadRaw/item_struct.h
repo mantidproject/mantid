@@ -69,7 +69,7 @@ public:
   }
 
   int getItem(const std::string &item_name, T &value);
-  int getItem(const std::string &item_name, long *spec_array, int nspec, T *lVal);
+  int getItem(const std::string &item_name, const long *spec_array, int nspec, T *lVal);
   int getArrayItemSize(const std::string &item_name, int *dims_array, int &ndims);
   int getArrayItem(const std::string &item_name, int nspec, T *larray);
   int getArrayItem(const std::string &item_name, T *larray);

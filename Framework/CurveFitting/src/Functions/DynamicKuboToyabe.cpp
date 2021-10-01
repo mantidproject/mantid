@@ -68,7 +68,7 @@ double midpnt(double func(const double, const double, const double), const doubl
 }
 
 // Polynomial interpolation
-void polint(double xa[], double ya[], int n, double x, double &y, double &dy) {
+void polint(double xa[], const double ya[], int n, double x, double &y, double &dy) {
   int i, m, ns = 1;
   double dif;
 

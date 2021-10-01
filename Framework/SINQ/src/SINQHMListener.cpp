@@ -192,7 +192,7 @@ void SINQHMListener::doSpecialDim() {
     dim[1] = 128;
   }
 }
-int SINQHMListener::calculateCAddress(coord_t *pos) {
+int SINQHMListener::calculateCAddress(const coord_t *pos) {
   auto result = static_cast<int>(pos[rank - 1]);
   for (int i = 0; i < rank - 1; i++) {
     int mult = 1;

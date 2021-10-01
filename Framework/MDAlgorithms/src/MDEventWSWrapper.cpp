@@ -83,8 +83,8 @@ coordinates of nd-dimensional events
 *@param dataSize -- the length of the vector of MD events
 */
 template <size_t nd>
-void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16_t *goniometerIndex, uint32_t *detId,
-                                   coord_t *Coord, size_t dataSize) const {
+void MDEventWSWrapper::addMDDataND(const float *sigErr, const uint16_t *expInfoIndex, const uint16_t *goniometerIndex,
+                                   const uint32_t *detId, const coord_t *Coord, size_t dataSize) const {
 
   auto *const pWs = dynamic_cast<DataObjects::MDEventWorkspace<DataObjects::MDEvent<nd>, nd> *>(m_Workspace.get());
   if (pWs) {
@@ -110,8 +110,9 @@ void MDEventWSWrapper::addMDDataND(float *sigErr, uint16_t *expInfoIndex, uint16
 /// the function used in template metaloop termination on 0 dimensions and to
 /// throw the error in attempt to add data to 0-dimension workspace
 template <>
-void MDEventWSWrapper::addMDDataND<0>(float * /*unused*/, uint16_t * /*unused*/, uint16_t * /*unused*/,
-                                      uint32_t * /*unused*/, coord_t * /*unused*/, size_t /*unused*/) const {
+void MDEventWSWrapper::addMDDataND<0>(const float * /*unused*/, const uint16_t * /*unused*/,
+                                      const uint16_t * /*unused*/, const uint32_t * /*unused*/,
+                                      const coord_t * /*unused*/, size_t /*unused*/) const {
   throw(std::invalid_argument(" class has not been initiated, can not add data "
                               "to 0-dimensional workspace"));
 }

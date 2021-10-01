@@ -81,13 +81,10 @@ const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
 
 /** This is a function called every time NeXuS raises an error.
  * This swallows the errors and outputs nothing.
- *
- * @param data :: data passed in NXMSetError (will be NULL)
- * @param text :: text of the error.
  */
-void NexusErrorFunction(void *data, char *text) {
-  UNUSED_ARG(data);
-  UNUSED_ARG(text);
+// Prevent clang-tidy trying to change the signature for ext. interface
+// NOLINTNEXTLINE(readability-non-const-parameter)
+void NexusErrorFunction(void *, char *) {
   // Do nothing.
 }
 
