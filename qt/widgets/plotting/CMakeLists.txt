@@ -43,7 +43,7 @@ mtd_add_qt_library(
   INCLUDE_DIRS inc
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
     ${POCO_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
@@ -83,10 +83,10 @@ mtd_add_qt_tests(
     ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    DataObjects
+    Mantid::DataObjects
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
     gmock
     Python::Python
   MTD_QT_LINK_LIBS

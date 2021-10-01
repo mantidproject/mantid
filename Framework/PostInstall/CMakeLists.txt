@@ -20,4 +20,6 @@ set(
   "${COMPILE_SCRIPT}\n  execute_process ( COMMAND ${Python_EXECUTABLE} -m compileall -q -j 0 -x \"${EXCLUDE_REGEX}\" \"${PACKAGE_ROOT}\" OUTPUT_QUIET ERROR_QUIET )"
   )
 
+if (NOT CONDA_BUILD)
 install(CODE ${COMPILE_SCRIPT})
+endif()

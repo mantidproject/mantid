@@ -67,11 +67,11 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    DataObjects
+    Mantid::DataObjects
     gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
     Python::Python
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesISISReflectometry

@@ -46,7 +46,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
-                     Json
+                     Mantid::Json
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
                      MantidQtWidgetsMplCpp

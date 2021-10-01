@@ -196,7 +196,10 @@ configure_file(
 # ##############################################################################
 
 add_custom_target(SystemTests)
-add_dependencies(SystemTests Framework StandardTestData SystemTestData)
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+add_dependencies(SystemTests Framework)
+endif()
+add_dependencies(SystemTests StandardTestData SystemTestData)
 set_target_properties(
   SystemTests
   PROPERTIES
@@ -218,5 +221,5 @@ set(PLUGINS_DIR plugins)
 
 set(WORKBENCH_BIN_DIR ${BIN_DIR})
 set(WORKBENCH_LIB_DIR ${LIB_DIR})
-set(WORKBENCH_SITE_PACKAGES ${LIB_DIR})
+set(WORKBENCH_SITE_PACKAGES ${LIB_DIR} CACHE PATH "Path to workbench site packages install location")
 set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})

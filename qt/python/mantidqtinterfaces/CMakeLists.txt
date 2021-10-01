@@ -26,7 +26,9 @@ set_property(TARGET CompilePyUI PROPERTY FOLDER "CompilePyUI")
 set_property(TARGET CompileUIUI PROPERTY FOLDER "CompilePyUI")
 
 # Setup dependency chain
-add_dependencies(mantidqtinterfaces PythonInterface)
+if(BUILD_MANTIDFRAMEWORK)
+  add_dependencies(mantidqtinterfaces PythonInterface)
+endif()
 
 add_subdirectory(test)
 add_subdirectory(mantidqtinterfaces/Engineering/gui)

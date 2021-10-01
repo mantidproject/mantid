@@ -114,9 +114,13 @@ if (WIN32)
                     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
   # Install rule for package's resources.py
   install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install
-            DESTINATION bin/workbench/app RENAME resources.py)
+            DESTINATION ${WORKBENCH_SITE_PACKAGES}/workbench/app RENAME resources.py)
 else()
+  if (CONDA_BUILD)
+  set (_output_res_py ${WORKBENCH_SITE_PACKAGES}/workbench/app/resources.py)
+  else()
   set (_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  endif()
   add_custom_command(OUTPUT ${_output_res_py}
                      COMMAND ${PYRCC5_CMD} -o ${_output_res_py} ${_images_qrc_file}
                      COMMENT "Generating workbench resources module"
@@ -125,10 +129,14 @@ else()
 endif()
 
 # Dependency chain
-add_dependencies(workbench workbench_resources mantidqt)
+add_dependencies(workbench workbench_resources)
+# if we are building mantidqt we can add a dependency for workbench
+if (MANTID_QT_LIB STREQUAL "BUILD")
+add_dependencies(workbench mantidqt)
+endif()
 
 # macOS package fixes
-if(APPLE)
+if(APPLE AND NOT CONDA_BUILD)
   # create Info.plist
   set ( MAC_BUNDLE_EXECUTABLE ${PACKAGE_EXECUTABLE})
   set ( MAC_BUNDLE_IDENTIFIER "org.mantidproject.${PACKAGE_EXECUTABLE}" )
