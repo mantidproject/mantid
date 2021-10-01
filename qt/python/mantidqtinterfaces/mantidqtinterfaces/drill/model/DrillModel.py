@@ -453,6 +453,50 @@ class DrillModel(QObject):
         sample.setOutputName(params["OutputWorkspace"])
         return params
 
+    def processGroupByGroup(self, indexes):
+        """
+        Create and submit a task per group. Parameter values are appended if the
+        configuration says so. Otherwise, the value from the master sample is
+        taken.
+
+        Args:
+            indexes (list(int)): list of sample indexes
+        """
+        groups = set()
+        processingParams = dict()
+        for index in indexes:
+            sample = self._samples[index]
+            group = sample.getGroup()
+            if group is not None:
+                groups.add(group)
+        tasks = list()
+        if not groups:
+            return False
+        for group in groups:
+            samples = group.getSamples()
+            master = group.getMaster()
+            for sample in samples:
+                sParameters = sample.getParameterValues()
+                for name, value in sParameters.items():
+                    if name in RundexSettings.GROUPED_COLUMNS[self.acquisitionMode]:
+                        if name in processingParams:
+                            processingParams[name] += ("," + str(value))
+                        else:
+                            processingParams[name] = str(value)
+                    elif sample == master:
+                        processingParams[name] = value
+            for p in self._parameters:
+                if p.getName() not in processingParams:
+                    processingParams[p.getName()] = p.getValue()
+            task = DrillTask(group.getName(), self.algorithm, **processingParams)
+            for sample in samples:
+                task.addStartedCallback(sample.onProcessStarted)
+                task.addSuccessCallback(sample.onProcessSuccess)
+                task.addErrorCallback(sample.onProcessError)
+            tasks.append(task)
+        self.tasksPool.addProcesses(tasks)
+        return True
+
     def process(self, elements):
         """
         Start samples processing. The method first checks that all the samples
