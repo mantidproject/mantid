@@ -49,7 +49,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
             column (int): column index
             text (str): string to be written in the cell
         """
-        columnIndex = self.drill.table.columns.index(column)
+        columnIndex = self.drill.table._columns.index(column)
         y = self.drill.table.rowViewportPosition(row) + 5
         x = self.drill.table.columnViewportPosition(columnIndex) + 5
         QTest.mouseClick(self.drill.table.viewport(),
