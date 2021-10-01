@@ -266,7 +266,13 @@ class DrillPresenter:
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
         if group:
-            result = self.model.processGroup(rows)
+            acquisionMode = self.model.getAcquisitionMode()
+            if ((acquisionMode in RundexSettings.PROCESSING_MODE)
+                and (RundexSettings.PROCESSING_MODE[acquisionMode]
+                    == RundexSettings.GROUP_BY_GROUP)):
+                result = self.model.processGroupByGroup(rows)
+            else:
+                result = self.model.processGroup(rows)
         else:
             result = self.model.process(rows)
         if not result:
