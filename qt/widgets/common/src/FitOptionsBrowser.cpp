@@ -368,7 +368,7 @@ void FitOptionsBrowser::updateMinimizer() {
   auto minimizerProperties = minimizer->getProperties();
   for (auto &minimizerProperty : minimizerProperties) {
     auto prop = createPropertyProperty(minimizerProperty);
-    if (nullptr != prop) {
+    if (prop) {
       m_minimizerGroup->addSubProperty(prop);
     }
   }

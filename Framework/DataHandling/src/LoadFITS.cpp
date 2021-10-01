@@ -410,9 +410,9 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths, const std::str
   size_t fileNumberInGroup = 0;
   WorkspaceGroup_sptr wsGroup;
 
-  if (AnalysisDataService::Instance().doesExist(outWSName)) {
+  if (auto &ads = AnalysisDataService::Instance(); ads.doesExist(outWSName)) {
     // Get the name of the latest file in group to start numbering from
-    wsGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(outWSName);
+    wsGroup = ads.retrieveWS<WorkspaceGroup>(outWSName);
     std::string latestName = wsGroup->getNames().back();
     // Set next file number
     fileNumberInGroup = fetchNumber(latestName) + 1;
