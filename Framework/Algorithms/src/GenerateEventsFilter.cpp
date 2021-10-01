@@ -114,14 +114,18 @@ void GenerateEventsFilter::init() {
                       std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
-                  "Tolerance in time for the event times to keep; it is used in the case to filter by single value.");
+                  "Tolerance, in seconds, for the event times to keep.  It is used in the case to filter by single "
+                  "value. How TimeTolerance is applied is highly correlated to LogBoundary and PulseFilter.  Check the "
+                  "help or algorithm documents for details.");
   setPropertySettings("TimeTolerance", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = std::make_shared<StringListValidator>(logboundoptions);
   declareProperty("LogBoundary", "Centre", logvalidator,
-                  "How to treat log values as being measured in the centre of time\n"
-                  "There are three options, 'Centre', 'Left' and 'Other'. ");
+                  "How to treat log values as being measured in the centre of time. "
+                  "There are three options, 'Centre', 'Left' and 'Other'. "
+                  "This value must be set to Left if the sample log is recorded upon changing,"
+                  "which applies to most of the sample environment devices in SNS.");
   setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty(
