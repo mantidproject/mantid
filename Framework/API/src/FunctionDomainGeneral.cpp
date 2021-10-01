@@ -10,8 +10,7 @@
 #include "MantidAPI/FunctionDomainGeneral.h"
 #include "MantidAPI/Column.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Return the number of arguments in the domain
 size_t FunctionDomainGeneral::size() const { return m_columns.empty() ? 0 : m_columns.front()->size(); }
@@ -36,5 +35,4 @@ void FunctionDomainGeneral::addColumn(const std::shared_ptr<Column> &column) {
 /// @param i :: Index of a column to get.
 std::shared_ptr<Column> FunctionDomainGeneral::getColumn(size_t i) const { return m_columns.at(i); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

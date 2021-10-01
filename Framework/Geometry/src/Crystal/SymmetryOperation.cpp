@@ -10,8 +10,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Default constructor, results in identity.
 SymmetryOperation::SymmetryOperation()
@@ -319,5 +318,4 @@ SymmetryOperation getUnitCellIntervalOperation(const SymmetryOperation &symOp) {
   return SymmetryOperation(symOp.matrix(), getWrappedVector(symOp.vector()));
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

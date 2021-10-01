@@ -17,8 +17,7 @@
 using Mantid::HistogramData::HistogramX;
 using Mantid::HistogramData::HistogramY;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FFTDerivative)
@@ -186,5 +185,4 @@ void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re, HistogramY
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

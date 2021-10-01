@@ -10,8 +10,7 @@
 
 #include <functional>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using namespace Kernel;
 
@@ -68,5 +67,4 @@ SymmetryOperation GroupTransformation::transformOperation(const SymmetryOperatio
 
 void GroupTransformation::setInverseFromPair() { m_inversePair = m_matrixVectorPair.getInverse(); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

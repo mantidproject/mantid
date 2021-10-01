@@ -37,14 +37,13 @@ void copyDataRange(const MatrixWorkspace_const_sptr &inputWorkspace, const Matri
   auto const xMinIndex = static_cast<int>(inputWorkspace->yIndexOfX(xMin, 0));
   auto const xMaxIndex = static_cast<int>(inputWorkspace->yIndexOfX(xMax, 0));
 
-  copyDataRange(inputWorkspace, std::move(destWorkspace), specMin, specMax, xMinIndex, xMaxIndex, yInsertionIndex,
+  copyDataRange(inputWorkspace, destWorkspace, specMin, specMax, xMinIndex, xMaxIndex, yInsertionIndex,
                 xInsertionIndex);
 }
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CopyDataRange)
 
@@ -163,5 +162,4 @@ void CopyDataRange::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

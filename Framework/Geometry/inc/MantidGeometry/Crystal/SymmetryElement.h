@@ -45,7 +45,7 @@ public:
   std::string hmSymbol() const { return m_hmSymbol; }
 
 protected:
-  SymmetryElement(const std::string &symbol);
+  SymmetryElement(std::string symbol);
 
   std::string m_hmSymbol;
 };

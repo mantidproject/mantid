@@ -12,9 +12,9 @@
 #include "MantidKernel/Unit.h"
 #include "MantidNexus/NexusIOHelper.h"
 #include <algorithm>
+#include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /** Constructor
  *
@@ -28,14 +28,13 @@ namespace DataHandling {
  * @param scheduler :: the ThreadScheduler that runs this task.
  * @param framePeriodNumbers :: Period numbers corresponding to each frame
  */
-LoadBankFromDiskTask::LoadBankFromDiskTask(DefaultEventLoader &loader, const std::string &entry_name,
-                                           const std::string &entry_type, const std::size_t numEvents,
-                                           const bool oldNeXusFileNames, API::Progress *prog,
-                                           std::shared_ptr<std::mutex> ioMutex, Kernel::ThreadScheduler &scheduler,
-                                           const std::vector<int> &framePeriodNumbers)
-    : m_loader(loader), entry_name(entry_name), entry_type(entry_type), prog(prog), scheduler(scheduler),
-      m_loadError(false), m_oldNexusFileNames(oldNeXusFileNames), m_have_weight(false),
-      m_framePeriodNumbers(framePeriodNumbers) {
+LoadBankFromDiskTask::LoadBankFromDiskTask(DefaultEventLoader &loader, std::string entry_name, std::string entry_type,
+                                           const std::size_t numEvents, const bool oldNeXusFileNames,
+                                           API::Progress *prog, std::shared_ptr<std::mutex> ioMutex,
+                                           Kernel::ThreadScheduler &scheduler, std::vector<int> framePeriodNumbers)
+    : m_loader(loader), entry_name(std::move(entry_name)), entry_type(std::move(entry_type)), prog(prog),
+      scheduler(scheduler), m_loadError(false), m_oldNexusFileNames(oldNeXusFileNames), m_have_weight(false),
+      m_framePeriodNumbers(std::move(framePeriodNumbers)) {
   setMutex(ioMutex);
   m_cost = static_cast<double>(numEvents);
   m_min_id = std::numeric_limits<uint32_t>::max();
@@ -457,5 +456,4 @@ int64_t LoadBankFromDiskTask::recalculateDataSize(const int64_t &size) {
   return size;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/ExecutionMode.h"
 
-namespace Mantid {
-namespace Parallel {
+namespace Mantid::Parallel {
 
 /// Returns the corresponding ExecutionMode for a given StorageMode.
 ExecutionMode getCorrespondingExecutionMode(StorageMode storageMode) {
@@ -41,5 +40,4 @@ std::string toString(ExecutionMode mode) {
   }
 }
 
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel

@@ -15,9 +15,7 @@
 
 using std::size_t;
 
-namespace Mantid {
-namespace Kernel {
-namespace VectorHelper {
+namespace Mantid::Kernel::VectorHelper {
 
 /** Creates a new output X array given a 'standard' set of rebinning parameters.
  *  @param[in]  params Rebin parameters input [x_1, delta_1,x_2, ...
@@ -735,6 +733,4 @@ template DLLExport std::vector<float> splitStringIntoVector<float>(std::string l
 template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString);
 template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
 
-} // End namespace VectorHelper
-} // End namespace Kernel
-} // End namespace Mantid
+} // namespace Mantid::Kernel::VectorHelper

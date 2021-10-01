@@ -20,9 +20,7 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_version.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 namespace {
 // Get a reference to the logger
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
@@ -152,6 +150,4 @@ void LevenbergMarquardtMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix 
 #endif
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

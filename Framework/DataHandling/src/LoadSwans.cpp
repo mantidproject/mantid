@@ -16,8 +16,7 @@
 #include <fstream>
 #include <map>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -271,5 +270,4 @@ unsigned int LoadSwans::getDetectorSize() {
   return x_size * y_size;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

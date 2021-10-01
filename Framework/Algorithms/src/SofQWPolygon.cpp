@@ -18,8 +18,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofQWPolygon)
@@ -183,5 +182,4 @@ void SofQWPolygon::initThetaCache(const API::MatrixWorkspace &workspace) {
   g_log.information() << "Calculated detector width in theta=" << (m_thetaWidth * 180.0 / M_PI) << " degrees.\n";
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

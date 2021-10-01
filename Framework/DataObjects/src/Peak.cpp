@@ -25,8 +25,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
@@ -48,7 +47,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::
   // Initialization of m_inst, sourcePos, m_samplePos
   setInstrument(m_inst);
   // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName, m_initialEnergy, m_finalEnergy
-  setQLabFrame(QLabFrame, std::move(detectorDistance));
+  setQLabFrame(QLabFrame, detectorDistance);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -70,7 +69,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::
   // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
   // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName, m_initialEnergy, m_finalEnergy
-  this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
+  this->setQSampleFrame(QSampleFrame, detectorDistance);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -187,7 +186,7 @@ Peak::Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak, const Geometry::In
            boost::optional<double> detectorDistance)
     : BasePeak(lpeak) {
   this->setInstrument(inst);
-  this->setQLabFrame(lpeak.getQLabFrame(), std::move(detectorDistance));
+  this->setQLabFrame(lpeak.getQLabFrame(), detectorDistance);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -765,5 +764,4 @@ Mantid::Kernel::V3D Peak::getDetectorPosition() const {
 
 Mantid::Kernel::Logger Peak::g_log("PeakLogger");
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

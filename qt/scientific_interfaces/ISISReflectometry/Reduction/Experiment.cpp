@@ -8,9 +8,7 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cmath>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Experiment::Experiment()
     : m_analysisMode(AnalysisMode::PointDetector), m_reductionType(ReductionType::Normal),
@@ -31,9 +29,8 @@ Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, S
                        // cppcheck-suppress passedByValue
                        LookupTable lookupTable)
     : m_analysisMode(analysisMode), m_reductionType(reductionType), m_summationType(summationType),
-      m_includePartialBins(includePartialBins), m_debug(debug),
-      m_backgroundSubtraction(std::move(backgroundSubtraction)),
-      m_polarizationCorrections(std::move(polarizationCorrections)), m_floodCorrections(std::move(floodCorrections)),
+      m_includePartialBins(includePartialBins), m_debug(debug), m_backgroundSubtraction(backgroundSubtraction),
+      m_polarizationCorrections(polarizationCorrections), m_floodCorrections(std::move(floodCorrections)),
       m_transmissionStitchOptions(std::move(transmissionStitchOptions)),
       m_stitchParameters(std::move(stitchParameters)), m_lookupTable(std::move(lookupTable)) {}
 
@@ -98,6 +95,4 @@ bool operator==(Experiment const &lhs, Experiment const &rhs) {
          lhs.transmissionStitchOptions() == rhs.transmissionStitchOptions() &&
          lhs.stitchParameters() == rhs.stitchParameters() && lhs.lookupTable() == rhs.lookupTable();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

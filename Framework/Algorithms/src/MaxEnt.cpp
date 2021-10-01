@@ -29,8 +29,7 @@
 #include <gsl/gsl_linalg.h>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
@@ -892,11 +891,11 @@ void MaxEnt::populateImageWS(MatrixWorkspace_const_sptr &inWS, size_t spec, size
     }
   }
 
-  outWS->mutableX(spec) = std::move(X);
-  outWS->mutableY(spec) = std::move(YR);
-  outWS->mutableE(spec) = std::move(E);
+  outWS->mutableX(spec) = X;
+  outWS->mutableY(spec) = YR;
+  outWS->mutableE(spec) = E;
   outWS->setSharedX(nspec + spec, outWS->sharedX(spec));
-  outWS->mutableY(nspec + spec) = std::move(YI);
+  outWS->mutableY(nspec + spec) = YI;
   outWS->setSharedE(nspec + spec, outWS->sharedE(spec));
 }
 
@@ -968,14 +967,13 @@ void MaxEnt::populateDataWS(MatrixWorkspace_const_sptr &inWS, size_t spec, size_
       }
     }
 
-    outWS->mutableX(specA) = std::move(X);
-    outWS->mutableY(specA) = std::move(YR);
-    outWS->mutableE(specA) = std::move(E);
-    outWS->mutableY(nspec + specA) = std::move(YI);
+    outWS->mutableX(specA) = X;
+    outWS->mutableY(specA) = YR;
+    outWS->mutableE(specA) = E;
+    outWS->mutableY(nspec + specA) = YI;
     outWS->setSharedX(nspec + specA, outWS->sharedX(spec));
     outWS->setSharedE(nspec + specA, outWS->sharedE(spec));
   } // Next spectrum if concatenated
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

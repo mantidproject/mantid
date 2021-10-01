@@ -11,8 +11,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using std::size_t;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Multiply)
 
@@ -202,5 +201,4 @@ std::string Multiply::checkSizeCompatibility(const API::MatrixWorkspace_const_sp
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

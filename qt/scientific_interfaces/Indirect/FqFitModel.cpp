@@ -113,7 +113,7 @@ std::string extractSpectrum(const MatrixWorkspace_sptr &workspace, int index, st
 std::string extractHWHMSpectrum(const MatrixWorkspace_sptr &workspace, int index) {
   auto const scaledName = "__scaled_" + std::to_string(index);
   auto const extractedName = "__extracted_" + std::to_string(index);
-  auto const outputName = scaleWorkspace(extractSpectrum(std::move(workspace), index, extractedName), scaledName, 0.5);
+  auto const outputName = scaleWorkspace(extractSpectrum(workspace, index, extractedName), scaledName, 0.5);
   deleteTemporaryWorkspaces({extractedName});
   return outputName;
 }
@@ -186,9 +186,7 @@ boost::optional<std::vector<std::size_t>> getSpectrum(const FqFitParameters &par
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitModel::FqFitModel() : m_adsInstance(Mantid::API::AnalysisDataService::Instance()) { m_fitType = FQFIT_STRING; }
 
@@ -236,7 +234,7 @@ FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace, cons
   const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  return m_fqFitParameters[hwhmName] = std::move(parameters);
+  return m_fqFitParameters[hwhmName] = parameters;
 }
 
 FqFitParameters FqFitModel::createFqFitParameters(MatrixWorkspace *workspace) {
@@ -353,6 +351,4 @@ bool FqFitModel::allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &wor
   return true;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

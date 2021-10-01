@@ -15,8 +15,7 @@
 #include <boost/lexical_cast.hpp>
 #include <set>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 DECLARE_FUNCTION(MultiDomainFunction)
 
@@ -348,5 +347,4 @@ std::vector<IFunction_sptr> MultiDomainFunction::createEquivalentFunctions() con
   return outFunctions;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

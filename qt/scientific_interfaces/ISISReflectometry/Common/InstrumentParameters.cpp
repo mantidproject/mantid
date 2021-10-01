@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentParameters.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 InstrumentParameters::InstrumentParameters(Mantid::Geometry::Instrument_const_sptr instrument)
     : m_instrument(std::move(instrument)) {}
 
@@ -22,6 +20,4 @@ std::vector<MissingInstrumentParameterValue> const &InstrumentParameters::missin
 bool InstrumentParameters::hasMissingValues() const { return !m_missingValueErrors.empty(); }
 
 std::string const &MissingInstrumentParameterValue::parameterName() const { return m_parameterName; }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

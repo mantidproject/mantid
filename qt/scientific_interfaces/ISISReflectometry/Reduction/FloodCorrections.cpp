@@ -8,9 +8,7 @@
 
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 FloodCorrections::FloodCorrections(FloodCorrectionType correctionType, boost::optional<std::string> workspace)
     : m_correctionType(correctionType), m_workspace(std::move(workspace)) {}
@@ -24,6 +22,4 @@ bool operator!=(FloodCorrections const &lhs, FloodCorrections const &rhs) { retu
 bool operator==(FloodCorrections const &lhs, FloodCorrections const &rhs) {
   return lhs.correctionType() == rhs.correctionType() && lhs.workspace() == rhs.workspace();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -20,8 +20,7 @@
 #include <cstdio> //Required for gcc 4.4
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadRawSpectrum0)
 
@@ -148,5 +147,4 @@ void LoadRawSpectrum0::exec() {
   reset();
   fclose(file);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

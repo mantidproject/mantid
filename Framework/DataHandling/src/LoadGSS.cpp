@@ -31,8 +31,7 @@ using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadGSS)
 
@@ -378,9 +377,9 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename, boo
       }
 
       // store read in data (x, y, e) to vector
-      vecX.emplace_back(std::move(xValue));
-      vecY.emplace_back(std::move(yValue));
-      vecE.emplace_back(std::move(eValue));
+      vecX.emplace_back(xValue);
+      vecY.emplace_back(yValue);
+      vecE.emplace_back(eValue);
     } // Date Line
     else {
       g_log.warning() << "Line not defined: " << currentLine << '\n';
@@ -540,6 +539,4 @@ void LoadGSS::createInstrumentGeometry(const MatrixWorkspace_sptr &workspace, co
     paramMap.addDouble(detector->getComponentID(), "DIFC", difcs[i]);
   }
 }
-} // namespace DataHandling
-
-} // namespace Mantid
+} // namespace Mantid::DataHandling

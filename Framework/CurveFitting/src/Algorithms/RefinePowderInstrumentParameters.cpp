@@ -49,9 +49,7 @@ using namespace Mantid::HistogramData;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(RefinePowderInstrumentParameters)
 
@@ -423,8 +421,7 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(const TableW
 
   // 2. Parse parameter (table) workspace
   vector<double> stepsizes, lowerbounds, upperbounds;
-  importMonteCarloParametersFromTable(std::move(parameterWS), m_PeakFunctionParameterNames, stepsizes, lowerbounds,
-                                      upperbounds);
+  importMonteCarloParametersFromTable(parameterWS, m_PeakFunctionParameterNames, stepsizes, lowerbounds, upperbounds);
 
   stringstream dbss;
   for (size_t i = 0; i < m_PeakFunctionParameterNames.size(); ++i) {
@@ -1145,6 +1142,4 @@ DataObjects::TableWorkspace_sptr RefinePowderInstrumentParameters::genOutputInst
   return newtablews;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

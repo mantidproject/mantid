@@ -16,8 +16,7 @@
 
 namespace {
 
-MatrixWorkspace_sptr cropWorkspace(const MatrixWorkspace_sptr &workspace,
-                                   double startX, double endX) {
+MatrixWorkspace_sptr cropWorkspace(const MatrixWorkspace_sptr &workspace, double startX, double endX) {
   auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
   cropper->setAlwaysStoreInADS(false);
   cropper->setProperty("InputWorkspace", workspace);
@@ -38,14 +37,12 @@ MatrixWorkspace_sptr convertToPointData(const MatrixWorkspace_sptr &workspace) {
 }
 
 IFunction_sptr createFlatBackground(double height = 0.0) {
-  auto flatBackground =
-      FunctionFactory::Instance().createFunction("FlatBackground");
+  auto flatBackground = FunctionFactory::Instance().createFunction("FlatBackground");
   flatBackground->setParameter("A0", height);
   return flatBackground;
 }
 
-IFunction_sptr createGaussian(double height = 0.0, double peakCentre = 0.0,
-                              double sigma = 0.0) {
+IFunction_sptr createGaussian(double height = 0.0, double peakCentre = 0.0, double sigma = 0.0) {
   auto gaussian = FunctionFactory::Instance().createFunction("Gaussian");
   gaussian->setParameter("Height", height);
   gaussian->setParameter("PeakCentre", peakCentre);
@@ -53,9 +50,7 @@ IFunction_sptr createGaussian(double height = 0.0, double peakCentre = 0.0,
   return gaussian;
 }
 
-IFunction_sptr createGaussian(const Mantid::MantidVec &xData,
-                              const Mantid::MantidVec &yData,
-                              double backgroundHeight) {
+IFunction_sptr createGaussian(const Mantid::MantidVec &xData, const Mantid::MantidVec &yData, double backgroundHeight) {
   const auto maxValue = *std::max_element(yData.begin(), yData.end());
 
   auto sigma(0.0);
@@ -75,9 +70,7 @@ IFunction_sptr createGaussian(const Mantid::MantidVec &xData,
   return createGaussian(maxValue - backgroundHeight, centre, sigma);
 }
 
-CompositeFunction_sptr
-createCompositeFunction(const IFunction_sptr &flatBackground,
-                        const IFunction_sptr &gaussian) {
+CompositeFunction_sptr createCompositeFunction(const IFunction_sptr &flatBackground, const IFunction_sptr &gaussian) {
   auto composite = std::make_shared<CompositeFunction>();
   composite->addFunction(flatBackground);
   composite->addFunction(gaussian);
@@ -88,16 +81,12 @@ createCompositeFunction(const IFunction_sptr &flatBackground,
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel()
-    : m_estimateFunction(nullptr) {}
+PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel() : m_estimateFunction(nullptr) {}
 
-IFunction_sptr
-PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
-                                const std::pair<double, double> &range,
-                                const IFunction_sptr func) {
+IFunction_sptr PlotFitAnalysisPaneModel::doFit(const std::string &wsName, const std::pair<double, double> &range,
+                                               const IFunction_sptr func) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
   alg->initialize();
@@ -110,8 +99,8 @@ PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
   return alg->getProperty("Function");
 }
 
-IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(
-    const std::string &workspaceName, const std::pair<double, double> &range) {
+IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(const std::string &workspaceName,
+                                                           const std::pair<double, double> &range) {
   auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
@@ -124,24 +113,19 @@ IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(
   }
 }
 
-IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(
-    MatrixWorkspace_sptr &workspace, const std::pair<double, double> &range) {
+IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(MatrixWorkspace_sptr &workspace,
+                                                           const std::pair<double, double> &range) {
   workspace = cropWorkspace(workspace, range.first, range.second);
   workspace = convertToPointData(workspace);
 
   const auto xData = workspace->readX(0);
   const auto yData = workspace->readY(0);
 
-  const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) /
-                          static_cast<double>(yData.size());
+  const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
-  return createCompositeFunction(createFlatBackground(background),
-                                 createGaussian(xData, yData, background));
+  return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
 }
 
-bool PlotFitAnalysisPaneModel::hasEstimate() const {
-  return m_estimateFunction != nullptr;
-}
+bool PlotFitAnalysisPaneModel::hasEstimate() const { return m_estimateFunction != nullptr; }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

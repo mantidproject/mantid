@@ -68,7 +68,7 @@ unsigned vax_to_local_int(const fort_int *i) {
 #endif /* WORDS_BIGENDIAN */
 }
 
-void local_to_vax_shorts(unsigned short *sa, const int *n) {
+void local_to_vax_shorts(const unsigned short *sa, const int *n) {
 #if defined(WORDS_BIGENDIAN)
   int i;
   for (i = 0; i < *n; i++) {
@@ -79,7 +79,7 @@ void local_to_vax_shorts(unsigned short *sa, const int *n) {
   (void)n; // Avoid compiler warning
 }
 
-void vax_to_local_shorts(unsigned short *sa, const int *n) {
+void vax_to_local_shorts(const unsigned short *sa, const int *n) {
 #if defined(WORDS_BIGENDIAN)
   int i;
   for (i = 0; i < *n; i++) {
@@ -90,7 +90,7 @@ void vax_to_local_shorts(unsigned short *sa, const int *n) {
   (void)n; // Avoid compiler warning
 }
 
-void local_to_vax_ints(fort_int *ia, const fort_int *n) {
+void local_to_vax_ints(const fort_int *ia, const fort_int *n) {
 #if defined(WORDS_BIGENDIAN)
   int i;
   unsigned *uia = (unsigned *)ia;
@@ -102,7 +102,7 @@ void local_to_vax_ints(fort_int *ia, const fort_int *n) {
   (void)n; // Avoid compiler warning
 }
 
-void vax_to_local_ints(fort_int *ia, const fort_int *n) {
+void vax_to_local_ints(const fort_int *ia, const fort_int *n) {
 #if defined(WORDS_BIGENDIAN)
   int i;
   unsigned *uia = (unsigned *)ia;
@@ -387,7 +387,7 @@ void local_to_vaxf(float *val, const int *n, int *errcode) {
 #endif
 }
 
-void ieee_float_to_local(float *val, const int *n, int *errcode) {
+void ieee_float_to_local(const float *val, const int *n, int *errcode) {
 #if defined(IEEEFP)
   (void)val;
   (void)n; // Avoid compiler warning
@@ -407,7 +407,7 @@ void ieee_float_to_local(float *val, const int *n, int *errcode) {
 #endif
 }
 
-void ieee_double_to_local(double *val, const int *n, int *errcode) {
+void ieee_double_to_local(const double *val, const int *n, int *errcode) {
 #if defined(IEEEFP)
   (void)val;
   (void)n; // Avoid compiler warning
@@ -428,7 +428,7 @@ void ieee_double_to_local(double *val, const int *n, int *errcode) {
 #endif
 }
 
-void local_to_ieee_float(float *val, const int *n, int *errcode) {
+void local_to_ieee_float(const float *val, const int *n, int *errcode) {
 #if defined(IEEEFP)
   (void)val;
   (void)n; // Avoid compiler warning
@@ -449,7 +449,7 @@ void local_to_ieee_float(float *val, const int *n, int *errcode) {
 #endif
 }
 
-void local_to_ieee_double(double *val, const int *n, int *errcode) {
+void local_to_ieee_double(const double *val, const int *n, int *errcode) {
 #if defined(IEEEFP)
   (void)val;
   (void)n; // Avoid compiler warning

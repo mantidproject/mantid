@@ -7,8 +7,7 @@
 #include "MantidKernel/StringContainsValidator.h"
 #include <memory>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor
  */
@@ -64,5 +63,4 @@ std::string StringContainsValidator::checkValidity(const std::string &value) con
   return error;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

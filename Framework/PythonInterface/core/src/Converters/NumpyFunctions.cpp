@@ -12,21 +12,18 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Converters {
-namespace Impl {
+namespace Mantid::PythonInterface::Converters::Impl {
 
 PyObject *func_PyArray_IterNew(PyArrayObject *arr) { return PyArray_IterNew(reinterpret_cast<PyObject *>(arr)); }
 
-PyArrayObject *func_PyArray_NewFromDescr(int datatype, const int ndims, Py_intptr_t *dims) {
+PyArrayObject *func_PyArray_NewFromDescr(int datatype, int ndims, Py_intptr_t *dims) {
   return reinterpret_cast<PyArrayObject *>(PyArray_NewFromDescr(&PyArray_Type, PyArray_DescrFromType(datatype),
                                                                 ndims, // rank
                                                                 dims,  // Length in each dimension
                                                                 nullptr, nullptr, 0, nullptr));
 }
 
-PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, const int ndims, Py_intptr_t *dims) {
+PyArrayObject *func_PyArray_NewFromDescr(const char *datadescr, int ndims, Py_intptr_t *dims) {
   // convert the string description to an actual description
   PyArray_Descr *descr = func_PyArray_Descr(datadescr);
 
@@ -46,7 +43,4 @@ PyArray_Descr *func_PyArray_Descr(const char *datadescr) {
 
   return descr;
 }
-} // namespace Impl
-} // namespace Converters
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Converters::Impl

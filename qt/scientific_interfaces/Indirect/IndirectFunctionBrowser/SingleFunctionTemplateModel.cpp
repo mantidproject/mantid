@@ -13,9 +13,7 @@
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include <unordered_map>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 namespace {
 // Sort the function list, keep existing order just rotate the None entry into
@@ -138,6 +136,4 @@ boost::optional<QString> SingleFunctionTemplateModel::findFitTypeForFunctionName
   return boost::none;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -31,8 +31,7 @@ namespace {
 Mantid::Kernel::Logger g_log("Function Browser");
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -180,7 +179,7 @@ void FunctionBrowser::setCurrentDataset(int i) { m_presenter->setCurrentDataset(
 
 /// Remove local parameter values for a number of datasets.
 /// @param indices :: A list of indices of datasets to remove.
-void FunctionBrowser::removeDatasets(const QList<int> &indices) { m_presenter->removeDatasets(std::move(indices)); }
+void FunctionBrowser::removeDatasets(const QList<int> &indices) { m_presenter->removeDatasets(indices); }
 
 /// Add some datasets to those already set.
 /// @param names :: A list of names for the new datasets.
@@ -303,5 +302,4 @@ void FunctionBrowser::hideGlobalCheckbox() { m_presenter->hideGlobals(); }
 
 void FunctionBrowser::showGlobalCheckbox() { m_presenter->showGlobals(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

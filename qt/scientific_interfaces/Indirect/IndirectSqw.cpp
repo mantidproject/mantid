@@ -48,8 +48,7 @@ std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &t
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -278,5 +277,4 @@ void IndirectSqw::updateRunButton(bool enabled, std::string const &enableOutputB
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

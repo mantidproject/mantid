@@ -15,8 +15,7 @@
 #include <fstream>
 #include <string>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register algorithm with AlgorithmFactory
 DECLARE_ALGORITHM(SaveVTK)
@@ -217,5 +216,4 @@ void SaveVTK::writeVTKPiece(std::ostream &outVTP, const std::vector<double> &xVa
   // End of this piece
   outVTP << "</Piece>\n";
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -25,8 +25,7 @@
 #include <Poco/Environment.h>
 #endif
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //--------------------------------------------------------------------------------
 /** Constructor
@@ -186,5 +185,4 @@ void ThreadPool::joinAll() {
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -26,8 +26,7 @@ void saveNexusProcessed(std::string const &workspaceName, std::string const &fil
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -354,5 +353,4 @@ void ILLEnergyTransfer::updateRunButton(bool enabled, std::string const &enableO
   m_uiForm.pbRun->setToolTip(tooltip);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

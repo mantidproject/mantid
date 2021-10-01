@@ -44,8 +44,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
@@ -1035,7 +1034,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
     LeanElasticPeak peak;
     peak.setGoniometerMatrix(goniometer.getR());
     peak.setRunNumber(peakWS->getRunNumber());
-    peakWS->addPeak(std::move(peak));
+    peakWS->addPeak(peak);
   }
 
   for (const auto &str : columnNames) {
@@ -2379,7 +2378,7 @@ size_t LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspec
  *
  * @param local_workspace :: the workspace containing logs to be filtered
  */
-void LoadNexusProcessed::applyLogFiltering(Mantid::API::Workspace_sptr local_workspace) {
+void LoadNexusProcessed::applyLogFiltering(const Mantid::API::Workspace_sptr &local_workspace) {
   auto mWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(local_workspace);
   if (mWorkspace) {
     auto run = mWorkspace->run();
@@ -2390,5 +2389,4 @@ void LoadNexusProcessed::applyLogFiltering(Mantid::API::Workspace_sptr local_wor
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

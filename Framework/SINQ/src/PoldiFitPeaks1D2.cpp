@@ -24,9 +24,9 @@
 
 #include <boost/math/distributions/normal.hpp>
 #include <functional>
+#include <utility>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Kernel;
 using namespace API;
@@ -49,7 +49,7 @@ RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples) : m
   setRangeBorders(peak->q() - extent, peak->q() + extent);
 }
 
-RefinedRange::RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks) : m_peaks(peaks) {
+RefinedRange::RefinedRange(double xStart, double xEnd, std::vector<PoldiPeak_sptr> peaks) : m_peaks(std::move(peaks)) {
 
   setRangeBorders(xStart, xEnd);
 }
@@ -379,5 +379,4 @@ IAlgorithm_sptr PoldiFitPeaks1D2::getFitAlgorithm(const Workspace2D_sptr &dataWo
   return fitAlgorithm;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

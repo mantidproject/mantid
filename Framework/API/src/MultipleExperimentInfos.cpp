@@ -16,8 +16,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Copy constructor
@@ -123,5 +122,4 @@ const std::string MultipleExperimentInfos::toString() const {
   return os.str();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

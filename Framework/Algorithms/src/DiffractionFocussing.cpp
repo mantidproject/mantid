@@ -17,8 +17,7 @@
 #include <limits>
 #include <map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing)
@@ -248,5 +247,4 @@ std::multimap<int64_t, int64_t> DiffractionFocussing::readGroupingFile(const std
   return detectorGroups;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

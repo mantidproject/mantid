@@ -223,7 +223,7 @@ int IDCAgetparc(idc_handle_t fh, const char *name, char **value, int dims_array[
 #ifdef _WIN32
 void __stdcall IDCFOPEN(const char *host, unsigned len_host, int *mode, int *options, int fh[], int *errcode)
 #else
-void idcfopen_(const char *host, int *mode, int *options, int fh[], int *errcode, unsigned len_host)
+void idcfopen_(const char *host, const int *mode, const int *options, int fh[], int *errcode, unsigned len_host)
 #endif
 {
   int stat;
@@ -334,7 +334,7 @@ void idcfgetparc_(int fh[], const char *name, char *value, int dims_array[], int
 #ifdef _WIN32
 void __stdcall IDCFGETDAT(int fh[], int *ifsn, int *nos, int value[], int dims_array[], int *ndims, int *errcode)
 #else
-void idcfgetdat_(int fh[], int *ifsn, int *nos, int value[], int dims_array[], int *ndims, int *errcode)
+void idcfgetdat_(int fh[], const int *ifsn, const int *nos, int value[], int dims_array[], int *ndims, int *errcode)
 #endif
 {
   int stat;

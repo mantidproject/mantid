@@ -19,8 +19,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 
@@ -115,5 +114,4 @@ PyObject *cloneE(MatrixWorkspace &self) {
 PyObject *cloneDx(MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(cloneArray(self, DxValues, 0, self.getNumberHistograms()));
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

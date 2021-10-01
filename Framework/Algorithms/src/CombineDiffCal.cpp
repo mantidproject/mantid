@@ -12,8 +12,7 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
 
@@ -74,7 +73,7 @@ bool findColumn(const std::vector<std::string> &columnNames, const std::string &
   return std::find(columnNames.begin(), columnNames.end(), name) != columnNames.end();
 }
 
-std::string generateErrorString(const DataObjects::TableWorkspace_sptr ws) {
+std::string generateErrorString(const DataObjects::TableWorkspace_sptr &ws) {
   const std::vector<std::string> columnNames = ws->getColumnNames();
 
   std::stringstream error;
@@ -107,7 +106,7 @@ std::map<std::string, std::string> CombineDiffCal::validateInputs() {
   return results;
 }
 
-std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(API::ITableWorkspace_sptr ws, int detid) {
+std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(const API::ITableWorkspace_sptr &ws, int detid) {
   size_t start = 0;
   size_t end = ws->rowCount() - 1;
   while (end >= start) {
@@ -125,7 +124,7 @@ std::shared_ptr<Mantid::API::TableRow> binarySearchForRow(API::ITableWorkspace_s
   return nullptr;
 }
 
-void addRowFromGroupedCalibration(DataObjects::TableWorkspace_sptr ws, Mantid::API::TableRow row) {
+void addRowFromGroupedCalibration(const DataObjects::TableWorkspace_sptr &ws, Mantid::API::TableRow row) {
   Mantid::API::TableRow newRow = ws->appendRow();
   newRow << row.Int(0) << row.Double(1) << row.Double(2) << row.Double(3);
 }
@@ -193,5 +192,4 @@ void CombineDiffCal::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

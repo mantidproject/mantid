@@ -14,8 +14,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::ITableWorkspace_const_sptr;
 using Mantid::API::WorkspaceProperty;
@@ -391,5 +390,4 @@ void PDDetermineCharacterizations::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

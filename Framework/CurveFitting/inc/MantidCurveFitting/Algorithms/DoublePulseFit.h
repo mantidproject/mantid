@@ -111,10 +111,10 @@ private:
 
   std::vector<Mantid::API::MatrixWorkspace_sptr> getWorkspaces() const;
   void declareAdditionalProperties();
-  void runFitAlgorith(Mantid::API::IAlgorithm_sptr fitAlgorithm, Mantid::API::IFunction_sptr function,
+  void runFitAlgorith(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, const Mantid::API::IFunction_sptr &function,
                       int maxIterations);
   void setOutputProperties();
-  void createOutput(Mantid::API::IAlgorithm_sptr fitAlg, Mantid::API::IFunction_sptr function);
+  void createOutput(const Mantid::API::IAlgorithm_sptr &fitAlg, const Mantid::API::IFunction_sptr &function);
 
   bool m_makeOutput;
   bool m_outputFitData;

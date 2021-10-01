@@ -50,8 +50,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D2)
@@ -352,5 +351,4 @@ void SaveCanSAS1D2::writeHeader(const std::string &fileName) {
     throw Exception::FileError("Error opening the output file for writing", fileName);
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

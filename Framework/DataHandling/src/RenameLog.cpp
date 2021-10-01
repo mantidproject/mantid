@@ -13,8 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(RenameLog)
 
@@ -54,5 +53,4 @@ void RenameLog::exec() {
   matrixWS->mutableRun().addProperty(timeprop);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

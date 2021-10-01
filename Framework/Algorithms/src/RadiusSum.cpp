@@ -29,8 +29,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RadiusSum)
@@ -608,5 +607,4 @@ void RadiusSum::setUpOutputWorkspace(const std::vector<double> &values) {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

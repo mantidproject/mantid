@@ -11,8 +11,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 HistoryView::HistoryView(const WorkspaceHistory &wsHist) : m_wsHist(wsHist), m_historyItems() {
   // add all of the top level algorithms to the view by default
@@ -189,5 +188,4 @@ void HistoryView::filterBetweenExecDate(Mantid::Types::Core::DateAndTime start, 
   m_historyItems.erase(lastItem, m_historyItems.end());
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

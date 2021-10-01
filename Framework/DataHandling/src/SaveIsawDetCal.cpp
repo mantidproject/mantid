@@ -26,8 +26,7 @@ using namespace Mantid::Geometry;
 using Mantid::Types::Core::DateAndTime;
 using std::string;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawDetCal)
@@ -274,5 +273,4 @@ void SaveIsawDetCal::sizeBanks(const std::string &bankName, int &NCOLS, int &NRO
     ysize = first->getDistance(*last);
   }
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

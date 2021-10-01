@@ -21,8 +21,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::Kernel;
 
@@ -229,5 +228,4 @@ std::string CheckMantidVersion::getVersionsFromGitHub(const std::string &url) {
 */
 std::string CheckMantidVersion::getCurrentVersion() const { return Mantid::Kernel::MantidVersion::version(); }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

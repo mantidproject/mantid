@@ -33,10 +33,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using Mantid::Kernel::IPropertyManager;
 
-namespace Mantid {
-
-//
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Method of complex validator class
 // method checks if the property is enabled
@@ -758,5 +755,4 @@ void NormaliseToMonitor::normalisationFactor(const BinEdges &X, Counts &Y, Count
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -86,8 +86,7 @@ std::string getAdjustedConstraint(std::string const &constraint) {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel()
     : m_presenter(), m_outputBaseName("Output_Fit"), m_fitDomains(), m_globalParameters(), m_globalTies(),
@@ -753,5 +752,4 @@ void FitScriptGeneratorModel::addGlobalTies(MultiDomainFunction_sptr &function) 
     function->addTies(globalTie.asString());
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

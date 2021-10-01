@@ -16,8 +16,7 @@
 
 using Mantid::DataObjects::PeaksWorkspace;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CentroidPeaks)
@@ -371,5 +370,4 @@ void CentroidPeaks::sizeBanks(const std::string &bankName, int &nCols, int &nRow
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

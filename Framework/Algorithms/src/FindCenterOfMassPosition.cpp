@@ -18,8 +18,7 @@
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindCenterOfMassPosition)
@@ -230,5 +229,4 @@ void FindCenterOfMassPosition::exec() {
   g_log.information() << "Center of Mass found at x=" << center_x << " y=" << center_y << '\n';
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

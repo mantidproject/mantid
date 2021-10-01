@@ -34,9 +34,7 @@ const std::string MSDYIFUNC{"MsdYi"};
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 auto msdFunctionStrings =
     std::map<std::string, std::string>({{"None", ""},
@@ -155,6 +153,4 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
   return parameterEstimation;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

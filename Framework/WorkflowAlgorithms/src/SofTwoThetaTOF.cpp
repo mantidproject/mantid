@@ -86,8 +86,7 @@ std::string ensureXMLExtension(std::string const &filename) {
 }
 } // namespace
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SofTwoThetaTOF)
@@ -230,5 +229,4 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::rebinToNonRagged(API::MatrixWorkspace_
   return rebin->getProperty("OutputWorkspace");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

@@ -8,9 +8,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataView::IndirectFitDataView(QWidget *parent)
     : IIndirectFitDataView(parent), m_dataForm(new Ui::IndirectFitDataView) {
@@ -32,6 +30,4 @@ void IndirectFitDataView::displayWarning(const std::string &warning) {
   QMessageBox::warning(parentWidget(), "MantidPlot - Warning", QString::fromStdString(warning));
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

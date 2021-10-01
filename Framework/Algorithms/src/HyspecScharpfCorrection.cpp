@@ -16,8 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -232,5 +231,4 @@ float HyspecScharpfCorrection::calculateFactor(const double kfki, const double t
   return (factor);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

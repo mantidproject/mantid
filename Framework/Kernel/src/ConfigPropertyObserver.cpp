@@ -7,8 +7,7 @@
 #include "MantidKernel/ConfigPropertyObserver.h"
 #include "MantidKernel/ConfigService.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Begins listening for change notifications from the global ConfigService
@@ -24,5 +23,4 @@ void ConfigPropertyObserver::onValueChanged(const std::string &name, const std::
   if (name == m_propertyName)
     onPropertyValueChanged(newValue, prevValue);
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -77,9 +77,7 @@ public:
 };
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataTablePresenter::IndirectFitDataTablePresenter(IIndirectFitDataTableModel *model, QTableWidget *dataTable)
     : IndirectFitDataTablePresenter(model, dataTable, defaultHeaders()) {}
@@ -220,6 +218,4 @@ void IndirectFitDataTablePresenter::setCellText(const QString &text, FitDomainIn
   m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

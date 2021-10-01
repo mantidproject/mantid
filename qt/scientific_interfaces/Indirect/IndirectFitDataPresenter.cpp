@@ -10,9 +10,7 @@
 
 #include "IndirectAddWorkspaceDialog.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFittingModel *model, IIndirectFitDataView *view)
     : IndirectFitDataPresenter(
@@ -67,7 +65,7 @@ void IndirectFitDataPresenter::updateDataInTable() { m_tablePresenter->updateTab
 
 DataForParameterEstimationCollection
 IndirectFitDataPresenter::getDataForParameterEstimation(const EstimationDataSelector &selector) const {
-  return m_model->getDataForParameterEstimation(std::move(selector));
+  return m_model->getDataForParameterEstimation(selector);
 }
 
 UserInputValidator &IndirectFitDataPresenter::validate(UserInputValidator &validator) {
@@ -116,6 +114,4 @@ void IndirectFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog)
 
 void IndirectFitDataPresenter::displayWarning(const std::string &warning) { m_view->displayWarning(warning); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

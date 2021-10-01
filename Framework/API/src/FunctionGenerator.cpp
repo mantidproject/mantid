@@ -10,8 +10,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 
@@ -340,5 +339,4 @@ IConstraint *FunctionGenerator::getConstraint(size_t i) const {
   return constraint;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -17,8 +17,7 @@
 #include <cstring>
 #include <string>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 //---------------------------------------------------------------------------------------------------------------------------
 // static NexusDescriptor constants
 //---------------------------------------------------------------------------------------------------------------------------
@@ -249,5 +248,4 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
   file.closeGroup();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

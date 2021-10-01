@@ -7,8 +7,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
 #include "boost/make_shared.hpp"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 PoldiTimeTransformer::PoldiTimeTransformer()
     : m_detectorCenter(), m_detectorElementData(), m_detectorEfficiency(0.0), m_chopperSlits(0), m_spectrum() {}
@@ -76,5 +75,4 @@ PoldiTimeTransformer::getDetectorCenterCharacteristics(const PoldiAbstractDetect
   return DetectorElementCharacteristics(static_cast<int>(detector->centralElement()), detector, chopper);
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

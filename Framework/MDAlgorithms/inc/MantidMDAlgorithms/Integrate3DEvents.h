@@ -58,12 +58,12 @@ class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
-                    Kernel::DblMatrix const &UBinv, double radius, const bool useOnePercentBackgroundCorrection = true);
+                    Kernel::DblMatrix UBinv, double radius, const bool useOnePercentBackgroundCorrection = true);
 
   Integrate3DEvents(const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> &peak_q_list,
                     std::vector<Mantid::Kernel::V3D> const &hkl_list, std::vector<Mantid::Kernel::V3D> const &mnp_list,
-                    Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL, double radius_m, double radius_s,
-                    int MaxO, const bool CrossT, const bool useOnePercentBackgroundCorrection = true);
+                    Kernel::DblMatrix UBinv, Kernel::DblMatrix ModHKL, double radius_m, double radius_s, int MaxO,
+                    const bool CrossT, const bool useOnePercentBackgroundCorrection = true);
 
   /// Add event Q's to lists of events near peaks
   void addEvents(std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const &event_qs,

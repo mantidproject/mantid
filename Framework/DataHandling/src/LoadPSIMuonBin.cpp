@@ -31,8 +31,7 @@
 #include <map>
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 const std::map<std::string, std::string> MONTHS{{"JAN", "01"}, {"FEB", "02"}, {"MAR", "03"}, {"APR", "04"},
@@ -596,7 +595,7 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(DataObjects::Workspace2D_s
     const bool isSpace = name.find_first_not_of(" ") == std::string::npos;
     std::string label = isSpace ? "group_" + std::to_string(i + 1) : m_header.labelsOfHistograms[i];
 
-    addToSampleLog("Label Spectra " + std::to_string(i), std::move(label), outputWorkspace);
+    addToSampleLog("Label Spectra " + std::to_string(i), label, outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);
@@ -846,5 +845,4 @@ void LoadPSIMuonBin::readInTemperatureFile(DataObjects::Workspace2D_sptr &ws) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

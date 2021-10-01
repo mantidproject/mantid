@@ -10,9 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidIndexing/IndexInfo.h"
 
-namespace Mantid {
-namespace DataObjects {
-namespace detail {
+namespace Mantid::DataObjects::detail {
 HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
   histogram.setSharedY(nullptr);
   histogram.setSharedE(nullptr);
@@ -89,6 +87,4 @@ template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::true_type>(const 
                                                                           API::MatrixWorkspace &);
 template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::false_type>(const API::MatrixWorkspace &,
                                                                            API::MatrixWorkspace &);
-} // namespace detail
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects::detail

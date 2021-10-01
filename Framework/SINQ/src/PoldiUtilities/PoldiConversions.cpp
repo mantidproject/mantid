@@ -10,11 +10,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-
-namespace Poldi {
-
-namespace Conversions {
+namespace Mantid::Poldi::Conversions {
 
 /* Unit conversion functions dtoTOF and TOFtod
  *
@@ -97,6 +93,4 @@ double degToRad(double degree) { return degree / 180.0 * M_PI; }
  * @return angle in degrees
  */
 double radToDeg(double radians) { return radians / M_PI * 180.0; }
-} // namespace Conversions
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi::Conversions

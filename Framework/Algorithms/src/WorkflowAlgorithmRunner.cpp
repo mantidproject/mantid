@@ -15,8 +15,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace PropertyNames {
 const static std::string ALGORITHM("Algorithm");
@@ -272,5 +271,4 @@ void WorkflowAlgorithmRunner::configureRow(ITableWorkspace_sptr setupTable, ITab
   rowsBeingQueued->erase(currentRow);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

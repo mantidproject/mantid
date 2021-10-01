@@ -27,8 +27,7 @@
 #include <boost/format.hpp>
 #include <memory>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -241,5 +240,4 @@ MatrixWorkspace_sptr AnnularRingAbsorption::runMonteCarloAbsorptionCorrection(co
   return alg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

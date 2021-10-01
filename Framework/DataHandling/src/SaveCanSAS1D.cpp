@@ -59,8 +59,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveCanSAS1D)
@@ -701,5 +700,4 @@ void SaveCanSAS1D::createSASInstrument(std::string &sasInstrument) {
   sasInstrument += sasDet;
   sasInstrument += "\n\t\t</SASinstrument>";
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

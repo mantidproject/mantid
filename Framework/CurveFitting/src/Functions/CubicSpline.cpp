@@ -16,9 +16,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 namespace {
@@ -351,6 +349,4 @@ void CubicSpline::reallocGSLObjects(const int n) {
   gsl_interp_accel_reset(m_acc.get());
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

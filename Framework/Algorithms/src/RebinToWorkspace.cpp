@@ -12,8 +12,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Rebin.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using DataObjects::EventWorkspace;
@@ -181,5 +180,4 @@ RebinToWorkspace::getParallelExecutionMode(const std::map<std::string, Parallel:
   return Parallel::getCorrespondingExecutionMode(storageModes.at("WorkspaceToRebin"));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -20,8 +20,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 
@@ -600,7 +599,7 @@ void Run::calculateAverageGoniometerMatrix() {
  * Calculate the goniometer matrixes from logs
  * @param goniometer goniometer with axes names to use
  */
-void Run::calculateGoniometerMatrices(Geometry::Goniometer goniometer) {
+void Run::calculateGoniometerMatrices(const Geometry::Goniometer &goniometer) {
   if (goniometer.getNumberAxes() == 0)
     throw std::runtime_error("Run::calculateGoniometerMatrices must include axes for goniometer");
 
@@ -659,5 +658,4 @@ void Run::copyGoniometers(const Run &other) {
     m_goniometers.emplace_back(std::move(new_goniometer));
   }
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

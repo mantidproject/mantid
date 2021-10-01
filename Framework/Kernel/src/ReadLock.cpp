@@ -9,8 +9,7 @@
 
 #include <Poco/RWLock.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -28,5 +27,4 @@ ReadLock::~ReadLock() {
   m_item.m_lock->unlock();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -11,8 +11,7 @@
 #include "MantidKernel/FloatingPointComparison.h"
 #include <limits>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::V2D;
 
 namespace {
@@ -160,5 +159,4 @@ bool edgeAimsAt(const PolygonEdge &a, const PolygonEdge &b, PointClassification 
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

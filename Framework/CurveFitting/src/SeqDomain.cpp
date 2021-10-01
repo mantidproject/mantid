@@ -11,8 +11,7 @@
 #include "MantidCurveFitting/ParDomain.h"
 #include <numeric>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /// Return the number of points in the domain
 size_t SeqDomain::size() const {
@@ -146,5 +145,4 @@ void SeqDomain::rwpValDerivHessian(const CostFunctions::CostFuncRwp &rwp, bool e
   }
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

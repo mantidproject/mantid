@@ -26,9 +26,7 @@
 
 #include <QApplication>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui, const IMainWindowView *view) {
   auto mwv = dynamic_cast<const QtMainWindowView *>(view);
@@ -417,6 +415,4 @@ void Decoder::decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> 
   gui->m_ui.logValueTypeEdit->setText(map[QString("logValueTypeEdit")].toString());
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

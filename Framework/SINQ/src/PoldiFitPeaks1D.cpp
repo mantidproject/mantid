@@ -21,8 +21,7 @@
 
 #include "MantidAPI/CompositeFunction.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Kernel;
 using namespace API;
@@ -174,5 +173,4 @@ IAlgorithm_sptr PoldiFitPeaks1D::getFitAlgorithm(const Workspace2D_sptr &dataWor
   return fitAlgorithm;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

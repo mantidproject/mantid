@@ -91,8 +91,7 @@ std::set<std::string> logFilesFromAlternateDataStream(const Poco::Path &pathToRa
 
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -1221,5 +1220,4 @@ void LoadRawHelper::ProcessLoadMonitorOptions(bool &bincludeMonitors, bool &bsep
   //
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

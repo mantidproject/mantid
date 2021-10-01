@@ -28,9 +28,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -1360,6 +1358,4 @@ void CrystalFieldFunction::cacheSourceParameters() const {
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

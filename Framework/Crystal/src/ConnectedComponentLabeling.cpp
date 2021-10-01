@@ -21,8 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Crystal::ConnectedComponentMappingTypes;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 namespace {
 /**
  * Perform integer power to determine the maximum number of face and edge
@@ -421,5 +420,4 @@ ClusterTuple ConnectedComponentLabeling::executeAndFetchClusters(IMDHistoWorkspa
   return ClusterTuple(outWS, clusters);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

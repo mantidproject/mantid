@@ -29,9 +29,7 @@ QVariant getSetting(std::string const &settingGroup, std::string const &settingN
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IndirectSettingsHelper {
+namespace MantidQt::CustomInterfaces::IndirectSettingsHelper {
 
 static std::string const INDIRECT_SETTINGS_GROUP("Indirect Settings");
 static std::string const RESTRICT_DATA_PROPERTY("restrict-input-by-name");
@@ -47,6 +45,4 @@ void setRestrictInputDataByName(bool restricted) {
 
 void setExternalPlotErrorBars(bool errorBars) { setSetting(INDIRECT_SETTINGS_GROUP, ERROR_BARS_PROPERTY, errorBars); }
 
-} // namespace IndirectSettingsHelper
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IndirectSettingsHelper

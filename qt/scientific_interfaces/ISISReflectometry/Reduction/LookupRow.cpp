@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "LookupRow.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 LookupRow::LookupRow(boost::optional<double> theta,
                      // cppcheck-suppress passedByValue
@@ -17,8 +15,7 @@ LookupRow::LookupRow(boost::optional<double> theta,
                      boost::optional<double> scaleFactor,
                      boost::optional<ProcessingInstructions> processingInstructions,
                      boost::optional<ProcessingInstructions> backgroundProcessingInstructions)
-    : m_theta(std::move(theta)), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
-      m_scaleFactor(std::move(scaleFactor)),
+    : m_theta(theta), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(qRange), m_scaleFactor(scaleFactor),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
       m_processingInstructions(std::move(processingInstructions)),
       m_backgroundProcessingInstructions(std::move(backgroundProcessingInstructions)) {}
@@ -75,6 +72,4 @@ LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
     result[9] = *lookupRow.backgroundProcessingInstructions();
   return result;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

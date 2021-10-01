@@ -19,8 +19,7 @@ QHash<QString, QVariant> defaultLineKwargs() {
 
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 SingleSelector::SingleSelector(PreviewPlot *plot, SelectType type, double position, bool visible, const QColor &colour)
     : QObject(), m_plot(plot),
@@ -135,5 +134,4 @@ void SingleSelector::redrawMarker() {
     m_singleMarker->redraw();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

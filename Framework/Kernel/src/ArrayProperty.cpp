@@ -10,8 +10,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** Constructor
  *  @param name ::      The name to assign to the property
  *  @param vec ::       The initial vector of values to assign to the
@@ -22,7 +21,7 @@ namespace Kernel {
 template <typename T>
 ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> vec, const IValidator_sptr &validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::move(vec), std::move(validator), direction) {}
+    : PropertyWithValue<std::vector<T>>(name, std::move(vec), validator, direction) {}
 
 /** Constructor
  *  Will lead to the property having a default-constructed (i.e. empty) vector
@@ -34,7 +33,7 @@ ArrayProperty<T>::ArrayProperty(const std::string &name, std::vector<T> vec, con
 
 template <typename T>
 ArrayProperty<T>::ArrayProperty(const std::string &name, const IValidator_sptr &validator, const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(), std::move(validator), direction) {}
+    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), validator, direction) {}
 
 /** Constructor that's useful for output properties or inputs with an empty
  * default and no validator.
@@ -45,8 +44,7 @@ ArrayProperty<T>::ArrayProperty(const std::string &name, const IValidator_sptr &
  */
 template <typename T>
 ArrayProperty<T>::ArrayProperty(const std::string &name, const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(), IValidator_sptr(new NullValidator),
-                                        direction) {}
+    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), IValidator_sptr(new NullValidator), direction) {}
 
 /** Constructor from which you can set the property's values through a string:
  *
@@ -66,7 +64,7 @@ ArrayProperty<T>::ArrayProperty(const std::string &name, const unsigned int dire
 template <typename T>
 ArrayProperty<T>::ArrayProperty(const std::string &name, const std::string &values, const IValidator_sptr &validator,
                                 const unsigned int direction)
-    : PropertyWithValue<std::vector<T>>(std::move(name), std::vector<T>(), values, std::move(validator), direction) {}
+    : PropertyWithValue<std::vector<T>>(name, std::vector<T>(), values, validator, direction) {}
 
 template <typename T>
 ArrayProperty<T>::ArrayProperty(const ArrayProperty<T> &other) : PropertyWithValue<std::vector<T>>(other) {}
@@ -127,5 +125,4 @@ template class DLLExport ArrayProperty<std::vector<unsigned long>>;
 
 template <> MANTID_KERNEL_DLL void ArrayProperty<int>::visualStudioC4661Workaround() {}
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

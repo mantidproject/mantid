@@ -25,8 +25,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
@@ -384,5 +383,4 @@ double BasePeak::calculateWavelengthFromQLab(const V3D qLab) {
 
 Mantid::Kernel::Logger BasePeak::g_log("PeakLogger");
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

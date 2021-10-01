@@ -9,8 +9,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /** Initializes a DetectorGridDefinition object.
  *  @param minLatitude Start of the latitude range.
@@ -129,5 +128,4 @@ size_t DetectorGridDefinition::numberColumns() const { return m_longitudePoints;
  */
 size_t DetectorGridDefinition::numberRows() const { return m_latitudePoints; }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

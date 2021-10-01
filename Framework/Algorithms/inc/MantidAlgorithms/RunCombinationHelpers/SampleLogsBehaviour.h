@@ -70,7 +70,7 @@ public:
   };
 
   SampleLogsBehaviour(const API::MatrixWorkspace_sptr &ws, Kernel::Logger &logger,
-                      const SampleLogNames &logEntries = {}, const ParameterName &parName = {});
+                      const SampleLogNames &logEntries = {}, ParameterName parName = {});
 
   /// Create and update sample logs according to instrument parameters
   void mergeSampleLogs(const API::MatrixWorkspace_sptr &addeeWS, const API::MatrixWorkspace_sptr &outWS);

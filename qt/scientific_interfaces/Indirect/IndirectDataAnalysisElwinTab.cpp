@@ -147,9 +147,7 @@ QStringList getSampleFBSuffices() {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataTableModel>()) {
   m_uiForm.setupUi(parent);
@@ -614,7 +612,7 @@ void IndirectDataAnalysisElwinTab::checkNewPreviewSelected(int index) {
   }
 }
 
-void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString workspaceName, const QString filename) {
+void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString &workspaceName, const QString &filename) {
   auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
   if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
     auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
@@ -632,7 +630,7 @@ void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString workspac
   }
 }
 
-void IndirectDataAnalysisElwinTab::newPreviewWorkspaceSelected(const QString workspaceName) {
+void IndirectDataAnalysisElwinTab::newPreviewWorkspaceSelected(const QString &workspaceName) {
   if (m_uiForm.inputChoice->currentIndex() == 1) {
     auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
     setInputWorkspace(workspace);
@@ -970,6 +968,4 @@ void IndirectDataAnalysisElwinTab::checkLoadedFiles() {
   }
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

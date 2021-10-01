@@ -14,8 +14,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RecordPythonScript)
@@ -101,5 +100,4 @@ void RecordPythonScript::startingHandle(API::IAlgorithm_sptr alg) {
   m_generatedScript += alg->name() + "(" + algString + ")\n";
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

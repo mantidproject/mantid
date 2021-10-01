@@ -20,8 +20,7 @@
 
 #include <limits>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(UnwrapSNS)
 
@@ -298,5 +297,4 @@ void UnwrapSNS::runMaskDetectors() {
     throw std::runtime_error("MaskDetectors Child Algorithm has not executed successfully");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

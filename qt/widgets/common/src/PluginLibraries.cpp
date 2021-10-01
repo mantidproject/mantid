@@ -15,8 +15,7 @@ using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::LibraryManager;
 using Mantid::Kernel::LibraryManagerImpl;
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 /**
  * Retrieve the path to some qt-related plugins from the mantid configuration
@@ -41,7 +40,7 @@ std::string qtPluginPathFromCfg(const std::string &key) {
  * %V to specify the Qt version
  * @return The number of libraries successfully loaded
  */
-int loadPluginsFromCfgPath(const std::string &key) { return loadPluginsFromPath(qtPluginPathFromCfg(std::move(key))); }
+int loadPluginsFromCfgPath(const std::string &key) { return loadPluginsFromPath(qtPluginPathFromCfg(key)); }
 
 /**
  * Load all plugins from the path specified.
@@ -57,5 +56,4 @@ int loadPluginsFromPath(const std::string &path) {
 #endif
   return LibraryManager::Instance().openLibraries(path, LibraryManagerImpl::NonRecursive, excludes);
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

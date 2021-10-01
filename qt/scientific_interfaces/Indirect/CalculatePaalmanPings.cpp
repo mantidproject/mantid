@@ -36,8 +36,7 @@ std::string extractFirstOf(std::string const &str, std::string const &delimiter)
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
     : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
@@ -679,5 +678,4 @@ void CalculatePaalmanPings::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

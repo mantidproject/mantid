@@ -22,8 +22,7 @@
 
 #include <cfloat>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertSpectrumAxis)
 using namespace Kernel;
@@ -216,5 +215,4 @@ double ConvertSpectrumAxis::getEfixed(const Mantid::Geometry::IDetector &detecto
   }
   return efixed;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

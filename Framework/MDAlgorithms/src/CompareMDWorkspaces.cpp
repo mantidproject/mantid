@@ -13,6 +13,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -29,8 +30,7 @@ public:
   std::string getMessage() const { return this->what(); }
 };
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 class SimpleMDEvent {
 
@@ -44,8 +44,8 @@ public:
   static float s_tolerance;
   // static float s_tolerance {static_cast<float>(1E-7)};
 
-  SimpleMDEvent(const std::vector<float> &coordinates, const float &signal, const float &error)
-      : mCoordinates(coordinates), mSignal(signal), mError(error) {}
+  SimpleMDEvent(std::vector<float> coordinates, const float &signal, const float &error)
+      : mCoordinates(std::move(coordinates)), mSignal(signal), mError(error) {}
 
   SimpleMDEvent(const SimpleMDEvent &other)
       : mCoordinates(other.mCoordinates), mSignal(other.mSignal), mError(other.mError) {}
@@ -530,5 +530,4 @@ void CompareMDWorkspaces::exec() {
   setProperty("Result", m_result);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

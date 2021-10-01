@@ -7,8 +7,7 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Constructor taking a reference to a filter. Note that constructing a
  * LogFilter this
@@ -167,5 +166,4 @@ TimeSeriesProperty<double> *LogFilter::convertToTimeSeriesOfDouble(const Propert
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

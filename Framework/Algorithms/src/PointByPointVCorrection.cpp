@@ -18,8 +18,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(PointByPointVCorrection)
@@ -203,5 +202,4 @@ void PointByPointVCorrection::check_masks(const API::MatrixWorkspace_const_sptr 
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

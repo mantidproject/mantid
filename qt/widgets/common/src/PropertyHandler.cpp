@@ -36,8 +36,7 @@ const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
 inline bool variableIsPrefixed(const std::string &name) { return std::regex_match(name, PREFIX_REGEX); }
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 // Constructor
 PropertyHandler::PropertyHandler(const Mantid::API::IFunction_sptr &fun, Mantid::API::CompositeFunction_sptr parent,
@@ -131,8 +130,8 @@ void PropertyHandler::init() {
  */
 class CreateAttributeProperty : public Mantid::API::IFunction::ConstAttributeVisitor<QtProperty *> {
 public:
-  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, const QString &name)
-      : m_browser(browser), m_handler(handler), m_name(name) {}
+  CreateAttributeProperty(FitPropertyBrowser *browser, PropertyHandler *handler, QString name)
+      : m_browser(browser), m_handler(handler), m_name(std::move(name)) {}
 
 protected:
   /// Create string property
@@ -1561,5 +1560,4 @@ void PropertyHandler::setFunctionWorkspace() {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

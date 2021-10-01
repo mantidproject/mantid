@@ -16,8 +16,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace std;
 using Mantid::API::WorkspaceProperty; // NOLINT
@@ -120,5 +119,4 @@ void EstimateDivergence::exec() {
   setProperty("OutputWorkspace", divergenceWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

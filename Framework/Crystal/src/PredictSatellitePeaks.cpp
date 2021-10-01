@@ -401,7 +401,7 @@ PredictSatellitePeaks::createPeakForOutputWorkspace(Kernel::Matrix<double> const
     return nullptr;
 }
 
-void PredictSatellitePeaks::addPeakToOutputWorkspace(std::shared_ptr<IPeak> satellite_iPeak,
+void PredictSatellitePeaks::addPeakToOutputWorkspace(const std::shared_ptr<IPeak> &satellite_iPeak,
                                                      Kernel::Matrix<double> const &peak_goniometer_matrix,
                                                      Kernel::V3D const &hkl, Kernel::V3D const &satelliteHKL,
                                                      int const RunNumber,

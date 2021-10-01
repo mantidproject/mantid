@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/Comment.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::Workspace;
 using Mantid::API::WorkspaceProperty;
@@ -53,5 +52,4 @@ void Comment::exec() {
   // do nothing
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

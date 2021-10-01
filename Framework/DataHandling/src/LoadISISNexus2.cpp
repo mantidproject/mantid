@@ -60,8 +60,7 @@ Mantid::DataHandling::DataBlockComposite getMonitorsFromComposite(Mantid::DataHa
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
@@ -1062,5 +1061,4 @@ bool LoadISISNexus2::isMultipleTimeRegimeFile(NeXus::NXEntry &entry) const {
   return hasMultipleTimeRegimes;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

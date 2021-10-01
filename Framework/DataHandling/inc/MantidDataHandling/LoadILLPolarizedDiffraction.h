@@ -44,14 +44,14 @@ private:
   void loadData();
   void loadMetaData();
   void sortPolarisations();
-  void loadInstrument(API::MatrixWorkspace_sptr, const std::string &);
-  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr, const NeXus::NXEntry &, const int);
-  std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr, const int);
-  void moveTwoTheta(const NeXus::NXEntry &, API::MatrixWorkspace_sptr);
+  void loadInstrument(const API::MatrixWorkspace_sptr &, const std::string &);
+  std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &, const NeXus::NXEntry &, const int);
+  std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr &, const int);
+  void moveTwoTheta(const NeXus::NXEntry &, const API::MatrixWorkspace_sptr &);
   std::vector<double> prepareAxes(const NeXus::NXEntry &);
 
   API::MatrixWorkspace_sptr convertSpectrumAxis(API::MatrixWorkspace_sptr);
-  API::MatrixWorkspace_sptr transposeMonochromatic(API::MatrixWorkspace_sptr);
+  API::MatrixWorkspace_sptr transposeMonochromatic(const API::MatrixWorkspace_sptr &);
 
   size_t m_numberOfChannels; // number of channels data
   size_t m_acquisitionMode;  // acquisition mode of measurement, 0 -

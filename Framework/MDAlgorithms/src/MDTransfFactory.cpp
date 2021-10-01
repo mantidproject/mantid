@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** Returns an instance of the class with the given name. Overrides the base
  * class method.
@@ -28,5 +27,4 @@ std::shared_ptr<MDTransfInterface> MDTransfFactoryImpl::create(const std::string
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

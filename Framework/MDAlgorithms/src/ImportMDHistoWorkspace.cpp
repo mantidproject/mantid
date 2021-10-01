@@ -11,8 +11,7 @@
 #include <fstream>
 #include <iterator>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace API;
 using namespace DataObjects;
@@ -105,5 +104,4 @@ void ImportMDHistoWorkspace::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

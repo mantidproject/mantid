@@ -15,8 +15,7 @@
 
 using Mantid::DataObjects::PeaksWorkspace;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CentroidPeaksMD)
@@ -159,5 +158,4 @@ void CentroidPeaksMD::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

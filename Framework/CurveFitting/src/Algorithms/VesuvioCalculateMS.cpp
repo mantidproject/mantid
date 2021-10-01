@@ -31,9 +31,7 @@
 
 #include <memory>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 using namespace API;
 using namespace Kernel;
 using namespace CurveFitting;
@@ -754,6 +752,4 @@ double VesuvioCalculateMS::generateE1(CurveFitting::MSVesuvioHelper::RandomVaria
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

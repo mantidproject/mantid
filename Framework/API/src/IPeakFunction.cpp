@@ -20,8 +20,7 @@
 #include <limits>
 #include <memory>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 
@@ -273,5 +272,4 @@ void IPeakFunction::functionDerivLocal(Jacobian *jacobian, const double *xValues
   this->calcNumericalDerivative1D(jacobian, std::move(evalMethod), xValues, nData);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

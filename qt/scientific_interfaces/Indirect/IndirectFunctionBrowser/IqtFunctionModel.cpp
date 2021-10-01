@@ -11,9 +11,7 @@
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include <map>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 using namespace Mantid::API;
@@ -621,6 +619,4 @@ boost::optional<QString> IqtFunctionModel::getBackgroundPrefix() const {
   return QString("f%1.").arg(m_numberOfExponentials + (m_hasStretchExponential ? 1 : 0));
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

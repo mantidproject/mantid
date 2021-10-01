@@ -19,9 +19,7 @@
 
 #include <boost/regex.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using namespace Mantid::API;
 
@@ -282,6 +280,4 @@ std::vector<std::string> SavePresenter::getAvailableWorkspaceNames() {
 
   return validNames;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

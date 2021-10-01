@@ -8,8 +8,7 @@
 #include "MantidGeometry/Objects/MeshObject.h"
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   std::ifstream file(filename.c_str());
@@ -119,5 +118,4 @@ bool LoadAsciiStl::readSTLLine(std::ifstream &file, std::string const &type) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -18,8 +18,7 @@
 #include <numeric>
 #include <set>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(CompressEvents)
 
@@ -130,5 +129,4 @@ void CompressEvents::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

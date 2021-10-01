@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 JobTreeViewSignalAdapter::JobTreeViewSignalAdapter(JobTreeView &view, QObject *parent) : QObject(parent) {
   qRegisterMetaType<RowLocation>("MantidQt::MantidWidgets::Batch::RowLocation");
   qRegisterMetaType<std::vector<RowLocation>>("std::vector<MantidQt::MantidWidgets::Batch::RowLocation>");
@@ -43,6 +41,4 @@ void JobTreeViewSignalAdapter::notifyCutRowsRequested() { emit cutRowsRequested(
 void JobTreeViewSignalAdapter::notifyPasteRowsRequested() { emit pasteRowsRequested(); }
 
 void JobTreeViewSignalAdapter::notifyFilterReset() { emit filterReset(); }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

@@ -12,8 +12,7 @@
 #include <QHeaderView>
 #include <QTableWidget>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor
@@ -65,5 +64,4 @@ void ImageInfoWidget::showInfo(const ImageInfoModel::ImageInfo &info) {
  * @param ws A pointer to a Workspace object
  */
 void ImageInfoWidget::setWorkspace(const Mantid::API::Workspace_sptr &ws) { m_presenter->setWorkspace(ws); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

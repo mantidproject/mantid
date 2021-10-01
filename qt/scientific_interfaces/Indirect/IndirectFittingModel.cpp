@@ -212,15 +212,15 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 }
 
 WorkspaceGroup_sptr getOutputResult(const IAlgorithm_sptr &algorithm) {
-  return getWorkspaceOutput<WorkspaceGroup>(std::move(algorithm), "OutputWorkspace");
+  return getWorkspaceOutput<WorkspaceGroup>(algorithm, "OutputWorkspace");
 }
 
 ITableWorkspace_sptr getOutputParameters(const IAlgorithm_sptr &algorithm) {
-  return getWorkspaceOutput<ITableWorkspace>(std::move(algorithm), "OutputParameterWorkspace");
+  return getWorkspaceOutput<ITableWorkspace>(algorithm, "OutputParameterWorkspace");
 }
 
 WorkspaceGroup_sptr getOutputGroup(const IAlgorithm_sptr &algorithm) {
-  return getWorkspaceOutput<WorkspaceGroup>(std::move(algorithm), "OutputWorkspaceGroup");
+  return getWorkspaceOutput<WorkspaceGroup>(algorithm, "OutputWorkspaceGroup");
 }
 
 void addFitProperties(Mantid::API::IAlgorithm &algorithm, const Mantid::API::IFunction_sptr &function,
@@ -230,9 +230,7 @@ void addFitProperties(Mantid::API::IAlgorithm &algorithm, const Mantid::API::IFu
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 std::unordered_map<FittingMode, std::string> fitModeToName = std::unordered_map<FittingMode, std::string>(
     {{FittingMode::SEQUENTIAL, "Seq"}, {FittingMode::SIMULTANEOUS, "Sim"}});
@@ -532,15 +530,15 @@ Mantid::API::IAlgorithm_sptr IndirectFittingModel::simultaneousFitAlgorithm() co
   return AlgorithmManager::Instance().create("QENSFitSimultaneous");
 }
 
-IAlgorithm_sptr IndirectFittingModel::createSequentialFit(IFunction_sptr function) const {
+IAlgorithm_sptr IndirectFittingModel::createSequentialFit(const IFunction_sptr &function) const {
   const auto input = constructInputString(m_fitDataModel.get());
-  return createSequentialFit(std::move(function), input);
+  return createSequentialFit(function, input);
 }
 
 IAlgorithm_sptr IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
                                                           const std::string &input) const {
   auto fitAlgorithm = sequentialFitAlgorithm();
-  addFitProperties(*fitAlgorithm, std::move(function), getResultXAxisUnit());
+  addFitProperties(*fitAlgorithm, function, getResultXAxisUnit());
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("LogName", getResultLogName());
@@ -624,6 +622,4 @@ std::vector<std::pair<std::string, size_t>> IndirectFittingModel::getResolutions
 
 IIndirectFitDataTableModel *IndirectFittingModel::getFitDataModel() { return m_fitDataModel.get(); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

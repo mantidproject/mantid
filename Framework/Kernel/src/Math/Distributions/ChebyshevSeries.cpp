@@ -15,8 +15,7 @@
 // Anonmouys static helpers
 //-----------------------------------------------------------------------------
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //-----------------------------------------------------------------------------
 // Public members
@@ -53,5 +52,4 @@ double ChebyshevSeries::operator()(const std::vector<double> &c, const double x)
   return m_bk[0] - x * m_bk[1];
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

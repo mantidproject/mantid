@@ -19,9 +19,7 @@ using namespace Mantid::CurveFitting;
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -73,6 +71,4 @@ double ThermalNeutronBk2BkExpBeta::corefunction(double dh, double width, double 
   return beta;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

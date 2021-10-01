@@ -26,8 +26,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Strings::strip;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** Constructor
  */
@@ -845,7 +844,7 @@ SlicingAlgorithm::createMDFrameForNonAxisAligned(const std::string &units,
   auto indicesWithProjection = getIndicesWithProjection(basisVector, oldBasis);
 
   // Extract MDFrame
-  return extractMDFrameForNonAxisAligned(indicesWithProjection, std::move(units));
+  return extractMDFrameForNonAxisAligned(indicesWithProjection, units);
 }
 
 std::vector<Mantid::Kernel::VMD> SlicingAlgorithm::getOldBasis(size_t dimension) const {
@@ -941,5 +940,4 @@ void SlicingAlgorithm::setTargetUnits(Mantid::Geometry::MDFrame_uptr &mdFrame, c
   // else leave the unit the same as the input workspace
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

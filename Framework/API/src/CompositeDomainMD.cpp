@@ -13,8 +13,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**
  * Create a composite domain from a IMDWorkspace.
@@ -55,5 +54,4 @@ const FunctionDomain &CompositeDomainMD::getDomain(size_t i) const {
   return *m_domains[i];
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

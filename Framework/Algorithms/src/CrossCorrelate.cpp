@@ -53,8 +53,7 @@ Variances subtractMean(std::vector<double> &signal, std::vector<double> &error) 
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CrossCorrelate)
@@ -264,5 +263,4 @@ void CrossCorrelate::exec() {
   setProperty("OutputWorkspace", out);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

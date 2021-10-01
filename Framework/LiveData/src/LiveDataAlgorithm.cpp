@@ -23,8 +23,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LiveDataAlgorithm::category() const { return "DataHandling\\LiveData"; }
@@ -401,5 +400,4 @@ std::map<std::string, std::string> LiveDataAlgorithm::validateInputs() {
   return out;
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

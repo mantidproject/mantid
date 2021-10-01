@@ -27,8 +27,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddAbsorptionWeightedPathLengths)
@@ -199,5 +198,4 @@ std::unique_ptr<IBeamProfile> AddAbsorptionWeightedPathLengths::createBeamProfil
   return std::make_unique<RectangularBeamProfile>(*frame, source->getPos(), beamWidth, beamHeight);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

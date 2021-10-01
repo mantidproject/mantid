@@ -49,8 +49,7 @@ static const std::string FREDRIKZE{"Fredrikze"};
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -319,5 +318,4 @@ API::MatrixWorkspace_sptr PolarizationEfficiencyCor::getEfficiencies() {
   return efficiencies;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

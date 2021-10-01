@@ -24,9 +24,7 @@
 
 #include <memory>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Fit)
@@ -375,6 +373,4 @@ void Fit::execConcrete() {
   progress(1.0);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

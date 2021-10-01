@@ -96,8 +96,7 @@ QIcon MantidQt::Icons::getIcon(const QStringList &iconNames, const QList<QHash<Q
   return iconicFont.getIcon(iconNames, options);
 }
 
-namespace MantidQt {
-namespace Icons {
+namespace MantidQt::Icons {
 
 IconicFont::IconicFont() : m_fontnames(), m_charmap(), m_painter() {
   this->loadFont(QString("mdi"), QString(":/mdi-font.ttf"), QString(":/mdi-charmap.json"));
@@ -167,5 +166,4 @@ void IconicFont::addValuesToOptions(QList<QHash<QString, QVariant>> &options, co
   options[vectorIndex].insert(QString("character"), QVariant(character));
 }
 
-} // namespace Icons
-} // namespace MantidQt
+} // namespace MantidQt::Icons

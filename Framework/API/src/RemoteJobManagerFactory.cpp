@@ -9,8 +9,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger object
 Kernel::Logger g_log("RemoteJobManagerFactory");
@@ -79,5 +78,4 @@ Mantid::API::IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(const st
   return jm;
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API

@@ -12,8 +12,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterByLogValue)
 
@@ -228,5 +227,4 @@ void FilterByLogValue::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

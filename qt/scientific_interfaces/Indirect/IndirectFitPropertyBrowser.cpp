@@ -36,9 +36,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 struct ScopedSignalBlocker {
   // block signals on construction
@@ -85,7 +83,7 @@ void IndirectFitPropertyBrowser::initFitOptionsBrowser() {
   m_fitOptionsBrowser->setCurrentFittingType(FittingMode::SEQUENTIAL);
 }
 
-void IndirectFitPropertyBrowser::setHiddenProperties(std::vector<std::string> hiddenProperties) {
+void IndirectFitPropertyBrowser::setHiddenProperties(const std::vector<std::string> &hiddenProperties) {
   for (const auto &propertyName : hiddenProperties) {
     m_fitOptionsBrowser->addPropertyToBlacklist(QString::fromStdString(propertyName));
   }
@@ -429,6 +427,4 @@ void IndirectFitPropertyBrowser::showFullFunctionBrowser(bool on) {
   m_functionWidget->setCurrentIndex(index);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

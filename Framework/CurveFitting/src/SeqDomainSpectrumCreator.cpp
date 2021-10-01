@@ -16,8 +16,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/Matrix.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 
@@ -220,5 +219,4 @@ bool SeqDomainSpectrumCreator::histogramIsUsable(size_t i) const {
   return !spectrumInfo.isMasked(i);
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

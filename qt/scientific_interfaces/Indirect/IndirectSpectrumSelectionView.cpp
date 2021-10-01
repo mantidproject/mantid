@@ -12,9 +12,7 @@
 
 #include <boost/numeric/conversion/cast.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectSpectrumSelectionView::IndirectSpectrumSelectionView(QWidget *parent)
     : API::MantidWidget(parent), m_selector(new Ui::IndirectSpectrumSelector) {
@@ -239,6 +237,4 @@ void IndirectSpectrumSelectionView::emitMaskSpectrumChanged(int spectrum) {
   emit maskSpectrumChanged(WorkspaceIndex{static_cast<size_t>(spectrum)});
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -14,8 +14,7 @@
 #include "MantidAPI/TransformScaleFactory.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("LogarithmScale");
@@ -55,5 +54,4 @@ void LogarithmScale::transform(std::vector<double> &gd) {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

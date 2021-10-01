@@ -9,8 +9,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /** Obtain a valid XMode for a Histogram based on x and y data size.
 
@@ -278,5 +277,4 @@ HistogramIterator Histogram::begin() const & { return HistogramIterator(*this, 0
 
 HistogramIterator Histogram::end() const & { return HistogramIterator(*this, size()); }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

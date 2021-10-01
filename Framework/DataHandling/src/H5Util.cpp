@@ -15,9 +15,7 @@
 
 using namespace H5;
 
-namespace Mantid {
-namespace DataHandling {
-namespace H5Util {
+namespace Mantid::DataHandling::H5Util {
 
 namespace {
 /// static logger object
@@ -576,6 +574,4 @@ template MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce<int32_t>
 template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce<uint32_t>(DataSet &dataset);
 template MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce<int64_t>(DataSet &dataset);
 template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce<uint64_t>(DataSet &dataset);
-} // namespace H5Util
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling::H5Util

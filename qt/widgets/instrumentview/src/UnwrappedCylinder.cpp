@@ -9,11 +9,9 @@
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor,
-                                     const Mantid::Kernel::V3D &origin,
+UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                                      const Mantid::Kernel::V3D &axis)
     : RotationSurface(rootActor, origin, axis) {
   init();
@@ -28,8 +26,7 @@ UnwrappedCylinder::UnwrappedCylinder(const InstrumentActor *rootActor,
  * @param uscale :: scaling for u direction
  * @param vscale :: scaling for v direction
  */
-void UnwrappedCylinder::project(const Mantid::Kernel::V3D &pos, double &u,
-                                double &v, double &uscale,
+void UnwrappedCylinder::project(const Mantid::Kernel::V3D &pos, double &u, double &v, double &uscale,
                                 double &vscale) const {
   // projection to cylinder axis
   v = pos.scalar_prod(m_zaxis);
@@ -41,8 +38,7 @@ void UnwrappedCylinder::project(const Mantid::Kernel::V3D &pos, double &u,
   vscale = 1.;
 }
 
-void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
-                               Mantid::Kernel::Quat &R) const {
+void UnwrappedCylinder::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
   // direction in which to look
   Mantid::Kernel::V3D eye;
   const auto &componentInfo = m_instrActor->componentInfo();
@@ -64,5 +60,4 @@ void UnwrappedCylinder::rotate(const UnwrappedDetector &udet,
   R = R1 * componentInfo.rotation(udet.detIndex);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

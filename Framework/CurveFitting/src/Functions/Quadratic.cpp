@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/Quadratic.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -61,6 +59,4 @@ void Quadratic::functionDeriv1D(API::Jacobian *out, const double *xValues, const
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

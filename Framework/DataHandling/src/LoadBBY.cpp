@@ -38,8 +38,7 @@
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadBBY)
@@ -808,5 +807,4 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

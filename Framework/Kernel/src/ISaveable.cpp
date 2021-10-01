@@ -7,8 +7,7 @@
 #include "MantidKernel/ISaveable.h"
 //#include "MantidKernel/INode.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Constructor    */
 ISaveable::ISaveable()
@@ -84,5 +83,4 @@ void ISaveable::clearBufferState() {
   m_BufPosition = boost::optional<std::list<ISaveable *>::iterator>();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

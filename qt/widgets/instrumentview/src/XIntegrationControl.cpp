@@ -22,13 +22,11 @@
 #include <cfloat>
 #include <numeric>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 XIntegrationScrollBar::XIntegrationScrollBar(QWidget *parent)
-    : QFrame(parent), m_resizeMargin(5), m_init(false), m_resizingLeft(false),
-      m_resizingRight(false), m_moving(false), m_changed(false), m_x(0),
-      m_width(0), m_minimum(0.0), m_maximum(1.0) {
+    : QFrame(parent), m_resizeMargin(5), m_init(false), m_resizingLeft(false), m_resizingRight(false), m_moving(false),
+      m_changed(false), m_x(0), m_width(0), m_minimum(0.0), m_maximum(1.0) {
   setMouseTracking(true);
   setFrameShape(StyledPanel);
   m_slider = new QPushButton(this);
@@ -47,9 +45,7 @@ void XIntegrationScrollBar::resizeEvent(QResizeEvent * /*unused*/) {
   }
 }
 
-void XIntegrationScrollBar::mouseMoveEvent(QMouseEvent *e) {
-  QFrame::mouseMoveEvent(e);
-}
+void XIntegrationScrollBar::mouseMoveEvent(QMouseEvent *e) { QFrame::mouseMoveEvent(e); }
 
 /**
  * Process events comming to the slider
@@ -203,8 +199,8 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     return true;
   } else if (e->type() == QEvent::KeyRelease) {
     QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
-    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right ||
-         keyEv->key() == Qt::Key_Up || keyEv->key() == Qt::Key_Down) &&
+    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right || keyEv->key() == Qt::Key_Up ||
+         keyEv->key() == Qt::Key_Down) &&
         !keyEv->isAutoRepeat()) {
       emit changed(m_minimum, m_maximum);
     }
@@ -233,8 +229,7 @@ double XIntegrationScrollBar::getWidth() const { return m_maximum - m_minimum; }
  */
 void XIntegrationScrollBar::set(double minimum, double maximum) {
   if (minimum < 0 || minimum > 1. || maximum < 0 || maximum > 1.) {
-    throw std::invalid_argument(
-        "XIntegrationScrollBar : minimum and maximum must be between 0 and 1");
+    throw std::invalid_argument("XIntegrationScrollBar : minimum and maximum must be between 0 and 1");
   }
   if (minimum > maximum) {
     std::swap(minimum, maximum);
@@ -259,8 +254,8 @@ void XIntegrationScrollBar::updateMinMax() {
 //---------------------------------------------------------------------------------//
 
 XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
-    : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0),
-      m_totalMaximum(1), m_minimum(0), m_maximum(1) {
+    : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0), m_totalMaximum(1), m_minimum(0),
+      m_maximum(1) {
   auto *layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);
@@ -280,10 +275,8 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
   layout->addWidget(m_setWholeRange, 0);
   setLayout(layout);
 
-  connect(m_scrollBar, SIGNAL(changed(double, double)), this,
-          SLOT(sliderChanged(double, double)));
-  connect(m_scrollBar, SIGNAL(running(double, double)), this,
-          SLOT(sliderRunning(double, double)));
+  connect(m_scrollBar, SIGNAL(changed(double, double)), this, SLOT(sliderChanged(double, double)));
+  connect(m_scrollBar, SIGNAL(running(double, double)), this, SLOT(sliderRunning(double, double)));
   connect(m_minText, SIGNAL(editingFinished()), this, SLOT(setMinimum()));
   connect(m_maxText, SIGNAL(editingFinished()), this, SLOT(setMaximum()));
   connect(m_setWholeRange, SIGNAL(clicked()), this, SLOT(setWholeRange()));
@@ -333,17 +326,14 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
   m_minimum = minimum;
   m_maximum = maximum;
   double w = m_totalMaximum - m_totalMinimum;
-  m_scrollBar->set((m_minimum - m_totalMinimum) / w,
-                   (m_maximum - m_totalMinimum) / w);
+  m_scrollBar->set((m_minimum - m_totalMinimum) / w, (m_maximum - m_totalMinimum) / w);
 
   updateTextBoxes();
 
   emit changed(m_minimum, m_maximum);
 }
 
-void XIntegrationControl::setWholeRange() {
-  setRange(m_totalMinimum, m_totalMaximum);
-}
+void XIntegrationControl::setWholeRange() { setRange(m_totalMinimum, m_totalMaximum); }
 
 double XIntegrationControl::getMinimum() const { return m_minimum; }
 
@@ -354,8 +344,7 @@ double XIntegrationControl::getWidth() const { return m_maximum - m_minimum; }
 void XIntegrationControl::updateTextBoxes() {
   m_minText->setText(QString::number(m_minimum));
   m_maxText->setText(QString::number(m_maximum));
-  m_setWholeRange->setEnabled(m_minimum != m_totalMinimum ||
-                              m_maximum != m_totalMaximum);
+  m_setWholeRange->setEnabled(m_minimum != m_totalMinimum || m_maximum != m_totalMaximum);
 }
 
 void XIntegrationControl::setMinimum() {
@@ -378,8 +367,5 @@ void XIntegrationControl::setMaximum() {
   setRange(minValue, maxValue);
 }
 
-void XIntegrationControl::setUnits(const QString &units) {
-  m_units->setText(units);
-}
-} // namespace MantidWidgets
-} // namespace MantidQt
+void XIntegrationControl::setUnits(const QString &units) { m_units->setText(units); }
+} // namespace MantidQt::MantidWidgets

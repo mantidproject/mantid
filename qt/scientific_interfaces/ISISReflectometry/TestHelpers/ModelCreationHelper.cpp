@@ -10,10 +10,7 @@
 
 #include "../../ISISReflectometry/Reduction/Batch.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
-namespace ModelCreationHelper {
+namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper {
 
 namespace { // unnamed
 Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
@@ -49,8 +46,7 @@ Row makeSimpleRow(std::string const &run, double theta) {
 Row makeRow(std::string const &run, double theta, std::string const &trans1, std::string const &trans2,
             boost::optional<double> qMin, boost::optional<double> qMax, boost::optional<double> qStep,
             boost::optional<double> scale, ReductionOptionsMap const &optionsMap) {
-  return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
-             RangeInQ(std::move(qMin), std::move(qMax), std::move(qStep)), std::move(scale), optionsMap,
+  return Row({run}, theta, TransmissionRunPair({trans1, trans2}), RangeInQ(qMin, qMax, qStep), scale, optionsMap,
              ReductionWorkspaces({run}, TransmissionRunPair({trans1, trans2})));
 }
 
@@ -436,7 +432,4 @@ Instrument makeEmptyInstrument() {
                     MonitorCorrections(0, true, RangeInLambda(0.0, 0.0), RangeInLambda(0.0, 0.0)),
                     DetectorCorrections(false, DetectorCorrectionType::VerticalShift));
 }
-} // namespace ModelCreationHelper
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper

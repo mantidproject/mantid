@@ -54,8 +54,7 @@ std::vector<size_t> toWorkspaceIndices(const Mantid::Indexing::SpectrumIndexSet 
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 
@@ -272,5 +271,4 @@ double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
   return eppTable->getRef<double>("PeakCentre", 0);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

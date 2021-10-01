@@ -24,8 +24,7 @@
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// @cond
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::IAlgorithm>>;
@@ -44,5 +43,4 @@ template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::WorkspaceGr
 template class MANTID_API_DLL PropertyWithValue<std::shared_ptr<API::ExperimentInfo>>;
 /// @endcond
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

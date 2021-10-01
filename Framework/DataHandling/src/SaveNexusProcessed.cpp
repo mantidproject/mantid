@@ -25,8 +25,7 @@
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -266,7 +265,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   const bool append_to_file = getProperty("Append");
 
   nexusFile->resetProgress(&prog_init);
-  nexusFile->openNexusWrite(filename, std::move(entryNumber), append_to_file || keepFile);
+  nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
 
   // Equivalent C++ API handle
   ::NeXus::File cppFile(nexusFile->fileID);
@@ -636,5 +635,4 @@ void SaveNexusProcessed::saveSpectrumNumbersNexus(const API::MatrixWorkspace &ws
   file->writeCompData("spectra", spectra, dims, compression, dims);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

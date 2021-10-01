@@ -30,11 +30,11 @@
 
 #include <algorithm>
 #include <fstream>
+#include <utility>
 
 using namespace std;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -49,7 +49,7 @@ const char INT32 = 'i';
  * @brief SpiceXMLNode::SpiceXMLNode
  * @param nodename
  */
-SpiceXMLNode::SpiceXMLNode(const std::string &nodename) : m_name{nodename}, m_typechar('s') {}
+SpiceXMLNode::SpiceXMLNode(std::string nodename) : m_name{std::move(nodename)}, m_typechar('s') {}
 
 /** Set node value in string format
  * @brief SpiceXMLNode::setValue
@@ -993,7 +993,7 @@ void LoadSpiceXML2DDet::setXtoLabQ(const API::MatrixWorkspace_sptr &dataws, cons
  * @param matrixws
  * @param idffilename
  */
-void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename) {
+void LoadSpiceXML2DDet::loadInstrument(const API::MatrixWorkspace_sptr &matrixws, const std::string &idffilename) {
   // load instrument
   auto loadinst = createChildAlgorithm("LoadInstrument");
   loadinst->initialize();
@@ -1008,5 +1008,4 @@ void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws, const
     g_log.error("Unable to load instrument to output workspace");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

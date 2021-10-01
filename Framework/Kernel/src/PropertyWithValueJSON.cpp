@@ -14,8 +14,7 @@
 
 using Json::Value;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 
@@ -161,5 +160,4 @@ std::unique_ptr<Property> decodeAsProperty(const std::string &name, const Json::
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

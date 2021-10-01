@@ -4,16 +4,17 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/DataBlockGenerator.h"
-#include "MantidDataHandling/DataBlock.h"
+#include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+#include "MantidDataHandling/DataBlock.h"
+#include "MantidDataHandling/DataBlockGenerator.h"
+
+namespace Mantid::DataHandling {
 
 // -------------------------------------------------------------
 // DataBlock Generator
 // -------------------------------------------------------------
-DataBlockGenerator::DataBlockGenerator(const std::vector<SpectrumPair> &intervals) : m_intervals(intervals) {
+DataBlockGenerator::DataBlockGenerator(std::vector<SpectrumPair> intervals) : m_intervals(std::move(intervals)) {
   // We need to sort the data items.
   auto comparison = [](const SpectrumPair &el1, const SpectrumPair &el2) { return el1.first < el2.first; };
   std::sort(m_intervals.begin(), m_intervals.end(), comparison);
@@ -77,5 +78,4 @@ void DataBlockGenerator::next() { ++(*this); }
 bool DataBlockGenerator::isDone() { return !m_currentIntervalIndex; }
 
 specnum_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

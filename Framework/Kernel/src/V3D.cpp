@@ -43,8 +43,7 @@ double nearInt(double val, double eps, double mult) noexcept {
 }
 } // namespace
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
   Sets the vector position based on spherical coordinates
@@ -533,5 +532,4 @@ double V3D::hklError() const {
          fabs(m_pt[2] - std::round(m_pt[2]));
 }
 
-} // Namespace Kernel
-} // Namespace Mantid
+} // namespace Mantid::Kernel

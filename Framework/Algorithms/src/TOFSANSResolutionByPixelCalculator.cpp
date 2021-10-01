@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/TOFSANSResolutionByPixelCalculator.h"
 #include <cmath>
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Calculates the wavelength-independent prefactor for the resolutin calculation
@@ -51,5 +50,4 @@ double TOFSANSResolutionByPixelCalculator::getSigmaQValue(double moderatorValue,
 
   return sqrt(wavlengthIndependentFactor / (wavelength * wavelength) + (sigWavelengthSquared * qbyWavelengthSquared));
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

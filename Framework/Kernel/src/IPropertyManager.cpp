@@ -28,8 +28,7 @@ DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<double>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::string>)
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<std::vector<std::string>>)
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 // This template implementation has been left in because although you can't
 // assign to an existing string
 // via the getProperty() method, you can construct a local variable by saying,
@@ -119,21 +118,13 @@ IPropertyManager::TypedValue::operator OptionalBool() { return pm.getValue<Optio
 IPropertyManager::TypedValue::operator Property *() { return pm.getPointerToProperty(prop); }
 
 #ifdef __APPLE__
-} // namespace Kernel
-} // namespace Mantid
-// These must precede the operator() declaration
+// These must precede the operator() declaration, temporarily switch batch to global namespace
+}
 DEFINE_IPROPERTYMANAGER_GETVALUE(unsigned long);
 DEFINE_IPROPERTYMANAGER_GETVALUE(std::vector<unsigned long>);
-namespace Mantid {
-namespace Kernel {
 // Intel 64-bit size_t
+namespace Mantid::Kernel {
 IPropertyManager::TypedValue::operator unsigned long() { return pm.getValue<unsigned long>(prop); }
-} // namespace Kernel
-} // namespace Mantid
-
-#else
-} // namespace Kernel
-} // namespace Mantid
 #endif
-
+} // namespace Mantid::Kernel
 /// @endcond

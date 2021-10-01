@@ -30,8 +30,7 @@ static const std::string numberLogOption = "Number";
 static const std::string numberSeriesLogOption = "Number Series";
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddSampleLog)
@@ -432,5 +431,4 @@ void AddSampleLog::getMetaData(const API::MatrixWorkspace_const_sptr &dataws, bo
   return;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

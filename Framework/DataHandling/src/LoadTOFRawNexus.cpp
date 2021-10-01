@@ -22,8 +22,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
@@ -526,5 +525,4 @@ void LoadTOFRawNexus::exec() {
   setProperty("OutputWorkspace", WS);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

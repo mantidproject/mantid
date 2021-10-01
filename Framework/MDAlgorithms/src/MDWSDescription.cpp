@@ -22,8 +22,7 @@
 #include <boost/lexical_cast.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /** set specific (non-default) dimension name
  * @param nDim   -- number of dimension;
@@ -412,5 +411,4 @@ bool MDWSDescription::isQ3DMode() const { return this->AlgID == "Q3D"; }
 
 bool MDWSDescription::hasLattice() const { return m_InWS->sample().hasOrientedLattice(); }
 
-} // end namespace MDAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::MDAlgorithms

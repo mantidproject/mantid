@@ -15,9 +15,7 @@
 #include <gsl/gsl_sf_erf.h>
 #include <gsl/gsl_sf_lambert.h>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -165,6 +163,4 @@ double BackToBackExponential::expWidth() const {
   return M_LN2 * (a + b) / (a * b);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -18,8 +18,7 @@
 #include <QVBoxLayout>
 #include <set>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
 Helper comparitor class used to determine if a workspace is not of a given type.
@@ -110,5 +109,4 @@ void SelectWorkspacesDialog::selectionChanged() { m_okButton->setEnabled(m_wsLis
 
 /// slot to handle the custom button press
 void SelectWorkspacesDialog::customButtonPress() { this->done(CustomButton); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

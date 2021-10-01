@@ -28,7 +28,8 @@ using namespace MantidQt::API;
  *
  * @param parameters :: a struct representing the parameters of the file search
  */
-FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters) : QRunnable(), m_parameters(parameters) {
+FindFilesWorker::FindFilesWorker(FindFilesSearchParameters parameters)
+    : QRunnable(), m_parameters(std::move(parameters)) {
   qRegisterMetaType<MantidQt::API::FindFilesSearchResults>("FindFilesSearchResults");
 }
 

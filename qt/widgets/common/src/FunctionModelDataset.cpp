@@ -7,15 +7,12 @@
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
 #include <stdexcept>
+#include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-FunctionModelDataset::FunctionModelDataset(const QString &workspaceName, const FunctionModelSpectra &spectra)
-    : m_workspaceName(workspaceName), m_spectra(spectra) {}
-
-FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelSpectra &&spectra)
-    : m_workspaceName(workspaceName), m_spectra(std::move(spectra)) {}
+FunctionModelDataset::FunctionModelDataset(QString workspaceName, FunctionModelSpectra spectra)
+    : m_workspaceName(std::move(workspaceName)), m_spectra(std::move(spectra)) {}
 
 /**
  * Returns the names given to each domain (i.e. spectrum) in this dataset. This
@@ -37,5 +34,4 @@ QStringList FunctionModelDataset::domainNames() const {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

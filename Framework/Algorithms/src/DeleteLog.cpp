@@ -9,8 +9,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace API;
 using namespace Kernel;
 
@@ -48,5 +47,4 @@ void DeleteLog::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

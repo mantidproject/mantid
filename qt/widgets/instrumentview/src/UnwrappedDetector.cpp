@@ -10,28 +10,22 @@
 
 using namespace Mantid::Geometry;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
-UnwrappedDetector::UnwrappedDetector()
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0) {
+UnwrappedDetector::UnwrappedDetector() : u(0), v(0), width(0), height(0), uscale(0), vscale(0) {
   color = GLColor(0, 0, 0);
 }
 
 UnwrappedDetector::UnwrappedDetector(const GLColor &color, size_t detIndex)
-    : u(0), v(0), width(0), height(0), uscale(0), vscale(0),
-      detIndex(detIndex) {
+    : u(0), v(0), width(0), height(0), uscale(0), vscale(0), detIndex(detIndex) {
   this->color = color;
 }
 
 /** Copy constructor */
-UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) {
-  this->operator=(other);
-}
+UnwrappedDetector::UnwrappedDetector(const UnwrappedDetector &other) { this->operator=(other); }
 
 /** Assignment operator */
-UnwrappedDetector &UnwrappedDetector::
-operator=(const UnwrappedDetector &other) {
+UnwrappedDetector &UnwrappedDetector::operator=(const UnwrappedDetector &other) {
   color = other.color;
   u = other.u;
   v = other.v;
@@ -43,9 +37,6 @@ operator=(const UnwrappedDetector &other) {
   return *this;
 }
 
-bool UnwrappedDetector::empty() const {
-  return detIndex == std::numeric_limits<size_t>::max();
-}
+bool UnwrappedDetector::empty() const { return detIndex == std::numeric_limits<size_t>::max(); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -33,8 +33,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 namespace PropertyNames {
@@ -696,5 +695,4 @@ bool LoadGroupMapFile::nextDataLine(std::string &line) {
   return false;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

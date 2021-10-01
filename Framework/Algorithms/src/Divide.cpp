@@ -10,8 +10,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Divide)
 
@@ -225,5 +224,4 @@ std::string Divide::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

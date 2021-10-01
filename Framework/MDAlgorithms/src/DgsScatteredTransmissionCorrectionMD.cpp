@@ -25,8 +25,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 constexpr double EMPTY_FLT() noexcept { return std::numeric_limits<float>::max() / 2; }
 
@@ -194,5 +193,4 @@ void DgsScatteredTransmissionCorrectionMD::exec() {
   setProperty("OutputWorkspace", outputWs);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

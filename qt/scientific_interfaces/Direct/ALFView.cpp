@@ -13,8 +13,7 @@
 
 #include <tuple>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 DECLARE_SUBWINDOW(ALFView)
 
@@ -34,5 +33,4 @@ ALFView::ALFView(QWidget *parent)
 }
 void ALFView::initLayout() { this->setCentralWidget(m_view); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

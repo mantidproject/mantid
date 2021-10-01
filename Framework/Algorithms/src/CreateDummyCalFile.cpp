@@ -22,8 +22,7 @@
 #include <fstream>
 #include <queue>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(CreateDummyCalFile)
@@ -240,5 +239,4 @@ void CreateDummyCalFile::writeHeaders(std::ostream &os, const std::string &filen
      << "\n";
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

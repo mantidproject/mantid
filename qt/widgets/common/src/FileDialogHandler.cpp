@@ -32,9 +32,7 @@ QString getExtensionFromFilter(const QString &selectedFilter) {
 
 } // anonymous namespace
 
-namespace MantidQt {
-namespace API {
-namespace FileDialogHandler {
+namespace MantidQt::API::FileDialogHandler {
 /**
     Contains modifications to Qt functions where problems have been found
     on certain operating systems
@@ -157,6 +155,4 @@ QString getCaption(const std::string &dialogName, const Mantid::Kernel::Property
   }
   return dialogTitle;
 }
-} // namespace FileDialogHandler
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API::FileDialogHandler

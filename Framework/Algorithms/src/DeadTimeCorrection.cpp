@@ -14,8 +14,7 @@
 
 #include <limits>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using API::FileProperty;
 using API::MatrixWorkspace_sptr;
@@ -150,5 +149,4 @@ void DeadTimeCorrection::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

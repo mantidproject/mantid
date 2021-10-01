@@ -27,8 +27,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsPreprocessData)
@@ -138,5 +137,4 @@ void DgsPreprocessData::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -156,6 +154,4 @@ void CalculateChiSquared::calcChiSquared(const API::IFunction &fun, size_t nPara
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -24,8 +24,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Types::Event::TofEvent;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
@@ -303,5 +302,4 @@ void ConvertToDetectorFaceMD::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

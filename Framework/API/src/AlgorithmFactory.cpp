@@ -17,8 +17,7 @@
 
 #include "MantidKernel/StringTokenizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger instance
 Kernel::Logger g_log("AlgorithmFactory");
@@ -443,5 +442,4 @@ std::shared_ptr<Algorithm> AlgorithmFactoryImpl::createAlgorithm(const std::stri
   return Kernel::DynamicFactory<Algorithm>::create(createName(name, version));
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

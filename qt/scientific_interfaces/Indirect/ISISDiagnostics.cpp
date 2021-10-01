@@ -19,8 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ISISDiagnostics");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -506,5 +505,4 @@ void ISISDiagnostics::updateRunButton(bool enabled, std::string const &enableOut
     setSaveEnabled(enableOutputButtons == "enable");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

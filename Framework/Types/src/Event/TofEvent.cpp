@@ -8,9 +8,7 @@
 
 using std::ostream;
 
-namespace Mantid {
-namespace Types {
-namespace Event {
+namespace Mantid::Types::Event {
 /** Comparison operator.
  * @param rhs: the other TofEvent to compare.
  * @return true if the TofEvent's are identical.*/
@@ -49,6 +47,4 @@ ostream &operator<<(ostream &os, const TofEvent &event) {
   os << event.m_tof << "," << event.m_pulsetime.toSimpleString();
   return os;
 }
-} // namespace Event
-} // namespace Types
-} // namespace Mantid
+} // namespace Mantid::Types::Event

@@ -23,7 +23,7 @@ using namespace boost::python;
 
 namespace {
 
-PyObject *convertWsToObj(Workspace_sptr ws) {
+PyObject *convertWsToObj(const Workspace_sptr &ws) {
   if (Mantid ::API::AnalysisDataService::Instance().doesExist(ws->getName())) {
     // Decay to weak ptr so the ADS manages lifetime
     using PtrT = std::weak_ptr<Workspace>;

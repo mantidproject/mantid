@@ -19,8 +19,7 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -56,8 +55,8 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaSampleZ", 0.0, "relative shift of sample position along Z.");
 }
 
-void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string componentName,
-                                                  const std::vector<double> tofs) {
+void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string &componentName,
+                                                  const std::vector<double> &tofs) {
   m_pws = pws->clone();
   m_cmpt = componentName;
 
@@ -191,7 +190,7 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
  * @param pws  :: input workspace (mostly peaksworkspace)
  */
 IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(double deltaX, double deltaY, double deltaZ,
-                                                                          std::string componentName,
+                                                                          const std::string &componentName,
                                                                           IPeaksWorkspace_sptr &pws) const {
   // Workspace_sptr inputws = std::dynamic_pointer_cast<Workspace>(pws);
 
@@ -222,7 +221,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::moveInstruentComponentBy(double
  * @return IPeaksWorkspace_sptr
  */
 IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(double rotX, double rotY, double rotZ,
-                                                                             std::string componentName,
+                                                                             const std::string &componentName,
                                                                              IPeaksWorkspace_sptr &pws) const {
   // rotate
   auto rot_alg = Mantid::API::AlgorithmFactory::Instance().create("RotateInstrumentComponent", -1);
@@ -266,5 +265,4 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(dou
   return pws;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

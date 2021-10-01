@@ -17,8 +17,7 @@
 /*  Following A.J.Schultz's anvred, scaling the vanadium spectra:
  */
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(NormaliseVanadium)
@@ -120,5 +119,4 @@ void NormaliseVanadium::exec() {
   setProperty("OutputWorkspace", correctionFactors);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

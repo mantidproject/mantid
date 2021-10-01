@@ -12,9 +12,7 @@
 #include <functional>
 #include <map>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 namespace {
 
@@ -447,6 +445,4 @@ void CrystalFieldPeaksBaseImpl::function(const API::FunctionDomain & /*domain*/,
   throw Kernel::Exception::NotImplementedError("Method is intentionally not implemented.");
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

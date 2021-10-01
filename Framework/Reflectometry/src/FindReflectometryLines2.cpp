@@ -66,8 +66,7 @@ Mantid::API::MatrixWorkspace_sptr makeOutput(double const x) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindReflectometryLines2)
@@ -243,5 +242,4 @@ API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(API::MatrixWorkspac
   return transposedWS;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

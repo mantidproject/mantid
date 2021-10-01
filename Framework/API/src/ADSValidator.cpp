@@ -11,8 +11,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Default constructor. Sets up an empty list of valid values.
 ADSValidator::ADSValidator(const bool allowMultiSelection, const bool isOptional)
@@ -68,5 +67,4 @@ std::vector<std::string> ADSValidator::allowedValues() const {
   return vals;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

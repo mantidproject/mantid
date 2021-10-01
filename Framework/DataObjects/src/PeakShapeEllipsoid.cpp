@@ -11,8 +11,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 PeakShapeEllipsoid::PeakShapeEllipsoid(const std::vector<Kernel::V3D> &directions, const std::vector<double> &abcRadii,
                                        const std::vector<double> &abcRadiiBackgroundInner,
@@ -118,5 +117,4 @@ boost::optional<double> PeakShapeEllipsoid::radius(RadiusType type) const {
 
 const std::string PeakShapeEllipsoid::ellipsoidShapeName() { return "ellipsoid"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

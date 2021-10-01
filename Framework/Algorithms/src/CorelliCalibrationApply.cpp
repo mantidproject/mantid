@@ -16,8 +16,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -181,6 +180,4 @@ void CorelliCalibrationApply::exec() {
   g_log.notice() << "Finished applying CORELLI calibration\n";
 }
 
-} // namespace Algorithms
-
-} // namespace Mantid
+} // namespace Mantid::Algorithms

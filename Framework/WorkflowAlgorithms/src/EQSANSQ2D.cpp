@@ -11,8 +11,7 @@
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 #include "Poco/NumberFormatter.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSQ2D)
@@ -203,5 +202,4 @@ void EQSANSQ2D::exec() {
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

@@ -20,8 +20,7 @@
 #include <cmath>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SetScalingPSD)
@@ -317,5 +316,4 @@ void SetScalingPSD::getDetPositionsFromRaw(const std::string &rawfile, std::vect
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

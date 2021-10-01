@@ -17,8 +17,7 @@
 
 const double IGNOREDCHANGE = 1.0E-9;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 int IPowderDiffPeakFunction::s_peakRadius = 5;
 
@@ -254,5 +253,4 @@ std::complex<double> E1(std::complex<double> z) {
   return exp_e1;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

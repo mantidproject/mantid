@@ -14,8 +14,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Power)
@@ -37,5 +36,4 @@ void Power::performUnaryOperation(const double XIn, const double YIn, const doub
 }
 
 inline double Power::calculatePower(const double base, const double exponent) { return std::pow(base, exponent); }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

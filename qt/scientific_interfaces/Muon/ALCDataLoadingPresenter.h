@@ -58,7 +58,7 @@ private slots:
   void handleRunsEditingFinished();
 
   /// Handle for when instrument changed
-  void handleInstrumentChanged(std::string instrument);
+  void handleInstrumentChanged(const std::string &instrument);
 
   /// Handle for when manage user directories clicked
   void handleManageDirectories();

@@ -30,8 +30,7 @@ using namespace boost;
 // FIXME  Consider to output multiple workspaces if there are multiple column
 // data (X, Y1, E1, Y2, E2)
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadPDFgetNFile)
 
@@ -383,5 +382,4 @@ void LoadPDFgetNFile::generateDataWorkspace() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

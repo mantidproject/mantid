@@ -44,8 +44,7 @@ const char *LINE_COUNT_MAX_KEY_NAME = "MessageDisplayLineCountMax";
 
 using Mantid::Kernel::ConfigService;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //-------------------------------------------
 // Public member functions
@@ -479,5 +478,4 @@ bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
     return true;
   return false;
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

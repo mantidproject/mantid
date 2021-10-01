@@ -8,8 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace API;
 
@@ -93,5 +92,4 @@ void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(const IFunction_spt
 
 DECLARE_FUNCTION(PoldiSpectrumPawleyFunction)
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

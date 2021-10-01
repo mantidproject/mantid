@@ -12,9 +12,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 DECLARE_FUNCTION(MultivariateGaussianComptonProfile)
@@ -234,6 +232,4 @@ void MultivariateGaussianComptonProfile::buildS2Cache(std::vector<double> &s2Cac
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

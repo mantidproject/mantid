@@ -12,9 +12,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace MSVesuvioHelper {
+namespace Mantid::CurveFitting::MSVesuvioHelper {
 
 /**
  * Generate the final energy of a neutron for gold foil analyser at 293K
@@ -372,6 +370,4 @@ void SimulationWithErrors::normalise() {
   }
 }
 
-} // namespace MSVesuvioHelper
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::MSVesuvioHelper

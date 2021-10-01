@@ -10,8 +10,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Construct with a source time series & a filter property
@@ -76,5 +75,4 @@ INSTANTIATE(bool)
 
 ///@endcond
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

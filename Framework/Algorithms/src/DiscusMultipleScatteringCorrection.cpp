@@ -36,8 +36,7 @@ constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DiscusMultipleScatteringCorrection)
@@ -393,7 +392,7 @@ void DiscusMultipleScatteringCorrection::exec() {
  * scatter calculation should be performed
  * @return The total cross section
  */
-double DiscusMultipleScatteringCorrection::new_vector(const MatrixWorkspace_sptr sigmaSSWS, const Material &material,
+double DiscusMultipleScatteringCorrection::new_vector(const MatrixWorkspace_sptr &sigmaSSWS, const Material &material,
                                                       double kinc, bool specialSingleScatterCalc) {
   double scatteringXSection, absorbXsection;
   if (specialSingleScatterCalc) {
@@ -478,7 +477,7 @@ double DiscusMultipleScatteringCorrection::interpolateGaussian(const HistogramDa
 double DiscusMultipleScatteringCorrection::simulatePaths(const int nPaths, const int nScatters, const Sample &sample,
                                                          const Geometry::Instrument &instrument,
                                                          Kernel::PseudoRandomNumberGenerator &rng,
-                                                         const MatrixWorkspace_sptr sigmaSSWS,
+                                                         const MatrixWorkspace_sptr &sigmaSSWS,
                                                          const HistogramData::Histogram &SOfQ, const double kinc,
                                                          Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double sumOfWeights = 0, sumOfQSS = 0.;
@@ -644,10 +643,10 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
  * @param rng Random number generator
  * @return a track intercepting the sample
  */
-Geometry::Track DiscusMultipleScatteringCorrection::start_point(const Geometry::IObject &shape,
-                                                                std::shared_ptr<const Geometry::ReferenceFrame> frame,
-                                                                const V3D sourcePos,
-                                                                Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track
+DiscusMultipleScatteringCorrection::start_point(const Geometry::IObject &shape,
+                                                const std::shared_ptr<const Geometry::ReferenceFrame> &frame,
+                                                const V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
   const int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
@@ -688,7 +687,7 @@ void DiscusMultipleScatteringCorrection::updateWeightAndPosition(Geometry::Track
  * @return a track
  */
 Geometry::Track DiscusMultipleScatteringCorrection::generateInitialTrack(
-    const Geometry::IObject &shape, std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D &sourcePos,
+    const Geometry::IObject &shape, const std::shared_ptr<const Geometry::ReferenceFrame> &frame, const V3D &sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
@@ -816,5 +815,4 @@ void DiscusMultipleScatteringCorrection::setWorkspaceName(const API::MatrixWorks
   API::AnalysisDataService::Instance().addOrReplace(wsName, ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

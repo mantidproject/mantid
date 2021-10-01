@@ -51,8 +51,7 @@ Mantid::Kernel::Logger docklog("MantidDockWidget");
 WorkspaceIcons WORKSPACE_ICONS = WorkspaceIcons();
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly, QWidget *parent)
     : QWidget(parent), m_mantidDisplayModel(mdb), m_viewOnly(viewOnly), m_updateCount(0), m_treeUpdating(false),
@@ -1591,5 +1590,4 @@ void WorkspaceTreeWidget::hideButtonToolbar() {
   m_sortButton->hide();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

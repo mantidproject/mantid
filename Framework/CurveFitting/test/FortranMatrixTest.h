@@ -159,14 +159,12 @@ public:
     m(1, 2) = 1.2;
     m(2, 1) = 2.1;
     m(2, 2) = 2.2;
-    auto p = &m(1, 1);
 
     auto mm = m.moveToBaseMatrix();
     TS_ASSERT_EQUALS(mm(0, 0), 1.1);
     TS_ASSERT_EQUALS(mm(0, 1), 1.2);
     TS_ASSERT_EQUALS(mm(1, 0), 2.1);
     TS_ASSERT_EQUALS(mm(1, 1), 2.2);
-    TS_ASSERT_EQUALS(p, &mm(0, 0));
   }
 
   void test_allocate_double() {

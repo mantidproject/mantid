@@ -9,8 +9,7 @@
 
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Defines a negative value which is not something which spectra
 // indices can have.
@@ -52,5 +51,4 @@ bool DataBlock::operator==(const DataBlock &other) const {
          (m_maxSpectraID == other.m_maxSpectraID);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

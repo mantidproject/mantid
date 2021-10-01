@@ -32,10 +32,7 @@ using namespace ::NeXus;
 #pragma warning(disable : 4805)
 #endif
 
-namespace Mantid {
-namespace Kernel {
-
-namespace PropertyNexus {
+namespace Mantid::Kernel::PropertyNexus {
 
 //----------------------------------------------------------------------------------------------
 /** Helper method to create a property
@@ -210,7 +207,4 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &g
 #pragma warning(pop)
 #endif
 
-} // namespace PropertyNexus
-
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::PropertyNexus

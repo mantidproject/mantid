@@ -10,8 +10,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Geometry;
 
@@ -77,5 +76,4 @@ std::vector<int> PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawEle
 
 bool PoldiDeadWireDecorator::isDeadElement(int index) { return m_deadWireSet.count(index) != 0; }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

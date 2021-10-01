@@ -53,7 +53,7 @@ public:
   /// Default constructor
   CSGObject();
   /// Constructor providing shape xml.
-  CSGObject(const std::string &shapeXML);
+  CSGObject(std::string shapeXML);
   /// Copy constructor
   CSGObject(const CSGObject &);
   /// Assignment operator

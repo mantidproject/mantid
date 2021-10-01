@@ -9,8 +9,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace API;
 
@@ -64,5 +63,4 @@ void PoldiSpectrumLinearBackground::poldiFunction1D(const std::vector<int> &indi
 /// Declares the function's single parameter A1.
 void PoldiSpectrumLinearBackground::init() { declareParameter("A1"); }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

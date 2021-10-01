@@ -9,8 +9,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 PoldiResidualCorrelationCore::PoldiResidualCorrelationCore(Kernel::Logger &g_log, double weight)
     : PoldiAutoCorrelationCore(g_log), m_weight(weight) {}
@@ -179,5 +178,4 @@ void PoldiResidualCorrelationCore::addToCountData(int x, int y, double newCounts
   m_countData->mutableY(x)[y] += newCounts;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
 }
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm, AlgorithmRuntimeProps properties)
     : m_algorithm(std::move(algorithm)), m_properties(std::move(properties)) {}
@@ -284,5 +283,4 @@ void BatchAlgorithmRunner::handleAlgorithmError(const Poco::AutoPtr<AlgorithmErr
   // Notify UI elements
   emit algorithmError(pNf->algorithm(), errorMessage);
 }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

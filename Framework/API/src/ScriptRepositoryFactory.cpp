@@ -10,8 +10,7 @@
 #include "MantidKernel/StringTokenizer.h"
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 ScriptRepositoryFactoryImpl::ScriptRepositoryFactoryImpl() : Kernel::DynamicFactory<ScriptRepository>() {
   // we need to make sure the library manager has been loaded before we
@@ -20,5 +19,4 @@ ScriptRepositoryFactoryImpl::ScriptRepositoryFactoryImpl() : Kernel::DynamicFact
   Mantid::Kernel::LibraryManager::Instance();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

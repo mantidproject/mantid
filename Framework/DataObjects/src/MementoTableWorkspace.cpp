@@ -10,8 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 DECLARE_WORKSPACE(MementoTableWorkspace)
 
@@ -69,5 +68,4 @@ MementoTableWorkspace::MementoTableWorkspace(int nRows) : TableWorkspace(nRows) 
   this->addColumn("double", "gamma");
   this->addColumn("str", "Status");
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

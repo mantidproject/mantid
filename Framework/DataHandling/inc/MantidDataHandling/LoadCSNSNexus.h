@@ -43,7 +43,7 @@ public:
                                                                   const std::vector<uint32_t> &endList,
                                                                   const std::vector<int64_t> &pids);
   void loadEventData(DataObjects::EventWorkspace_sptr &workspace, const std::vector<uint32_t> &timeOfFlight,
-                     size_t pidNums, const std::multimap<uint32_t, std::pair<float, int64_t>> evtData);
+                     size_t pidNums, const std::multimap<uint32_t, std::pair<float, int64_t>> &evtData);
 
 private:
   void init() override;

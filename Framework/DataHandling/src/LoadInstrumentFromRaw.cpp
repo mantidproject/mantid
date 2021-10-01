@@ -20,8 +20,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadInstrumentFromRaw)
 
@@ -159,5 +158,4 @@ void LoadInstrumentFromRaw::exec() {
                          "configuration property.\n";
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

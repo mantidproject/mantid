@@ -114,7 +114,7 @@ public:
   // load experiment infos, previously saved through the the saveExperimentInfo
   // function
   static void loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
-                                  std::shared_ptr<API::MultipleExperimentInfos> mei, bool lazy = false);
+                                  const std::shared_ptr<API::MultipleExperimentInfos> &mei, bool lazy = false);
 
   static void saveAffineTransformMatricies(::NeXus::File *const file, const API::IMDWorkspace_const_sptr &ws);
   static void saveAffineTransformMatrix(::NeXus::File *const file, API::CoordTransform const *transform,

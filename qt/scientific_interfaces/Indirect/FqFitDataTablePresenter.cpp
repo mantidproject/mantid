@@ -23,9 +23,7 @@ QStringList FqFitHeaders() {
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitDataTablePresenter::FqFitDataTablePresenter(FqFitModel *model, QTableWidget *dataTable)
     : IndirectFitDataTablePresenter(model->getFitDataModel(), dataTable, FqFitHeaders()) {
@@ -59,6 +57,4 @@ void FqFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
   setCell(std::move(cell), row, 1);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

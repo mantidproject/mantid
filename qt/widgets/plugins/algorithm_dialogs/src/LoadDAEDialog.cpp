@@ -15,8 +15,7 @@
 #include <QLineEdit>
 #include <QValidator>
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 
 DECLARE_DIALOG(LoadDAEDialog)
 
@@ -90,5 +89,4 @@ void LoadDAEDialog::initLayout() {
   setWindowTitle(tr("Load Workspace from DAE"));
   setFixedHeight(sizeHint().height());
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

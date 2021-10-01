@@ -28,9 +28,7 @@
 #include <numeric>
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace Kernel;
 using API::Jacobian;
@@ -744,6 +742,4 @@ FitData::FitData(Fit1D *fit, const std::string &fixed)
       J.m_map[i] = -1;
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

@@ -280,9 +280,7 @@ WorkspaceGroup_sptr runParameterProcessingWithGrouping(IAlgorithm &processingAlg
 }
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 using namespace Kernel;
@@ -511,7 +509,7 @@ void QENSFitSimultaneous::extractMembers(const WorkspaceGroup_sptr &resultGroupW
     workspaceNames.emplace_back(name);
   }
 
-  auto extractAlgorithm = extractMembersAlgorithm(std::move(resultGroupWs), outputWsName);
+  auto extractAlgorithm = extractMembersAlgorithm(resultGroupWs, outputWsName);
   extractAlgorithm->setProperty("InputWorkspaces", workspaceNames);
   extractAlgorithm->execute();
 
@@ -667,6 +665,4 @@ void QENSFitSimultaneous::renameWorkspaces(const API::WorkspaceGroup_sptr &outpu
   return renameWorkspacesInQENSFit(this, rename, outputGroup, outputBaseName, endOfSuffix + "s", getNameSuffix);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

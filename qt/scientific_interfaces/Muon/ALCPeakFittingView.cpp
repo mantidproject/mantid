@@ -12,8 +12,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
@@ -135,5 +134,4 @@ void ALCPeakFittingView::changePlotGuessState(bool plotted) {
   m_ui.plotGuess->setText(plotted ? "Remove guess" : "Plot guess");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

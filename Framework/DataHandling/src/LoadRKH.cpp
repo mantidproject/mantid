@@ -47,8 +47,7 @@ bool isUnit(const Mantid::Kernel::StringTokenizer &codes) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -578,5 +577,4 @@ bool LoadRKH::hasXerror(std::ifstream &stream) {
   stream.seekg(currentPutLocation, stream.beg);
   return containsXerror;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

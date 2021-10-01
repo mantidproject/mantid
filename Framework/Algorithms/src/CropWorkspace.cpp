@@ -8,8 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using std::size_t;
 
@@ -81,5 +80,4 @@ void CropWorkspace::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

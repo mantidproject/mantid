@@ -22,8 +22,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
 
@@ -371,5 +370,4 @@ const SpectrumInfoConstIt SpectrumInfo::cbegin() const { return SpectrumInfoCons
 // End method for iterator
 const SpectrumInfoConstIt SpectrumInfo::cend() const { return SpectrumInfoConstIt(*this, size()); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

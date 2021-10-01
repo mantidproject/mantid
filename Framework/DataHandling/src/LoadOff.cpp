@@ -12,8 +12,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 LoadOff::LoadOff(const std::string &filename, ScaleUnits scaleType)
     : LoadSingleMesh(filename, std::ios_base::in, scaleType) {}
@@ -126,5 +125,4 @@ std::unique_ptr<Geometry::MeshObject> LoadOff::readShape() {
   }
   return nullptr;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -19,9 +19,7 @@
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 // These values control the dimensions of the axes used
@@ -292,6 +290,4 @@ void ColorbarWidget::connectSignals() {
   connect(m_ui.powerEdit, SIGNAL(editingFinished()), this, SLOT(powerExponentEdited()));
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

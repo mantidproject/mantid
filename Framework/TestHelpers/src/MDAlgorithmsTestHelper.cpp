@@ -19,12 +19,7 @@ namespace Mantid {
 using namespace API;
 using namespace DataObjects;
 
-namespace MDAlgorithms {
-
-/** Set of helper methods for testing MDEventWorkspace things
- *
- * */
-namespace MDAlgorithmsTestHelper {
+namespace MDAlgorithms::MDAlgorithmsTestHelper {
 
 /** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
  *points
@@ -98,6 +93,5 @@ DataObjects::MDEventWorkspace3Lean::sptr makeFileBackedMDEWwithMDFrame(const std
       Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
 }
 
-} // namespace MDAlgorithmsTestHelper
-} // namespace MDAlgorithms
+} // namespace MDAlgorithms::MDAlgorithmsTestHelper
 } // namespace Mantid

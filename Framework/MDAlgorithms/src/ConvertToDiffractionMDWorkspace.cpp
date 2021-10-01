@@ -38,8 +38,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Types::Event::TofEvent;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 bool DODEBUG = true;
 
@@ -555,5 +554,4 @@ void ConvertToDiffractionMDWorkspace::exec() {
   delete[] m_extentsMax;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

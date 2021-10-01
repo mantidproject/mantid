@@ -15,9 +15,7 @@
 
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 // ------------------------ Static methods ---------------------
 /**
@@ -141,6 +139,4 @@ std::vector<QRgb> MantidColorMap::rgb(double vmin, double vmax, const std::vecto
   return m_mappable.toRGBA(values);
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

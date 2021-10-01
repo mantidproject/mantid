@@ -119,7 +119,7 @@ public:
 protected:
   std::string createOutputName(const std::string &fitMode) const;
   Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const;
-  Mantid::API::IAlgorithm_sptr createSequentialFit(Mantid::API::IFunction_sptr function) const;
+  Mantid::API::IAlgorithm_sptr createSequentialFit(const Mantid::API::IFunction_sptr &function) const;
   Mantid::API::IAlgorithm_sptr createSimultaneousFit(const Mantid::API::MultiDomainFunction_sptr &function) const;
   virtual Mantid::API::MultiDomainFunction_sptr getMultiDomainFunction() const;
   virtual std::unordered_map<std::string, std::string> mapDefaultParameterNames() const;

@@ -31,8 +31,7 @@
 #include <numeric>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -484,11 +483,10 @@ void CreateSampleWorkspace::replaceAll(std::string &str, const std::string &from
  * @param instrName :: Name of the underlying instrument, can be used to mock existing beamlines
  * @returns A shared pointer to the generated instrument
  */
-Instrument_sptr
-CreateSampleWorkspace::createTestInstrumentRectangular(API::Progress &progress, int numBanks, int numMonitors,
-                                                       int pixels, double pixelDiameter, double pixelHeight,
-                                                       double pixelSpacing, const double bankDistanceFromSample,
-                                                       const double sourceSampleDistance, const std::string instrName) {
+Instrument_sptr CreateSampleWorkspace::createTestInstrumentRectangular(
+    API::Progress &progress, int numBanks, int numMonitors, int pixels, double pixelDiameter, double pixelHeight,
+    double pixelSpacing, const double bankDistanceFromSample, const double sourceSampleDistance,
+    const std::string &instrName) {
   auto testInst = std::make_shared<Instrument>(instrName);
   // The instrument is going to be set up with z as the beam axis and y as the
   // vertical axis.
@@ -606,5 +604,4 @@ IObject_sptr CreateSampleWorkspace::createSphere(double radius, const V3D &centr
   return shapeMaker.createShape(xml.str());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

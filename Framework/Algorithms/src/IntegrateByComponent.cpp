@@ -15,8 +15,7 @@
 #include <gsl/gsl_statistics.h>
 #include <unordered_map>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IntegrateByComponent)
@@ -215,5 +214,4 @@ std::vector<std::vector<size_t>> IntegrateByComponent::makeMap(const API::Matrix
   return speclist;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

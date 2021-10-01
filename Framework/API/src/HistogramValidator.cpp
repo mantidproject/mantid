@@ -7,8 +7,7 @@
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *
@@ -41,5 +40,4 @@ std::string HistogramValidator::checkValidity(const MatrixWorkspace_sptr &value)
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

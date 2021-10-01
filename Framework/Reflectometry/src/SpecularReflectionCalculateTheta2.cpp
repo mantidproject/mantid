@@ -23,8 +23,7 @@ const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
 const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpecularReflectionCalculateTheta2)
@@ -64,5 +63,4 @@ void SpecularReflectionCalculateTheta2::exec() {
   this->setProperty("TwoTheta", twoTheta);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

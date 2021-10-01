@@ -33,8 +33,7 @@ bool checkForDouble(const std::string &val) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -185,5 +184,4 @@ double SANSCollimationLengthEstimator::getGuideValue(Mantid::Kernel::Property *p
                               "Guides. Currently only Numeric and TimeSeries "
                               "are supported.");
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

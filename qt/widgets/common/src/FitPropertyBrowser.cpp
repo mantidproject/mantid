@@ -1523,7 +1523,7 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler *h) const {
  * @param f :: New current function
  */
 void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFunction_const_sptr &f) const {
-  setCurrentFunction(getHandler()->findHandler(std::move(f)));
+  setCurrentFunction(getHandler()->findHandler(f));
 }
 
 /**

@@ -17,8 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddLogDerivative)
@@ -146,5 +145,4 @@ void AddLogDerivative::exec() {
   g_log.notice() << "Added log named " << NewLogName << '\n';
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -11,8 +11,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -99,5 +98,4 @@ void RemoveMaskedSpectra::makeIndexList(std::vector<size_t> &indices, const API:
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

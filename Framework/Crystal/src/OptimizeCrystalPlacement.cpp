@@ -27,6 +27,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 
 #include <cstdarg>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -35,18 +36,16 @@ using Mantid::Geometry::IndexingUtils;
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(OptimizeCrystalPlacement)
 
 class OrEnabledWhenProperties : public Kernel::IPropertySettings {
 public:
-  OrEnabledWhenProperties(const std::string &prop1Name, ePropertyCriterion prop1Crit, const std::string &prop1Value,
-                          const std::string &prop2Name, ePropertyCriterion prop2Crit, const std::string &prop2Value)
-      : IPropertySettings(), propName1(prop1Name), propName2(prop2Name), Criteria1(prop1Crit), Criteria2(prop2Crit),
-        value1(prop1Value), value2(prop2Value)
+  OrEnabledWhenProperties(std::string prop1Name, ePropertyCriterion prop1Crit, std::string prop1Value,
+                          std::string prop2Name, ePropertyCriterion prop2Crit, std::string prop2Value)
+      : IPropertySettings(), propName1(std::move(prop1Name)), propName2(std::move(prop2Name)), Criteria1(prop1Crit),
+        Criteria2(prop2Crit), value1(std::move(prop1Value)), value2(std::move(prop2Value))
 
   {
     Prop1 = std::make_unique<Kernel::EnabledWhenProperty>(propName1, Criteria1, value1);
@@ -450,6 +449,4 @@ void OptimizeCrystalPlacement::exec() {
 
 } // exec
 
-} // namespace Crystal
-
-} // namespace Mantid
+} // namespace Mantid::Crystal

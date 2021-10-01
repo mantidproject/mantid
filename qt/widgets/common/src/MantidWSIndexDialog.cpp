@@ -22,8 +22,7 @@
 #include <exception>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 /// The string "Workspace index"
 const QString MantidWSIndexWidget::WORKSPACE_NAME = "Workspace name";
 const QString MantidWSIndexWidget::WORKSPACE_INDEX = "Workspace index";
@@ -1002,7 +1001,7 @@ void Interval::init(int start, int end) {
 //----------------------------------
 IntervalList::IntervalList(void) {}
 
-IntervalList::IntervalList(const QString &intervals) { addIntervals(std::move(intervals)); }
+IntervalList::IntervalList(const QString &intervals) { addIntervals(intervals); }
 
 IntervalList::IntervalList(const Interval &interval) { m_list.append(interval); }
 
@@ -1222,8 +1221,8 @@ IntervalList IntervalList::intersect(const IntervalList &a, const IntervalList &
 //----------------------------------
 // IntervalListValidator public methods
 //----------------------------------
-IntervalListValidator::IntervalListValidator(QObject *parent, const IntervalList &intervalList)
-    : QValidator(parent), m_intervalList(intervalList) {}
+IntervalListValidator::IntervalListValidator(QObject *parent, IntervalList intervalList)
+    : QValidator(parent), m_intervalList(std::move(intervalList)) {}
 
 QValidator::State IntervalListValidator::validate(QString &input, int &pos) const {
   UNUSED_ARG(pos)
@@ -1263,5 +1262,4 @@ void MantidWSIndexWidget::QLineEditWithErrorMark::setError(const QString &error)
     m_validLbl->setToolTip(error.trimmed());
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

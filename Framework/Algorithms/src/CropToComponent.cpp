@@ -30,8 +30,7 @@ std::vector<size_t> getDetectorIndices(const Mantid::API::MatrixWorkspace &works
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -115,5 +114,4 @@ std::map<std::string, std::string> CropToComponent::validateInputs() {
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -16,8 +16,7 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using API::IFunction;
 using PythonInterface::callMethod;
 using PythonInterface::callMethodNoCheck;
@@ -306,5 +305,4 @@ void IFunctionAdapter::evaluateDerivative(API::Jacobian *out, const double *xVal
   if (PyErr_Occurred())
     throw PythonException();
 }
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

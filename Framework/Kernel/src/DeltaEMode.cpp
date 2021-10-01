@@ -12,8 +12,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace // unnamed
 {
 struct ModeIndex {
@@ -80,5 +79,4 @@ DeltaEMode::Type DeltaEMode::fromString(const std::string &modeStr) {
   // Unknown mode
   throw std::invalid_argument("DeltaEMode::fromString - Unknown energy transfer mode: " + modeStr);
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

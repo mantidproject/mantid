@@ -46,8 +46,7 @@ using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -651,5 +650,4 @@ void LoadSpice2D::setSansSpiceXmlFormatVersion(std::map<std::string, std::string
   }
   g_log.debug() << "Sans_spice_xml_format_version == " << m_sansSpiceXmlFormatVersion << "\n";
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

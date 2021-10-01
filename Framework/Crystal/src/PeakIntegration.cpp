@@ -22,8 +22,7 @@
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PeakIntegration)
@@ -346,5 +345,4 @@ int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name, int x
   return TOFmax - 1;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

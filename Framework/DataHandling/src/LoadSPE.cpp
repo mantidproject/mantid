@@ -19,8 +19,7 @@
 #include <fstream>
 #include <limits>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -236,5 +235,4 @@ void LoadSPE::reportFormatError(const std::string &what) {
   throw Exception::FileError("Unexpected formatting in file: ", m_filename);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

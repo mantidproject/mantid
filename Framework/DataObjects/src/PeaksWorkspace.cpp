@@ -25,8 +25,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 /// Register the workspace as a type
 DECLARE_WORKSPACE(PeaksWorkspace)
 
@@ -928,13 +927,11 @@ API::LogManager_const_sptr PeaksWorkspace::getLogs() const {
 ITableWorkspace *PeaksWorkspace::doCloneColumns(const std::vector<std::string> & /*colNames*/) const {
   throw Kernel::Exception::NotImplementedError("PeaksWorkspace cannot clone columns.");
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_sptr
@@ -962,7 +959,6 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(const
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

@@ -17,8 +17,7 @@
 
 #include <json/json.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 using std::string;
 
@@ -734,5 +733,4 @@ void PropertyManager::clear() {
  */
 Json::Value encodeAsJson(const PropertyManager &propMgr) { return propMgr.asJson(true); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

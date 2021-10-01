@@ -8,8 +8,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectSimulationTab::IndirectSimulationTab(QWidget *parent) : IndirectTab(parent) {}
 
@@ -25,5 +24,4 @@ void IndirectSimulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::stri
 
 void IndirectSimulationTab::clearOutputPlotOptionsWorkspaces() { m_plotOptionsPresenter->clearWorkspaces(); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

@@ -24,8 +24,7 @@
 #include <map>
 #include <memory>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -188,5 +187,4 @@ Mantid::Geometry::MDFrame_uptr SetMDFrame::createMDFrame(const std::string &fram
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

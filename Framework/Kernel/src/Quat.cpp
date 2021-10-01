@@ -13,8 +13,7 @@
 #include <boost/algorithm/string.hpp>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 Logger g_log("Quat");
 }
@@ -791,6 +790,4 @@ std::vector<double> Quat::getEulerAngles(const std::string &convention = "XYZ") 
   return angles;
 }
 
-} // Namespace Kernel
-
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -25,9 +25,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IsoRotDiff");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(ElasticIsoRotDiff)
 
@@ -68,6 +66,4 @@ double ElasticIsoRotDiff::HeightPrefactor() const {
   return pow(boost::math::sph_bessel(0, Q * R), 2);
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

@@ -39,9 +39,7 @@ WorkspaceGroup_sptr getADSGroupWorkspace(std::string const &workspaceName) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 /**
  * @param functionName  The name of the function.
@@ -310,7 +308,8 @@ void IndirectFitAnalysisTab::updateParameterValues(const std::unordered_map<std:
   }
 }
 
-void IndirectFitAnalysisTab::updateFitBrowserParameterValues(std::unordered_map<std::string, ParameterValue> params) {
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues(
+    const std::unordered_map<std::string, ParameterValue> &params) {
   IFunction_sptr fun = m_fittingModel->getFitFunction();
   if (fun) {
     for (auto pair : params) {
@@ -663,6 +662,4 @@ void IndirectFitAnalysisTab::respondToFunctionChanged() {
   emit functionChanged();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

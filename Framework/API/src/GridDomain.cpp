@@ -13,8 +13,7 @@
 #include "MantidAPI/GridDomain.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("GridDomain");
@@ -53,5 +52,4 @@ void GridDomain::reScale(const std::string &scaling) {
     grid->reScale(scaling);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

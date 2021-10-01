@@ -22,8 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 std::string const CreatePolarizationEfficienciesBase::Pp("Pp");
 std::string const CreatePolarizationEfficienciesBase::Ap("Ap");
@@ -77,5 +76,4 @@ CreatePolarizationEfficienciesBase::getNonDefaultProperties(std::vector<std::str
   return outputLabels;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

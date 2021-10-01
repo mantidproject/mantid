@@ -11,8 +11,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView *view,
                                                              IALCBaselineModellingModel *model)
@@ -189,5 +188,4 @@ void ALCBaselineModellingPresenter::updateFunction() {
   }
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

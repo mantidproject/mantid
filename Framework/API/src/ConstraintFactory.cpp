@@ -10,8 +10,7 @@
 #include "MantidKernel/LibraryManager.h"
 #include "MantidKernel/StringTokenizer.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 ConstraintFactoryImpl::ConstraintFactoryImpl() : Kernel::DynamicFactory<IConstraint>() {
   // we need to make sure the library manager has been loaded before we
@@ -52,5 +51,4 @@ IConstraint *ConstraintFactoryImpl::createInitialized(IFunction *fun, const Expr
   return c;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

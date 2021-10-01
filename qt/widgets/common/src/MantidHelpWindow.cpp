@@ -33,8 +33,7 @@
 #include <QWidget>
 #include <stdexcept>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using std::string;
 using namespace MantidQt::API;
@@ -471,5 +470,4 @@ void MantidHelpWindow::determineFileLocs() {
 
 void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

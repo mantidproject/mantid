@@ -28,9 +28,7 @@
 
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Quadratic");
 }
@@ -332,6 +330,4 @@ void Quadratic::write(std::ostream &OX) const
 
 std::unique_ptr<Quadratic> Quadratic::clone() const { return std::unique_ptr<Quadratic>(doClone()); }
 
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

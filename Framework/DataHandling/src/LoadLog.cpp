@@ -33,8 +33,7 @@
 
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadLog)
 
@@ -561,5 +560,4 @@ int LoadLog::countNumberColumns(std::ifstream &logFileStream, const std::string 
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

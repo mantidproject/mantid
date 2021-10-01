@@ -20,9 +20,7 @@ const double NEG_DBL_MAX = -1. * DBL_MAX;
 
 using namespace std;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 namespace {
@@ -458,6 +456,4 @@ double NeutronBk2BkExpConvPVoigt::calOmega(const double x, const double eta, con
   return omega;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

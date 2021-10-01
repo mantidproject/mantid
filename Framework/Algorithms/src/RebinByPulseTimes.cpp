@@ -15,8 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinByPulseTimes)
@@ -62,8 +61,8 @@ void RebinByPulseTimes::doHistogramming(IEventWorkspace_sptr inWS, MatrixWorkspa
     outputWS->setSharedX(i, x);
 
     // Copy the data over.
-    outputWS->mutableY(i) = std::move(y_data);
-    outputWS->mutableE(i) = std::move(e_data);
+    outputWS->mutableY(i) = y_data;
+    outputWS->mutableE(i) = e_data;
 
     // Report progress
     prog.report(name());
@@ -90,5 +89,4 @@ uint64_t RebinByPulseTimes::getMinX(Mantid::API::IEventWorkspace_sptr ws) const 
   return ws->getPulseTimeMin().totalNanoseconds();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

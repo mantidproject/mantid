@@ -11,8 +11,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 /// Returns a scattered copy of `indexInfo` with storage mode `Distributed`.
 IndexInfo scatter(const Indexing::IndexInfo &indexInfo) {
@@ -36,5 +35,4 @@ IndexInfo scatter(const Indexing::IndexInfo &indexInfo) {
   return scattered;
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

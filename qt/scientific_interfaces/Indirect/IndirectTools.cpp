@@ -10,11 +10,9 @@
 
 #include "MantidKernel/ConfigService.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 DECLARE_SUBWINDOW(IndirectTools)
-}
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces
 
 using namespace MantidQt::CustomInterfaces;
 

@@ -8,8 +8,7 @@
 #include <cmath>
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Constructor
@@ -334,5 +333,4 @@ double MaxentCalculator::calculateChiSquared(const std::vector<double> &data) co
   return chisq / dpoints;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

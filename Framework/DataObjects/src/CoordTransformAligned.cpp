@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -172,5 +171,4 @@ std::string CoordTransformAligned::toXMLString() const {
  */
 std::string CoordTransformAligned::id() const { return "CoordTransformAligned"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

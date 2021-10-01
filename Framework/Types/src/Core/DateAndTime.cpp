@@ -2,9 +2,7 @@
 
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
-namespace Mantid {
-namespace Types {
-namespace Core {
+namespace Mantid::Types::Core {
 
 const uint32_t DateAndTime::EPOCH_DIFF = 631152000;
 /// The epoch for GPS times.
@@ -729,6 +727,4 @@ std::ostream &operator<<(std::ostream &stream, const DateAndTime &t) {
   stream << t.toSimpleString();
   return stream;
 }
-} // namespace Core
-} // namespace Types
-} // namespace Mantid
+} // namespace Mantid::Types::Core

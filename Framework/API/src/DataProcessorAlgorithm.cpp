@@ -28,8 +28,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -531,5 +530,4 @@ template class MANTID_API_DLL GenericDataProcessorAlgorithm<DistributedAlgorithm
 
 template <> MANTID_API_DLL void GenericDataProcessorAlgorithm<Algorithm>::visualStudioC4661Workaround() {}
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

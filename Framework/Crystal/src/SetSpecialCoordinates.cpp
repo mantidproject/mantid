@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("SetSpecialCoordinates");
 }
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetSpecialCoordinates)
@@ -136,5 +135,4 @@ void SetSpecialCoordinates::exec() {
   }
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

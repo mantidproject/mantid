@@ -10,8 +10,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/PropertyWithValue.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 using namespace API;
 
@@ -136,5 +135,4 @@ std::shared_ptr<API::Workspace> HistogramDomainCreator::createOutputWorkspace(
   return ws;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

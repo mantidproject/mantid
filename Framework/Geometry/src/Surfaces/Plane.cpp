@@ -35,9 +35,7 @@ GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("cast-qual")
 #endif
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Plane");
 }
@@ -438,6 +436,4 @@ TopoDS_Shape Plane::createShape() {
 }
 #endif
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

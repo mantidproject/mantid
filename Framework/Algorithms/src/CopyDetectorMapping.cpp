@@ -11,8 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CopyDetectorMapping)
 
@@ -68,5 +67,4 @@ std::map<std::string, std::string> CopyDetectorMapping::validateInputs() {
   return issues;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

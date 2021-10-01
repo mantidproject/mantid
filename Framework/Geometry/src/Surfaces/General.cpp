@@ -7,9 +7,7 @@
 #include "MantidGeometry/Surfaces/General.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 
 General::General()
     : Quadratic()
@@ -115,6 +113,4 @@ void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &x
   UNUSED_ARG(zmin);
 }
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

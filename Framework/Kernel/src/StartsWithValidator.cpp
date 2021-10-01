@@ -9,8 +9,7 @@
 #include <memory>
 #endif
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Constructor.
  * @param values :: A vector with the allowed values.
@@ -43,5 +42,4 @@ std::string StartsWithValidator::checkValidity(const std::string &value) const {
   return os.str();
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

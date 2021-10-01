@@ -32,8 +32,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using API::ExperimentInfo;
 using API::Workspace_sptr;
@@ -1089,5 +1088,4 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(const Prope
   }
   return compatible;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

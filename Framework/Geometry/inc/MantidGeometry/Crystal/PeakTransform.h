@@ -20,7 +20,7 @@ Used to remap coordinates into a form consistent with an axis reordering.
 */
 class DLLExport PeakTransform {
 public:
-  PeakTransform(const std::string &xPlotLabel, const std::string &yPlotLabel, const boost::regex &regexOne,
+  PeakTransform(std::string xPlotLabel, std::string yPlotLabel, const boost::regex &regexOne,
                 const boost::regex &regexTwo, const boost::regex &regexThree);
   virtual ~PeakTransform() = default;
   /// Perform Transform

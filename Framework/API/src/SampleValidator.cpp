@@ -10,8 +10,7 @@
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using Kernel::Strings::join;
 
 /**
@@ -53,5 +52,4 @@ std::string SampleValidator::checkValidity(const MatrixWorkspace_sptr &value) co
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

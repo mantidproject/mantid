@@ -37,8 +37,7 @@
 
 using Mantid::Kernel::V3D;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * The constructor.
@@ -630,7 +629,7 @@ void ProjectionSurface::saveShapesToTableWorkspace() { m_maskShapes.saveToTableW
  * @param ws :: table workspace to load shapes from
  */
 void ProjectionSurface::loadShapesFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws) {
-  m_maskShapes.loadFromTableWorkspace(std::move(ws));
+  m_maskShapes.loadFromTableWorkspace(ws);
 }
 
 /**
@@ -1001,5 +1000,4 @@ std::string ProjectionSurface::saveToProject() const {
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -26,9 +26,7 @@
 #include <QVBoxLayout>
 #include <limits>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 /**
  * Constructor
@@ -98,6 +96,4 @@ void FunctionTemplateBrowser::init() {
 
 void FunctionTemplateBrowser::clear() { m_browser->clear(); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

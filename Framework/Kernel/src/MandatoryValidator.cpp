@@ -12,9 +12,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include <cmath>
 
-namespace Mantid {
-namespace Kernel {
-namespace Detail {
+namespace Mantid::Kernel::Detail {
 /**
  * Specialization of checkIsEmpty for string
  * @param value :: A string object
@@ -56,6 +54,4 @@ template <> DLLExport bool checkIsEmpty(const int64_t &value) { return (value ==
  * @return True if the value is considered empty, see EmptyValues.h
  */
 template <> DLLExport bool checkIsEmpty(const OptionalBool &value) { return (value.getValue() == OptionalBool::Unset); }
-} // namespace Detail
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel::Detail

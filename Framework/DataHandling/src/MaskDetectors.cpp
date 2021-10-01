@@ -38,8 +38,7 @@ void constrainIndexInRange(std::vector<size_t> &sourceList, std::vector<size_t> 
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectors)
@@ -593,5 +592,4 @@ void MaskDetectors::appendToDetectorListFromComponentList(std::vector<detid_t> &
   std::copy(detectorIDs.cbegin(), detectorIDs.cend(), appendBegin);
 } // appendToDetectorListFromComponentList
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

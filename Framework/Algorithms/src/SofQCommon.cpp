@@ -14,8 +14,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitConversion.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 /** The procedure analyses emode and efixed properties provided to the algorithm
  *and identify the energy analysis mode and the way the properties are defined
  *@param workspace     :: input workspace which may or may not have incident
@@ -231,5 +230,4 @@ std::pair<double, double> SofQCommon::qBinHintsIndirect(const API::MatrixWorkspa
   }
   return std::make_pair(minQ, maxQ);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

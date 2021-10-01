@@ -11,9 +11,7 @@ using namespace Mantid;
 using namespace Mantid::API;
 using Mantid::HistogramData::Histogram;
 
-namespace Mantid {
-namespace Algorithms {
-namespace PeakParameterHelper {
+namespace Mantid::Algorithms::PeakParameterHelper {
 
 /** Get an index of a value in a sorted vector.  The index should be the item
  * with value nearest to X
@@ -203,6 +201,4 @@ template MANTID_ALGORITHMS_DLL size_t findXIndex(const HistogramData::Points &, 
 template MANTID_ALGORITHMS_DLL size_t findXIndex(const HistogramData::HistogramX &, const double, const size_t);
 template MANTID_ALGORITHMS_DLL size_t findXIndex(const std::vector<double> &, const double, const size_t);
 
-} // namespace PeakParameterHelper
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms::PeakParameterHelper

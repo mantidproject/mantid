@@ -7,8 +7,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/ITableWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /**   Constructor
       @param trh :: TableRowHelper returned by TableWorkspace::getRow
@@ -89,5 +88,4 @@ std::ostream &operator<<(std::ostream &s, const TableRow &row) {
   return s;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

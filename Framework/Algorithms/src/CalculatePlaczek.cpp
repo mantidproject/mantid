@@ -27,8 +27,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -554,5 +553,4 @@ std::vector<double> CalculatePlaczek::getEfficiencyCoefficient2() {
   return eps2;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

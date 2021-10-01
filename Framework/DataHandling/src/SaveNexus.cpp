@@ -18,8 +18,7 @@
 #include <cmath>
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexus)
@@ -164,5 +163,4 @@ bool SaveNexus::processGroups() {
   return true;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -207,9 +207,7 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
 
@@ -319,14 +317,11 @@ void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
 }
 
 void ConvFitModel::setParameterNameChanges(const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
-  m_parameterNameChanges =
-      constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.is_initialized());
+  m_parameterNameChanges = constructParameterNameChanges(model, backgroundIndex, m_temperature.is_initialized());
 }
 
 std::vector<std::pair<std::string, size_t>> ConvFitModel::getResolutionsForFit() const {
   return m_fitDataModel->getResolutionsForFit();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

@@ -10,9 +10,7 @@
 
 #include "MantidAPI/IAlgorithm.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
@@ -29,6 +27,4 @@ void BatchJobAlgorithm::updateItem() {
   if (m_item)
     m_updateFunction(m_algorithm, *m_item);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SerialAlgorithm.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 Parallel::ExecutionMode
 SerialAlgorithm::getParallelExecutionMode(const std::map<std::string, Parallel::StorageMode> &storageModes) const {
@@ -21,5 +20,4 @@ SerialAlgorithm::getParallelExecutionMode(const std::map<std::string, Parallel::
   return getCorrespondingExecutionMode(StorageMode::MasterOnly);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

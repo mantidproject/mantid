@@ -7,8 +7,7 @@
 #include "MantidDataObjects/PeakNoShapeFactory.h"
 #include "MantidDataObjects/NoShape.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 void PeakNoShapeFactory::setSuccessor(std::shared_ptr<const PeakShapeFactory> /*successorFactory*/) {}
 
@@ -18,5 +17,4 @@ void PeakNoShapeFactory::setSuccessor(std::shared_ptr<const PeakShapeFactory> /*
  */
 Mantid::Geometry::PeakShape *PeakNoShapeFactory::create(const std::string & /*source*/) const { return new NoShape; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

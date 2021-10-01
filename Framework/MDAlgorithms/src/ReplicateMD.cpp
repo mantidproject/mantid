@@ -18,8 +18,7 @@
 #include <string>
 #include <utility>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -355,5 +354,4 @@ void ReplicateMD::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

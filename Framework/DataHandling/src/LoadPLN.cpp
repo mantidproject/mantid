@@ -26,9 +26,9 @@
 #include <algorithm>
 #include <cmath>
 #include <fstream>
+#include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 
@@ -263,9 +263,9 @@ protected:
 
 public:
   EventProcessor(const std::vector<bool> &roi, const std::vector<size_t> &mapIndex, const double framePeriod,
-                 const double gatePeriod, const TimeLimits &timeBoundary)
+                 const double gatePeriod, TimeLimits timeBoundary)
       : m_roi(roi), m_mapIndex(mapIndex), m_framePeriod(framePeriod), m_gatePeriod(gatePeriod), m_frames(0),
-        m_framesValid(0), m_timeBoundary(timeBoundary) {}
+        m_framesValid(0), m_timeBoundary(std::move(timeBoundary)) {}
 
   void newFrame() {
     m_frames++;
@@ -906,5 +906,4 @@ void LoadPLN::exec() {
 // register the algorithms into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadPLN)
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

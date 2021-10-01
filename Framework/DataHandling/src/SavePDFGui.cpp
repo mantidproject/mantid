@@ -15,8 +15,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -126,5 +125,4 @@ void SavePDFGui::writeWSData(std::ofstream &out, const API::MatrixWorkspace_cons
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

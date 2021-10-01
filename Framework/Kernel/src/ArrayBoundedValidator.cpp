@@ -9,8 +9,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Copy constructor
@@ -127,5 +126,4 @@ template class ArrayBoundedValidator<int64_t>;
 template class ArrayBoundedValidator<long>;
 #endif
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

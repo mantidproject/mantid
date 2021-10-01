@@ -22,9 +22,7 @@
 
 #include <memory>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 /// Starting value of peak position in y-space for fit
 double PEAK_POS_GUESS = -0.1;
@@ -359,6 +357,4 @@ void NormaliseByPeakArea::symmetriseYSpace() {
   }
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

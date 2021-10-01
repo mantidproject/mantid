@@ -7,8 +7,7 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /// Construct empty
 Histogram1D::Histogram1D(HistogramData::Histogram::XMode xmode, HistogramData::Histogram::YMode ymode)
@@ -84,5 +83,4 @@ void Histogram1D::checkAndSanitizeHistogram(HistogramData::Histogram &histogram)
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

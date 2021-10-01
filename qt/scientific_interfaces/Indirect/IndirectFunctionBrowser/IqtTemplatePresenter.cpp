@@ -10,9 +10,7 @@
 
 #include <cmath>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
@@ -315,6 +313,4 @@ void IqtTemplatePresenter::viewChangedParameterValue(const QString &parName, dou
   emit functionStructureChanged();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

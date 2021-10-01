@@ -10,8 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 
@@ -84,10 +83,10 @@ void RRFMuon::exec() {
   // Put results into output workspace
   // Real RRF polarization
   outputWs->setSharedX(0, inputWs->sharedX(0));
-  outputWs->mutableY(0) = std::move(rrfRe);
+  outputWs->mutableY(0) = rrfRe;
   // Imaginary RRF polarization
   outputWs->setSharedX(1, inputWs->sharedX(1));
-  outputWs->mutableY(1) = std::move(rrfIm);
+  outputWs->mutableY(1) = rrfIm;
 
   // Set output workspace
   setProperty("OutputWorkspace", outputWs);
@@ -120,5 +119,4 @@ double RRFMuon::unitConversionFactor(const std::string &uin, const std::string &
     throw std::runtime_error("X units must be in microseconds");
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

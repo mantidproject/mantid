@@ -11,8 +11,7 @@
 
 #include <Poco/Thread.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //-----------------------------------------------------------------------------------
 /** Constructor
@@ -92,5 +91,4 @@ void ThreadPoolRunnable::run() {
   // Thread now will exit
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -9,8 +9,7 @@
 #include <boost/algorithm/string.hpp>
 #include <utility>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(InvalidParameterParser)
 
 InvalidParameterParser::InvalidParameterParser() {}
@@ -28,5 +27,4 @@ void InvalidParameterParser::setSuccessorParser(ImplicitFunctionParameterParser 
   UNUSED_ARG(parser);
   // Do nothing. No successor allowed.
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

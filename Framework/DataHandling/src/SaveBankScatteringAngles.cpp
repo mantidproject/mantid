@@ -23,8 +23,7 @@ double radToDeg(const double rad) {
 }
 } // anonymous namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 
@@ -121,5 +120,4 @@ std::map<std::string, std::string> SaveBankScatteringAngles::validateInputs() {
   return issues;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

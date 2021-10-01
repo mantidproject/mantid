@@ -14,8 +14,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterBadPulses)
 
@@ -125,5 +124,4 @@ void FilterBadPulses::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -9,9 +9,7 @@
 #include "SingleFunctionTemplateBrowser.h"
 #include <math.h>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 using namespace MantidWidgets;
 
@@ -233,6 +231,4 @@ void SingleFunctionTemplatePresenter::viewChangedParameterValue(const QString &p
   emit functionStructureChanged();
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

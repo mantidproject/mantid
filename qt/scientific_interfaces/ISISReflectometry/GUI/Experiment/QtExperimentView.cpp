@@ -13,9 +13,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 // Changing the palette for spin boxes doesn't work but we can
@@ -79,11 +77,11 @@ void QtExperimentView::subscribe(ExperimentViewSubscriber *notifyee) { m_notifye
 /**
 Initialise the Interface
 */
-void QtExperimentView::initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
+void QtExperimentView::initLayout(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")), m_ui.optionsTable);
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this, SLOT(onRemoveLookupRowRequested()));
-  initOptionsTable(std::move(algorithmForTooltips));
+  initOptionsTable(algorithmForTooltips);
   initFloodControls();
 
   auto blacklist = std::vector<std::string>({"InputWorkspaces", "OutputWorkspace"});
@@ -145,7 +143,7 @@ void QtExperimentView::initOptionsTable(const Mantid::API::IAlgorithm_sptr &algo
   table->resizeColumnsToContents();
   table->setColumnCount(LookupRow::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
-  initializeTableColumns(*table, std::move(algorithmForTooltips));
+  initializeTableColumns(*table, algorithmForTooltips);
   initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
@@ -237,7 +235,7 @@ void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
 void QtExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
 
 void QtExperimentView::registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg) {
-  registerExperimentSettingsWidgets(std::move(alg));
+  registerExperimentSettingsWidgets(alg);
   connectExperimentSettingsWidgets();
 }
 
@@ -696,6 +694,4 @@ void QtExperimentView::setStitchOptions(std::string const &stitchOptions) {
 void showOptionLoadErrors(std::vector<InstrumentParameterTypeMissmatch> const &typeErrors,
                           std::vector<MissingInstrumentParameterValue> const &missingValues);
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

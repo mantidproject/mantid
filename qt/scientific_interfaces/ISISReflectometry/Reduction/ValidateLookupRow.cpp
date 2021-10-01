@@ -11,9 +11,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 template <typename T> class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
 public:
@@ -122,6 +120,4 @@ ValidationResult<LookupRow, std::vector<int>> validateLookupRow(CellText const &
   auto validate = LookupRowValidator();
   return validate(cells);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

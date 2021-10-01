@@ -7,8 +7,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include <memory>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 RebinParamsValidator::RebinParamsValidator(bool allowEmpty, bool allowRange)
     : m_allowEmpty(allowEmpty), m_allowRange(allowRange) {}
 
@@ -63,5 +62,4 @@ std::string RebinParamsValidator::checkValidity(const std::vector<double> &value
   return "";
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

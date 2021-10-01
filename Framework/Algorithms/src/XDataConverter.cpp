@@ -12,8 +12,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace_sptr;
@@ -108,5 +107,4 @@ void XDataConverter::setXData(const API::MatrixWorkspace_sptr &outputWS, const A
     outputWS->setSharedX(index, calculateXPoints(inputWS->sharedX(index)));
   }
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

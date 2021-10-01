@@ -21,8 +21,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using Mantid::Types::Event::TofEvent;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveIsawQvector)
@@ -195,5 +194,4 @@ void SaveIsawQvector::initTargetWSDescr(const EventWorkspace_sptr &wksp) {
     m_targWSDescr.m_PreprDetTable = table;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

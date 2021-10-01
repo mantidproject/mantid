@@ -23,9 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("CrystalFieldSpectrum");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Kernel;
@@ -189,6 +187,4 @@ std::string CrystalFieldSpectrum::writeToString(const std::string &parentLocalAt
   return ostr.str();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

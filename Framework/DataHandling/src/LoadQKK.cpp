@@ -26,8 +26,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadQKK)
@@ -194,5 +193,4 @@ void LoadQKK::exec() {
   setProperty("OutputWorkspace", std::move(outputWorkspace));
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

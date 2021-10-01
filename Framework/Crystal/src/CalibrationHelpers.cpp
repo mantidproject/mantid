@@ -13,10 +13,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Crystal {
-
-namespace CalibrationHelpers {
+namespace Mantid::Crystal::CalibrationHelpers {
 /**
  * Updates the ComponentInfo for the workspace containing newInstrument to
  *reflect the position of the source
@@ -107,6 +104,4 @@ void adjustBankPositionsAndSizes(const std::vector<std::string> &bankNames, cons
   }
 }
 
-} // namespace CalibrationHelpers
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal::CalibrationHelpers

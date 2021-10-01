@@ -40,8 +40,7 @@ template <typename InterpretType> double toDouble(uint8_t *src) {
 }
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadFITS)
@@ -1139,5 +1138,4 @@ std::string LoadFITS::padZeros(const size_t number, const size_t totalDigitCount
 
   return ss.str();
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

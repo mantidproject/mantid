@@ -61,11 +61,11 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   /// PeaksWorkspace -> LeanElasticPeaksWorkspace
-  Mantid::API::IPeaksWorkspace_sptr makeLeanElasticPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ipws);
+  Mantid::API::IPeaksWorkspace_sptr makeLeanElasticPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ipws);
 
   /// LeanElasticPeaksWorkspace -> PeaksWorkspace
-  Mantid::API::IPeaksWorkspace_sptr makePeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ipws,
-                                                       Mantid::API::Workspace_sptr ws);
+  Mantid::API::IPeaksWorkspace_sptr makePeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ipws,
+                                                       const Mantid::API::Workspace_sptr &ws);
 };
 
 } // namespace Crystal

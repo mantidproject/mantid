@@ -10,19 +10,16 @@
 #include "MantidKernel/DataItem.h"
 #include <Poco/RWLock.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /** Default constructor
  */
-DataItem::DataItem() { m_lock = std::make_unique<Poco::RWLock>(); }
+DataItem::DataItem() : m_lock(std::make_unique<Poco::RWLock>()) {}
 
 /** Copy constructor
+ * Always makes a unique lock
  */
-DataItem::DataItem(const DataItem & /*other*/) {
-  // Always make a unique lock!
-  m_lock = std::make_unique<Poco::RWLock>();
-}
+DataItem::DataItem(const DataItem & /*other*/) : m_lock(std::make_unique<Poco::RWLock>()) {}
 
 /**
  * Destructor. Required in cpp do avoid linker errors when other projects try to
@@ -39,5 +36,4 @@ void DataItem::unlock() { getLock()->unlock(); }
  */
 Poco::RWLock *DataItem::getLock() const { return m_lock.get(); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

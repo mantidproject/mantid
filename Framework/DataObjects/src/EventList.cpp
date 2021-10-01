@@ -34,8 +34,7 @@ using std::runtime_error;
 using std::size_t;
 using std::vector;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 using Types::Core::DateAndTime;
 using Types::Event::TofEvent;
 using namespace Mantid::API;
@@ -4713,5 +4712,4 @@ void EventList::checkIsYAndEWritable() const {
                            "generated automatically based on the events");
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

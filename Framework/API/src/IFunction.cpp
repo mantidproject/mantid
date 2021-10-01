@@ -41,8 +41,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using namespace Geometry;
 
 namespace {
@@ -852,7 +851,7 @@ public:
    * Constructor
    * @param value :: The value to set
    */
-  explicit SetValue(const std::string &value) : m_value(value) {}
+  explicit SetValue(std::string value) : m_value(std::move(value)) {}
 
 protected:
   /// Apply if string
@@ -1508,12 +1507,10 @@ void IFunction::sortTies() {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL std::shared_ptr<Mantid::API::IFunction>
@@ -1540,6 +1537,5 @@ IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(const 
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 ///\endcond TEMPLATE

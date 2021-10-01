@@ -27,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON QtSignalChannel : public QObject, public Poco::
 
 public:
   /// Default constructor
-  QtSignalChannel(const QString &source = "");
+  QtSignalChannel(QString source = "");
   /// Destructor
   ~QtSignalChannel() override;
 

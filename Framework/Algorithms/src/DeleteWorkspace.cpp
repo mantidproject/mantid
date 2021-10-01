@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/DeleteWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm
 DECLARE_ALGORITHM(DeleteWorkspace)
@@ -27,5 +26,4 @@ void DeleteWorkspace::exec() {
   const std::string wsName = getProperty("Workspace");
   dataStore.remove(wsName); // Logs if it doesn't exist
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

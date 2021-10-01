@@ -8,8 +8,7 @@
 
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 InvalidParameter::InvalidParameter() {}
 
 InvalidParameter::InvalidParameter(std::string value) : m_value(std::move(value)) {}
@@ -25,5 +24,4 @@ InvalidParameter *InvalidParameter::clone() const { return new InvalidParameter(
 std::string InvalidParameter::toXMLString() const {
   throw std::runtime_error("Invalid parameters cannot be represented in xml.");
 }
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -25,8 +25,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using API::ExperimentInfo;
 using Geometry::Goniometer;
@@ -728,5 +727,4 @@ void LoadSQW2::finalize() {
   setProperty("OutputWorkspace", m_outputWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

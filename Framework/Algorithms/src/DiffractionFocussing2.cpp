@@ -31,9 +31,7 @@ using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
 using std::vector;
 
-namespace Mantid {
-
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing2)
@@ -636,5 +634,4 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   return totalHistProcess;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

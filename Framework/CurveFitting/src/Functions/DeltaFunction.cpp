@@ -11,9 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <algorithm>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -40,6 +38,4 @@ void DeltaFunction::functionDeriv1D(Jacobian *out, const double *xValues, const 
   std::runtime_error("Cannot compute derivative of a delta function");
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

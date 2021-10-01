@@ -7,8 +7,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -33,5 +32,4 @@ void MDImplicitFunction::addPlane(const MDPlane &plane) {
   m_numPlanes = m_planes.size();
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

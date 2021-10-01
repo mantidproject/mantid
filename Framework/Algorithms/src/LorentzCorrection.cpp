@@ -17,8 +17,7 @@
 #include <cmath>
 #include <memory>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -195,5 +194,4 @@ void LorentzCorrection::processTOF_PD(MatrixWorkspace_sptr &wksp, Progress &prog
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

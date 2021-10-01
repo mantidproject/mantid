@@ -23,7 +23,7 @@ class IAlgorithm;
 */
 class MANTID_API_DLL AlgorithmHasProperty : public Kernel::TypedValidator<std::shared_ptr<IAlgorithm>> {
 public:
-  AlgorithmHasProperty(const std::string &propName);
+  AlgorithmHasProperty(std::string propName);
   std::string getType() const;
   Kernel::IValidator_sptr clone() const override;
 

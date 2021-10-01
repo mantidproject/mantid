@@ -13,8 +13,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace DataObjects;
 using namespace API;
@@ -259,5 +258,4 @@ std::vector<double> PoldiSpectrumDomainFunction::getChopperSlitOffsets(const Pol
   return offsets;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

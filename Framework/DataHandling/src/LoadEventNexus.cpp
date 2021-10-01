@@ -40,8 +40,7 @@ using std::string;
 using std::vector;
 using namespace ::NeXus;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEventNexus)
 
@@ -1624,5 +1623,4 @@ LoadEventNexus::getParallelExecutionMode(const std::map<std::string, Parallel::S
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

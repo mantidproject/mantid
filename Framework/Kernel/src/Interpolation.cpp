@@ -13,8 +13,7 @@
 #include <iterator>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 namespace {
 /// static logger
 Logger g_log("Interpolation");
@@ -190,5 +189,4 @@ std::istream &operator>>(std::istream &in, Interpolation &f) {
   return in;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

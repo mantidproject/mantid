@@ -15,8 +15,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Material.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CopySample)
@@ -191,5 +190,4 @@ void CopySample::copyParameters(Sample &from, Sample &to, bool nameFlag, bool ma
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -14,8 +14,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace API;
 using namespace DataObjects;
 
@@ -194,5 +193,4 @@ void CorrectToFile::doWkspAlgebra(const API::MatrixWorkspace_sptr &lhs, const AP
   result = algebra->getProperty("OutputWorkspace");
   g_log.debug() << algName << " complete\n";
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

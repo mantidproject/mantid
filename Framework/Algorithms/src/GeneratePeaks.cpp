@@ -28,8 +28,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(GeneratePeaks)
 
 //----------------------------------------------------------------------------------------------
@@ -743,5 +742,4 @@ std::vector<std::string> GeneratePeaks::addFunctionParameterNames(const std::vec
   return vec_funcparnames;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

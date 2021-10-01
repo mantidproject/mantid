@@ -11,8 +11,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ICostFunction.h"
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 /** Fit GSL function wrapper
  * @param x :: Input function parameters
@@ -209,5 +208,4 @@ GSL_FitData::~GSL_FitData() {
   gsl_vector_free(initFuncParams);
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

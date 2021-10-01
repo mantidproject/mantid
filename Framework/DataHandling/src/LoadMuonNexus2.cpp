@@ -36,8 +36,7 @@
 
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
@@ -531,5 +530,4 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
   return mapping;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

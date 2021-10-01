@@ -15,8 +15,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(EQSANSMonitorTOF)
@@ -396,5 +395,4 @@ double EQSANSMonitorTOF::getTofOffset(const MatrixWorkspace_const_sptr &inputWS,
   return frame_tof0;
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

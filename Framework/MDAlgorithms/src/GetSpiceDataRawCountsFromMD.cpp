@@ -19,8 +19,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::HistogramData;
 using namespace Mantid::API;
@@ -144,7 +143,7 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(const API::IMDEventWorksp
   std::vector<double> vec2theta;
   std::vector<double> vecDetCounts;
   int detid = -1;
-  getDetCounts(std::move(datamdws), runnumber, detid, vec2theta, vecDetCounts, true);
+  getDetCounts(datamdws, runnumber, detid, vec2theta, vecDetCounts, true);
   if (vec2theta.size() != vecDetCounts.size())
     throw std::runtime_error("Logic error! Vector of 2theta must have same size as "
                              "vector of detectors' counts.");
@@ -154,7 +153,7 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(const API::IMDEventWorksp
   std::vector<double> vecMonitorCounts;
   // Normalize if required
   if (donormalize) {
-    getDetCounts(std::move(monitormdws), runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
+    getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
     // check
     if (vecDetCounts.size() != vecMonitorCounts.size())
       throw std::runtime_error("Number of detectors' counts' is different from that of "
@@ -231,7 +230,7 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(const API::IMDEventW
   // FIXME - Consider refactoring in future
   // Normalize if required
   if (donormalize) {
-    getDetCounts(std::move(monitormdws), runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
+    getDetCounts(monitormdws, runnumber, detid, vec2thetaMon, vecMonitorCounts, false);
     if (vecDetCounts.size() != vecMonitorCounts.size())
       throw std::runtime_error("Number of detectors' counts' is different from that of "
                                "monitor counts.");
@@ -497,5 +496,4 @@ MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(const st
   return outws;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -16,9 +16,7 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include <memory>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 
@@ -44,7 +42,7 @@ BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IR
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
       m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false),
-      m_jobRunner(new BatchJobRunner(std::move(model))) {
+      m_jobRunner(new BatchJobRunner(model)) {
 
   m_view->subscribe(this);
 
@@ -327,6 +325,4 @@ void BatchPresenter::clearADSHandle() {
   m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

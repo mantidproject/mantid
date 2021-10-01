@@ -7,8 +7,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include <list>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 /// List of functions to call on program exit
@@ -43,5 +42,4 @@ void deleteOnExit(const SingletonDeleterFn &func) {
   }
   deleters.push_front(func);
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

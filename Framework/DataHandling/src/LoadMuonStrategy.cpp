@@ -15,8 +15,7 @@
 #include "MantidNexus/NexusClasses.h"
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /**
  * Creates a timezero table for the loaded detectors
@@ -136,5 +135,4 @@ DataObjects::TableWorkspace_sptr LoadMuonStrategy::createDeadTimeTable(const std
   return deadTimesTable;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

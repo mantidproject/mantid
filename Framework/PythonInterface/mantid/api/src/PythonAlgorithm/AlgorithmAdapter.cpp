@@ -22,8 +22,7 @@
 //-----------------------------------------------------------------------------
 // AlgorithmAdapter definition
 //-----------------------------------------------------------------------------
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 using namespace boost::python;
 
 /**
@@ -353,5 +352,4 @@ template class AlgorithmAdapter<API::DataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::SerialDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::ParallelDataProcessorAlgorithm>;
 template class AlgorithmAdapter<API::DistributedDataProcessorAlgorithm>;
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

@@ -11,9 +11,7 @@
 #include <algorithm>
 #include <vector>
 
-namespace Mantid {
-namespace Kernel {
-namespace Strings {
+namespace Mantid::Kernel::Strings {
 
 namespace {
 Logger logger("Regex");
@@ -345,8 +343,4 @@ template DLLExport int findComp(std::istream &, const boost::regex &, int &);
 
 /// \endcond TEMPLATE
 
-} // NAMESPACE Strings
-
-} // NAMESPACE Kernel
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Kernel::Strings

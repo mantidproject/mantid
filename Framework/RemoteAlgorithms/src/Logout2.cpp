@@ -11,8 +11,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the Algorithm Factory
 DECLARE_ALGORITHM(Logout2)
@@ -47,5 +46,4 @@ void Logout2::exec() {
                          "again with the resource. \n";
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

@@ -54,17 +54,14 @@
 
 using Mantid::API::AlgorithmManager;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 using namespace boost::math;
 
 namespace {
 // Get the phi angle between the detector with reference to the origin
 // Makes assumptions about beam direction. Legacy code and not robust.
-double getPhi(const Mantid::Kernel::V3D &pos) {
-  return std::atan2(pos[1], pos[0]);
-}
+double getPhi(const Mantid::Kernel::V3D &pos) { return std::atan2(pos[1], pos[0]); }
 
 // Calculate the phi angle between detector and beam, and then offset.
 // Makes assumptions about beam direction. Legacy code and not robust.
@@ -79,11 +76,8 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
  * @param instrWidget :: Parent InstrumentWidget.
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
-    : InstrumentWidgetTab(instrWidget), m_freezePlot(false),
-      m_tubeXUnitsCache(0), m_plotTypeCache(0),
-      m_addedActions(
-          std::vector<std::pair<
-              QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
+    : InstrumentWidgetTab(instrWidget), m_freezePlot(false), m_tubeXUnitsCache(0), m_plotTypeCache(0),
+      m_addedActions(std::vector<std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this,
@@ -118,8 +112,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_linearY->setCheckable(true);
   m_linearY->setChecked(true);
   connect(m_sumDetectors, SIGNAL(triggered()), this, SLOT(sumDetectors()));
-  connect(m_integrateTimeBins, SIGNAL(triggered()), this,
-          SLOT(integrateTimeBins()));
+  connect(m_integrateTimeBins, SIGNAL(triggered()), this, SLOT(integrateTimeBins()));
   connect(m_logY, SIGNAL(triggered()), m_plot, SLOT(setYLogScale()));
   connect(m_linearY, SIGNAL(triggered()), m_plot, SLOT(setYLinearScale()));
 
@@ -142,16 +135,13 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 
   m_outOfPlaneAngleUnits = new QAction("Out of plane angle", this);
   m_outOfPlaneAngleUnits->setCheckable(true);
-  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits,
-                            DetectorPlotController::OUT_OF_PLANE_ANGLE);
-  connect(m_outOfPlaneAngleUnits, SIGNAL(triggered()), m_unitsMapper,
-          SLOT(map()));
+  m_unitsMapper->setMapping(m_outOfPlaneAngleUnits, DetectorPlotController::OUT_OF_PLANE_ANGLE);
+  connect(m_outOfPlaneAngleUnits, SIGNAL(triggered()), m_unitsMapper, SLOT(map()));
 
   m_unitsGroup = new QActionGroup(this);
   m_unitsGroup->addAction(m_detidUnits);
   m_unitsGroup->addAction(m_lengthUnits);
-  m_unitsGroup->addAction(
-      m_phiUnits); // re #4169 disabled until fixed or removed
+  m_unitsGroup->addAction(m_phiUnits); // re #4169 disabled until fixed or removed
   m_unitsGroup->addAction(m_outOfPlaneAngleUnits);
   connect(m_unitsMapper, SIGNAL(mapped(int)), this, SLOT(setTubeXUnits(int)));
 
@@ -159,8 +149,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_storeCurve = new QAction("Store curve", this);
   connect(m_storeCurve, SIGNAL(triggered()), this, SLOT(storeCurve()));
   m_savePlotToWorkspace = new QAction("Save plot to workspace", this);
-  connect(m_savePlotToWorkspace, SIGNAL(triggered()), this,
-          SLOT(savePlotToWorkspace()));
+  connect(m_savePlotToWorkspace, SIGNAL(triggered()), this, SLOT(savePlotToWorkspace()));
 
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
@@ -312,9 +301,7 @@ void InstrumentWidgetPickTab::collapsePlotPanel() {
 /**
  * Returns true if the plot can be updated when the mouse moves over detectors
  */
-bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const {
-  return !m_peakAdd->isChecked();
-}
+bool InstrumentWidgetPickTab::canUpdateTouchedDetector() const { return !m_peakAdd->isChecked(); }
 
 /**
  * Display the miniplot's context menu.
@@ -324,13 +311,11 @@ void InstrumentWidgetPickTab::plotContextMenu() {
 
   auto plotType = m_plotController->getPlotType();
 
-  if (plotType == DetectorPlotController::TubeSum ||
-      plotType == DetectorPlotController::TubeIntegral) {
+  if (plotType == DetectorPlotController::TubeSum || plotType == DetectorPlotController::TubeIntegral) {
     // only for multiple detector selectors
     context.addActions(m_summationType->actions());
     m_sumDetectors->setChecked(plotType == DetectorPlotController::TubeSum);
-    m_integrateTimeBins->setChecked(plotType !=
-                                    DetectorPlotController::TubeSum);
+    m_integrateTimeBins->setChecked(plotType != DetectorPlotController::TubeSum);
     m_integrateTimeBins->setEnabled(true);
     context.addSeparator();
   }
@@ -349,8 +334,7 @@ void InstrumentWidgetPickTab::plotContextMenu() {
       connect(remove, SIGNAL(triggered()), signalMapper, SLOT(map()));
       signalMapper->setMapping(remove, label);
     }
-    connect(signalMapper, SIGNAL(mapped(const QString &)), this,
-            SLOT(removeCurve(const QString &)));
+    connect(signalMapper, SIGNAL(mapped(const QString &)), this, SLOT(removeCurve(const QString &)));
     context.addMenu(removeCurves);
   }
 
@@ -399,9 +383,7 @@ void InstrumentWidgetPickTab::plotContextMenu() {
 /**
  * Update the plot caption. The captions shows the selection type.
  */
-void InstrumentWidgetPickTab::setPlotCaption() {
-  m_plotPanel->setCaption(m_plotController->getPlotCaption());
-}
+void InstrumentWidgetPickTab::setPlotCaption() { m_plotPanel->setCaption(m_plotController->getPlotCaption()); }
 
 /**
  * Switch to the detectors summing regime.
@@ -425,8 +407,7 @@ void InstrumentWidgetPickTab::integrateTimeBins() {
  * Set the selection type according to which tool button is checked.
  */
 void InstrumentWidgetPickTab::setSelectionType() {
-  ProjectionSurface::InteractionMode surfaceMode =
-      ProjectionSurface::PickSingleMode;
+  ProjectionSurface::InteractionMode surfaceMode = ProjectionSurface::PickSingleMode;
   auto plotType = m_plotController->getPlotType();
   if (m_zoom->isChecked()) {
     m_selectionType = Single;
@@ -466,43 +447,37 @@ void InstrumentWidgetPickTab::setSelectionType() {
     m_activeTool->setText("Tool: Rectangle");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWidget->getSurface()->startCreatingShape2D(
-        "rectangle", Qt::green, QColor(255, 255, 255, 80));
+    m_instrWidget->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWidget->getSurface()->startCreatingShape2D(
-        "ellipse", Qt::green, QColor(255, 255, 255, 80));
+    m_instrWidget->getSurface()->startCreatingShape2D("ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWidget->getSurface()->startCreatingShape2D(
-        "ring ellipse", Qt::green, QColor(255, 255, 255, 80));
+    m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWidget->getSurface()->startCreatingShape2D(
-        "ring rectangle", Qt::green, QColor(255, 255, 255, 80));
+    m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_sector->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Circular sector");
     surfaceMode = ProjectionSurface::DrawRegularMode;
     plotType = DetectorPlotController::Single;
-    m_instrWidget->getSurface()->startCreatingShape2D(
-        "sector", Qt::green, QColor(255, 255, 255, 80));
+    m_instrWidget->getSurface()->startCreatingShape2D("sector", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_free_draw->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Arbitrary shape");
     surfaceMode = ProjectionSurface::DrawFreeMode;
     plotType = DetectorPlotController::Single;
-    m_instrWidget->getSurface()->startCreatingFreeShape(
-        Qt::green, QColor(255, 255, 255, 80));
+    m_instrWidget->getSurface()->startCreatingFreeShape(Qt::green, QColor(255, 255, 255, 80));
   } else if (m_edit->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
@@ -514,8 +489,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
   if (surface) {
     surface->setInteractionMode(surfaceMode);
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode == ProjectionSurface::DrawRegularMode ||
-        interactionMode == ProjectionSurface::MoveMode) {
+    if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
       updatePlotMultipleDetectors();
     } else {
       m_plot->clearAll();
@@ -568,21 +542,17 @@ void InstrumentWidgetPickTab::setTubeXUnits(int units) {
  * Get the color of the overlay shapes in this tab.
  * @return
  */
-QColor InstrumentWidgetPickTab::getShapeBorderColor() const {
-  return QColor(Qt::green);
-}
+QColor InstrumentWidgetPickTab::getShapeBorderColor() const { return QColor(Qt::green); }
 
 /**
  * Do something when the time bin integration range has changed.
  */
-void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/,
-                                                      double /*unused*/) {
+void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/, double /*unused*/) {
   m_plotController->updatePlot();
   auto surface = m_instrWidget->getSurface();
   if (surface) {
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode == ProjectionSurface::DrawRegularMode ||
-        interactionMode == ProjectionSurface::MoveMode) {
+    if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
       updatePlotMultipleDetectors();
     }
   }
@@ -590,64 +560,42 @@ void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/,
 
 void InstrumentWidgetPickTab::initSurface() {
   ProjectionSurface *surface = getSurface().get();
-  connect(surface, SIGNAL(singleComponentTouched(size_t)), this,
-          SLOT(singleComponentTouched(size_t)));
-  connect(surface, SIGNAL(singleComponentPicked(size_t)), this,
-          SLOT(singleComponentPicked(size_t)));
+  connect(surface, SIGNAL(singleComponentTouched(size_t)), this, SLOT(singleComponentTouched(size_t)));
+  connect(surface, SIGNAL(singleComponentPicked(size_t)), this, SLOT(singleComponentPicked(size_t)));
   connect(surface,
           SIGNAL(comparePeaks(
-              const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                              std::vector<Mantid::Geometry::IPeak *>> &)),
+              const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &)),
           this,
           SLOT(comparePeaks(
-              const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                              std::vector<Mantid::Geometry::IPeak *>> &)));
-  connect(surface,
-          SIGNAL(alignPeaks(const std::vector<Mantid::Kernel::V3D> &,
-                            const Mantid::Geometry::IPeak *)),
-          this,
-          SLOT(alignPeaks(const std::vector<Mantid::Kernel::V3D>,
-                          const Mantid::Geometry::IPeak *)));
-  connect(surface, SIGNAL(peaksWorkspaceAdded()), this,
-          SLOT(updateSelectionInfoDisplay()));
-  connect(surface, SIGNAL(peaksWorkspaceDeleted()), this,
-          SLOT(updateSelectionInfoDisplay()));
+              const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &)));
+  connect(surface, SIGNAL(alignPeaks(const std::vector<Mantid::Kernel::V3D> &, const Mantid::Geometry::IPeak *)), this,
+          SLOT(alignPeaks(const std::vector<Mantid::Kernel::V3D>, const Mantid::Geometry::IPeak *)));
+  connect(surface, SIGNAL(peaksWorkspaceAdded()), this, SLOT(updateSelectionInfoDisplay()));
+  connect(surface, SIGNAL(peaksWorkspaceDeleted()), this, SLOT(updateSelectionInfoDisplay()));
   connect(surface, SIGNAL(shapeCreated()), this, SLOT(shapeCreated()));
-  connect(surface, SIGNAL(shapeChangeFinished()), this,
-          SLOT(updatePlotMultipleDetectors()));
-  connect(surface, SIGNAL(shapesCleared()), this,
-          SLOT(updatePlotMultipleDetectors()));
-  connect(surface, SIGNAL(shapesRemoved()), this,
-          SLOT(updatePlotMultipleDetectors()));
+  connect(surface, SIGNAL(shapeChangeFinished()), this, SLOT(updatePlotMultipleDetectors()));
+  connect(surface, SIGNAL(shapesCleared()), this, SLOT(updatePlotMultipleDetectors()));
+  connect(surface, SIGNAL(shapesRemoved()), this, SLOT(updatePlotMultipleDetectors()));
   auto *p3d = dynamic_cast<Projection3D *>(surface);
   if (p3d) {
-    connect(p3d, SIGNAL(finishedMove()), this,
-            SLOT(updatePlotMultipleDetectors()));
+    connect(p3d, SIGNAL(finishedMove()), this, SLOT(updatePlotMultipleDetectors()));
   }
-  m_infoController =
-      new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
+  m_infoController = new ComponentInfoController(this, m_instrWidget, m_selectionInfoDisplay);
   m_plotController = new DetectorPlotController(this, m_instrWidget, m_plot);
-  m_plotController->setTubeXUnits(
-      static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
-  m_plotController->setPlotType(
-      static_cast<DetectorPlotController::PlotType>(m_plotTypeCache));
+  m_plotController->setTubeXUnits(static_cast<DetectorPlotController::TubeXUnits>(m_tubeXUnitsCache));
+  m_plotController->setPlotType(static_cast<DetectorPlotController::PlotType>(m_plotTypeCache));
   // miniplot X unit
   const auto &actor = m_instrWidget->getInstrumentActor();
   // default X axis label
-  m_plot->setXLabel(QString::fromStdString(
-      actor.getWorkspace()->getAxis(0)->unit()->unitID()));
+  m_plot->setXLabel(QString::fromStdString(actor.getWorkspace()->getAxis(0)->unit()->unitID()));
 }
 
 /**
  * Return current ProjectionSurface.
  */
-std::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const {
-  return m_instrWidget->getSurface();
-}
+std::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const { return m_instrWidget->getSurface(); }
 
-const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const {
-  return m_instrWidget;
-}
+const InstrumentWidget *InstrumentWidgetPickTab::getInstrumentWidget() const { return m_instrWidget; }
 
 /**
  * Save tab's persistent settings to the provided QSettings instance
@@ -665,12 +613,10 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   // loadSettings is called when m_plotController is not created yet.
   // Cache the settings and apply them later
   m_tubeXUnitsCache = settings.value("TubeXUnits", 0).toInt();
-  m_plotTypeCache =
-      settings.value("PlotType", DetectorPlotController::Single).toInt();
+  m_plotTypeCache = settings.value("PlotType", DetectorPlotController::Single).toInt();
 }
-void InstrumentWidgetPickTab::addToContextMenu(
-    QAction *action,
-    std::function<bool(std::map<std::string, bool>)> &actionCondition) {
+void InstrumentWidgetPickTab::addToContextMenu(QAction *action,
+                                               std::function<bool(std::map<std::string, bool>)> &actionCondition) {
   auto pair = std::make_pair(action, actionCondition);
   m_addedActions.emplace_back(pair);
 }
@@ -759,14 +705,12 @@ void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
 }
 
 void InstrumentWidgetPickTab::comparePeaks(
-    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   m_infoController->displayComparePeaksInfo(peaks);
 }
 
-void InstrumentWidgetPickTab::alignPeaks(
-    const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *peak) {
+void InstrumentWidgetPickTab::alignPeaks(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                                         const Mantid::Geometry::IPeak *peak) {
   m_infoController->displayAlignPeaksInfo(planePeaks, peak);
 }
 
@@ -820,9 +764,7 @@ void InstrumentWidgetPickTab::clearWidgets() {
 /**
  * Save data plotted on the miniplot into a MatrixWorkspace.
  */
-void InstrumentWidgetPickTab::savePlotToWorkspace() {
-  m_plotController->savePlotToWorkspace();
-}
+void InstrumentWidgetPickTab::savePlotToWorkspace() { m_plotController->savePlotToWorkspace(); }
 
 /** Load pick tab state from a Mantid project file
  * @param lines :: lines from the project file to load state from
@@ -839,10 +781,8 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
   API::TSVSerialiser tab(tabLines);
 
   // load active push button
-  std::vector<QPushButton *> buttons{
-      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peakAdd,        m_peakErase};
+  std::vector<QPushButton *> buttons{m_zoom,      m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
+                                     m_free_draw, m_one,  m_tube,    m_peakAdd,   m_peakErase};
 
   tab.selectLine("ActiveTools");
   for (auto button : buttons) {
@@ -852,8 +792,7 @@ void InstrumentWidgetPickTab::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "MaskBinsData::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("MaskBinsData::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -865,10 +804,8 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
   API::TSVSerialiser tsv, tab;
 
   // save active push button
-  std::vector<QPushButton *> buttons{
-      m_zoom,         m_edit,           m_ellipse,   m_rectangle,
-      m_ring_ellipse, m_ring_rectangle, m_free_draw, m_one,
-      m_tube,         m_peakAdd,        m_peakErase};
+  std::vector<QPushButton *> buttons{m_zoom,      m_edit, m_ellipse, m_rectangle, m_ring_ellipse, m_ring_rectangle,
+                                     m_free_draw, m_one,  m_tube,    m_peakAdd,   m_peakErase};
 
   tab.writeLine("ActiveTools");
   for (auto button : buttons) {
@@ -878,8 +815,7 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
   tsv.writeSection("picktab", tab.outputLines());
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "MaskBinsData::saveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("MaskBinsData::saveToProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -891,13 +827,10 @@ std::string InstrumentWidgetPickTab::saveToProject() const {
  * @param instrWidget :: A pointer to an InstrumentWidget instance.
  * @param infoDisplay :: Widget on which to display the information.
  */
-ComponentInfoController::ComponentInfoController(
-    InstrumentWidgetPickTab *tab, const InstrumentWidget *instrWidget,
-    QTextEdit *infoDisplay)
-    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget),
-      m_selectionInfoDisplay(infoDisplay), m_freezePlot(false),
-      m_instrWidgetBlocked(false),
-      m_currentPickID(std::numeric_limits<size_t>::max()) {}
+ComponentInfoController::ComponentInfoController(InstrumentWidgetPickTab *tab, const InstrumentWidget *instrWidget,
+                                                 QTextEdit *infoDisplay)
+    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_selectionInfoDisplay(infoDisplay), m_freezePlot(false),
+      m_instrWidgetBlocked(false), m_currentPickID(std::numeric_limits<size_t>::max()) {}
 
 /**
  * Display info on a component refered to by a pick ID.
@@ -946,35 +879,28 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
   const auto &componentInfo = actor.componentInfo();
   auto detid = actor.getDetID(index);
 
-  text = "Selected detector: " +
-         QString::fromStdString(componentInfo.name(index)) + "\n";
+  text = "Selected detector: " + QString::fromStdString(componentInfo.name(index)) + "\n";
   text += "Detector ID: " + QString::number(detid) + '\n';
   QString wsIndex;
   auto ws = actor.getWorkspaceIndex(index);
   wsIndex = ws == InstrumentActor::INVALID_INDEX ? "None" : QString::number(ws);
   text += "Workspace index: " + wsIndex + '\n';
   Mantid::Kernel::V3D pos = componentInfo.position(index);
-  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
-          "," + QString::number(pos.Z()) + '\n';
+  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
   pos.getSpherical(r, t, p);
-  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
-          QString::number(p) + '\n';
+  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," + QString::number(p) + '\n';
   if (componentInfo.hasParent(index)) {
     QString textpath;
     auto parent = index;
     while (componentInfo.hasParent(parent)) {
       parent = componentInfo.parent(parent);
-      textpath =
-          "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
+      textpath = "/" + QString::fromStdString(componentInfo.name(parent)) + textpath;
     }
-    text += "Component path:" + textpath + "/" +
-            QString::fromStdString(componentInfo.name(index)) + '\n';
+    text += "Component path:" + textpath + "/" + QString::fromStdString(componentInfo.name(index)) + '\n';
 
     const double integrated = actor.getIntegratedCounts(index);
-    const QString counts = integrated == InstrumentActor::INVALID_VALUE
-                               ? "N/A"
-                               : QString::number(integrated);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE ? "N/A" : QString::number(integrated);
     text += "Pixel counts: " + counts + '\n';
 
     // Display tube counts if the tube selection tool is active.
@@ -1006,26 +932,22 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
  * choppers, etc).
  * @param compID :: A component ID for a component to display.
  */
-QString ComponentInfoController::displayNonDetectorInfo(
-    Mantid::Geometry::ComponentID compID) {
+QString ComponentInfoController::displayNonDetectorInfo(Mantid::Geometry::ComponentID compID) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   const auto &componentInfo = actor.componentInfo();
   auto component = componentInfo.indexOf(compID);
   QString text = "Selected component: ";
   text += QString::fromStdString(componentInfo.name(component)) + '\n';
   Mantid::Kernel::V3D pos = componentInfo.position(component);
-  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) +
-          "," + QString::number(pos.Z()) + '\n';
+  text += "xyz: " + QString::number(pos.X()) + "," + QString::number(pos.Y()) + "," + QString::number(pos.Z()) + '\n';
   double r, t, p;
   pos.getSpherical(r, t, p);
-  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," +
-          QString::number(p) + '\n';
+  text += "rtp: " + QString::number(r) + "," + QString::number(t) + "," + QString::number(p) + '\n';
   text += actor.getParameterInfo(component);
   return text;
 }
 
-QString
-ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
+QString ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
   std::stringstream text;
   auto peak = dynamic_cast<Mantid::DataObjects::Peak *>(ipeak);
   auto instrument = peak->getInstrument();
@@ -1046,8 +968,7 @@ ComponentInfoController::displayPeakInfo(Mantid::Geometry::IPeak *ipeak) {
 }
 
 QString ComponentInfoController::displayPeakAngles(
-    const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *>
-        &peaks) {
+    const std::pair<Mantid::Geometry::IPeak *, Mantid::Geometry::IPeak *> &peaks) {
   std::stringstream text;
   auto peak1 = peaks.first;
   auto peak2 = peaks.second;
@@ -1063,13 +984,11 @@ QString ComponentInfoController::displayPeakAngles(
 }
 
 void ComponentInfoController::displayComparePeaksInfo(
-    const std::pair<std::vector<Mantid::Geometry::IPeak *>,
-                    std::vector<Mantid::Geometry::IPeak *>> &peaks) {
+    const std::pair<std::vector<Mantid::Geometry::IPeak *>, std::vector<Mantid::Geometry::IPeak *>> &peaks) {
   std::stringstream text;
 
   text << "Comparison Information\n";
-  auto peaksFromDetectors =
-      std::make_pair(peaks.first.front(), peaks.second.front());
+  auto peaksFromDetectors = std::make_pair(peaks.first.front(), peaks.second.front());
   text << displayPeakAngles(peaksFromDetectors).toStdString();
 
   text << "-------------------------------\n";
@@ -1087,9 +1006,8 @@ void ComponentInfoController::displayComparePeaksInfo(
   m_selectionInfoDisplay->setText(QString::fromStdString(text.str()));
 }
 
-void ComponentInfoController::displayAlignPeaksInfo(
-    const std::vector<Mantid::Kernel::V3D> &planePeaks,
-    const Mantid::Geometry::IPeak *ipeak) {
+void ComponentInfoController::displayAlignPeaksInfo(const std::vector<Mantid::Kernel::V3D> &planePeaks,
+                                                    const Mantid::Geometry::IPeak *ipeak) {
 
   using Mantid::Kernel::V3D;
 
@@ -1176,14 +1094,11 @@ void ComponentInfoController::clear() { m_selectionInfoDisplay->clear(); }
  * @param instrWidget :: A pointer to a InstrumentWidget instance.
  * @param plot :: The plot widget.
  */
-DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab,
-                                               InstrumentWidget *instrWidget,
+DetectorPlotController::DetectorPlotController(InstrumentWidgetPickTab *tab, InstrumentWidget *instrWidget,
                                                MiniPlot *plot)
-    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot),
-      m_plotType(Single), m_enabled(true), m_tubeXUnits(DETECTOR_ID),
-      m_currentPickID(std::numeric_limits<size_t>::max()) {
-  connect(m_plot, SIGNAL(clickedAt(double, double)), this,
-          SLOT(addPeak(double, double)));
+    : QObject(tab), m_tab(tab), m_instrWidget(instrWidget), m_plot(plot), m_plotType(Single), m_enabled(true),
+      m_tubeXUnits(DETECTOR_ID), m_currentPickID(std::numeric_limits<size_t>::max()) {
+  connect(m_plot, SIGNAL(clickedAt(double, double)), this, SLOT(addPeak(double, double)));
 }
 
 /**
@@ -1226,8 +1141,7 @@ void DetectorPlotController::setPlotData(size_t pickID) {
  * Set curev data from multiple detectors: sum their spectra.
  * @param detIndices :: A list of detector Indices.
  */
-void DetectorPlotController::setPlotData(
-    const std::vector<size_t> &detIndices) {
+void DetectorPlotController::setPlotData(const std::vector<size_t> &detIndices) {
   setPlotType(DetectorSum);
   clear();
   std::vector<double> x, y;
@@ -1237,9 +1151,7 @@ void DetectorPlotController::setPlotData(
   QApplication::restoreOverrideCursor();
   if (!x.empty()) {
     m_plot->setData(std::move(x), std::move(y),
-                    QString::fromStdString(
-                        actor.getWorkspace()->getAxis(0)->unit()->unitID()),
-                    "multiple");
+                    QString::fromStdString(actor.getWorkspace()->getAxis(0)->unit()->unitID()), "multiple");
   }
 
   addPeakLabels(detIndices);
@@ -1249,8 +1161,7 @@ void DetectorPlotController::setPlotData(
  * Add peak labels to plot for each detector shown
  * @param detIndices :: A list of detector inidices.
  */
-void DetectorPlotController::addPeakLabels(
-    const std::vector<size_t> &detIndices) {
+void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices) {
   auto surface = m_tab->getSurface();
   if (surface) {
     const auto &actor = m_instrWidget->getInstrumentActor();
@@ -1295,8 +1206,7 @@ void DetectorPlotController::plotSingle(size_t detindex) {
   // set the data
   auto detid = actor.getDetID(detindex);
   m_plot->setData(std::move(x), std::move(y),
-                  QString::fromStdString(
-                      actor.getWorkspace()->getAxis(0)->unit()->unitID()),
+                  QString::fromStdString(actor.getWorkspace()->getAxis(0)->unit()->unitID()),
                   "Detector " + QString::number(detid));
 
   // find any markers
@@ -1362,12 +1272,9 @@ void DetectorPlotController::plotTubeSums(size_t detindex) {
   const auto &componentInfo = actor.componentInfo();
   auto parent = componentInfo.parent(detindex);
   auto detid = actor.getDetID(detindex);
-  QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
-                  QString::number(detid) + ") Sum";
+  QString label = QString::fromStdString(componentInfo.name(parent)) + " (" + QString::number(detid) + ") Sum";
   m_plot->setData(std::move(x), std::move(y),
-                  QString::fromStdString(
-                      actor.getWorkspace()->getAxis(0)->unit()->unitID()),
-                  std::move(label));
+                  QString::fromStdString(actor.getWorkspace()->getAxis(0)->unit()->unitID()), std::move(label));
 }
 
 /**
@@ -1398,10 +1305,8 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
   // curve label: "tube_name (detid) Integrals"
   // detid is included to distiguish tubes with the same name
   QString label = QString::fromStdString(componentInfo.name(parent)) + " (" +
-                  QString::number(actor.getDetID(detindex)) + ") Integrals/" +
-                  getTubeXUnitsName();
-  m_plot->setData(std::move(x), std::move(y), std::move(xAxisCaption),
-                  std::move(label));
+                  QString::number(actor.getDetID(detindex)) + ") Integrals/" + getTubeXUnitsName();
+  m_plot->setData(std::move(x), std::move(y), std::move(xAxisCaption), std::move(label));
 }
 
 /**
@@ -1411,9 +1316,8 @@ void DetectorPlotController::plotTubeIntegrals(size_t detindex) {
  * @param y :: Vector of y coordinates (output)
  * @param err :: Optional pointer to a vector of errors (output)
  */
-void DetectorPlotController::prepareDataForSinglePlot(
-    size_t detindex, std::vector<double> &x, std::vector<double> &y,
-    std::vector<double> *err) {
+void DetectorPlotController::prepareDataForSinglePlot(size_t detindex, std::vector<double> &x, std::vector<double> &y,
+                                                      std::vector<double> *err) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   Mantid::API::MatrixWorkspace_const_sptr ws = actor.getWorkspace();
   auto wi = actor.getWorkspaceIndex(detindex);
@@ -1444,9 +1348,7 @@ void DetectorPlotController::prepareDataForSinglePlot(
  * @param y :: Vector of y coordinates (output)
  * @param err :: Optional pointer to a vector of errors (output)
  */
-void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
-                                                    std::vector<double> &x,
-                                                    std::vector<double> &y,
+void DetectorPlotController::prepareDataForSumsPlot(size_t detindex, std::vector<double> &x, std::vector<double> &y,
                                                     std::vector<double> *err) {
   const auto &actor = m_instrWidget->getInstrumentActor();
   auto ws = actor.getWorkspace();
@@ -1474,23 +1376,19 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
       if (index == InstrumentActor::INVALID_INDEX)
         continue;
       const auto &Y = ws->y(index);
-      std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(),
-                     std::plus<double>());
+      std::transform(y.begin(), y.end(), Y.begin() + imin, y.begin(), std::plus<double>());
       if (err) {
         const auto &E = ws->e(index);
         std::vector<double> tmp;
         tmp.assign(E.begin() + imin, E.begin() + imax);
-        std::transform(tmp.begin(), tmp.end(), tmp.begin(), tmp.begin(),
-                       std::multiplies<double>());
-        std::transform(err->begin(), err->end(), tmp.begin(), err->begin(),
-                       std::plus<double>());
+        std::transform(tmp.begin(), tmp.end(), tmp.begin(), tmp.begin(), std::multiplies<double>());
+        std::transform(err->begin(), err->end(), tmp.begin(), err->begin(), std::plus<double>());
       }
     }
   }
 
   if (err)
-    std::transform(err->begin(), err->end(), err->begin(),
-                   [](double val) { return sqrt(val); });
+    std::transform(err->begin(), err->end(), err->begin(), [](double val) { return sqrt(val); });
 }
 
 /**
@@ -1505,15 +1403,14 @@ void DetectorPlotController::prepareDataForSumsPlot(size_t detindex,
  * @param y :: Vector of y coordinates (output)
  * @param err :: Optional pointer to a vector of errors (output)
  */
-void DetectorPlotController::prepareDataForIntegralsPlot(
-    size_t detindex, std::vector<double> &x, std::vector<double> &y,
-    std::vector<double> *err) {
+void DetectorPlotController::prepareDataForIntegralsPlot(size_t detindex, std::vector<double> &x,
+                                                         std::vector<double> &y, std::vector<double> *err) {
 
-#define PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED                              \
-  x.clear();                                                                   \
-  y.clear();                                                                   \
-  if (err)                                                                     \
-    err->clear();                                                              \
+#define PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED                                                                      \
+  x.clear();                                                                                                           \
+  y.clear();                                                                                                           \
+  if (err)                                                                                                             \
+    err->clear();                                                                                                      \
   return;
 
   const auto &actor = m_instrWidget->getInstrumentActor();
@@ -1523,8 +1420,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
   // Does the instrument definition specify that psi should be offset.
   std::vector<std::string> parameters = actor.getStringParameter("offset-phi");
   const bool bOffsetPsi =
-      (!parameters.empty()) && std::find(parameters.begin(), parameters.end(),
-                                         "Always") != parameters.end();
+      (!parameters.empty()) && std::find(parameters.begin(), parameters.end(), "Always") != parameters.end();
   auto parent = componentInfo.parent(detindex);
   auto ass = componentInfo.detectorsInSubtree(parent);
   auto wi = actor.getWorkspaceIndex(detindex);
@@ -1554,8 +1450,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
     PREPAREDATAFORINTEGRALSPLOT_RETURN_FAILED
   }
 
-  const auto normal = normalize(componentInfo.position(ass[1]) -
-                                componentInfo.position(ass[0]));
+  const auto normal = normalize(componentInfo.position(ass[1]) - componentInfo.position(ass[0]));
   const auto &detectorInfo = actor.detectorInfo();
   for (auto det : ass) {
     if (componentInfo.isDetector(det)) {
@@ -1587,8 +1482,7 @@ void DetectorPlotController::prepareDataForIntegralsPlot(
         const auto &E = ws->e(index);
         std::vector<double> tmp(imax - imin);
         // take squares of the errors
-        std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin,
-                       tmp.begin(), std::multiplies<double>());
+        std::transform(E.begin() + imin, E.begin() + imax, E.begin() + imin, tmp.begin(), std::multiplies<double>());
         // sum them
         const double sum = std::accumulate(tmp.begin(), tmp.end(), 0);
         // take sqrt
@@ -1627,8 +1521,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     return;
   }
   const auto &actor = m_instrWidget->getInstrumentActor();
-  Mantid::API::MatrixWorkspace_const_sptr parentWorkspace =
-      actor.getWorkspace();
+  Mantid::API::MatrixWorkspace_const_sptr parentWorkspace = actor.getWorkspace();
   // interpret curve labels and reconstruct the data to be saved
   QStringList labels = m_plot->getLabels();
   if (m_plot->hasCurve()) {
@@ -1679,8 +1572,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     }
     if (!x.empty()) {
       if (nbins > 0 && x.size() != nbins) {
-        QMessageBox::critical(nullptr, "MantidPlot - Error",
-                              "Curves have different sizes.");
+        QMessageBox::critical(nullptr, "MantidPlot - Error", "Curves have different sizes.");
         return;
       } else {
         nbins = x.size();
@@ -1695,8 +1587,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     if (nbins == 0)
       nbins = 1;
     E.resize(Y.size(), 1.0);
-    Mantid::API::IAlgorithm_sptr alg =
-        Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", -1);
+    Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", -1);
     alg->initialize();
     alg->setPropertyValue("OutputWorkspace", "Curves");
     alg->setProperty("DataX", X);
@@ -1709,17 +1600,15 @@ void DetectorPlotController::savePlotToWorkspace() {
 
     if (!detids.empty()) {
       // set up spectra - detector mapping
-      Mantid::API::MatrixWorkspace_sptr ws =
-          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-              Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
+      Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
       if (!ws) {
         throw std::runtime_error("Failed to create Curves workspace");
       }
 
       if (detids.size() == ws->getNumberHistograms()) {
         size_t i = 0;
-        for (std::vector<Mantid::detid_t>::const_iterator id = detids.begin();
-             id != detids.end(); ++id, ++i) {
+        for (std::vector<Mantid::detid_t>::const_iterator id = detids.begin(); id != detids.end(); ++id, ++i) {
           ws->getSpectrum(i).setDetectorID(*id);
         }
       }
@@ -1738,10 +1627,8 @@ void DetectorPlotController::savePlotToWorkspace() {
  * @return :: Angle between the vector and the plane in radians in [-pi/2,
  * pi/2].
  */
-double
-DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos,
-                                           const Mantid::Kernel::V3D &origin,
-                                           const Mantid::Kernel::V3D &normal) {
+double DetectorPlotController::getOutOfPlaneAngle(const Mantid::Kernel::V3D &pos, const Mantid::Kernel::V3D &origin,
+                                                  const Mantid::Kernel::V3D &normal) {
   const auto vec = normalize(pos - origin);
   return asin(vec.scalar_prod(normal));
 }
@@ -1845,36 +1732,29 @@ void DetectorPlotController::addPeak(double x, double y) {
       // different to here.
       Mantid::Geometry::Instrument_const_sptr instr = ws->getInstrument();
 
-      if (!Mantid::API::AnalysisDataService::Instance().doesExist(
-              peakTableName)) {
-        tw = Mantid::API::WorkspaceFactory::Instance().createPeaks(
-            "PeaksWorkspace");
+      if (!Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName)) {
+        tw = Mantid::API::WorkspaceFactory::Instance().createPeaks("PeaksWorkspace");
         tw->setInstrument(instr);
         Mantid::API::AnalysisDataService::Instance().add(peakTableName, tw);
         newPeaksWorkspace = true;
       } else {
         tw = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
-            Mantid::API::AnalysisDataService::Instance().retrieve(
-                peakTableName));
+            Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
         if (!tw) {
           QMessageBox::critical(m_tab, "Mantid - Error",
-                                "Workspace " +
-                                    QString::fromStdString(peakTableName) +
-                                    " is not a TableWorkspace");
+                                "Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
           return;
         }
       }
       auto unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface.get());
       if (unwrappedSurface) {
-        unwrappedSurface->setPeaksWorkspace(
-            std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+        unwrappedSurface->setPeaksWorkspace(std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
       }
     }
 
     // Run the AddPeak algorithm
     auto alg = AlgorithmManager::Instance().create("AddPeak");
-    const auto &detIDs =
-        m_instrWidget->getInstrumentActor().detectorInfo().detectorIDs();
+    const auto &detIDs = m_instrWidget->getInstrumentActor().detectorInfo().detectorIDs();
     alg->setPropertyValue("RunWorkspace", ws->getName());
     alg->setPropertyValue("PeaksWorkspace", peakTableName);
     alg->setProperty("DetectorID", detIDs[m_currentPickID]);
@@ -1898,10 +1778,8 @@ void DetectorPlotController::addPeak(double x, double y) {
       alg->execute();
     }
   } catch (std::exception &e) {
-    QMessageBox::critical(
-        m_tab, "MantidPlot -Error",
-        "Cannot create a Peak object because of the error:\n" +
-            QString(e.what()));
+    QMessageBox::critical(m_tab, "MantidPlot -Error",
+                          "Cannot create a Peak object because of the error:\n" + QString(e.what()));
   }
 }
 
@@ -1915,5 +1793,4 @@ void DetectorPlotController::zoomOutOnPlot() {
   m_plot->zoomOutOnPlot();
 #endif
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

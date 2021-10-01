@@ -15,8 +15,7 @@
 #include <limits>
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 Kernel::Logger g_log("ParamFunction");
 }
@@ -305,5 +304,4 @@ size_t ParamFunction::getParameterIndex(const ParameterReference &ref) const {
   return nParams();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

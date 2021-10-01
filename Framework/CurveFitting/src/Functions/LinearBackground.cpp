@@ -10,9 +10,7 @@
 #include "MantidCurveFitting/Functions/LinearBackground.h"
 #include "MantidAPI/FunctionFactory.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -126,6 +124,4 @@ void LinearBackground::histogramDerivative1D(Jacobian *jacobian, double left, co
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

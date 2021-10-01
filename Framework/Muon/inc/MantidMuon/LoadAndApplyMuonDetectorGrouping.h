@@ -74,7 +74,7 @@ private:
   Mantid::API::WorkspaceGroup_sptr addGroupedWSWithDefaultName(Mantid::API::Workspace_sptr inputWS);
 
   /// Throw an error if the detector IDs in grouping are not in workspace
-  void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping, Mantid::API::Workspace_sptr workspace);
+  void checkDetectorIDsInWorkspace(Mantid::API::Grouping &grouping, const Mantid::API::Workspace_sptr &workspace);
 
   /// Check if the group/pair names are valid, and if all the groups which
   /// are paired are also included as groups.

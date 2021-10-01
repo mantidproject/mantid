@@ -8,8 +8,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include <boost/algorithm/string/regex.hpp>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 /// constructor
 CatalogSearchParam::CatalogSearchParam() : m_startRun(0), m_endRun(0), m_startDate(0), m_endDate(0), m_myData(false) {}
 
@@ -189,5 +188,4 @@ time_t CatalogSearchParam::getTimevalue(const std::string &inputDate) {
   // Return the date as time_t value.
   return Types::Core::DateAndTime(isoDate).to_time_t();
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

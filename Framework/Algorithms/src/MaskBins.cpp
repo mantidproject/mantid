@@ -15,8 +15,7 @@
 
 using Mantid::HistogramData::BinEdges;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskBins)
@@ -152,5 +151,4 @@ void MaskBins::findIndices(const BinEdges &X, MantidVec::difference_type &startB
   endBin = std::distance(X.cbegin(), last);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

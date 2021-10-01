@@ -11,8 +11,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.tcc"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Constructor
  * @param propName :: Name of the property
@@ -41,8 +40,7 @@ template class MANTID_KERNEL_DLL MatrixProperty<double>;
 template class MANTID_KERNEL_DLL MatrixProperty<int>;
 template class MANTID_KERNEL_DLL MatrixProperty<float>;
 ///@endcond
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///@cond
 /**

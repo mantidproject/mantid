@@ -19,8 +19,7 @@ constexpr const char *LDPRELOAD_ENV = "LD_PRELOAD";
 } // namespace
 #endif
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 
 /**
  * Opens a url in the appropriate web browser. On Linux systems if LD_PRELOAD is
@@ -73,5 +72,4 @@ void MantidDesktopServices::setUrlHandler(const QString &scheme, QObject *receiv
  * @param scheme Name of scheme to drop
  */
 void MantidDesktopServices::unsetUrlHandler(const QString &scheme) { QDesktopServices::unsetUrlHandler(scheme); }
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

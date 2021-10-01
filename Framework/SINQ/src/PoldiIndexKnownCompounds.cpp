@@ -18,8 +18,7 @@
 
 #include <boost/math/distributions/normal.hpp>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using Mantid::Kernel::Direction;
 using namespace Mantid::API;
@@ -765,5 +764,4 @@ void PoldiIndexKnownCompounds::exec() {
   setProperty("OutputWorkspace", outputWorkspaces);
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

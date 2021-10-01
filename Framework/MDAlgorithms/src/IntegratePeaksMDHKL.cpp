@@ -19,8 +19,7 @@
 #include <boost/math/special_functions/round.hpp>
 #include <limits>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::Kernel::Direction;
 // using Mantid::API::WorkspaceProperty;
@@ -319,5 +318,4 @@ MDHistoWorkspace_sptr IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double
   return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

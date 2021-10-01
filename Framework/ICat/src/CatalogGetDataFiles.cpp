@@ -11,8 +11,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogGetDataFiles)
 
 /// Initialising the algorithm
@@ -33,5 +32,4 @@ void CatalogGetDataFiles::exec() {
       ->getDataFiles(getProperty("InvestigationId"), workspace);
   setProperty("OutputWorkspace", workspace);
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

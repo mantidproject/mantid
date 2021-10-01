@@ -8,8 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Class constructor with parameter.
  * @param axisNumber :: set the axis number to validate
@@ -37,5 +36,4 @@ std::string NumericAxisValidator::checkValidity(const MatrixWorkspace_sptr &valu
     return "A workspace with axis being a Numeric Axis is required here.";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

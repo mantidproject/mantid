@@ -20,8 +20,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(CalculatePlaczekSelfScattering2)
 
@@ -71,5 +70,4 @@ void CalculatePlaczekSelfScattering2::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

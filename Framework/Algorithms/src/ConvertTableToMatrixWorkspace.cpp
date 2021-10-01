@@ -17,8 +17,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertTableToMatrixWorkspace)
@@ -72,5 +71,4 @@ void ConvertTableToMatrixWorkspace::exec() {
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

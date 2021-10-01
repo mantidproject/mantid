@@ -10,9 +10,7 @@
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 FqFitDataPresenter::FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
                                        IFQFitObserver *SingleFunctionTemplateBrowser)
@@ -52,7 +50,7 @@ void FqFitDataPresenter::dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dia
   updateParameterOptions(dialog, parameter);
 }
 
-void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, FqFitParameters parameter) {
+void FqFitDataPresenter::updateParameterOptions(FqFitAddWorkspaceDialog *dialog, const FqFitParameters &parameter) {
   setActiveWorkspaceIDToCurrentWorkspace(dialog);
   setActiveParameterType(dialog->parameterType());
   if (m_activeParameterType == "Width")
@@ -130,6 +128,4 @@ std::unique_ptr<IAddWorkspaceDialog> FqFitDataPresenter::getAddWorkspaceDialog(Q
   return dialog;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA
