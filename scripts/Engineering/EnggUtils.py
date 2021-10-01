@@ -174,56 +174,61 @@ def get_diffractometer_constants_from_workspace(ws):
     return diff_consts
 
 
-def plot_tof_vs_d_from_calibration(diag_ws, ws_foc):
+def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing):
     """
-    Plot fitted TOF vs expected d-spacing from diagnositc workspaces output from PDCalibration
+    Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from PDCalibration
     :param diag_ws: workspace object of group of diagnostic workspaces
-    :param ws_foc: workspace object of focussed data (post ApplyDiffCal with calibrated diff_consts)
+    :param ws_foc: workspace object of focused data (post ApplyDiffCal with calibrated diff_consts)
     :return:
     """
+    from matplotlib.pyplot import subplots
+
     fitparam = mtd[diag_ws.name() + "_fitparam"].toDict()
     fiterror = mtd[diag_ws.name() + "_fiterror"].toDict()
     d_table = mtd[diag_ws.name() + "_dspacing"].toDict()
-    d = np.array([float(name.strip('@')) for name in d_table.keys() if '@' in name])  # expected d-spacing
+    dspacing = np.array(sorted(dspacing))  # PDCal sorts the dspacing list passed
     x0 = np.array(fitparam['X0'])
     x0_er = np.array(fiterror['X0'])
     ws_index = np.array(fitparam['wsindex'])
-    xye = []
     nspec = len(set(ws_index))
     si = ws_foc.spectrumInfo()
+
+    ncols_per_fig = 4  # max number of spectra per figure window
+    figs = []
     for ispec in range(nspec):
-        # get index of valid peaks
+        # extract data from tables
         detid = ws_foc.getSpectrum(ispec).getDetectorIDs()[0]
         irow = d_table['detid'].index(detid)
-        valid = [np.isfinite(d_table[key][irow]) for key in d_table if '@' in key]
-        # get peak centres of valid fits
-        ipks = np.where(ws_index == ispec)
-        xye_dict = {'x': d[valid], 'y': x0[ipks][valid], 'e': x0_er[ipks][valid]}
-        # evaluate quadratic fit and clac residuals
+        valid = [np.isfinite(d_table[key][irow]) for key in d_table if '@' in key]  # nan if fit unsuccessful
+        ipks = ws_index == ispec  # peak centres for this spectrum
+        x, y, e = dspacing[valid], x0[ipks][valid], x0_er[ipks][valid]
+        # get poly fit
         diff_consts = si.diffractometerConstants(ispec)  # output is a UnitParametersMap
-        xye_dict['yfit'] = np.array([UnitConversion.run("dSpacing", "TOF", d, 0,
-                                                        DeltaEModeType.Elastic, diff_consts) for d in xye_dict['x']])
-        xye.append(xye_dict)
-
-    # plot - To-DO add titles?
-    from matplotlib.pyplot import subplots
-    fig, ax = subplots(2, nspec, subplot_kw={'projection': 'mantid'})
-    ax = np.reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if nspec==1
-    for ispec in range(nspec):
+        yfit = np.array([UnitConversion.run("dSpacing", "TOF", xpt, 0, DeltaEModeType.Elastic, diff_consts)
+                         for xpt in x])
+        # plot polynomial fit to TOF vs dSpacing
+        if ispec + 1 > len(figs)*ncols_per_fig:
+            # create new figure
+            ncols = ncols_per_fig if not nspec-ispec < ncols_per_fig else nspec % ncols_per_fig
+            fig, ax = subplots(2, ncols, sharex=True, sharey='row', subplot_kw={'projection': 'mantid'})
+            ax = np.reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if ncols==1
+            ax[0, 0].set_ylabel('Fitted TOF (\u03BCs)')
+            ax[1, 0].set_ylabel('Residuals (\u03BCs)')
+            figs.append(fig)
+            icol = 0
         # plot TOF vs d
-        ax[0, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'], yerr=xye[ispec]['e'],
-                              marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
-        ax[0, ispec].plot(xye[ispec]['x'], xye[ispec]['yfit'], '-r', label='quadratic fit')
-        ax[0, ispec].set_ylabel('Fitted TOF (\u03BCs)')
+        ax[0, icol].set_title(f"spec: {ispec+1}")
+        ax[0, icol].errorbar(x, y, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
+        ax[0, icol].plot(x, yfit, '-r', label='quadratic fit')
         # plot residuals
-        ax[1, ispec].errorbar(xye[ispec]['x'], xye[ispec]['y'] - xye[ispec]['yfit'],
-                              yerr=xye[ispec]['e'], marker='o', markersize=3, capsize=2, ls='',
-                              color='b', label='residuals')
-        ax[1, ispec].axhline(color='r', ls='-')
-        ax[1, ispec].set_xlabel('d-spacing (Ang)')
-        ax[1, ispec].set_ylabel('Residuals (\u03BCs)')
-    fig.tight_layout()
-    fig.show()
+        ax[1, icol].errorbar(x, y-yfit, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='resids')
+        ax[1, icol].axhline(color='r', ls='-')
+        ax[1, icol].set_xlabel('d-spacing (Ang)')
+        icol += 1
+    # Format figs and show
+    for fig in figs:
+        fig.tight_layout()
+        fig.show()
 
 
 def generate_tof_fit_dictionary(cal_name=None) -> dict:
@@ -381,10 +386,10 @@ def default_ceria_expected_peaks(final=False):
     @param :: final - if true, returns a list better suited to a secondary fitting
     @Returns :: a list of peaks in d-spacing as a float list
     """
-    _CERIA_EXPECTED_PEAKS = [2.705702376, 1.913220892, 1.631600313, 1.352851554, 1.104598643]
-    _CERIA_EXPECTED_PEAKS_FINAL = [2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554,
-                                   1.241461538, 1.210027059, 1.104598643, 1.04142562, 0.956610446,
-                                   0.914694494, 0.901900955, 0.855618487]
+    _CERIA_EXPECTED_PEAKS = [1.104598643, 1.352851554, 1.631600313, 1.913220892, 2.705702376]
+    _CERIA_EXPECTED_PEAKS_FINAL = [0.855618487, 0.901900955, 0.914694494, 0.956610446, 1.04142562, 1.104598643,
+                                   1.210027059, 1.241461538, 1.352851554, 1.562138267, 1.631600313, 1.913220892,
+                                   2.705702376]
 
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
 

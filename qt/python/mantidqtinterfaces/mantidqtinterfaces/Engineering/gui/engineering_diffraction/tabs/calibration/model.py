@@ -51,7 +51,8 @@ class CalibrationModel(object):
         self.update_calibration_params_table(rows)
 
         if plot_output:
-            EnggUtils.plot_tof_vs_d_from_calibration(diag_ws, focused_ceria)
+            EnggUtils.plot_tof_vs_d_from_calibration(diag_ws, focused_ceria,
+                                                     EnggUtils.default_ceria_expected_peaks(final=True))
 
         # extract Back-to-Back Exponential params for .prm before deleting raw data
         bk2bk_params = self.extract_b2b_params(ceria_workspace)
