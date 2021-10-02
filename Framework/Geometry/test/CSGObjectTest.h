@@ -1314,40 +1314,17 @@ public:
     EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
 
     constexpr double halfWidth{0.75};
-    auto cuboid = ComponentCreationHelper::createCuboid(halfWidth);
+    auto ball = ComponentCreationHelper::createCuboid(halfWidth);
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
+    boost::optional<V3D> point = ball->generatePointInObject(rng, activeRegion, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
+    // We should get the point generated from the second 'random' triplet.
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-0.1 + randX * 0.2, point->X(), tolerance)
     TS_ASSERT_DELTA(-0.1 + randY * 0.2, point->Y(), tolerance)
     TS_ASSERT_DELTA(-0.1 + randZ * 0.2, point->Z(), tolerance)
-  }
-
-  void testGeneratePointSometimesMisses() {
-    // if there's a requirement to fairly sample scatter points between different sample environment
-    // parts then it's important the generatePointInObject method misses sometimes
-    using namespace ::testing;
-
-    // Generate "random" sequence.
-    MockRNG rng;
-    Sequence rand;
-    constexpr double randX{0.92};
-    constexpr double randY{0.14};
-    constexpr double randZ{0.83};
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randX));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randY));
-    EXPECT_CALL(rng, nextValue()).InSequence(rand).WillOnce(Return(randZ));
-
-    constexpr double halfWidth{0.075};
-    auto cuboid = ComponentCreationHelper::createCuboid(halfWidth);
-    // Create a rectangular region to restrict point generation
-    BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
-    constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
-    TS_ASSERT_EQUALS(!point, true);
   }
 
   void testSolidAngleSphere()
