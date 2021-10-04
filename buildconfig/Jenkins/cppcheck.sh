@@ -44,7 +44,7 @@ fi
 $SCL_ENABLE "$CMAKE_EXE ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=Debug -DCPPCHECK_GENERATE_XML=TRUE -DCPPCHECK_NUM_THREADS=$BUILD_THREADS .."
 
 # run cppcheck
-$SCL_ENABLE "$CMAKE_EXE --build . --target cppcheck"
+$CMAKE_EXE --build . --target cppcheck
 
 # Generate HTML report
 cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
