@@ -1,1 +1,2 @@
 include mantidqtinterfaces/drill/view/ui/*.ui
+recursive-include mantidqtinterfaces/Engineering/calib *
