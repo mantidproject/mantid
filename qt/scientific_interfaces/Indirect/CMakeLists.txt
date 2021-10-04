@@ -248,10 +248,9 @@ set(
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
-if (ENABLE_WORKBENCH)
-    # XML is required to parse the settings file
-    find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
-endif ()
+
+# XML is required to parse the settings file
+find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
 
 mtd_add_qt_library(
         TARGET_NAME MantidScientificInterfacesIndirect
@@ -268,7 +267,7 @@ mtd_add_qt_library(
         INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         LINK_LIBS
         ${CORE_MANTIDLIBS}
-        PythonInterfaceCore
+        Mantid::PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
         Python::Python

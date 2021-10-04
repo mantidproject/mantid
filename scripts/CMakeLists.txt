@@ -47,7 +47,9 @@ add_custom_command(
   COMMENT "Generating scripts .pth file"
 )
 add_custom_target(ScriptsDotPth ALL DEPENDS ${_scripts_pth_dest})
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
 add_dependencies(PythonInterface ScriptsDotPth)
+endif()
 
 # install copy
 set(_scripts_pth_install

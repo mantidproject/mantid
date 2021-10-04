@@ -26,12 +26,12 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                  SRC
                    ${TEST_FILES}
                  LINK_LIBS
-                   API
-                   DataObjects
-                   HistogramData
-                   Kernel
-                   PythonInterfaceCore
-                   Types
+                   Mantid::API
+                   Mantid::DataObjects
+                   Mantid::HistogramData
+                   Mantid::Kernel
+                   Mantid::PythonInterfaceCore
+                   Mantid::Types
                    ${Boost_LIBRARIES}
                    ${POCO_LIBRARIES}
                    Python::Python

@@ -65,7 +65,8 @@ mtd_add_qt_library(
     inc
     ${Boost_INCLUDE_DIRS}
   LINK_LIBS
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
+    Mantid::API
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
   INSTALL_DIR
