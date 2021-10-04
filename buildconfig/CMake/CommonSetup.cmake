@@ -58,6 +58,10 @@ set(TESTING_TIMEOUT
     CACHE STRING "Timeout in seconds for each test (default 300=5minutes)"
 )
 
+option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
+option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
+
 # ##############################################################################
 # Look for dependencies Do NOT add include_directories commands here. They will
 # affect every target.
@@ -130,11 +134,6 @@ if (BUILD_MANTIDFRAMEWORK)
     )
   endif()
 endif()
-
-option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
-option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
-option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
-
 
 find_package(Doxygen) # optional
 
