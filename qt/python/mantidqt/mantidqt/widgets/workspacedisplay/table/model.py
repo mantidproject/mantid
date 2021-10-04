@@ -110,7 +110,7 @@ class TableWorkspaceDisplayModel:
         if self.is_peaks_workspace():
             return self.ws.getColumnNames()[icol] in self.EDITABLE_COLUMN_NAMES
         else:
-            return not self.ws.getReadOnly(icol)
+            return not self.ws.getColumnReadOnly(icol)
 
     def is_peaks_workspace(self):
         return isinstance(self.ws, IPeaksWorkspace)

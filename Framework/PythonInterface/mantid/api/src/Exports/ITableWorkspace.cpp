@@ -515,7 +515,7 @@ void setCell(ITableWorkspace &self, const object &col_or_row, const int row_or_c
  * @param column Name or index of column
  * @return True if read only, False otherwise.
  */
-int getReadOnly(ITableWorkspace &self, const object &column) {
+int getColumnReadOnly(ITableWorkspace &self, const object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
   if (STR_CHECK(column.ptr())) {
@@ -533,7 +533,7 @@ int getReadOnly(ITableWorkspace &self, const object &column) {
  * @param column Name or index of column.
  * @param readOnly True if read only, False otherwise.
  */
-void setReadOnly(ITableWorkspace &self, const object &column, const bool readOnly) {
+void setColumnReadOnly(ITableWorkspace &self, const object &column, const bool readOnly) {
   // Find the column
   Mantid::API::Column_sptr colptr;
   if (STR_CHECK(column.ptr())) {
@@ -737,11 +737,11 @@ void export_ITableWorkspace() {
            "dictionary will be the names of the columns of the table. The "
            "values of the entries will be lists of values for each column.")
 
-      .def("setReadOnly", &setReadOnly, (arg("self"), arg("column"), arg("read_only")),
+      .def("setColumnReadOnly", &setColumnReadOnly, (arg("self"), arg("column"), arg("read_only")),
            "Sets whether or not a given column of this workspace should be read-only. Columns can be "
            "selected by name or by index")
 
-      .def("getReadOnly", &getReadOnly, (arg("self"), arg("column")),
+      .def("getColumnReadOnly", &getColumnReadOnly, (arg("self"), arg("column")),
            "Gets whether or not a given column of this workspace is be read-only. Columns can be "
            "selected by name or by index");
 
