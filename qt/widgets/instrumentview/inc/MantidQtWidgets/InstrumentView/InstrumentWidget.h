@@ -149,7 +149,8 @@ public:
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void resetSurface();
-  void resetInstrumentActor();
+  void resetInstrumentActor(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax,
+                            bool setDefaultView);
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;
@@ -258,14 +259,13 @@ public slots:
   void enableGL(bool on);
   void updateInfoText(const QString &text = QString());
 
-  void initWidget();
+  void initWidget(bool resetGeometry, bool setDefaultView);
 
 private slots:
   void helpClicked();
 
 protected:
-  void init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
-            bool resetActor = true);
+  void init(bool resetGeometry, bool setDefaultView);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);

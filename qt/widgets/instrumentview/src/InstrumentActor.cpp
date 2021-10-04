@@ -89,9 +89,7 @@ InstrumentActor::InstrumentActor(MatrixWorkspace_sptr workspace, MantidWidgets::
   m_renderer->changeScaleType(m_scaleType);
 }
 
-void InstrumentActor::initialize() {
-  loadSettings();
-
+void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
   auto sharedWorkspace = m_workspace;
 
   if (!sharedWorkspace)
@@ -134,7 +132,8 @@ void InstrumentActor::initialize() {
 
   resetColors();
 
-  emit initWidget();
+  // send signal back to the InstrumentWidget to finish setting up
+  emit initWidget(resetGeometry, setDefaultView);
   emit refreshView();
 }
 

@@ -220,10 +220,10 @@ public:
 signals:
   void colorMapChanged() const;
   void refreshView() const;
-  void initWidget() const;
+  void initWidget(bool resetGeometry, bool setDefaultView) const;
 
 public slots:
-  void initialize();
+  void initialize(bool resetGeometry, bool setDefaultView);
   void deleteLater();
 
 private:

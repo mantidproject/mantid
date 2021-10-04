@@ -169,7 +169,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   // disable all controls until background thread has finished
   m_controlPanelLayout->setEnabled(false);
-  resetInstrumentActor();
+  resetInstrumentActor(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
 
   // Background colour
   setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
@@ -275,12 +275,7 @@ Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) cons
  * @param setDefaultView :: Set the default surface type
  * @param resetActor :: If true reset the instrumentActor object
  */
-void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
-                            bool resetActor) {
-  if (resetActor) {
-    m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
-                                                          scaleMin, scaleMax);
-  }
+void InstrumentWidget::init(bool resetGeometry, bool setDefaultView) {
 
   auto surface = getSurface();
   if (resetGeometry || !surface) {
@@ -310,11 +305,12 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
  * Wrapper around the init function that is called
  * when thread creating the InstrumentActor is finished
  */
-void InstrumentWidget::initWidget() {
+void InstrumentWidget::initWidget(bool resetGeometry, bool setDefaultView) {
   // re-enable side panels now that the instrument is loaded
   m_controlPanelLayout->setEnabled(true);
   m_xIntegration->setEnabled(true);
-  init(m_resetGeometry, m_autoscaling, m_scaleMin, m_scaleMax, m_setDefaultView, false);
+  init(resetGeometry, setDefaultView);
+  updateInstrumentDetectors();
 }
 
 /**
@@ -322,7 +318,7 @@ void InstrumentWidget::initWidget() {
  * @param resetGeometry
  */
 void InstrumentWidget::resetInstrument(bool resetGeometry) {
-  init(resetGeometry, true, 0.0, 0.0, false);
+  init(resetGeometry, false);
   updateInstrumentDetectors();
 }
 
@@ -335,8 +331,17 @@ void InstrumentWidget::resetSurface() {
 /**
  * Re-creates the instrument actor and initializes it
  * in a background thread
+ * @param resetGeometry :: Set true for resetting the view's geometry: the
+ * bounding box and rotation. Default is true.
+ * @param autoscaling :: True to start with autoscaling option on.
+ * @param scaleMin :: Minimum value of the colormap scale. Ignored if
+ * autoscaling == true.
+ * @param scaleMax :: Maximum value of the colormap scale. Ignored if
+ * autoscaling == true.
+ * @param setDefaultView :: Set the default surface type
  */
-void InstrumentWidget::resetInstrumentActor() {
+void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax,
+                                            bool setDefaultView) {
   if (m_thread.isRunning()) {
     cancelThread();
   }
@@ -346,12 +351,13 @@ void InstrumentWidget::resetInstrumentActor() {
   m_xIntegration->setEnabled(false);
   updateInfoText("Loading instrument...");
 
-  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, m_autoscaling,
-                                                        m_scaleMin, m_scaleMax);
+  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                        scaleMin, scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
-  m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget()), this, SLOT(initWidget()));
+  m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
   m_thread.start();
-  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection);
+  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
+                            Q_ARG(bool, setDefaultView));
 }
 
 void InstrumentWidget::cancelThread() {
@@ -649,7 +655,9 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
   renameWorkspace(newWs);
-  resetInstrumentActor();
+  // re-create the underlying instrument in the background and reset the autoscale, scales, and default view options to
+  // the values that this window was launched with originally
+  resetInstrumentActor(true, m_autoscaling, 0.0, 0.0, false);
 
   // update the view and colormap
   auto surface = getSurface();
@@ -1500,8 +1508,8 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   }
   // try to detect if the instrument changes (unlikely if the workspace
   // hasn't, but theoretically possible)
-  m_resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
-  resetInstrumentActor();
+  bool resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
+  resetInstrumentActor(resetGeometry, m_autoscaling, m_scaleMin, m_scaleMax, m_setDefaultView);
   updateIntegrationWidget();
 }
 
