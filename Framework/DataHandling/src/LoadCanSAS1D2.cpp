@@ -59,19 +59,19 @@ void LoadCanSAS1D2::exec() {
    Process the Transmission workspaces in order to output them to Mantid.
    @param trans_gp: A vector with the pointers to the workspaces related to the
    transmission
-   @param name: Name of the transmission. Only two names are allowed:
+   @param trans_name: Name of the transmission. Only two names are allowed:
    sample/can.
    @param output_name: The name of the OutputWorkspace, in order to create the
    workspaces with similar names.
  */
-void LoadCanSAS1D2::processTransmission(std::vector<MatrixWorkspace_sptr> &trans_gp, const std::string &name,
+void LoadCanSAS1D2::processTransmission(std::vector<MatrixWorkspace_sptr> &trans_gp, const std::string &trans_name,
                                         const std::string &output_name) {
 
-  std::string trans_wsname = std::string(output_name).append("_trans_").append(name);
+  std::string trans_wsname = std::string(output_name).append("_trans_").append(trans_name);
   const std::string fileName = getPropertyValue("Filename");
 
   std::string propertyWS;
-  if (name == "sample")
+  if (trans_name == "sample")
     propertyWS = "TransmissionWorkspace";
   else
     propertyWS = "TransmissionCanWorkspace";

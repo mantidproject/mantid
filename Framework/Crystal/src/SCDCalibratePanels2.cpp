@@ -1355,10 +1355,10 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
 
   // Use OPENMP to speed up the profiling
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
-  for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
+  for (int bankIndex = 0; bankIndex < static_cast<int>(m_BankNames.size()); ++bankIndex) {
     PARALLEL_START_INTERUPT_REGION
     // prepare local copies to work with
-    const std::string bankname = *std::next(m_BankNames.begin(), i);
+    const std::string bankname = *std::next(m_BankNames.begin(), bankIndex);
     const std::string pwsBankiName = "_pws_" + bankname;
 
     //-- step 0: extract peaks that lies on the current bank

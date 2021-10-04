@@ -4,7 +4,7 @@ SCRIPT_DIR=$(dirname "$0")
 # If errors slip through to master this can be used to set a non-zero
 # allowed count while those errors are dealt with. This avoids breaking all
 # builds for all developers
-ALLOWED_ERRORS_COUNT=1066
+ALLOWED_ERRORS_COUNT=0
 
 if [[ ${JOB_NAME} == *pull_requests* ]]; then
     # This relies on the fact pull requests use pull/$PR-NAME
@@ -49,8 +49,8 @@ $SCL_ENABLE "$CMAKE_EXE --build . --target cppcheck"
 # Generate HTML report
 cppcheck-htmlreport --file=cppcheck.xml --title=Embedded --report-dir=cppcheck-report
 
-# Mark build as passed or failed
-errors_count=$(grep -c '</error>' cppcheck.xml)
+# Mark build as passed or failed. The additional "|| true" stops the build from failing if there are no errors.
+errors_count=$(grep -c '</error>' cppcheck.xml) || true
 if [ $errors_count -ne ${ALLOWED_ERRORS_COUNT} ]; then
   echo "CppCheck found ${errors_count} errors."
   echo "See CppCheck link on the job page for more detail, or adjust the count."
