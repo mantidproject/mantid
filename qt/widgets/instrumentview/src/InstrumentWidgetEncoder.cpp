@@ -36,9 +36,7 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encode(const InstrumentWidget &
   // the empty map
   if (!obj.isWsBeingReplaced()) {
     // if thread to load instrument actor is still running, wait for it
-    if (obj.isThreadRunning()) {
-      obj.waitForThread();
-    }
+    obj.waitForThread();
 
     m_projectPath = projectPath.toStdString();
     m_saveMask = saveMask;
