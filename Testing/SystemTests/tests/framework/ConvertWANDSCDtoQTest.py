@@ -8,8 +8,6 @@ import systemtesting
 import numpy as np
 from mantid.simpleapi import *
 
-from mantid import config
-
 
 class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
@@ -125,47 +123,25 @@ class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
         return 8000
 
     def runTest(self):
-        config['Q.convention'] = "Inelastic"
-
         angleOffset = 45
-
-        # wavelength (angstrom) --------------------------------------------------------
-        wavelength = 1.486
-
-        # minimum and maximum values for Q sample --------------------------------------
-        min_values = [-7.5,-0.65,-4.4]
-        max_values = [6.8,0.65,7.5]
-
-        # obliquity parallax coefficient
-        cop = 1.022
-
         # ---
+        LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
+        SetGoniometer('ConvertWANDSCDtoQTest_data', Axis0='s1,0,1,0,1', Average=False)
+        LoadMD('HB2C_WANDSCD_norm.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_norm')
 
-        data = LoadMD(Filename='HB2C_WANDSCD_data.nxs')
-        SetGoniometer('data', Axis0='s1,0,1,0,1', Average=False)
-
-        ConvertHFIRSCDtoMDE(data,
-                            Wavelength=wavelength,
-                            ObliquityParallaxCoefficient=cop,
-                            MinValues='{},{},{}'.format(*min_values),
-                            MaxValues='{},{},{}'.format(*max_values),
-                            OutputWorkspace='qb')
-
-        Q = ConvertWANDSCDtoQ(InputWorkspace='data',
-                                S1Offset='0',
-                                BinningDim1='-1,1,1')
-
-        Qrot = ConvertWANDSCDtoQ(InputWorkspace='data',
-                                    S1Offset=angleOffset,
-                                    BinningDim1='-1,1,1')
+        Q = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
+                              NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
+        Qrot = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
+                                 NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
+                                 S1Offset=angleOffset)
 
         tableQ = FindPeaksMD(InputWorkspace=Q, PeakDistanceThreshold=2,
-                             CalculateGoniometerForCW=True, Wavelength=1.488)
+                             CalculateGoniometerForCW=True, Wavelength=1.488,
+                             MaxPeaks=10)
 
         tableQrot = FindPeaksMD(InputWorkspace=Qrot, PeakDistanceThreshold=2,
-                                CalculateGoniometerForCW=True, Wavelength=1.488)
-
-        self.assertEqual(tableQrot.getNumberPeaks(),tableQ.getNumberPeaks())
+                                CalculateGoniometerForCW=True, Wavelength=1.488,
+                                MaxPeaks=10)
 
         peak = tableQ.getPeak(0)
         # determine angle from origin (x,y) plane only
