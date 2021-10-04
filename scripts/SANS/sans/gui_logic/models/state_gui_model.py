@@ -13,7 +13,7 @@ from typing import Union
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SaveType,
                                DetectorType, FitModeForMerge)
-from sans.common.general_functions import get_ranges_from_event_slice_setting
+from sans.common.general_functions import get_ranges_from_event_slice_setting, wav_ranges_to_str
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
 from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter, apply_selective_view_scaling,
@@ -410,6 +410,9 @@ class StateGuiModel(ModelCommon):
     @property
     def wavelength_range(self):
         val = self._wavelength_range
+        if not val:
+            val = wav_ranges_to_str(self.all_states.wavelength.wavelength_interval.selected_ranges,
+                                    remove_full_range=True)
         return self._get_val_or_default(val)
 
     @wavelength_range.setter
