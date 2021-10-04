@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path, makedirs
 from shutil import copy2
+from numpy import array, zeros
 from mantid.api import AnalysisDataService as Ads
 from mantid.kernel import logger, UnitParams
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussing, \
@@ -16,13 +17,9 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cali
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common import path_handling
 
-CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
-
-NORTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_North_bank.prm"
-SOUTH_BANK_TEMPLATE_FILE = "template_ENGINX_241391_South_bank.prm"
-
 
 class CalibrationModel(object):
+
     def create_new_calibration(self, calibration, rb_num, plot_output):
         """
         Create a new calibration from a ceria run
@@ -39,16 +36,9 @@ class CalibrationModel(object):
         # run PDCalibration
         focused_ceria, cal_table, diag_ws, mask = self.run_calibration(ceria_workspace, calibration, full_calib)
 
-        # extract diffractometer constants
+        # extract diffractometer constants from calibration
         diff_consts = self.extract_diff_consts_from_ws(focused_ceria, mask)
-        difa = [diffs[UnitParams.difa] for diffs in diff_consts]
-        difc = [diffs[UnitParams.difc] for diffs in diff_consts]
-        tzero = [diffs[UnitParams.tzero] for diffs in diff_consts]
-        # write to table
-        rows = []
-        for i in range(len(difc)):
-            rows.append([i, difc[i], difa[i], tzero[i]])
-        self.update_calibration_params_table(rows)
+        self.write_diff_consts_to_table(diff_consts)
 
         if plot_output:
             EnggUtils.plot_tof_vs_d_from_calibration(diag_ws, focused_ceria,
@@ -65,7 +55,7 @@ class CalibrationModel(object):
             calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
 
         # get diff consts from table?
-        self.create_output_files(calib_dir, difa, difc, tzero, bk2bk_params, calibration)
+        self.create_output_files(calib_dir, diff_consts, bk2bk_params, calibration)
 
     @staticmethod
     def extract_b2b_params(workspace):
@@ -91,31 +81,25 @@ class CalibrationModel(object):
         try:
             # read diff constants from prm
             diff_consts = self.read_diff_constants_from_prm(prm_filepath)
-            self.update_calibration_params_table(diff_consts)
+            self.write_diff_consts_to_table(diff_consts)
         except RuntimeError:
             logger.error(f"Invalid file selected: {prm_filepath}")
             return
-        # how about grouping ws if made?
         calibration.load_relevant_calibration_files()
 
-    @staticmethod
-    def update_calibration_params_table(params_table):
-        if len(params_table) == 0:
-            return
-
-        # Create blank, or clear rows from existing, params table.
-        if Ads.doesExist(CALIB_PARAMS_WORKSPACE_NAME):
-            workspace = Ads.retrieve(CALIB_PARAMS_WORKSPACE_NAME)
-            workspace.setRowCount(0)
-        else:
-            workspace = CreateEmptyTableWorkspace(OutputWorkspace=CALIB_PARAMS_WORKSPACE_NAME)
-            workspace.addColumn("int", "bankid")
-            workspace.addColumn("double", "difc")
-            workspace.addColumn("double", "difa")
-            workspace.addColumn("double", "tzero")
-
-        for row in params_table:
-            workspace.addRow(row)
+    def write_diff_consts_to_table(self, diff_consts):
+        """
+        :param diff_consts: (nspec x 3) array with columns difc difa tzero (in that order).
+        """
+        # make table
+        table = CreateEmptyTableWorkspace(OutputWorkspace="diffractometer_consts_table")
+        table.addColumn("int", "spectrum index")
+        table.addColumn("double", "difc")
+        table.addColumn("double", "difa")
+        table.addColumn("double", "tzero")
+        # add to row per spectrum to table
+        for ispec in range(len(diff_consts)):
+            table.addRow([ispec, *diff_consts[ispec, :]])
 
     @staticmethod
     def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
@@ -171,27 +155,31 @@ class CalibrationModel(object):
         return full_calib
 
     def extract_diff_consts_from_ws(self, ws_foc, mask_ws):
+        """
+        :param ws_foc: workspace of focused spectra
+        :param mask_ws: mask ws output from PDCal - spectra are masked if polynomial fit to TOF vs d was unsuccessful
+        :return: (nspec x 3) array with columns difc difa tzero (in that order).
+        """
         si = ws_foc.spectrumInfo()
         masked_detIDs = mask_ws.getMaskedDetectors()
-        diff_consts = []
-        for ispec in range(ws_foc.getNumberHistograms()):
+        diff_consts = zeros((ws_foc.getNumberHistograms(), 3))
+        for ispec in range(diff_consts.shape[0]):
             if ws_foc.getSpectrum(ispec).getDetectorIDs()[0] in masked_detIDs:
                 # spectrum has detectors that were masked in output of PDCal
                 logger.warning(f'PDCalibration failed for spectrum index {ispec} - proceeding with uncalibrated DIFC.')
-            diff_consts.append(si.diffractometerConstants(ispec))
+            dc = si.diffractometerConstants(ispec)
+            diff_consts[ispec, :] = [dc[param] for param in [UnitParams.difc, UnitParams.difa, UnitParams.tzero]]
         return diff_consts
 
-    def create_output_files(self, calibration_dir, difa, difc, tzero, bk2bk_params, calibration):
+    def create_output_files(self, calibration_dir, diff_consts, bk2bk_params, calibration):
         """
         Create output files from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
-        :param difa: DIFA values from calibration algorithm.
-        :param difc: DIFC values from the calibration algorithm.
-        :param tzero: TZERO values from the calibration algorithm.
+        :param diff_consts: (nspec x 3) array with columns difc difa tzero (in that order).
         :param bk2bk_params: BackToBackExponential parameters from Parameters.xml file.
         :param CalibrationInfo object with details of calibration and grouping
         """
-        # create calibration dir of not exiust
+        # create calibration dir of not exist
         if not path.exists(calibration_dir):
             makedirs(calibration_dir)
 
@@ -204,7 +192,8 @@ class CalibrationModel(object):
         prm_filepath = calibration_dir + calibration.generate_output_file_name()
         set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                     "last_calibration_path", prm_filepath)
-        EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, difa, difc, tzero, bk2bk_params,
+        EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath, list(diff_consts[:, 1]), diff_consts[:, 0], diff_consts[:, 2],
+                                                bk2bk_params,
                                                 bank_names=calibration.group.banks,
                                                 template_file=calibration.get_prm_template_file(),
                                                 ceria_run=ceria_run)
@@ -213,6 +202,8 @@ class CalibrationModel(object):
         filepath, ext = path.splitext(prm_filepath)
         nxs_filepath = filepath + '.nxs'
         SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
+
+        # if both banks calibrated save individual banks separately as well
         if calibration.group == EnggUtils.GROUP.BOTH:
             # output a separate prm for North and South when both banks included
             for ibank, bank in enumerate(calibration.group.banks):
@@ -220,8 +211,8 @@ class CalibrationModel(object):
                 bank_group = CalibrationInfo(EnggUtils.GROUP(str(ibank + 1)),
                                              calibration.get_instrument(), calibration.get_ceria_path())
                 prm_filepath_bank = calibration_dir + bank_group.generate_output_file_name()
-                EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath_bank,
-                                                        [difa[ibank]], [difc[ibank]], [tzero[ibank]],
+                EnggUtils.write_ENGINX_GSAS_iparam_file(prm_filepath_bank, [diff_consts[ibank, 1]],
+                                                        [diff_consts[ibank, 0]], [diff_consts[ibank, 2]],
                                                         bk2bk_params, bank_names=bank_group.group.banks,
                                                         template_file=bank_group.get_prm_template_file(),
                                                         ceria_run=ceria_run)
@@ -233,24 +224,20 @@ class CalibrationModel(object):
 
     @staticmethod
     def read_diff_constants_from_prm(file_path):
-        # TODO: Find a way to reliably get the instrument from the file without using the filename.
+        """
+        :param file_path: path to prm file
+        :return: (nspec x 3) array with columns difc difa tzero (in that order).
+        """
         diff_consts = []  # one list per component (e.g. bank)
         with open(file_path) as f:
             for line in f.readlines():
                 if "ICONS" in line:
                     # If formatted correctly the line should be in the format INS bank ICONS difc difa tzero
                     elements = line.split()
-                    bank = elements[1]
-                    diff_consts.append(
-                        [int(bank) - 1,
-                         float(elements[3]),
-                         float(elements[4]),
-                         float(elements[5])])
-
+                    diff_consts.append([float(elements[ii]) for ii in range(3, 6)])
         if not diff_consts:
             raise RuntimeError("Invalid file format.")
-
-        return diff_consts
+        return array(diff_consts)
 
     @staticmethod
     def _generate_table_workspace_name(bank_num):

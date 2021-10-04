@@ -755,9 +755,8 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     @returns
 
     """
-    if not isinstance(difc, list) or not isinstance(tzero, list):
-        raise ValueError("The parameters difc and tzero must be lists, with as many elements as "
-                         "banks")
+    if not hasattr(difc, '__iter__') or not hasattr(tzero, '__iter__'):
+        raise ValueError("The parameters difc and tzero must be sequences, with as many elements as focused spectra")
 
     if len(difc) != len(tzero) and len(difc) != len(difa):
         raise ValueError("The lengths of the difa, difc and tzero lists must be the same")
