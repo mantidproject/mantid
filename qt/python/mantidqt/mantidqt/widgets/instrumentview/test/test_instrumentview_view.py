@@ -60,6 +60,9 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
 
+        # wait for the background loading to finish setting up the widget
+        iv_presenter.wait()
+
         # select pick tab
         iv_presenter.select_pick_tab()
         current_tab_index = iv_presenter.container.widget.getCurrentTab()
@@ -94,6 +97,9 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         # create instrument view presenter
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
+
+        # wait for the background loading to finish setting up the widget
+        iv_presenter.wait()
 
         # get render tab
         render_tab = iv_presenter.get_render_tab()

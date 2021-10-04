@@ -203,7 +203,7 @@ public:
       newInstrumentWindowName The new title of the window
 %End
 
-  bool isThreadRunning() /ReleaseGIL/;
+  bool isThreadRunning();
 %Docstring
   bool isThreadRunning()
   ----------------------

@@ -375,6 +375,7 @@ private:
   std::unique_ptr<IMessageHandler> m_messageHandler;
 
   mutable QThread m_thread;
+  bool m_finished;
   bool m_autoscaling;
   double m_scaleMin;
   double m_scaleMax;

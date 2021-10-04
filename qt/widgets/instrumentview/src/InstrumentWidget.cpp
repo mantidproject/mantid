@@ -116,7 +116,7 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
-      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)),
+      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)), m_finished(false),
       m_autoscaling(autoscaling), m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView),
       m_resetGeometry(resetGeometry) {
   QWidget *aWidget = new QWidget(this);
@@ -311,6 +311,8 @@ void InstrumentWidget::initWidget(bool resetGeometry, bool setDefaultView) {
   m_xIntegration->setEnabled(true);
   init(resetGeometry, setDefaultView);
   updateInstrumentDetectors();
+
+  m_finished = true;
 }
 
 /**
@@ -345,6 +347,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
   if (m_thread.isRunning()) {
     cancelThread();
   }
+
+  m_finished = false;
 
   // disable main GUI elements while thread is running - these are re-enabled afterwards in initWidget
   m_controlPanelLayout->setEnabled(false);
@@ -493,8 +497,8 @@ bool InstrumentWidget::isThreadRunning() const { return m_thread.isRunning(); }
  * Blocks until the background InstrumentActor setup thread is finished
  */
 void InstrumentWidget::waitForThread() const {
-  if (isThreadRunning()) {
-    m_thread.wait();
+  while (!m_finished) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
   }
 }
 
