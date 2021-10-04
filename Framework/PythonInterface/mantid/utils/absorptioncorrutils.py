@@ -61,6 +61,7 @@ def __get_cache_name(
     :param abs_method: method used to perform the absorption calculation
     :param cache_dirs: cache directories to scan/load cache data
     :param prefix_name: prefix to add to wkspname for caching
+    :param ms_method: method used to perform multiple scattering correction
 
     return cache_filenames: full paths to candidate cache files
            ascii_hash: MD5 value based on selected property
@@ -309,6 +310,7 @@ def calculate_absorption_correction(
     :param metaws: Optional workspace containing metadata to use instead of reading from filename
     :param cache_dirs: list of cache directories for storing cached absorption correction workspace
     :param prefix: How the prefix of cache file is determined - FILENAME to use file, or SHA prefix
+    :param ms_method: Method to use for multiple scattering correction
 
     :return:
         Two workspaces (A_s, A_c) names
