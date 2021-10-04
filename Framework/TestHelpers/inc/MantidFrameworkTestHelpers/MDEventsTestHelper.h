@@ -187,7 +187,7 @@ makeFakeMDHistoWorkspaceGeneral(size_t numDims, double signal, double errorSquar
 template <typename MDE, size_t nd>
 std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 makeAnyMDEW(size_t splitInto, coord_t min, coord_t max, size_t numEventsPerBox = 0, const std::string &wsName = "",
-            std::string axisNameFormat = "Axis%d", std::string axisIdFormat = "Axis%d") {
+            const std::string &axisNameFormat = "Axis%d", const std::string &axisIdFormat = "Axis%d") {
   // Create bare workspace
   auto out = createOutputWorkspace<MDE, nd>(splitInto);
 
@@ -262,8 +262,8 @@ makeAnyMDEWWithIndividualFrames(size_t splitInto, coord_t min, coord_t max,
 template <typename MDE, size_t nd>
 std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 makeAnyMDEWWithFrames(size_t splitInto, coord_t min, coord_t max, const Mantid::Geometry::MDFrame &frame,
-                      size_t numEventsPerBox = 0, const std::string &wsName = "", std::string axisNameFormat = "Axis%d",
-                      std::string axisIdFormat = "Axis%d") {
+                      size_t numEventsPerBox = 0, const std::string &wsName = "",
+                      const std::string &axisNameFormat = "Axis%d", const std::string &axisIdFormat = "Axis%d") {
   // Create bare workspace
   auto out = createOutputWorkspace<MDE, nd>(splitInto);
 
