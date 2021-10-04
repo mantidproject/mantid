@@ -867,7 +867,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexD
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:1016
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:1166
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:155
-constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:191
+constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:190
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:111
 uninitStructMember:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidWSIndexDialog.cpp:107
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/SlitCalculator.cpp:85

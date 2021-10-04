@@ -238,6 +238,10 @@ create2DDetectorScanWorkspaceWithFullInstrument(int nhist, int nbins, size_t nTi
                                                 bool startYNegative = false, bool isHistogram = true,
                                                 const std::string &instrumentName = std::string("testInst"));
 
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc, int nbins,
+                                           const std::string &instrumentName = std::string("testInst"));
+
 /**
  * Create a test workspace with a Theta numeric axis instead of a spectrum axis
  * the values run from 1 to nhist
