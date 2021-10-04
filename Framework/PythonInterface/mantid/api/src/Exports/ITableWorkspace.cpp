@@ -508,6 +508,42 @@ void setCell(ITableWorkspace &self, const object &col_or_row, const int row_or_c
     self.modified();
   }
 }
+
+/**
+ * Get whether or not a column given by name or index is read only.
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @return True if read only, False otherwise.
+ */
+int getReadOnly(ITableWorkspace &self, const object &column) {
+  // Find the column
+  Mantid::API::Column_const_sptr colptr;
+  if (STR_CHECK(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  return colptr->getReadOnly();
+}
+
+/**
+ * Set whether or not a column given by name or index should be read only.
+ * @param self Reference to the TableWorkspace this was called on.
+ * @param column Name or index of column.
+ * @param readOnly True if read only, False otherwise.
+ */
+void setReadOnly(ITableWorkspace &self, const object &column, const bool readOnly) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (STR_CHECK(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+  colptr->setReadOnly(readOnly);
+  self.modified();
+}
 } // namespace
 
 /**
@@ -699,7 +735,15 @@ void export_ITableWorkspace() {
       .def("toDict", &toDict, (arg("self")),
            "Gets the values of this workspace as a dictionary. The keys of the "
            "dictionary will be the names of the columns of the table. The "
-           "values of the entries will be lists of values for each column.");
+           "values of the entries will be lists of values for each column.")
+
+      .def("setReadOnly", &setReadOnly, (arg("self"), arg("column"), arg("read_only")),
+           "Sets whether or not a given column of this workspace should be read-only. Columns can be "
+           "selected by name or by index")
+
+      .def("getReadOnly", &getReadOnly, (arg("self"), arg("column")),
+           "Gets whether or not a given column of this workspace is be read-only. Columns can be "
+           "selected by name or by index");
 
   //-------------------------------------------------------------------------------------------------
 
