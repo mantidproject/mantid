@@ -123,5 +123,6 @@ template <typename WorkspaceType> struct WorkspacePropertyExporter {
         .add_property("value", &value);
   }
 };
+
 } // namespace PythonInterface
 } // namespace Mantid

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
+import json
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -159,8 +160,7 @@ def _convert_to_wavelength(workspace, wavelength_state: StateWavelength,
     wavelength_step_type = wavelength_state.wavelength_step_type_lin_log
     convert_name = "SANSConvertToWavelengthAndRebin"
     convert_options = {"InputWorkspace": workspace,
-                       "WavelengthLow": wav_range[0],
-                       "WavelengthHigh": wav_range[1],
+                       "WavelengthPairs": json.dumps([(wav_range[0], wav_range[1])]),
                        "WavelengthStep": wavelength_step,
                        "WavelengthStepType": wavelength_step_type.value,
                        "RebinMode": norm_state.rebin_type.value}
@@ -169,4 +169,5 @@ def _convert_to_wavelength(workspace, wavelength_state: StateWavelength,
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     convert_alg.setProperty("OutputWorkspace", workspace)
     convert_alg.execute()
-    return convert_alg.getProperty("OutputWorkspace").value
+    group_ws = convert_alg.getProperty("OutputWorkspace").value
+    return group_ws.getItem(0)
