@@ -53,6 +53,18 @@ if (NOT (ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD" OR MANTID_FRAMEWORK_
 message(FATAL_ERROR "Must select atleast one component to build")
 endif()
 
+# Create two internal BUILD_* variables. With these, we can do consistent checks throughout, e.g:
+# if(BUILD_MANTIDQT OR ENABLE_WORKBENCH)
+#   ....
+# endif()
+# to check if we are building the mantidqt libs or the workbench application
+if (MANTID_QT_LIB STREQUAL "BUILD")
+  set(BUILD_MANTIDQT ON)
+endif()
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  set(BUILD_MANTIDFRAMEWORK ON)
+endif()
+
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
 # Conda build variable
@@ -94,7 +106,7 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 include(Bootstrap)
 
 # Configure Eigen early
-if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+if (BUILD_MANTIDFRAMEWORK)
 include(Eigen)
 endif()
 include(Span)
@@ -125,7 +137,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
+if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   find_package(Qt5
                COMPONENTS Core
                           Gui
@@ -136,8 +148,8 @@ if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
   endif()
-  if (MANTID_QT_LIB STREQUAL "BUILD")
-  find_package(QScintillaQt5 REQUIRED)
+  if (BUILD_MANTIDQT)
+    find_package(QScintillaQt5 REQUIRED)
   endif()
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
@@ -157,12 +169,13 @@ option(CXXTEST_ADD_PERFORMANCE
        "Switch to add performance tests to the list of tests run by ctest?")
 
 include(TargetFunctions)
+
 if (MANTID_FRAMEWORK_LIB STREQUAL "SYSTEM")
-if (MANTID_QT_LIB STREQUAL "BUILD")
-find_package(MantidFramework REQUIRED)
-endif()
+  if (BUILD_MANTIDQT)
+    find_package(MantidFramework REQUIRED)
+  endif()
 else()
-add_subdirectory(Framework)
+  add_subdirectory(Framework)
 endif()
 
 
@@ -180,11 +193,11 @@ endif()
 
 add_custom_target(AllTests)
 
-if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
-add_dependencies(AllTests FrameworkTests)
+if (BUILD_MANTIDFRAMEWORK)
+  add_dependencies(AllTests FrameworkTests)
 endif()
 
-if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
+if(BUILD_MANTIDQT OR ENABLE_WORKBENCH)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
   # Collect all tests together
@@ -192,7 +205,9 @@ if(ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD")
   add_subdirectory(qt)
 endif()
 
-add_subdirectory(scripts)
+if (BUILD_MANTIDFRAMEWORK)
+  add_subdirectory(scripts)
+endif()
 
 
 # Docs requirements

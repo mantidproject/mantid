@@ -58,6 +58,10 @@ set(TESTING_TIMEOUT
     CACHE STRING "Timeout in seconds for each test (default 300=5minutes)"
 )
 
+option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
+option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
+
 # ##############################################################################
 # Look for dependencies Do NOT add include_directories commands here. They will
 # affect every target.
@@ -80,17 +84,16 @@ add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
 # Silence issues with deprecated allocator methods in boost regex
 add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 
-if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD" OR MANTID_QT_LIB STREQUAL "BUILD")
-find_package(Poco 1.4.6 REQUIRED)
-add_definitions(-DPOCO_ENABLE_CPP11)
-
-find_package(TBB REQUIRED)
-
-find_package(OpenSSL REQUIRED)
-
+# if we are building the framework or mantidqt we need these
+if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
+  find_package(Poco 1.4.6 REQUIRED)
+  add_definitions(-DPOCO_ENABLE_CPP11)
+  find_package(TBB REQUIRED)
+  find_package(OpenSSL REQUIRED)
 endif()
+
 # if we are building the framework we will need these libraries.
-if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+if (BUILD_MANTIDFRAMEWORK)
   find_package(GSL REQUIRED)
   find_package(Nexus 4.3.1 REQUIRED)
   find_package(MuParser REQUIRED)
@@ -131,11 +134,6 @@ if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     )
   endif()
 endif()
-
-option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
-option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
-option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
-
 
 find_package(Doxygen) # optional
 
