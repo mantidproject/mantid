@@ -171,7 +171,8 @@ public:
     for (const size_t chunkSize : {37, 123, 1111}) {
       for (const auto threads : {1, 2, 3, 5, 7, 13}) {
         ParallelTestHelpers::ParallelRunner runner(threads);
-        runner.run(do_test_load, chunkSize);
+        runner.runParallel(do_test_load, chunkSize);
+        runner.runSerial(do_test_load, chunkSize);
       }
     }
   }

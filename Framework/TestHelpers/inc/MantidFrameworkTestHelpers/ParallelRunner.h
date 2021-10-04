@@ -28,17 +28,19 @@ public:
 
   int size() const;
 
-  template <class Function, class... Args> void run(Function &&f, Args &&...args);
+  template <class Function, class... Args> void runSerial(Function &&f, Args &&...args);
+  template <class Function, class... Args> void runParallel(Function &&f, Args &&...args);
 
 private:
   std::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_backend;
   std::shared_ptr<Mantid::Parallel::detail::ThreadingBackend> m_serialBackend;
 };
 
-template <class Function, class... Args> void ParallelRunner::run(Function &&f, Args &&...args) {
-  // 1. Run serial
+template <class Function, class... Args> void ParallelRunner::runSerial(Function &&f, Args &&...args) {
   f(Mantid::Parallel::Communicator(m_serialBackend, 0), std::forward<Args>(args)...);
-  // 2. Run parallel
+}
+
+template <class Function, class... Args> void ParallelRunner::runParallel(Function &&f, Args &&...args) {
   if (!m_backend) {
     Mantid::Parallel::Communicator comm;
     f(comm, std::forward<Args>(args)...);
@@ -56,7 +58,7 @@ template <class Function, class... Args> void ParallelRunner::run(Function &&f, 
 
 template <class... Args> void runParallel(Args &&...args) {
   ParallelRunner runner;
-  runner.run(std::forward<Args>(args)...);
+  runner.runParallel(std::forward<Args>(args)...);
 }
 
 } // namespace ParallelTestHelpers

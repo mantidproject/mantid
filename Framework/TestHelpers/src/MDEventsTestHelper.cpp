@@ -31,7 +31,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/cow_ptr.h"
 
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
