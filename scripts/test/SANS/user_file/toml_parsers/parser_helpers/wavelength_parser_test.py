@@ -76,6 +76,18 @@ class WavelengthParserTest(unittest.TestCase):
         self.assertEqual([(1., 3.), (4., 6.), (1., 6.0)],  wav_objs.wavelength.wavelength_interval.selected_ranges)
         self.assertEqual(0.5, wav_objs.wavelength.wavelength_interval.wavelength_step)
 
+    def test_rangelin_wavelength_setting_legacy(self):
+        input_dict = {"binning": {"wavelength": {"type": "RangeLog",
+                                                 "binning": "1,3,7,9",
+                                                 "step": "0.5"}}}
+        wav_objs = self._get_wavelength_objs()
+        WavelengthTomlParser(input_dict).set_wavelength_details(wav_objs)
+
+        self._assert_wav_objs(wav_objs, range_type=RangeStepType.RANGE_LOG,
+                              wav_low=1., wav_high=9.)
+        self.assertEqual([(1., 3.), (3., 7.), (7., 9.), (1., 9.)],  wav_objs.wavelength.wavelength_interval.selected_ranges)
+        self.assertEqual(0.5, wav_objs.wavelength.wavelength_interval.wavelength_step)
+
     def test_can_handle_no_wavelength(self):
         input_dict = {"binning": {"another_field": None}}
         self.assertIsNone(WavelengthTomlParser(input_dict)
