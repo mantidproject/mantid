@@ -26,6 +26,7 @@
 #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
 #include "MantidTestHelpers/ParallelRunner.h"
 
+#include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -264,6 +265,14 @@ public:
   }
 
   void test_load_event_nexus_POLARIS() {
+    // POLARIS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("POLARIS9fbf7121b4274c833043ae8933ec643ff7b9313d.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     const std::string file = "POLARIS00130512.nxs";
     LoadEventNexus alg;
     alg.setChild(true);
@@ -277,12 +286,15 @@ public:
     TS_ASSERT(eventWS);
 
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 19268117);
-    TS_ASSERT_EQUALS(eventWS->detectorInfo().size(), 3008);
     TS_ASSERT_DELTA(eventWS->getTofMin(), 0., 1.0e-3);
     TS_ASSERT_DELTA(eventWS->getTofMax(), 19994.945, 1.0e-3);
 
     // this file contains events that aren't sorted in pulse time order, even per spectra
     validate_pulse_time_sorting(eventWS);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
   void test_NumberOfBins() {
