@@ -33,9 +33,7 @@ std::vector<std::string> IQTFIT_HIDDEN_PROPS = std::vector<std::string>(
      "OutputWorkspace", "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisIqtFitTab::IndirectDataAnalysisIqtFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
@@ -110,6 +108,4 @@ void IndirectDataAnalysisIqtFitTab::setRunIsRunning(bool running) {
 
 void IndirectDataAnalysisIqtFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

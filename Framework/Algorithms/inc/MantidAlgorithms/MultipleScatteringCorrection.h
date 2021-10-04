@@ -53,8 +53,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
-  void calculateSingleComponent(API::MatrixWorkspace_sptr outws, const Geometry::IObject &shape);
-  void calculateSampleAndContainer(API::MatrixWorkspace_sptr outws);
+  void calculateSingleComponent(const API::MatrixWorkspace_sptr &outws, const Geometry::IObject &shape);
+  void calculateSampleAndContainer(const API::MatrixWorkspace_sptr &outws);
   // For single component case
   void calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraber, //
                      std::vector<double> &LS1s,                                //
