@@ -101,7 +101,7 @@ void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorksp
   int i = 0;
   constexpr double deg2rad = M_PI / 180.0;
   const double angincRad = anginc * deg2rad;
-  auto R = 1.0;
+  constexpr double R = 1.0;
   for (int lat = 0; lat < nlat; ++lat) {
     for (int lng = 0; lng < nlong; ++lng) {
       std::stringstream buffer;
