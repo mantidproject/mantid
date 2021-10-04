@@ -6,15 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal
+from qtpy.QtCore import Signal, QSettings
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
-from mantid.kernel import ConfigService
 
 from .details import MoreDetailsDialog
-import os
 
 DEFAULT_PLAIN_TEXT = (
     """Please enter any additional information about your problems. (Max 3200 characters)
@@ -34,6 +32,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     quit_signal = Signal()
     free_text_edited = False
     interface_manager = InterfaceManager()
+    CONTACT_INFO = "ContactInfo"
+    NAME = "Name"
+    EMAIL = "Email"
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -81,22 +82,17 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         # Set default focus to the editing box, rather then letting qt try and guess
         self.input_free_text.setFocus()
 
-        self.contact_info_file_path = os.path.join(ConfigService.getAppDataDirectory(),
-                                                   'workbench_contact_info.txt')
-        self.contact_info_file_exists = bool(os.path.isfile(self.contact_info_file_path))
-        self.saved_name, self.saved_email = None, None
-        if self.contact_info_file_exists:
-            with open(self.contact_info_file_path, 'r') as file:
-                lines = file.readlines()
-            if lines:
-                name_line, email_line = [line.strip().split('\n')[0] for line in lines]
-                self.saved_name = name_line[7:]
-                self.saved_email = email_line[8:]
-                if self.saved_name or self.saved_email:
-                    self.input_name_line_edit.setText(self.saved_name)
-                    self.input_email_line_edit.setText(self.saved_email)
-                    self.nonIDShareButton.setEnabled(True)
-                    self.rememberContactInfoCheckbox.setChecked(True)
+        # Prefill name and email saved in QSettings
+        qSettings = QSettings()
+        qSettings.beginGroup(self.CONTACT_INFO)
+        self.saved_name = str(qSettings.value(self.NAME, ""))
+        self.saved_email = str(qSettings.value(self.EMAIL, ""))
+        qSettings.endGroup()
+        if self.saved_name or self.saved_email:
+            self.input_name_line_edit.setText(self.saved_name)
+            self.input_email_line_edit.setText(self.saved_email)
+            self.nonIDShareButton.setEnabled(True)
+            self.rememberContactInfoCheckbox.setChecked(True)
 
     def quit(self):
         self.quit_signal.emit()

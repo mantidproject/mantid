@@ -7,6 +7,7 @@
 import json
 import os
 from typing import Optional
+from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
 
@@ -42,16 +43,18 @@ class ErrorReporterPresenter(object):
             except OSError:
                 pass
 
-    def empty_contact_info_file(self):
-        if self._view.contact_info_file_exists:
-            with open(self._view.contact_info_file_path, 'w') as file:
-                file.truncate(0)
+    def forget_contact_info(self):
+        settings = QSettings()
+        settings.beginGroup(self._view.CONTACT_INFO)
+        settings.setValue(self._view.NAME, "")
+        settings.setValue(self._view.EMAIL, "")
+        settings.endGroup()
 
     def do_not_share(self, continue_working=True):
         self.error_log.notice("No information shared")
         self._handle_exit(continue_working)
         if not self._view.rememberContactInfoCheckbox.checkState():
-            self.empty_contact_info_file()
+            self.forget_contact_info()
         return -1
 
     def share_non_identifiable_information(self, continue_working, text_box):
@@ -60,7 +63,7 @@ class ErrorReporterPresenter(object):
         self.error_log.notice("Sent non-identifiable information")
         self._handle_exit(continue_working)
         if not self._view.rememberContactInfoCheckbox.checkState():
-            self.empty_contact_info_file()
+            self.forget_contact_info()
         return status
 
     def share_all_information(self, continue_working, new_name, new_email, text_box):
@@ -73,12 +76,16 @@ class ErrorReporterPresenter(object):
         self.error_log.notice("Sent full information")
         self._handle_exit(continue_working)
 
+        # Remember name and email in QSettings
         if self._view.rememberContactInfoCheckbox.checkState():
             if new_name != self._view.saved_name or new_email != self._view.saved_email:
-                with open(self._view.contact_info_file_path, 'w') as file:
-                    file.writelines(["NAME = ", new_name, '\n', "EMAIL = ", new_email])
+                settings = QSettings()
+                settings.beginGroup(self._view.CONTACT_INFO)
+                settings.setValue(self._view.NAME, new_name)
+                settings.setValue(self._view.EMAIL, new_email)
+                settings.endGroup()
         else:
-            self.empty_contact_info_file()
+            self.forget_contact_info()
         return status
 
     def error_handler(self, continue_working, share, name, email, text_box):
