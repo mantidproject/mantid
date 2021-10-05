@@ -194,6 +194,22 @@ bool addColumnSimple(ITableWorkspace &self, const std::string &type, const std::
 }
 
 /**
+ * Add a column to the TableWorkspace that cannot be edited.
+ * @param self A reference to the TableWorkspace python object that we were
+ * called on
+ * @param type The data type of the column to add
+ * @param name The name of the column to add
+ * @return A boolean indicating success or failure. Note that this is different
+ * to the corresponding C++ method, which returns a pointer to the
+ * newly-created column (as the Column class is not exposed to python).
+ */
+bool addReadOnlyColumn(ITableWorkspace &self, const std::string &type, const std::string &name) {
+  auto newColumn = self.addColumn(type, name);
+  newColumn->setReadOnly(true);
+  return newColumn != nullptr;
+}
+
+/**
  * Get the plot type of a column given by name or index
  * @param self Reference to TableWorkspace this is called on
  * @param column Name or index of column
@@ -668,6 +684,10 @@ void export_ITableWorkspace() {
            "(int,float,double,bool,str,V3D,long64) "
            "\nand plottype "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+
+      .def("addReadOnlyColumn", &addReadOnlyColumn, (arg("self"), arg("type"), arg("name")),
+           "Add a read-only, named column with the given type. Recognized types are: "
+           "int,float,double,bool,str,V3D,long64")
 
       .def("getPlotType", &getPlotType, (arg("self"), arg("column")),
            "Get the plot type of given column as an integer. "
