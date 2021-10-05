@@ -213,6 +213,10 @@ class RundexSettings(object):
                 "SaveNISTDAT": True
                 },
             SANS_MULTI: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveCanSAS1D": True,
+                "SaveNISTDAT": True
                 },
             REFL_POL: {
                 "SaveNexusProcessed": False,
