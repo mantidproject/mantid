@@ -58,13 +58,17 @@ def __get_cache_name(
     """generate candidate cachefile names (full paths) and associated ascii hash
 
     :param meta_wksp_name: name of workspace contains relevant meta data for hashing
-    :param abs_method: method used to perform the absorption calculation
+    :param abs_method: method used to perform the absorption calculation (mandatory)
     :param cache_dirs: cache directories to scan/load cache data
     :param prefix_name: prefix to add to wkspname for caching
-    :param ms_method: method used to perform multiple scattering correction
+    :param ms_method: method used to perform multiple scattering correction (optional)
 
     return cache_filenames: full paths to candidate cache files
            ascii_hash: MD5 value based on selected property
+
+    IMPORTANT:
+        multiple scattering correction is optional whereas absorption
+        correction mandatory.
     """
     # grab the workspace
     if meta_wksp_name in mtd:
