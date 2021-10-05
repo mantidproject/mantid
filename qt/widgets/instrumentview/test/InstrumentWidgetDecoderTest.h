@@ -39,6 +39,7 @@ public:
     alg->setProperty("OutputWorkspace", "ws");
     alg->execute();
     m_instrumentWidget = new InstrumentWidget(QString("ws"));
+    m_instrumentWidget->waitForThread();
     m_decoder = new InstrumentWidgetDecoder();
 
     // Setup the infomap for decoding

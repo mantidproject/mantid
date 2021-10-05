@@ -62,6 +62,7 @@ public:
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
     auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
+
   }
 
   void test_constructor_gl_disabled() {
@@ -104,6 +105,7 @@ public:
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
     auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    widget.waitForThread();
     widget.updateInstrumentDetectors();
   }
 
@@ -114,6 +116,7 @@ public:
     EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
     auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    widget.waitForThread();
     widget.updateInstrumentDetectors();
   }
 
@@ -128,6 +131,7 @@ public:
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
     auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    widget.waitForThread();
     widget.updateInstrumentDetectors();
   }
 
@@ -140,6 +144,7 @@ public:
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
 
     auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    widget.waitForThread();
     widget.updateInstrumentDetectors();
   }
 
@@ -150,6 +155,7 @@ public:
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, updateView(expected)).Times(1);
       auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+      widget.waitForThread();
       widget.updateInstrumentView(expected);
     }
   }
@@ -193,6 +199,11 @@ private:
         .Times(1);
     mockConnect(*mock, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),
                 SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
+
+    mockConnect(*mock, SIGNAL(initWidget(bool, bool)), SLOT(initWidget(bool, bool)));
+    mockConnect(*mock, SIGNAL(destroyed()), SLOT(threadFinished()));
+
+    mockConnect(*mock, SIGNAL(refreshView()), SLOT(refreshView()));
 
     EXPECT_CALL(*mock,
                 connect(_, StrEq(SIGNAL(updateInfoText())), _, StrEq(SLOT(updateInfoText())), Qt::QueuedConnection))
