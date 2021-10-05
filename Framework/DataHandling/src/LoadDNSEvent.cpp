@@ -13,7 +13,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-//#include "MantidKernel/MultiThreaded.h"
 
 #include <stdexcept>
 #include <vector>
@@ -73,18 +72,31 @@ void LoadDNSEvent::init() {
 
   const std::vector<std::string> exts{".mdat"};
   declareProperty(
-      std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
-      "The XML or Map file with full path.");
+      std::make_unique<FileProperty>("InputFile", "", 
+                                     FileProperty::Load, exts),
+      "A DNS mesydaq listmode event datafile.");
 
   declareProperty<uint32_t>(
-      "ChopperChannel", 1u,
+      "ChopperChannel", 2u,
       std::make_shared<BoundedValidator<uint32_t>>(0, 4),
-      "The Chopper Channel", Kernel::Direction::Input);
+      "The Chopper Channel (0 to 4)", Kernel::Direction::Input);
 
-  declareProperty<uint32_t>(
-      "MonitorChannel", 1u,
-      std::make_shared<BoundedValidator<uint32_t>>(0, 4),
-      "The Monitor Channel", Kernel::Direction::Input);
+  // declareProperty<uint32_t>(
+      // "MonitorChannel", 1u,
+      // std::make_shared<BoundedValidator<uint32_t>>(0, 4),
+      // "The Monitor Channel (0 to 4)", Kernel::Direction::Input);
+
+  declareProperty<bool>(
+      "DiscardPreChopperEvents", true,
+      std::make_shared<BoundedValidator<bool>>(0, 1),
+      "Discards events before first chopper trigger (turn off for elastic)",
+      Kernel::Direction::Input);
+
+  declareProperty<bool>(
+      "SetBinBoundary",  true,
+      std::make_shared<BoundedValidator<bool>>(0, 1),
+      "Sets all bin boundaries to include all events (can be turned off to save time).",
+      Kernel::Direction::Input);
 
   declareProperty(
       std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>(
@@ -100,19 +112,22 @@ void LoadDNSEvent::exec() {
           "EventWorkspace", DETECTOR_PIXEL_COUNT, DUMMY_SIZE, DUMMY_SIZE));
   outputWS->switchEventType(Mantid::API::EventType::TOF);
   outputWS->getAxis(0)->setUnit("TOF");
-
+  outputWS->setYUnit("Counts");
   runLoadInstrument(INSTRUMENT_NAME, outputWS);
 
   // loadProperties:
   const std::string fileName = getPropertyValue("InputFile");
   chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
-  monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
+  // monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
+  discardPreChopperEvents = static_cast<bool>(getProperty("DiscardPreChopperEvents"));
+  setBinBoundary = static_cast<bool>(getProperty("SetBinBoundary"));
+
   //const auto instrParamMonitorChannels =
   //    outputWS->instrumentParameters().getType<int>("monitor", "channel");
 
   if (chopperChannel == 0) {
     const auto instrumentParametersChopperChannels =
-        outputWS->instrumentParameters().getType<double>("chopper", "channel");
+        outputWS->instrumentParameters().getType<int>("chopper", "channel");
     if (!instrumentParametersChopperChannels.empty()) {
       chopperChannel =
           static_cast<uint32_t>(instrumentParametersChopperChannels.at(0));
@@ -123,27 +138,29 @@ void LoadDNSEvent::exec() {
     }
   }
 
-  if (monitorChannel == 0) {
-    const auto instrumentParametersMonitorChannels =
-        outputWS->instrumentParameters().getType<double>("monitor", "channel");
-    if (!instrumentParametersMonitorChannels.empty()) {
-      monitorChannel =
-          static_cast<uint32_t>(instrumentParametersMonitorChannels.at(0));
-    } else {
-      g_log.error() << "The instrument definition is missing a monitor channel."
-                       " You must specify it manually."
-                    << std::endl;
-    }
-  }
+  // if (monitorChannel == 0) {
+    // const auto instrumentParametersMonitorChannels =
+        // outputWS->instrumentParameters().getType<int>("monitor", "channel");
+    // if (!instrumentParametersMonitorChannels.empty()) {
+      // monitorChannel =
+          // static_cast<uint32_t>(instrumentParametersMonitorChannels.at(0));
+    // } else {
+      // g_log.error() << "The instrument definition is missing a monitor channel."
+                       // " You must specify it manually."
+                    // << std::endl;
+    // }
+  // }
 
-  g_log.notice() << "ChopperChannel: " << chopperChannel
-                 << " MonitorChannel: " << monitorChannel << std::endl;
+  // g_log.notice() << "ChopperChannel: " << chopperChannel
+                 // << " MonitorChannel: " << monitorChannel << std::endl;
 
   FileByteStream file(static_cast<std::string>(fileName), endian::big);
 
   auto finalEventAccumulator = parse_File(file, fileName);
   populate_EventWorkspace(outputWS, finalEventAccumulator);
-
+  if (setBinBoundary) {
+    outputWS->setAllX({0, outputWS->getEventXMax()});
+  }
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -196,16 +213,19 @@ void LoadDNSEvent::populate_EventWorkspace(
       }
 
       chopperIt = std::lower_bound(
-          finalEventAccumulator.triggerEvents.cbegin(), finalEventAccumulator.triggerEvents.cend(),
+          finalEventAccumulator.triggerEvents.cbegin(),
+          finalEventAccumulator.triggerEvents.cend(),
           event.timestamp, [](auto l, auto r) { return l.timestamp > r; });
       const uint64_t chopperTimestamp =
           chopperIt != finalEventAccumulator.triggerEvents.cend()
               ? chopperIt->timestamp
               : 0; //before first chopper trigger
-      if (chopperTimestamp != 0) { 
-      // throw away events before first chopper trigger
+      if ((chopperTimestamp == 0) && discardPreChopperEvents)  { 
+        // throw away events before first chopper trigger
+        continue;
+      }
       spectrum.addEventQuickly(Types::Event::TofEvent(
-      double(event.timestamp - chopperTimestamp) / 10.0));}
+      double(event.timestamp - chopperTimestamp) / 10.0));
     }
 
     // PARALLEL_END_INTERUPT_REGION
@@ -502,10 +522,8 @@ LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
   file.read<2>(header.headerLength);
   file.read<2>(header.bufferNumber);
   file.read<2>(header.runId);
-  //file.skip<10>()
   file.read<1>(header.mcpdId);
   file.read<1>(header.deviceStatus);
-  //file.skip<1>()
   file.read<2>(ts1);
   file.read<2>(ts2);
   file.read<2>(ts3);
@@ -540,7 +558,7 @@ void LoadDNSEvent::parse_andAddEvent(
   file.read<2>(data3);
   // 48 bit event is 3 2-byte MSB words ordered LSB
   data = (uint64_t) data3 << 32 | (uint64_t) data2 << 16 | data1;
-  eventId = static_cast<event_id_e>((data >> 47) & 0b1) ;
+  eventId = static_cast<event_id_e>((data >> 47) & 0b1);
   switch (eventId) {
   case event_id_e::TRIGGER: {
     uint8_t trigId;

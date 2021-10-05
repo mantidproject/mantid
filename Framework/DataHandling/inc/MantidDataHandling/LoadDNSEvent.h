@@ -56,7 +56,7 @@ public:
   const std::string name() const override { return "LoadDNSEvent"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Loads data from the PSD detector to a Mantid EventWorkspace.";
+    return "Loads data from the DNS PSD detector to a Mantid EventWorkspace.";
   }
 
   /// Algorithm's version for identification
@@ -75,16 +75,12 @@ private:
   struct BufferHeader {
     uint16_t bufferLength;
     uint16_t bufferVersion;
-    uint16_t headerLength; // static const uint16_t headerLength = 21;
+    uint16_t headerLength;
     uint16_t bufferNumber;
     uint16_t runId;
     uint8_t mcpdId;
     uint8_t deviceStatus;
     uint64_t timestamp;
-    // std::array<uint16_t, 3> parameter0;
-    // std::array<uint16_t, 3> parameter1;
-    // std::array<uint16_t, 3> parameter2;
-    // std::array<uint16_t, 3> parameter3;
   };
 
 
@@ -103,7 +99,9 @@ private:
   };
 
   uint32_t chopperChannel;
-  uint32_t monitorChannel;
+  // uint32_t monitorChannel;
+  bool discardPreChopperEvents;
+  bool setBinBoundary;
 
   void runLoadInstrument(std::string instrumentName,
                          DataObjects::EventWorkspace_sptr &eventWS);
