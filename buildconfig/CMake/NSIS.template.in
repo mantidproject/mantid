@@ -1,5 +1,9 @@
 ; CPack install script designed for a nmake build
 
+;This must be set for long paths to work properly.
+;Unicode only defaults to true in NSIS 3.07 onwards.
+Unicode True
+
 ;--------------------------------
 ; You must define these values
 
