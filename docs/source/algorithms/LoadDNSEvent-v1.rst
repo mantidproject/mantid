@@ -10,7 +10,7 @@ Description
 -----------
 
 
-This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspace <EventWorkspace>`. 
+This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspace <EventWorkspace>`.
 
 **Output**
 
@@ -22,7 +22,7 @@ It can be set to integers between 0 and 4. If the value is not set or is set to 
 
 
 **DiscardPreChopperEvents**:
-If set to *true* events with a timestamp before the first chopper timestamp are ignored, since they have no valid TOF. 
+If set to *true* events with a timestamp before the first chopper timestamp are ignored, since they have no valid TOF.
 If the dataset is elastic they can be included, since only the position and not the TOF is used.
 
 
@@ -37,7 +37,7 @@ Restrictions
 
 - This algorithm only supports the *DNS* instrument.
 
-- This algorithm loads raw TOF data, without normalization and without considering the detectorbank position. 
+- This algorithm loads raw TOF data, without normalization and without considering the detectorbank position.
 
 
 Usage
@@ -55,7 +55,7 @@ Usage
     print("Maximum time of flight: {}".format(eventWS.getTofMax()))
     print("Number of detector pixels: {}".format(eventWS.getNumberHistograms()))
     print("Number of bins: {}".format(eventWS.blocksize()))
-    
+
     # rebin spectra:
     test2 = Rebin(InputWorkspace='eventWS', Params='0, 100, {0}'.format(eventWS.getTofMax()))
     print("Number of bins after rebinning: {}".format(eventWS.blocksize()))
