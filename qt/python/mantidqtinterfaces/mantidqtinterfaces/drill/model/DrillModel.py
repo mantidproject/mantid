@@ -462,13 +462,13 @@ class DrillModel(QObject):
         Args:
             indexes (list(int)): list of sample indexes
         """
-        groups = set()
+        groups = list()
         processingParams = dict()
         for index in indexes:
             sample = self._samples[index]
             group = sample.getGroup()
-            if group is not None:
-                groups.add(group)
+            if group is not None and group not in groups:
+                groups.append(group)
         tasks = list()
         if not groups:
             return False
