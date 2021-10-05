@@ -14,8 +14,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Key for the "normalize data to bin width" plot option
 const std::string CreateUserDefinedBackground::AUTODISTRIBUTIONKEY = "graph1d.autodistribution";
@@ -76,7 +75,7 @@ void CreateUserDefinedBackground::exec() {
   // Generate output workspace with background data
   const auto outputWS = createBackgroundWorkspace(pointsTable, inputWS);
 
-  setProperty("OutputBackgroundWorkspace", API::MatrixWorkspace_sptr(std::move(outputWS)));
+  setProperty("OutputBackgroundWorkspace", API::MatrixWorkspace_sptr(outputWS));
 }
 
 /**
@@ -250,5 +249,4 @@ std::map<std::string, std::string> CreateUserDefinedBackground::validateInputs()
   return errors;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

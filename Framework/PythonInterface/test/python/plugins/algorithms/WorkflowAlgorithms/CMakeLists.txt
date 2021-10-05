@@ -59,6 +59,7 @@ set(TEST_PY_FILES
     ReflectometryILLPreprocessTest.py
     ReflectometryILLSumForegroundTest.py
     ReflectometryISISLoadAndProcessTest.py
+    ReflectometryISISPreprocessTest.py
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
@@ -77,6 +78,7 @@ set(TEST_PY_FILES
     SwapWidthsTest.py
     TimeSliceTest.py
     TOSCABankCorrectionTest.py
+    TotScatCalculateSelfScatteringTest.py
     TransformToIqtTest.py
     VesuvioDiffractionReductionTest.py
     WANDPowderReductionTest.py)

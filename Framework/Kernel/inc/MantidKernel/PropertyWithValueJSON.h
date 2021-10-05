@@ -30,6 +30,7 @@ template <typename T> struct ToCpp {
     throw Exception::NotImplementedError("Unknown conversion from Json to C++ type");
   }
 };
+
 /// Specialization of ToCpp for int
 template <> struct ToCpp<int> {
   int operator()(const Json::Value &value) { return value.asInt(); }
@@ -129,6 +130,20 @@ template <typename ValueType> Json::Value encodeAsJson(const ValueType &value) {
 template <typename ValueType> Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
   Json::Value jsonArray(Json::arrayValue);
   for (const auto &element : vectorValue) {
+    jsonArray.append(encodeAsJson(element));
+  }
+  return jsonArray;
+}
+
+/**
+ * Specialization to encode a std::vector<bool> value as a Json::Value arrayValue type. Needs to
+ * deal with the fact that the return value from an iterator is a temporary object
+ * @param vectorValue The C++ value to encode
+ * @return A new Json::Value
+ */
+template <> inline Json::Value encodeAsJson(const std::vector<bool> &vectorValue) {
+  Json::Value jsonArray(Json::arrayValue);
+  for (const auto element : vectorValue) {
     jsonArray.append(encodeAsJson(element));
   }
   return jsonArray;

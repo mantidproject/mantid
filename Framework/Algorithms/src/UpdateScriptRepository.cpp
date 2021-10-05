@@ -8,8 +8,7 @@
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidAPI/ScriptRepositoryFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(UpdateScriptRepository)
@@ -58,5 +57,4 @@ void UpdateScriptRepository::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

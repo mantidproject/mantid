@@ -31,9 +31,7 @@ using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
 using std::vector;
 
-namespace Mantid {
-
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing2)
@@ -373,7 +371,7 @@ void DiffractionFocussing2::execEvent() {
     int chunkSize = 200;
 
     int end = (totalHistProcess / chunkSize) + 1;
-    // cppcheck-suppress syntaxError
+
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int wiChunk = 0; wiChunk < end; wiChunk++) {
       PARALLEL_START_INTERUPT_REGION
@@ -636,5 +634,4 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
   return totalHistProcess;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -13,9 +13,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 
@@ -121,6 +119,4 @@ void Chebyshev::setAttribute(const std::string &attName, const API::IFunction::A
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

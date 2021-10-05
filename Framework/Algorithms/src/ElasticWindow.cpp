@@ -13,8 +13,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ElasticWindow)
@@ -149,8 +148,6 @@ void ElasticWindow::exec() {
     tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
     tranQ2->execute();
     outputQSquared = tranQ2->getProperty("OutputWorkspace");
-    startProgress += stepProgress;
-    endProgress += stepProgress;
   } else {
     // ... Transpose (Q) ...
     auto tranQ = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
@@ -186,5 +183,4 @@ void ElasticWindow::exec() {
   setProperty("OutputInQSquared", outputQSquared);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

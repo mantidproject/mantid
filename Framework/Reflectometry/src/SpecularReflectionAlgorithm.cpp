@@ -55,8 +55,7 @@ void checkSpectrumNumbers(const std::vector<int> &spectrumNumbers, bool strictSp
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /**
  * Initialize common properties
@@ -212,5 +211,4 @@ double SpecularReflectionAlgorithm::calculateTwoTheta() const {
   return twoTheta;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

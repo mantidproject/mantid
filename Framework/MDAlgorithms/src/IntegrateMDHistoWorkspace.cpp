@@ -227,8 +227,7 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator, MDBoxImp
   }
 }
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -414,5 +413,4 @@ std::map<std::string, std::string> Mantid::MDAlgorithms::IntegrateMDHistoWorkspa
   return errors;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -58,6 +58,10 @@ set(TESTING_TIMEOUT
     CACHE STRING "Timeout in seconds for each test (default 300=5minutes)"
 )
 
+option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
+option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
+option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
+
 # ##############################################################################
 # Look for dependencies Do NOT add include_directories commands here. They will
 # affect every target.
@@ -80,56 +84,59 @@ add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
 # Silence issues with deprecated allocator methods in boost regex
 add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
 
-find_package(Poco 1.4.6 REQUIRED)
-add_definitions(-DPOCO_ENABLE_CPP11)
+# if we are building the framework or mantidqt we need these
+if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
+  find_package(Poco 1.4.6 REQUIRED)
+  add_definitions(-DPOCO_ENABLE_CPP11)
+  find_package(TBB REQUIRED)
+  find_package(OpenSSL REQUIRED)
+endif()
 
-find_package(GSL REQUIRED)
-find_package(Nexus 4.3.1 REQUIRED)
-find_package(MuParser REQUIRED)
-find_package(JsonCPP 0.7.0 REQUIRED)
+# if we are building the framework we will need these libraries.
+if (BUILD_MANTIDFRAMEWORK)
+  find_package(GSL REQUIRED)
+  find_package(Nexus 4.3.1 REQUIRED)
+  find_package(MuParser REQUIRED)
+  find_package(JsonCPP 0.7.0 REQUIRED)
 
-option(ENABLE_OPENGL "Enable OpenGLbased rendering" ON)
-option(ENABLE_OPENCASCADE "Enable OpenCascade-based 3D visualisation" ON)
-option(USE_PYTHON_DYNAMIC_LIB "Dynamic link python libs" ON)
+  if(ENABLE_OPENCASCADE)
+    find_package(OpenCascade REQUIRED)
+    add_definitions(-DENABLE_OPENCASCADE)
+  endif()
 
-if(ENABLE_OPENCASCADE)
-  find_package(OpenCascade REQUIRED)
-  add_definitions(-DENABLE_OPENCASCADE)
+  if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
+    find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
+    set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
+    find_package(
+      HDF5
+      COMPONENTS C CXX HL
+      REQUIRED CONFIGS hdf5-config.cmake
+    )
+    set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
+  elseif(CONDA_BUILD)
+    # We'll use the cmake finder
+    find_package(ZLIB REQUIRED)
+    find_package(
+      HDF5
+      MODULE
+      COMPONENTS C CXX HL
+      REQUIRED
+    )
+    set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
+    set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
+    else()
+    find_package(ZLIB REQUIRED)
+    find_package(
+      HDF5
+      MODULE
+      COMPONENTS C CXX HL
+      REQUIRED
+    )
+  endif()
 endif()
 
 find_package(Doxygen) # optional
 
-if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
-  find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
-  set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
-  find_package(
-    HDF5
-    COMPONENTS C CXX HL
-    REQUIRED CONFIGS hdf5-config.cmake
-  )
-  set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-elseif(CONDA_BUILD)
-  # We'll use the cmake finder
-  find_package(ZLIB REQUIRED)
-  find_package(
-    HDF5
-    MODULE
-    COMPONENTS C CXX HL
-    REQUIRED
-  )
-  set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
-  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
-  else()
-  find_package(ZLIB REQUIRED)
-  find_package(
-    HDF5
-    MODULE
-    COMPONENTS C CXX HL
-    REQUIRED
-  )
-endif()
-
-find_package(OpenSSL REQUIRED)
 
 # ##############################################################################
 # Look for Git. Used for version headers - faked if not found. Also makes sure
@@ -321,64 +328,7 @@ endif()
 # ##############################################################################
 # Configure clang-tidy if the tool is found
 # ##############################################################################
-
-if(CMAKE_VERSION VERSION_GREATER "3.5")
-  set(DEFAULT_CLANG_TIDY_CHECKS
-      "-*,performance-for-range-copy,performance-unnecessary-copy-initialization,modernize-use-override,modernize-use-nullptr,modernize-loop-convert,modernize-use-bool-literals,modernize-deprecated-headers,misc-*,-misc-unused-parameters"
-  )
-  option(ENABLE_CLANG_TIDY "Add clang-tidy automatically to builds")
-  if(ENABLE_CLANG_TIDY)
-    find_program(
-      CLANG_TIDY_EXE
-      NAMES "clang-tidy"
-      PATHS /usr/local/opt/llvm/bin
-    )
-    if(CLANG_TIDY_EXE)
-      message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
-      set(CLANG_TIDY_CHECKS
-          "${DEFAULT_CLANG_TIDY_CHECKS}"
-          CACHE STR "Select checks to perform"
-      )
-      option(APPLY_CLANG_TIDY_FIX "Apply fixes found through clang-tidy checks"
-             OFF
-      )
-      if(CLANG_TIDY_CHECKS STREQUAL "")
-        # use default checks if empty to avoid errors
-        set(CLANG_TIDY_CHECKS
-            "${DEFAULT_CLANG_TIDY_CHECKS}"
-            CACHE STR "Select checks to perform" FORCE
-        )
-      endif()
-      if(APPLY_CLANG_TIDY_FIX)
-        set(CMAKE_CXX_CLANG_TIDY
-            "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*';-fix"
-            CACHE STRING "" FORCE
-        )
-      else()
-        set(CMAKE_CXX_CLANG_TIDY
-            "${CLANG_TIDY_EXE};-checks=${CLANG_TIDY_CHECKS};-header-filter='${CMAKE_SOURCE_DIR}/*'"
-            CACHE STRING "" FORCE
-        )
-      endif()
-    else()
-      message(AUTHOR_WARNING "clang-tidy not found!")
-      set(CMAKE_CXX_CLANG_TIDY
-          ""
-          CACHE STRING "" FORCE
-      ) # delete it
-    endif()
-  else()
-    set(CMAKE_CXX_CLANG_TIDY
-        ""
-        CACHE STRING "" FORCE
-    ) # delete it
-  endif()
-else()
-  message(
-    AUTHOR_WARNING
-      "Using cmake version 3.5 or below. Clang-tidy is not supported!"
-  )
-endif()
+include(ClangTidy)
 
 # ##############################################################################
 # Setup cppcheck

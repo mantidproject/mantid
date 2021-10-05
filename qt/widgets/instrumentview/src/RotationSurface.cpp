@@ -23,8 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("RotationSurface");
 } // namespace
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 RotationSurface::RotationSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin,
                                  const Mantid::Kernel::V3D &axis)
@@ -112,7 +111,7 @@ void RotationSurface::createUnwrappedDetectors() {
   auto detectors = retrieveSurfaceDetectors();
   bool exceptionThrown = false;
   // For each detector in the order of actors
-  // cppcheck-suppress syntaxError
+
   PRAGMA_OMP(parallel for)
   for (int ii = 0; ii < int(detectors.size()); ++ii) {
     if (!exceptionThrown) {
@@ -352,5 +351,4 @@ void RotationSurface::setAutomaticUCorrection() {
   updateViewRectForUCorrection();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -49,8 +49,7 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus2)
 
@@ -719,7 +718,7 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
   partWorkspaces.resize(numThreads);
   buffers.resize(numThreads);
   eventVectors = new EventVector_pt *[numThreads];
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
       // This is the partial workspace we are about to create (if in parallel)
@@ -1307,5 +1306,4 @@ void LoadEventPreNexus2::processInvestigationInputs() {
     m_dbOpNumPulses = 0;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

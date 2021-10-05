@@ -15,8 +15,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 IndirectMolDyn::IndirectMolDyn(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
@@ -166,5 +165,4 @@ void IndirectMolDyn::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(en
 
 void IndirectMolDyn::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

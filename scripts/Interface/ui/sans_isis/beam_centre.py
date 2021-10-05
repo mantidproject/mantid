@@ -8,9 +8,6 @@ from abc import ABCMeta, abstractmethod
 from qtpy import QtGui, QtCore, QtWidgets
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import messagedisplay
-
-from mantid import UsageService
-from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import get_detector_from_gui_selection, \
      get_detector_strings_for_gui, get_string_for_gui_from_reduction_mode
 
@@ -52,10 +49,6 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.q_max_line_edit.hide()
         self.Q_to.hide()
 
-        # At the moment we only track how many times this is opened, if it's popular
-        # we can track individual feature usage at a later date
-        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Beam Centre Tab"], False)
-
     def _setup_log_widget(self):
         self.log_widget = messagedisplay.MessageDisplay(parent=self.groupBox_2)
         self.log_widget.setMinimumSize(QtCore.QSize(491, 371))
@@ -90,10 +83,10 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         positive_integer_validator = QtGui.QIntValidator()
         positive_integer_validator.setBottom(1)
 
-        self.lab_pos_1_line_edit.setValidator(double_validator)
-        self.lab_pos_2_line_edit.setValidator(double_validator)
-        self.hab_pos_1_line_edit.setValidator(double_validator)
-        self.hab_pos_2_line_edit.setValidator(double_validator)
+        self.rear_pos_1_line_edit.setValidator(double_validator)
+        self.rear_pos_2_line_edit.setValidator(double_validator)
+        self.front_pos_1_line_edit.setValidator(double_validator)
+        self.front_pos_2_line_edit.setValidator(double_validator)
 
         self.r_min_line_edit.setValidator(positive_double_validator)
         self.r_max_line_edit.setValidator(positive_double_validator)
@@ -109,13 +102,13 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         component_list = get_detector_strings_for_gui(self.instrument)
         self.set_component_options(component_list)
         if len(component_list) < 2:
-            self.hab_pos_1_line_edit.setEnabled(False)
-            self.hab_pos_2_line_edit.setEnabled(False)
-            self.update_hab_check_box.setEnabled(False)
+            self.front_pos_1_line_edit.setEnabled(False)
+            self.front_pos_2_line_edit.setEnabled(False)
+            self.update_front_check_box.setEnabled(False)
         else:
-            self.hab_pos_1_line_edit.setEnabled(True)
-            self.hab_pos_2_line_edit.setEnabled(True)
-            self.update_hab_check_box.setEnabled(True)
+            self.front_pos_1_line_edit.setEnabled(True)
+            self.front_pos_2_line_edit.setEnabled(True)
+            self.update_front_check_box.setEnabled(True)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Actions
@@ -132,8 +125,8 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.q_min = options.q_min
         self.q_max = options.q_max
         self.component = options.component
-        self.update_lab = options.update_lab
-        self.update_hab = options.update_hab
+        self.update_rear = options.update_rear
+        self.update_front = options.update_front
 
     def update_simple_line_edit_field(self, line_edit, value):
         gui_element = getattr(self, line_edit)
@@ -152,11 +145,11 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.run_button.setText("Run")
         self.run_button.setEnabled(True)
 
-    def enable_update_hab(self, enabled):
-        self.update_hab_check_box.setChecked(enabled)
+    def enable_update_front(self, enabled):
+        self.update_front_check_box.setChecked(enabled)
 
-    def enable_update_lab(self, enabled):
-        self.update_lab_check_box.setChecked(enabled)
+    def enable_update_rear(self, enabled):
+        self.update_rear_check_box.setChecked(enabled)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Properties
@@ -242,36 +235,36 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
         self.COM_check_box.setChecked(value)
 
     @property
-    def lab_pos_1(self):
-        return self.get_simple_line_edit_field(line_edit="lab_pos_1_line_edit", expected_type=float)
+    def rear_pos_1(self):
+        return self.get_simple_line_edit_field(line_edit="rear_pos_1_line_edit", expected_type=float)
 
-    @lab_pos_1.setter
-    def lab_pos_1(self, value):
-        self.update_simple_line_edit_field(line_edit="lab_pos_1_line_edit", value=value)
-
-    @property
-    def lab_pos_2(self):
-        return self.get_simple_line_edit_field(line_edit="lab_pos_2_line_edit", expected_type=float)
-
-    @lab_pos_2.setter
-    def lab_pos_2(self, value):
-        self.update_simple_line_edit_field(line_edit="lab_pos_2_line_edit", value=value)
+    @rear_pos_1.setter
+    def rear_pos_1(self, value):
+        self.update_simple_line_edit_field(line_edit="rear_pos_1_line_edit", value=value)
 
     @property
-    def hab_pos_1(self):
-        return self.get_simple_line_edit_field(line_edit="hab_pos_1_line_edit", expected_type=float)
+    def rear_pos_2(self):
+        return self.get_simple_line_edit_field(line_edit="rear_pos_2_line_edit", expected_type=float)
 
-    @hab_pos_1.setter
-    def hab_pos_1(self, value):
-        self.update_simple_line_edit_field(line_edit="hab_pos_1_line_edit", value=value)
+    @rear_pos_2.setter
+    def rear_pos_2(self, value):
+        self.update_simple_line_edit_field(line_edit="rear_pos_2_line_edit", value=value)
 
     @property
-    def hab_pos_2(self):
-        return self.get_simple_line_edit_field(line_edit="hab_pos_2_line_edit", expected_type=float)
+    def front_pos_1(self):
+        return self.get_simple_line_edit_field(line_edit="front_pos_1_line_edit", expected_type=float)
 
-    @hab_pos_2.setter
-    def hab_pos_2(self, value):
-        self.update_simple_line_edit_field(line_edit="hab_pos_2_line_edit", value=value)
+    @front_pos_1.setter
+    def front_pos_1(self, value):
+        self.update_simple_line_edit_field(line_edit="front_pos_1_line_edit", value=value)
+
+    @property
+    def front_pos_2(self):
+        return self.get_simple_line_edit_field(line_edit="front_pos_2_line_edit", expected_type=float)
+
+    @front_pos_2.setter
+    def front_pos_2(self, value):
+        self.update_simple_line_edit_field(line_edit="front_pos_2_line_edit", value=value)
 
     @property
     def component(self):
@@ -303,17 +296,17 @@ class BeamCentre(QtWidgets.QWidget, Ui_BeamCentre):
             self.component_combo_box.setCurrentIndex(current_index)
 
     @property
-    def update_hab(self):
-        return self.update_hab_check_box.isChecked()
+    def update_front(self):
+        return self.update_front_check_box.isChecked()
 
-    @update_hab.setter
-    def update_hab(self, value):
-        self.update_hab_check_box.setChecked(value)
+    @update_front.setter
+    def update_front(self, value):
+        self.update_front_check_box.setChecked(value)
 
     @property
-    def update_lab(self):
-        return self.update_lab_check_box.isChecked()
+    def update_rear(self):
+        return self.update_rear_check_box.isChecked()
 
-    @update_lab.setter
-    def update_lab(self, value):
-        self.update_lab_check_box.setChecked(value)
+    @update_rear.setter
+    def update_rear(self, value):
+        self.update_front_check_box.setChecked(value)

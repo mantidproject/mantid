@@ -11,9 +11,7 @@
 #include <functional>
 #include <map>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(CrystalFieldPeaks)
 
@@ -66,6 +64,4 @@ void CrystalFieldPeaks::functionGeneral(const API::FunctionDomainGeneral & /*dom
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

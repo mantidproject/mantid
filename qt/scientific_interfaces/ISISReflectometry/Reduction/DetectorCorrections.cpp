@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DetectorCorrections.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 DetectorCorrections::DetectorCorrections(bool correctPositions, DetectorCorrectionType correctionType)
     : m_correctPositions(correctPositions), m_correctionType(correctionType) {}
@@ -21,6 +19,4 @@ bool operator!=(DetectorCorrections const &lhs, DetectorCorrections const &rhs) 
 bool operator==(DetectorCorrections const &lhs, DetectorCorrections const &rhs) {
   return lhs.correctPositions() == rhs.correctPositions() && lhs.correctionType() == rhs.correctionType();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

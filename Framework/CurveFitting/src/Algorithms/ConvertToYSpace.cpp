@@ -20,9 +20,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToYSpace)
@@ -288,6 +286,4 @@ void ConvertToYSpace::cacheInstrumentGeometry() {
   m_samplePos = sample->getPos();
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

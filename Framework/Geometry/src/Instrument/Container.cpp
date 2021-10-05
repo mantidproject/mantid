@@ -18,8 +18,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 constexpr const char *SAMPLEGEOMETRY_TAG = "samplegeometry";
@@ -145,5 +144,4 @@ void Container::setID(const std::string &id) {
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

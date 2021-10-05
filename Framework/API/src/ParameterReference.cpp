@@ -7,8 +7,7 @@
 #include "MantidAPI/ParameterReference.h"
 #include "MantidAPI/CompositeFunction.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Default constructor
 ParameterReference::ParameterReference() : m_owner(), m_function(), m_index(0), m_isDefault(false) {}
@@ -102,5 +101,4 @@ bool ParameterReference::isParameterOf(const IFunction *fun) const {
   return false;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

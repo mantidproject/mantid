@@ -184,20 +184,18 @@ def get_string_for_gui_from_instrument(instrument):
         return None
 
 
-def get_reduction_mode_from_gui_selection(gui_selection):
-    # TODO when we hit only Python 3 this should use casefold rather than lower
-    case_folded_selection = gui_selection.lower()
-    if case_folded_selection == MERGED.lower():
+def get_reduction_mode_from_gui_selection(gui_selection: str):
+    case_folded_selection = gui_selection.strip().casefold()
+    if case_folded_selection == MERGED.casefold():
         return ReductionMode.MERGED
-
-    elif case_folded_selection == ALL.lower():
+    elif case_folded_selection == ALL.casefold():
         return ReductionMode.ALL
-
-    elif any(case_folded_selection == lab.lower() for lab in LAB_STRINGS.values()):
+    elif any(case_folded_selection == lab.casefold() for lab in LAB_STRINGS.values()):
         return ReductionMode.LAB
-
-    elif any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
+    elif any(case_folded_selection == hab.casefold() for hab in HAB_STRINGS.values()):
         return ReductionMode.HAB
+    elif not case_folded_selection:
+        return ReductionMode.NOT_SET
     else:
         raise RuntimeError("Reduction mode selection {0} is not valid.".format(gui_selection))
 

@@ -36,9 +36,7 @@
 #include <ctime>
 #include <random>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace FuncMinimisers {
+namespace Mantid::CurveFitting::FuncMinimisers {
 using namespace Mantid::API;
 
 namespace {
@@ -1098,6 +1096,4 @@ void FABADAMinimizer::initSimulatedAnnealing() {
   }
 }
 
-} // namespace FuncMinimisers
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::FuncMinimisers

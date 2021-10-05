@@ -70,8 +70,7 @@ template <typename TYPE> std::vector<double> getZscore(const std::vector<TYPE> &
 template <typename TYPE>
 std::vector<double> getWeightedZscore(const std::vector<TYPE> &data, const std::vector<TYPE> &weights);
 /// Return the modified Z score values for a dataset
-template <typename TYPE>
-std::vector<double> getModifiedZscore(const std::vector<TYPE> &data, const bool sorted = false);
+template <typename TYPE> std::vector<double> getModifiedZscore(const std::vector<TYPE> &data);
 /// Return the R-factors (Rwp) of a diffraction pattern data
 Rfactor MANTID_KERNEL_DLL getRFactor(const std::vector<double> &obsI, const std::vector<double> &calI,
                                      const std::vector<double> &obsE);

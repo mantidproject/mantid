@@ -7,6 +7,27 @@ SANS TOML Files
 .. contents:: Table of Contents
     :local:
 
+General Notes
+=============
+
+- Lengths are given in meters within TOML files, unlike previous legacy formats.
+
+
+Format Changes
+==============
+
+V0 to V1
+--------
+
+- *normalisation* and *normalization* are both accepted and equivalent
+- *detector.calibration* was renamed to *detector.correction*
+- *mask.beamstop_shadow* and *mask.mask_pixels* were moved to
+  *mask.spatial.beamstop_shadow* and *mask.spatial.mask_pixels*
+- *normalisation.all_monitors* was added to support *BACK/MON/TIMES*
+- *[gravity]* and *gravity.enabled* were merged into *instrument.configuration.gravity_enabled*
+- *detector.configuration.selected_detector* is now mandatory
+- *detector.configuration.selected_detector* accepts *front* and *rear* instead of *HAB* and *LAB* respectively.
+- *detector.configuration.all_centre* has been added to set the front and rear centre at the same time.
 
 Conversion From Legacy User Files
 =================================
@@ -73,16 +94,42 @@ For converting existing files I recommend the following process:
 BACK/MON/TIMES
 --------------
 
-**Replacement**
-Unsupported - Monitor ranges must be set directly
+Note: This command subtracts the *same* background level from *all* monitors.
+The continued use of this method of monitor correction is now deprecated.
+See BACK/M[n]/TIMES.
+
+..  code-block:: none
+
+    [normalisation]
+      [normalisation.all_monitors]
+        background = [x, y]
+        enabled = true
+
+**Existing Example**
+
+..  code-block:: none
+
+    BACK/MON/TIMES 30000 40000
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [normalisation]
+      [normalisation.all_monitors]
+        background = [30000, 40000]
+        enabled = true
 
 
 BACK/M[n]/TIMES x y
 -------------------
 
+Note: This command subtracts the specified background level from the specified monitor.
+
 ..  code-block:: none
 
-    [normalization]
+    # Note: both "normalisation" and "normalisation" are both accepted
+    [normalisation]
       [normalisation.monitor.Mn]
         spectrum_number = n
         background = [x, y]
@@ -108,7 +155,7 @@ BACK/M[n]/TIMES x y
 
 ..  code-block:: none
 
-    [normalization]
+    [normalisation]
       [normalisation.monitor.M1]
         spectrum_number = 1
         background = [30000.0, 40000.0]
@@ -127,12 +174,29 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 
     [detector]
       [detector.calibration.position]
+        # Note fields can be added or omitted as required
+        # This is the complete list of adjustments available
         front_x = a
         front_y = b
         front_z = c
-        front_rot = d
-        rear_x = e
-        rear_z = f
+
+        front_x_tilt = d
+        front_y_tilt = e
+        front_z_tilt = f
+
+        front_rot = g
+        front_side = h
+
+        rear_x = a
+        rear_y = b
+        rear_z = c
+
+        rear_x_tilt = d
+        rear_y_tilt = e
+        rear_z_tilt = f
+
+        rear_rot = g
+        rear_side = h
 
 **Existing Example**
 
@@ -161,10 +225,13 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 DET/[LAB][HAB][MERGED][ALL]
 ---------------------------
 
+Note: The group now refers to *LAB* and *HAB* as *rear* and *front* respectively.
+All reduction types are lower case.
+
 ..  code-block:: none
 
     [detector.configuration]
-      selected_detector = "LAB"
+      selected_detector = "rear"
 
 **Existing Example**
 
@@ -172,13 +239,13 @@ DET/[LAB][HAB][MERGED][ALL]
 
     DET/HAB
 
-
 **Existing Replacement**
 
 ..  code-block:: none
 
     [detector.configuration]
-      selected_detector = "HAB"  # Or "LAB", "All" (with lowercase l's), "Merged" ...etc.
+      # Accepts "front", "rear", "merged", or "all".
+      selected_detector = "front"
 
 DET/RESCALE[/FIT] x y
 ---------------------
@@ -425,8 +492,8 @@ GRAVITY/ON
 
 ..  code-block:: none
 
-    [gravity]
-      enabled = true
+    [instrument.configuration]
+      gravity_enabled = true
 
 **Existing Example**
 
@@ -438,8 +505,9 @@ GRAVITY/ON
 
 ..  code-block:: none
 
-    [gravity]
-      enabled = true
+    [instrument.configuration]
+      gravity_enabled = true
+
 
 GRAVITY/LEXTRA x
 ----------------
@@ -463,7 +531,6 @@ GRAVITY/LEXTRA x
 
     [instrument.configuration]
       gravity_extra_length = 2.0
-
 
 
 L/EVENTSTIME str
@@ -682,7 +749,7 @@ L/WAV min max step [/LIN]
     [binning]
       # Only for "Lin", "Log"
       wavelength = {start = 2.0, step=0.125, stop=14.0, type = "Lin"}
-      # Only for "RangeLin" or "RangeLog
+      # Only for "RangeLin" or "RangeLog"
       wavelength = {binning="2.0-7.0, 7.0-14.0", type = "RangeLin"}
 
 MASKFILE str
@@ -905,6 +972,31 @@ MASK/LINE x y
     [mask]
       beamstop_shadow = {width = 0.03, angle = 170.0}
 
+MASK/LINE a b c d
+-----------------
+
+Note: *c* and *d* representing x and y positions are already in meters in
+legacy files.
+
+**Replacement**
+
+..  code-block:: none
+
+    beamstop_shadow = {width = a, angle = b, x_pos = c, y_pos = d}
+
+**Existing Example:**
+
+..  code-block:: none
+
+    MASK/LINE 30 170 0.3 0.1
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [mask]
+      beamstop_shadow = {width = 0.03, angle = 170.0, x_pos=0.3, y_pos=0.1}
+
 MON/DIRECT="filename"
 ---------------------
 
@@ -1002,6 +1094,99 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
     [normalisation.monitor.M1]
       spectrum_number = 1
 
+QRESOL/A1=x
+--------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    source_aperture = x
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/A1=30
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    source_aperture = 0.03
+
+QRESOL/A2=x
+--------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_aperture_diameter = x
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/A2=20
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [instrument.configuration]
+    sample_aperture_diameter = 0.02
+
+QRESOL/DELTAR=x
+---------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    delta_r = x
+
+**Existing Example:**
+
+..  code-block:: none
+
+  QRESOL/DELTAR=10
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    delta_r = 10
+
+QRESOL/MODERATOR=filename.txt
+-----------------------------
+
+**Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    moderator_file = filename.txt
+
+**Existing Example:**
+
+..  code-block:: none
+
+    QRESOL/MODERATOR=moderator_rkh_file.txt
+
+**Existing Replacement**
+
+..  code-block:: none
+
+  [q_resolution]
+    moderator_file = moderator_rkh_file.txt
+
+
 QRESOL[/ON][/OFF]
 -----------------
 
@@ -1082,8 +1267,33 @@ SAMPLE/OFFSET x
     sample_offset = -0.06
 
 
-set centre a b c d
-------------------
+set centre a b
+--------------
+
+..  code-block:: none
+
+    [detector]
+      [detector.configuration]
+        all_centre = {x=a, y=b}
+
+**Existing Example:**
+
+..  code-block:: none
+
+    set centre 84.2 -196.5
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [detector]
+      [detector.configuration]
+        # This will set both front and rear to the same centre values.
+        all_centre = {x=a, y=b}
+
+
+set centre a b c d [/MAIN] [/HAB]
+---------------------------------
 
 ..  code-block:: none
 
@@ -1096,7 +1306,8 @@ set centre a b c d
 
 ..  code-block:: none
 
-    set centre 84.2 -196.5 5.1 5.1
+    set centre 84.2 -196.5 5.1 5.1 /MAIN
+    set centre 84.2 -196.5 /HAB
 
 **Existing Replacement**
 
@@ -1164,6 +1375,37 @@ TRANS/TRANSSPEC=n
 
       [transmission.monitor.M3]
         spectrum_number = 3
+
+TRANS/TRANSPEC=n/SHIFT=a
+------------------------
+
+**Replacement**
+
+..  code-block:: none
+
+    [transmission]
+      # Where Mn is arbitrary but must match the section label
+      selected_monitor = "Mn"
+
+      [transmission.monitor.Mn]
+        spectrum_number = n
+
+**Existing Example:**
+
+..  code-block:: none
+
+    TRANS/TRANSPEC=3/SHIFT=-58
+
+**Existing Replacement**
+
+..  code-block:: none
+
+    [transmission]
+      selected_monitor = "M3"
+
+      [transmission.monitor.M3]
+        spectrum_number = 3
+        shift = -0.058
 
 TUBECALIBFILE=str
 -----------------

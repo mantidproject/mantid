@@ -26,14 +26,15 @@ public:
   /**
    Constructor
    */
-  CalculateReflectometryQxQz() : m_cos_theta_i(0.0), m_sin_theta_i(0.0), m_dirQx(0.0), m_dirQz(0.0) {}
+  CalculateReflectometryQxQz(int version)
+      : CalculateReflectometry(version), m_cos_theta_i(0.0), m_sin_theta_i(0.0), m_dirQx(0.0), m_dirQz(0.0) {}
 
   /**
    Setter for the incident theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) override {
+  void updateThetaIncident(double thetaIncident) override {
     m_cos_theta_i = cos(thetaIncident * to_radians_factor);
     m_sin_theta_i = sin(thetaIncident * to_radians_factor);
   }
@@ -48,6 +49,17 @@ public:
     m_dirQx = (c_cos_theta_f - m_cos_theta_i);
     const double c_sin_theta_f = sin(thetaFinal * to_radians_factor);
     m_dirQz = (c_sin_theta_f + m_sin_theta_i);
+  }
+
+  /**
+   Set the final theta value from the detector twoTheta value.
+   @param twoTheta: detector twoTheta value in degrees
+   */
+  void setTwoTheta(double twoTheta) override {
+    if (m_version == 1)
+      setThetaFinal(twoTheta);
+    else
+      setThetaFinal(twoTheta - m_theta_i);
   }
 
   /**
@@ -70,12 +82,12 @@ public:
 
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper,
                                              double thetaLower) override {
-    setThetaFinal(thetaLower);
+    setTwoTheta(thetaLower);
     const Mantid::Kernel::V2D firstVertex(calculateDim0(lamLower), // highest qx
                                           calculateDim1(lamLower));
     const Mantid::Kernel::V2D secondVertex(calculateDim0(lamUpper),
                                            calculateDim1(lamUpper)); // lowest qz
-    setThetaFinal(thetaUpper);
+    setTwoTheta(thetaUpper);
     const Mantid::Kernel::V2D thirdVertex(calculateDim0(lamLower),
                                           calculateDim1(lamLower)); // highest qz
     const Mantid::Kernel::V2D fourthVertex(calculateDim0(lamUpper), // lowest qx

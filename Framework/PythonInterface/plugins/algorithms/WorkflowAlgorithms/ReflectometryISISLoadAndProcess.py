@@ -8,7 +8,7 @@
 from mantid.api import (AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm,
                         WorkspaceGroup)
 
-from mantid.simpleapi import (LoadEventNexus, LoadNexus, MergeRuns, RenameWorkspace)
+from mantid.simpleapi import MergeRuns
 
 from mantid.kernel import (CompositeValidator, Direction, EnabledWhenProperty,
                            IntBoundedValidator, Property, PropertyCriterion,
@@ -46,7 +46,7 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
 
     def category(self):
         """Return the categories of the algorithm."""
-        return 'ISIS\\Reflectometry;Workflow\\Reflectometry'
+        return 'Reflectometry\\ISIS;Workflow\\Reflectometry'
 
     def name(self):
         """Return the name of the algorithm."""
@@ -329,29 +329,27 @@ class ReflectometryISISLoadAndProcess(DataProcessorAlgorithm):
             # the ADS
             AnalysisDataService.addOrReplace(output_ws_name, ws_group)
 
-    def _renameWorkspaceBasedOnRunNumber(self, workspace_name, isTrans):
-        """Rename the given workspace based on its run number and a standard prefix"""
-        new_name = self._prefixedName(_getRunNumberAsString(workspace_name), isTrans)
-        if new_name != workspace_name:
-            RenameWorkspace(InputWorkspace=workspace_name, OutputWorkspace=new_name)
-            # Also rename the monitor workspace, if there is one
-            if AnalysisDataService.doesExist(_monitorWorkspace(workspace_name)):
-                RenameWorkspace(InputWorkspace=_monitorWorkspace(workspace_name),
-                                OutputWorkspace=_monitorWorkspace(new_name))
-        return new_name
-
     def _loadRun(self, run, isTrans):
         """Load a run as an event workspace if slicing is requested, or a histogram
         workspace otherwise. Transmission runs are always loaded as histogram workspaces."""
-        workspace_name = self._prefixedName(run, isTrans)
-        if not isTrans and self._slicingEnabled():
-            LoadEventNexus(Filename=run, OutputWorkspace=workspace_name, LoadMonitors=True)
+        event_mode = not isTrans and self._slicingEnabled()
+        args = {'InputRunList': [run], 'EventMode': event_mode}
+        alg = self.createChildAlgorithm('ReflectometryISISPreprocess', **args)
+        alg.setRethrows(True)
+        alg.execute()
+
+        ws = alg.getProperty('OutputWorkspace').value
+        monitor_ws = alg.getProperty('MonitorWorkspace').value
+        workspace_name = self._prefixedName(_getRunNumberAsString(ws), isTrans)
+        AnalysisDataService.addOrReplace(workspace_name, ws)
+        if monitor_ws:
+            AnalysisDataService.addOrReplace(_monitorWorkspace(workspace_name), monitor_ws)
+
+        if event_mode:
             _throwIfNotValidReflectometryEventWorkspace(workspace_name)
             self.log().information('Loaded event workspace ' + workspace_name)
         else:
-            LoadNexus(Filename=run, OutputWorkspace=workspace_name)
             self.log().information('Loaded workspace ' + workspace_name)
-        workspace_name = self._renameWorkspaceBasedOnRunNumber(workspace_name, isTrans)
         return workspace_name
 
     def _sumWorkspaces(self, workspaces, isTrans):
@@ -508,17 +506,16 @@ def _monitorWorkspace(workspace):
     return workspace + '_monitors'
 
 
-def _getRunNumberAsString(workspace_name):
+def _getRunNumberAsString(workspace):
     """Get the run number for a workspace. If it's a workspace group, get
     the run number from the first child workspace."""
     try:
-        workspace = AnalysisDataService.retrieve(workspace_name)
         if not isinstance(workspace, WorkspaceGroup):
             return str(workspace.getRunNumber())
         # Get first child in the group
         return str(workspace[0].getRunNumber())
     except:
-        raise RuntimeError('Could not find run number for workspace ' + workspace_name)
+        raise RuntimeError('Could not find run number for workspace ' + workspace.getName())
 
 
 def _hasWorkspaceID(workspace_name, workspace_id):

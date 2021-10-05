@@ -53,8 +53,7 @@ double offsetAngleFromCentre(const MatrixWorkspace &ws, const double l2, const d
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SpecularReflectionPositionCorrect2)
@@ -312,5 +311,4 @@ double SpecularReflectionPositionCorrect2::twoThetaFromProperties(const MatrixWo
   return twoThetaInRad;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

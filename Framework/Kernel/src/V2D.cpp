@@ -9,8 +9,7 @@
 
 #include <ostream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //-----------------------------------------------------------------------------
 // Public member functions
@@ -54,5 +53,4 @@ std::ostream &operator<<(std::ostream &os, const V2D &point) {
   return os;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

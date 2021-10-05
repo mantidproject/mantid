@@ -17,9 +17,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SplineInterpolation)
@@ -407,6 +405,4 @@ std::pair<size_t, size_t> SplineInterpolation::findInterpolationRange(const Matr
 
   return std::make_pair(firstIndex, lastIndex);
 }
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

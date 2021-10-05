@@ -62,8 +62,7 @@ using Mantid::Types::Core::DateAndTime;
 
 #include <json/json.h>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("ScriptRepositoryImpl");
@@ -1686,6 +1685,4 @@ std::string ScriptRepositoryImpl::convertPath(const std::string &path) {
   return path;
 }
 
-} // namespace API
-
-} // namespace Mantid
+} // namespace Mantid::API

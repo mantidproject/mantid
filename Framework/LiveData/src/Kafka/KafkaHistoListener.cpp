@@ -16,8 +16,7 @@ namespace {
 Mantid::Kernel::Logger g_log("KafkaHistoListener");
 }
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 DECLARE_LISTENER(KafkaHistoListener)
 
@@ -96,5 +95,4 @@ API::ILiveListener::RunStatus KafkaHistoListener::runStatus() {
 /// @copydoc ILiveListener::runNumber
 int KafkaHistoListener::runNumber() const { return (m_decoder ? m_decoder->runNumber() : -1); }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

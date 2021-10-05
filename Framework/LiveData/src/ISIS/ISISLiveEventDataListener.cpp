@@ -32,8 +32,7 @@ GNU_DIAG_OFF("unused-variable")
 const char *PROTON_CHARGE_PROPERTY = "proton_charge";
 const char *RUN_NUMBER_PROPERTY = "run_number";
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 DECLARE_LISTENER(ISISLiveEventDataListener)
 
@@ -441,5 +440,4 @@ void ISISLiveEventDataListener::IDCReporter(int status, int code, const char *me
   (void)code; // Avoid compiler warning
   g_log.error(message);
 }
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

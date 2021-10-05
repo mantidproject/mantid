@@ -572,6 +572,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/GitHubApiHelper.h.in
 # the part that turns relative into absolute paths in the properties file
 set(MANTID_ROOT ${CMAKE_SOURCE_DIR})
 # This keeps things working for people building just the framework project
+set(PYTHON_INTERFACES_DIR ${MANTID_ROOT}/qt/python/mantidqtinterfaces/mantidqtinterfaces)
 if(${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework")
   set(MANTID_ROOT ${CMAKE_SOURCE_DIR}/..)
 endif()
@@ -603,6 +604,8 @@ else()
 endif()
 
 set(CONSOLECHANNELCLASS "ConsoleChannel")
+set(ALIASDEPRECATED "Raise")
+set(ALGORITHMDEPRECATED "Raise")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 
@@ -653,6 +656,8 @@ else()
 endif()
 
 set(CONSOLECHANNELCLASS "StdoutChannel")
+set(ALIASDEPRECATED "Log")
+set(ALGORITHMDEPRECATED "Log")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
 

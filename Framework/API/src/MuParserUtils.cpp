@@ -12,9 +12,7 @@
 
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace API {
-namespace MuParserUtils {
+namespace Mantid::API::MuParserUtils {
 
 // The constant names below try to follow the naming scheme of the
 // scipy.constants Python module.
@@ -56,6 +54,4 @@ void MANTID_API_DLL extraOneVarFunctions(mu::Parser &parser) {
   }
 }
 
-} // namespace MuParserUtils
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API::MuParserUtils

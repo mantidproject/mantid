@@ -14,8 +14,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace API;
 using namespace Geometry;
@@ -152,5 +151,4 @@ RunCombinationHelper::validateInputWorkspaces(const std::vector<std::string> &in
   return inWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

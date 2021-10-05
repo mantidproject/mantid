@@ -8,9 +8,7 @@
 #include "MantidTypes/Event/TofEvent.h"
 #include <memory>
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
+namespace Mantid::Parallel::IO {
 
 /// Constructor
 EventsListsShmemStorage::EventsListsShmemStorage(const std::string &segmentName, const std::string &elName, size_t size,
@@ -49,6 +47,4 @@ std::ostream &operator<<(std::ostream &os, const EventsListsShmemStorage &storag
   return os;
 }
 
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO

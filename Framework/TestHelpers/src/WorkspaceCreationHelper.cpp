@@ -62,7 +62,7 @@ using Mantid::MantidVecPtr;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
-MockAlgorithm::MockAlgorithm(size_t nSteps) : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
+StubAlgorithm::StubAlgorithm(size_t nSteps) : m_Progress(std::make_unique<API::Progress>(this, 0.0, 1.0, nSteps)) {}
 
 EPPTableRow::EPPTableRow(const double peakCentre_, const double sigma_, const double height_,
                          const FitStatus fitStatus_)
@@ -159,7 +159,7 @@ Workspace2D_sptr create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBound
   Workspace2D_sptr out = create2DWorkspaceBinned(nhist, numBoundaries);
   for (int workspaceIndex = 0; workspaceIndex < nhist; workspaceIndex++) {
     std::vector<double> yValues(numBoundaries, static_cast<double>(workspaceIndex));
-    out->mutableY(workspaceIndex) = std::move(yValues);
+    out->mutableY(workspaceIndex) = yValues;
   }
 
   return out;
@@ -398,6 +398,24 @@ MatrixWorkspace_sptr create2DDetectorScanWorkspaceWithFullInstrument(int nhist, 
   builder.setTimeRanges(DateAndTime(int(startTime), 0), timeRanges);
 
   return builder.buildWorkspace();
+}
+
+//================================================================================================================
+/** Create an Workspace2D with an instrument that contains detectors arranged at even latitude/longitude
+ * values. For use in testing absorption and multiple scattering corrections. The sparse instrument functionality
+ * in these algorithms uses geographical angles (lat/long) to specify the detector positions
+ * Latitude/longitude corresponds to two theta if longitude/latitude equals zero
+ */
+Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc,
+                                                            const int nbins, const std::string &instrumentName) {
+  constexpr double x0 = 0.5;
+  auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, x0);
+  inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
+
+  InstrumentCreationHelper::addInstrumentWithGeographicalDetectorsToWorkspace(*inputWorkspace, nlat, nlong, anginc,
+                                                                              instrumentName);
+
+  return inputWorkspace;
 }
 
 //================================================================================================================
@@ -863,7 +881,7 @@ void displayDataY(const MatrixWorkspace_const_sptr &ws) {
     std::cout << '\n';
   }
 }
-void displayData(const MatrixWorkspace_const_sptr &ws) { displayDataX(std::move(ws)); }
+void displayData(const MatrixWorkspace_const_sptr &ws) { displayDataX(ws); }
 
 // not strictly creating a workspace, but really helpful to see what one
 // contains
@@ -1009,7 +1027,7 @@ Mantid::API::MatrixWorkspace_sptr createProcessedInelasticWS(const std::vector<d
     for (size_t i = 0; i <= numBins; i++) {
       E_transfer.emplace_back(Emin + static_cast<double>(i) * dE);
     }
-    ws->mutableX(j) = std::move(E_transfer);
+    ws->mutableX(j) = E_transfer;
   }
 
   // set axis, correspondent to the X-values

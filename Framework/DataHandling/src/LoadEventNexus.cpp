@@ -13,6 +13,7 @@
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidDataHandling/EventWorkspaceCollection.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataHandling/ParallelEventLoader.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -40,8 +41,7 @@ using std::string;
 using std::vector;
 using namespace ::NeXus;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadEventNexus)
 
@@ -246,7 +246,12 @@ void LoadEventNexus::init() {
                   "If true, only the meta data and sample logs will be loaded.");
 
   declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadLogs", true, Direction::Input),
-                  "Load the Sample/DAS logs from the file (default True).");
+                  "Load only the Sample/DAS logs from the file (default True).");
+
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LoadAllLogs", false, Direction::Input),
+                  "Load all the logs from the nxs, without checking or processing them; if checked, LoadLogs will be "
+                  "ignored; use with caution");
+
   std::vector<std::string> loadType{"Default"};
 
 #ifndef _WIN32
@@ -343,7 +348,38 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorks
   // We provide a function pointer to the filter method of the object
   using std::placeholders::_1;
   auto func = std::bind(&LoadEventNexus::filterDuringPause<MatrixWorkspace_sptr>, this, _1);
+  workspace->applyFilterInPlace(func);
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * Filter the events by pulse time - no in place version so have to return workspace
+ *
+ */
+template <typename T>
+T LoadEventNexus::filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
+                                     Mantid::Types::Core::DateAndTime &stopTime) {
+
+  auto filterByTime = createChildAlgorithm("FilterByTime");
+  g_log.information("Filtering events by time...");
+  filterByTime->setProperty("InputWorkspace", workspace);
+  // sample log already filtered by time so use absolute times to be safe
+  filterByTime->setProperty("AbsoluteStartTime", startTime.toISO8601String());
+  filterByTime->setProperty("AbsoluteStopTime", stopTime.toISO8601String());
+  filterByTime->execute();
+  return filterByTime->getProperty("OutputWorkspace");
+}
+
+template <>
+EventWorkspaceCollection_sptr
+LoadEventNexus::filterEventsByTime<EventWorkspaceCollection_sptr>(EventWorkspaceCollection_sptr workspace,
+                                                                  Mantid::Types::Core::DateAndTime &startTime,
+                                                                  Mantid::Types::Core::DateAndTime &stopTime) {
+  // We provide a function pointer to the filter method of the object
+  using std::placeholders::_1;
+  auto func = std::bind(&LoadEventNexus::filterEventsByTime<EventWorkspace_sptr>, this, _1, startTime, stopTime);
   workspace->applyFilter(func);
+  return workspace;
 }
 
 //------------------------------------------------------------------------------------------------
@@ -562,6 +598,8 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
       // (this is used in LoadInstrument to find the right instrument file to
       // use).
       localWorkspace->mutableRun().addProperty("run_start", run_start.toISO8601String(), true);
+    } else if (run.hasProperty("start_time")) {
+      localWorkspace->mutableRun().addProperty("run_start", run.getProperty("start_time")->value(), true);
     } else {
       alg.getLogger().warning() << "Empty proton_charge sample log. You will "
                                    "not be able to filter by time.\n";
@@ -812,27 +850,43 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   bad_tofs = 0;
   int nPeriods = 1;
   auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log");
+
+  bool loadAllLogs = getProperty("LoadAllLogs");
+
   if (loadlogs) {
-    prog->doReport("Loading DAS logs");
+    if (!loadAllLogs) {
+      prog->doReport("Loading DAS logs");
 
-    if (allow_list.empty() && block_list.empty()) {
-      m_allBanksPulseTimes =
-          runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods, periodLog);
+      if (allow_list.empty() && block_list.empty()) {
+        m_allBanksPulseTimes =
+            runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods, periodLog);
+      } else {
+        m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods,
+                                                                               periodLog, allow_list, block_list);
+      }
+
+      try {
+        run_start = m_ws->getFirstPulseTime();
+      } catch (Kernel::Exception::NotFoundError &) {
+        /*
+          This is added to (a) support legacy behaviour of continuing to take
+          times from the proto_charge log, but (b) allowing a fall back of
+          getting run start and end from actual pulse times within the
+          NXevent_data group. Note that the latter is better Nexus compliant.
+        */
+        takeTimesFromEvents = true;
+      }
     } else {
-      m_allBanksPulseTimes = runLoadNexusLogs<EventWorkspaceCollection_sptr>(m_filename, m_ws, *this, true, nPeriods,
-                                                                             periodLog, allow_list, block_list);
-    }
+      prog->doReport("Loading all logs");
+      // Open NeXus file
+      NXhandle nxHandle;
+      NXstatus nxStat = NXopen(m_filename.c_str(), NXACC_READ, &nxHandle);
 
-    try {
-      run_start = m_ws->getFirstPulseTime();
-    } catch (Kernel::Exception::NotFoundError &) {
-      /*
-        This is added to (a) support legacy behaviour of continuing to take
-        times from the proto_charge log, but (b) allowing a fall back of
-        getting run start and end from actual pulse times within the
-        NXevent_data group. Note that the latter is better Nexus compliant.
-      */
-      takeTimesFromEvents = true;
+      if (nxStat != NX_ERROR) {
+        LoadHelper loadHelper;
+        loadHelper.addNexusFieldsToWsRun(nxHandle, m_ws->mutableRun());
+        NXclose(&nxHandle);
+      }
     }
   } else {
     g_log.information() << "Skipping the loading of sample logs!\n"
@@ -962,7 +1016,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_time_start = Types::Core::DateAndTime::minimum();
   filter_time_stop = Types::Core::DateAndTime::maximum();
 
-  if (m_allBanksPulseTimes->numPulses > 0) {
+  if (m_allBanksPulseTimes->pulseTimes.size() > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
     // seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL()) {
@@ -983,11 +1037,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       msg += "filter for time's Stop value is smaller than the Start value.";
       throw std::invalid_argument(msg);
     }
-  }
-
-  if (is_time_filtered) {
-    // Now filter out the run, using the DateAndTime type.
-    m_ws->mutableRun().filterByTime(filter_time_start, filter_time_stop);
   }
 
   if (metaDataOnly) {
@@ -1070,10 +1119,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     } else {
 
       struct ExceptionOutput {
-        static void out(decltype(g_log) &log, const std::exception &e, int level = 0) {
-          log.warning() << std::string(level, ' ') << "exception: " << e.what() << '\n';
+        static void out(decltype(g_log) &log, const std::exception &except, int level = 0) {
+          log.warning() << std::string(level, ' ') << "exception: " << except.what() << '\n';
           try {
-            std::rethrow_if_nested(e);
+            std::rethrow_if_nested(except);
           } catch (const std::exception &e) {
             ExceptionOutput::out(log, e, level + 1);
           } catch (...) {
@@ -1157,6 +1206,12 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
   // if there is time_of_flight load it
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
+
+  if (is_time_filtered) {
+    // Now filter out the run and events, using the DateAndTime type.
+    // This will sort both by pulse time
+    filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
+  }
 }
 
 //-----------------------------------------------------------------------------
@@ -1592,5 +1647,4 @@ LoadEventNexus::getParallelExecutionMode(const std::map<std::string, Parallel::S
   static_cast<void>(storageModes);
   return Parallel::ExecutionMode::Distributed;
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

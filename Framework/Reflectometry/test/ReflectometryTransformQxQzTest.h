@@ -31,8 +31,9 @@ public:
     double qzMin = 1;
     double qzMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-                     const std::invalid_argument &);
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version),
+                       const std::invalid_argument &);
   }
 
   void test_qxmin_equal_to_qxmax_throws() {
@@ -41,8 +42,9 @@ public:
     double qzMin = 1;
     double qzMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-                     const std::invalid_argument &);
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version),
+                       const std::invalid_argument &);
   }
 
   void test_qzmin_greater_than_qzmax_throws() {
@@ -51,8 +53,9 @@ public:
     double qzMin = 2;
     double qzMax = 1; // Smaller than qzMin!
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-                     const std::invalid_argument &);
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version),
+                       const std::invalid_argument &);
   }
 
   void test_qzmin_equal_to_qzmax_throws() {
@@ -61,8 +64,9 @@ public:
     double qzMin = 1;
     double qzMax = 1; // Equal to qzMin!
     double incidentTheta = 1;
-    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta),
-                     const std::invalid_argument &);
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version),
+                       const std::invalid_argument &);
   }
 
   void test_incident_theta_negative() {
@@ -71,7 +75,9 @@ public:
     double qzMin = 1;
     double qzMax = 3;
     double incidentTheta = -0.001; // Negative
-    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta), const std::out_of_range &);
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version),
+                       const std::out_of_range &);
   }
 
   void test_incident_theta_too_large() {
@@ -80,7 +86,9 @@ public:
     double qzMin = 1;
     double qzMax = 3;
     double incidentTheta = 90.001; // Too large
-    TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta), const std::out_of_range &);
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version),
+                       const std::out_of_range &);
   }
 
   void test_valid_construction_inputs() {
@@ -89,32 +97,63 @@ public:
     double qzMin = 1;
     double qzMax = 2;
     double incidentTheta = 1;
-    TS_ASSERT_THROWS_NOTHING(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta));
+    for (auto version : m_versions)
+      TS_ASSERT_THROWS_NOTHING(ReflectometryTransformQxQz(qxMin, qxMax, qzMin, qzMax, incidentTheta, version));
   }
 
   //---- Tests for Qx Calculator ---- //
 
-  void test_calculate_Qx() {
+  void test_calculate_Qx_v1() {
     // Set up calculation so that it collapses down to 2*M_PI/wavelength by
-    // setting initial theta to M_PI/2 and final theta to zero
-    CalculateReflectometryQxQz calculator;
+    // setting initial theta to M_PI/2 and final theta to zero.
+    // In v1, thetaFinal is set directly from twoTheta.
+    const int version = 1;
+    CalculateReflectometryQxQz calculator(version);
     calculator.setThetaIncident(90);
     double qx;
     const double wavelength = 0.1;
-    TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(0));
+    TS_ASSERT_THROWS_NOTHING(calculator.setTwoTheta(0));
     TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim0(wavelength));
     TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
   }
 
-  void test_recalculate_Qx() {
-    CalculateReflectometryQxQz calculator;
+  void test_calculate_Qx_v2() {
+    // Set up calculation so that it collapses down to 2*M_PI/wavelength by
+    // setting initial theta to M_PI/2 and final theta to zero.
+    // In v2, thetaFinal is set from twoTheta - thetaIncident.
+    const int version = 2;
+    CalculateReflectometryQxQz calculator(version);
+    calculator.setThetaIncident(90);
+    double qx;
+    const double wavelength = 0.1;
+    TS_ASSERT_THROWS_NOTHING(calculator.setTwoTheta(90));
+    TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim0(wavelength));
+    TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
+  }
+
+  void test_recalculate_Qx_v1() {
+    const int version = 1;
+    CalculateReflectometryQxQz calculator(version);
     calculator.setThetaIncident(0);
-    calculator.setThetaFinal(0);
+    calculator.setTwoTheta(0);
     const double wavelength = 0.1;
     TS_ASSERT_DELTA(0, calculator.calculateDim0(wavelength), 0.0001);
 
     // Now reset the final theta and should be able to re-execute
-    calculator.setThetaFinal(90);
+    calculator.setTwoTheta(90);
+    TS_ASSERT_DELTA(-2 * M_PI / wavelength, calculator.calculateDim0(wavelength), 0.0001);
+  }
+
+  void test_recalculate_Qx_v2() {
+    const int version = 2;
+    CalculateReflectometryQxQz calculator(version);
+    calculator.setThetaIncident(0);
+    calculator.setTwoTheta(0);
+    const double wavelength = 0.1;
+    TS_ASSERT_DELTA(0, calculator.calculateDim0(wavelength), 0.0001);
+
+    // Now reset the final theta and should be able to re-execute
+    calculator.setTwoTheta(90);
     TS_ASSERT_DELTA(-2 * M_PI / wavelength, calculator.calculateDim0(wavelength), 0.0001);
   }
 
@@ -122,28 +161,57 @@ public:
 
   //---- Tests for Qz Calculator ---- //
 
-  void test_calculate_Qz() {
+  void test_calculate_Qz_v1() {
     // Set up calculation so that it collapses down to 2*M_PI/wavelength
-    CalculateReflectometryQxQz calculator;
+    const int version = 1;
+    CalculateReflectometryQxQz calculator(version);
     calculator.setThetaIncident(0);
     double qx;
     const double wavelength = 0.1;
-    TS_ASSERT_THROWS_NOTHING(calculator.setThetaFinal(90));
+    TS_ASSERT_THROWS_NOTHING(calculator.setTwoTheta(90));
     TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim1(wavelength));
     TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
   }
 
-  void test_recalculate_Qz() {
-    CalculateReflectometryQxQz calculator;
+  void test_calculate_Qz_v2() {
+    // Set up calculation so that it collapses down to 2*M_PI/wavelength
+    const int version = 2;
+    CalculateReflectometryQxQz calculator(version);
+    calculator.setThetaIncident(0);
+    double qx;
+    const double wavelength = 0.1;
+    TS_ASSERT_THROWS_NOTHING(calculator.setTwoTheta(90));
+    TS_ASSERT_THROWS_NOTHING(qx = calculator.calculateDim1(wavelength));
+    TS_ASSERT_DELTA(2 * M_PI / wavelength, qx, 0.0001);
+  }
+
+  void test_recalculate_Qz_v1() {
+    const int version = 1;
+    CalculateReflectometryQxQz calculator(version);
     calculator.setThetaIncident(90);
-    calculator.setThetaFinal(90);
+    calculator.setTwoTheta(90);
     const double wavelength = 0.1;
     TS_ASSERT_DELTA(2 * (2 * M_PI / wavelength), calculator.calculateDim1(wavelength), 0.001);
 
     // Now reset the final theta and should be able to re-execute
-    calculator.setThetaFinal(0);
+    calculator.setTwoTheta(0);
+    TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateDim1(wavelength), 0.001);
+  }
+
+  void test_recalculate_Qz_v2() {
+    const int version = 2;
+    CalculateReflectometryQxQz calculator(version);
+    calculator.setThetaIncident(90);
+    calculator.setTwoTheta(180);
+    const double wavelength = 0.1;
+    TS_ASSERT_DELTA(2 * (2 * M_PI / wavelength), calculator.calculateDim1(wavelength), 0.001);
+
+    // Now reset the final theta and should be able to re-execute
+    calculator.setTwoTheta(90);
     TS_ASSERT_DELTA(2 * M_PI / wavelength, calculator.calculateDim1(wavelength), 0.001);
   }
 
   //---- End Tests for Qz Calculator ---- //
+private:
+  std::array<int, 2> m_versions{1, 2};
 };

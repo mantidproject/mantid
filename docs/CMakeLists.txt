@@ -32,16 +32,6 @@ else()
   set(ENABLE_PLOTDIRECTIVE "")
 endif()
 
-# sphinx.__main__ was introduced in version 1.3.
-# Prior to this we need to pass sphinx.__init__ to -m
-if(SPHINX_VERSION VERSION_GREATER_EQUAL "1.3")
-  set(SPHINX_MAIN "sphinx")
-  set(SPHINX_NOCOLOR "--no-color")
-else()
-  set(SPHINX_MAIN "sphinx.__init__")
-  set(SPHINX_NOCOLOR "")
-endif()
-
 # Add a sphinx build target to build documentation
 #   builder - Name of the sphinx builder: html, qthelp etc
 #   target_name - Optional target name. Default=docs-${builder}
@@ -59,7 +49,8 @@ function (add_sphinx_build_target builder math_renderer)
     set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
   endif()
 
-  set(sphinx_options ${SPHINX_NOCOLOR} -b ${builder} -d ${DOCTREES_DIR})
+  # -W turns warnings into errors, but there is an issue with getting the numpy intersphinx
+  set(sphinx_options ${SPHINX_NOCOLOR} ${SPHINX_KEEPGOING} -b ${builder} -d ${DOCTREES_DIR})
   # add a tag to differentiate between html/qthelp in conf
   if(ARGC GREATER 3)
     set(sphinx_options ${sphinx_options} -t ${ARGV3})

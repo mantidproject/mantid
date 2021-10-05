@@ -54,9 +54,9 @@ public:
     TS_ASSERT_EQUALS(stats.median, 17.2);
   }
 
-  void test_Unsorted_Data_With_Sorted_Flag_Gives_Expected_Incorrect_Result_For_Median() {
+  void test_Unsorted_Data_With_Sorted_Flag_Gives_Expected_Result_For_Median() {
     vector<double> data;
-    data.emplace_back(17.2);
+    data.emplace_back(17.2); // Median value
     data.emplace_back(18.1);
     data.emplace_back(16.5);
     data.emplace_back(18.3);
@@ -68,7 +68,7 @@ public:
     TS_ASSERT(std::isnan(stats.standard_deviation));
     TS_ASSERT(std::isnan(stats.minimum));
     TS_ASSERT(std::isnan(stats.maximum));
-    TS_ASSERT_EQUALS(stats.median, 16.5);
+    TS_ASSERT_EQUALS(stats.median, 17.2);
   }
 
   void test_Doubles_With_Corrected_StdDev_Calculates_Mean() {

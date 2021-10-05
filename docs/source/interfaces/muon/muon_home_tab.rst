@@ -21,12 +21,6 @@ The specified first good data is used for all calculations.
 **Last Good Data** This is the Last good data value used. By default the last good data is taken from the file. However, the user can manually set the value.
 The specified first good data is used for all calculations.
 
-**Deadtime** The default is to use no deadtime correction. There are three deadtime correction options if required.
-
-* ``From data file``: The deadtime table will be taken from the relevant data file
-* ``From table workspace``: A previously loaded deadtime table may be selected which will then be used in all group and pair calculations.
-* ``From other file``: A file may be selected to load a deadtime table from this will then be used in all group and pair calculations.
-
 **Double Pulse** This controls whether todo a double pulse fit and if so what time offset to use. If checked then :ref:`DoublePulseFit <algm-DoublePulseFit>` is run instead of :ref:`Fit <algm-Fit>`, when pressing the `fit` button. The `PulseOffset` parameter is the value entered here. The pulse weightings are set as
 
 .. math::

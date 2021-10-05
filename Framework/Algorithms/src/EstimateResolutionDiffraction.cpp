@@ -30,8 +30,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(EstimateResolutionDiffraction)
 
@@ -253,5 +252,4 @@ void EstimateResolutionDiffraction::estimateDetectorResolution() {
   g_log.notice() << "Number of detector having NO size information = " << count_nodetsize << "\n";
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

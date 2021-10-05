@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("InstrumentSelector");
 }
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 using namespace Mantid::Kernel;
 
 /**
@@ -122,8 +121,7 @@ void InstrumentSelector::handleConfigChange(Mantid::Kernel::ConfigValChangeNotif
  * Populate list with instruments from the named facility. Note the current list
  * is cleared.
  * @param name :: The name of the facility whose instruments should be placed in
- * the list. An empty string uses the default
- * facility defined in Mantid.
+ * the list. An empty string uses the default facility defined in Mantid.
  */
 void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
   ConfigServiceImpl &mantidSettings = ConfigService::Instance();
@@ -149,10 +147,10 @@ void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
     alphabetizedNames.insert(instrument.name());
   }
   for (const auto &name_std_str : alphabetizedNames) {
-    QString name = QString::fromStdString(name_std_str);
+    QString instrumentName = QString::fromStdString(name_std_str);
     std::string prefix = m_currentFacility->instrument(name_std_str).shortName();
     QString shortName = QString::fromStdString(prefix);
-    this->addItem(name, QVariant(shortName));
+    this->addItem(instrumentName, QVariant(shortName));
   }
   filterByTechniquesAtFacility(m_techniques, *m_currentFacility);
 
@@ -246,5 +244,4 @@ void InstrumentSelector::filterByTechniquesAtFacility(const QStringList &techniq
   emit instrumentListUpdated();
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -11,8 +11,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using std::string;
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RemovePromptPulse)
@@ -187,5 +186,4 @@ std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, co
 
   return times;
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

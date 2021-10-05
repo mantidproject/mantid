@@ -66,8 +66,7 @@ double integrate(const std::vector<double> &y, const double dx) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 //-----------------------------------------------------------------------------
 // Public methods
@@ -326,5 +325,4 @@ double MayersSampleCorrectionStrategy::sigmaTotal(const double flightPath, const
  */
 void MayersSampleCorrectionStrategy::seedRNG(const size_t seed) { m_rng->setSeed(seed); }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

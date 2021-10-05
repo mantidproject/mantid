@@ -25,8 +25,7 @@
 
 #include <Poco/TemporaryFile.h>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -694,5 +693,4 @@ void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(std::vector<Matrix
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

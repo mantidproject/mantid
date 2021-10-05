@@ -11,11 +11,7 @@ namespace {
 static constexpr std::size_t RUN_TIME_STRING_LENGTH = 19;
 } // namespace
 
-namespace Mantid {
-
-namespace DataHandling {
-
-namespace LoadISISNexusHelper {
+namespace Mantid::DataHandling::LoadISISNexusHelper {
 
 using namespace API;
 using namespace NeXus;
@@ -222,6 +218,4 @@ std::shared_ptr<HistogramData::HistogramX> loadTimeData(const NXEntry &entry) {
     return timeData;
   }
 }
-} // namespace LoadISISNexusHelper
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling::LoadISISNexusHelper

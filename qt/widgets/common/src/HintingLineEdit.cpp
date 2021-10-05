@@ -13,8 +13,7 @@
 #include <boost/algorithm/string.hpp>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 HintingLineEdit::HintingLineEdit(QWidget *parent, std::vector<Hint> hints)
     : QLineEdit(parent), m_hints(std::move(hints)), m_dontComplete(false) {
   m_hintLabel = new QLabel(this, Qt::ToolTip);
@@ -156,7 +155,7 @@ void HintingLineEdit::nextSuggestion() {
   clearSuggestion();
   // Find the next suggestion in the hint map
   if (m_match != m_matches.end()) {
-    m_match++;
+    ++m_match;
     if (m_match == m_matches.end())
       m_match = m_matches.begin();
     insertSuggestion();
@@ -171,10 +170,9 @@ void HintingLineEdit::prevSuggestion() {
     if (m_match == m_matches.cbegin()) {
       m_match = m_matches.cend() - 1;
     } else {
-      m_match--;
+      --m_match;
     }
     insertSuggestion();
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

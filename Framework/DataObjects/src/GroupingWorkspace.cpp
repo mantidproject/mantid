@@ -15,8 +15,7 @@
 using std::size_t;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 // Register the workspace
 DECLARE_WORKSPACE(GroupingWorkspace)
 
@@ -33,8 +32,7 @@ GroupingWorkspace::GroupingWorkspace(size_t numvectors) { this->init(numvectors,
  * @param inst :: input instrument that is the base for this workspace
  * @return created GroupingWorkspace
  */
-GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst)
-    : SpecialWorkspace2D(std::move(inst)) {}
+GroupingWorkspace::GroupingWorkspace(const Geometry::Instrument_const_sptr &inst) : SpecialWorkspace2D(inst) {}
 
 //----------------------------------------------------------------------------------------------
 /** Fill a map with key = detector ID, value = group number
@@ -91,13 +89,11 @@ void GroupingWorkspace::makeDetectorIDToGroupVector(std::vector<int> &detIDToGro
   }
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 DLLExport Mantid::DataObjects::GroupingWorkspace_sptr
@@ -127,7 +123,6 @@ IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(co
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

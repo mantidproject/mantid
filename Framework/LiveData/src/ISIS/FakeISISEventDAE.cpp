@@ -19,8 +19,7 @@
 
 #include <utility>
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISEventDAE)
 
@@ -46,9 +45,9 @@ public:
    * @param soc :: A socket that provides communication with the client.
    */
   TestServerConnection(const Poco::Net::StreamSocket &soc, int nper, int nspec, int rate, int nevents,
-                       const std::shared_ptr<Progress> &prog)
+                       std::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnection(soc), m_nPeriods(nper), m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents),
-        m_prog(prog) {
+        m_prog(std::move(prog)) {
     m_prog->report(0, "Client Connected");
     sendInitialSetup();
   }
@@ -131,9 +130,9 @@ public:
   /**
    * Constructor.
    */
-  TestServerConnectionFactory(int nper, int nspec, int rate, int nevents, const std::shared_ptr<Progress> &prog)
+  TestServerConnectionFactory(int nper, int nspec, int rate, int nevents, std::shared_ptr<Progress> prog)
       : Poco::Net::TCPServerConnectionFactory(), m_nPeriods(nper), m_nSpectra(nspec), m_Rate(rate), m_nEvents(nevents),
-        m_prog(prog) {}
+        m_prog(std::move(prog)) {}
   /**
    * The factory method.
    * @param socket :: The socket.
@@ -207,5 +206,4 @@ void FakeISISEventDAE::exec() {
   socket.close();
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

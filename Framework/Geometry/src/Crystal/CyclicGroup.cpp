@@ -8,8 +8,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Construct cyclic group from one symmetry operation by applying it to itself
 /// until identity is obtained.
@@ -32,5 +31,4 @@ std::vector<SymmetryOperation> CyclicGroup::generateAllOperations(const Symmetry
   return symOps;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

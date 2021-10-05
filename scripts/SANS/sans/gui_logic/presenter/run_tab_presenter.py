@@ -17,6 +17,7 @@ from functools import wraps
 from typing import Optional
 
 from mantidqt.utils.observer_pattern import GenericObserver
+from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 from ui.sans_isis import SANSSaveOtherWindow
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
@@ -394,7 +395,7 @@ class RunTabPresenter(PresenterCommon):
             # Always set the instrument to NoInstrument unless otherwise specified as our fallback
             user_file_items = FileLoading.load_user_file(file_path=user_file_path,
                                                          file_information=self._file_information)
-        except UserFileLoadException as e:
+        except (UserFileLoadException, TomlValidationError) as e:
             # It is in this exception block that loading fails if the file is invalid (e.g. a csv)
             self._on_user_file_load_failure(e, error_msg + " when reading file.", use_error_name=True)
             return
@@ -484,7 +485,7 @@ class RunTabPresenter(PresenterCommon):
         for row in self._table_model.get_non_empty_rows():
             try:
                 file_info = row.file_information
-            except (ValueError, RuntimeError):
+            except (ValueError, RuntimeError, OSError):
                 pass
 
         if self._file_information != file_info:
@@ -873,9 +874,9 @@ class RunTabPresenter(PresenterCommon):
             return
         mode = get_reduction_mode_from_gui_selection(selection)
         if mode == ReductionMode.HAB:
-            self._beam_centre_presenter.update_hab_selected()
+            self._beam_centre_presenter.update_front_selected()
         elif mode == ReductionMode.LAB:
-            self._beam_centre_presenter.update_lab_selected()
+            self._beam_centre_presenter.update_rear_selected()
         else:
             self._beam_centre_presenter.update_all_selected()
 
@@ -1146,8 +1147,8 @@ class RunTabPresenter(PresenterCommon):
             self._set_on_custom_model("batch_file", state_model)
 
             # Beam Centre
-            self._beam_centre_presenter.set_on_state_model("lab_pos_1", state_model)
-            self._beam_centre_presenter.set_on_state_model("lab_pos_2", state_model)
+            self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
         except (RuntimeError, ValueError) as e:
             self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 

@@ -10,9 +10,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidIndexing/IndexInfo.h"
 
-namespace Mantid {
-namespace DataObjects {
-namespace detail {
+namespace Mantid::DataObjects::detail {
 HistogramData::Histogram stripData(HistogramData::Histogram histogram) {
   histogram.setSharedY(nullptr);
   histogram.setSharedE(nullptr);
@@ -27,11 +25,9 @@ template <> std::unique_ptr<API::MatrixWorkspace> createHelper() { return {nullp
 
 template <> std::unique_ptr<API::MatrixWorkspace> createConcreteHelper() {
   throw std::runtime_error("Attempt to create instance of abstract type MatrixWorkspace");
-  return {nullptr};
 }
 template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
   throw std::runtime_error("Attempt to create instance of abstract type HistoWorkspace");
-  return {nullptr};
 }
 
 template <class UseIndexInfo>
@@ -89,6 +85,4 @@ template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::true_type>(const 
                                                                           API::MatrixWorkspace &);
 template void MANTID_DATAOBJECTS_DLL initializeFromParent<std::false_type>(const API::MatrixWorkspace &,
                                                                            API::MatrixWorkspace &);
-} // namespace detail
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects::detail

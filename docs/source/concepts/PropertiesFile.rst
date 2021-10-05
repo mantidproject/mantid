@@ -36,6 +36,15 @@ General properties
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
 |                                  | algorithms that should be hidden in Mantid.      |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.deprecated``        | Action upon invoking a deprecated algorithm.     | ``Log`` or ``Raise``   |
+|                                  | ``Log`` causes a log message at error level.     |                        |
+|                                  |``Raise`` causes a ``RuntimError``.               |                        |
++----------------------------------+--------------------------------------------------+------------------------+
+| ``algorithms.alias.deprecated``  | Action upon invoking the algorithm via one of    | ``Log`` or ``Raise``   |
+|                                  | its deprecated aliases.                          |                        |
+|                                  | ``Log`` causes a log message at error level.     |                        |
+|                                  |``Raise`` causes a ``RuntimError``.               |                        |
++----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
@@ -147,7 +156,7 @@ you may want to alter and those properties are detailed below.
 |                                                 | redirected using pipes.                           |                             |
 |                                                 | ``PythonStdoutChannel`` writes to stdout through  |                             |
 |                                                 | python and is visible in jupyter notebooks.       |                             |
-+-------------------------------------------------+---------------------------------------------------+-----------------------------+
++-- -----------------------------------------------+---------------------------------------------------+-----------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
 

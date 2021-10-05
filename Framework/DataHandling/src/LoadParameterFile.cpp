@@ -28,8 +28,7 @@ using Poco::XML::Document;
 using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadParameterFile)
 
@@ -138,5 +137,4 @@ void LoadParameterFile::exec() {
   prog.report("Done");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

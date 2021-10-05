@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 UnknownFrame::UnknownFrame(std::unique_ptr<Kernel::MDUnit> unit) : m_unit(unit.release()) {}
 
@@ -45,5 +44,4 @@ bool UnknownFrame::isSameType(const MDFrame &frame) const {
   }
   return isSameType;
 }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

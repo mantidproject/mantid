@@ -56,6 +56,7 @@ Bugfixes
 - Fix the format inconsistency (with data saved from autoreduction workflow) issue for saving GSAS data using :ref:`HB2AReduce <algm-HB2AReduce>` - both are now using :ref:`SaveGSSCW <algm-SaveGSSCW>` for saving GSAS data.
 - Fix out-of-range bug in :ref:`FitPeaks <algm-FitPeaks>` for histogram data.
 - Fix bug in :ref:`FitPeaks <algm-FitPeaks>` not correctly checking right window for an individual peak.
+- Fix :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering>` calculation of mass term for multiple-element materials
 - Fix bug to implement intended sequential fit of DIFC, DIFA, TZERO in :ref:`PDCalibration <algm-PDCalibration>`.
 - Correct unit to TOF for ``_tof_xye`` files output for PEARL, when the focusing mode is set to *all*.
 - Allow a different number of spectra for absorption correction division of PEARL data. This allows ``create_vanadium`` to work for a non-standard dataset.

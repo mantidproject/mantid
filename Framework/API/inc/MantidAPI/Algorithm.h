@@ -111,7 +111,7 @@ public:
   class MANTID_API_DLL ProgressNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ProgressNotification(const Algorithm *const alg, double p, const std::string &msg, double estimatedTime,
+    ProgressNotification(const Algorithm *const alg, double p, std::string msg, double estimatedTime,
                          int progressPrecision);
     std::string name() const override;
     double progress;       ///< Current progress. Value must be between 0 and 1.
@@ -126,7 +126,7 @@ public:
   class MANTID_API_DLL ErrorNotification : public AlgorithmNotification {
   public:
     /// Constructor
-    ErrorNotification(const Algorithm *const alg, const std::string &str);
+    ErrorNotification(const Algorithm *const alg, std::string str);
     std::string name() const override;
     std::string what; ///< message string
   };
@@ -171,9 +171,13 @@ public:
   /// Function to return all of the seeAlso (these are not validated) algorithms
   /// related to this algorithm.A default implementation is provided.
   const std::vector<std::string> seeAlso() const override { return {}; };
-  /// function to return any aliases to the algorithm;  A default implementation
-  /// is provided
+  /// function to return any aliases to the algorithm;  A default implementation is provided
   const std::string alias() const override { return ""; }
+  /// Flag to indicate if the algorithm is called by its alias.
+  bool calledByAlias = false;
+
+  /// Expiration date (in ISO8601 format) for the algorithm aliases; default implementation for no expiration date
+  const std::string aliasDeprecated() const override { return ""; }
 
   /// function to return URL for algorithm documentation; A default
   /// implementation is provided.
@@ -342,6 +346,9 @@ public:
 
   /// Removes the property from management
   void removeProperty(const std::string &name, const bool delproperty = true) override;
+  /// Removes the property from management and returns a pointer to it
+  std::unique_ptr<Kernel::Property> takeProperty(const size_t index) override;
+
   /// Clears all properties under management
   void clear() override;
   /// Override this method to perform a custom action right after a property was

@@ -8,8 +8,7 @@
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Constructs Frequencies from Counts and bin width based on BinEdges.
 Frequencies::Frequencies(const Counts &counts, const BinEdges &edges) : Frequencies(Counts(counts), edges) {}
@@ -33,5 +32,4 @@ Frequencies::Frequencies(Counts &&counts, const BinEdges &edges) {
   }
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

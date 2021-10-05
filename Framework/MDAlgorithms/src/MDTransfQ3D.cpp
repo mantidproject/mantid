@@ -8,8 +8,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/RegistrationHelper.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 // register the class, whith conversion factory under Q3D name
 DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 
@@ -328,5 +327,4 @@ std::vector<std::string> MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmo
 MDTransfQ3D::MDTransfQ3D()
     : m_isLorentzCorrected(false), m_SinThetaSqArray(nullptr), SinThetaSq(), m_SinThetaSq(0.), m_AbsMin(0.) {}
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

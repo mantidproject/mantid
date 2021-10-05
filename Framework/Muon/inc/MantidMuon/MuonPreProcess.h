@@ -46,7 +46,7 @@ private:
 
   MatrixWorkspace_sptr applyTimeOffset(MatrixWorkspace_sptr ws, const double &offset);
 
-  MatrixWorkspace_sptr applyTimeZeroTable(MatrixWorkspace_sptr ws, const TableWorkspace_sptr &tz);
+  MatrixWorkspace_sptr applyTimeZeroTable(const MatrixWorkspace_sptr &ws, const TableWorkspace_sptr &tz);
 
   MatrixWorkspace_sptr applyCropping(MatrixWorkspace_sptr ws, const double &xMin, const double &xMax);
 
@@ -67,10 +67,10 @@ private:
   bool checkGroups() override;
 
   /// Crop workspace with single xMin and xMax values
-  MatrixWorkspace_sptr cropWithSingleValues(MatrixWorkspace_sptr ws, const double xMin, const double xMax);
+  MatrixWorkspace_sptr cropWithSingleValues(const MatrixWorkspace_sptr &ws, const double xMin, const double xMax);
 
   /// Crop workspace with vector of doubles
-  MatrixWorkspace_sptr cropWithVectors(MatrixWorkspace_sptr ws, const double xMin, const double xMax);
+  MatrixWorkspace_sptr cropWithVectors(const MatrixWorkspace_sptr &ws, const double xMin, const double xMax);
 };
 
 } // namespace Muon

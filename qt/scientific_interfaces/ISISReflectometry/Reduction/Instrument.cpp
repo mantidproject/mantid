@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Instrument.h"
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Instrument::Instrument()
     : m_wavelengthRange(RangeInLambda(0.0, 0.0)),
@@ -17,7 +15,7 @@ Instrument::Instrument()
 Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections)
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
-      m_detectorCorrections(std::move(detectorCorrections)) {}
+      m_detectorCorrections(detectorCorrections) {}
 
 boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const { return m_wavelengthRange; }
 
@@ -45,6 +43,4 @@ bool operator==(Instrument const &lhs, Instrument const &rhs) {
   return lhs.wavelengthRange() == rhs.wavelengthRange() && lhs.monitorCorrections() == rhs.monitorCorrections() &&
          lhs.detectorCorrections() == rhs.detectorCorrections();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

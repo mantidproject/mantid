@@ -56,13 +56,12 @@ public:
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
-  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/,
-                     double /*nearz*/, double /*farz*/,
+  void setProjection(double /*l*/, double /*r*/, double /*b*/, double /*t*/, double /*nearz*/, double /*farz*/,
                      ProjectionType type = Viewport::ORTHO);
   /// Set a projection.
-  void setProjection(const Mantid::Kernel::V3D &minBounds,
-                     const Mantid::Kernel::V3D &maxBounds,
+  void setProjection(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds,
                      ProjectionType type = Viewport::ORTHO);
+  void setProjectionZPlane(const Mantid::Kernel::V3D &minBounds, const Mantid::Kernel::V3D &maxBounds);
   /// Apply the projection to OpenGL engine
   void applyProjection() const;
   /// Rotate the model
@@ -84,6 +83,8 @@ public:
   void setViewToYNegative();
   /// Call to set the View to Z- direction
   void setViewToZNegative();
+
+  void adjustProjection();
 
   /// Init rotation at a point on the screen
   void initRotationFrom(int a, int b);
@@ -115,8 +116,7 @@ public:
   void setTranslation(double /*xval*/, double /*yval*/);
 
   // void getProjection(double&,double&,double&,double&,double&,double&);
-  void getInstantProjection(double & /*xmin*/, double & /*xmax*/,
-                            double & /*ymin*/, double & /*ymax*/,
+  void getInstantProjection(double & /*xmin*/, double & /*xmax*/, double & /*ymin*/, double & /*ymax*/,
                             double & /*zmin*/, double & /*zmax*/) const;
 
   /// Apply the transformation to a vector
@@ -128,8 +128,7 @@ public:
 
 protected:
   /// Correct for aspect ratio
-  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin,
-                                    double &ymax, double &zmin,
+  void correctForAspectRatioAndZoom(double &xmin, double &xmax, double &ymin, double &ymax, double &zmin,
                                     double &zmax) const;
   /// Project a point onto a sphere centered at rotation point
   void projectOnSphere(int a, int b, Mantid::Kernel::V3D &point) const;
@@ -152,6 +151,14 @@ protected:
   /// z axis)
   double m_far; ///< Ortho/Prespective Projection zmax value (Far side of the z
   /// axis)
+  double m_leftOrig;
+  double m_rightOrig;
+  double m_bottomOrig;
+  double m_topOrig;
+  double m_zminOrig;
+  double m_zmaxOrig;
+  double m_zmin;
+  double m_zmax;
 
   /* Trackball rotation */
 

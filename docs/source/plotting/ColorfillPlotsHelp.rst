@@ -51,7 +51,7 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
+|O| ptions Menu
 -----------------------------------
 
 .. figure:: /images/PlotOptionsColorfillContour.png
@@ -165,7 +165,7 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
+|O| ptions Menu
 -----------------------------------
 
 .. figure:: /images/PlotOptionsColorfillContour.png
@@ -248,7 +248,7 @@ File > Settings
 * :ref:`plotting`
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 
-.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+.. |O| image:: /images/FigureOptionsGear.png
    :width: 150px
 .. |GenerateAScript.png| image:: /images/GenerateAScript.png
    :width: 30px

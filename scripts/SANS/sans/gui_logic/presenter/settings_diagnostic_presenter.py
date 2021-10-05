@@ -11,6 +11,8 @@ import os
 from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 
 from mantid.kernel import Logger
+from mantid import UsageService
+from mantid.kernel import FeatureType
 from sans.gui_logic.gui_common import JSON_SUFFIX
 from sans.state.AllStates import AllStates
 from sans.state.Serializer import Serializer
@@ -110,6 +112,7 @@ class SettingsDiagnosticPresenter(object):
         self._view.set_tree(dict_vals)
 
     def on_save_state(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS","Settings Diagnostics - Save JSON"], False)
         # Get the save location
         save_location = self._view.get_save_location()
         # Check if it exists

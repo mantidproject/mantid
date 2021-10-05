@@ -8,8 +8,7 @@
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 AnalysisDataServiceObserverAdapter::AnalysisDataServiceObserverAdapter(PyObject *self)
     : API::AnalysisDataServiceObserver(), m_self(self) {}
@@ -86,5 +85,4 @@ void AnalysisDataServiceObserverAdapter::groupUpdateHandle(const std::string &ws
   }
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

@@ -83,15 +83,17 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertTrue('J' in nested_l2_pmgr)
         self.assertEqual(120.6, nested_l2_pmgr['J'].value)
 
+    def test_set_property_on_algorithm_property_manager(self):
+        # set the property directly from a PropertyManager
+        fake = FakeAlgorithm()
+        fake.initialize()
+        fake.setProperty("Args", PropertyManager())
+
     def test_that_empty_sequence_in_property_manager_raises(self):
         fake = FakeAlgorithm()
         fake.initialize()
-        try:
+        with self.assertRaises(RuntimeError):
             fake.setProperty("Args", {'A': []})
-            has_raised = False
-        except RuntimeError:
-            has_raised = True
-        self.assertTrue(has_raised)
 
     def test_create_with_dictionary_as_default_value(self):
         default = { 'A' : {}, 'B' : 1 }

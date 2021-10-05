@@ -163,8 +163,7 @@ double getThetaFromLogs(const MatrixWorkspace_sptr &inputWs) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToReflectometryQ)
@@ -309,15 +308,15 @@ void ConvertToReflectometryQ::exec() {
   Mantid::Geometry::MDFrame_uptr frame;
   if (outputDimensions == qSpaceTransform()) {
     transform = std::make_shared<ReflectometryTransformQxQz>(dim0min, dim0max, dim1min, dim1max, incidentTheta,
-                                                             numberOfBinsQx, numberOfBinsQz);
+                                                             version(), numberOfBinsQx, numberOfBinsQz);
     frame.reset(new Mantid::Geometry::QLab);
   } else if (outputDimensions == pSpaceTransform()) {
-    transform = std::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta,
+    transform = std::make_shared<ReflectometryTransformP>(dim0min, dim0max, dim1min, dim1max, incidentTheta, version(),
                                                           numberOfBinsQx, numberOfBinsQz);
     frame.reset(new Mantid::Geometry::GeneralFrame("P", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   } else {
     transform = std::make_shared<ReflectometryTransformKiKf>(dim0min, dim0max, dim1min, dim1max, incidentTheta,
-                                                             numberOfBinsQx, numberOfBinsQz);
+                                                             version(), numberOfBinsQx, numberOfBinsQz);
     frame.reset(new Mantid::Geometry::GeneralFrame("KiKf", Mantid::Kernel::InverseAngstromsUnit().getUnitLabel()));
   }
 
@@ -422,5 +421,4 @@ MatrixWorkspace_sptr ConvertToReflectometryQ::correctDetectors(MatrixWorkspace_s
   return outWS;
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

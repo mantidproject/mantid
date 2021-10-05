@@ -21,8 +21,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -390,5 +389,4 @@ SelectedAlgorithm FindAlgComboBox::getSelectedAlgorithm() {
   return SelectedAlgorithm(typedText, -1);
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

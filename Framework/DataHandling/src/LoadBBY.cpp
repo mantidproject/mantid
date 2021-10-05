@@ -38,8 +38,7 @@
 #include <Poco/TemporaryFile.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadBBY)
@@ -489,10 +488,10 @@ void LoadBBY::loadInstrumentParameters(NeXus::NXEntry &entry, std::map<std::stri
         auto hdfTag = boost::algorithm::trim_copy(details[0]);
         try {
           // extract the parameter and add it to the parameter dictionary,
-          // check the default for value numeric and string
+          // check the scale factor for numeric and string
           auto updateOk = false;
           if (!hdfTag.empty()) {
-            if (isNumeric(details[2])) {
+            if (isNumeric(details[1])) {
               if (loadNXDataSet(entry, hdfTag, tmpFloat)) {
                 auto factor = std::stod(details[1]);
                 logParams[logTag] = factor * tmpFloat;
@@ -504,12 +503,17 @@ void LoadBBY::loadInstrumentParameters(NeXus::NXEntry &entry, std::map<std::stri
             }
           }
           if (!updateOk) {
-            if (isNumeric(details[2]))
-              logParams[logTag] = std::stod(details[2]);
-            else
-              logStrings[logTag] = details[2];
-            if (!hdfTag.empty())
-              g_log.warning() << "Cannot find hdf parameter " << hdfTag << ", using default.\n";
+            // if the hdf is missing the tag then add the default if
+            // it is provided
+            auto defValue = boost::algorithm::trim_copy(details[2]);
+            if (!defValue.empty()) {
+              if (isNumeric(defValue))
+                logParams[logTag] = std::stod(defValue);
+              else
+                logStrings[logTag] = defValue;
+              if (!hdfTag.empty())
+                g_log.warning() << "Cannot find hdf parameter " << hdfTag << ", using default.\n";
+            }
           }
         } catch (const std::invalid_argument &) {
           g_log.warning() << "Invalid format for BILBY parameter " << x.first << std::endl;
@@ -803,5 +807,4 @@ void LoadBBY::loadEvents(API::Progress &prog, const char *progMsg, ANSTO::Tar::F
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

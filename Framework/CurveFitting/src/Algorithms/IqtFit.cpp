@@ -60,9 +60,7 @@ private:
 std::string getPropertySuffix(std::size_t index) { return index == 0 ? "" : "_" + std::to_string(index); }
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 using namespace API;
 
@@ -168,6 +166,4 @@ using IqtFitSimultaneous = IqtFit<QENSFitSimultaneous>;
 DECLARE_ALGORITHM(IqtFitSequential)
 DECLARE_ALGORITHM(IqtFitSimultaneous)
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

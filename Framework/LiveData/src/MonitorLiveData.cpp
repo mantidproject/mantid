@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MonitorLiveData)
@@ -252,5 +251,4 @@ void MonitorLiveData::exec() {
 
 } // exec()
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

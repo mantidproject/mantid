@@ -62,11 +62,11 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         # MD transformations
         QxQy, _QxQy_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                                       OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12')
+                                                       OutputDimensions='Q (lab frame)', Extents='-0.0005,0.0005,0,0.12', Version=1)
         KiKf, _KiKF_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                                       OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05')
+                                                       OutputDimensions='K (incident, final)', Extents='0,0.05,0,0.05', Version=1)
         PiPf, _PiPf_vertexes = ConvertToReflectometryQ(InputWorkspace='SignedTheta_vs_Wavelength',
-                                                       OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15')
+                                                       OutputDimensions='P (lab frame)', Extents='0,0.1,-0.02,0.15', Version=1)
 
         # Bin the outputs to histograms because observations are not important.
         BinMD(InputWorkspace=QxQy, AxisAligned='0',BasisVector0='Qx,(Ang^-1),1,0',BasisVector1='Qz,(Ang^-1),0,1',
@@ -87,9 +87,9 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         pipf_comparison = CompareMDWorkspaces(Workspace1='PiPf_rebinned',Workspace2='PiPf_benchmark', Tolerance=0.01, CheckEvents=False)
 
         # Assert against the outputs
-        self.assertEqual(int(qxqy_comparison[0]),  1)
-        self.assertEqual(int(kikf_comparison[0]),  1)
-        self.assertEqual(int(pipf_comparison[0]),  1)
+        self.assertEqual(qxqy_comparison[0],  True, qxqy_comparison[1])
+        self.assertEqual(kikf_comparison[0],  True, kikf_comparison[1])
+        self.assertEqual(pipf_comparison[0],  True, pipf_comparison[1])
 
         return True
 

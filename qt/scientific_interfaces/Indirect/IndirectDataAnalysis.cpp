@@ -116,7 +116,7 @@ void IndirectDataAnalysis::loadSettings() {
  */
 void IndirectDataAnalysis::tabChanged(int) {}
 
-std::string IndirectDataAnalysis::documentationPage() const { return "Indirect Data Analysis"; }
+std::string IndirectDataAnalysis::documentationPage() const { return "Inelastic Data Analysis"; }
 
 /**
  * Handles exporting a Python script for the current tab.

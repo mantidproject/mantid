@@ -20,8 +20,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -232,7 +231,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     unitchar = 'q';
 
   binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
-  binMD(std::move(monitorws), unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
+  binMD(monitorws, unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
 
   // Normalize by division
   double maxmonitorcounts = 0;
@@ -658,5 +657,4 @@ bool ConvertCWPDMDToSpectra::isExcluded(const std::vector<detid_t> &vec_excluded
   return std::find(vec_excludedet.begin(), vec_excludedet.end(), detid) != vec_excludedet.end();
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

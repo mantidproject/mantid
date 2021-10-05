@@ -181,6 +181,19 @@ private:
     TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540", filteredLogEndTime.toSimpleString());
   }
 
+  void validate_pulse_time_sorting(EventWorkspace_sptr eventWS) {
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); i++) {
+      auto eventList = eventWS->getSpectrum(i);
+      if (eventList.getSortType() == DataObjects::PULSETIME_SORT) {
+        std::vector<DateAndTime> pulsetimes;
+        for (auto &event : eventList.getEvents()) {
+          pulsetimes.emplace_back(event.pulseTime());
+        }
+        TS_ASSERT(std::is_sorted(pulsetimes.cbegin(), pulsetimes.cend()));
+      }
+    }
+  }
+
 public:
   void test_load_event_nexus_v20_ess() {
     const std::string file = "V20_ESS_example.nxs";
@@ -219,6 +232,8 @@ public:
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
+
+    validate_pulse_time_sorting(eventWS);
   }
 
   void test_load_event_nexus_v20_ess_integration_2018() {
@@ -241,6 +256,8 @@ public:
                        (300 * 300) + 2) // Two monitors
       TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
       TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
+
+      validate_pulse_time_sorting(eventWS);
     }
   }
 
@@ -731,8 +748,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     // Pixels have to be padded
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), SingleBankPixelsOnly ? 1024 : 51200);
     // Events - there are fewer now.
@@ -838,8 +854,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
@@ -881,8 +896,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     const auto numHist = WS->getNumberHistograms();
     TS_ASSERT_EQUALS(numHist, 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
@@ -992,6 +1006,62 @@ public:
     loader.setPropertyValue("OutputWorkspace", "dummy");
     loader.setPropertyValue("Filename", "SANS2D00059115_corrupted.nxs");
     TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
+  }
+
+  void test_load_ILL_no_triggers() {
+    // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
+    // But some of these nexuses don't have any triggers either, so they are modified to be allowed to be loaded.
+
+    LoadEventNexus loader;
+
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/D22B/000242_trunc.event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setProperty("LoadAllLogs", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    EventWorkspace_sptr eventWS;
+    TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
+    TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-01-28T18:07:12"));
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin(), eventWS->getPulseTimeMax());
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin().totalNanoseconds(), 980705232000000000);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 13515.0517592763, 1e-2);
+
+    // check that the logs have been loaded by looking at some random example
+    TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.21, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
+  }
+
+  void test_load_ILL_triggers() {
+    // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
+
+    LoadEventNexus loader;
+
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/D22B/042730_trunc.event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setProperty("LoadAllLogs", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    EventWorkspace_sptr eventWS;
+    TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
+    TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-03-24T20:52:50"));
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin().totalNanoseconds(), 985467170046478105);
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMax().totalNanoseconds(), 985467770208320643);
+
+    // check that the logs have been loaded by looking at some random example
+    TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.2, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
   }
 
 private:

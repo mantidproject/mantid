@@ -23,27 +23,27 @@
       <item row="0" column="0">
        <widget class="QGroupBox" name="groupBox_3">
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The centre positions of both the high angle and low angle detector banks. The values here if they exist will be used in any reduction initiated from the runs tab.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; background-color:transparent;&quot;&gt;The centre positions of both the Front (HAB) and Rear detector banks. Any values calculated here will be used automatically in subsequent reductions initiated from the runs tab.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="title">
          <string>Centre Position</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_4">
          <item row="3" column="0">
-          <widget class="QLineEdit" name="hab_pos_1_line_edit"/>
+          <widget class="QLineEdit" name="front_pos_1_line_edit"/>
          </item>
          <item row="1" column="0">
-          <widget class="QLineEdit" name="lab_pos_1_line_edit"/>
+          <widget class="QLineEdit" name="rear_pos_1_line_edit"/>
          </item>
          <item row="0" column="0">
-          <widget class="QLabel" name="lab_centre_label">
+          <widget class="QLabel" name="rear_centre_label">
            <property name="text">
-            <string>Centre Position LAB (mm)</string>
+            <string>Centre Position - Rear (mm)</string>
            </property>
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QLineEdit" name="hab_pos_2_line_edit"/>
+          <widget class="QLineEdit" name="front_pos_2_line_edit"/>
          </item>
          <item row="4" column="0">
           <widget class="QLabel" name="label_4">
@@ -53,29 +53,29 @@
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QLabel" name="hab_centre_label">
+          <widget class="QLabel" name="front_centre_label">
            <property name="text">
-            <string>Centre Position HAB (mm)</string>
+            <string>Centre Position - Front (mm)</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QLineEdit" name="lab_pos_2_line_edit"/>
+          <widget class="QLineEdit" name="rear_pos_2_line_edit"/>
          </item>
          <item row="5" column="0">
           <widget class="QComboBox" name="component_combo_box"/>
          </item>
          <item row="4" column="1">
-          <widget class="QCheckBox" name="update_lab_check_box">
+          <widget class="QCheckBox" name="update_rear_check_box">
            <property name="text">
-            <string>Use LAB Centre in Reduction</string>
+            <string>Use Rear Centre in Reduction</string>
            </property>
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QCheckBox" name="update_hab_check_box">
+          <widget class="QCheckBox" name="update_front_check_box">
            <property name="text">
-            <string>Use HAB Centre in Reduction</string>
+            <string>Use Front Centre in Reduction</string>
            </property>
           </widget>
          </item>
@@ -318,13 +318,13 @@
   </layout>
  </widget>
  <tabstops>
-  <tabstop>lab_pos_1_line_edit</tabstop>
-  <tabstop>lab_pos_2_line_edit</tabstop>
-  <tabstop>hab_pos_1_line_edit</tabstop>
-  <tabstop>hab_pos_2_line_edit</tabstop>
+  <tabstop>rear_pos_1_line_edit</tabstop>
+  <tabstop>rear_pos_2_line_edit</tabstop>
+  <tabstop>front_pos_1_line_edit</tabstop>
+  <tabstop>front_pos_2_line_edit</tabstop>
   <tabstop>component_combo_box</tabstop>
-  <tabstop>update_lab_check_box</tabstop>
-  <tabstop>update_hab_check_box</tabstop>
+  <tabstop>update_rear_check_box</tabstop>
+  <tabstop>update_front_check_box</tabstop>
   <tabstop>r_min_line_edit</tabstop>
   <tabstop>r_max_line_edit</tabstop>
   <tabstop>q_min_line_edit</tabstop>

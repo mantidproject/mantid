@@ -53,8 +53,7 @@ std::unique_ptr<RdKafka::Conf> createGlobalConfiguration(const std::string &brok
 }
 } // namespace
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 // -----------------------------------------------------------------------------
 // Public members
@@ -180,7 +179,7 @@ std::unique_ptr<Metadata> KafkaTopicSubscriber::queryMetadata() const {
   // &metadata.get() as it is an rvalue
   m_consumer->metadata(true, nullptr, &metadataRawPtr, CONSUME_TIMEOUT_MS);
   // Capture the pointer in an owning struct to take care of deletion
-  std::unique_ptr<Metadata> metadata(std::move(metadataRawPtr));
+  std::unique_ptr<Metadata> metadata(metadataRawPtr);
   if (!metadata) {
     throw std::runtime_error("Failed to query metadata from broker");
   }
@@ -471,5 +470,4 @@ std::unordered_map<std::string, std::vector<int64_t>> KafkaTopicSubscriber::getO
 
   return partitionOffsetMap;
 }
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

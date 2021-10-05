@@ -10,8 +10,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FindDeadDetectors)
@@ -136,5 +135,4 @@ MatrixWorkspace_sptr FindDeadDetectors::integrateWorkspace() {
   return childAlg->getProperty("OutputWorkspace");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

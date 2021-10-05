@@ -377,8 +377,7 @@ double sphereSolidAngle(const V3D &observer, const std::vector<V3D> &vectors, co
 }
 } // namespace
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 namespace {
 Kernel::Logger logger("CSGObject");
@@ -392,11 +391,11 @@ CSGObject::CSGObject() : CSGObject("") {}
  *  Construct with original shape xml knowledge.
  *  @param shapeXML : string with original shape xml.
  */
-CSGObject::CSGObject(const std::string &shapeXML)
+CSGObject::CSGObject(std::string shapeXML)
     : m_topRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0),
       boolBounded(false), m_objNum(0), m_handler(), bGeometryCaching(false),
       vtkCacheReader(std::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()), m_shapeXML(shapeXML), m_id() {
+      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()), m_shapeXML(std::move(shapeXML)), m_id() {
   m_handler = std::make_shared<GeometryHandler>(this);
   m_material = std::make_unique<Material>();
 }
@@ -574,7 +573,6 @@ int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
   }
 
   throw std::runtime_error("Object::complement :: " + Part);
-  return 0;
 }
 
 /**
@@ -2193,5 +2191,4 @@ void CSGObject::GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vecto
 */
 std::string CSGObject::getShapeXML() const { return this->m_shapeXML; }
 
-} // NAMESPACE Geometry
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

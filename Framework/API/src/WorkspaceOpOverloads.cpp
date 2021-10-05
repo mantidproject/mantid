@@ -17,8 +17,7 @@
 
 #include <numeric>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 namespace OperatorOverloads {
 
 /** Performs a binary operation on two workspaces
@@ -459,5 +458,4 @@ void WorkspaceHelpers::makeDistribution(const MatrixWorkspace_sptr &workspace, c
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

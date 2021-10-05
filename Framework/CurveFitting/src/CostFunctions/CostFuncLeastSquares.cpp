@@ -18,9 +18,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 namespace {
 /// static logger
 Kernel::Logger g_log("CostFuncLeastSquares");
@@ -195,6 +193,4 @@ void CostFuncLeastSquares::calActiveCovarianceMatrix(GSLMatrix &covar, double ep
   }
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

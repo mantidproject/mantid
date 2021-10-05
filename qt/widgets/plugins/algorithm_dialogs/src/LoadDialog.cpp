@@ -29,8 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using MantidQt::API::FileFinderWidget;
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 namespace {
 /// Holds a flag at a given value
 /// and flips it back to its starting value on destruction
@@ -375,5 +374,4 @@ int LoadDialog::createWidgetsForProperty(const Mantid::Kernel::Property *prop, Q
 
   return inputWidget->geometry().height();
 }
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

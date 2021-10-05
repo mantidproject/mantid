@@ -19,8 +19,7 @@
 
 #include <memory>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(PoldiAutoCorrelation5)
 
@@ -139,5 +138,4 @@ void PoldiAutoCorrelation5::logConfigurationInformation(const std::shared_ptr<Po
   }
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

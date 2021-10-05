@@ -13,8 +13,7 @@
 
 #include "Poco/NumberFormatter.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -63,5 +62,4 @@ void HFIRSANSNormalise::exec() {
   setProperty("OutputMessage", "Normalisation by " + normalisation + ": " + Poco::NumberFormatter::format(norm_count));
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

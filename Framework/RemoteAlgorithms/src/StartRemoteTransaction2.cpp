@@ -10,8 +10,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace RemoteAlgorithms {
+namespace Mantid::RemoteAlgorithms {
 
 // Register the algorithm into the Algorithm Factory
 DECLARE_ALGORITHM(StartRemoteTransaction2)
@@ -43,5 +42,4 @@ void StartRemoteTransaction2::exec() {
   g_log.information() << "Transaction ID " << tid << " started.\n";
 }
 
-} // end namespace RemoteAlgorithms
-} // end namespace Mantid
+} // namespace Mantid::RemoteAlgorithms

@@ -15,8 +15,7 @@
 
 using Mantid::DataObjects::PeaksWorkspace;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CentroidPeaksMD)
@@ -85,7 +84,6 @@ template <typename MDE, size_t nd> void CentroidPeaksMD::integrate(typename MDEv
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
 
-  // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i = 0; i < int(peakWS->getNumberPeaks()); ++i) {
       Peak &p = peakWS->getPeak(i);
@@ -159,5 +157,4 @@ void CentroidPeaksMD::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

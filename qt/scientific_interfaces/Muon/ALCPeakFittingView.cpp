@@ -12,8 +12,7 @@
 
 using namespace Mantid::API;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui(), m_peakPicker(nullptr) {}
 
@@ -37,13 +36,14 @@ void ALCPeakFittingView::initialize() {
   m_ui.plot->setLinesWithErrors(plotsWithErrors);
 
   // XXX: Being a QwtPlotItem, should get deleted when m_ui.plot gets deleted
+  // TODO: the peak picker is broken, these are being dissabled for release and will be fixed in maintinance.
   // (auto-delete option)
-  m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
+  // m_peakPicker = new MantidWidgets::PeakPicker(m_ui.plot, Qt::red);
 
-  connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
+  // connect(m_peakPicker, SIGNAL(changed()), SIGNAL(peakPickerChanged()));
 
-  connect(m_ui.peaks, SIGNAL(currentFunctionChanged()), SIGNAL(currentFunctionChanged()));
-  connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)), SIGNAL(parameterChanged(QString, QString)));
+  // connect(m_ui.peaks, SIGNAL(functionStructureChanged()), SIGNAL(currentFunctionChanged()));
+  // connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)), SIGNAL(parameterChanged(QString, QString)));
 
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
@@ -54,6 +54,7 @@ void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   QHash<QString, QVariant> kwargs;
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.plot->clear();
   m_ui.plot->addSpectrum("Corrected", workspace, workspaceIndex, Qt::black, kwargs);
@@ -133,5 +134,4 @@ void ALCPeakFittingView::changePlotGuessState(bool plotted) {
   m_ui.plotGuess->setText(plotted ? "Remove guess" : "Plot guess");
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

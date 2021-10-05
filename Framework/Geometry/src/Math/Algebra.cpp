@@ -21,9 +21,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger logger("Algebra");
 }
@@ -323,6 +321,4 @@ int Algebra::logicalEqual(const Algebra &A) const
   return F.logicalEqual(A.F);
 }
 
-} // namespace Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

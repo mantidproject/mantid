@@ -7,8 +7,7 @@
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /// Clone the current state
 Kernel::IValidator_sptr CommonBinsValidator::clone() const { return std::make_shared<CommonBinsValidator>(*this); }
@@ -27,5 +26,4 @@ std::string CommonBinsValidator::checkValidity(const MatrixWorkspace_sptr &value
     return "The workspace must have common bin boundaries for all histograms";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

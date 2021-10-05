@@ -61,6 +61,8 @@ protected:
                                                                  const size_t wavelengthPoints, const size_t rows,
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
+  std::unique_ptr<IBeamProfile> createBeamProfile(const Geometry::Instrument &instrument,
+                                                  const Geometry::IObject &sample) const;
 
 private:
   void init() override;
@@ -73,8 +75,6 @@ private:
                                          const size_t maxScatterPtAttempts,
                                          const MCInteractionVolume::ScatteringPointVicinity pointsIn);
   API::MatrixWorkspace_uptr createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
-  std::unique_ptr<IBeamProfile> createBeamProfile(const Geometry::Instrument &instrument,
-                                                  const API::Sample &sample) const;
   void interpolateFromSparse(API::MatrixWorkspace &targetWS, const SparseWorkspace &sparseWS,
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
 };

@@ -23,6 +23,8 @@ procedure in a sensible manner to code generated automatically.
    CPPStandards
    GUIStandards
    PythonStandards
+   DeprecateAlgorithm
+   RenameAlgorithm
    UnitTestStandards
 
 Documentation Standards

@@ -230,7 +230,7 @@ void LoadFlexiNexus::loadMD(NeXus::File *fin) {
   // assign the workspace
   setProperty("OutputWorkspace", ws);
 }
-int LoadFlexiNexus::calculateCAddress(int *pos, int *dim, int rank) {
+int LoadFlexiNexus::calculateCAddress(const int *pos, const int *dim, int rank) {
   int result = pos[rank - 1];
   for (int i = 0; i < rank - 1; i++) {
     int mult = 1;
@@ -288,11 +288,10 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
       }
     }
   }
-  coord_t min, max, tmp;
-  min = static_cast<coord_t>(dData[0]);
-  max = static_cast<coord_t>(dData[length - 1]);
+  auto min = static_cast<coord_t>(dData[0]);
+  auto max = static_cast<coord_t>(dData[length - 1]);
   if (min > max) {
-    tmp = max;
+    const auto tmp = max;
     max = min;
     min = tmp;
     g_log.notice("WARNING: swapped axis values on " + name);

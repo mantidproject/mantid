@@ -13,8 +13,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 // -----------------------------------------------------------------------------
 // Public Methods
@@ -157,5 +156,4 @@ IPropertyManager::getValue<PropertyManager_const_sptr>(const std::string &name) 
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

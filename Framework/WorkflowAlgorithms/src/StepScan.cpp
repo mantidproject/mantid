@@ -10,8 +10,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StepScan)
 
@@ -156,5 +155,4 @@ void StepScan::runFilterByXValue(const MatrixWorkspace_sptr &inputWS, const doub
   filter->executeAsChildAlg();
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

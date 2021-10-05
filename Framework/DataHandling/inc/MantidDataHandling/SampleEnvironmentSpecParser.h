@@ -50,7 +50,7 @@ private:
   void LoadOptionalDoubleFromXML(Poco::XML::Element *componentElement, const std::string &elementName,
                                  double &targetVariable) const;
   std::vector<double> parseTranslationVector(const std::string &translationVectorStr) const;
-  std::string findFile(std::string filename) const;
+  std::string findFile(const std::string &filename) const;
   // Members
   MaterialsIndex m_materials;
   std::string m_filepath;

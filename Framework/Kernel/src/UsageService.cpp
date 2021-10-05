@@ -26,8 +26,7 @@ namespace {
 constexpr auto SEPARATOR = "->";
 }
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /// static logger
 Kernel::Logger g_log("UsageServiceImpl");
@@ -340,5 +339,4 @@ int UsageServiceImpl::sendReport(const std::string &message, const std::string &
   return status;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

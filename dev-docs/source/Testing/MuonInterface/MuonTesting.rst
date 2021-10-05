@@ -58,11 +58,8 @@ Ionic Diffusion Test
 	- **f1.Delta:** ``0.389``
 	- **f1.Nu:** ``0.474``
 
-- Back in the workspaces toolbox, click the workspace group for the fitted,
-  data (Name similar to *EMU51341; Pair Asym; long; MA+ ...; Fitted; FlatBackground,DynamicKuboToyabe*)
-- Ctrl + Click all the Workspace 2D data, then right click **Plot** > **Spectrum ...**
-- Choose Plot type **Individual** and click **Plot All**
-- You should get something like the following plot:
+- In the plotting window click the ``External Plot`` button
+- You should get a plot that looks like the following:
 
 .. figure:: ../../images/MuonAnalysisTests/MATestingIDF.png
 	:alt: MATestingIDF.png
@@ -90,10 +87,11 @@ Superconducting Copper Test
 - Go to the **Results** tab
 	- In the **Log Values** table, check **run_number** and **Field_Danfysik**
 	- Click **Output Results**
-- Open the results table by double clicking the table in the workspace toolbox
-- Ctrl-Click the **field_danfysik** and the **lambda** column
-- Right click **lambda** column, click **Plot...** and then **Line**
-- You should get something like the following plot:
+- Go to the **Model Fitting** tab
+- Set the ``Select Data`` to ``field_danfysik`` and ``Lambda``
+- The plot will look similar to the one below
+- Add a peak function (e.g. Gaussian)
+- You should be able to fit to the data
 
 .. figure:: ../../images/MuonAnalysisTests/Cu-fitting.png
 	:alt: Cu-fitting.png

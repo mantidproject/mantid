@@ -13,8 +13,7 @@
 #include <Poco/Glob.h>
 #include <Poco/Path.h>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -140,5 +139,4 @@ int ClearCache::deleteFiles(const std::string &path, const std::string &pattern)
   return filesDeleted;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -11,6 +11,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidAlgorithms/WorkspaceBoundingBox.h"
+#include "MantidDataObjects/EventWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -63,6 +65,12 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
+  /// Helper functions
+  void findCenterOfMass(const API::MatrixWorkspace_sptr &inputWS, double &centerX, double &centerY, const int numSpec,
+                        API::Progress &progress);
+  void storeOutputWorkspace(double centerX, double centerY);
+  // Iteration cutoff
+  const int m_maxIteration = 200;
 };
 
 } // namespace Algorithms

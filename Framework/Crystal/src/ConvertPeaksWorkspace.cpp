@@ -16,8 +16,7 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Logger.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -62,19 +61,18 @@ std::map<std::string, std::string> ConvertPeaksWorkspace::validateInputs() {
   PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(ipws);
   LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(ipws);
 
-  // case I: missing instrument when converting to PeaksWorkspace
   if (lpws && !pws) {
+    // case I: missing instrument when converting to PeaksWorkspace
     if (getPointerToProperty("InstrumentWorkspace")->isDefault()) {
       issues["InstrumentWorkspace"] = "Need a PeaksWorkspace with proper instrument attached to assist conversion.";
     }
-  }
-
-  // case II: instrument cannot be found within donor workspace
-  if (lpws && !pws) {
-    Workspace_sptr ws = getProperty("InstrumentWorkspace");
-    ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
-    if (!inputExperimentInfo) {
-      issues["InstrumentWorkspace"] = "Invalid instrument found in donor workspace.";
+    // case II: instrument cannot be found within donor workspace
+    else {
+      Workspace_sptr ws = getProperty("InstrumentWorkspace");
+      ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+      if (!inputExperimentInfo) {
+        issues["InstrumentWorkspace"] = "Invalid instrument found in donor workspace.";
+      }
     }
   }
 
@@ -112,7 +110,7 @@ void ConvertPeaksWorkspace::exec() {
  * @param ipws input PeaksWorkspace as IPeaksWorkspace_sptr
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaksWorkspace_sptr ipws) {
+IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(const IPeaksWorkspace_sptr &ipws) {
   // prep
   PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(ipws);
   LeanElasticPeaksWorkspace_sptr lpws = std::make_shared<LeanElasticPeaksWorkspace>();
@@ -138,7 +136,8 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makeLeanElasticPeaksWorkspace(IPeaks
  * @param ws donor PeaksWorkspace to provide instrument and ExperimentInfo
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_sptr ipws, Workspace_sptr ws) {
+IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(const IPeaksWorkspace_sptr &ipws,
+                                                               const Workspace_sptr &ws) {
   // prep
   LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(ipws);
   PeaksWorkspace_sptr pws = std::make_shared<PeaksWorkspace>();
@@ -169,5 +168,4 @@ IPeaksWorkspace_sptr ConvertPeaksWorkspace::makePeaksWorkspace(IPeaksWorkspace_s
   return outpws;
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

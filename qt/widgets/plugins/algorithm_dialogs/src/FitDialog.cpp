@@ -30,8 +30,7 @@
 
 using namespace MantidQt::API;
 
-namespace MantidQt {
-namespace CustomDialogs {
+namespace MantidQt::CustomDialogs {
 
 // Declare the dialog. Name must match the class name
 DECLARE_DIALOG(FitDialog)
@@ -528,5 +527,4 @@ int FitDialog::getDomainType() const {
 /// Get the domain type: Simple, Sequential, or Parallel
 QString FitDialog::getDomainTypeString() const { return m_form.cbDomainType->currentText(); }
 
-} // namespace CustomDialogs
-} // namespace MantidQt
+} // namespace MantidQt::CustomDialogs

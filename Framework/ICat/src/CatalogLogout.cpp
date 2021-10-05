@@ -9,8 +9,7 @@
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/CatalogManager.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogLogout)
 
 /// Init method to declare algorithm properties
@@ -43,5 +42,4 @@ void CatalogLogout::exec() {
     }
   }
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

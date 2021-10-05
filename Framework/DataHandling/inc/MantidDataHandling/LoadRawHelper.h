@@ -58,11 +58,13 @@ public:
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
+  /// Search for the log files in the workspace, and output their names as a list.
+  static std::list<std::string> searchForLogFiles(const Poco::Path &pathToRawFile);
   /// returns true if the Exclude Monitor option(property) selected
   static bool isExcludeMonitors(const std::string &monitorOption);
-  ///  returns true if the Separate Monitor Option  selected
+  /// returns true if the Separate Monitor Option  selected
   static bool isSeparateMonitors(const std::string &monitorOption);
-  ///  returns true if the Include Monitor Option  selected
+  /// returns true if the Include Monitor Option  selected
   static bool isIncludeMonitors(const std::string &monitorOption);
 
   static void ProcessLoadMonitorOptions(bool &bincludeMonitors, bool &bseparateMonitors, bool &bexcludeMonitors,
@@ -73,7 +75,7 @@ public:
                                      API::WorkspaceGroup_sptr &mongrp_sptr, const int64_t mwsSpecs,
                                      const int64_t nwsSpecs, const int64_t numberOfPeriods, const int64_t lengthIn,
                                      const std::string &title, API::Algorithm *const pAlg);
-  /// creates  shared pointer to group workspace
+  /// creates shared pointer to group workspace
   static API::WorkspaceGroup_sptr createGroupWorkspace();
 
   /// creates shared pointer to workspace from parent workspace
@@ -215,9 +217,6 @@ private:
   /// A ptr to the log creator
   std::unique_ptr<ISISRunLogs> m_logCreator;
 
-  /// Search for the log files in the workspace, and output their names as a
-  /// set.
-  std::list<std::string> searchForLogFiles(const Poco::Path &pathToRawFile);
   /// Extract the log name from the path to the specific log file.
   std::string extractLogName(const std::string &path);
 };

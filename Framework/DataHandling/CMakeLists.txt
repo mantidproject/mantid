@@ -1,5 +1,4 @@
 set(SRC_FILES
-    src/AppendGeometryToSNSNexus.cpp
     src/ApplyDiffCal.cpp
     src/BankPulseTimes.cpp
     src/CheckMantidVersion.cpp
@@ -206,13 +205,13 @@ set(SRC_FILES
     src/SetSample.cpp
     src/SetSampleMaterial.cpp
     src/SetScalingPSD.cpp
+    src/SNSAppendGeometryToNexus.cpp
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp)
 
 set(INC_FILES
-    inc/MantidDataHandling/AppendGeometryToSNSNexus.h
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
     inc/MantidDataHandling/CheckMantidVersion.h
@@ -417,6 +416,7 @@ set(INC_FILES
     inc/MantidDataHandling/SetSample.h
     inc/MantidDataHandling/SetSampleMaterial.h
     inc/MantidDataHandling/SetScalingPSD.h
+    inc/MantidDataHandling/SNSAppendGeometryToNexus.h
     inc/MantidDataHandling/SortTableWorkspace.h
     inc/MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h
     inc/MantidDataHandling/UpdateInstrumentFromFile.h
@@ -428,7 +428,6 @@ set(INC_FILES
     src/LoadRaw/vms_convert.h)
 
 set(TEST_FILES
-    AppendGeometryToSNSNexusTest.h
     ApplyDiffCalTest.h
     CheckMantidVersionTest.h
     CompressEventsTest.h
@@ -610,6 +609,7 @@ set(TEST_FILES
     SetSampleMaterialTest.h
     SetSampleTest.h
     SetScalingPSDTest.h
+    SNSAppendGeometryToNexusTest.h
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h

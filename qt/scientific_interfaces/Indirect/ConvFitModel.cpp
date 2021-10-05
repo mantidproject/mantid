@@ -207,16 +207,9 @@ void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel, cons
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
-
-ConvFitModel::~ConvFitModel() {
-  for (const auto &resolution : m_extendedResolution)
-    AnalysisDataService::Instance().remove(resolution);
-}
 
 IAlgorithm_sptr ConvFitModel::sequentialFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSequential");
@@ -226,18 +219,10 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFitFunction() const {
-  return IndirectFittingModel::getFitFunction();
-}
-
 boost::optional<double> ConvFitModel::getInstrumentResolution(WorkspaceID workspaceID) const {
   if (workspaceID < getNumberOfWorkspaces())
     return instrumentResolution(getWorkspace(workspaceID));
   return boost::none;
-}
-
-std::size_t ConvFitModel::getNumberHistograms(WorkspaceID workspaceID) const {
-  return getWorkspace(workspaceID)->getNumberHistograms();
 }
 
 MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
@@ -249,26 +234,7 @@ MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
-void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) { IndirectFittingModel::setFitFunction(function); }
-
 void ConvFitModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
-
-void ConvFitModel::removeWorkspace(WorkspaceID workspaceID) {
-  IndirectFittingModel::removeWorkspace(workspaceID);
-
-  const auto newSize = getNumberOfWorkspaces();
-  while (m_resolution.size() > newSize)
-    m_resolution.remove(workspaceID);
-
-  while (m_extendedResolution.size() > newSize) {
-    AnalysisDataService::Instance().remove(m_extendedResolution[workspaceID]);
-    m_extendedResolution.remove(workspaceID);
-  }
-}
-
-void ConvFitModel::setResolution(const std::string &name, WorkspaceID workspaceID) {
-  m_fitDataModel->setResolution(name, workspaceID);
-}
 
 std::unordered_map<std::string, ParameterValue> ConvFitModel::createDefaultParameters(WorkspaceID workspaceID) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
@@ -323,10 +289,4 @@ void ConvFitModel::setParameterNameChanges(const IFunction &model, boost::option
       constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.is_initialized());
 }
 
-std::vector<std::pair<std::string, size_t>> ConvFitModel::getResolutionsForFit() const {
-  return m_fitDataModel->getResolutionsForFit();
-}
-
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

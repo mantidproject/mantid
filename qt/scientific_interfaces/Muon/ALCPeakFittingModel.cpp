@@ -48,8 +48,7 @@ MatrixWorkspace_sptr evaluateFunction(const IFunction_const_sptr &function,
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 void ALCPeakFittingModel::setData(MatrixWorkspace_sptr newData) {
   m_data = std::move(newData);
@@ -113,5 +112,4 @@ MatrixWorkspace_sptr ALCPeakFittingModel::guessData(IFunction_const_sptr functio
   return extractSpectrum(evaluateFunction(function, inputWorkspace), 1);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

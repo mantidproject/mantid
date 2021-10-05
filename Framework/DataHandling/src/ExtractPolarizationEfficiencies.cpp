@@ -15,8 +15,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractPolarizationEfficiencies)
 
@@ -70,7 +69,7 @@ const std::string ExtractPolarizationEfficiencies::name() const { return "Extrac
 int ExtractPolarizationEfficiencies::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string ExtractPolarizationEfficiencies::category() const { return "DataHandling;ISIS\\Reflectometry"; }
+const std::string ExtractPolarizationEfficiencies::category() const { return "DataHandling;Reflectometry\\ISIS"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string ExtractPolarizationEfficiencies::summary() const {
@@ -144,5 +143,4 @@ void ExtractPolarizationEfficiencies::exec() {
   setProperty("CorrectionOption", option);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

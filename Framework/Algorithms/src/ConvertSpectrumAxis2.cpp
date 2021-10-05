@@ -29,8 +29,7 @@
 
 constexpr double rad2deg = 180.0 / M_PI;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertSpectrumAxis2)
 using namespace Kernel;
@@ -190,9 +189,6 @@ double ConvertSpectrumAxis2::signedInPlaneTwoTheta(const size_t index, const API
   const auto spectrumInfo = inputWS->spectrumInfo();
   const auto refFrame = inputWS->getInstrument()->getReferenceFrame();
 
-  // Get the axis defining the sign
-  const auto &instrumentUpAxis = refFrame->vecThetaSign();
-
   const auto samplePos = spectrumInfo.samplePosition();
   const auto beamLine = samplePos - spectrumInfo.sourcePosition();
 
@@ -202,14 +198,7 @@ double ConvertSpectrumAxis2::signedInPlaneTwoTheta(const size_t index, const API
 
   const V3D sampleDetVec = spectrumInfo.position(index) - samplePos;
 
-  double angle = std::atan2(sampleDetVec[refFrame->pointingHorizontal()], sampleDetVec[refFrame->pointingAlongBeam()]);
-
-  const auto cross = beamLine.cross_prod(sampleDetVec);
-  const auto normToSurface = beamLine.cross_prod(instrumentUpAxis);
-  if (normToSurface.scalar_prod(cross) < 0) {
-    angle *= -1;
-  }
-  return angle;
+  return std::atan2(sampleDetVec[refFrame->pointingHorizontal()], sampleDetVec[refFrame->pointingAlongBeam()]);
 }
 
 /** Convert X axis to Elastic Q representation
@@ -374,5 +363,4 @@ void ConvertSpectrumAxis2::emplaceIndexMap(double value, size_t wsIndex) {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -16,8 +16,7 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor. Validates the inputs
@@ -54,5 +53,4 @@ Mantid::Kernel::VMD CoordTransform::applyVMD(const Mantid::Kernel::VMD &inputVec
   return out;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

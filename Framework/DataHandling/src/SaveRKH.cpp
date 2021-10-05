@@ -16,8 +16,7 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/LocalDateTime.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveRKH)
@@ -223,5 +222,4 @@ void SaveRKH::write2D() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

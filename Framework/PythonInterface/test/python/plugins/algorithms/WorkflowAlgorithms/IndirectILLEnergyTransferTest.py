@@ -106,6 +106,16 @@ class IndirectILLEnergyTransferTest(unittest.TestCase):
         res = IndirectILLEnergyTransfer(**args)
         self._check_workspace_group(res, 1, 2050, 1121)
 
+    def test_bats_monitor(self):
+        args = {'Run': self._runs['bats'], 'PulseChopper': '34', 'GroupDetectors': False, 'DeleteMonitorWorkspace':False}
+        res = IndirectILLEnergyTransfer(**args)
+        mon_ws = 'res_215962_mon'
+        self.assertTrue(mtd.doesExist(mon_ws))
+        self.assertTrue(mtd[mon_ws])
+        self.assertTrue(isinstance(mtd[mon_ws], MatrixWorkspace))
+        self.assertEquals(mtd[mon_ws].getAxis(0).getUnit().unitID(), 'DeltaE')
+        self._check_workspace_group(res, 1, 2050, 1121)
+
     def test_bats_grouped(self):
         args = {'Run': self._runs['bats'], 'PulseChopper': '34'}
         res = IndirectILLEnergyTransfer(**args)

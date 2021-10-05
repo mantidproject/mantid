@@ -146,7 +146,7 @@ Output:
 .. testcode:: ExTimeZeroLoading
 
    # Load some spectra
-   ws, main_field_direction, time_zero, first_good_data, time_zero_list, time_zero_table, dead_time_table, detector_grouping_table = \
+   ws, main_field_direction, time_zero, first_good_data, last_good_data, time_zero_list, time_zero_table, dead_time_table, detector_grouping_table = \
       LoadMuonNexusV2(Filename="EMU00102347.nxs_v2",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable",TimeZeroTable="timeZeroTable")
 
    print('Single time zero value is {:.2g}'.format(time_zero))

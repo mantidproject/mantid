@@ -11,8 +11,7 @@
 #include <QPixmap>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Constructor
 QtDisplay::QtDisplay(QWidget *parent) : IQtDisplay(parent) {
@@ -150,5 +149,4 @@ void QtDisplay::leaveEvent(QEvent *event) {
   }
   update();
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

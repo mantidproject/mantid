@@ -21,8 +21,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadAscii)
 
 using namespace Kernel;
@@ -347,5 +346,4 @@ void LoadAscii::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

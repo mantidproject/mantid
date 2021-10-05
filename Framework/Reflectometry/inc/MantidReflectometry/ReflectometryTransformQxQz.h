@@ -25,7 +25,7 @@ namespace Reflectometry {
 class MANTID_REFLECTOMETRY_DLL ReflectometryTransformQxQz : public DataObjects::ReflectometryTransform {
 public:
   /// Constructor
-  ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta,
+  ReflectometryTransformQxQz(double qxMin, double qxMax, double qzMin, double qzMax, double incidentTheta, int version,
                              int numberOfBinsQx = 100, int numberOfBinsQz = 100);
 
   /// Disable default constructor

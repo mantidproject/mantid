@@ -194,7 +194,7 @@ class GenerateLogbook(PythonAlgorithm):
     def _get_entries(self):
         """Gets default and optional metadata entries using the specified instrument IPF."""
         self._metadata_entries = []
-        self._metadata_headers = [('d', 'run_number')]
+        self._metadata_headers = [('s', 'file_name')]
         tmp_instr = self._instrument + '_tmp'
         # Load empty instrument to access parameters defining metadata entries to be searched
         LoadEmptyInstrument(Filename=self._instrument + "_Definition.xml", OutputWorkspace=tmp_instr)
@@ -238,8 +238,8 @@ class GenerateLogbook(PythonAlgorithm):
         logbook_ws = self.getPropertyValue('OutputWorkspace')
         CreateEmptyTableWorkspace(OutputWorkspace=logbook_ws)
         type_dict = {'s': 'str', 'd': 'int', 'f': 'float'}
-        for type, headline in self._metadata_headers:
-            mtd[logbook_ws].addColumn(type_dict[type], headline)
+        for header_type, headline in self._metadata_headers:
+            mtd[logbook_ws].addColumn(type_dict[header_type], headline)
         return logbook_ws
 
     def _perform_binary_operations(self, values, binary_operations, operations):
@@ -251,8 +251,17 @@ class GenerateLogbook(PythonAlgorithm):
             if operation == list():
                 break
             ind1, ind2, op = operation[0]
+            if values[ind2] is None or values[ind2] is str():
+                if op != "+" or op == "+" and values[ind1] in [None, str()]:
+                    values[ind1] = "N/A"
+                values.pop(ind2)
+                binary_operations.pop(ind1)
+                continue
             if op == "+":
-                new_val = values[ind1] + values[ind2]
+                padding = 0
+                if type(values[ind1]) == str:
+                    padding = " "
+                new_val = values[ind1] + padding + values[ind2]
             elif op == "-":
                 new_val = values[ind1] - values[ind2]
             elif op == "*":
@@ -265,6 +274,8 @@ class GenerateLogbook(PythonAlgorithm):
                     new_val = values[ind1] / values[ind2]
             else:
                 raise RuntimeError("Unknown operation: {}".format(operation))
+            if type(new_val) == str():
+                new_val = new_val.strip()
             values[ind1] = new_val
             values.pop(ind2)
             binary_operations.pop(ind1)
@@ -315,7 +326,7 @@ class GenerateLogbook(PythonAlgorithm):
         """Fills out the logbook with the requested meta-data."""
         n_entries = len(self._metadata_headers)
         entry_not_found_msg = "The requested entry: {}, is not present in the raw data"
-        operators = ["+","-","*","//"]
+        operators = ["+", "-", "*", "//"]
         cache_entries_ops = {}
 
         for file_no, file_name in enumerate(data_array):
@@ -323,9 +334,10 @@ class GenerateLogbook(PythonAlgorithm):
             if file_no % (len(data_array)/10) == 0:
                 progress.report("Filling logbook table...")
             file_path = os.path.join(self._data_directory, file_name + '.nxs')
+
             with h5py.File(file_path, 'r') as f:
                 rowData = np.empty(n_entries, dtype=object)
-                rowData[0] = int(file_name)
+                rowData[0] = str(file_name)
                 for entry_no, entry in enumerate(self._metadata_entries, 1):
                     if any(op in entry for op in operators):
                         if entry in cache_entries_ops:
@@ -341,10 +353,9 @@ class GenerateLogbook(PythonAlgorithm):
                                 split_entry, index = self._get_index(split_entry)
                                 data = f.get(split_entry)[index]
                             except TypeError:
-                                values[0] = "Not found"
-                                binary_operations = []
+                                values[split_entry_no] = ""
                                 self.log().warning(entry_not_found_msg.format(entry))
-                                break
+                                continue
                             else:
                                 if isinstance(data, np.bytes_):
                                     if any(op in operators[1:] for op in binary_operations):

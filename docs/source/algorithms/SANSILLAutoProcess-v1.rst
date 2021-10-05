@@ -17,6 +17,15 @@ One can use water reference measurement in order to derive the relative inter-pi
 The regular output will contain fully corrected water run, and there will be an additional output containing the sensitivity map itself.
 The sensitivity map, as well as reduced water can be saved out to a file and used for sample reductions.
 
+OutputBinning
+-------------
+
+This property can be used to set manual q-binning parameters per detector distance/configuration.
+This accepts a string, which must be `:` delimited sets of binning parameters per distance.
+The reason it is a string, is that at a given configuration the parameters set can be composed of `,` separated values (such as start, width, end).
+In fact, it could be even more complicated. See the semantics in :ref:`SANSILLIntegration <algm-SANSILLIntegration>`.
+If one parameter set is provided, i.e. there is no `:`, the same parameter set will be used for all the detector distances/configurations.
+
 Caching with ADS
 ----------------
 

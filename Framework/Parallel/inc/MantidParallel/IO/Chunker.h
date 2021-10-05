@@ -27,7 +27,7 @@ public:
     size_t eventOffset;
     size_t eventCount;
   };
-  Chunker(const int numWorkers, const int worker, const std::vector<size_t> &bankSizes, const size_t chunkSize);
+  Chunker(const int numWorkers, const int worker, std::vector<size_t> bankSizes, const size_t chunkSize);
 
   size_t chunkSize() const;
 

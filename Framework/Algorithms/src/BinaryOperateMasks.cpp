@@ -11,8 +11,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(BinaryOperateMasks)
 
@@ -95,5 +94,4 @@ void BinaryOperateMasks::exec() {
   this->setProperty("OutputWorkspace", outputws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -9,8 +9,7 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractSingleSpectrum)
@@ -48,5 +47,4 @@ void ExtractSingleSpectrum::exec() {
   setProperty<MatrixWorkspace_sptr>("OutputWorkspace", cropper->getProperty("OutputWorkspace"));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

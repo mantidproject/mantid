@@ -49,14 +49,15 @@ private:
   /// Shapes for each component
   std::shared_ptr<std::vector<std::shared_ptr<const Geometry::IObject>>> m_shapes;
 
-  BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference) const;
+  BoundingBox componentBoundingBox(const size_t index, const BoundingBox *reference,
+                                   const bool excludeMonitors = false) const;
 
   /// Private copy constructor. Do not make public.
   ComponentInfo(const ComponentInfo &other);
   void growBoundingBoxAsRectuangularBank(size_t index, const Geometry::BoundingBox *reference,
-                                         Geometry::BoundingBox &mutableBB) const;
-  void growBoundingBoxAsOutline(size_t index, const Geometry::BoundingBox *reference,
-                                Geometry::BoundingBox &mutableBB) const;
+                                         Geometry::BoundingBox &mutableBB, const bool excludeMonitors = false) const;
+  void growBoundingBoxAsOutline(size_t index, const Geometry::BoundingBox *reference, Geometry::BoundingBox &mutableBB,
+                                const bool excludeMonitors = false) const;
 
 public:
   struct QuadrilateralComponent {
@@ -121,7 +122,8 @@ public:
   const Geometry::IObject &shape(const size_t componentIndex) const;
 
   double solidAngle(const size_t componentIndex, const Kernel::V3D &observer) const;
-  BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr) const;
+  BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,
+                          const bool excludeMonitors = false) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;
   void setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval);
   size_t scanCount() const;

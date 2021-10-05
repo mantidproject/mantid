@@ -19,8 +19,7 @@ namespace Mantid {
 using Kernel::Direction;
 using Kernel::PropertyManager;
 
-namespace PythonInterface {
-namespace Registry {
+namespace PythonInterface::Registry {
 
 /**
  * @param mapping A Python dictionary instance
@@ -42,6 +41,5 @@ std::shared_ptr<Kernel::PropertyManager> createPropertyManager(const boost::pyth
   }
   return pmgr;
 }
-} // namespace Registry
-} // namespace PythonInterface
+} // namespace PythonInterface::Registry
 } // namespace Mantid

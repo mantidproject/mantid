@@ -70,8 +70,7 @@ private:
 class MANTID_CRYSTAL_DLL UniqueReflectionCollection {
 public:
   UniqueReflectionCollection(const Geometry::UnitCell &cell, const std::pair<double, double> &dLimits,
-                             const Geometry::PointGroup_sptr &pointGroup,
-                             const Geometry::ReflectionCondition_sptr &centering);
+                             Geometry::PointGroup_sptr pointGroup, const Geometry::ReflectionCondition_sptr &centering);
 
   ~UniqueReflectionCollection() = default;
 

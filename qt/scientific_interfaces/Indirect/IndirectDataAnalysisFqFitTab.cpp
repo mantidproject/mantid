@@ -48,10 +48,12 @@ IndirectDataAnalysisFqFitTab::IndirectDataAnalysisFqFitTab(QWidget *parent)
   auto parameterEstimation = createParameterEstimation();
   auto templateBrowser = new SingleFunctionTemplateBrowser(
       widthFits, std::make_unique<IDAFunctionParameterEstimation>(parameterEstimation));
+
+  m_uiForm->dockArea->setFitDataView(new FqFitDataView(m_uiForm->dockArea));
+  setFitDataPresenter(std::make_unique<FqFitDataPresenter>(m_FqFittingModel->getFitDataModel(),
+                                                           m_uiForm->dockArea->m_fitDataView, templateBrowser));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   m_plotPresenter->setXBounds({0.0, 2.0});
-  setFitDataPresenter(
-      std::make_unique<FqFitDataPresenter>(m_FqFittingModel, m_uiForm->dockArea->m_fitDataView, templateBrowser));
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
 
   m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(templateBrowser);
@@ -117,6 +119,40 @@ EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector()
 
     return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
   };
+}
+
+void IndirectDataAnalysisFqFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto fqFitDialog = dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
+    m_dataPresenter->addWorkspace(fqFitDialog->workspaceName(), fqFitDialog->parameterType(),
+                                  fqFitDialog->parameterNameIndex());
+    m_FqFittingModel->addDefaultParameters();
+    setActiveWorkspaceIDToCurrentWorkspace(fqFitDialog);
+    setModelSpectrum(fqFitDialog->parameterNameIndex(), fqFitDialog->parameterType());
+    m_activeWorkspaceID = m_dataPresenter->getNumberOfWorkspaces();
+  }
+}
+
+void IndirectDataAnalysisFqFitTab::setActiveWorkspaceIDToCurrentWorkspace(IAddWorkspaceDialog const *dialog) {
+  //  update active data index with correct index based on the workspace name
+  //  and the vector in m_fitDataModel which is in the base class
+  //  indirectFittingModel get table workspace index
+  const auto wsName = dialog->workspaceName().append("_HWHM");
+  // This a vector of workspace names currently loaded
+  auto wsVector = m_FqFittingModel->getFitDataModel()->getWorkspaceNames();
+  // this is an iterator pointing to the current wsName in wsVector
+  auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
+  // this is the index of the workspace.
+  const auto index = WorkspaceID(std::distance(wsVector.begin(), wsIt));
+  m_activeWorkspaceID = index;
+}
+
+void IndirectDataAnalysisFqFitTab::setModelSpectrum(int index, const std::string &paramType) {
+  if (index < 0)
+    throw std::runtime_error("No valid parameter was selected.");
+  else if (paramType == "Width")
+    m_dataPresenter->setActiveWidth(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
+  else
+    m_dataPresenter->setActiveEISF(static_cast<std::size_t>(index), m_activeWorkspaceID, false);
 }
 
 namespace {

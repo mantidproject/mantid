@@ -11,13 +11,13 @@ from abins.constants import (FLOAT_ID, INT_ID, INT_TYPE,
                              FUNDAMENTALS, HIGHER_ORDER_QUANTUM_EVENTS)
 
 
-class FrequencyPowderGenerator(object):
+class FrequencyPowderGenerator:
     """
     Class which generates frequencies for quantum order events.
     """
 
     def __init__(self):
-        super(FrequencyPowderGenerator, self).__init__()
+        raise Exception("FrequencyPowderGenerator does not need to be instantiated.")
 
     @staticmethod
     def construct_freq_combinations(previous_array=None, previous_coefficients=None,

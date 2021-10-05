@@ -22,7 +22,7 @@ public:
    * Unique constructor
    * @param filename input HDF5 Nexus file name
    */
-  NexusHDF5Descriptor(const std::string &filename);
+  NexusHDF5Descriptor(std::string filename);
 
   NexusHDF5Descriptor() = delete;
 

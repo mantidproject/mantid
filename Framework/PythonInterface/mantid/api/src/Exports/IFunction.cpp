@@ -39,8 +39,8 @@ namespace {
  * @param self :: Enables it to be called as a member function on the
  * FunctionFactory class
  */
-PyObject *getCategories(IFunction &self) {
-  std::vector<std::string> categories = self.categories();
+PyObject *getCategories(const IFunction &self) {
+  const auto categories = self.categories();
 
   PyObject *registered = PyList_New(0);
   for (const auto &category : categories) {
@@ -180,7 +180,8 @@ void export_IFunction() {
       .def("declareAttribute", &IFunctionAdapter::declareAttribute, (arg("self"), arg("name"), arg("default_value")),
            "Declare an attribute with an initial value")
 
-      .def("getAttributeValue", (PyObject * (*)(IFunction &, const std::string &)) IFunctionAdapter::getAttributeValue,
+      .def("getAttributeValue",
+           (PyObject * (*)(const IFunction &, const std::string &)) IFunctionAdapter::getAttributeValue,
            (arg("self"), arg("name")), "Return the value of the named attribute")
 
       .def("setAttributeValue", &IFunctionAdapter::setAttributePythonValue, (arg("self"), arg("name"), arg("value")),

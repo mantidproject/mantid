@@ -208,8 +208,10 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         retval = ''
         qbinning = self.getPropertyValue('OutputBinning')
         if qbinning:
-            if qbinning.count(':') + 1 != len(self.sample):
-                retval = 'Number of Q binning params must be equal to the number of distances.'
+            n_items = qbinning.count(':') + 1
+            n_samples = len(self.sample)
+            if n_items != n_samples and n_items != 1:
+                retval = f'Number of Q binning params must be equal to the number of distances; found {n_items} instead of {n_samples}.'
             else:
                 for qbin_params in qbinning.split(':'):
                     if qbin_params:
@@ -405,6 +407,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              doc='Index of reference workspace during stitching.')
 
         self.copyProperties('SANSILLIntegration', ['ShapeTable'])
+
+        self.copyProperties('SANSILLReduction', 'Wavelength')
 
     def PyExec(self):
         self.setUp()
@@ -719,11 +723,34 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise)
         return container_name
 
+    def getWavelength(self, logs):
+        """Returns wavelength from the property Wavelength, if defined, otherwise attempts to obtain it from
+        the logs."""
+        WAVELENGTH_LOG1 = "wavelength"
+        WAVELENGTH_LOG2 = "selector.wavelength"
+        wavelength = None
+        if not self.getProperty('Wavelength').isDefault:
+            wavelength = self.getProperty('Wavelength').value
+        else:
+            try:
+                wavelength = float(logs[WAVELENGTH_LOG1])
+                if wavelength < 0.0:
+                    wavelength = None
+                    raise ValueError
+            except:
+                try:
+                    wavelength = float(logs[WAVELENGTH_LOG2])
+                    if wavelength < 0.0:
+                        wavelength = None
+                        raise ValueError
+                except:
+                    logger.notice("Unable to get a valid wavelength from the "
+                                  "sample logs.")
+        return wavelength
+
     def createCustomSuffix(self, ws):
         DISTANCE_LOG = "L2"
         COLLIMATION_LOG = "collimation.actual_position"
-        WAVELENGTH_LOG1 = "wavelength"
-        WAVELENGTH_LOG2 = "selector.wavelength"
 
         logs = mtd[ws].run().getProperties()
         logs = {log.name:log.value for log in logs}
@@ -755,21 +782,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         except:
             logger.notice("Unable to get a valid collimation distance from "
                           "the sample logs.")
-        wavelength = None
-        try:
-            wavelength = float(logs[WAVELENGTH_LOG1])
-            if wavelength < 0.0:
-                wavelength = None
-                raise ValueError
-        except:
-            try:
-                wavelength = float(logs[WAVELENGTH_LOG2])
-                if wavelength < 0.0:
-                    wavelength = None
-                    raise ValueError
-            except:
-                logger.notice("Unable to get a valid wavelength from the "
-                              "sample logs.")
+
+        wavelength = self.getWavelength(logs)
+
         suffix = ""
         if distance:
             suffix += "_d{:.1f}m".format(distance)
@@ -877,6 +892,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('SampleThickness').value,
                 WaterCrossSection=
                 self.getProperty('WaterCrossSection').value,
+                Wavelength=self.getProperty('Wavelength').value
                 )
 
         output_sample = self.output + '_#' + str(i + 1)
@@ -894,7 +910,11 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         qbinning = self.getPropertyValue('OutputBinning')
         if qbinning:
-            qbinning = qbinning.split(':')[i]
+            qbinning = qbinning.split(':')
+            if len(qbinning) > 1:
+                qbinning = qbinning[i]
+            else:
+                qbinning = qbinning[0]
         SANSILLIntegration(
                 InputWorkspace=sample_name,
                 OutputWorkspace=output_sample,

@@ -80,6 +80,7 @@ public:
 signals:
   void functionStructureChanged();
   void parameterChanged(const QString &funcIndex, const QString &paramName);
+  void attributeChanged(const QString &attributeName);
 private slots:
   void viewChangedParameter(const QString &parName);
   void viewChangedAttribute(const QString &attrName);

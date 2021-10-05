@@ -54,8 +54,7 @@ using Poco::XML::NodeFilter;
 using Poco::XML::NodeIterator;
 using Poco::XML::NodeList;
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 // initialize the static logger
 Kernel::Logger g_log("InstrumentDefinitionParser");
@@ -2043,7 +2042,7 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp, const Poc
  *instrument file
  */
 void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, const Poco::XML::Element *pElem,
-                                            InstrumentParameterCache &logfileCache, std::string requestedDate) {
+                                            InstrumentParameterCache &logfileCache, const std::string &requestedDate) {
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
   // The purpose below is to have a quicker way to judge if pElem contains a
@@ -2371,7 +2370,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
  */
 void InstrumentDefinitionParser::setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument,
                                                    Poco::XML::Element *pRootElem, Kernel::ProgressBase *progress,
-                                                   std::string requestedDate) {
+                                                   const std::string &requestedDate) {
   // check if any logfile cache units set. As of this writing the only unit to
   // check is if "angle=radian"
   std::map<std::string, std::string> &units = instrument->getLogfileUnit();
@@ -3069,5 +3068,4 @@ std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssem
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

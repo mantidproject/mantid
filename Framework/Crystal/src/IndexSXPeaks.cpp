@@ -14,8 +14,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(IndexSXPeaks)
@@ -242,5 +241,4 @@ void IndexSXPeaks::exec() {
     }
   }
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

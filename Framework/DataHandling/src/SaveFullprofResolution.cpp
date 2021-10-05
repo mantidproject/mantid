@@ -24,8 +24,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace std;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(SaveFullprofResolution)
 
@@ -452,5 +451,4 @@ bool SaveFullprofResolution::has_key(std::map<std::string, double> profmap, cons
   return exist;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

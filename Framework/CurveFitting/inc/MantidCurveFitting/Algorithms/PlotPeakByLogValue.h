@@ -73,10 +73,10 @@ private:
 
   double calculateLogValue(const std::string &logName, const InputSpectraToFit &data);
 
-  API::ITableWorkspace_sptr createResultsTable(const std::string &logName, const API::IFunction_sptr ifunSingle,
+  API::ITableWorkspace_sptr createResultsTable(const std::string &logName, const API::IFunction_sptr &ifunSingle,
                                                bool &isDataName);
 
-  void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result, const API::IFunction_sptr ifun,
+  void appendTableRow(bool isDataName, API::ITableWorkspace_sptr &result, const API::IFunction_sptr &ifun,
                       const InputSpectraToFit &data, double logValue, double chi2) const;
 
   void finaliseOutputWorkspaces(bool createFitOutput, const std::vector<API::MatrixWorkspace_sptr> &fitWorkspaces,

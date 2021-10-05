@@ -15,8 +15,7 @@
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 ALCBaselineModellingView::ALCBaselineModellingView(QWidget *widget)
     : m_widget(widget), m_ui(), m_rangeSelectors(), m_selectorModifiedMapper(new QSignalMapper(this)) {}
 
@@ -85,6 +84,8 @@ QHash<QString, QVariant> ALCBaselineModellingView::getPlotKwargs(PreviewPlot *pl
   UNUSED_ARG(curveName);
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
+
   return kwargs;
 }
 
@@ -203,5 +204,4 @@ void ALCBaselineModellingView::help() {
 
 void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

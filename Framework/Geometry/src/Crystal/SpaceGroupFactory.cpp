@@ -17,9 +17,9 @@
 #include <boost/algorithm/string.hpp>
 #include <locale>
 #include <memory>
+#include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Free function that tries to parse the given list of symmetry operations and
 /// returns true if successfull.
@@ -27,9 +27,9 @@ bool isValidGeneratorString(const std::string &generatorString) {
   std::vector<std::string> generatorStrings;
   boost::split(generatorStrings, generatorString, boost::is_any_of(";"));
 
-  for (auto &generatorString : generatorStrings) {
+  for (auto &identifier : generatorStrings) {
     try {
-      SymmetryOperationSymbolParser::parseIdentifier(generatorString);
+      SymmetryOperationSymbolParser::parseIdentifier(identifier);
     } catch (const Kernel::Exception::ParseError &) {
       return false;
     }
@@ -76,9 +76,10 @@ std::vector<std::string> operator*(const SymmetryOperation &symOp, const std::ve
 }
 
 /// Constructor for AbstractSpaceGroupGenerator
-AbstractSpaceGroupGenerator::AbstractSpaceGroupGenerator(size_t number, const std::string &hmSymbol,
-                                                         const std::string &generatorInformation)
-    : m_number(number), m_hmSymbol(hmSymbol), m_generatorString(generatorInformation), m_prototype() {}
+AbstractSpaceGroupGenerator::AbstractSpaceGroupGenerator(size_t number, std::string hmSymbol,
+                                                         std::string generatorInformation)
+    : m_number(number), m_hmSymbol(std::move(hmSymbol)), m_generatorString(std::move(generatorInformation)),
+      m_prototype() {}
 
 /// Returns the internally stored prototype, generates one if necessary.
 SpaceGroup_const_sptr AbstractSpaceGroupGenerator::getPrototype() {
@@ -814,5 +815,4 @@ DECLARE_TRANSFORMED_SPACE_GROUP(228, "F d -3 c :2", "F d -3 c | x+3/8,y+3/8,z+3/
 DECLARE_GENERATED_SPACE_GROUP(229, "I m -3 m", "-x,-y,z; -x,y,-z; z,x,y; y,x,-z; -x,-y,-z")
 DECLARE_GENERATED_SPACE_GROUP(230, "I a -3 d", "-x+1/2,-y,z+1/2; -x,y+1/2,-z+1/2; z,x,y; y+3/4,x+1/4,-z+1/4; -x,-y,-z")
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

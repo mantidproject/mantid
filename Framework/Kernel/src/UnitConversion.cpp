@@ -11,8 +11,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Convert a single value between the given units (as strings)
  * @param src :: The starting unit
@@ -139,5 +138,4 @@ double UnitConversion::convertToElasticQ(const double theta, const double efixed
   return 4.0 * M_PI * stheta / wavelength;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

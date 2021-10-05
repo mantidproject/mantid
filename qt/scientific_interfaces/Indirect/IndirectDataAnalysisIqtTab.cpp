@@ -133,9 +133,7 @@ std::tuple<bool, float, int, int> calculateBinParameters(std::string const &wsNa
 }
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
@@ -190,7 +188,7 @@ void IndirectDataAnalysisIqtTab::setup() {
   setPreviewSpectrumMaximum(0);
 
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
-  xRangeSelector->setBounds(-1.0, 1.0);
+  xRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
   // signals / slots & validators
   connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(rangeChanged(double, double)));
@@ -546,6 +544,4 @@ void IndirectDataAnalysisIqtTab::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

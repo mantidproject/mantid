@@ -12,8 +12,7 @@
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/TCPServer.h>
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FakeISISHistoDAE)
 
@@ -356,5 +355,4 @@ void FakeISISHistoDAE::exec() {
   socket.close();
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

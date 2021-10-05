@@ -22,8 +22,7 @@ using namespace Mantid::API;
 const QString DEFAULT_LOG("run_number");
 const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "MUSR"};
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
     : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
@@ -163,6 +162,7 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
   QHash<QString, QVariant> kwargs;
   kwargs.insert("linestyle", QString("None").toLatin1().constData());
   kwargs.insert("marker", QString(".").toLatin1().constData());
+  kwargs.insert("distribution", QString("False").toLatin1().constData());
 
   m_ui.dataPlot->clear();
   auto _log = log();
@@ -413,5 +413,4 @@ std::string ALCDataLoadingView::getAlphaValue() const {
 
 void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage->setVisible(alpha); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

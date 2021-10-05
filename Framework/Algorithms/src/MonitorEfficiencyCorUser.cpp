@@ -18,8 +18,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -133,5 +132,4 @@ std::string MonitorEfficiencyCorUser::getValFromInstrumentDef(const std::string 
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

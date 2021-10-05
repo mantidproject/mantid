@@ -25,9 +25,7 @@ using OptionalTupleDouble = optional<std::tuple<double, double>>;
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 /**
@@ -212,6 +210,4 @@ std::tuple<double, double> PowerNorm::autoscale(std::tuple<double, double> clim)
   return NormalizeBase::autoscale(clim);
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

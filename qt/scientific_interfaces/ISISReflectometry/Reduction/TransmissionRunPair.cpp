@@ -7,23 +7,20 @@
 #include "TransmissionRunPair.h"
 #include <boost/algorithm/string/join.hpp>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 TransmissionRunPair::TransmissionRunPair() : m_firstTransmissionRunNumbers(), m_secondTransmissionRunNumbers() {}
 
-TransmissionRunPair::TransmissionRunPair( // cppcheck-suppress passedByValue
-    std::string firstTransmissionRun,
-    // cppcheck-suppress passedByValue
-    std::string secondTransmissionRun)
+TransmissionRunPair::TransmissionRunPair(std::string firstTransmissionRun,
+
+                                         std::string secondTransmissionRun)
     : m_firstTransmissionRunNumbers{std::move(firstTransmissionRun)}, m_secondTransmissionRunNumbers{
                                                                           std::move(secondTransmissionRun)} {}
 
 TransmissionRunPair::TransmissionRunPair(
-    // cppcheck-suppress passedByValue
+
     std::vector<std::string> firstTransmissionRunNumbers,
-    // cppcheck-suppress passedByValue
+
     std::vector<std::string> secondTransmissionRunNumbers)
     : m_firstTransmissionRunNumbers(std::move(firstTransmissionRunNumbers)),
       m_secondTransmissionRunNumbers(std::move(secondTransmissionRunNumbers)) {}
@@ -50,6 +47,4 @@ bool operator==(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs) 
 
 bool operator!=(TransmissionRunPair const &lhs, TransmissionRunPair const &rhs) { return !(lhs == rhs); }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

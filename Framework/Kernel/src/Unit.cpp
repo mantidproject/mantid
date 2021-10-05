@@ -16,8 +16,7 @@
 #include <limits>
 #include <sstream>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 namespace {
 // static logger object
@@ -596,12 +595,7 @@ Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
 void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
   double difc = 0.;
-  if (!ParamPresentAndSet(&params, UnitParams::difc, difc)) {
-    if (!ParamPresent(params, UnitParams::twoTheta) || (!ParamPresent(params, UnitParams::l2)))
-      throw std::runtime_error("A difc value or L2/two theta must be supplied "
-                               "in the extra parameters when initialising " +
-                               this->unitID() + " for conversion via TOF");
-  } else {
+  if (ParamPresentAndSet(&params, UnitParams::difc, difc)) {
     // check validations only applicable to fromTOF
     toDSpacingError = "";
     double difa = 0.;
@@ -614,6 +608,12 @@ void dSpacing::validateUnitParams(const int, const UnitParametersMap &params) {
       toDSpacingError = "A positive difc value must be supplied in the extra parameters when "
                         "initialising " +
                         this->unitID() + " for conversion via TOF";
+    }
+  } else {
+    if (!ParamPresent(params, UnitParams::twoTheta) || (!ParamPresent(params, UnitParams::l2))) {
+      throw std::runtime_error("A difc value or L2/two theta must be supplied "
+                               "in the extra parameters when initialising " +
+                               this->unitID() + " for conversion via TOF");
     }
   }
 }
@@ -650,50 +650,76 @@ double dSpacing::singleToTOF(const double x) const {
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleToTOF called before object "
                              "has been initialized.");
-  return difa * x * x + difc * x + tzero;
+  if (difa == 0.)
+    return difc * x + tzero;
+  else
+    return difa * x * x + difc * x + tzero;
 }
 
+/**
+ * DIFA * d^2 + DIFC * d + T0 - TOF = 0
+ *
+ * Use the citardauq formula to solve quadratic in order to minimise loss of precision. citardauq (quadratic spelled
+ * backwards) is an alternate formulation of the quadratic formula. DIFC and sqrt term are often similar and the
+ * "classic" quadratic formula involves calculating their difference in the numerator
+ *
+ *               2*(T0 - TOF)                                            (T0 - TOF)
+ * d = -------------------------------------------  =  ---------------------------------------------------
+ *     -DIFC -+ SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))       0.5 * DIFC (-1 -+ SQRT(1 - 4*DIFA*(T0 - TOF)/DIFC^2)
+ *
+ * the variables in this formulation are the same as the quadratic formula
+ * a = difa      square term
+ * b = DIFC      linear term - assumed to be positive
+ * c = T0 - TOF  constant term
+ */
 double dSpacing::singleFromTOF(const double tof) const {
-  // DIFA * d^2 + DIFC * d + T0 - TOF = 0
-
-  // Use the citardauq formula to solve quadratic in order to minimise loss of precision. DIFC and sqrt term are often
-  // similar and the "classic" quadratic formula involves calculating their difference in the numerator
-
-  //               2*(T0 - TOF)                                            (T0 - TOF)
-  // d = -------------------------------------------  =  ---------------------------------------------------
-  //     -DIFC -+ SQRT(DIFC^2 - 4*DIFA*(T0 - TOF))       0.5 * DIFC (-1 -+ SQRT(1 - 4*DIFA*(T0 - TOF)/DIFC^2)
-
   // dealing with various edge cases
   if (!isInitialized())
     throw std::runtime_error("dSpacingBase::singleFromTOF called before object "
                              "has been initialized.");
   if (!toDSpacingError.empty())
     throw std::runtime_error(toDSpacingError);
-  double c = tzero - tof;
-  // handle special cases first...
-  // citardauq formula hides non-zero root if c=0
+
+  // non-physical result
+  if (tzero > tof) {
+    if (difa > 0.) {
+      throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight and difa is positive. "
+                               "Quadratic doesn't have a positive root");
+    } else if (difa == 0.) {
+      throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight");
+    }
+  }
+
+  // citardauq formula hides non-zero root if tof==tzero
+  // wich means that the constantTerm == 0
   if (tof == tzero) {
-    if (difa < 0)
+    if (difa < 0.)
       return -difc / difa;
     else
-      return 0;
+      return 0.;
   }
-  double sqrtTerm = 1 - 4 * difa * c / (difc * difc);
-  if (sqrtTerm < 0) {
+
+  // this is with the opposite sign from the equation above
+  // as it reduces number of individual flops
+  const double negativeConstantTerm = tof - tzero;
+
+  // don't need to solve a quadratic when difa==0
+  if (difa == 0.)
+    return negativeConstantTerm / difc;
+
+  // general citarqauq equation
+  const double sqrtTerm = 1 + 4 * difa * negativeConstantTerm / (difc * difc);
+  if (sqrtTerm < 0.) {
     throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't have real roots");
   }
-  if ((difa > 0) && (c > 0)) {
-    throw std::runtime_error("Cannot convert to d spacing. Quadratic doesn't "
-                             "have a positive root");
-  }
-  // pick smallest positive root. Since difc is positive it just depends on sign of c
-  // Note - c is generally negative
-  if (c > 0)
+  // pick smallest positive root. Since difc is positive it just depends on sign of constantTerm
+  // Note - constantTerm is generally negative
+  if (negativeConstantTerm < 0)
     // single positive root
-    return c / (0.5 * difc * (-1 + sqrt(sqrtTerm)));
+    return negativeConstantTerm / (0.5 * difc * (1 - sqrt(sqrtTerm)));
   else
     // two positive roots. pick most negative denominator to get smallest root
-    return c / (0.5 * difc * (-1 - sqrt(sqrtTerm)));
+    return negativeConstantTerm / (0.5 * difc * (1 + sqrt(sqrtTerm)));
 }
 
 double dSpacing::conversionTOFMin() const {
@@ -1437,5 +1463,4 @@ double timeConversionValue(const std::string &input_unit, const std::string &out
 
 } // namespace Units
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

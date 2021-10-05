@@ -58,7 +58,7 @@ private:
   /// Read member variables from experiment info
   void readExperimentInfo(const Mantid::API::ExperimentInfo_sptr &ei);
   void checkWorkspaceDims(const Mantid::API::IMDWorkspace_sptr &ws);
-  void determineOutputType(const std::string peakType, const uint16_t numExperimentInfo);
+  void determineOutputType(const std::string &peakType, const uint16_t numExperimentInfo);
 
   /// Adds a peak based on Q, bin count & a set of detector IDs
   void addPeak(const Mantid::Kernel::V3D &Q, const double binCount, const Geometry::InstrumentRayTracer &tracer);

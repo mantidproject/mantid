@@ -70,8 +70,8 @@ private:
   /// Set the loader option for use as a Child Algorithm.
   void setUpLoader(const API::IAlgorithm_sptr &loader, const double startProgress = -1.0,
                    const double endProgress = -1.0, const bool logging = true) const;
-  /// Set the output workspace(s)
-  void setOutputWorkspace(const API::IAlgorithm_sptr &loader);
+  /// Set the output properties
+  void setOutputProperties(const API::IAlgorithm_sptr &loader);
   /// Retrieve a pointer to the output workspace from the Child Algorithm
   API::Workspace_sptr getOutputWorkspace(const std::string &propName, const API::IAlgorithm_sptr &loader) const;
 

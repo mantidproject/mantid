@@ -7,9 +7,7 @@
 #include "MantidQtWidgets/Common/Batch/Row.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <boost/algorithm/string/predicate.hpp>
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 Row::Row(RowLocation location, std::vector<Cell> cells) : m_location(std::move(location)), m_cells(std::move(cells)) {}
 
@@ -38,6 +36,4 @@ bool operator<=(Row const &lhs, Row const &rhs) { return lhs < rhs || lhs == rhs
 bool operator>=(Row const &lhs, Row const &rhs) { return !(lhs < rhs); }
 
 bool operator>(Row const &lhs, Row const &rhs) { return !(lhs <= rhs); }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

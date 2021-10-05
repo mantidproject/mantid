@@ -37,8 +37,7 @@ using namespace Mantid::Indexing;
 
 // const double MINHEIGHT = 2.00000001;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindPeaks)
@@ -991,9 +990,6 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input, int spectru
 
   // Local check whether FindPeakBackground gives a reasonable value
   vecpeakrange.resize(2);
-
-  /// @todo Remove this cppcheck suppression when #13950 is fixed
-  // cppcheck-suppress knownConditionTrueFalse
   if (fitresult > 0) {
     // Use FitPeakBackgroud's result
     size_t i_peakmin, i_peakmax;
@@ -1464,8 +1460,7 @@ std::vector<double> FindPeaks::getStartingPeakValues() {
   return vec_value;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms
 
 // 0.5044, 0.5191, 0.535, 0.5526, 0.5936, 0.6178, 0.6453, 0.6768, 0.7134,
 // 0.7566, 0.8089, 0.8737, 0.9571, 1.0701, 1.2356, 1.5133, 2.1401

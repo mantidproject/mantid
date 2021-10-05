@@ -23,8 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("ContainerSubtraction");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(parent), m_spectra(0) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
@@ -421,34 +420,34 @@ MatrixWorkspace_sptr ContainerSubtraction::requestRebinToSample(MatrixWorkspace_
 
 MatrixWorkspace_sptr ContainerSubtraction::shiftWorkspace(const MatrixWorkspace_sptr &workspace,
                                                           double shiftValue) const {
-  auto shiftAlg = shiftAlgorithm(std::move(workspace), shiftValue);
+  auto shiftAlg = shiftAlgorithm(workspace, shiftValue);
   shiftAlg->execute();
   return shiftAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr ContainerSubtraction::scaleWorkspace(const MatrixWorkspace_sptr &workspace,
                                                           double scaleValue) const {
-  auto scaleAlg = scaleAlgorithm(std::move(workspace), scaleValue);
+  auto scaleAlg = scaleAlgorithm(workspace, scaleValue);
   scaleAlg->execute();
   return scaleAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr ContainerSubtraction::minusWorkspace(const MatrixWorkspace_sptr &lhsWorkspace,
                                                           const MatrixWorkspace_sptr &rhsWorkspace) const {
-  auto minusAlg = minusAlgorithm(std::move(lhsWorkspace), std::move(rhsWorkspace));
+  auto minusAlg = minusAlgorithm(lhsWorkspace, rhsWorkspace);
   minusAlg->execute();
   return minusAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr ContainerSubtraction::rebinToWorkspace(const MatrixWorkspace_sptr &workspaceToRebin,
                                                             const MatrixWorkspace_sptr &workspaceToMatch) const {
-  auto rebinAlg = rebinToWorkspaceAlgorithm(std::move(workspaceToRebin), std::move(workspaceToMatch));
+  auto rebinAlg = rebinToWorkspaceAlgorithm(workspaceToRebin, workspaceToMatch);
   rebinAlg->execute();
   return rebinAlg->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr ContainerSubtraction::convertToHistogram(const MatrixWorkspace_sptr &workspace) const {
-  auto convertAlg = convertToHistogramAlgorithm(std::move(workspace));
+  auto convertAlg = convertToHistogramAlgorithm(workspace);
   convertAlg->execute();
   return convertAlg->getProperty("OutputWorkspace");
 }
@@ -537,5 +536,4 @@ void ContainerSubtraction::setRunIsRunning(bool running) {
   setButtonsEnabled(!running);
 }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

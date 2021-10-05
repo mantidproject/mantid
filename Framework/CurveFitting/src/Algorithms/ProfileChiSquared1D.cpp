@@ -16,6 +16,7 @@
 #include "MantidCurveFitting/GSLJacobian.h"
 
 #include <boost/math/distributions/chi_squared.hpp>
+#include <utility>
 
 namespace {
 // The maximum difference of chi squared to search for
@@ -39,9 +40,7 @@ double getDiff(const Mantid::API::IFunction &fun, size_t nParams, const Mantid::
 
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 DECLARE_ALGORITHM(ProfileChiSquared1D)
 
@@ -63,7 +62,8 @@ public:
            const API::FunctionDomain &domain, API::FunctionValues &values, double chi0,
            std::vector<int> &freeParameters)
       : m_fixedParameterIndex(fixedParameterIndex), m_domain(domain), m_values(values), m_chi0(chi0),
-        m_function(inputFunction), m_ws(inputWS), m_workspaceIndex(workspaceIndex), m_freeParameters(freeParameters) {
+        m_function(std::move(inputFunction)), m_ws(std::move(inputWS)), m_workspaceIndex(workspaceIndex),
+        m_freeParameters(freeParameters) {
     // create a fitting algorithm based on least squares (which is the default)
     m_fitalg = AlgorithmFactory::Instance().create("Fit", -1);
     m_fitalg->setChild(true);
@@ -460,6 +460,4 @@ std::tuple<double, double> ProfileChiSquared1D::getChiSquaredRoots(const Functio
   return {roots[0], roots[1]};
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

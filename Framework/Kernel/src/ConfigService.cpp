@@ -135,7 +135,6 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   setBaseDirectory();
 
-  m_configPaths.insert("mantidqt.python_interfaces_directory");
   m_configPaths.insert("framework.plugins.directory");
   m_configPaths.insert("mantidqt.plugins.directory");
   m_configPaths.insert("instrumentDefinition.directory");
@@ -578,7 +577,9 @@ void ConfigServiceImpl::createUserPropertiesFile() const {
     filestr << "#MantidOptions.ReusePlotInstances=Off\n\n";
     filestr << "## Uncomment to disable use of OpenGL to render unwrapped "
                "instrument views\n";
-    filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off\n";
+    filestr << "#MantidOptions.InstrumentView.UseOpenGL=Off\n\n";
+    filestr << "## Muon GUI settings\n";
+    filestr << "#muon.GUI = \n";
 
     filestr.close();
   } catch (std::runtime_error &ex) {
@@ -1238,7 +1239,6 @@ std::string ConfigServiceImpl::getDirectoryOfExecutable() const {
 std::string ConfigServiceImpl::getPathToExecutable() const {
   std::string execpath;
   const size_t LEN(1024);
-  // cppcheck-suppress variableScope
   char pBuf[LEN];
 
 #ifdef _WIN32

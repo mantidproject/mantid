@@ -471,7 +471,7 @@ protected:
   /// Adds the workspace index property to the browser.
   virtual void addWorkspaceIndexToBrowser();
   /// Set the parameters to the fit outcome
-  void getFitResults();
+  void updateBrowserFromFitResults(const Mantid::API::IFunction_sptr &finalFunction);
   /// Create a double property and set some settings
   QtProperty *addDoubleProperty(const QString &name, QtDoublePropertyManager *manager = nullptr) const;
   /// Called when the minimizer changes. Creates minimizes's properties.

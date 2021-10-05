@@ -29,16 +29,46 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/buildconfig/CMake")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
-option(ENABLE_MANTIDPLOT "Enable Qt4-based gui & components" OFF)
-option(ENABLE_WORKBENCH "Enable Qt5-based gui & components" ON)
-if(ENABLE_MANTIDPLOT)
-  message( FATAL_ERROR "MantidPlot has been removed from the source code")
+option(ENABLE_MANTIDQT "Enable Qt5-based components" ON)
+option(ENABLE_WORKBENCH "Enable Qt5-based gui" ON)
+
+
+set(MANTID_FRAMEWORK_LIB "BUILD" CACHE STRING "Mantid framework build options, valid options are (BUILD, SYSTEM).
+If system is specificed a valid mantid framework installation must be present on the system, e.g from conda")
+set_property(CACHE MANTID_FRAMEWORK_LIB PROPERTY STRINGS "BUILD" "SYSTEM")
+
+# set this for compatability, as previously if enable_workbench was off we didn't build the qt element
+# we can override this behavior on the command line.
+if (NOT ENABLE_WORKBENCH)
+set(_mantidqt_option "OFF")
+else()
+set(_mantidqt_option "BUILD")
+endif()
+
+set(MANTID_QT_LIB ${_mantidqt_option} CACHE STRING "Mantid qt build options, valid options are (OFF, BUILD, SYSTEM).
+If system is specificed a valid mantid qt installation must be present on the system, e.g. from conda")
+set_property(CACHE MANTID_QT_LIB PROPERTY STRINGS "OFF" "BUILD" "SYSTEM")
+
+if (NOT (ENABLE_WORKBENCH OR MANTID_QT_LIB STREQUAL "BUILD" OR MANTID_FRAMEWORK_LIB STREQUAL "BUILD"))
+message(FATAL_ERROR "Must select atleast one component to build")
+endif()
+
+# Create two internal BUILD_* variables. With these, we can do consistent checks throughout, e.g:
+# if(BUILD_MANTIDQT OR ENABLE_WORKBENCH)
+#   ....
+# endif()
+# to check if we are building the mantidqt libs or the workbench application
+if (MANTID_QT_LIB STREQUAL "BUILD")
+  set(BUILD_MANTIDQT ON)
+endif()
+if (MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  set(BUILD_MANTIDFRAMEWORK ON)
 endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
 # Conda build variable
-set(CONDA_BUILD FALSE CACHE BOOL "If True, proceed with a Conda build. Only relevant on Windows")
+set(CONDA_BUILD FALSE CACHE BOOL "If True, proceed with a Conda build. This setting adds some conda specific configuration to the mantid build")
 
 # Ensure that if we are running any sanitizers the compiler options are
 # known in sub targets
@@ -76,7 +106,9 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 include(Bootstrap)
 
 # Configure Eigen early
+if (BUILD_MANTIDFRAMEWORK)
 include(Eigen)
+endif()
 include(Span)
 
 if( MSVC )
@@ -97,8 +129,6 @@ if(ENABLE_OPENGL)
   endif()
 endif()
 
-find_package(TBB REQUIRED)
-
 # We probably don't want this to run on every build.
 option(COVERAGE "Generate coverage data" OFF)
 
@@ -107,7 +137,7 @@ if(COVERAGE)
   coverage_turn_on()
 endif()
 
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   find_package(Qt5
                COMPONENTS Core
                           Gui
@@ -118,7 +148,9 @@ if(ENABLE_WORKBENCH)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
   endif()
-  find_package(QScintillaQt5 REQUIRED)
+  if (BUILD_MANTIDQT)
+    find_package(QScintillaQt5 REQUIRED)
+  endif()
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
@@ -136,20 +168,18 @@ set(DOCS_BUILDDIR ${CMAKE_BINARY_DIR}/docs)
 option(CXXTEST_ADD_PERFORMANCE
        "Switch to add performance tests to the list of tests run by ctest?")
 
-add_subdirectory(Framework)
+include(TargetFunctions)
 
-include_directories(Framework/Kernel/inc)
-include_directories(Framework/Json/inc)
-include_directories(Framework/HistogramData/inc)
-include_directories(Framework/Indexing/inc)
-include_directories(Framework/Parallel/inc)
-include_directories(Framework/Beamline/inc)
-include_directories(Framework/Geometry/inc)
-include_directories(Framework/API/inc)
-include_directories(Framework/Types/inc)
-include_directories(Framework/NexusGeometry/inc)
+if (MANTID_FRAMEWORK_LIB STREQUAL "SYSTEM")
+  if (BUILD_MANTIDQT)
+    find_package(MantidFramework REQUIRED)
+  endif()
+else()
+  add_subdirectory(Framework)
+endif()
 
-set(CORE_MANTIDLIBS Kernel HistogramData Indexing Beamline Geometry API Types)
+
+set(CORE_MANTIDLIBS Mantid::Kernel Mantid::HistogramData Mantid::Indexing Mantid::Beamline Mantid::Geometry Mantid::API Mantid::Types)
 
 if(UNIX)
   # Experimental feature. Unix only at this point.
@@ -162,9 +192,12 @@ if(MSVC)
 endif()
 
 add_custom_target(AllTests)
-add_dependencies(AllTests FrameworkTests)
 
-if(ENABLE_WORKBENCH)
+if (BUILD_MANTIDFRAMEWORK)
+  add_dependencies(AllTests FrameworkTests)
+endif()
+
+if(BUILD_MANTIDQT OR ENABLE_WORKBENCH)
   add_custom_target(GUITests)
   add_dependencies(check GUITests)
   # Collect all tests together
@@ -172,7 +205,10 @@ if(ENABLE_WORKBENCH)
   add_subdirectory(qt)
 endif()
 
-add_subdirectory(scripts)
+if (BUILD_MANTIDFRAMEWORK)
+  add_subdirectory(scripts)
+endif()
+
 
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
@@ -221,7 +257,7 @@ endif()
 # Installation settings
 
 # Install the files (.desktop and icon) to create a menu items
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND NOT CONDA_BUILD)
   function(uppercase_first_letter output_var input)
   string(LENGTH ${input} _inputlen)
   string(TOUPPER ${input} _allupper)

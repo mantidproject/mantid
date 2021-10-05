@@ -17,8 +17,7 @@
 #include <cfloat>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 using Kernel::Quat;
 using Kernel::V3D;
 
@@ -344,5 +343,4 @@ size_t ObjComponent::registerContents(class ComponentVisitor &componentVisitor) 
     return componentVisitor.registerInfiniteObjComponent(*this);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

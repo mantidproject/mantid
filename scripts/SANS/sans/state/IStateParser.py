@@ -13,7 +13,7 @@ from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTra
 from sans.state.StateObjects.StateCompatibility import StateCompatibility
 from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
 from sans.state.StateObjects.StateData import StateData, get_data_builder
-from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors
+from sans.state.StateObjects.StateMaskDetectors import StateMask
 from sans.state.StateObjects.StateMoveDetectors import StateMove
 from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
 from sans.state.StateObjects.StateReductionMode import StateReductionMode
@@ -67,7 +67,7 @@ class IStateParser(metaclass=ABCMeta):
             return StateData()
 
     @abstractmethod
-    def get_state_mask(self, file_information) -> StateMaskDetectors:
+    def get_state_mask(self, file_information) -> StateMask:
         pass
 
     @abstractmethod

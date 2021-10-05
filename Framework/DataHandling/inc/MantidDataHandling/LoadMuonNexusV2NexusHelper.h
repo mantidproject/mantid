@@ -38,6 +38,8 @@ public:
                                              int periodNumber);
   // Load first good data from the nexus entry
   double loadFirstGoodDataFromNexus();
+  // Load last good data from the nexus entry
+  double loadLastGoodDataFromNexus();
   // Load time zero from the nexus entry
   double loadTimeZeroFromNexusFile();
   // Load time zero from nexus entry into a vector
@@ -46,6 +48,14 @@ public:
   MuonNexus::SampleInformation loadSampleInformationFromNexus();
   // Number of periods in the nexus file
   int getNumberOfPeriods() const;
+  std::string getPeriodLabels() const;
+  std::vector<int> getIntVector(const int &numPeriods, const std::string &name) const;
+  std::string getPeriodSequenceString(const int &numPeriods) const;
+  std::string getPeriodTypes(const int &numPeriods) const;
+  std::string getPeriodFramesRequested(const int &numPeriods) const;
+  std::string getPeriodRawFrames(const int &numPeriods) const;
+  std::string getPeriodOutput(const int &numPeriods) const;
+  std::string getPeriodTotalCounts(const int &numPeriods) const;
 
 private:
   const NeXus::NXEntry &m_entry;

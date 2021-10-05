@@ -17,11 +17,13 @@ Sequential fitting options
 
 **Fit selected** Performs a fit on the fit object selected in the table.
 
-**Plot fit results** Determines whether the results of the fit will be added to the plot window.
+**Filter by** This is only available on the Frequency Domain Analysis interface. It allows you to select the type of data you want to sequentially fit.
 
 **Parameters for previous fit** Uses the parameters from the previous fit calculation as initial values for the next fit.
 
 **Initial parameters for each fit** Uses the initial values (as specified in the Fit Table) in each fit calculation.
+
+**Copy fit parameters to all** Editing a fit parameter will copy its new value to all domains if this is ticked.
 
 Fit Table
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,3 +43,4 @@ Used By
 ^^^^^^^
 
 :ref:`Muon Analysis <Muon_Analysis-ref>`
+:ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>`

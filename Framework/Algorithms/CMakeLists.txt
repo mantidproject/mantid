@@ -28,8 +28,10 @@ set(SRC_FILES
     src/CalculateEfficiency2.cpp
     src/CalculateFlatBackground.cpp
     src/CalculateIqt.cpp
-    src/CalculateMultipleScattering.cpp
+    src/DiscusMultipleScatteringCorrection.cpp
+    src/CalculatePlaczek.cpp
     src/CalculatePlaczekSelfScattering.cpp
+    src/CalculatePlaczekSelfScattering2.cpp
     src/CalculatePolynomialBackground.cpp
     src/CalculateTransmission.cpp
     src/CalculateTransmissionBeamSpreader.cpp
@@ -159,7 +161,6 @@ set(SRC_FILES
     src/GeneratePythonFitScript.cpp
     src/GeneratePythonScript.cpp
     src/GetAllEi.cpp
-    src/GetDetOffsetsMultiPeaks.cpp
     src/GetDetectorOffsets.cpp
     src/GetEi.cpp
     src/GetEi2.cpp
@@ -212,6 +213,8 @@ set(SRC_FILES
     src/MonitorEfficiencyCorUser.cpp
     src/MonteCarloAbsorption.cpp
     src/MostLikelyMean.cpp
+    src/MultipleScatteringCorrection.cpp
+    src/MultipleScatteringCorrectionDistGraber.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
     src/NormaliseByCurrent.cpp
@@ -332,6 +335,7 @@ set(SRC_FILES
     src/WeightingStrategy.cpp
     src/WienerSmooth.cpp
     src/WorkflowAlgorithmRunner.cpp
+    src/WorkspaceBoundingBox.cpp
     src/WorkspaceJoiners.cpp
     src/XDataConverter.cpp
     src/XrayAbsorptionCorrection.cpp)
@@ -366,8 +370,10 @@ set(INC_FILES
     inc/MantidAlgorithms/CalculateEfficiency2.h
     inc/MantidAlgorithms/CalculateFlatBackground.h
     inc/MantidAlgorithms/CalculateIqt.h
-    inc/MantidAlgorithms/CalculateMultipleScattering.h
+    inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h
+    inc/MantidAlgorithms/CalculatePlaczek.h
     inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h
+    inc/MantidAlgorithms/CalculatePlaczekSelfScattering2.h
     inc/MantidAlgorithms/CalculatePolynomialBackground.h
     inc/MantidAlgorithms/CalculateTransmission.h
     inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -498,7 +504,6 @@ set(INC_FILES
     inc/MantidAlgorithms/GeneratePythonFitScript.h
     inc/MantidAlgorithms/GeneratePythonScript.h
     inc/MantidAlgorithms/GetAllEi.h
-    inc/MantidAlgorithms/GetDetOffsetsMultiPeaks.h
     inc/MantidAlgorithms/GetDetectorOffsets.h
     inc/MantidAlgorithms/GetEi.h
     inc/MantidAlgorithms/GetEi2.h
@@ -554,6 +559,8 @@ set(INC_FILES
     inc/MantidAlgorithms/MonitorEfficiencyCorUser.h
     inc/MantidAlgorithms/MonteCarloAbsorption.h
     inc/MantidAlgorithms/MostLikelyMean.h
+    inc/MantidAlgorithms/MultipleScatteringCorrection.h
+    inc/MantidAlgorithms/MultipleScatteringCorrectionDistGraber.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
@@ -678,6 +685,7 @@ set(INC_FILES
     inc/MantidAlgorithms/WeightingStrategy.h
     inc/MantidAlgorithms/WienerSmooth.h
     inc/MantidAlgorithms/WorkflowAlgorithmRunner.h
+    inc/MantidAlgorithms/WorkspaceBoundingBox.h
     inc/MantidAlgorithms/WorkspaceJoiners.h
     inc/MantidAlgorithms/XDataConverter.h
     inc/MantidAlgorithms/XrayAbsorptionCorrection.h)
@@ -722,8 +730,10 @@ set(TEST_FILES
     CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
-    CalculateMultipleScatteringTest.h
+    DiscusMultipleScatteringCorrectionTest.h
+    CalculatePlaczekSelfScattering2Test.h
     CalculatePlaczekSelfScatteringTest.h
+    CalculatePlaczekTest.h
     CalculatePolynomialBackgroundTest.h
     CalculateTransmissionBeamSpreaderTest.h
     CalculateTransmissionTest.h
@@ -851,7 +861,6 @@ set(TEST_FILES
     GeneratePythonFitScriptTest.h
     GeneratePythonScriptTest.h
     GetAllEiTest.h
-    GetDetOffsetsMultiPeaksTest.h
     GetDetectorOffsetsTest.h
     GetEiMonDet3Test.h
     GetEiTest.h
@@ -905,6 +914,7 @@ set(TEST_FILES
     MonitorEfficiencyCorUserTest.h
     MonteCarloAbsorptionTest.h
     MostLikelyMeanTest.h
+    MultipleScatteringCorrectionTest.h
     MultiplyRangeTest.h
     MultiplyTest.h
     MuonWorkspaceCreationHelperTest.h

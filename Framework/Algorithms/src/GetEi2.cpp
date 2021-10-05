@@ -30,8 +30,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetEi2)
@@ -267,7 +266,7 @@ double GetEi2::calculateEi(const double initial_guess) {
  * passed
  *  @param ws_index :: The workspace index of the detector
  *  @param spectrumInfo :: A spectrum info object for the input workspace
- *  @return The distance between the source and the given detector(or
+ *  @return The distance between the source and the given detector (or
  * DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
@@ -590,7 +589,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(const API::MatrixWorkspace_sptr &d
  */
 double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws, const double prominence) {
   std::vector<double> peak_x, peak_y, peak_e;
-  calculatePeakWidthAtHalfHeight(std::move(monitor_ws), prominence, peak_x, peak_y, peak_e);
+  calculatePeakWidthAtHalfHeight(monitor_ws, prominence, peak_x, peak_y, peak_e);
 
   // Area
   double area(0.0), dummy(0.0);
@@ -724,5 +723,4 @@ void GetEi2::storeEi(const double ei) const {
   Property *incident_energy = new PropertyWithValue<double>("Ei", ei, Direction::Input);
   m_input_ws->mutableRun().addProperty(incident_energy, true);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

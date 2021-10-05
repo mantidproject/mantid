@@ -70,6 +70,27 @@ class ReductionMode(Enum):
     HAB = "HAB"
     LAB = "LAB"
 
+    @staticmethod
+    def convert(val: str, *, support_deprecated=True):
+        """
+        Converts the existing legacy format enum values into the new front/rear types
+        :param val: String value to convert
+        :param support_deprecated: (Optional) support HAB/LAB legacy input. True by default, throws when False.
+        :return: Reduction Mode enum, or throws if unsupported
+        """
+        mapping = {"HAB": ReductionMode.HAB, "front": ReductionMode.HAB,
+                   "LAB": ReductionMode.LAB, "rear": ReductionMode.LAB,
+                   "All": ReductionMode.ALL,
+                   "Merged": ReductionMode.MERGED}
+        if not support_deprecated and next((key for key in ["hab", "lab"] if val.casefold() == key.casefold()), None):
+            raise ValueError(f"A deprecated key was found: {val}.\nPlease use front/rear as appropriate instead.")
+
+        # Case insensitive key search
+        enum_val = next((enum_val for key, enum_val in mapping.items() if val.casefold() == key.casefold()), None)
+        if not enum_val:
+            ReductionMode(val)  # Rethrow using enums built in exception
+        return enum_val
+
 
 @json_serializable
 class ReductionDimensionality(Enum):

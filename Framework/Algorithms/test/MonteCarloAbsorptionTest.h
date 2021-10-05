@@ -16,7 +16,9 @@
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/IMCInteractionVolume.h"
 #include "MantidAlgorithms/SampleCorrections/MCInteractionStatistics.h"
+#include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
@@ -558,6 +560,29 @@ public:
     TS_ASSERT_EQUALS(allZero, true);
   }
 
+  void test_Beam_Height_Calculation_With_Offset_Sample() {
+    using namespace Mantid::Kernel;
+    using namespace Mantid::Algorithms;
+    using namespace Mantid::Geometry;
+    // Define a sample shape
+    constexpr double sampleRadius{0.006};
+    constexpr double sampleHeight{0.04};
+    const V3D sampleBaseCentre{0., sampleHeight / 2., 0.};
+    const V3D yAxis{0., 1., 0.};
+    auto sampleShape = ComponentCreationHelper::createCappedCylinder(sampleRadius, sampleHeight, sampleBaseCentre,
+                                                                     yAxis, "sample-cylinder");
+    auto mcAbsorb = createTestAlgorithm();
+    auto instrument = std::make_shared<Mantid::Geometry::Instrument>("test");
+    instrument->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+    ObjComponent *source = new ObjComponent("moderator");
+    source->setPos(V3D(0.0, 0.0, -20.0));
+    instrument->add(source);
+    instrument->markAsSource(source);
+    std::shared_ptr<IBeamProfile> beam;
+    TS_ASSERT_THROWS_NOTHING(beam = mcAbsorb->createBeamProfile(*instrument, *sampleShape));
+    TS_ASSERT(std::dynamic_pointer_cast<RectangularBeamProfile>(beam)->maxPoint()[1] == 0.06);
+  }
+
   //---------------------------------------------------------------------------
   // Failure cases
   //---------------------------------------------------------------------------
@@ -667,6 +692,7 @@ private:
       m_MCAbsorptionStrategy = absStrategy;
     }
     void setSparseWorkspace(std::shared_ptr<MockSparseWorkspace> sparseWS) { m_SparseWorkspace = sparseWS; }
+    using MonteCarloAbsorption::createBeamProfile;
 
   protected:
     std::shared_ptr<Mantid::Algorithms::IMCAbsorptionStrategy>

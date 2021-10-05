@@ -5,9 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/CellStandardItem.h"
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 void applyCellPropertiesToItem(Cell const &cell, QStandardItem &item) {
   item.setText(QString::fromStdString(cell.contentText()));
@@ -84,6 +82,4 @@ std::string getForegroundColor(QStandardItem const &item) {
 }
 
 QColor getBorderColor(QStandardItem const &item) { return item.data(CellUserRoles::BorderColor).value<QColor>(); }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

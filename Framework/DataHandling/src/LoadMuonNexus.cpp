@@ -33,8 +33,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -91,6 +90,17 @@ void LoadMuonNexus::init() {
   declareProperty("TimeZero", 0.0, "Time zero in units of micro-seconds (default to 0.0)", Direction::Output);
   declareProperty("FirstGoodData", 0.0, "First good data in units of micro-seconds (default to 0.0)",
                   Direction::Output);
+  declareProperty("LastGoodData", 0.0, "Last good data in the OutputWorkspace's spectra", Kernel::Direction::Output);
+
+  declareProperty(std::make_unique<ArrayProperty<double>>("TimeZeroList", Direction::Output),
+                  "A vector of time zero values");
+
+  declareProperty(
+      std::make_unique<WorkspaceProperty<Workspace>>("TimeZeroTable", "", Direction::Output, PropertyMode::Optional),
+      "TableWorkspace containing time zero values per spectra.");
+
+  declareProperty("CorrectTime", true, "Boolean flag controlling whether time should be corrected by timezero.",
+                  Direction::Input);
 
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("DeadTimeTable", "", Direction::Output, PropertyMode::Optional),
@@ -196,7 +206,7 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const int logNumb
 /**
  * Fucntion to add a single string as a sample log to a workspace
  */
-void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string logString,
+void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string &logString,
                                    DataObjects::Workspace2D_sptr &ws) {
   auto alg = createSampleLogAlgorithm(ws);
   alg->setProperty("LogType", "String");
@@ -204,5 +214,4 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string
   alg->setProperty("LogText", logString);
   alg->executeAsChildAlg();
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

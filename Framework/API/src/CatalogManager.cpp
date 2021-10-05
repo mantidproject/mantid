@@ -14,8 +14,7 @@
 #include <map>
 #include <memory>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /**
  * Logs the user into the catalog if session details are valid.
  * This is used here as we need to obtain the session for a specific catalog
@@ -106,5 +105,4 @@ std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
 
 /// @returns An unsigned value indicating the number of active sessions
 size_t CatalogManagerImpl::numberActiveSessions() const { return m_activeCatalogs.size(); }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

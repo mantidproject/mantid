@@ -47,7 +47,7 @@ namespace IO {
 */
 class MANTID_PARALLEL_DLL MultiProcessEventLoader {
 public:
-  MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses, uint32_t numThreads, const std::string &binary,
+  MultiProcessEventLoader(uint32_t numPixels, uint32_t numProcesses, uint32_t numThreads, std::string binary,
                           bool precalc = true);
   void load(const std::string &filename, const std::string &groupname, const std::vector<std::string> &bankNames,
             const std::vector<int32_t> &bankOffsets,

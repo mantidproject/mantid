@@ -13,6 +13,7 @@
 
 #include <boost/format.hpp>
 #include <cmath>
+#include <utility>
 
 #include "MantidKernel/Logger.h"
 namespace {
@@ -34,8 +35,7 @@ private:
 };
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 //------------------------------------------------------------------------------
 // public members
@@ -58,7 +58,7 @@ NumericAxis::NumericAxis(const std::size_t &length) : Axis(), m_values(length) {
  * Constructor taking a set of centre point values
  * @param centres A vector of values to assign to the axis
  */
-NumericAxis::NumericAxis(const std::vector<double> &centres) : Axis(), m_values(centres) {}
+NumericAxis::NumericAxis(std::vector<double> centres) : Axis(), m_values(std::move(centres)) {}
 
 /** Virtual constructor
  *  @param parentWorkspace :: The workspace is not used in this implementation
@@ -187,5 +187,4 @@ const std::vector<double> &NumericAxis::getValues() const { return m_values; }
  */
 NumericAxis::NumericAxis() {}
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

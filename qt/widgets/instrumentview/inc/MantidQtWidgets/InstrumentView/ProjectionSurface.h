@@ -167,6 +167,18 @@ public:
   /// This method resizes the shape to fit into the new rectangle.
   void setCurrentBoundingRect(const RectF &rect) { m_maskShapes.setCurrentBoundingRect(rect); }
 
+  /// Return bounding rotation of the currently selected shape in the "original"
+  /// coord system.
+  /// It doesn't depend on the zooming of the surface
+  double getCurrentBoundingRotation() const { return m_maskShapes.getCurrentBoundingRotation(); }
+
+  /// Set new bounding rect of the currently selected shape in the "original"
+  /// coord system.
+  /// This method resizes the shape to fit into the new rectangle.
+  void setCurrentBoundingRotation(const double rotation) { m_maskShapes.setCurrentBoundingRotation(rotation); }
+
+  std::string getCurrentShapeType() const { return m_maskShapes.getCurrentShapeType(); }
+
   /// Initialize interactive shape creation.
   /// @param type :: Type of the shape. For available types see code of
   /// Shape2DCollection::createShape(const QString& type,int x,int y) const

@@ -14,10 +14,9 @@
 #include "MantidKernel/Strings.h"
 
 #include <nexus/NeXusException.hpp>
+#include <utility>
 
-namespace Mantid {
-
-namespace API {
+namespace Mantid::API {
 using namespace Mantid::Kernel;
 using Geometry::IObject;
 using Geometry::IObject_sptr;
@@ -136,7 +135,7 @@ const SampleEnvironment &Sample::getEnvironment() const {
  * @param env :: A pointer to a created sample environment. This takes
  * ownership of the object.
  */
-void Sample::setEnvironment(std::shared_ptr<SampleEnvironment> env) { m_environment = env; }
+void Sample::setEnvironment(std::shared_ptr<SampleEnvironment> env) { m_environment = std::move(env); }
 
 /** Return a const reference to the OrientedLattice of this sample
  * @return A const reference to a OrientedLattice object
@@ -426,5 +425,4 @@ bool Sample::operator==(const Sample &other) const {
 }
 
 bool Sample::operator!=(const Sample &other) const { return !this->operator==(other); }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

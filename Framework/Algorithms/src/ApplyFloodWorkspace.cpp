@@ -61,8 +61,7 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const Mat
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyFloodWorkspace)
@@ -132,5 +131,4 @@ void ApplyFloodWorkspace::exec() {
   setProperty(Prop::OUTPUT_WORKSPACE, output);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

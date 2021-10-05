@@ -1042,7 +1042,6 @@ std::string FitPropertyBrowser::defaultPeakType() {
 void FitPropertyBrowser::setDefaultPeakType(const std::string &fnType) {
   m_defaultPeak = fnType;
   setDefaultFunctionType(fnType);
-  Mantid::Kernel::ConfigService::Instance().setString("curvefitting.defaultPeak", fnType);
 }
 /// Get the default background type
 std::string FitPropertyBrowser::defaultBackgroundType() const { return m_defaultBackground; }
@@ -1232,6 +1231,7 @@ void FitPropertyBrowser::enumChanged(QtProperty *prop) {
   if (prop == m_workspace) {
     workspaceChange(QString::fromStdString(workspaceName()));
     setWorkspaceProperties();
+    intChanged(m_workspaceIndex);
     m_storedWorkspaceName = workspaceName();
   } else if (prop->propertyName() == "Type") {
     disableUndo();
@@ -1296,6 +1296,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     return;
 
   if (prop == m_workspaceIndex) {
+    // Get current value displayed by the workspace index spinbox
     auto const currentIndex = workspaceIndex();
     auto const allowedIndex = getAllowedIndex(currentIndex);
     if (allowedIndex != currentIndex) {
@@ -1522,7 +1523,7 @@ void FitPropertyBrowser::setCurrentFunction(PropertyHandler *h) const {
  * @param f :: New current function
  */
 void FitPropertyBrowser::setCurrentFunction(const Mantid::API::IFunction_const_sptr &f) const {
-  setCurrentFunction(getHandler()->findHandler(std::move(f)));
+  setCurrentFunction(getHandler()->findHandler(f));
 }
 
 /**
@@ -1628,7 +1629,8 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   else // else fitting to current workspace, group under same name.
     emit fittingDone(name);
 
-  getFitResults();
+  IFunction_sptr function = alg->getProperty("Function");
+  updateBrowserFromFitResults(function);
   if (!isWorkspaceAGroup() && alg->existsProperty("OutputWorkspace")) {
     std::string out = alg->getProperty("OutputWorkspace");
     emit algorithmFinished(QString::fromStdString(out));
@@ -2023,30 +2025,13 @@ void FitPropertyBrowser::clearBrowser() {
 }
 
 /// Set the parameters to the fit outcome
-void FitPropertyBrowser::getFitResults() {
-  std::string wsName = outputName() + "_Parameters";
-  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
-    Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
-
-    Mantid::API::TableRow row = ws->getFirstRow();
-    do {
-      try {
-        std::string name;
-        double value, error;
-        row >> name >> value >> error;
-
-        size_t paramIndex = compositeFunction()->parameterIndex(name);
-
-        compositeFunction()->setParameter(paramIndex, value);
-        compositeFunction()->setError(paramIndex, error);
-      } catch (...) {
-        // do nothing
-      }
-    } while (row.next());
-    updateParameters();
-    getHandler()->updateErrors();
+void FitPropertyBrowser::updateBrowserFromFitResults(const IFunction_sptr &finalFunction) {
+  for (auto paramIndex = 0u; paramIndex < finalFunction->nParams(); ++paramIndex) {
+    compositeFunction()->setParameter(paramIndex, finalFunction->getParameter(paramIndex));
+    compositeFunction()->setError(paramIndex, finalFunction->getError(paramIndex));
   }
+  updateParameters();
+  getHandler()->updateErrors();
 }
 
 /**
@@ -2449,10 +2434,6 @@ int FitPropertyBrowser::getAllowedIndex(int currentIndex) const {
 
   if (!workspace) {
     return 0;
-  }
-
-  if (currentIndex == m_oldWorkspaceIndex) {
-    return currentIndex < 0 ? 0 : currentIndex;
   }
 
   auto const allowedIndices =
@@ -3261,7 +3242,16 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName, const QList<in
     for (auto const i : wsSpectra) {
       indices.push_back(static_cast<int>(ws->getIndexFromSpectrumNumber(i)));
     }
+    auto wsFound = m_allowedSpectra.find(wsName);
     m_allowedSpectra.insert(wsName, indices);
+    if (wsFound != m_allowedSpectra.end()) {
+      // we already knew about this workspace
+      // update workspace index list
+      intChanged(m_workspaceIndex);
+    } else {
+      // new workspace, update workspace names
+      populateWorkspaceNames();
+    }
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }

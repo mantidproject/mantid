@@ -84,6 +84,7 @@ private:
   std::unique_ptr<LoadMuonNexusV2NexusHelper> m_nexusLoader;
   // Change the time axis unit as LoadISISNexus has the wrong one
   void applyTimeAxisUnitCorrection(API::Workspace &workspace);
+  void loadPeriodInfo(API::Workspace &workspace);
 };
 } // namespace DataHandling
 } // namespace Mantid

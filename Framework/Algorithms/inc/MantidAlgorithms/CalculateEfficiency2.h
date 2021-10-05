@@ -76,7 +76,7 @@ private:
   void exec() override;
   bool processGroups() override;
 
-  API::MatrixWorkspace_sptr calculateEfficiency(API::MatrixWorkspace_sptr, double startProgress = 0.0,
+  API::MatrixWorkspace_sptr calculateEfficiency(const API::MatrixWorkspace_sptr &, double startProgress = 0.0,
                                                 double stepProgress = 1.0);
 
   /// Sum all detectors, excluding monitors and masked detectors

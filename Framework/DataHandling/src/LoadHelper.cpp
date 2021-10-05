@@ -20,8 +20,13 @@
 #include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
 
 namespace Mantid {
-namespace DataHandling {
 
+namespace {
+/// static logger
+Kernel::Logger g_log("LoadHelper");
+} // namespace
+
+namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 
@@ -242,7 +247,12 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                     else
                       runDetails.addProperty(property_name, property_value);
                   } else {
-                    runDetails.addProperty(property_name, property_value);
+                    if (!runDetails.hasProperty(property_name)) {
+                      runDetails.addProperty(property_name, property_value);
+                    } else {
+                      g_log.warning() << "Property " << property_name
+                                      << " was set twice. Please check the Nexus file and your inputs." << std::endl;
+                    }
                   }
 
                 } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) || (type == NX_INT16) || (type == NX_INT32) ||
@@ -267,10 +277,16 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                       } else if (type == NX_FLOAT64) {
                         property_double_value = *(reinterpret_cast<double *>(dataBuffer));
                       }
-                      if (units_status != NX_ERROR)
-                        runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
-                      else
-                        runDetails.addProperty(property_name, property_double_value);
+                      if (!runDetails.hasProperty(property_name)) {
+
+                        if (units_status != NX_ERROR)
+                          runDetails.addProperty(property_name, property_double_value, std::string(units_sbuf));
+                        else
+                          runDetails.addProperty(property_name, property_double_value);
+                      } else {
+                        g_log.warning() << "Property " << property_name
+                                        << " was set twice. Please check the Nexus file and your inputs." << std::endl;
+                      }
                     } else if (build_small_float_array) {
                       // An array, converted to "name_index", with index < 10
                       // (see
@@ -283,10 +299,18 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                         }
                         std::string indexed_property_name =
                             property_name + std::string("_") + std::to_string(dim_index);
-                        if (units_status != NX_ERROR)
-                          runDetails.addProperty(indexed_property_name, property_double_value, std::string(units_sbuf));
-                        else
-                          runDetails.addProperty(indexed_property_name, property_double_value);
+
+                        if (!runDetails.hasProperty(property_name)) {
+                          if (units_status != NX_ERROR)
+                            runDetails.addProperty(indexed_property_name, property_double_value,
+                                                   std::string(units_sbuf));
+                          else
+                            runDetails.addProperty(indexed_property_name, property_double_value);
+                        } else {
+                          g_log.warning()
+                              << "Property " << property_name
+                              << " was set twice. Please check the Nexus file and your inputs." << std::endl;
+                        }
                       }
                     }
 
@@ -301,10 +325,15 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                       property_int_value = *(reinterpret_cast<short unsigned int *>(dataBuffer));
                     }
 
-                    if (units_status != NX_ERROR)
-                      runDetails.addProperty(property_name, property_int_value, std::string(units_sbuf));
-                    else
-                      runDetails.addProperty(property_name, property_int_value);
+                    if (!runDetails.hasProperty(property_name)) {
+                      if (units_status != NX_ERROR)
+                        runDetails.addProperty(property_name, property_int_value, std::string(units_sbuf));
+                      else
+                        runDetails.addProperty(property_name, property_int_value);
+                    } else {
+                      g_log.warning() << "Property " << property_name
+                                      << " was set twice. Please check the Nexus file and your inputs." << std::endl;
+                    }
 
                   } // if (type==...
                 }
@@ -395,6 +424,14 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID) {
  */
 std::string LoadHelper::dateTimeInIsoFormat(const std::string &dateToParse) {
   namespace bt = boost::posix_time;
+  try {
+    // Try to convert to a boost date as an iso string. If it works, we are already in ISO and no conversion is
+    // requiered.
+    bt::from_iso_extended_string(dateToParse);
+    return dateToParse;
+
+  } catch (...) {
+  }
   // parsing format
   const std::locale format = std::locale(std::locale::classic(), new bt::time_input_facet("%d-%b-%y %H:%M:%S"));
 

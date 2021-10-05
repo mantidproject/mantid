@@ -54,6 +54,11 @@ public:
   virtual const std::string toString() const = 0;
   //@}
 
+  /// Acquires a read lock. If another thread currently holds a write lock,
+  /// waits until the write lock is released.
+  void readLock();
+  void unlock();
+
 protected:
   Poco::RWLock *getLock() const;
 

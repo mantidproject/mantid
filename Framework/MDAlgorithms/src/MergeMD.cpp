@@ -18,8 +18,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MergeMD)
@@ -213,7 +212,7 @@ template <typename MDE, size_t nd> void MergeMD::doPlus(typename MDEventWorkspac
 
   // Add the boxes in parallel. They should be spread out enough on each
   // core to avoid stepping on each other.
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for if (!ws2->isFileBacked()) )
     for (int i = 0; i < numBoxes; i++) {
       PARALLEL_START_INTERUPT_REGION
@@ -301,5 +300,4 @@ void MergeMD::exec() {
   g_log.debug() << tim << " to merge all workspaces.\n";
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

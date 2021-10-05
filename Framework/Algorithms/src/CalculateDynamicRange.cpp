@@ -23,8 +23,7 @@ double calculateQ(const double lambda, const double twoTheta) {
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -144,5 +143,4 @@ void CalculateDynamicRange::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

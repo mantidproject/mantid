@@ -16,8 +16,7 @@
 
 #include <boost/algorithm/string.hpp>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetInstrumentParameter)
@@ -202,5 +201,4 @@ void SetInstrumentParameter::addParameter(Mantid::Geometry::ParameterMap &pmap,
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

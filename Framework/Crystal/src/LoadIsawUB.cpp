@@ -16,8 +16,7 @@ using namespace Mantid::Kernel::Strings;
 using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::DblMatrix;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadIsawUB)
@@ -189,5 +188,4 @@ void LoadIsawUB::readModulatedUB(std::ifstream &in, DblMatrix &ub) {
   this->setProperty("InputWorkspace", ws1);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

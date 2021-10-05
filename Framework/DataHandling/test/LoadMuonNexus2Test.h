@@ -73,8 +73,10 @@ public:
     TS_ASSERT(field == "Transverse");
     double timeZero = nxLoad.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.224, 0.001);
-    double firstgood = nxLoad.getProperty("FirstGoodData");
-    TS_ASSERT_DELTA(firstgood, 0.384, 0.001);
+    double firstGood = nxLoad.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA(firstGood, 0.384, 0.001);
+    double lastGood = nxLoad.getProperty("LastGoodData");
+    TS_ASSERT_DELTA(lastGood, 32.0, 0.001);
     //
 
     //
@@ -408,11 +410,13 @@ public:
     //
     std::string field = nxLoad.getProperty("MainFieldDirection");
     TS_ASSERT(field == "Transverse");
-    //  TimeZero and FirstGoodData are not read yet so they are 0
+    //  TimeZero, FirstGoodData and LastGoodData are not read yet so they are 0
     double timeZero = nxLoad.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.0, 0.001);
-    double firstgood = nxLoad.getProperty("FirstGoodData");
-    TS_ASSERT_DELTA(firstgood, 0.0, 0.001);
+    double firstGood = nxLoad.getProperty("FirstGoodData");
+    TS_ASSERT_DELTA(firstGood, 0.0, 0.001);
+    double lastGood = nxLoad.getProperty("LastGoodData");
+    TS_ASSERT_DELTA(lastGood, 0.0, 0.001);
 
     //
     // Test workspace data

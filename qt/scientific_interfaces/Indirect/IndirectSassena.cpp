@@ -11,8 +11,7 @@
 #include <QFileInfo>
 #include <QString>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 IndirectSassena::IndirectSassena(QWidget *parent) : IndirectSimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
@@ -119,5 +118,4 @@ void IndirectSassena::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(e
 
 void IndirectSassena::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

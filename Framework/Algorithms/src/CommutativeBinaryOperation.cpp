@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 /** Performs a simple check to see if the sizes of two workspaces are compatible
  * for a binary operation
  * In order to be size compatible then the larger workspace
@@ -41,5 +40,4 @@ std::string CommutativeBinaryOperation::checkSizeCompatibility(const API::Matrix
   // call the base routine
   return BinaryOperation::checkSizeCompatibility(wsLarger, wsSmaller);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

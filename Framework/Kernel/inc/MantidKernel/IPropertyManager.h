@@ -178,6 +178,9 @@ public:
   /// Removes the property from management
   virtual void removeProperty(const std::string &name, const bool delproperty = true) = 0;
 
+  /// Removes the property from management and returns a pointer to it
+  virtual std::unique_ptr<Property> takeProperty(const size_t index) = 0;
+
   virtual void resetProperties() = 0;
 
   /** Sets all the declared properties from a string.

@@ -18,8 +18,7 @@ GNU_DIAG_OFF("literal-suffix")
 #include <ctime>
 #include <iomanip>
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 using namespace Kernel;
 using namespace API;
 using namespace ICat3;
@@ -675,5 +674,4 @@ void CICatHelper::setSSLContext(ICat3::ICATPortBindingProxy &icat) {
     CErrorHandling::throwErrorMessages(icat);
   }
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

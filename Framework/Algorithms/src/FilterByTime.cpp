@@ -13,8 +13,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterByTime)
 
@@ -132,5 +131,4 @@ void FilterByTime::exec() {
   setProperty("OutputWorkspace", std::move(outputWS));
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

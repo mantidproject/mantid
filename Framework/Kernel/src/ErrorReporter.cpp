@@ -18,8 +18,9 @@
 #include <Poco/ActiveResult.h>
 #include <json/json.h>
 
-namespace Mantid {
-namespace Kernel {
+#include <utility>
+
+namespace Mantid::Kernel {
 
 namespace {
 /// static logger
@@ -41,11 +42,12 @@ ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::
                              const std::string &email, const std::string &textBox)
     : ErrorReporter(application, upTime, exitCode, share, name, email, textBox, "") {}
 
-ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::time_duration &upTime,
-                             const std::string &exitCode, const bool share, const std::string &name,
-                             const std::string &email, const std::string &textBox, const std::string &traceback)
-    : m_application(application), m_exitCode(exitCode), m_upTime(upTime), m_share(share), m_name(name), m_email(email),
-      m_textbox(textBox), m_stacktrace(traceback) {
+ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration upTime, std::string exitCode,
+                             const bool share, std::string name, std::string email, std::string textBox,
+                             std::string traceback)
+    : m_application(std::move(application)), m_exitCode(std::move(exitCode)), m_upTime(std::move(upTime)),
+      m_share(share), m_name(std::move(name)), m_email(std::move(email)), m_textbox(std::move(textBox)),
+      m_stacktrace(std::move(traceback)) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("errorreports.rooturl");
   if (!url.is_initialized()) {
     g_log.debug() << "Failed to load error report url\n";
@@ -138,5 +140,4 @@ int ErrorReporter::sendReport(const std::string &message, const std::string &url
   return status;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

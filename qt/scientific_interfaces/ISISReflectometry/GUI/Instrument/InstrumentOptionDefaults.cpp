@@ -12,9 +12,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Instrument.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 // unnamed namespace
 namespace {
@@ -51,13 +49,11 @@ Instrument getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
   auto detectorCorrections = DetectorCorrections(defaults.getBoolOrTrue("CorrectDetectors", "CorrectDetectors"),
                                                  detectorCorrectionTypeFromString(detectorCorrectionString));
 
-  return Instrument(std::move(wavelengthRange), std::move(monitorCorrections), std::move(detectorCorrections));
+  return Instrument(wavelengthRange, std::move(monitorCorrections), detectorCorrections);
 }
 } // unnamed namespace
 
 Instrument InstrumentOptionDefaults::get(Mantid::Geometry::Instrument_const_sptr instrument) {
   return getInstrumentDefaults(instrument);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

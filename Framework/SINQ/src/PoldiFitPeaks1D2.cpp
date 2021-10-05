@@ -24,9 +24,9 @@
 
 #include <boost/math/distributions/normal.hpp>
 #include <functional>
+#include <utility>
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace Kernel;
 using namespace API;
@@ -49,7 +49,7 @@ RefinedRange::RefinedRange(const PoldiPeak_sptr &peak, double fwhmMultiples) : m
   setRangeBorders(peak->q() - extent, peak->q() + extent);
 }
 
-RefinedRange::RefinedRange(double xStart, double xEnd, const std::vector<PoldiPeak_sptr> &peaks) : m_peaks(peaks) {
+RefinedRange::RefinedRange(double xStart, double xEnd, std::vector<PoldiPeak_sptr> peaks) : m_peaks(std::move(peaks)) {
 
   setRangeBorders(xStart, xEnd);
 }
@@ -264,9 +264,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sp
         throw std::runtime_error("Not a composite function!");
       }
 
-      std::vector<PoldiPeak_sptr> peaks = currentRange->getPeaks();
-      for (size_t i = 0; i < peaks.size(); ++i) {
-        setValuesFromProfileFunction(peaks[i], composite->getFunction(i));
+      std::vector<PoldiPeak_sptr> currentRangePeaks = currentRange->getPeaks();
+      for (size_t i = 0; i < currentRangePeaks.size(); ++i) {
+        setValuesFromProfileFunction(currentRangePeaks[i], composite->getFunction(i));
         MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
         m_fitplots->addWorkspace(fpg);
       }
@@ -379,5 +379,4 @@ IAlgorithm_sptr PoldiFitPeaks1D2::getFitAlgorithm(const Workspace2D_sptr &dataWo
   return fitAlgorithm;
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

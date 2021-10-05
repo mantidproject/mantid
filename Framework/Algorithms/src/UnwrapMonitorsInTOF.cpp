@@ -239,8 +239,7 @@ std::vector<size_t> getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace 
 }
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -358,5 +357,4 @@ std::map<std::string, std::string> UnwrapMonitorsInTOF::validateInputs() {
   return invalidProperties;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

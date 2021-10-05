@@ -82,6 +82,9 @@ public:
   explicit WidgetScrollbarDecorator(QWidget *target);
   virtual ~WidgetScrollbarDecorator();
 
+  WidgetScrollbarDecorator(const WidgetScrollbarDecorator &) = delete;
+  WidgetScrollbarDecorator &operator=(WidgetScrollbarDecorator) = delete;
+
   /// Check whether the target is currently scrollable
   bool enabled() const;
 

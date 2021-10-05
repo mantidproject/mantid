@@ -25,8 +25,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidParallel/Communicator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -174,7 +173,7 @@ void CompareWorkspaces::exec() {
 
   if (!m_result) {
     std::string message = m_messages->cell<std::string>(0, 0);
-    g_log.notice() << "The workspaces did not match: " << message << '\n';
+    g_log.warning() << "The workspaces did not match: " << message << '\n';
   } else {
     std::string ws1 = Workspace_const_sptr(getProperty("Workspace1"))->getName();
     std::string ws2 = Workspace_const_sptr(getProperty("Workspace2"))->getName();
@@ -1082,8 +1081,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
 }
 
 //------------------------------------------------------------------------------------------------
-void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_sptr tws1,
-                                                     LeanElasticPeaksWorkspace_sptr tws2) {
+void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorkspace_sptr &tws1,
+                                                     const LeanElasticPeaksWorkspace_sptr &tws2) {
   // Check some table-based stuff
   if (tws1->getNumberPeaks() != tws2->getNumberPeaks()) {
     recordMismatch("Mismatched number of rows.");
@@ -1110,50 +1109,50 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_s
   IPeaksWorkspace_sptr ipws2 = sortPeaks->getProperty("OutputWorkspace");
 
   const double tolerance = getProperty("Tolerance");
-  for (int i = 0; i < ipws1->getNumberPeaks(); i++) {
+  for (int peakIndex = 0; peakIndex < ipws1->getNumberPeaks(); peakIndex++) {
     for (size_t j = 0; j < ipws1->columnCount(); j++) {
       std::shared_ptr<const API::Column> col = ipws1->getColumn(j);
-      std::string name = col->name();
+      const std::string name = col->name();
       double s1 = 0.0;
       double s2 = 0.0;
       if (name == "RunNumber") {
-        s1 = double(ipws1->getPeak(i).getRunNumber());
-        s2 = double(ipws2->getPeak(i).getRunNumber());
+        s1 = double(ipws1->getPeak(peakIndex).getRunNumber());
+        s2 = double(ipws2->getPeak(peakIndex).getRunNumber());
       } else if (name == "h") {
-        s1 = ipws1->getPeak(i).getH();
-        s2 = ipws2->getPeak(i).getH();
+        s1 = ipws1->getPeak(peakIndex).getH();
+        s2 = ipws2->getPeak(peakIndex).getH();
       } else if (name == "k") {
-        s1 = ipws1->getPeak(i).getK();
-        s2 = ipws2->getPeak(i).getK();
+        s1 = ipws1->getPeak(peakIndex).getK();
+        s2 = ipws2->getPeak(peakIndex).getK();
       } else if (name == "l") {
-        s1 = ipws1->getPeak(i).getL();
-        s2 = ipws2->getPeak(i).getL();
+        s1 = ipws1->getPeak(peakIndex).getL();
+        s2 = ipws2->getPeak(peakIndex).getL();
       } else if (name == "Wavelength") {
-        s1 = ipws1->getPeak(i).getWavelength();
-        s2 = ipws2->getPeak(i).getWavelength();
+        s1 = ipws1->getPeak(peakIndex).getWavelength();
+        s2 = ipws2->getPeak(peakIndex).getWavelength();
       } else if (name == "DSpacing") {
-        s1 = ipws1->getPeak(i).getDSpacing();
-        s2 = ipws2->getPeak(i).getDSpacing();
+        s1 = ipws1->getPeak(peakIndex).getDSpacing();
+        s2 = ipws2->getPeak(peakIndex).getDSpacing();
       } else if (name == "Intens") {
-        s1 = ipws1->getPeak(i).getIntensity();
-        s2 = ipws2->getPeak(i).getIntensity();
+        s1 = ipws1->getPeak(peakIndex).getIntensity();
+        s2 = ipws2->getPeak(peakIndex).getIntensity();
       } else if (name == "SigInt") {
-        s1 = ipws1->getPeak(i).getSigmaIntensity();
-        s2 = ipws2->getPeak(i).getSigmaIntensity();
+        s1 = ipws1->getPeak(peakIndex).getSigmaIntensity();
+        s2 = ipws2->getPeak(peakIndex).getSigmaIntensity();
       } else if (name == "BinCount") {
-        s1 = ipws1->getPeak(i).getBinCount();
-        s2 = ipws2->getPeak(i).getBinCount();
+        s1 = ipws1->getPeak(peakIndex).getBinCount();
+        s2 = ipws2->getPeak(peakIndex).getBinCount();
       } else if (name == "QLab") {
-        V3D q1 = ipws1->getPeak(i).getQLabFrame();
-        V3D q2 = ipws2->getPeak(i).getQLabFrame();
+        V3D q1 = ipws1->getPeak(peakIndex).getQLabFrame();
+        V3D q2 = ipws2->getPeak(peakIndex).getQLabFrame();
         // using s1 here as the diff
         for (int i = 0; i < 3; ++i) {
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
       } else if (name == "QSample") {
-        V3D q1 = ipws1->getPeak(i).getQSampleFrame();
-        V3D q2 = ipws2->getPeak(i).getQSampleFrame();
+        V3D q1 = ipws1->getPeak(peakIndex).getQSampleFrame();
+        V3D q2 = ipws2->getPeak(peakIndex).getQSampleFrame();
         // using s1 here as the diff
         for (int i = 0; i < 3; ++i) {
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
@@ -1168,7 +1167,7 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(LeanElasticPeaksWorkspace_s
                        << "s2 = " << s2 << "\n"
                        << "std::fabs(s1 - s2) = " << std::fabs(s1 - s2) << "\n"
                        << "tolerance = " << tolerance << "\n";
-        g_log.notice() << "Data mismatch at cell (row#,col#): (" << i << "," << j << ")\n";
+        g_log.notice() << "Data mismatch at cell (row#,col#): (" << peakIndex << "," << j << ")\n";
         recordMismatch("Data mismatch");
         return;
       }
@@ -1330,5 +1329,4 @@ void CompareWorkspaces::execMasterOnly() {
     setProperty("Result", true);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

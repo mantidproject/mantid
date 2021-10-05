@@ -12,8 +12,7 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValueIO.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using namespace API;
 using namespace DataObjects;
@@ -99,5 +98,4 @@ void PoldiPeakSummary::storePeakSummary(TableRow tableRow, const PoldiPeak_sptr 
            << UncertainValueIO::toString(peak->intensity());
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

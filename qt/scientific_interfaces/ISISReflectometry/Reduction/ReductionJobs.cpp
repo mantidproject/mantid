@@ -12,9 +12,7 @@
 #include <iostream>
 #include <numeric>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs, std::string const &groupName) {
@@ -34,9 +32,7 @@ int countItems(ReductionJobs const &jobs, Item::ItemCountFunction countFunction)
 }
 } // namespace
 
-ReductionJobs::ReductionJobs( // cppcheck-suppress passedByValue
-    std::vector<Group> groups)
-    : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
+ReductionJobs::ReductionJobs(std::vector<Group> groups) : m_groups(std::move(groups)), m_groupNameSuffix(1) {}
 
 ReductionJobs::ReductionJobs() : m_groupNameSuffix(1) {}
 
@@ -288,6 +284,4 @@ Item const &ReductionJobs::getItemFromPath(const MantidWidgets::Batch::RowLocati
 bool operator!=(ReductionJobs const &lhs, ReductionJobs const &rhs) { return !(lhs == rhs); }
 
 bool operator==(ReductionJobs const &lhs, ReductionJobs const &rhs) { return lhs.groups() == rhs.groups(); }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -139,7 +139,7 @@
   <component type="panel" idstart="2001" idfillbyfirst="y" idstep="1" idstepbyrow="1">
     <location z="3.163" name="linear-detector"/>
     <parameter name="y">
-      <logfile id="Theta" eq="3.163*tan(1*value*0.0174533)" extract-single-value-as="last_value"/>
+      <logfile id="Theta" eq="3.163*tan(2*value*0.0174533)" extract-single-value-as="last_value"/>
     </parameter>
 
   </component>

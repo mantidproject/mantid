@@ -13,6 +13,7 @@ from sans.command_interface.batch_csv_parser import BatchCsvParser
 from sans.common.enums import (SANSFacility, ReductionDimensionality, SaveType, RowState)
 from sans.common.enums import SANSInstrument
 from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.file_loading import UserFileLoadException
 from sans.gui_logic.models.run_tab_model import RunTabModel
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.gui_logic.models.table_model import TableModel
@@ -22,6 +23,7 @@ from sans.test_helper.common import (remove_file)
 from sans.test_helper.mock_objects import (create_mock_view)
 from sans.test_helper.user_file_test_helper import (create_user_file, sample_user_file)
 from ui.sans_isis.sans_gui_observable import SansGuiObservable
+from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 
 BATCH_FILE_TEST_CONTENT_1 = [RowEntries(sample_scatter=1, sample_transmission=2,
                                         sample_direct=3, output_name='test_file',
@@ -133,6 +135,19 @@ class RunTabPresenterTest(unittest.TestCase):
         # clean up
         remove_file(user_file_path)
 
+    @mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileLoading")
+    @mock.patch("sans.gui_logic.presenter.run_tab_presenter.FileFinder")
+    def test_user_file_loading_handles_exceptions(self, _, mocked_loader):
+        for e in [UserFileLoadException("e"), TomlValidationError("e")]:
+            self._mock_view.display_message_box.reset_mock()
+            self._mock_view.on_user_file_load_failure.reset_mock()
+
+            mocked_loader.load_user_file.side_effect = e
+            self.presenter.on_user_file_load()
+
+            self._mock_view.on_user_file_load_failure.assert_called_once()
+            self._mock_view.display_message_box.assert_called_once_with(mock.ANY, mock.ANY, "e")
+
     def test_that_checks_default_user_file(self):
         # Setup self.presenter.and mock view
         view, settings_diagnostic_tab, _ = create_mock_view("")
@@ -154,6 +169,15 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.set_view(view)
 
         self.assertIsNone(self.presenter.on_user_file_load())
+
+    def test_file_information_exceptions_handled(self):
+        for e in [ValueError, RuntimeError, OSError]:
+            mocked_row = mock.Mock()
+            type(mocked_row).file_information = mock.PropertyMock(side_effect=e)
+            exception_rows = [mocked_row, mocked_row]
+            self._mock_table.get_non_empty_rows = mock.Mock(return_value=exception_rows)
+
+            self.presenter.on_update_rows()  # should not throw
 
     def test_that_gets_states_from_view(self):
         # Arrange
@@ -199,7 +223,9 @@ class RunTabPresenterTest(unittest.TestCase):
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
     def test_state_retrieved_from_model(self):
+        # Set values which trigger operators, such as divide or parsing, in StateModels
         self._mock_view.q_1d_step = 1.0
+        self._mock_view.transmission_mn_4_shift = 1.0
 
         expected = self.mock_run_tab_model.get_save_types().to_all_states()
         all_states = self.presenter.update_model_from_view()
@@ -710,35 +736,35 @@ class RunTabPresenterTest(unittest.TestCase):
         self.presenter.on_output_mode_changed()
         self.presenter._view.enable_file_type_buttons.assert_called_once()
 
-    def test_that_on_reduction_mode_changed_calls_update_hab_if_selection_is_HAB(self):
+    def test_that_on_reduction_mode_changed_calls_update_front_if_selection_is_HAB(self):
 
         self.presenter._beam_centre_presenter = mock.MagicMock()
 
         self.presenter.on_reduction_mode_selection_has_changed("Hab")
-        self.presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.update_front_selected.assert_called_once_with()
 
         self.presenter._beam_centre_presenter.reset_mock()
         self.presenter.on_reduction_mode_selection_has_changed("front")
-        self.presenter._beam_centre_presenter.update_hab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.update_front_selected.assert_called_once_with()
 
-    def test_that_on_reduction_mode_changed_calls_update_lab_if_selection_is_LAB(self):
+    def test_that_on_reduction_mode_changed_calls_update_rear_if_selection_is_LAB(self):
 
         self.presenter._beam_centre_presenter = mock.MagicMock()
 
         self.presenter.on_reduction_mode_selection_has_changed("rear")
-        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.update_rear_selected.assert_called_once_with()
 
         self.presenter._beam_centre_presenter.reset_mock()
         self.presenter.on_reduction_mode_selection_has_changed("main-detector")
-        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.update_rear_selected.assert_called_once_with()
 
         self.presenter._beam_centre_presenter.reset_mock()
         self.presenter.on_reduction_mode_selection_has_changed("DetectorBench")
-        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.update_rear_selected.assert_called_once_with()
 
         self.presenter._beam_centre_presenter.reset_mock()
         self.presenter.on_reduction_mode_selection_has_changed("rear-detector")
-        self.presenter._beam_centre_presenter.update_lab_selected.assert_called_once_with()
+        self.presenter._beam_centre_presenter.update_rear_selected.assert_called_once_with()
 
     @staticmethod
     def _clear_property_manager_data_service():

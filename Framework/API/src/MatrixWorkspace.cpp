@@ -38,6 +38,7 @@
 #include <cmath>
 #include <functional>
 #include <numeric>
+#include <utility>
 
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
@@ -53,8 +54,7 @@ auto accumulate_if_finite = [](const double accumulator, const double newValue) 
 };
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 using std::size_t;
 using namespace Geometry;
 using Kernel::V3D;
@@ -726,6 +726,9 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
                                            const bool entireRange) const {
   out.resize(this->getNumberHistograms(), 0.0);
 
+  // offset for histogram data, because the x axis is not the same size for histogram and point data.
+  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
+
   // Run in parallel if the implementation is threadsafe
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
@@ -733,21 +736,21 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
     const Mantid::MantidVec &x = this->readX(wksp_index);
     const auto &y = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 2) && (!y.empty())) {
+    if ((x.size() <= 1 + histogramOffset) && (!y.empty())) {
       out[wksp_index] = y[0];
     } else {
       // Iterators for limits - whole range by default
       Mantid::MantidVec::const_iterator lowit, highit;
       lowit = x.begin();
-      highit = x.end() - 1;
+      highit = x.end() - histogramOffset;
 
       // But maybe we don't want the entire range?
       if (!entireRange) {
         // If the first element is lower that the xmin then search for new lowit
         if ((*lowit) < minX)
           lowit = std::lower_bound(x.begin(), x.end(), minX);
-        // If the last element is higher that the xmax then search for new lowit
-        if ((*highit) > maxX)
+        // If the last element is higher that the xmax then search for new highit
+        if (*(highit - 1 + histogramOffset) > maxX)
           highit = std::upper_bound(lowit, x.end(), maxX);
       }
 
@@ -1091,6 +1094,23 @@ bool MatrixWorkspace::isCommonBins() const {
   return m_isCommonBinsFlag;
 }
 
+/**
+ * Whether the workspace's bins are integers - and common.
+ * @return Whether the workspace's bins are integers - and common.
+ **/
+bool MatrixWorkspace::isIntegerBins() const {
+  if (!this->isCommonBins())
+    return false;
+
+  const HistogramData::HistogramX bins = x(0);
+
+  for (size_t i = 0; i < bins.size(); ++i) {
+    if (std::trunc(bins[i]) != bins[i])
+      return false;
+  }
+  return true;
+}
+
 /** Called by the algorithm MaskBins to mask a single bin for the first time,
  * algorithms that later propagate the
  *  the mask from an input to the output should call flagMasked() instead. Here
@@ -1402,8 +1422,9 @@ std::string MatrixWorkspace::getDimensionIdFromAxis(const int &axisIndex) const 
 //===============================================================================
 class MWDimension : public Mantid::Geometry::IMDDimension {
 public:
-  MWDimension(const Axis *axis, const std::string &dimensionId)
-      : m_axis(*axis), m_dimensionId(dimensionId), m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
+  MWDimension(const Axis *axis, std::string dimensionId)
+      : m_axis(*axis), m_dimensionId(std::move(dimensionId)),
+        m_haveEdges(dynamic_cast<const BinEdgeAxis *>(&m_axis) != nullptr),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_axis.unit()->label(), m_axis.unit()->label())) {}
 
   /// the name of the dimennlsion as can be displayed along the axis
@@ -1481,8 +1502,8 @@ private:
  */
 class MWXDimension : public Mantid::Geometry::IMDDimension {
 public:
-  MWXDimension(const MatrixWorkspace *ws, const std::string &dimensionId)
-      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(dimensionId),
+  MWXDimension(const MatrixWorkspace *ws, std::string dimensionId)
+      : m_ws(ws), m_X(ws->readX(0)), m_dimensionId(std::move(dimensionId)),
         m_frame(std::make_unique<Geometry::GeneralFrame>(m_ws->getAxis(0)->unit()->label(),
                                                          m_ws->getAxis(0)->unit()->label())) {}
 
@@ -2110,12 +2131,10 @@ void MatrixWorkspace::rebuildDetectorIDGroupings() {
   }
 }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_sptr
@@ -2143,7 +2162,6 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::s
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

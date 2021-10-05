@@ -14,9 +14,9 @@
 #include <algorithm>
 #include <cfloat>
 #include <sstream>
+#include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::V2D;
 
@@ -31,7 +31,7 @@ ConvexPolygon::ConvexPolygon() : m_minX(DBL_MAX), m_maxX(-DBL_MAX), m_minY(DBL_M
 /**
  * @param vertices A list of points that form the polygon
  */
-ConvexPolygon::ConvexPolygon(const Vertices &vertices) : m_vertices(vertices) { setup(); }
+ConvexPolygon::ConvexPolygon(Vertices vertices) : m_vertices(std::move(vertices)) { setup(); }
 
 /// @return True if polygon has 3 or more points
 bool ConvexPolygon::isValid() const { return (npoints() > 2); }
@@ -239,5 +239,4 @@ std::ostream &operator<<(std::ostream &os, const ConvexPolygon &polygon) {
   return os;
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

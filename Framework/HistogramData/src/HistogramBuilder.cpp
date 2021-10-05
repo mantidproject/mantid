@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidHistogramData/HistogramBuilder.h"
 
-namespace Mantid {
-namespace HistogramData {
+namespace Mantid::HistogramData {
 
 /// Set the `distribution` property. true = Frequencies, false = Counts. If not
 /// set, the default is Counts.
@@ -40,5 +39,4 @@ Histogram HistogramBuilder::build() const {
   return *histogram;
 }
 
-} // namespace HistogramData
-} // namespace Mantid
+} // namespace Mantid::HistogramData

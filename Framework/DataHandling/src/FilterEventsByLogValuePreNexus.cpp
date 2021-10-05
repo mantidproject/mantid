@@ -52,8 +52,7 @@
 
 // #define DBOUT
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_FILELOADER_ALGORITHM(FilterEventsByLogValuePreNexus)
 
@@ -872,7 +871,7 @@ void FilterEventsByLogValuePreNexus::procEvents(DataObjects::EventWorkspace_sptr
   g_log.information() << "Processing input event preNexus by " << numThreads << " threads"
                       << " in " << numBlocks << " blocks. "
                       << "\n";
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
       // This is the partial workspace we are about to create (if in parallel)
@@ -2237,5 +2236,4 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(const std::string &filename
   this->m_protonChargeTot = this->m_protonChargeTot * CURRENT_CONVERSION;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

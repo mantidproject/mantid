@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/MayersSampleCorrection.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -143,6 +144,8 @@ private:
     const double l2 = 2.2;
     auto &detInfo = testWS->mutableDetectorInfo();
     detInfo.setPosition(0, V3D(l2 * sin(twoTheta), 0.0, l2 * cos(twoTheta)));
+
+    testWS->getAxis(0)->setUnit("TOF");
     return testWS;
   }
 

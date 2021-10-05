@@ -11,17 +11,15 @@ from distutils.version import LooseVersion
 
 
 # -- General configuration ------------------------------------------------
-
 if LooseVersion(sphinx_version) > LooseVersion("1.6"):
+
     def setup(app):
         """Called automatically by Sphinx when starting the build process
         """
-        # Add support for multiple Sphinx versions
-        if hasattr(app, "add_css_file"):
+        if hasattr(app, 'add_css_file'):  # >=v1.8
             app.add_css_file("custom.css")
         else:
-            app.add_stylesheet("custom.css")
-
+            app.add_stylesheet("custom.css")  # v1.6-1.8
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -174,7 +172,7 @@ epub_uid = "Mantid Reference: " + version
 intersphinx_mapping = {
     'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
     'matplotlib': ('http://matplotlib.org', None),
-    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'numpy': ('https://numpy.org/doc/stable/', None),
     'python': ('https://docs.python.org/3/', None),
     'SciPy': ('http://docs.scipy.org/doc/scipy/reference', None),
     'mantid': ('http://docs.mantidproject.org/', None)

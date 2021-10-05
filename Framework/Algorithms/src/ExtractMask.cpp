@@ -12,8 +12,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/NullValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractMask)
@@ -89,5 +88,4 @@ void ExtractMask::exec() {
   setProperty("OutputWorkspace", maskWS);
   setProperty("DetectorList", detectorList);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

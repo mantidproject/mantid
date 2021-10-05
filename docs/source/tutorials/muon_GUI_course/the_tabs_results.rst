@@ -86,4 +86,4 @@ it could be right clicked after selection and then `Set as X`. This process is s
 
     Figure 35: How to plot a graph from two parameters of a results table.
 
-For more details on the Results Table tab, see the corresponding section of :ref:`Muon_Analysis-ref`
+For more details on the Results tab, see the corresponding section of :ref:`Muon_Analysis-ref`

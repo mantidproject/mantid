@@ -167,32 +167,33 @@ class FigureInteractionTest(unittest.TestCase):
         mocked_figure_type.return_value = FigureType.Line
 
         # Expect a call to QMenu() for the outer menu followed by two more calls
-        # for the Axes and Normalization menus
-        qmenu_call1 = MagicMock()
+        # for the Axes, Normalization, and Markers menus
+        outer_qmenu_call = MagicMock()
         qmenu_call2 = MagicMock()
         qmenu_call3 = MagicMock()
         qmenu_call4 = MagicMock()
-        mocked_qmenu_cls.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
+        mocked_qmenu_cls.side_effect = [outer_qmenu_call, qmenu_call2, qmenu_call3, qmenu_call4]
 
         with patch('workbench.plotting.figureinteraction.QActionGroup',
                    autospec=True):
-            with patch.object(interactor.toolbar_manager, 'is_tool_active',
-                              lambda: False):
-                with patch.object(interactor, 'add_error_bars_menu', MagicMock()):
-                    interactor.on_mouse_button_press(mouse_event)
-                    self.assertEqual(0, qmenu_call1.addSeparator.call_count)
-                    self.assertEqual(0, qmenu_call1.addAction.call_count)
-                    expected_qmenu_calls = [call(),
-                                            call("Axes", qmenu_call1),
-                                            call("Normalization", qmenu_call1),
-                                            call("Markers", qmenu_call1)]
-                    self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
-                    # 4 actions in Axes submenu
-                    self.assertEqual(4, qmenu_call2.addAction.call_count)
-                    # 2 actions in Normalization submenu
-                    self.assertEqual(2, qmenu_call3.addAction.call_count)
-                    # 3 actions in Markers submenu
-                    self.assertEqual(3, qmenu_call4.addAction.call_count)
+            with patch('workbench.plotting.figureinteraction.QAction'):
+                with patch.object(interactor.toolbar_manager, 'is_tool_active',
+                                  lambda: False):
+                    with patch.object(interactor, 'add_error_bars_menu', MagicMock()):
+                        interactor.on_mouse_button_press(mouse_event)
+                        self.assertEqual(0, outer_qmenu_call.addSeparator.call_count)
+                        self.assertEqual(1, outer_qmenu_call.addAction.call_count) # Show/hide legend action
+                        expected_qmenu_calls = [call(),
+                                                call("Axes", outer_qmenu_call),
+                                                call("Normalization", outer_qmenu_call),
+                                                call("Markers", outer_qmenu_call)]
+                        self.assertEqual(expected_qmenu_calls, mocked_qmenu_cls.call_args_list)
+                        # 4 actions in Axes submenu
+                        self.assertEqual(4, qmenu_call2.addAction.call_count)
+                        # 2 actions in Normalization submenu
+                        self.assertEqual(2, qmenu_call3.addAction.call_count)
+                        # 3 actions in Markers submenu
+                        self.assertEqual(3, qmenu_call4.addAction.call_count)
 
     def test_toggle_normalization_no_errorbars(self):
         self._test_toggle_normalization(errorbars_on=False, plot_kwargs={'distribution': True})

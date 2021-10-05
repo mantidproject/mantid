@@ -21,8 +21,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 FunctionFactoryImpl::FunctionFactoryImpl() : Kernel::DynamicFactory<IFunction>() {
   // we need to make sure the library manager has been loaded before we
@@ -404,5 +403,4 @@ void FunctionFactoryImpl::unsubscribe(const std::string &className) {
   Kernel::DynamicFactory<IFunction>::unsubscribe(className);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

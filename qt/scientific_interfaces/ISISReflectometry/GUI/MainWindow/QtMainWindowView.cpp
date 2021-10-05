@@ -25,8 +25,7 @@ namespace MantidQt {
 
 using MantidWidgets::SlitCalculator;
 
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace CustomInterfaces::ISISReflectometry {
 
 // Do not change the last arguement as you will break backwards compatibility
 // with project save it should be the same as one of the tags in the decoder.
@@ -87,10 +86,11 @@ void QtMainWindowView::initLayout() {
   auto makeSaveSettingsPresenter = SavePresenterFactory();
   auto makeExperimentPresenter = ExperimentPresenterFactory(thetaTolerance);
   auto makeInstrumentPresenter = InstrumentPresenterFactory();
+  auto makePreviewPresenter = PreviewPresenterFactory();
 
-  auto makeBatchPresenter = std::make_unique<BatchPresenterFactory>(
-      std::move(makeRunsPresenter), std::move(makeEventPresenter), std::move(makeExperimentPresenter),
-      std::move(makeInstrumentPresenter), std::move(makeSaveSettingsPresenter));
+  auto makeBatchPresenter =
+      std::make_unique<BatchPresenterFactory>(std::move(makeRunsPresenter), makeEventPresenter, makeExperimentPresenter,
+                                              makeInstrumentPresenter, makePreviewPresenter, makeSaveSettingsPresenter);
 
   // Create the presenter
   auto slitCalculator = std::make_unique<SlitCalculator>(this);
@@ -221,6 +221,5 @@ void QtMainWindowView::saveJSONToFile(std::string const &filename, QMap<QString,
 QMap<QString, QVariant> QtMainWindowView::loadJSONFromFile(std::string const &filename) {
   return MantidQt::API::loadJSONFromFile(QString::fromStdString(filename));
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
+} // namespace CustomInterfaces::ISISReflectometry
 } // namespace MantidQt

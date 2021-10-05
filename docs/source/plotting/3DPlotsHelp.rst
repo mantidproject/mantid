@@ -54,7 +54,7 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
+|O| ptions Menu
 -----------------------------------
 
 .. figure:: /images/PlotOptions3DSurface.png
@@ -125,7 +125,7 @@ Click Menus
 |
 |
 
-|FigureOptionsGear.png| ptions Menu
+|O| ptions Menu
 -----------------------------------
 
 .. figure:: /images/PlotOptions3DWireframe.png
@@ -196,5 +196,5 @@ File > Settings
 * `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
 * See :ref:`here <plotting>` for custom color cycles and colormaps
 
-.. |FigureOptionsGear.png| image:: /images/FigureOptionsGear.png
+.. |O| image:: /images/FigureOptionsGear.png
    :width: 150px

@@ -21,8 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Indexing;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * Create the scanning workspace builder. Time ranges must still be set before
@@ -306,5 +305,4 @@ void ScanningWorkspaceBuilder::validateInputs() const {
                            "building.");
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

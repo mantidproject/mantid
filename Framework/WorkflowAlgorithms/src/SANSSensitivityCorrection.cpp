@@ -24,8 +24,7 @@
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSensitivityCorrection)
@@ -370,5 +369,4 @@ void SANSSensitivityCorrection::exec() {
   progress.report("Performed sensitivity correction");
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

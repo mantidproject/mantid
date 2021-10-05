@@ -15,8 +15,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace Beamline {
+namespace Mantid::Beamline {
 
 namespace {
 void failMerge(const std::string &what) {
@@ -160,6 +159,13 @@ size_t ComponentInfo::size() const { return m_size; }
 size_t ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
   auto range = detectorRangeInSubtree(componentIndex);
   return std::distance(range.begin(), range.end());
+}
+
+bool ComponentInfo::isMonitor(const size_t componentIndex) const {
+  if (hasDetectorInfo()) {
+    return this->m_detectorInfo->isMonitor(componentIndex);
+  }
+  return false;
 }
 
 const Eigen::Vector3d &ComponentInfo::position(const size_t componentIndex) const {
@@ -681,5 +687,4 @@ size_t ComponentInfo::nonDetectorSize() const {
     return 0;
 }
 
-} // namespace Beamline
-} // namespace Mantid
+} // namespace Mantid::Beamline

@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentSpaceComplex.h"
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Converts a vector of complex values to a vector of complex numbers (i.e. does
@@ -26,5 +25,4 @@ std::vector<double> MaxentSpaceComplex::toComplex(const std::vector<double> &val
  */
 std::vector<double> MaxentSpaceComplex::fromComplex(const std::vector<double> &values) { return values; }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

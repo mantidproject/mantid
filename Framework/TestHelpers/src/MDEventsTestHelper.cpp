@@ -41,8 +41,7 @@
 
 #include <Poco/File.h>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using namespace Mantid::API;
 using Mantid::DataObjects::EventWorkspace;
@@ -350,5 +349,4 @@ void checkAndDeleteFile(const std::string &filename) {
 }
 
 } // namespace MDEventsTestHelper
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

@@ -10,8 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Algorithm not registered as this will be used for testing MPI
 // DECLARE_ALGORITHM(ChangePulsetime2)
@@ -62,5 +61,4 @@ void ChangePulsetime2::exec() {
   setProperty("OutputWorkspace", out_ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -10,8 +10,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/IPropertyManager.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 using std::size_t;
 
@@ -72,11 +71,9 @@ void WorkspaceSingleValue::generateHistogram(const std::size_t index, const Mant
 /// Our parent MatrixWorkspace has hardcoded 2, but we need 0.
 size_t WorkspaceSingleValue::getNumDims() const { return 0; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::WorkspaceSingleValue_sptr
 IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_sptr>(const std::string &name) const {
@@ -105,7 +102,6 @@ IPropertyManager::getValue<Mantid::DataObjects::WorkspaceSingleValue_const_sptr>
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

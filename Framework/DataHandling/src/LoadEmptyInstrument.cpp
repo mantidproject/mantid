@@ -20,8 +20,7 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory as a file loading algorithm
 DECLARE_FILELOADER_ALGORITHM(LoadEmptyInstrument)
 
@@ -122,13 +121,13 @@ void LoadEmptyInstrument::exec() {
   bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
   prog.reportIncrement(5, "Creating Data");
   if (MakeEventWorkspace) {
-    setProperty("OutputWorkspace", create<EventWorkspace>(std::move(instrument), indexInfo,
-                                                          BinEdges{0.0, std::numeric_limits<double>::min()}));
+    setProperty("OutputWorkspace",
+                create<EventWorkspace>(instrument, indexInfo, BinEdges{0.0, std::numeric_limits<double>::min()}));
   } else {
     const double detector_value = getProperty("DetectorValue");
     const double monitor_value = getProperty("MonitorValue");
     auto ws2D = create<Workspace2D>(
-        std::move(instrument), indexInfo,
+        instrument, indexInfo,
         Histogram(BinEdges{0.0, 1.0}, Counts(1, detector_value), CountStandardDeviations(1, detector_value)));
 
     Counts v_monitor_y(1, monitor_value);
@@ -162,5 +161,4 @@ API::MatrixWorkspace_sptr LoadEmptyInstrument::runLoadInstrument(const std::stri
   return ws;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

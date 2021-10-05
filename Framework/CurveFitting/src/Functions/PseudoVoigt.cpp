@@ -51,9 +51,7 @@ inline constexpr double cal_lorentzian(const double gamma_div_2, const double ga
 
 } // namespace
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Constraints;
@@ -374,6 +372,4 @@ void PseudoVoigt::setHeight(const double h) {
  */
 void PseudoVoigt::setFwhm(const double w) { setParameter("FWHM", w, true); }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

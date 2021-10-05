@@ -72,16 +72,26 @@ sampling = {
     'broadening_scheme': 'auto',
     }
 
-# Parameters related to performance optimisation that do NOT impact calculation results
+# Parameters related to estimated of spectra of high quantum orders by repeated convolution with fundamentals
+autoconvolution = {
+    'max_order': 10, # Highest quantum order accessed by autoconvolution
+    'scale': 1.0,    # Scale factor applied to normalised convolution kernel
+    'fine_bin_factor': 10
+    }
+
 performance = {
     'optimal_size': 5000000,  # this is used to create optimal size of chunk energies for which S is calculated
     'threads': 4  # number of threads used in parallel calculations
     }
 
+# Experimental / debug features
+development = {'isotropic_fundamentals': False}
+
 all_parameters = {'instruments': instruments,
                   'hdf_groups': hdf_groups,
                   'sampling': sampling,
-                  'performance': performance}
+                  'performance': performance,
+                  'development': development}
 
 non_performance_parameters = {'instruments': instruments,
                               'hdf_groups': hdf_groups,

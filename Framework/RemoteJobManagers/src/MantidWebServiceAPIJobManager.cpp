@@ -12,8 +12,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace RemoteJobManagers {
+namespace Mantid::RemoteJobManagers {
 
 // Register this job manager into the RemoteJobManagerFactory
 DECLARE_REMOTEJOBMANAGER(MantidWebServiceAPIJobManager)
@@ -483,5 +482,4 @@ void MantidWebServiceAPIJobManager::uploadRemoteFile(const std::string &transact
   }
 }
 
-} // end namespace RemoteJobManagers
-} // end namespace Mantid
+} // namespace Mantid::RemoteJobManagers

@@ -92,8 +92,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_FILELOADER_ALGORITHM(LoadDNSSCD)
 
@@ -814,5 +813,4 @@ void LoadDNSSCD::read_data(const std::string &fname, std::map<std::string, std::
   m_data.emplace_back(ds);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

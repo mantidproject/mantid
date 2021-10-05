@@ -1,5 +1,7 @@
 # mantid.utils tests
 
+add_subdirectory(nomad)
+
 set(TEST_PY_FILES
     absorptioncorrutilsTest.py
     dgsTest.py)

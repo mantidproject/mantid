@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 /**Small class to diable propery on interface */
 class DisabledProperty : public EnabledWhenProperty {
@@ -189,5 +188,4 @@ void BaseConvertToDiffractionMDWorkspace::exec() {
   this->setProperty("OutputWorkspace", iOut);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

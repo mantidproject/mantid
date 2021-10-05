@@ -9,8 +9,7 @@
 #include <algorithm>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Indexing {
+namespace Mantid::Indexing {
 
 Partitioner::Partitioner(const int numberOfPartitions, const PartitionIndex partition,
                          const MonitorStrategy monitorStrategy, std::vector<GlobalSpectrumIndex> monitors)
@@ -51,5 +50,4 @@ bool Partitioner::isMonitor(const GlobalSpectrumIndex index) const {
   return std::find(m_monitors.begin(), m_monitors.end(), index) != m_monitors.end();
 }
 
-} // namespace Indexing
-} // namespace Mantid
+} // namespace Mantid::Indexing

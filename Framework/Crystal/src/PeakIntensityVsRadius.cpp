@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PeakIntensityVsRadius)
@@ -222,5 +221,4 @@ void PeakIntensityVsRadius::exec() {
   setProperty("OutputWorkspace2", outWS2);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

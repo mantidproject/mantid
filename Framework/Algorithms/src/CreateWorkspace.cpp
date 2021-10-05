@@ -24,8 +24,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -98,27 +97,25 @@ void CreateWorkspace::exec() {
   const Property *const dataEprop = getProperty("DataE");
   const Property *const errorDxprop = getProperty("Dx");
 
-  const ArrayProperty<double> *pCheck = nullptr;
-
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
-  if (!pCheck)
+  const auto xCheck = dynamic_cast<const ArrayProperty<double> *>(dataXprop);
+  if (!xCheck)
     throw std::invalid_argument("DataX cannot be casted to a double vector");
-  const std::vector<double> &dataX = *pCheck;
+  const std::vector<double> &dataX = *xCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
-  if (!pCheck)
+  const auto yCheck = dynamic_cast<const ArrayProperty<double> *>(dataYprop);
+  if (!yCheck)
     throw std::invalid_argument("DataY cannot be casted to a double vector");
-  const std::vector<double> &dataY = *pCheck;
+  const std::vector<double> &dataY = *yCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
-  if (!pCheck)
+  const auto eCheck = dynamic_cast<const ArrayProperty<double> *>(dataEprop);
+  if (!eCheck)
     throw std::invalid_argument("DataE cannot be casted to a double vector");
-  const std::vector<double> &dataE = *pCheck;
+  const std::vector<double> &dataE = *eCheck;
 
-  pCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
-  if (!pCheck)
+  const auto dxCheck = dynamic_cast<const ArrayProperty<double> *>(errorDxprop);
+  if (!dxCheck)
     throw std::invalid_argument("Dx cannot be casted to a double vector");
-  const std::vector<double> &dX = *pCheck;
+  const std::vector<double> &dX = *dxCheck;
 
   const int nSpec = getProperty("NSpec");
   const std::string xUnit = getProperty("UnitX");
@@ -288,5 +285,4 @@ CreateWorkspace::getParallelExecutionMode(const std::map<std::string, Parallel::
   return Parallel::getCorrespondingExecutionMode(storageMode);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

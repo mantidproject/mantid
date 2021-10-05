@@ -110,8 +110,7 @@ constructActions(boost::optional<std::map<std::string, std::string>> const &avai
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
     boost::optional<std::map<std::string, std::string>> const &availableActions)
@@ -122,7 +121,7 @@ IndirectPlotOptionsModel::IndirectPlotOptionsModel(
 IndirectPlotOptionsModel::IndirectPlotOptionsModel(
     ExternalPlotter *plotter, boost::optional<std::map<std::string, std::string>> const &availableActions)
     : m_actions(constructActions(availableActions)), m_fixedIndices(false), m_workspaceIndices(boost::none),
-      m_workspaceName(boost::none), m_plotter(std::move(plotter)) {}
+      m_workspaceName(boost::none), m_plotter(plotter) {}
 
 IndirectPlotOptionsModel::~IndirectPlotOptionsModel() {}
 
@@ -240,5 +239,4 @@ boost::optional<std::string> IndirectPlotOptionsModel::checkWorkspaceSize(std::s
 
 std::map<std::string, std::string> IndirectPlotOptionsModel::availableActions() const { return m_actions; }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

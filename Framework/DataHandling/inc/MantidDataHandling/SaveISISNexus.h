@@ -12,6 +12,7 @@
 #include <nexus/NeXusFile.hpp>
 
 #include <climits>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -52,7 +53,7 @@ private:
   /// Overwrites Algorithm method
   void exec() override;
 
-  ISISRAW2 m_isisRaw;
+  std::unique_ptr<ISISRAW2> m_isisRaw;
   NXhandle handle;
   FILE *rawFile;
   std::vector<int> monitorData;

@@ -804,7 +804,7 @@ public:
   /**  Opens the dataset within this NXData with signal=1 attribute.
    */
   template <typename T> NXDataSetTyped<T> openData() {
-    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); it++) {
+    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
       dset.open();
       // std::cerr << "NXData signal of " << it->nxname << " = " <<
@@ -921,9 +921,9 @@ public:
 class DLLExport NXRoot : public NXClass {
 public:
   // Constructor
-  NXRoot(const std::string &fname);
+  NXRoot(std::string fname);
   // Constructor
-  NXRoot(const std::string &fname, const std::string &entry);
+  NXRoot(std::string fname, const std::string &entry);
   /// Destructor
   ~NXRoot() override;
   /// Return the NX class for a class (HDF group) or "SDS" for a data set;

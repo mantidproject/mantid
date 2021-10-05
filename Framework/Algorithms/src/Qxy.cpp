@@ -25,8 +25,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Qxy)
@@ -451,5 +450,4 @@ API::MatrixWorkspace_sptr Qxy::setUpOutputWorkspace(const API::MatrixWorkspace_c
   return outputWorkspace;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

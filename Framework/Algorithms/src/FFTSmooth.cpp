@@ -18,8 +18,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFTSmooth)
@@ -196,5 +195,4 @@ void FFTSmooth::zero(int n) {
   std::copy(m_unfilteredWS->y(1).cbegin(), m_unfilteredWS->y(1).begin() + ny, m_filteredWS->mutableY(1).begin());
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

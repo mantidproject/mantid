@@ -11,8 +11,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(InvertMask)
 
@@ -55,5 +54,4 @@ void InvertMask::exec() {
   this->setProperty("OutputWorkspace", outputws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

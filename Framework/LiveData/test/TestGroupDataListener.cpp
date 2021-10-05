@@ -16,8 +16,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::ConfigService;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(TestGroupDataListener)
 
 /// Constructor
@@ -67,5 +66,4 @@ void TestGroupDataListener::setAlgorithm(const IAlgorithm &callingAlgorithm) {
   this->updatePropertyValues(callingAlgorithm);
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

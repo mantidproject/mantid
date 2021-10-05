@@ -17,8 +17,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 namespace {
 const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
 const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
@@ -147,8 +146,8 @@ void SpecularReflectionPositionCorrect::moveDetectors(const API::MatrixWorkspace
       /*
        * We have to move individual components.
        */
-      for (const auto &detector : detectors) {
-        moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset,
+      for (const auto &det : detectors) {
+        moveDetectors(toCorrect, det, sample, upOffset, acrossOffset,
                       detectorPosition); // Recursive call
       }
     }
@@ -210,5 +209,4 @@ void SpecularReflectionPositionCorrect::correctPosition(const API::MatrixWorkspa
   moveDetectors(toCorrect, detector, sample, upOffset, acrossOffset, detector->getPos());
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

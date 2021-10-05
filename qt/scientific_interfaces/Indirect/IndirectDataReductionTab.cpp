@@ -22,8 +22,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IndirectDataReductionTab");
 }
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent)
     : IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false) {
@@ -267,5 +266,4 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
  */
 void IndirectDataReductionTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

@@ -1,6 +1,7 @@
 set(SRC_FILES
     src/CalculateSlits.cpp
     src/ConvertToReflectometryQ.cpp
+    src/ConvertToReflectometryQ2.cpp
     src/CreateTransmissionWorkspace2.cpp
     src/CreateTransmissionWorkspaceAuto2.cpp
     src/FindReflectometryLines2.cpp
@@ -26,6 +27,7 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidReflectometry/CalculateSlits.h
     inc/MantidReflectometry/ConvertToReflectometryQ.h
+    inc/MantidReflectometry/ConvertToReflectometryQ2.h
     inc/MantidReflectometry/CreateTransmissionWorkspace2.h
     inc/MantidReflectometry/CreateTransmissionWorkspaceAuto2.h
     inc/MantidReflectometry/FindReflectometryLines2.h

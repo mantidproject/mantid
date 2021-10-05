@@ -17,8 +17,7 @@ template <typename Observer> void modifyObserver(const bool turnOn, bool &isObse
 }
 } // namespace
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 AlgorithmFactoryObserver::AlgorithmFactoryObserver()
     : m_updateObserver(*this, &AlgorithmFactoryObserver::_updateHandle) {}
@@ -63,5 +62,4 @@ void AlgorithmFactoryObserver::_updateHandle(AlgorithmFactoryUpdateNotification_
   this->updateHandle();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -22,8 +22,7 @@
 #include <fstream>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace Mantid::API;
@@ -178,7 +177,7 @@ template <typename T> void SaveOpenGenieAscii::convertWorkspaceData(const T &his
   // Have to put the number of values (second member of pair)
   // followed by a space then a new line then the data into a string
   auto outDataString = std::to_string(valueCount) + " \r\n" + std::move(outputString);
-  addToOutputBuffer(std::string(1, axis), outputType, std::move(outDataString));
+  addToOutputBuffer(std::string(1, axis), outputType, outDataString);
 }
 
 /**
@@ -381,5 +380,4 @@ void SaveOpenGenieAscii::writeDataToFile(std::ofstream &outfile) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

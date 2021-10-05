@@ -7,9 +7,7 @@
 #include "Parse.h"
 #include <cctype>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 bool isEntirelyWhitespace(std::string const &string) {
   return std::all_of(string.cbegin(), string.cend(), [](unsigned char c) { return std::isspace(c); });
@@ -70,6 +68,4 @@ boost::optional<int> parseNonNegativeInt(std::string string) {
   else
     return boost::none;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

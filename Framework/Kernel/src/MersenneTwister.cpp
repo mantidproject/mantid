@@ -13,8 +13,7 @@
 
 #include <Poco/Timestamp.h>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //------------------------------------------------------------------------------
 // Public member functions
@@ -103,5 +102,4 @@ void MersenneTwister::restore() {
     restart();
   }
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

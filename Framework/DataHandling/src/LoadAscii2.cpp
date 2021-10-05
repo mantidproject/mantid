@@ -28,8 +28,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 DECLARE_FILELOADER_ALGORITHM(LoadAscii2)
 
 using namespace Kernel;
@@ -202,7 +201,7 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
               // trim the strings
               boost::trim(name);
               boost::trim(type);
-              ws->addColumn(std::move(type), std::move(name));
+              ws->addColumn(type, name);
               itName++;
               itTypes++;
             }
@@ -856,5 +855,4 @@ void LoadAscii2::exec() {
   }
   setProperty("OutputWorkspace", rd);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

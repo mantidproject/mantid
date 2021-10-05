@@ -16,8 +16,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::API::CoordTransform;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -175,5 +174,4 @@ std::string CoordTransformDistance::toXMLString() const {
  */
 std::string CoordTransformDistance::id() const { return "CoordTransformDistance"; }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

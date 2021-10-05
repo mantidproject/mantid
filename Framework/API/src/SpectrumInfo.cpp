@@ -22,8 +22,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /// static logger object
 Kernel::Logger g_log("ExperimentInfo");
 
@@ -343,8 +342,8 @@ const Geometry::IDetector &SpectrumInfo::getDetector(const size_t index) const {
   } else {
     // Else need to construct a DetectorGroup and use that
     std::vector<std::shared_ptr<const Geometry::IDetector>> det_ptrs;
-    for (const auto &index : specDef) {
-      const auto detIndex = index.first;
+    for (const auto &specDefIndex : specDef) {
+      const auto detIndex = specDefIndex.first;
       det_ptrs.emplace_back(m_detectorInfo.getDetectorPtr(detIndex));
     }
     m_lastDetector[thread] = std::make_shared<Geometry::DetectorGroup>(det_ptrs);
@@ -371,5 +370,4 @@ const SpectrumInfoConstIt SpectrumInfo::cbegin() const { return SpectrumInfoCons
 // End method for iterator
 const SpectrumInfoConstIt SpectrumInfo::cend() const { return SpectrumInfoConstIt(*this, size()); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

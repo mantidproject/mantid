@@ -10,8 +10,7 @@
 #include <boost/tokenizer.hpp>
 #include <vector>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 namespace {
 void appendKeyValuePair(const std::pair<std::string, std::string> &kvp, const bool quoteValues,
@@ -258,5 +257,4 @@ std::string optionsToString(std::map<std::string, std::string> const &options, c
     return std::string();
   }
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

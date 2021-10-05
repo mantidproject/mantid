@@ -245,6 +245,8 @@ I(Q, t) tab as seen in the :ref:`iqt-example-workflow`.
    algorithm for more details. Note that the output workspace is inserted into the group workspace in which
    (1) is found.
 
+.. _convfit:
+
 Conv Fit
 --------
 
@@ -384,6 +386,8 @@ and *Use Delta Function* options in the interface.
 The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
 formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
 :math:`T` is the temperature in Kelvin.
+
+.. _fqfit:
 
 F(Q) Fit
 --------

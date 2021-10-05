@@ -17,8 +17,7 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -282,5 +281,4 @@ double ConvertAxisByFormula::evaluateResult(mu::Parser &p) {
   return result;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

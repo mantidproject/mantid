@@ -44,8 +44,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid;
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 namespace {
 bool isPhysicalView() {
   std::string view = Mantid::Kernel::ConfigService::Instance().getString("instrument.view.geometry");
@@ -212,18 +211,16 @@ bool InstrumentActor::hasChildVisible() const {
  *  !!!! USE InstrumentActor::getInstrument() BELOW !!!!
  */
 MatrixWorkspace_const_sptr InstrumentActor::getWorkspace() const {
-  auto sharedWorkspace = m_workspace.lock();
-
-  if (!sharedWorkspace) {
+  if (m_workspace.expired())
     throw std::runtime_error("Instrument view: workspace doesn't exist");
-  }
 
-  return sharedWorkspace;
+  return m_workspace.lock();
 }
 
-void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound) const {
+void InstrumentActor::getBoundingBox(Mantid::Kernel::V3D &minBound, Mantid::Kernel::V3D &maxBound,
+                                     const bool excludeMonitors) const {
   const auto &compInfo = componentInfo();
-  auto bb = compInfo.boundingBox(compInfo.root());
+  auto bb = compInfo.boundingBox(compInfo.root(), nullptr, excludeMonitors);
   minBound = bb.minPoint();
   maxBound = bb.maxPoint();
 }
@@ -1190,5 +1187,4 @@ const Mantid::Geometry::DetectorInfo &InstrumentActor::detectorInfo() const {
   else
     return getWorkspace()->detectorInfo();
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

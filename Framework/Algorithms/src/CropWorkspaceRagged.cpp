@@ -22,8 +22,7 @@ std::vector<double> getSubVector(Mantid::MantidVec &data, const int64_t &lowerIn
 
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -148,9 +147,9 @@ void CropWorkspaceRagged::exec() {
     dataE.resize(newE.size());
 
     // update the data
-    outputWS->mutableX(i) = std::move(newX);
-    outputWS->mutableY(i) = std::move(newY);
-    outputWS->mutableE(i) = std::move(newE);
+    outputWS->mutableX(i) = newX;
+    outputWS->mutableY(i) = newY;
+    outputWS->mutableE(i) = newE;
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -158,5 +157,4 @@ void CropWorkspaceRagged::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

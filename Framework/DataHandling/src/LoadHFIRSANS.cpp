@@ -47,8 +47,7 @@
 #include <utility>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using Mantid::API::WorkspaceProperty;
 using Mantid::Kernel::Direction;
@@ -666,5 +665,4 @@ void LoadHFIRSANS::setBeamDiameter() {
   addRunProperty<double>("beam-diameter", beamDiameter, "mm");
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

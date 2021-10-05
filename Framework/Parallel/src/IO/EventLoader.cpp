@@ -15,10 +15,7 @@
 #include <H5Cpp.h>
 #include <thread>
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
-namespace EventLoader {
+namespace Mantid::Parallel::IO::EventLoader {
 
 /** Return a map from any one event ID in a bank to the bank index.
  *
@@ -48,7 +45,7 @@ void load(const Communicator &comm, const std::string &filename, const std::stri
           const std::vector<std::vector<Types::Event::TofEvent> *> &eventLists) {
   H5::H5File file(filename, H5F_ACC_RDONLY);
   H5::Group group = file.openGroup(groupName);
-  load(readDataType(group, bankNames, "event_time_offset"), comm, group, bankNames, bankOffsets, std::move(eventLists));
+  load(readDataType(group, bankNames, "event_time_offset"), comm, group, bankNames, bankOffsets, eventLists);
 }
 
 /// Load events from given banks into event lists.
@@ -65,8 +62,4 @@ void load(const std::string &filename, const std::string &groupname, const std::
   loader.load(filename, groupname, bankNames, bankOffsets, eventLists);
 }
 
-} // namespace EventLoader
-
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO::EventLoader

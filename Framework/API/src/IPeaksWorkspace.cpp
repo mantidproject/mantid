@@ -11,8 +11,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/IPropertyManager.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using namespace Kernel;
 
@@ -28,14 +27,11 @@ const std::string IPeaksWorkspace::toString() const {
   return os.str();
 }
 
-} // namespace API
-
-} // namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::IPeaksWorkspace_sptr
@@ -63,7 +59,6 @@ IPropertyManager::getValue<Mantid::API::IPeaksWorkspace_const_sptr>(const std::s
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 
 ///\endcond TEMPLATE

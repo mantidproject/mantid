@@ -38,8 +38,7 @@ using namespace std;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
@@ -83,7 +82,7 @@ void SCDCalibratePanels::exec() {
     MyPanels.insert("East");
     MyPanels.insert("West");
     int maxRecurseDepth = 4;
-    // cppcheck-suppress syntaxError
+
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int num = 1; num < 64; ++num) {
       PARALLEL_START_INTERUPT_REGION
@@ -106,11 +105,11 @@ void SCDCalibratePanels::exec() {
 
   std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(), "fit_");
   std::vector<std::string> parameter_workspaces(MyBankNames.size() + MyPanels.size(), "params_");
-  int i = 0;
+  int bankAndPanelCount = 0;
   for (auto &MyPanel : MyPanels) {
-    fit_workspaces[i] += MyPanel;
-    parameter_workspaces[i] += MyPanel;
-    i++;
+    fit_workspaces[bankAndPanelCount] += MyPanel;
+    parameter_workspaces[bankAndPanelCount] += MyPanel;
+    bankAndPanelCount++;
   }
   if (snapPanels) {
     findL2(MyPanels, peaksWs);
@@ -123,16 +122,16 @@ void SCDCalibratePanels::exec() {
   }
 
   for (auto &MyBankName : MyBankNames) {
-    fit_workspaces[i] += MyBankName;
-    parameter_workspaces[i] += MyBankName;
-    i++;
+    fit_workspaces[bankAndPanelCount] += MyBankName;
+    parameter_workspaces[bankAndPanelCount] += MyBankName;
+    bankAndPanelCount++;
   }
   if (bankPanels) {
     findL2(MyBankNames, peaksWs);
   }
 
   // remove skipped banks
-  for (int j = i - 1; j >= 0; j--) {
+  for (int j = bankAndPanelCount - 1; j >= 0; j--) {
     if (!AnalysisDataService::Instance().doesExist(fit_workspaces[j]))
       fit_workspaces.erase(fit_workspaces.begin() + j);
     if (!AnalysisDataService::Instance().doesExist(parameter_workspaces[j]))
@@ -562,7 +561,6 @@ void SCDCalibratePanels::saveXmlFile(const string &FileName, const boost::contai
   IComponent_const_sptr source = instrument.getSource();
 
   oss3 << "<component-link name=\"" << source->getName() << "\">\n";
-  IComponent_const_sptr sample = instrument.getSample();
   V3D sourceRelPos = source->getRelativePos();
 
   writeXmlParameter(oss3, "x", sourceRelPos.X());
@@ -581,9 +579,9 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*peaksWs))
-  for (int i = 0; i < static_cast<int>(MyBankNames.size()); ++i) {
+  for (int bankIndex = 0; bankIndex < static_cast<int>(MyBankNames.size()); ++bankIndex) {
     PARALLEL_START_INTERUPT_REGION
-    const std::string &iBank = *std::next(MyBankNames.begin(), i);
+    const std::string &iBank = *std::next(MyBankNames.begin(), bankIndex);
     const std::string bankName = "__PWS_" + iBank;
     PeaksWorkspace_sptr local = peaksWs->clone();
     AnalysisDataService::Instance().addOrReplace(bankName, local);
@@ -655,8 +653,8 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
     fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
     std::string fitStatus = fit_alg->getProperty("OutputStatus");
-    double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq << "\n";
+    double fitChisq = fit_alg->getProperty("OutputChi2overDoF");
+    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << fitChisq << "\n";
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
@@ -690,9 +688,9 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
       fit2_alg->setProperty("CreateOutput", true);
       fit2_alg->setProperty("Output", "fit");
       fit2_alg->executeAsChildAlg();
-      std::string fitStatus = fit2_alg->getProperty("OutputStatus");
-      double chisq = fit2_alg->getProperty("OutputChi2overDoF");
-      g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq << "\n";
+      std::string fit2Status = fit2_alg->getProperty("OutputStatus");
+      double fit2Chisq = fit2_alg->getProperty("OutputChi2overDoF");
+      g_log.notice() << iBank << "  " << fit2Status << " Chi2overDoF " << fit2Chisq << "\n";
       fitWS = fit2_alg->getProperty("OutputWorkspace");
       AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
       paramsWS = fit2_alg->getProperty("OutputParameters");
@@ -707,5 +705,4 @@ void SCDCalibratePanels::findL2(boost::container::flat_set<string> MyBankNames,
   }
   PARALLEL_CHECK_INTERUPT_REGION
 }
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -17,8 +17,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 DECLARE_LISTENER(FileEventDataListener)
 
 namespace {
@@ -184,5 +183,4 @@ void FileEventDataListener::loadChunk() {
   m_chunkload = std::make_unique<Poco::ActiveResult<bool>>(m_loader->executeAsync());
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

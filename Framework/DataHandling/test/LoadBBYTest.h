@@ -167,6 +167,34 @@ public:
     TS_ASSERT_LESS_THAN(0.0399999, minTime);
   }
 
+  void test_default_parameters_logged() {
+    LoadBBY algToBeTested;
+
+    if (!algToBeTested.isInitialized())
+      algToBeTested.initialize();
+
+    std::string outputSpace = "LoadBBYTestB";
+    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
+    std::string inputFile = "BBY0000014.tar";
+    algToBeTested.setPropertyValue("Filename", inputFile);
+
+    // execute and get workspace generated
+    TS_ASSERT_THROWS_NOTHING(algToBeTested.execute());
+    TS_ASSERT(algToBeTested.isExecuted());
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outputSpace);
+    auto run = output->run();
+
+    // confirm that the sample_aperture which is not included in the hdf file
+    // is present in the log and set to the default value
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("sample_aperture"))->firstValue(), 0.0,
+                    1.0e-3);
+    TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty("source_aperture"))->firstValue(), 0.0,
+                    1.0e-3);
+
+    // confirm that the dummy test parameter in the xml without a default is not added to the log
+    TS_ASSERT(!run.hasProperty("sample_xxx"))
+  }
+
   void test_invalid_event_logged() {
     LoadBBY algToBeTested;
 

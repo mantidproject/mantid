@@ -7,13 +7,13 @@ set(
         CorrectionsTab.cpp
         ConvFitAddWorkspaceDialog.cpp
         ConvFitDataPresenter.cpp
-        ConvFitDataTablePresenter.cpp
+        ConvFitDataView.cpp
         ConvFitModel.cpp
         DensityOfStates.cpp
         FitStatusWidget.cpp
         FqFitAddWorkspaceDialog.cpp
         FqFitDataPresenter.cpp
-        FqFitDataTablePresenter.cpp
+        FqFitDataView.cpp
         FqFitModel.cpp
         FunctionTemplateBrowser.cpp
         IDAFunctionParameterEstimation.cpp
@@ -41,8 +41,8 @@ set(
         IndirectEditResultsDialog.cpp
         IndirectFitAnalysisTab.cpp
         IndirectFitData.cpp
+        IndirectFitDataModel.cpp
         IndirectFitDataPresenter.cpp
-	IndirectFitDataTablePresenter.cpp
         IndirectFitDataView.cpp
         IndirectFitOutputOptionsModel.cpp
         IndirectFitOutputOptionsPresenter.cpp
@@ -52,8 +52,7 @@ set(
         IndirectFitPlotView.cpp
         IndirectFitPropertyBrowser.cpp
         IndirectFittingModel.cpp
-        IndirectFitDataTableModel.cpp
-        IndirectFitOutputModel.cpp
+        IndirectFitOutput.cpp
         IndirectFunctionBrowser/ConvTypes.cpp
         IndirectFunctionBrowser/ConvFunctionModel.cpp
         IndirectFunctionBrowser/ConvTemplateBrowser.cpp
@@ -80,7 +79,6 @@ set(
         IndirectSettingsView.cpp
         IndirectSimulation.cpp
         IndirectSimulationTab.cpp
-        IndirectSpectrumSelectionView.cpp
         IndirectSqw.cpp
         IndirectSymmetrise.cpp
         IndirectTab.cpp
@@ -103,15 +101,15 @@ set(
         ContainerSubtraction.h
         ConvFitAddWorkspaceDialog.h
         ConvFitDataPresenter.h
-        ConvFitDataTablePresenter.h
+        ConvFitDataView.h
         CorrectionsTab.h
         DensityOfStates.h
         FqFitAddWorkspaceDialog.h
         FqFitDataPresenter.h
-        FqFitDataTablePresenter.h
+        FqFitDataView.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
-        IIndirectFitDataTableModel.h
+        IIndirectFitDataModel.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
@@ -135,8 +133,8 @@ set(
         IndirectDiffractionReduction.h
         IndirectEditResultsDialog.h
         IndirectFitAnalysisTab.h
+        IndirectFitDataModel.h
         IndirectFitDataPresenter.h
-	IndirectFitDataTablePresenter.h
         IndirectFitDataView.h
         IndirectFitOutputOptionsPresenter.h
         IndirectFitOutputOptionsView.h
@@ -161,7 +159,6 @@ set(
         IndirectSettingsView.h
         IndirectSimulation.h
         IndirectSimulationTab.h
-        IndirectSpectrumSelectionView.h
         IndirectSqw.h
         IndirectSymmetrise.h
         IndirectTab.h
@@ -190,8 +187,7 @@ set(
         IndirectFitPlotModel.h
         IndirectFitPlotPresenter.h
         IndirectFittingModel.h
-        IndirectFitDataTableModel.h
-        IndirectFitOutputModel.h
+        IndirectFitOutput.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectPlotOptionsModel.h
         IndirectSettingsHelper.h
@@ -248,10 +244,9 @@ set(
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
-if (ENABLE_WORKBENCH)
-    # XML is required to parse the settings file
-    find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
-endif ()
+
+# XML is required to parse the settings file
+find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
 
 mtd_add_qt_library(
         TARGET_NAME MantidScientificInterfacesIndirect
@@ -268,7 +263,7 @@ mtd_add_qt_library(
         INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
         LINK_LIBS
         ${CORE_MANTIDLIBS}
-        PythonInterfaceCore
+        Mantid::PythonInterfaceCore
         ${POCO_LIBRARIES}
         ${Boost_LIBRARIES}
         Python::Python

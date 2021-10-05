@@ -160,13 +160,19 @@ find_path(PYQT5_SIP_DIR
   PATH_SUFFIXES ${_sip_suffixes}
 )
 
+# PyQt5 compiles against v12 of the sip ABI
+set(PYQT5_SIP_ABI_VERSION
+    12
+    CACHE STRING "The sip ABI used to compile PyQt5" FORCE
+)
+
 message("Found PyQt sip dir ${PYQT5_SIP_DIR}")
 if (NOT EXISTS "${PYQT5_SIP_DIR}/QtCore/QtCoremod.sip")
   message (FATAL_ERROR "Unable to find QtCore/QtCoremod.sip in ${PYQT5_SIP_DIR}. PyQt sip files are missing.")
 endif()
 
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args(PyQt5 PYQT5_VERSION PYQT5_VERSION_STR PYQT5_VERSION_TAG PYQT5_SIP_DIR PYQT5_SIP_FLAGS PYQT5_PYUIC)
+find_package_handle_standard_args(PyQt5 PYQT5_VERSION PYQT5_VERSION_STR PYQT5_VERSION_TAG PYQT5_SIP_DIR PYQT5_SIP_FLAGS PYQT5_PYUIC PYQT5_SIP_ABI_VERSION)
 
 mark_as_advanced ( PYQT5_VERSION
                    PYQT5_VERSION_STR
@@ -174,4 +180,5 @@ mark_as_advanced ( PYQT5_VERSION
                    PYQT5_SIP_DIR
                    PYQT5_SIP_FLAGS
                    PYQT5_PYUIC
+                   PYQT5_SIP_ABI_VERSION
                    )

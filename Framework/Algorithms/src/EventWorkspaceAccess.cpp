@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/EventWorkspaceAccess.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 ///@cond Doxygen has problems for decltype for some reason.
 /// Returns std::mem_fn object refering to EventWorkspace::getSpectrum().
@@ -16,5 +15,4 @@ decltype(std::mem_fn((DataObjects::EventList & (DataObjects::EventWorkspace::*)(
     std::mem_fn((DataObjects::EventList & (DataObjects::EventWorkspace::*)(const std::size_t)) &
                 DataObjects::EventWorkspace::getSpectrum);
 ///@endcond
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

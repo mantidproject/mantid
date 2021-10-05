@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 template <>
 std::string checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
                                                const Mantid::Geometry::Instrument_const_sptr &instrument,
@@ -43,5 +42,4 @@ checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::
     return boost::optional<std::string>(algProperty->value());
   }
 }
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

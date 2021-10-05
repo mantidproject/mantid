@@ -60,9 +60,8 @@ public:
   };
 
 public:
-  IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &streamTopic,
-                      const std::string &runInfoTopic, const std::string &sampleEnvTopic,
-                      const std::string &chopperTopic, const std::string &monitorTopic);
+  IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, std::string streamTopic, std::string runInfoTopic,
+                      std::string sampleEnvTopic, std::string chopperTopic, std::string monitorTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;

@@ -49,9 +49,9 @@ AnalysisDataServiceImpl &instance() {
  * @param unrollGroups If true unroll the workspace groups
  * @return a python list of the workspaces in the ADS
  */
-list retrieveWorkspaces(AnalysisDataServiceImpl &self, const list &names, bool unrollGroups = false) {
+list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &names, bool unrollGroups = false) {
   return Converters::ToPyList<Workspace_sptr>()(
-      self.retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
+      self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
 }
 
 GNU_DIAG_OFF("unused-local-typedef")

@@ -18,8 +18,7 @@
 #include <QPushButton>
 #include <utility>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /// Constructor
 /// @param parent :: Parent widget.
@@ -35,9 +34,8 @@ namespace MantidWidgets {
 LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, double value, bool fixed, const QString &tie,
                                            const QString &constraint, bool othersFixed, bool allOthersFixed,
                                            bool othersTied, bool logOptionsEnabled)
-    : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)), m_fixed(fixed), m_tie(std::move(tie)),
-      m_constraint(std::move(constraint)), m_othersFixed(othersFixed), m_allOthersFixed(allOthersFixed),
-      m_othersTied(othersTied) {
+    : QWidget(parent), m_index(index), m_value(QString::number(value, 'g', 16)), m_fixed(fixed), m_tie(tie),
+      m_constraint(constraint), m_othersFixed(othersFixed), m_allOthersFixed(allOthersFixed), m_othersTied(othersTied) {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
   layout->setSpacing(0);
@@ -331,5 +329,4 @@ void LocalParameterEditor::setLogOptionsEnabled(bool enabled) {
   m_setToLogAction->setEnabled(enabled);
   m_setAllToLogAction->setEnabled(enabled);
 }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

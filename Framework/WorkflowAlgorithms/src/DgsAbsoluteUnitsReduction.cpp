@@ -18,8 +18,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::PhysicalConstants;
 using namespace WorkflowAlgorithmHelpers;
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DgsAbsoluteUnitsReduction)
 
@@ -204,5 +203,4 @@ void DgsAbsoluteUnitsReduction::exec() {
   this->setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

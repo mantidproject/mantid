@@ -38,8 +38,7 @@ using namespace boost::python;
 
 GET_POINTER_SPECIALIZATION(FunctionFactoryImpl)
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 /// Specialization for IFunction. Fit functions defined in
 /// python need to be wrapped in FunctionWrapper without
@@ -69,8 +68,7 @@ template <> std::shared_ptr<IFunction> PythonObjectInstantiator<IFunction>::crea
   return instancePtr;
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface
 
 namespace {
 ///@cond
@@ -81,8 +79,8 @@ namespace {
  * @param self :: Enables it to be called as a member function on the
  * FunctionFactory class
  */
-PyObject *getFunctionNames(FunctionFactoryImpl &self) {
-  const std::vector<std::string> &names = self.getFunctionNames<Mantid::API::IFunction>();
+PyObject *getFunctionNames(FunctionFactoryImpl const *const self) {
+  const auto &names = self->getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
@@ -100,12 +98,12 @@ PyObject *getFunctionNames(FunctionFactoryImpl &self) {
  * @param self :: Enables it to be called as a member function on the
  * FunctionFactory class
  */
-PyObject *getBackgroundFunctionNames(FunctionFactoryImpl &self) {
-  const std::vector<std::string> &names = self.getFunctionNames<Mantid::API::IFunction>();
+PyObject *getBackgroundFunctionNames(FunctionFactoryImpl const *const self) {
+  const auto &names = self->getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
-    auto fun = self.createFunction(name);
+    auto fun = self->createFunction(name);
     if (dynamic_cast<IBackgroundFunction *>(fun.get())) {
       PyObject *bkg_function = to_python_value<const std::string &>()(name);
       if (PyList_Append(registered, bkg_function))
@@ -122,12 +120,12 @@ PyObject *getBackgroundFunctionNames(FunctionFactoryImpl &self) {
  * @param self :: Enables it to be called as a member function on the
  * FunctionFactory class
  */
-PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
-  const std::vector<std::string> &names = self.getFunctionNames<Mantid::API::IFunction>();
+PyObject *getPeakFunctionNames(FunctionFactoryImpl const *const self) {
+  const auto &names = self->getFunctionNames<Mantid::API::IFunction>();
 
   PyObject *registered = PyList_New(0);
   for (const auto &name : names) {
-    auto fun = self.createFunction(name);
+    auto fun = self->createFunction(name);
     if (dynamic_cast<IPeakFunction *>(fun.get())) {
       PyObject *peak_function = to_python_value<const std::string &>()(name);
       if (PyList_Append(registered, peak_function))
@@ -145,9 +143,8 @@ PyObject *getPeakFunctionNames(FunctionFactoryImpl &self) {
  * FunctionFactory class
  * @param name :: Peak function name
  */
-Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl &self, const std::string &name) {
-
-  auto fun = self.createFunction(name);
+Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl const *const self, const std::string &name) {
+  auto fun = self->createFunction(name);
   auto peakFun = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(fun);
   if (!peakFun) {
     throw std::invalid_argument(name + " is not a PeakFunction");
@@ -165,8 +162,9 @@ Mantid::API::IPeakFunction_sptr createPeakFunction(FunctionFactoryImpl &self, co
  * @param name :: Name of the superclass of composite function,
  * e.g. "ProductFunction".
  */
-Mantid::API::CompositeFunction_sptr createCompositeFunction(FunctionFactoryImpl &self, const std::string &name) {
-  auto fun = self.createFunction(name);
+Mantid::API::CompositeFunction_sptr createCompositeFunction(FunctionFactoryImpl const *const self,
+                                                            const std::string &name) {
+  auto fun = self->createFunction(name);
   auto composite = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (composite) {
     return composite;

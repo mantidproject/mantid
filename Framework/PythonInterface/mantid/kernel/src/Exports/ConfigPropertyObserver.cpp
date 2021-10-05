@@ -28,11 +28,9 @@ private:
   PyObject *m_self;
 };
 
-namespace boost {
-namespace python {
+namespace boost::python {
 template <> struct has_back_reference<ConfigPropertyObserverWrapper> : mpl::true_ {};
-} // namespace python
-} // namespace boost
+} // namespace boost::python
 
 void export_ConfigPropertyObserver() {
   class_<ConfigPropertyObserverWrapper, boost::noncopyable>("ConfigPropertyObserver", init<std::string>())

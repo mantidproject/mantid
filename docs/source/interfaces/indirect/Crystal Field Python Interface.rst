@@ -282,7 +282,7 @@ Or using an arbitrary function `my_func`::
 
 Finally, the :ref:`PyChop` interface may be used to generate the resolution function for a particular spectrometer::
 
-    from PyChop import PyChop2
+    from mantidqtinterfaces.PyChop import PyChop2
     marires = PyChop2('MARI')
     marires.setChopper('S')
     marires.setFrequency(250)
@@ -387,6 +387,8 @@ Then call `fit()` method::
 
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
 
+The crystal field fit function is derived from the standard Mantid fit function and allows using the fit properties described in :ref:`algorithm page <algm-Fit>`.
+
 
 Multiple Ions
 -------------
@@ -477,7 +479,7 @@ can be used like a `CrystalField` object in this way, although `Temperatures` an
     cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
                                      BmolX=1.0, B40=-0.02)
 
-
+.. _cf_intensity_scaling:
 
 Intensity Scaling
 -----------------

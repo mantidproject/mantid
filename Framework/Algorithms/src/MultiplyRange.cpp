@@ -15,8 +15,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Algorithm must be declared
 DECLARE_ALGORITHM(MultiplyRange)
@@ -98,5 +97,4 @@ void MultiplyRange::exec() {
   PARALLEL_CHECK_INTERUPT_REGION
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

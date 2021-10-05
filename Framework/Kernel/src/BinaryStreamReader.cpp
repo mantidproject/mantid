@@ -14,8 +14,7 @@
 #include <istream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //------------------------------------------------------------------------------
 // Anonymous functions
@@ -324,5 +323,4 @@ BinaryStreamReader &BinaryStreamReader::read(Kernel::Matrix<double> &value, cons
  */
 void BinaryStreamReader::moveStreamToPosition(size_t nbytes) { m_istrm.seekg(nbytes, std::ios_base::beg); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

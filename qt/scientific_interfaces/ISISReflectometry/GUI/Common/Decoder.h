@@ -74,7 +74,8 @@ private:
   ReductionWorkspaces decodeReductionWorkspace(const QMap<QString, QVariant> &map);
   void decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &map);
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
-  void updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model, boost::optional<int> precision);
+  void updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
+                                    const boost::optional<int> &precision);
   bool m_projectSave = false;
   friend class CoderCommonTester;
 };

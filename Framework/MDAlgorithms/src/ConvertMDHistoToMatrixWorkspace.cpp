@@ -87,8 +87,7 @@ size_t findXAxis(const VMD &start, const VMD &end, CoordTransform const *const t
 }
 } // namespace
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertMDHistoToMatrixWorkspace)
@@ -332,5 +331,4 @@ size_t ConvertMDHistoToMatrixWorkspace::calcStride(const API::IMDHistoWorkspace 
   return stride;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -14,8 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -187,12 +186,11 @@ void WorkspaceJoiners::checkCompatibility(const API::MatrixWorkspace &ws1, const
  * @param max The maximum id (output).
  */
 void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min, specnum_t &max) {
-  specnum_t temp;
   size_t length = ws.getNumberHistograms();
   // initial values
   min = max = ws.getSpectrum(0).getSpectrumNo();
   for (size_t i = 0; i < length; i++) {
-    temp = ws.getSpectrum(i).getSpectrumNo();
+    const auto temp = ws.getSpectrum(i).getSpectrumNo();
     // Adjust min/max
     if (temp < min)
       min = temp;
@@ -201,5 +199,4 @@ void WorkspaceJoiners::getMinMax(const MatrixWorkspace &ws, specnum_t &min, spec
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

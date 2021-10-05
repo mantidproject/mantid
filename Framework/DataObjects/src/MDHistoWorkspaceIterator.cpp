@@ -67,8 +67,7 @@ Mantid::coord_t getDExact(Mantid::coord_t location, Mantid::coord_t origin, Mant
 }
 } // namespace
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -686,5 +685,4 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth1D(const int &width, const 
  */
 size_t MDHistoWorkspaceIterator::permutationCacheSize() const { return m_permutationsVertexTouchingMap.size(); }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

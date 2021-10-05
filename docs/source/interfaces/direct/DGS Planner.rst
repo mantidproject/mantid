@@ -1,3 +1,5 @@
+.. _dgsplanner-ref:
+
 DGS Planner
 ===========
 
@@ -28,6 +30,10 @@ The **Incident Energy** is in mili-electron-Volts. The **Fast** option will use 
 to calculate the coverage.
 One can use a previously saved Mantid workspace containing a mask, the **Mask file** option,
 to eliminate from the coverage calculations detectors that are masked in the experiment.
+
+For the constant wavelength instrument WAND² there are options for
+**S2** and **DetZ** values to move the detector, the incident energy
+is changed to wavelength and the **DeltaE** is fixed to ±1%.
 
 The **Goniometer** settings follow the Mantid convention (see :ref:`SetGoniometer <algm-SetGoniometer>`.
 The default values follow the goniometer description in `Horace <http://horace.isis.rl.ac.uk/Generating_SQW_files>`_.

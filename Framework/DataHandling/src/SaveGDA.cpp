@@ -21,8 +21,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 
@@ -242,5 +241,4 @@ std::vector<SaveGDA::CalibrationParams> SaveGDA::parseParamsFile() const {
   return calibParams;
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

@@ -19,8 +19,7 @@
 #include <sstream>
 #include <stdexcept>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 namespace {
 Kernel::Logger g_log("MultiDomainCreator");
@@ -48,13 +47,12 @@ void MultiDomainCreator::createDomain(std::shared_ptr<API::FunctionDomain> &doma
   i0 = 0;
   for (auto &creator : m_creators) {
     if (!creator) {
-
       throw std::runtime_error("Missing domain creator");
     }
-    API::FunctionDomain_sptr domain;
-    (*creator).createDomain(domain, values, i0);
-    jointDomain->addDomain(domain);
-    i0 += domain->size();
+    API::FunctionDomain_sptr dom;
+    creator->createDomain(dom, values, i0);
+    jointDomain->addDomain(dom);
+    i0 += dom->size();
   }
   domain.reset(jointDomain.release());
   ivalues = values;
@@ -151,5 +149,4 @@ std::shared_ptr<API::Workspace> MultiDomainCreator::createOutputWorkspace(
   return outWS;
 }
 
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

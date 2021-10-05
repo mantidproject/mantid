@@ -10,8 +10,7 @@
 #include <iterator>
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 // General template definition for RegisterConditions
 template <typename... Args> struct RegisterConditions;
@@ -105,5 +104,4 @@ ReflectionCondition_sptr getReflectionConditionBySymbol(const std::string &symbo
       [=](const ReflectionCondition_sptr &condition) { return condition->getSymbol() == symbol; }, symbol);
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

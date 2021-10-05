@@ -10,8 +10,7 @@
 
 #include <json/value.h>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 /** Constructor.
  *  Sets the property names but initialises the function pointer to null.
  *  @param name :: The name to assign to the property
@@ -38,7 +37,6 @@ FunctionProperty &FunctionProperty::operator=(const std::shared_ptr<IFunction> &
 /// Add the value of another property
 FunctionProperty &FunctionProperty::operator+=(Kernel::Property const * /*right*/) {
   throw Kernel::Exception::NotImplementedError("+= operator is not implemented for FunctionProperty.");
-  return *this;
 }
 
 /** Get the function definition
@@ -126,5 +124,4 @@ bool FunctionProperty::isDefault() const { return m_value == std::shared_ptr<IFu
 /// @return A populated PropertyHistory for this class
 const Kernel::PropertyHistory FunctionProperty::createHistory() const { return Kernel::PropertyHistory(this); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

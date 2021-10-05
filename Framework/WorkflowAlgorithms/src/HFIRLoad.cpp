@@ -17,8 +17,7 @@
 #include "MantidWorkflowAlgorithms/HFIRLoad.h"
 #include "Poco/NumberFormatter.h"
 
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(HFIRLoad)
@@ -291,5 +290,4 @@ void HFIRLoad::exec() {
   setPropertyValue("OutputMessage", output_message);
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

@@ -149,33 +149,3 @@ if(ENABLE_WORKBENCH)
     ${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
   ")
 endif()
-
-# MantidPlot
-if(ENABLE_MANTIDPLOT)
-  set( WINDOWS_NSIS_MANTIDPLOT_ICON_NAME "${PACKAGE_ICON_BASENAME}" )
-  set( MANTIDPLOT_LINK_NAME "Mantid Plot ${CPACK_PACKAGE_SUFFIX_CAMELCASE}.lnk" )
-  include( WindowsNSISQt4 )
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.bat DESTINATION bin )
-  install ( FILES ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig/CMake/Packaging/launch_mantidplot.vbs DESTINATION bin )
-  # shortcuts
-  set (CPACK_NSIS_CREATE_ICONS_EXTRA "
-  CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
-
-  ${CPACK_NSIS_CREATE_ICONS_EXTRA}
-")
-
-  set (CPACK_NSIS_DELETE_ICONS_EXTRA "
-  Delete \\\"$SMPROGRAMS\\\\$MUI_TEMP\\\\${MANTIDPLOT_LINK_NAME}\\\"
-  ${CPACK_NSIS_DELETE_ICONS_EXTRA}
-")
-  set (CPACK_NSIS_EXTRA_INSTALL_COMMANDS "
-  CreateShortCut '$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}' '$SYSDIR\\\\wscript.exe' '\\\"$INSTDIR\\\\bin\\\\launch_mantidplot.vbs\\\"' '$INSTDIR\\\\bin\\\\${WINDOWS_NSIS_MANTIDPLOT_ICON_NAME}.ico'
-
-  ${CPACK_NSIS_EXTRA_INSTALL_COMMANDS}
-")
-  set (CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS "
-  Delete \\\"$DESKTOP\\\\${MANTIDPLOT_LINK_NAME}\\\"
-  ${CPACK_NSIS_EXTRA_UNINSTALL_COMMANDS}
-")
-
-endif()

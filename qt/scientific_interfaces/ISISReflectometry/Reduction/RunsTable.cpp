@@ -7,16 +7,13 @@
 #include "RunsTable.h"
 #include "RowLocation.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using MantidWidgets::Batch::RowLocation;
 
-RunsTable::RunsTable( // cppcheck-suppress passedByValue
-    std::vector<std::string> instruments, double thetaTolerance,
-    // cppcheck-suppress passedByValue
-    ReductionJobs reductionJobs)
+RunsTable::RunsTable(std::vector<std::string> instruments, double thetaTolerance,
+
+                     ReductionJobs reductionJobs)
     : m_instruments(std::move(instruments)), m_thetaTolerance(thetaTolerance),
       m_reductionJobs(std::move(reductionJobs)), m_selectedRowLocations() {}
 
@@ -66,6 +63,4 @@ std::vector<Row> RunsTable::selectedRows() const {
   }
   return rows;
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

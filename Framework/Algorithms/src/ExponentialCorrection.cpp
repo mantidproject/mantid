@@ -13,8 +13,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ExponentialCorrection)
 
@@ -54,5 +53,4 @@ void ExponentialCorrection::performUnaryOperation(const double XIn, const double
   EOut = EIn * factor;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

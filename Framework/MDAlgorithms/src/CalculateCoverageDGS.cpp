@@ -24,8 +24,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 using namespace Mantid::Kernel;
 using Mantid::API::WorkspaceProperty;
 using namespace Mantid::API;
@@ -600,5 +599,4 @@ std::vector<Kernel::VMD> CalculateCoverageDGS::calculateIntersections(const doub
   return intersections;
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

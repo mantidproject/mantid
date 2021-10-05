@@ -19,8 +19,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -1121,5 +1120,4 @@ void ReflectometryReductionOneAuto2::applyFloodCorrections() {
   }
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

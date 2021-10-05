@@ -24,8 +24,7 @@
 #include <cstdio>
 #include <stdexcept>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveSPE)
@@ -339,5 +338,4 @@ void SaveSPE::logMissingMasked(const std::vector<int> &inds, const size_t nonMas
   g_log.debug() << "Wrote " << nonMasked << " histograms and " << masked
                 << " masked histograms to the output SPE file\n";
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

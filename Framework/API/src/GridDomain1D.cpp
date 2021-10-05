@@ -13,8 +13,7 @@
 #include "MantidAPI/ITransformScale.h"
 #include "MantidAPI/TransformScaleFactory.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 void GridDomain1D::initialize(double &startX, double &endX, size_t &n, const std::string &scaling) {
   m_points.resize(n);
@@ -29,5 +28,4 @@ void GridDomain1D::reScale(const std::string &scaling) {
   m_scaling = scaling;
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

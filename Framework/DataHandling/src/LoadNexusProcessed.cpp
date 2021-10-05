@@ -44,8 +44,7 @@
 #include <string>
 #include <vector>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
@@ -1035,7 +1034,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
     LeanElasticPeak peak;
     peak.setGoniometerMatrix(goniometer.getR());
     peak.setRunNumber(peakWS->getRunNumber());
-    peakWS->addPeak(std::move(peak));
+    peakWS->addPeak(peak);
   }
 
   for (const auto &str : columnNames) {
@@ -1798,6 +1797,13 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
 
   progress(progressStart + 0.2 * progressRange, "Reading the workspace history...");
 
+  try {
+    if (local_workspace->getTitle().empty())
+      local_workspace->setTitle(mtd_entry.getString("title"));
+  } catch (std::runtime_error &) {
+    g_log.debug() << "No title was found in the input file, " << getPropertyValue("Filename") << '\n';
+  }
+
   return std::static_pointer_cast<API::Workspace>(local_workspace);
 }
 
@@ -2372,7 +2378,7 @@ size_t LoadNexusProcessed::calculateWorkspaceSize(const std::size_t numberofspec
  *
  * @param local_workspace :: the workspace containing logs to be filtered
  */
-void LoadNexusProcessed::applyLogFiltering(Mantid::API::Workspace_sptr local_workspace) {
+void LoadNexusProcessed::applyLogFiltering(const Mantid::API::Workspace_sptr &local_workspace) {
   auto mWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(local_workspace);
   if (mWorkspace) {
     auto run = mWorkspace->run();
@@ -2383,5 +2389,4 @@ void LoadNexusProcessed::applyLogFiltering(Mantid::API::Workspace_sptr local_wor
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

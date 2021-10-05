@@ -170,9 +170,7 @@ std::string createExcludeRegionString(std::string regionString) {
 
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace, const FunctionModelSpectra &spectra)
     : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
@@ -284,12 +282,17 @@ void IndirectFitData::validateSpectra(FunctionModelSpectra const &spectra) {
 
 void IndirectFitData::setStartX(double const &startX, WorkspaceIndex const &spectrum) {
   const auto range = m_ranges.find(spectrum);
-  if (range != m_ranges.end())
-    range->second.first = startX;
-  else if (m_workspace)
+  if (range != m_ranges.end()) {
+    if (range->second.second < startX) {
+      range->second.first = range->second.second;
+    } else {
+      range->second.first = startX;
+    }
+  } else if (m_workspace) {
     m_ranges[spectrum] = std::make_pair(startX, m_workspace->x(0).back());
-  else
+  } else {
     throw std::runtime_error("Unable to set StartX: Workspace no longer exists.");
+  }
 }
 
 void IndirectFitData::setStartX(double const &startX) {
@@ -301,11 +304,16 @@ void IndirectFitData::setStartX(double const &startX) {
 void IndirectFitData::setEndX(double const &endX, WorkspaceIndex const &spectrum) {
   const auto range = m_ranges.find(spectrum);
   if (range != m_ranges.end()) {
-    range->second.second = endX;
+    if (range->second.first > endX) {
+      range->second.second = range->second.first;
+    } else {
+      range->second.second = endX;
+    }
   } else if (m_workspace) {
     m_ranges[spectrum] = std::make_pair(m_workspace->x(0).front(), endX);
-  } else
+  } else {
     throw std::runtime_error("Unable to set EndX: Workspace no longer exists.");
+  }
 }
 
 void IndirectFitData::setEndX(double const &endX) {
@@ -336,6 +344,4 @@ IndirectFitData &IndirectFitData::combine(IndirectFitData const &fitData) {
   return *this;
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

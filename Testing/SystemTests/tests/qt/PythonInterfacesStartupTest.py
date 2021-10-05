@@ -11,16 +11,10 @@ from mantid.kernel import ConfigService
 from mantidqt.utils.qt.testing import get_application
 
 from qtpy.QtCore import QCoreApplication, QSettings
-from qtpy.QtWidgets import QApplication
 
+INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS", "ORNL_SANS.py": "EQSANS", "Powder_Diffraction_Reduction.py": "NOM"}
 
-INSTRUMENT_SWITCHER = {"DGS_Reduction.py": "ARCS",
-                       "ORNL_SANS.py": "EQSANS",
-                       "Powder_Diffraction_Reduction.py": "NOM"}
-
-APP_NAME_SWITCHER = {"DGS_Reduction.py": "python",
-                     "ORNL_SANS.py": "python",
-                     "Powder_Diffraction_Reduction.py": "python"}
+APP_NAME_SWITCHER = {"DGS_Reduction.py": "python", "ORNL_SANS.py": "python", "Powder_Diffraction_Reduction.py": "python"}
 
 
 def set_instrument(interface_script_name):
@@ -41,38 +35,40 @@ class PythonInterfacesStartupTest(systemtesting.MantidSystemTest):
     """
     def __init__(self):
         super(PythonInterfacesStartupTest, self).__init__()
-
-        self._interface_directory = ConfigService.getString('mantidqt.python_interfaces_directory')
-        self._interface_scripts = [interface.split("/")[1] for interface in
-                                   ConfigService.getString('mantidqt.python_interfaces').split()]
+        import mantidqtinterfaces
+        self._interface_directory = os.path.dirname(mantidqtinterfaces.__file__)
+        self._interface_scripts = [interface.split("/")[1] for interface in ConfigService.getString('mantidqt.python_interfaces').split()]
 
     def runTest(self):
         if len(self._interface_scripts) == 0:
             self.fail("Failed to find any python interface scripts.")
 
-        for interface_script in self._interface_scripts:
-            self._attempt_to_open_python_interface(interface_script)
+        self._qapp = get_application()  # keep QApp reference alive
+        try:
+            for interface_script in self._interface_scripts:
+                self._attempt_to_open_and_close_python_interface(interface_script)
+        finally:
+            self._qapp = None
 
-    def _attempt_to_open_python_interface(self, interface_script):
+    def _attempt_to_open_and_close_python_interface(self, interface_script):
         # Ensures the interfaces close after their script has been executed
         set_application_name(interface_script)
         # Prevents a QDialog popping up when opening certain interfaces
         set_instrument(interface_script)
 
         try:
-            self._app = get_application()
             exec(open(os.path.join(self._interface_directory, interface_script)).read())
             self._close_interface()
         except Exception as ex:
             self.fail(f"Exception thrown when attempting to open the {interface_script} interface: {ex}.")
 
-    @staticmethod
-    def _close_interface():
-        """Close the interface after opening to ensure it is unsubscribed from the ADS. Must be done before the
+    def _close_interface(self):
+        """
+        Close all opened windows after opening to ensure it is unsubscribed from the ADS. Must be done before the
         next interface is opened because it appears the Qt objects of the previous interface get deleted when a
         python script runs to completion, but the python object itself is not. This means it is still subscribed to the
         ADS because the 'close_event' is not called, but the Qt objects no longer exist. This causes problems when
-        an ADS change is observed."""
-        for widget in QApplication.topLevelWidgets():
-            if not widget.isHidden():
-                widget.close()
+        an ADS change is observed.
+        """
+        self._qapp.closeAllWindows()
+        self._qapp.sendPostedEvents()

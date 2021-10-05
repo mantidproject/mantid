@@ -23,12 +23,10 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 Shape2DCollection::Shape2DCollection()
-    : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr),
-      m_currentCP(0), m_copiedShapes(QList<Shape2D *>()),
+    : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr), m_currentCP(0), m_copiedShapes(QList<Shape2D *>()),
       m_overridingCursor(false) {}
 
 Shape2DCollection::~Shape2DCollection() {
@@ -129,8 +127,7 @@ void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
   }
 }
 
-void Shape2DCollection::setWindow(const RectF &surface,
-                                  const QRect &viewport) const {
+void Shape2DCollection::setWindow(const RectF &surface, const QRect &viewport) const {
   m_viewport = viewport;
   m_surfaceRect = surface;
   m_surfaceRect.findTransform(m_transform, viewport);
@@ -140,9 +137,7 @@ void Shape2DCollection::refit() {}
 
 void Shape2DCollection::resetBoundingRect() {
   m_boundingRect = RectF();
-  foreach (const Shape2D *shape, m_shapes) {
-    m_boundingRect.unite(shape->getBoundingRect());
-  }
+  foreach (const Shape2D *shape, m_shapes) { m_boundingRect.unite(shape->getBoundingRect()); }
 }
 
 void Shape2DCollection::keyPressEvent(QKeyEvent *e) {
@@ -154,8 +149,7 @@ void Shape2DCollection::keyPressEvent(QKeyEvent *e) {
   }
 }
 
-void Shape2DCollection::addShape(const QString &type, int x, int y,
-                                 const QColor &borderColor,
+void Shape2DCollection::addShape(const QString &type, int x, int y, const QColor &borderColor,
                                  const QColor &fillColor) {
   deselectAll();
   Shape2D *shape = createShape(type, x, y);
@@ -171,8 +165,7 @@ void Shape2DCollection::addShape(const QString &type, int x, int y,
   emit shapeSelected();
 }
 
-Shape2D *Shape2DCollection::createShape(const QString &type, int x,
-                                        int y) const {
+Shape2D *Shape2DCollection::createShape(const QString &type, int x, int y) const {
   QPointF p = m_transform.inverted().map(QPointF(x, y));
 
   if (type.toLower() == "ellipse") {
@@ -199,8 +192,7 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x,
     return new Shape2DRing(child, xWidth, yWidth);
   }
 
-  throw std::invalid_argument("Shape " + type.toStdString() +
-                              " cannot be created");
+  throw std::invalid_argument("Shape " + type.toStdString() + " cannot be created");
 }
 
 /**
@@ -555,10 +547,8 @@ void Shape2DCollection::pasteCopiedShapes() {
   foreach (auto shape, m_copiedShapes) {
     Shape2D *newShape;
     if (shape->type() == "sector") {
-      double angleOffset =
-          shape->getDouble("endAngle") - shape->getDouble("startAngle");
-      shape->setDouble("startAngle",
-                       shape->getDouble("startAngle") + angleOffset);
+      double angleOffset = shape->getDouble("endAngle") - shape->getDouble("startAngle");
+      shape->setDouble("startAngle", shape->getDouble("startAngle") + angleOffset);
 
       shape->setDouble("endAngle", shape->getDouble("endAngle") + angleOffset);
     } else {
@@ -586,6 +576,13 @@ void Shape2DCollection::clear() {
   m_selectedShapes.clear();
   m_currentShape = nullptr;
   emit shapesDeselected();
+}
+
+std::string Shape2DCollection::getCurrentShapeType() const {
+  if (m_currentShape) {
+    return m_currentShape->type();
+  }
+  return "none";
 }
 
 QStringList Shape2DCollection::getCurrentDoubleNames() const {
@@ -623,8 +620,7 @@ QPointF Shape2DCollection::getCurrentPoint(const QString &prop) const {
   return QPointF();
 }
 
-void Shape2DCollection::setCurrentPoint(const QString &prop,
-                                        const QPointF &value) {
+void Shape2DCollection::setCurrentPoint(const QString &prop, const QPointF &value) {
   if (m_currentShape) {
     m_currentShape->setPoint(prop, value);
     emit shapeChanged();
@@ -641,6 +637,20 @@ RectF Shape2DCollection::getCurrentBoundingRect() const {
 void Shape2DCollection::setCurrentBoundingRect(const RectF &rect) {
   if (m_currentShape) {
     m_currentShape->setBoundingRect(rect);
+    emit shapeChanged();
+  }
+}
+
+double Shape2DCollection::getCurrentBoundingRotation() const {
+  if (m_currentShape) {
+    return m_currentShape->getBoundingRotation();
+  }
+  return 0.0;
+}
+
+void Shape2DCollection::setCurrentBoundingRotation(const double rotation) {
+  if (m_currentShape) {
+    m_currentShape->setBoundingRotation(rotation);
     emit shapeChanged();
   }
 }
@@ -719,14 +729,12 @@ void Shape2DCollection::saveToTableWorkspace() {
  *
  * @param ws :: table workspace to load shapes from.
  */
-void Shape2DCollection::loadFromTableWorkspace(
-    const Mantid::API::ITableWorkspace_const_sptr &ws) {
+void Shape2DCollection::loadFromTableWorkspace(const Mantid::API::ITableWorkspace_const_sptr &ws) {
   using namespace Mantid::API;
   auto columnNames = ws->getColumnNames();
 
   // Check if the column exists
-  if (std::find(columnNames.cbegin(), columnNames.cend(), "Parameters") ==
-      columnNames.cend())
+  if (std::find(columnNames.cbegin(), columnNames.cend(), "Parameters") == columnNames.cend())
     return;
 
   ConstColumnVector<std::string> col = ws->getVector("Parameters");
@@ -746,16 +754,13 @@ void Shape2DCollection::loadFromTableWorkspace(
  * @param borderColor :: The border colour.
  * @param fillColor :: The fill colour.
  */
-void Shape2DCollection::addFreeShape(const QPolygonF &poly,
-                                     const QColor &borderColor,
-                                     const QColor &fillColor) {
+void Shape2DCollection::addFreeShape(const QPolygonF &poly, const QColor &borderColor, const QColor &fillColor) {
   auto freeShape = dynamic_cast<Shape2DFree *>(m_currentShape);
   if (!freeShape) {
     if (poly.isEmpty())
       throw std::logic_error("Cannot create a shape from empty polygon.");
     auto p = m_transform.inverted().map(poly[0]);
-    addShape("free", static_cast<int>(p.x()), static_cast<int>(p.y()),
-             borderColor, fillColor);
+    addShape("free", static_cast<int>(p.x()), static_cast<int>(p.y()), borderColor, fillColor);
   }
   drawFree(poly);
 }
@@ -797,8 +802,7 @@ void Shape2DCollection::loadFromProject(const std::string &lines) {
   }
 #else
   Q_UNUSED(lines);
-  throw std::runtime_error(
-      "Shape2DCollection::loadFromProject() not implemented for Qt >= 5");
+  throw std::runtime_error("Shape2DCollection::loadFromProject() not implemented for Qt >= 5");
 #endif
 }
 
@@ -813,10 +817,8 @@ std::string Shape2DCollection::saveToProject() const {
   }
   return tsv.outputLines();
 #else
-  throw std::runtime_error(
-      "Shape2DCollection::saveToProject() not implemented for Qt >= 5");
+  throw std::runtime_error("Shape2DCollection::saveToProject() not implemented for Qt >= 5");
 #endif
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

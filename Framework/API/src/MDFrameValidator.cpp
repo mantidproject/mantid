@@ -7,17 +7,17 @@
 #include "MantidAPI/MDFrameValidator.h"
 #include "MantidKernel/IValidator.h"
 #include <memory>
+#include <utility>
 
 using Mantid::Kernel::IValidator_sptr;
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  *
  * @param frameName :: The name of the frame that the workspace must have.
  */
-MDFrameValidator::MDFrameValidator(const std::string &frameName) : m_frameID{frameName} {}
+MDFrameValidator::MDFrameValidator(std::string frameName) : m_frameID{std::move(frameName)} {}
 
 /**
  * Clone the current state
@@ -40,5 +40,4 @@ std::string MDFrameValidator::checkValidity(const IMDWorkspace_sptr &workspace) 
   return "";
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

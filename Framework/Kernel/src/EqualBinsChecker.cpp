@@ -17,8 +17,7 @@ namespace {
 Mantid::Kernel::Logger g_log("EqualBinsChecker");
 } // namespace
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  * Constructor, setting data and thresholds for errors and warnings.
@@ -128,5 +127,4 @@ double EqualBinsChecker::getDifference(const size_t bin, const double dx) const 
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

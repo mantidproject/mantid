@@ -15,8 +15,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CentroidPeaksMD2)
@@ -70,7 +69,6 @@ template <typename MDE, size_t nd> void CentroidPeaksMD2::integrate(typename MDE
   /// Radius to use around peaks
   double PeakRadius = getProperty("PeakRadius");
 
-  // cppcheck-suppress syntaxError
     PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i = 0; i < int(peakWS->getNumberPeaks()); ++i) {
       // Get a direct ref to that peak.
@@ -156,5 +154,4 @@ void CentroidPeaksMD2::exec() {
   CALL_MDEVENT_FUNCTION3(this->integrate, inWS);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

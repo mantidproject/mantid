@@ -54,19 +54,19 @@ GNU_DIAG_ON("cast-qual")
 
 #endif // ENABLE_OPENCASCADE
 
-namespace Mantid {
-namespace Geometry {
-namespace detail {
+namespace Mantid::Geometry::detail {
 namespace {
 /// static logger
 Kernel::Logger g_log("GeometryTriangulator");
 } // namespace
 
 GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
-    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj) {
+    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj)
 #ifdef ENABLE_OPENCASCADE
-  m_objSurface = nullptr;
+      ,
+      m_objSurface(nullptr)
 #endif
+{
 }
 
 GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> obj)
@@ -245,6 +245,4 @@ void GeometryTriangulator::setGeometryCache(size_t nPoints, size_t nFaces, std::
   m_faces = std::move(faces);
   m_isTriangulated = true;
 }
-} // namespace detail
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry::detail

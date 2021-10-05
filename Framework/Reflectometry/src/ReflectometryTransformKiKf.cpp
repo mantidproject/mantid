@@ -8,8 +8,7 @@
 
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Reflectometry {
+namespace Mantid::Reflectometry {
 
 /*
   Constructor
@@ -22,14 +21,14 @@ namespace Reflectometry {
   @param numberOfBinsQz: Number of bins in the qz axis
 */
 ReflectometryTransformKiKf::ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax,
-                                                       double incidentTheta, int numberOfBinsQx, int numberOfBinsQz)
+                                                       double incidentTheta, int version, int numberOfBinsQx,
+                                                       int numberOfBinsQz)
     : ReflectometryTransform("Ki", "ki", kiMin, kiMax, "Kf", "kf", kfMin, kfMax, numberOfBinsQx, numberOfBinsQz,
-                             new CalculateReflectometryKiKf()) {
+                             new CalculateReflectometryKiKf(version)) {
   if (incidentTheta < 0 || incidentTheta > 90) {
     throw std::out_of_range("incident theta angle must be > 0 and < 90");
   }
   m_calculator->setThetaIncident(incidentTheta);
 }
 
-} // namespace Reflectometry
-} // namespace Mantid
+} // namespace Mantid::Reflectometry

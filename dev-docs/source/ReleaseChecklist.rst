@@ -112,7 +112,7 @@ Monday, 3 weeks
 
 *  Ensure that Manual testing begins. An overview of the Manual testing to be done is
    found :ref:`here <Testing>`. Generate the Manual testing issues by following the instructions
-   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate>`__.
+   `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate>`__.
 *  Over the next week or so, read through the Manual testing issues and ensure that any
    serious problems are raised as an issue and marked against the relevant milestone.
 
@@ -122,7 +122,7 @@ Friday, 1 day
 *  It is likely that many changes have been made over the beta test period, therefore
    we must do some more Manual testing to ensure everything still works. This stage is
    called Smoke testing. Generate the Smoke testing issues by following the instructions
-   `here <https://github.com/mantidproject/documents/tree/master/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
+   `here <https://github.com/mantidproject/documents/tree/main/Project-Management/Tools/RoadmapUpdate/SmokeTesting>`__.
 *  Liase with the Technical Release Manager to announce the creation of the Smoke testing
    issues and Release Candidates in the *\#general* slack channel.
 
@@ -270,7 +270,7 @@ Monday, 3 weeks
    pull requests not targeted for release out of the milestone, and then change the base branch
    of the remaining pull requests to ``release-next``. You can use the following script
    to update the base branches of these pull requests `update-pr-base-branch.py
-   <https://github.com/mantidproject/mantid/blob/master/tools/scripts/update-pr-base-branch.py>`__
+   <https://github.com/mantidproject/mantid/blob/main/tools/scripts/update-pr-base-branch.py>`__
    A quick example to show how the arguments should be provided to this script is seen below:
 
 .. code-block:: bash
@@ -284,13 +284,13 @@ Monday, 3 weeks
 
   .. code
 
-  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/master-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
 
 **Create Release Notes Skeleton**
 
 *  Create a skeleton set of release notes on master for the next version using the
    `python helper tool
-   <https://github.com/mantidproject/mantid/blob/master/tools/release_generator/release.py>`_
+   <https://github.com/mantidproject/mantid/blob/main/tools/release_generator/release.py>`_
    and open a pull request to put them on ``master``. Make sure the
    ``docs/source/release/index.rst`` file has a link to the new release docs.
 
@@ -321,7 +321,7 @@ We are now ready to create the release candidates ready for Smoke testing.
    <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
    for MSlice.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
-   <https://github.com/mantidproject/mantid/blob/master/buildconfig/CMake/VersionNumber.cmake>`__
+   <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
 *  Ask a gatekeeper to: merge the ``release-next`` branch back to ``master`` locally, and then comment
    out the ``VERSION_PATCH`` on the ``master`` branch. They should then commit and push these changes

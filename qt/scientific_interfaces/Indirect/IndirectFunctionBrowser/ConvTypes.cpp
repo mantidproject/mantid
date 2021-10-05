@@ -8,10 +8,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
-namespace ConvTypes {
+namespace MantidQt::CustomInterfaces::IDA::ConvTypes {
 
 using namespace Mantid::API;
 
@@ -191,7 +188,4 @@ void applyToTemp(TempCorrectionType tempCorrectionType, const std::function<void
                       TempSubType::g_typeMap[tempCorrectionType].blocks.back(), paramFun);
 }
 
-} // namespace ConvTypes
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA::ConvTypes

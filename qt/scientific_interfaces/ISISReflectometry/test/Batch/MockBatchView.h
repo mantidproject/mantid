@@ -18,14 +18,17 @@ namespace ISISReflectometry {
 
 class MockBatchView : public IBatchView {
 public:
-  MOCK_METHOD1(subscribe, void(BatchViewSubscriber *));
   MOCK_CONST_METHOD0(runs, IRunsView *());
   MOCK_CONST_METHOD0(eventHandling, IEventView *());
   MOCK_CONST_METHOD0(save, ISaveView *());
   MOCK_CONST_METHOD0(experiment, IExperimentView *());
   MOCK_CONST_METHOD0(instrument, IInstrumentView *());
+  MOCK_CONST_METHOD0(preview, IPreviewView *());
+
+  // IJobRunner overrides
+  MOCK_METHOD1(subscribe, void(JobRunnerSubscriber *));
   MOCK_METHOD0(clearAlgorithmQueue, void());
-  MOCK_METHOD1(setAlgorithmQueue, void(std::deque<API::IConfiguredAlgorithm_sptr>));
+  MOCK_METHOD1(setAlgorithmQueue, void(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>));
   MOCK_METHOD0(executeAlgorithmQueue, void());
   MOCK_METHOD0(cancelAlgorithmQueue, void());
 };

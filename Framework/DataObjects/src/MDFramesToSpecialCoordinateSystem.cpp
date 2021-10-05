@@ -9,8 +9,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * Get the Special Coordinate System based on the MDFrame information.
@@ -99,5 +98,4 @@ bool MDFramesToSpecialCoordinateSystem::isUnknownFrame(
   }
   return isUnknown;
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

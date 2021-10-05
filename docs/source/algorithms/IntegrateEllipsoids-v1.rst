@@ -215,6 +215,19 @@ trajectories inside an integration volume, the peak must be rejected.
 If there are masked pixel trajectories inside the background volume, the background
 events are scaled by estimating the volume of the ellipsoid on the detector.
 
+ShareBackground option
+######################
+
+With this option enabled, satellite peaks will share the integrated background
+intensity and volume of its corresponding Bragg peak. The integrated intensity
+of satellite peaks will still use the radii set with **SatelliteRegionRadius**
+and **SatelitePeakSize** though its background intensity will be borrowed
+from its Bragg peak.
+
+In cases where a Bragg peak could not be found for a satellite peak, then the background
+for the satellite peak is determined as normal using the values of **SatelliteBackgroundInnerSize**
+and **SatelliteBackgroundOuterSize** for background subtraction.
+
 Sigma from the background
 #########################
 The sigma from the background could be too small because the background contains

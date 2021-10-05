@@ -22,8 +22,7 @@
 #include <memory>
 #include <utility>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ChangeTimeZero)
@@ -130,7 +129,7 @@ double ChangeTimeZero::getTimeShift(const API::MatrixWorkspace_sptr &ws) const {
   std::string timeOffset = getProperty("AbsoluteTimeOffset");
   if (isAbsoluteTimeShift(timeOffset)) {
     DateAndTime desiredTime(timeOffset);
-    DateAndTime originalTime(getStartTimeFromWorkspace(std::move(ws)));
+    DateAndTime originalTime(getStartTimeFromWorkspace(ws));
     timeShift = DateAndTime::secondsFromDuration(desiredTime - originalTime);
   } else {
     timeShift = getProperty("RelativeTimeOffset");
@@ -333,5 +332,4 @@ bool ChangeTimeZero::isAbsoluteTimeShift(const std::string &offset) const {
   return offset != m_defaultAbsoluteTimeShift && checkForDateTime(offset);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

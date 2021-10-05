@@ -33,31 +33,31 @@ Different input properties can be specified depending on the value of **ProcessA
 +------------------+---------------------------------+--------------------------------------------+
 | ProcessAs        | Input Workspace Properties      | Other Input Properties                     |
 +==================+=================================+============================================+
-| BeamWithCadmium  |                                 |                                            |
+| BeamWithCadmium  |                                 | * NormaliseBy                              |
 +------------------+---------------------------------+--------------------------------------------+
-| EmptyBeam        | * CadmiumTransmissionWorkspace  |                                            |
+| EmptyBeam        | * CadmiumTransmissionWorkspace  | * NormaliseBy                              |
 |                  |                                 |                                            |
 +------------------+---------------------------------+--------------------------------------------+
-| Transmission     | * CadmiumTransmissionWorkspace  |                                            |
+| Transmission     | * CadmiumTransmissionWorkspace  | * NormaliseBy                              |
 |                  | * **EmptyBeamWorkspace**        |                                            |
 +------------------+---------------------------------+--------------------------------------------+
-| Cadmium          |                                 |                                            |
+| Cadmium          |                                 | * NormaliseBy                              |
 +------------------+---------------------------------+--------------------------------------------+
-| Empty            |                                 |                                            |
+| Empty            |                                 | * NormaliseBy                              |
 +------------------+---------------------------------+--------------------------------------------+
-| Quartz           | * CadmiumWorkspace              | * OutputTreatment                          |
-|                  | * EmptyContainerWorkspace       |                                            |
+| Quartz           | * CadmiumWorkspace              | * NormaliseBy                              |
+|                  | * EmptyContainerWorkspace       | * OutputTreatment                          |
 |                  | * **Transmission**              |                                            |
 +------------------+---------------------------------+--------------------------------------------+
-| Vanadium         | * CadmiumWorkspace              | * SampleGeometry                           |
-|                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
-|                  | * Transmission                  | * OutputTreatment                          |
-|                  | * QuartzWorkspace               |                                            |
+| Vanadium         | * CadmiumWorkspace              | * NormaliseBy                              |
+|                  | * EmptyContainerWorkspace       | * SampleGeometry                           |
+|                  | * Transmission                  | * **SampleAndEnvironmentProperties**       |
+|                  | * QuartzWorkspace               | * OutputTreatment                          |
 +------------------+---------------------------------+--------------------------------------------+
 | Sample           | * CadmiumWorkspace              | * SampleGeometry                           |
 |                  | * EmptyContainerWorkspace       | * **SampleAndEnvironmentProperties**       |
 |                  | * Transmission                  | * OutputTreatment                          |
-|                  | * QuartzWorkspace               |                                            |
+|                  | * QuartzWorkspace               | * MeasurementTechnique                     |
 +------------------+---------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -65,6 +65,18 @@ For example, if processing as sample, if a empty container and cadmium absorber 
 The rare exceptions are when processing as transmission, when beam input workspace is mandatory, and to calculate polarising efficiencies,
 where input from transmission is indispensable. Transmission however can be provided also as a string containing floating point value of desired tranmission, that needs
 to be in the range (0, 1].
+
+NormaliseBy
+-----------
+
+This property allows to choose how the data is going to be normalised. The choices are: `Monitor` (Monitor 1) and `Time` (experiment duration saved in the NeXus file).
+
+MeasurementTechnique
+--------------------
+
+This property allows to distinguish between reducing powder data from single crystal measurement. The options are: `Powder` and `SingleCrystal`. In the case of single crystal
+data, one bank position is processed at a time, and all input files are concatenated into a single workspace with vertical axis being 2theta positions of detectors,
+and the horizontal axis containing omega scan steps.
 
 OutputTreatment
 ---------------
@@ -221,7 +233,7 @@ This example below performs a complete reduction for D7 data.
 
 .. include:: ../usagedata-note.txt
 
-**Example - full treatment of a sample**
+**Example - full treatment of a powder sample**
 
 .. testsetup:: ExPolDiffILLReduction
 
@@ -345,6 +357,105 @@ Output:
 .. testcleanup:: ExPolDiffILLReduction
 
     mtd.clear()
+
+**Example - full treatment of a single crystal sample**
+
+.. code-block:: python
+
+    vanadium_mass = 8.535
+    sample_formula_mass = 137.33 * 2.0 + 54.93 + 127.6 + 15.999 * 6.0
+    sample_mass = 7.83
+    vanadium_dictionary = {'SampleMass': vanadium_mass, 'FormulaUnits': 1, 'FormulaUnitMass': 50.942}
+    sample_dictionary = {'SampleMass': sample_mass, 'FormulaUnits': 1, 'FormulaUnitMass': sample_formula_mass,
+                             'KiXAngle': 45.0, 'OmegaShift': 52.5}
+    calibration_file = "D7_YIG_calibration.xml"
+
+    # Empty container for quartz and vanadium
+    PolDiffILLReduction(
+        Run='450747:450748',
+            OutputWorkspace='container_ws',
+            ProcessAs='Empty'
+   )
+
+   # Empty container for bank position 1 (bt1), tth=79.5
+   PolDiffILLReduction(
+       Run='397406:397407',
+       OutputTreatment='AveragePol',
+       OutputWorkspace='container_bt1_ws',
+       ProcessAs='Empty'
+   )
+   # empty container for bt2, tth=75
+   PolDiffILLReduction(
+       Run='397397:397398',
+       OutputTreatment='AveragePol',
+       OutputWorkspace='container_bt2_ws',
+       ProcessAs='Empty'
+   )
+
+   PolDiffILLReduction(
+       Run='450769:450770',
+       OutputWorkspace='pol_corrections',
+       EmptyContainerWorkspace='container_ws',
+       Transmission='0.9',
+       OutputTreatment='AveragePol',
+       ProcessAs='Quartz'
+   )
+
+   PolDiffILLReduction(
+       Run='450835:450836',
+       OutputWorkspace='vanadium_ws',
+       EmptyContainerWorkspace='container_ws',
+       Transmission='0.89',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Sum',
+       SampleGeometry='None',
+       SelfAttenuationMethod='Transmission',
+       SampleAndEnvironmentProperties=vanadium_dictionary,
+       AbsoluteNormalisation=True,
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Vanadium'
+   )
+
+   # bank position 1, tth=79.5
+   PolDiffILLReduction(
+       Run='399451:399452',
+       OutputWorkspace='bt1',
+       EmptyContainerWorkspace='container_bt1_ws',
+       Transmission='0.95',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Individual',
+       SampleGeometry='None',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       MeasurementTechnique='SingleCrystal',
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Sample'
+   )
+   # bank position 2, tth=75
+   PolDiffILLReduction(
+       Run='400287:400288',
+       OutputWorkspace='bt2',
+       EmptyContainerWorkspace='container_bt2_ws',
+       Transmission='0.95',
+       QuartzWorkspace='pol_corrections',
+       OutputTreatment='Individual',
+       SampleGeometry='None',
+       SampleAndEnvironmentProperties=sample_dictionary,
+       MeasurementTechnique='SingleCrystal',
+       InstrumentCalibration=calibration_file,
+       ProcessAs='Sample'
+   )
+   appended_ws = 'appended_ws'
+   AppendSpectra(InputWorkspace1='bt1', InputWorkspace2='bt2',
+   OutputWorkspace=appended_ws)
+   # names need to be re-set, AppendSpectra just concatenates them
+   possible_polarisations = ['ZPO_ON', 'ZPO_OFF', 'XPO_ON', 'XPO_OFF', 'YPO_ON', 'YPO_OFF']
+   polarisation = ""
+   for entry in mtd[appended_ws]:
+       entry_name = entry.name()
+       for polarisation in possible_polarisations:
+           if polarisation in entry_name:
+	       break
+       RenameWorkspace(InputWorkspace=entry, OutputWorkspace="{}_{}".format(appended_ws, polarisation))
 
 .. categories::
 

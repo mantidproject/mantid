@@ -9,8 +9,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/System.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor with spectrum number
  * @param specNo :: spectrum # of the spectrum
@@ -212,5 +211,4 @@ void ISpectrum::copyDataInto(SpectrumTester & /*unused*/) const {
   throw std::runtime_error("Incompatible types in ISpectrum::copyDataFrom");
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

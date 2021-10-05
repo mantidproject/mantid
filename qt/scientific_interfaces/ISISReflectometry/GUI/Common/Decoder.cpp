@@ -25,10 +25,9 @@
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QApplication>
+#include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui, const IMainWindowView *view) {
   auto mwv = dynamic_cast<const QtMainWindowView *>(view);
@@ -148,7 +147,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
                          const QMap<QString, QVariant> &map, boost::optional<int> precision,
                          QtCatalogSearcher *searcher) {
-  decodeRunsTable(gui->m_tableView, redJobs, presenter, map[QString("runsTable")].toMap(), precision);
+  decodeRunsTable(gui->m_tableView, redJobs, presenter, map[QString("runsTable")].toMap(), std::move(precision));
   gui->m_ui.comboSearchInstrument->setCurrentIndex(map[QString("comboSearchInstrument")].toInt());
   gui->m_ui.textSearch->setText(map[QString("textSearch")].toString());
   gui->m_ui.textCycle->setText(map[QString("textCycle")].toString());
@@ -161,7 +160,7 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
 }
 
 namespace HIDDEN_LOCAL {
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
@@ -176,7 +175,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, b
 } // namespace HIDDEN_LOCAL
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
-                                           boost::optional<int> precision) {
+                                           const boost::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
   auto groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
@@ -417,6 +416,4 @@ void Decoder::decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> 
   gui->m_ui.logValueTypeEdit->setText(map[QString("logValueTypeEdit")].toString());
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

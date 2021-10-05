@@ -10,8 +10,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExponentialMD)
@@ -42,5 +41,4 @@ void ExponentialMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 /// ExponentialMD::Run the algorithm with a MDHistoWorkspace
 void ExponentialMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) { out->exp(); }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -12,8 +12,7 @@
 
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
                                  std::shared_ptr<std::vector<uint32_t>> event_id,
@@ -105,21 +104,20 @@ void ProcessBankData::run() { // override {
 
   // Default pulse time (if none are found)
   const bool pulsetimesincreasing =
-      std::is_sorted(thisBankPulseTimes->pulseTimes, thisBankPulseTimes->pulseTimes + thisBankPulseTimes->numPulses);
+      std::is_sorted(thisBankPulseTimes->pulseTimes.cbegin(), thisBankPulseTimes->pulseTimes.cend());
   if (!std::is_sorted(event_index->cbegin(), event_index->cend()))
     throw std::runtime_error("Event index is not sorted");
 
   // And there are this many pulses
-  const auto NUM_PULSES = thisBankPulseTimes->numPulses;
+  const auto NUM_PULSES = thisBankPulseTimes->pulseTimes.size();
   prog->report(entry_name + ": filling events");
 
   // Will we need to compress?
   const bool compress = (alg->compressTolerance >= 0);
 
-  // Which detector IDs were touched? - only matters if compress is on
+  // Which detector IDs were touched?
   std::vector<bool> usedDetIds;
-  if (compress)
-    usedDetIds.assign(m_max_id - m_min_id + 1, false);
+  usedDetIds.assign(m_max_id - m_min_id + 1, false);
 
   const double TOF_MIN = alg->filter_tof_min;
   const double TOF_MAX = alg->filter_tof_max;
@@ -190,10 +188,8 @@ void ProcessBankData::run() { // override {
           } else
             badTofs++;
 
-          // Track all the touched wi (only necessary when compressing events,
-          // for thread safety)
-          if (compress)
-            usedDetIds[detId - m_min_id] = true;
+          // Track all the touched wi
+          usedDetIds[detId - m_min_id] = true;
         } // valid time-of-flight
 
       } // valid detector IDs
@@ -210,11 +206,12 @@ void ProcessBankData::run() { // override {
 
   //------------ Compress Events (or set sort order) ------------------
   // Do it on all the detector IDs we touched
-  if (compress) {
-    for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
-      if (usedDetIds[pixID - m_min_id]) {
-        // Find the the workspace index corresponding to that pixel ID
-        size_t wi = getWorkspaceIndexFromPixelID(pixID);
+  const size_t numEventLists = outputWS.getNumberHistograms();
+  for (detid_t pixID = m_min_id; pixID <= m_max_id; ++pixID) {
+    if (usedDetIds[pixID - m_min_id]) {
+      // Find the the workspace index corresponding to that pixel ID
+      size_t wi = getWorkspaceIndexFromPixelID(pixID);
+      if (wi < numEventLists) {
         auto &el = outputWS.getSpectrum(wi);
         if (compress)
           el.compressEvents(alg->compressTolerance, &el);
@@ -286,5 +283,4 @@ size_t ProcessBankData::getWorkspaceIndexFromPixelID(const detid_t pixID) {
   }
   return pixelID_to_wi_vector[offset_pixID];
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

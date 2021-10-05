@@ -10,8 +10,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/LogFilter.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register with the algorithm factory
 DECLARE_ALGORITHM(NormaliseByCurrent)
@@ -130,5 +129,4 @@ void NormaliseByCurrent::exec() {
   outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

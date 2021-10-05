@@ -41,13 +41,24 @@ void setDataSearchDirs(ConfigServiceImpl &self, const object &paths) {
 }
 
 /// Forward call from __getitem__ to getString with use_cache_true
-std::string getStringUsingCache(ConfigServiceImpl &self, const std::string &key) { return self.getString(key, true); }
+std::string getStringUsingCache(ConfigServiceImpl const *const self, const std::string &key) {
+  return self->getString(key, true);
+}
 
-const InstrumentInfo &getInstrument(ConfigServiceImpl &self, const object &name = object()) {
+const InstrumentInfo &getInstrument(ConfigServiceImpl const *const self, const object &name = object()) {
   if (name.is_none())
-    return self.getInstrument();
+    return self->getInstrument();
   else
-    return self.getInstrument(ExtractStdString(name)());
+    return self->getInstrument(ExtractStdString(name)());
+}
+
+/// duck typing emulating dict.get method
+std::string getStringUsingCacheElseDefault(ConfigServiceImpl const *const self, const std::string &key,
+                                           const std::string &defaultValue) {
+  if (self->hasProperty(key))
+    return self->getString(key, true);
+  else
+    return defaultValue;
 }
 
 GNU_DIAG_OFF("unused-local-typedef")
@@ -134,6 +145,12 @@ void export_ConfigService() {
       .def("keys", &ConfigServiceImpl::keys, arg("self"))
 
       // Treat this as a dictionary
+      .def("get", &getStringUsingCache, (arg("self"), arg("key")),
+           "get the string value of a property; return empty string value if the property "
+           "is not found in the configuration")
+      .def("get", &getStringUsingCacheElseDefault, (arg("self"), arg("key")), arg("default"),
+           "get the string value of a property; return a default string value if the property "
+           "is not found in the configuration")
       .def("__getitem__", &getStringUsingCache, (arg("self"), arg("key")))
       .def("__setitem__", &ConfigServiceImpl::setString, (arg("self"), arg("key"), arg("value")))
       .def("__contains__", &ConfigServiceImpl::hasProperty, (arg("self"), arg("key")))

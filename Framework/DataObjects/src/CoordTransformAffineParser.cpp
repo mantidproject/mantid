@@ -13,8 +13,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 /// Constructor
 CoordTransformAffineParser::CoordTransformAffineParser() {}
 
@@ -72,5 +71,4 @@ Set the successor parser.
 void CoordTransformAffineParser::setSuccessor(CoordTransformAffineParser *other) {
   m_successor = SuccessorType_sptr(other);
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

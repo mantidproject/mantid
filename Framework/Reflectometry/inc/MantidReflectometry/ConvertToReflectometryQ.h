@@ -26,7 +26,7 @@ public:
            "reflectometry workspaces";
   }
 
-  int version() const override;
+  virtual int version() const override;
   const std::vector<std::string> seeAlso() const override { return {"ConvertUnits", "ReflectometryMomentumTransfer"}; }
   const std::string category() const override;
 

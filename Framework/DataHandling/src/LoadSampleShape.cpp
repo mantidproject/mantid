@@ -21,8 +21,7 @@
 
 #include "MantidGeometry/Instrument.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 namespace {
 double DegreesToRadians(double angle) { return angle * M_PI / 180; }
@@ -115,5 +114,4 @@ void LoadSampleShape::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

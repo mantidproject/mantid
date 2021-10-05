@@ -32,9 +32,9 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -478,7 +478,7 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  * @param pws
  * @param pws_original
  */
-void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, IPeaksWorkspace_sptr pws_original) {
+void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWorkspace_sptr &pws_original) {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
@@ -730,7 +730,7 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
  *        input peak workspace
  *
  */
-void SCDCalibratePanels2::parseLatticeConstant(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::parseLatticeConstant(const IPeaksWorkspace_sptr &pws) {
   m_a = getProperty("a");
   m_b = getProperty("b");
   m_c = getProperty("c");
@@ -758,7 +758,7 @@ void SCDCalibratePanels2::parseLatticeConstant(IPeaksWorkspace_sptr pws) {
  *
  * @param pws
  */
-void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::updateUBMatrix(const IPeaksWorkspace_sptr &pws) {
   auto calcUB_alg = createChildAlgorithm("CalculateUMatrix", -1, -1, false);
   calcUB_alg->setLogging(LOGCHILDALG);
   calcUB_alg->setProperty("PeaksWorkspace", pws);
@@ -785,7 +785,7 @@ void SCDCalibratePanels2::updateUBMatrix(IPeaksWorkspace_sptr pws) {
  * @param pws
  * @return IPeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPeaksWorkspace_sptr pws) {
+IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(const Mantid::API::IPeaksWorkspace_sptr &pws) {
   auto fltpk_alg = createChildAlgorithm("FilterPeaks");
   fltpk_alg->setLogging(LOGCHILDALG);
   fltpk_alg->setProperty("InputWorkspace", pws);
@@ -806,7 +806,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(Mantid::API::IPea
  *
  * @param pws
  */
-std::vector<double> SCDCalibratePanels2::captureTOF(Mantid::API::IPeaksWorkspace_sptr pws) {
+std::vector<double> SCDCalibratePanels2::captureTOF(const Mantid::API::IPeaksWorkspace_sptr &pws) {
   std::vector<double> tofs;
 
   for (int i = 0; i < pws->getNumberPeaks(); ++i) {
@@ -821,7 +821,7 @@ std::vector<double> SCDCalibratePanels2::captureTOF(Mantid::API::IPeaksWorkspace
  *
  * @param pws
  */
-void SCDCalibratePanels2::getBankNames(IPeaksWorkspace_sptr pws) {
+void SCDCalibratePanels2::getBankNames(const IPeaksWorkspace_sptr &pws) {
   auto peaksWorkspace = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(pws);
   if (!peaksWorkspace)
     throw std::invalid_argument("a PeaksWorkspace is required to retrieve bank names");
@@ -841,8 +841,9 @@ void SCDCalibratePanels2::getBankNames(IPeaksWorkspace_sptr pws) {
  * @param outputwsn
  * @return DataObjects::PeaksWorkspace_sptr
  */
-IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(IPeaksWorkspace_sptr pws, const std::string bankname,
-                                                                const std::string outputwsn) {
+IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(const IPeaksWorkspace_sptr &pws,
+                                                                const std::string &bankname,
+                                                                const std::string &outputwsn) {
   auto fltpk_alg = createChildAlgorithm("FilterPeaks");
   fltpk_alg->setLogging(LOGCHILDALG);
   fltpk_alg->setProperty("InputWorkspace", pws);
@@ -863,7 +864,7 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(IPeaksWorkspace_
  * @param pws
  * @return MatrixWorkspace_sptr
  */
-MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWorkspace_sptr pws) {
+MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(const IPeaksWorkspace_sptr &pws) {
   int npeaks = pws->getNumberPeaks();
 
   // prepare workspace to store qSample as Histogram1D
@@ -930,7 +931,7 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(IPeaksWor
  * @param pws
  */
 void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz,
-                                          std::string cmptName, IPeaksWorkspace_sptr &pws) {
+                                          const std::string &cmptName, IPeaksWorkspace_sptr &pws) {
   // translation
   auto mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
   mv_alg->setLogging(LOGCHILDALG);
@@ -1342,7 +1343,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
  * @param pws_original
  */
 void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
-                                       Mantid::API::IPeaksWorkspace_sptr pws_original) {
+                                       const Mantid::API::IPeaksWorkspace_sptr &pws_original) {
   g_log.notice() << "START of profiling all banks along six degree of freedom\n";
 
   // control option
@@ -1354,10 +1355,10 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
 
   // Use OPENMP to speed up the profiling
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
-  for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
+  for (int bankIndex = 0; bankIndex < static_cast<int>(m_BankNames.size()); ++bankIndex) {
     PARALLEL_START_INTERUPT_REGION
     // prepare local copies to work with
-    const std::string bankname = *std::next(m_BankNames.begin(), i);
+    const std::string bankname = *std::next(m_BankNames.begin(), bankIndex);
     const std::string pwsBankiName = "_pws_" + bankname;
 
     //-- step 0: extract peaks that lies on the current bank
@@ -1621,5 +1622,4 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
                  << "END of profiling objective func along L1 and T0\n";
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

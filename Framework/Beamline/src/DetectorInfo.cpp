@@ -10,8 +10,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace Beamline {
+namespace Mantid::Beamline {
 
 DetectorInfo::DetectorInfo(std::vector<Eigen::Vector3d> positions,
                            std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>> rotations)
@@ -220,5 +219,4 @@ void DetectorInfo::checkSizes(const DetectorInfo &other) const {
   // TODO If we make masking time-independent we need to check masking here.
 }
 
-} // namespace Beamline
-} // namespace Mantid
+} // namespace Mantid::Beamline

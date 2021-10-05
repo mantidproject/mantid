@@ -24,8 +24,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid {
-namespace LiveData {
+namespace Mantid::LiveData {
 
 namespace {
 
@@ -127,34 +126,41 @@ Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_s
       g_log.error() << "Something really wrong happened when adding " << inputName << " to ADS. "
                     << this->getPropertyValue("OutputWorkspace") << '\n';
 
-    // What is the name of the input workspace property
-    if (alg->existsProperty("InputWorkspace")) {
+    // What is the name of the input workspace property and is it InOut
+    std::string algoInputWSName("InputWorkspace"), algoOutputWSName("OutputWorkspace");
+    bool inOutProperty{false};
+    if (alg->existsProperty(algoInputWSName)) {
       g_log.debug() << "Using InputWorkspace as the input workspace property name.\n";
-      alg->setPropertyValue("InputWorkspace", inputName);
+      alg->setPropertyValue(algoInputWSName, inputName);
     } else {
-      // Look for the first Workspace property that is marked INPUT.
-      std::vector<Property *> proplist = alg->getProperties();
+      // Look for the first Workspace property that is marked INPUT or INOUT.
+      const auto &proplist = alg->getProperties();
       g_log.debug() << "Processing algorithm (" << alg->name() << ") has " << proplist.size() << " properties.\n";
-      bool inputPropertyWorkspaceFound = false;
       for (auto prop : proplist) {
-        if ((prop->direction() == 0) && (!inputPropertyWorkspaceFound)) {
+        if ((prop->direction() == Direction::Input || prop->direction() == Direction::InOut)) {
           if (boost::ends_with(prop->type(), "Workspace")) {
             g_log.information() << "Using " << prop->name() << " as the input property.\n";
-            alg->setPropertyValue(prop->name(), inputName);
-            inputPropertyWorkspaceFound = true;
+            algoInputWSName = prop->name();
+            alg->setPropertyValue(algoInputWSName, inputName);
+            if (prop->direction() == Direction::InOut) {
+              inOutProperty = true;
+              algoOutputWSName = algoInputWSName;
+            }
+            break;
           }
         }
       }
     }
 
-    alg->setPropertyValue("OutputWorkspace", outputName);
+    if (!inOutProperty)
+      alg->setPropertyValue("OutputWorkspace", outputName);
     alg->setChild(true);
     alg->execute();
     if (!alg->isExecuted())
       throw std::runtime_error("Error processing the workspace using " + alg->name() + ". See log for details.");
 
     // Retrieve the output.
-    Property *prop = alg->getProperty("OutputWorkspace");
+    Property *prop = alg->getProperty(algoOutputWSName);
     auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (!wsProp)
       throw std::runtime_error("The " + alg->name() +
@@ -589,5 +595,4 @@ void LoadLiveData::exec() {
   }
 }
 
-} // namespace LiveData
-} // namespace Mantid
+} // namespace Mantid::LiveData

@@ -6,9 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "GUI/Common/IJobRunner.h"
 #include "GUI/Event/QtEventView.h"
 #include "GUI/Experiment/QtExperimentView.h"
 #include "GUI/Instrument/QtInstrumentView.h"
+#include "GUI/Preview/QtPreviewView.h"
 #include "GUI/Runs/QtRunsView.h"
 #include "GUI/Save/QtSaveView.h"
 #include "IBatchView.h"
@@ -18,6 +20,7 @@
 
 #include <QCloseEvent>
 #include <memory>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,13 +30,17 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtBatchView : public QWidget, public IBatch
   Q_OBJECT
 public:
   explicit QtBatchView(QWidget *parent);
-  void subscribe(BatchViewSubscriber *notifyee) override;
 
+  // IBatchView overrides
   IRunsView *runs() const override;
   IEventView *eventHandling() const override;
   ISaveView *save() const override;
   IExperimentView *experiment() const override;
   IInstrumentView *instrument() const override;
+  IPreviewView *preview() const override;
+
+  // IJobRunner overrides
+  void subscribe(JobRunnerSubscriber *notifyee) override;
   void clearAlgorithmQueue() override;
   void setAlgorithmQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms) override;
   void executeAlgorithmQueue() override;
@@ -56,12 +63,13 @@ private:
   std::unique_ptr<QtSaveView> createSaveTab();
 
   Ui::BatchWidget m_ui;
-  BatchViewSubscriber *m_notifyee;
+  std::vector<JobRunnerSubscriber *> m_notifyees;
   std::unique_ptr<QtRunsView> m_runs;
   std::unique_ptr<QtEventView> m_eventHandling;
   std::unique_ptr<QtSaveView> m_save;
   std::unique_ptr<QtExperimentView> m_experiment;
   std::unique_ptr<QtInstrumentView> m_instrument;
+  std::unique_ptr<QtPreviewView> m_preview;
   API::BatchAlgorithmRunner m_batchAlgoRunner;
 
   friend class Encoder;

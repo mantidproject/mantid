@@ -30,6 +30,15 @@ public:
   IBeamProfile::Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
                                   const Geometry::BoundingBox &bounds) const override;
   Geometry::BoundingBox defineActiveRegion(const Geometry::BoundingBox &) const override;
+  /// Returns the min point of the profile
+  inline Kernel::V3D minPoint() const { return Kernel::V3D{m_min[0], m_min[1], m_min[2]}; }
+  /// Returns the max point of the profile
+  inline Kernel::V3D maxPoint() const {
+    auto maxPt = minPoint();
+    maxPt[m_horIdx] += m_width;
+    maxPt[m_upIdx] += m_height;
+    return maxPt;
+  }
 
 private:
   const unsigned short m_upIdx;
@@ -37,7 +46,7 @@ private:
   const unsigned short m_horIdx;
   const double m_width;
   const double m_height;
-  std::array<double, 3> m_min;
+  /*std::array<double, 3>*/ Kernel::V3D m_min;
   Kernel::V3D m_beamDir;
 };
 

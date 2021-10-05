@@ -11,8 +11,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace API;
 using namespace NeXus;
@@ -24,7 +23,7 @@ constexpr bool MULTIPERIODSLOADED = true;
 } // namespace
 
 // Constructor
-MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string filename,
+MultiPeriodLoadMuonStrategy::MultiPeriodLoadMuonStrategy(Kernel::Logger &g_log, const std::string &filename,
                                                          LoadMuonNexusV2NexusHelper &nexusLoader,
                                                          API::WorkspaceGroup &workspace)
     : LoadMuonStrategy(g_log, filename, nexusLoader), m_workspaceGroup(workspace), m_detectors(getLoadedDetectors()) {}
@@ -89,8 +88,8 @@ Workspace_sptr MultiPeriodLoadMuonStrategy::loadDetectorGrouping() const {
  */
 void MultiPeriodLoadMuonStrategy::applyTimeZeroCorrection() {
   double timeZero = m_nexusLoader.loadTimeZeroFromNexusFile();
-  for (int i = 0; i < m_workspaceGroup.getNumberOfEntries(); ++i) {
-    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(i));
+  for (int wsIndex = 0; wsIndex < m_workspaceGroup.getNumberOfEntries(); ++wsIndex) {
+    auto workspace = std::dynamic_pointer_cast<Workspace2D>(m_workspaceGroup.getItem(wsIndex));
     auto numHistograms = workspace->getNumberHistograms();
     for (size_t i = 0; i < numHistograms; ++i) {
       auto &timeAxis = workspace->mutableX(i);
@@ -111,7 +110,7 @@ API::Workspace_sptr MultiPeriodLoadMuonStrategy::loadDeadTimeTable() const {
 
 /**
  * Gets time zero table from loaded time zeros
- * Assumes all peridos have same time zero
+ * Assumes all periods have same time zero
  * @returns :: Time zero table
  */
 Workspace_sptr MultiPeriodLoadMuonStrategy::getTimeZeroTable() {
@@ -130,5 +129,4 @@ std::vector<detid_t> MultiPeriodLoadMuonStrategy::getLoadedDetectors() {
   return getLoadedDetectorsFromWorkspace(*workspace);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

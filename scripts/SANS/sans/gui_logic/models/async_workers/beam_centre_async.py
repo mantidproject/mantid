@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Optional, Dict
 from mantid.py36compat import dataclass
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantid.kernel import Logger
-from mantidqt.utils.asynchronous import AsyncTaskFailure
+from mantidqt.utils.asynchronous import AsyncTaskFailure, AsyncTaskSuccess
 from sans.common.enums import DetectorType, FindDirectionEnum
 from sans.sans_batch import SANSCentreFinder
 from sans.state.AllStates import AllStates
@@ -42,6 +42,9 @@ class BeamCentreAsync(IQtAsync):
         super().__init__()
         self._parent_presenter = parent_presenter
         self._logger = Logger("CentreFinder")
+
+    def success_cb_slot(self, result: AsyncTaskSuccess) -> None:
+        self._parent_presenter.on_update_centre_values(result.output)
 
     def finished_cb_slot(self) -> None:
         self._parent_presenter.on_processing_finished_centre_finder()

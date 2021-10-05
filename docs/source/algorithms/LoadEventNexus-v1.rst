@@ -78,6 +78,10 @@ Veto pulses can be filtered out in a separate step using
 Data Loaded from Nexus File
 ###########################
 
+If `LoadAllLogs` is checked, all the logs in the Nexus files will be loaded directly in the sample logs as they are.
+The `LoadLogs` flag will be ignored.
+If only `LoadLogs` is checked, only a subset of the logs will be processed and loaded, in the manner described afterward.
+
 The nexus file must have ``/raw_data_1`` or ``/entry`` as its main group and
 that group be of type ``NXentry``. It also needs a group of type ``NXevent_data``.
 
@@ -178,8 +182,8 @@ Output:
 
 .. testcode:: ExLoadEventNexusWithFiltering
 
-   # Load SNS CNCS event dataset between 10 and 20 minutes
-   ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=600, FilterByTimeStop=1200)
+   # Load SNS CNCS event dataset between 1 and 2 minutes
+   ws = LoadEventNexus('CNCS_7860_event.nxs', FilterByTimeStart=60, FilterByTimeStop=120)
 
    print("The number of events: {}".format(ws.getNumberEvents()))
 
@@ -187,7 +191,7 @@ Output:
 
 .. testoutput:: ExLoadEventNexusWithFiltering
 
-   The number of events: 112266
+   The number of events: 29753
 
 
 .. categories::

@@ -53,7 +53,7 @@ private:
                             std::vector<double> &projection, std::stringstream &basisVector,
                             std::vector<size_t> &qDimensionIndices);
   inline void setQUnit(const std::vector<size_t> &qDimensionIndices,
-                       Mantid::DataObjects::MDHistoWorkspace_sptr outputMDHWS);
+                       const Mantid::DataObjects::MDHistoWorkspace_sptr &outputMDHWS);
 
   std::vector<coord_t> getValuesFromOtherDimensions(bool &skipNormalization, uint16_t expInfoIndex = 0) const;
 
@@ -80,7 +80,7 @@ private:
                               std::vector<coord_t> &posNew, std::vector<std::atomic<signal_t>> &signalArray,
                               const double &solidBkgd, std::vector<std::atomic<signal_t>> &bkgdSignalArray);
 
-  API::IMDWorkspace_sptr divideMD(API::IMDHistoWorkspace_sptr lhs, API::IMDHistoWorkspace_sptr rhs,
+  API::IMDWorkspace_sptr divideMD(const API::IMDHistoWorkspace_sptr &lhs, const API::IMDHistoWorkspace_sptr &rhs,
                                   const std::string &outputwsname, const double &startProgress,
                                   const double &endProgress);
 

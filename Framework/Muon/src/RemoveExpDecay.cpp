@@ -26,8 +26,7 @@ constexpr double MICROSECONDS_PER_SECOND{1000000.0};
 constexpr double MUON_LIFETIME_MICROSECONDS{Mantid::PhysicalConstants::MuonLifetime * MICROSECONDS_PER_SECOND};
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using API::Progress;
@@ -220,5 +219,4 @@ double MuonRemoveExpDecay::calNormalisationConst(const API::MatrixWorkspace_sptr
   return retVal;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

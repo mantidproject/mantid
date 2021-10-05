@@ -8,9 +8,7 @@
 #include "OptionsDialogPresenter.h"
 #include "IOptionsDialogView.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 /**
  * Construct a new presenter with the given view
@@ -67,6 +65,4 @@ void OptionsDialogPresenter::subscribe(OptionsDialogPresenterSubscriber *notifye
   notifyLoadOptions();
 }
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

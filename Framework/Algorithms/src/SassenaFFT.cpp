@@ -18,8 +18,7 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/UnitFactory.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SassenaFFT)
@@ -32,7 +31,6 @@ bool SassenaFFT::processGroups() {
   const std::string errMessg = "processGroups must not be called from SassenaFFT";
   this->g_log.error(errMessg);
   throw std::logic_error(errMessg);
-  return false;
 }
 
 /**
@@ -130,5 +128,4 @@ void SassenaFFT::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

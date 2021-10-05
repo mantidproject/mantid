@@ -131,7 +131,7 @@ bpl::object getWithDefault(bpl::object self, const bpl::object &key, bpl::object
  * @param key The key
  */
 bpl::object get(bpl::object self, const bpl::object &key) {
-  return getWithDefault(std::move(self), std::move(key), bpl::object());
+  return getWithDefault(std::move(self), key, bpl::object());
 }
 
 /**

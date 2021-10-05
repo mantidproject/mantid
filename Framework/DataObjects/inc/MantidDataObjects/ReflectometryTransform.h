@@ -38,7 +38,6 @@ struct MANTID_DATAOBJECTS_DLL DetectorAngularCache {
  @date 2012-05-29
  */
 class MANTID_DATAOBJECTS_DLL ReflectometryTransform {
-
 protected:
   const size_t m_d0NumBins;
   const size_t m_d1NumBins;
@@ -73,9 +72,9 @@ public:
 
   Mantid::API::IMDHistoWorkspace_sptr executeMDNormPoly(const Mantid::API::MatrixWorkspace_const_sptr &inputWs) const;
   virtual ~ReflectometryTransform() = default;
-  ReflectometryTransform(const std::string &d0Label, const std::string &d0ID, double d0Min, double d0Max,
-                         const std::string &d1Label, const std::string &d1ID, double d1Min, double d1Max,
-                         size_t d0NumBins, size_t d1NumBins, CalculateReflectometry *calc);
+  ReflectometryTransform(std::string d0Label, std::string d0ID, double d0Min, double d0Max, std::string d1Label,
+                         std::string d1ID, double d1Min, double d1Max, size_t d0NumBins, size_t d1NumBins,
+                         CalculateReflectometry *calc);
 };
 
 /// Create a new x-axis for the output workspace

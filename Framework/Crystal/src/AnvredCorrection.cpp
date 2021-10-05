@@ -60,8 +60,7 @@
  *  Which is a fairly expensive calulation when done for each event.
  */
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(AnvredCorrection)
@@ -538,5 +537,4 @@ void AnvredCorrection::scale_exec(std::string &bankName, double &lambda, double 
     value *= static_cast<double>(inst->getNumberParameter("detScale" + bankName)[0]);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

@@ -15,8 +15,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 using std::size_t;
 
@@ -164,5 +163,4 @@ double SpectraAxis::getMin() const { return m_parentWS->getSpectrum(0).getSpectr
 /// returns max value defined on axis
 double SpectraAxis::getMax() const { return m_parentWS->getSpectrum(length() - 1).getSpectrumNo(); }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

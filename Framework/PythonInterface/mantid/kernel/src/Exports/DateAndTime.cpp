@@ -24,12 +24,12 @@ using boost::python::arg;
  * given
  *  the special treatment that leads to the problem.
  */
-std::string ISO8601StringPlusSpace(DateAndTime &self) {
+std::string ISO8601StringPlusSpace(const DateAndTime &self) {
   // TODO this should cmake check and turn off the behavior
   return self.toISO8601String() + " ";
 }
 
-int64_t total_nanoseconds(DateAndTime &self) {
+int64_t total_nanoseconds(const DateAndTime &self) {
   PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
   return self.totalNanoseconds();
 }

@@ -9,8 +9,7 @@
 #include "MantidAPI/VectorParameterParser.h"
 #include "MantidDataObjects/CoordTransformDistance.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 /// Constructor
 CoordTransformDistanceParser::CoordTransformDistanceParser() {}
 
@@ -73,5 +72,4 @@ CoordTransformDistanceParser::createTransform(Poco::XML::Element *coordTransElem
 
   return transform;
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

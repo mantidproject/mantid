@@ -106,8 +106,7 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws) {
 using VecDouble = std::vector<double>;
 } // namespace
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PolarizationCorrectionFredrikze)
@@ -344,5 +343,4 @@ void PolarizationCorrectionFredrikze::exec() {
   this->setProperty("OutputWorkspace", outWS);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

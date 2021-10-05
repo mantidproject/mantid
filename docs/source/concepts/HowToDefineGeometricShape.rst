@@ -255,42 +255,154 @@ the direction of the normal vector.
 Cuboid
 ~~~~~~
 
-.. code-block:: xml
-
-      <cuboid id="shape">
-        <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
-        <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
-        <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
-        <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
-      </cuboid>
-      <algebra val="shape" />
-
-This particular example describes a cuboid with the origin at the centre
-of the front face, which is here facing the negative z-axis and has the
-dimensions 0.005mm x 0.2mm (in the xy-plane), and the depth of this
-cuboid is 0.02mm.
-
-.. figure:: ../images/XMLcuboidDescription.png
-   :alt: XMLcuboidDescription.png
-
-   XMLcuboidDescription.png
-
-Another example of a cuboid is
+Here the dimensions are used to define a 2m x 4m x 0.2m cuboid with its centre at (10,10,10).
 
 .. code-block:: xml
 
+      <cuboid id="some-cuboid">
+        <width val="2.0" />
+        <height val="4.0"  />
+        <depth  val="0.2" />
+        <centre x="10.0" y="10.0" z="10.0"  />
+      </cuboid>
+      <algebra val="some-cuboid" />
+
+.. plot::
+    :alt: Cuboid Dimension XML Example image
+
+    # import mantid algorithms, numpy and matplotlib
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+    cuboid = " \
+    <cuboid id='some-cuboid'> \
+      <width val='2.0' />  \
+      <height val='4.0'  /> \
+      <depth  val='0.2' />  \
+      <centre x='10.0' y='10.0' z='10.0'  />  \
+    </cuboid>  \
+    <algebra val='some-cuboid' /> \
+    "
+
+    ws = CreateSampleWorkspace()
+    SetSample(ws, Geometry={'Shape': 'CSG', 'Value': cuboid})
+    sample = ws.sample()
+    shape = sample.getShape()
+    mesh = shape.getMesh()
+    facecolors = ['purple','mediumorchid','royalblue','b','red','firebrick','green', 'darkgreen','grey','black', 'gold', 'orange']
+    mesh_polygon = Poly3DCollection(mesh, facecolors=facecolors)
+
+    fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'})
+    axes.add_collection3d(mesh_polygon)
+
+    axes.set_title('Sample Shape: Cuboid')
+    axes.set_xlabel('X / m')
+    axes.set_ylabel('Y / m')
+    axes.set_zlabel('Z / m')
+
+    axes.set_mesh_axes_equal(mesh)
+    axes.view_init(elev=20, azim=-27)
+
+    def arrow(ax, vector, origin = None, factor = None, color = 'r',linestyle = '-'):
+        if origin == None:
+            origin = (ax.get_xlim3d()[1],ax.get_ylim3d()[1],ax.get_zlim3d()[1])
+        ax.quiver(
+             origin[0], origin[1], origin[2],
+             vector[0], vector[1], vector[2],
+             color = color,
+             linestyle = linestyle
+        )
+
+    origins = [[11,10,9.5],[9,8,11.1],[10,12,10.5]]
+    colors = ['purple','black','b']
+    vectors = [[0,2,0],[0,0,-1],[1,0,0]]
+    for i in range(3):
+        vector, origin = vectors[i], origins[i]
+        arrow(axes, vector=vector, origin=origin, color =colors[i])
+        if i == 1:
+            origin[2] = 8.9
+        arrow(axes, vector=np.multiply(vector,-1), origin=origin, color =colors[i])
+
+    axes.text(8,7.2,9.65, "DEPTH", color='black', fontsize=12)
+    axes.text(10.5,11.5,11, "WIDTH", color='b', fontsize=12)
+    axes.text(11,9.5,9, "HEIGHT", color='purple', fontsize=12)
+
+    plt.show()
+
+In the next example, four points are used to describe a 2m x 0.8m x 0.4m cuboid with the its centre at the origin.
+
+.. code-block:: xml
+
       <cuboid id="shape">
-        <left-front-bottom-point x="0.0" y="-0.1" z="-0.01"  />
-        <left-front-top-point  x="0.0" y="0.1" z="-0.01"  />
-        <left-back-bottom-point  x="0.001" y="-0.1" z="-0.01"  />
-        <right-front-bottom-point  x="0.0" y="-0.1" z="0.01"  />
+        <left-front-bottom-point x="1" y="-0.4" z="-0.3"  />
+        <left-front-top-point  x="1" y="-0.4" z="0.3"  />
+        <left-back-bottom-point  x="-1" y="-0.4" z="-0.3"  />
+        <right-front-bottom-point  x="1" y="0.4" z="-0.3"  />
       </cuboid>
       <algebra val="shape" />
 
-which describes a cuboid with a front y-z plane (looking down the
-x-axis). The origin is assumed to be the centre of this front surface,
-which has dimensions 200mm along y and 20mm along z. The depth of this
-cuboid is taken to be 1mm (along x).
+.. plot::
+    :alt: Cuboid Point XML Example image
+
+    # import mantid algorithms, numpy and matplotlib
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection
+
+    cuboid = ' \
+    <cuboid id="shape"> \
+      <left-front-bottom-point x="1" y="-0.4" z="-0.3"  /> \
+      <left-front-top-point  x="1" y="-0.4" z="0.3"  /> \
+      <left-back-bottom-point  x="-1" y="-0.4" z="-0.3"  /> \
+      <right-front-bottom-point  x="1" y="0.4" z="-0.3"  /> \
+    </cuboid> \
+    <algebra val="shape" /> \
+    '
+
+    ws = CreateSampleWorkspace()
+    SetSample(ws, Geometry={'Shape': 'CSG', 'Value': cuboid})
+    sample = ws.sample()
+    shape = sample.getShape()
+    mesh = shape.getMesh()
+
+    mesh_polygon = Poly3DCollection(mesh, edgecolor = 'black' , linewidths=0.2)
+    mesh_polygon.set_facecolor((1,0,0,0.1))
+
+    fig, axes = plt.subplots(subplot_kw={'projection':'mantid3d'}, figsize = (8,6))
+    axes.add_collection3d(mesh_polygon)
+
+    axes.set_title('Cuboid defined by \n Points')
+    axes.set_xlabel('X / m')
+    axes.set_ylabel('Y / m')
+    axes.set_zlabel('Z / m')
+
+    axes.set_mesh_axes_equal(mesh)
+    axes.view_init(elev=29, azim=-22)
+
+    colors = ('darkorange','darkgreen','#33638DFF', '#440154FF')
+    points = [[1,-0.4,-0.3], [1,-0.4,0.3], [-1,-0.4,-0.3], [1,0.4,-0.3]]
+    point_names = ('left-front-\nbottom-point', 'left-front-\ntop-point', 'left-back-\nbottom-point', 'right-front-\nbottom-point')
+    for i in range(4):
+        axes.scatter(points[i][0],points[i][1],points[i][2], color=colors[i])
+        text_points = points[i]
+        if i % 2 == 0:
+            text_points[1] -= 0.7
+            text_points[2] -= 0.2
+        if i == 1:
+            text_points[1] -= 0.7
+            text_points[2] -= 0.2
+        if i == 3:
+            text_points[1] -= 0.1
+            text_points[2] -= 0.4
+        axes.text(text_points[0],text_points[1],text_points[2],point_names[i], color=colors[i], fontsize=14)
+
+    axes.scatter(0,0,0, color='b')
+    axes.text(0,0.1,-0.15, "ORIGIN", color='b', fontsize=12)
+
+    plt.show()
 
 
 Hexahedron
@@ -340,6 +452,61 @@ axis runs from the start aperture to the end aperture. "Height" is along
 the y-axis and "width" runs along the x-axis, before the application of
 the "axis" rotation.
 
+Rotating Shapes
+~~~~~~~~~~~~~~~
+
+*Note that some shapes (such as* `Cylinder (finite height) <Cylinder_>`_ *and* `Tapered Guide`_ *) can be oriented in a
+certain direction, using the* ``axis`` *tag, but this representation isn't general enough to support
+all possible 3D rotations for all shapes.*
+
+Most shapes can be rotated individually or as part of an ensemble, by using the
+``rotate`` or ``rotate-all`` tags respectively.
+The shapes that can be rotated are: Sphere_, `Cylinder (finite height) <Cylinder_>`_,
+`Hollow Cylinder (finite height) <Hollow Cylinder_>`_, `Infinite Cylinder`_,
+`Slice of Cylinder Ring`_, `Infinite Plane`_, Cuboid_, Hexahedron_ and `Tapered Guide`_.
+
+Use the ``rotate`` tag to rotate a shape **individually around its centre** (or centre-of-bottom-base).
+The shape is rotated by an angle in degrees around the x,y and z axes in that order. To rotate a
+cuboid 90° clockwise around x and 45° anti-clockwise around y:
+
+.. code-block:: xml
+
+      <cuboid id="stick">
+        <width val="3.0" />
+        <height val="0.5"  />
+        <depth  val="0.5" />
+        <centre x="0.0" y="0.0" z="0.0"  />
+        <rotate x="90" y="-45" z="0" />
+      </cuboid>
+
+      <algebra val="stick" />
+
+Use the ``rotate-all`` tag to rotate a combined shape **about the origin**. To rotate the unison of a
+sphere on the end of a cylinder (by 90° clockwise around x and 45° anti-clockwise around y):
+
+.. code-block:: xml
+
+      <cylinder id="stick">
+        <centre-of-bottom-base x="-1.0" y="0.0" z="0.0" />
+        <axis x="1.0" y="0.0" z="0.0" />
+        <radius val="0.2" />
+        <height val="2.0" />
+      </cylinder>
+
+      <sphere id="some-sphere">
+        <centre x="2.0"  y="0.0" z="0.0" />
+        <radius val="0.5" />
+      </sphere>
+
+      <algebra val="some-sphere (: stick)" />
+      <rotate-all x="90" y="-45" z="0" />
+
+All these rotatable shapes (expect for `Infinite Plane`_ and `Infinite Cylinder`_) can be plotted to check
+your shape definition is correct. For more details see :ref:`Mesh_Plots`.
+
+Shapes will be automatically rotated, if a rotation is set using :ref:`algm-SetGoniometer`.
+This goniometer rotation is about the origin and can work alongside manual rotation tags.
+Note the rotations are applied in the order ``rotate``, ``rotate-all``, ``goniometer``.
 
 .. _Bounding-Box:
 

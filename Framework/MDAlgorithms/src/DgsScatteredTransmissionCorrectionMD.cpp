@@ -25,8 +25,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 constexpr double EMPTY_FLT() noexcept { return std::numeric_limits<float>::max() / 2; }
 
@@ -145,7 +144,7 @@ void DgsScatteredTransmissionCorrectionMD::correctForTransmission(typename MDEve
   auto numBoxes = int(boxes.size());
 
   // Add the boxes in parallel. They should be spread out enough on each core to avoid stepping on each other.
-  // cppcheck-suppress syntaxError
+
   PRAGMA_OMP( parallel for if (!ws->isFileBacked()))
   for (int i = 0; i < numBoxes; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -194,5 +193,4 @@ void DgsScatteredTransmissionCorrectionMD::exec() {
   setProperty("OutputWorkspace", outputWs);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

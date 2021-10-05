@@ -43,8 +43,7 @@ using namespace Mantid::DataObjects;
 
 using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXusIO>;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 
@@ -748,5 +747,4 @@ std::vector<double> LoadMD::qDimensions(const API::IMDWorkspace_sptr &ws) {
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY = "visual_normalization";
 const std::string LoadMD::VISUAL_NORMALIZATION_KEY_HISTO = "visual_normalization_histo";
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

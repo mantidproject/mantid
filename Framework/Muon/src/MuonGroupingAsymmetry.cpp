@@ -132,8 +132,7 @@ MatrixWorkspace_sptr groupDetectors(const MatrixWorkspace_sptr &workspace, const
 
 } // namespace
 
-namespace Mantid {
-namespace Muon {
+namespace Mantid::Muon {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MuonGroupingAsymmetry)
@@ -298,5 +297,4 @@ void MuonGroupingAsymmetry::addGroupingAsymmetrySampleLogs(const MatrixWorkspace
   MuonAlgorithmHelper::addSampleLog(workspace, "analysis_periods_subtracted", getPropertyValue("SubtractedPeriods"));
 }
 
-} // namespace Muon
-} // namespace Mantid
+} // namespace Mantid::Muon

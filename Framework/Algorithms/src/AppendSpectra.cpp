@@ -20,8 +20,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AppendSpectra)
 
@@ -166,5 +165,4 @@ void AppendSpectra::combineLogs(const API::Run &lhs, const API::Run &rhs, API::R
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

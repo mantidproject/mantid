@@ -15,8 +15,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 /**
 Helper type to compute the square in-place.
 */
@@ -140,5 +139,4 @@ void CreateMDHistoWorkspace::exec() {
   setProperty("OutputWorkspace", ws);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

@@ -8,8 +8,7 @@
 #include "MantidAPI/CatalogManager.h"
 #include "MantidKernel/ArrayProperty.h"
 
-namespace Mantid {
-namespace ICat {
+namespace Mantid::ICat {
 DECLARE_ALGORITHM(CatalogListInvestigationTypes)
 
 /// Init method
@@ -27,5 +26,4 @@ void CatalogListInvestigationTypes::exec() {
   API::CatalogManager::Instance().getCatalog(getPropertyValue("Session"))->listInvestigationTypes(investigationTypes);
   setProperty("InvestigationTypes", investigationTypes);
 }
-} // namespace ICat
-} // namespace Mantid
+} // namespace Mantid::ICat

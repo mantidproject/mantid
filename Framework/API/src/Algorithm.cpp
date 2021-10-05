@@ -10,6 +10,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/DeprecatedAlias.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
@@ -512,10 +513,19 @@ bool Algorithm::executeInternal() {
   Timer timer;
   bool algIsExecuted = false;
   AlgorithmManager::Instance().notifyAlgorithmStarting(this->getAlgorithmID());
+
+  // runtime check for deprecation warning
   {
     auto *depo = dynamic_cast<DeprecatedAlgorithm *>(this);
     if (depo != nullptr)
       getLogger().error(depo->deprecationMsg(this));
+  }
+
+  // runtime check for deprecated alias warning
+  {
+    auto *da_alg = dynamic_cast<DeprecatedAlias *>(this);
+    if ((da_alg != nullptr) && (this->calledByAlias))
+      getLogger().warning(da_alg->deprecationMessage(this));
   }
 
   // Register clean up tasks that should happen regardless of the route
@@ -737,15 +747,17 @@ bool Algorithm::executeInternal() {
     throw;
   }
 
-  this->unlockWorkspaces();
-
   m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
       (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
   if (algIsExecuted) {
     setResultState(ResultState::Success);
   }
+
   // Only gets to here if algorithm ended normally
   notificationCenter().postNotification(new FinishedNotification(this, isExecuted()));
+
+  // Unlock the workspaces once the notification has been sent, to prevent too early deletion
+  this->unlockWorkspaces();
 
   return isExecuted();
 }
@@ -1879,15 +1891,15 @@ Algorithm::FinishedNotification::FinishedNotification(const Algorithm *const alg
     : AlgorithmNotification(alg), success(res) {}
 std::string Algorithm::FinishedNotification::name() const { return "FinishedNotification"; }
 
-Algorithm::ProgressNotification::ProgressNotification(const Algorithm *const alg, double p, const std::string &msg,
+Algorithm::ProgressNotification::ProgressNotification(const Algorithm *const alg, double p, std::string msg,
                                                       double estimatedTime, int progressPrecision)
-    : AlgorithmNotification(alg), progress(p), message(msg), estimatedTime(estimatedTime),
+    : AlgorithmNotification(alg), progress(p), message(std::move(msg)), estimatedTime(estimatedTime),
       progressPrecision(progressPrecision) {}
 
 std::string Algorithm::ProgressNotification::name() const { return "ProgressNotification"; }
 
-Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg, const std::string &str)
-    : AlgorithmNotification(alg), what(str) {}
+Algorithm::ErrorNotification::ErrorNotification(const Algorithm *const alg, std::string str)
+    : AlgorithmNotification(alg), what(std::move(str)) {}
 
 std::string Algorithm::ErrorNotification::name() const { return "ErrorNotification"; }
 
@@ -2089,6 +2101,15 @@ std::string Algorithm::asString(bool withDefaultValues) const { return m_propert
  */
 void Algorithm::removeProperty(const std::string &name, const bool delproperty) {
   m_properties.removeProperty(name, delproperty);
+}
+
+/**
+ * Removes a property from the properties map by index and return a pointer to it
+ * @param index :: index of the property to be removed
+ * @returns :: pointer to the removed property if found, NULL otherwise
+ */
+std::unique_ptr<Kernel::Property> Algorithm::takeProperty(const size_t index) {
+  return m_properties.takeProperty(index);
 }
 
 /**

@@ -24,8 +24,7 @@
 #include <cmath>
 #include <nexus/napi.h>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -33,6 +32,13 @@ using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect2)
+
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+LoadILLIndirect2::LoadILLIndirect2()
+    : m_numberOfTubes{16}, m_numberOfChannels{1024}, m_numberOfSimpleDetectors{8}, m_numberOfMonitors{1}, m_bats{false},
+      m_firstTubeAngleRounded{251}, m_supportedInstruments{"IN16B"} {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
@@ -218,7 +224,8 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
       firstTubeAngle.load();
       m_firstTubeAngleRounded = static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
     } catch (...) {
-      g_log.information() << "Unable to read first tube anlge, assuming 25.1";
+      m_firstTubeAngleRounded = 251;
+      g_log.information() << "Unable to read first tube angle, assuming 251";
     }
   } else {
     m_numberOfSimpleDetectors = 0;
@@ -265,8 +272,8 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   int *monitor_p = &dataMon(0, 0);
   m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
   // Assign Error
-  MantidVec &E = m_localWorkspace->dataE(0);
-  std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
+  MantidVec &dataE = m_localWorkspace->dataE(0);
+  std::transform(monitor_p, monitor_p + m_numberOfChannels, dataE.begin(), [](const double v) { return std::sqrt(v); });
   // Then Tubes
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
@@ -321,8 +328,8 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
   int *monitor_p = &dataMon(0, 0);
   m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
   // Assign Error
-  MantidVec &E = m_localWorkspace->dataE(0);
-  std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
+  MantidVec &dataE = m_localWorkspace->dataE(0);
+  std::transform(monitor_p, monitor_p + m_numberOfChannels, dataE.begin(), [](const double v) { return std::sqrt(v); });
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
@@ -457,5 +464,4 @@ void LoadILLIndirect2::rotateTubes() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

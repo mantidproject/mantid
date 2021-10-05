@@ -151,12 +151,15 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.reduction_mode = ReductionMode.MERGED
         self.assertEqual(state_gui_model.reduction_mode, ReductionMode.MERGED)
 
-    def test_that_raises_when_setting_with_wrong_input(self):
-        def red_mode_wrapper():
-            state_gui_model = StateGuiModel(AllStates())
-            state_gui_model.reduction_mode = "string"
+    def test_reduction_mode_not_set(self):
+        state_gui_model = StateGuiModel(AllStates())
+        state_gui_model.reduction_mode = ReductionMode.NOT_SET
+        self.assertEqual(state_gui_model.reduction_mode, ReductionMode.NOT_SET)
 
-        self.assertRaises(ValueError, red_mode_wrapper)
+    def test_that_raises_when_setting_with_wrong_input(self):
+        state_gui_model = StateGuiModel(AllStates())
+        with self.assertRaises(ValueError):
+            state_gui_model.reduction_mode = "string"
 
     def test_that_can_update_reduction_mode(self):
         state = AllStates()
@@ -561,10 +564,10 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertEqual(state_gui_model.q_resolution_delta_r, 0.1)
         self.assertEqual(state_gui_model.radius_limit_min, 12.)
         self.assertEqual(state_gui_model.radius_limit_max, 13.)
-        self.assertEqual(state_gui_model.lab_pos_1, 21.5)
-        self.assertEqual(state_gui_model.lab_pos_2, 17.8)
-        self.assertEqual(state_gui_model.hab_pos_1, 25.1)
-        self.assertEqual(state_gui_model.hab_pos_2, 16.9)
+        self.assertEqual(state_gui_model.rear_pos_1, 21.5)
+        self.assertEqual(state_gui_model.rear_pos_2, 17.8)
+        self.assertEqual(state_gui_model.front_pos_1, 25.1)
+        self.assertEqual(state_gui_model.front_pos_2, 16.9)
 
 
 if __name__ == '__main__':

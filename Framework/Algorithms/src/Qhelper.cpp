@@ -10,8 +10,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/Qhelper.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -32,7 +31,7 @@ void Qhelper::examineInput(const API::MatrixWorkspace_const_sptr &dataWS, const 
                            const API::MatrixWorkspace_const_sptr &qResolution) {
 
   // Check the compatibility of dataWS, binAdj and detectAdj
-  examineInput(dataWS, std::move(binAdj), std::move(detectAdj));
+  examineInput(dataWS, binAdj, detectAdj);
 
   // Check the compatibility of the QResolution workspace
   if (qResolution) {
@@ -200,5 +199,4 @@ void Qhelper::outputParts(API::Algorithm *alg, const API::MatrixWorkspace_sptr &
   alg->setProperty("sumOfNormFactors", sumOfNormFactors);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

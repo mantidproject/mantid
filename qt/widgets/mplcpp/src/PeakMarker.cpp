@@ -33,9 +33,7 @@ Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double yT
 
 } // namespace
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 /**
  * @brief Create a PeakMarker instance
@@ -125,6 +123,4 @@ bool PeakMarker::mouseMove(double x, double y) {
   return PyLong_AsLong(movedPy.ptr()) > 0;
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

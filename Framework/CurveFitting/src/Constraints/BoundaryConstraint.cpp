@@ -15,9 +15,7 @@
 #include <boost/lexical_cast.hpp>
 #include <sstream>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Constraints {
+namespace Mantid::CurveFitting::Constraints {
 namespace {
 /// static logger
 Kernel::Logger g_log("BoundaryConstraint");
@@ -144,8 +142,9 @@ void BoundaryConstraint::setPenaltyFactor(const double &c) {
     g_log.warning() << "Penalty factor <= 0 selected for boundary constraint."
                     << " Only positive penalty factor allowed. Penalty factor set to 1";
     m_penaltyFactor = 1;
+  } else {
+    m_penaltyFactor = c;
   }
-  { m_penaltyFactor = c; }
 }
 
 void BoundaryConstraint::setParamToSatisfyConstraint() {
@@ -253,6 +252,4 @@ std::string BoundaryConstraint::asString() const {
   return ostr.str();
 }
 
-} // namespace Constraints
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Constraints

@@ -9,8 +9,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Memory.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 Workspace::Workspace(const Parallel::StorageMode storageMode)
     : m_history(std::make_unique<WorkspaceHistory>()), m_storageMode(storageMode) {}
@@ -85,12 +84,10 @@ Parallel::StorageMode Workspace::storageMode() const { return m_storageMode; }
 /// Sets the storage mode (used for MPI runs)
 void Workspace::setStorageMode(Parallel::StorageMode storageMode) { m_storageMode = storageMode; }
 
-} // namespace API
-} // Namespace Mantid
+} // namespace Mantid::API
 
 ///\cond TEMPLATE
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 template <>
 MANTID_API_DLL Mantid::API::Workspace_sptr
@@ -117,6 +114,5 @@ IPropertyManager::getValue<Mantid::API::Workspace_const_sptr>(const std::string 
   }
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel
 ///\endcond TEMPLATE

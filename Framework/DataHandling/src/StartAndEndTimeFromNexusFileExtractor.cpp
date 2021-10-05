@@ -18,8 +18,7 @@ namespace {
 Mantid::Kernel::Logger g_log("StartAndEndTimeFromNexusFileExtractor");
 }
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 enum class NexusType { Muon, Processed, ISIS, TofRaw };
 enum class TimeType : unsigned char { StartTime, EndTime };
@@ -144,5 +143,4 @@ Mantid::Types::Core::DateAndTime extractEndTime(const std::string &filename) {
   return extractDateAndTime(TimeType::EndTime, filename);
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

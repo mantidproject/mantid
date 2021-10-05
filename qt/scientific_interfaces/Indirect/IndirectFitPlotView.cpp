@@ -12,6 +12,7 @@
 
 #include <QMessageBox>
 #include <QTimer>
+#include <limits>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtIcons/Icon.h"
@@ -277,7 +278,7 @@ void IndirectFitPlotView::setHWHMMinimum(double maximum) {
 
 void IndirectFitPlotView::addFitRangeSelector() {
   auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
-  fitRangeSelector->setBounds(-1.0, 1.0);
+  fitRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
   connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SIGNAL(endXChanged(double)));
@@ -304,7 +305,7 @@ void IndirectFitPlotView::setBackgroundBounds() {
 
 void IndirectFitPlotView::addHWHMRangeSelector() {
   auto hwhmRangeSelector = m_topPlot->addRangeSelector("HWHM");
-  hwhmRangeSelector->setBounds(-1.0, 1.0);
+  hwhmRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   hwhmRangeSelector->setColour(Qt::red);
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);

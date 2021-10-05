@@ -23,8 +23,7 @@ namespace {
 Mantid::Kernel::Logger g_log("GenerateIPythonNotebook");
 }
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(GenerateIPythonNotebook)
@@ -109,5 +108,4 @@ void GenerateIPythonNotebook::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

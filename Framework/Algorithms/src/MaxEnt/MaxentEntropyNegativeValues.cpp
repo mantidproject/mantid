@@ -7,8 +7,7 @@
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
 #include <cmath>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 /**
  * Returns the first derivative at a given point.
@@ -63,5 +62,4 @@ std::vector<double> MaxentEntropyNegativeValues::correctValues(const std::vector
   return values;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

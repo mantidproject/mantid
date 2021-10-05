@@ -3,11 +3,14 @@ set(TEST_FILES
   Instrument/InstrumentOptionDefaultsTest.h
   Instrument/InstrumentPresenterTest.h
   Batch/BatchPresenterTest.h
-  Batch/BatchJobRunnerProgressBarTest.h
-  Batch/BatchJobRunnerWorkspacesTest.h
+  Batch/BatchJobManagerProgressBarTest.h
+  Batch/BatchJobManagerWorkspacesTest.h
   Batch/GroupProcessingAlgorithmTest.h
-  Batch/BatchJobRunnerProcessingTest.h
+  Batch/BatchJobManagerProcessingTest.h
   Batch/RowProcessingAlgorithmTest.h
+  Batch/RowPreprocessingAlgorithmTest.h
+
+
   Event/EventPresenterTest.h
   MainWindow/MainWindowPresenterTest.h
   RunsTable/RunsTablePresenterRowDeletionTest.h
@@ -35,19 +38,26 @@ set(TEST_FILES
   Reduction/ValidateLookupRowTest.h
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
+
+  Preview/PreviewJobManagerTest.h
+  Preview/PreviewModelTest.h
+  Preview/PreviewPresenterTest.h
 )
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
 
 mtd_add_qt_tests(
-  TARGET_NAME MantidQtInterfacesISISReflectometryTest
+  TARGET_NAME MantidScientificInterfacesISISReflectometryTest
   QT_VERSION 5
   SRC ${TEST_FILES}
   INCLUDE_DIRS
     ../../../../Framework/CurveFitting/inc
     ../../../../Framework/DataObjects/inc
     ../../../../Framework/TestHelpers/inc
+    ../GUI/Preview
+    Preview
+    Reduction
   TEST_HELPER_SRCS
     ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
     ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
@@ -57,11 +67,11 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    DataObjects
+    Mantid::DataObjects
     gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
     Python::Python
   MTD_QT_LINK_LIBS
     MantidScientificInterfacesISISReflectometry

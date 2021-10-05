@@ -20,8 +20,7 @@
 
 using namespace Mantid::PhysicalConstants;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetSampleMaterial)
 
@@ -237,5 +236,4 @@ void SetSampleMaterial::exec() {
   // Done!
   progress(1);
 }
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

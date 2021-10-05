@@ -85,6 +85,7 @@ private:
   void readInHistograms(Mantid::Kernel::BinaryStreamReader &streamReader);
   void generateUnknownAxis();
   void makeDeadTimeTable(const size_t &numSpec);
+  void setEmptyDetectorGroupingTable(const size_t &numSpec);
 
   // Temperature file processing
   void readInTemperatureFile(DataObjects::Workspace2D_sptr &ws);

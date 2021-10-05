@@ -12,8 +12,7 @@
 
 #include <stdexcept>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(CarpenterSampleCorrection) // Register the class
                                              // into the algorithm
                                              // factory
@@ -139,5 +138,4 @@ MatrixWorkspace_sptr CarpenterSampleCorrection::multiply(const MatrixWorkspace_s
   return outWS;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

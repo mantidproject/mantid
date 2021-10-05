@@ -12,9 +12,7 @@
 #include "Reduction/ParseReflectometryStrings.h"
 #include "Reduction/ValidateLookupRow.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 // unnamed namespace
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
@@ -332,6 +330,4 @@ void ExperimentPresenter::updateViewFromModel() {
   // Reconnect settings change notifications
   m_view->connectExperimentSettingsWidgets();
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

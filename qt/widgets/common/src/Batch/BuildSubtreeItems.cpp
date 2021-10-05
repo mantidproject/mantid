@@ -6,9 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/BuildSubtreeItems.h"
 
-namespace MantidQt {
-namespace MantidWidgets {
-namespace Batch {
+namespace MantidQt::MantidWidgets::Batch {
 
 BuildSubtreeItems::BuildSubtreeItems(QtStandardItemTreeModelAdapter &adaptedModel,
                                      RowLocationAdapter const &rowLocationAdapter)
@@ -50,6 +48,4 @@ void BuildSubtreeItems::operator()(RowLocation const &parentOfSubtreeRoot, int f
 QModelIndexForMainModel BuildSubtreeItems::modelIndexAt(RowLocation const &parent) const {
   return m_rowLocations.indexAt(parent);
 }
-} // namespace Batch
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets::Batch

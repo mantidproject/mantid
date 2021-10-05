@@ -55,7 +55,14 @@ The maximum entropy method can be used to calculate the frequency domain spectru
 :ref:`MuonMaxent <algm-MuonMaxent>` algorithm to calculate the frequency spectrum. The MaxEnt Property table contains
 the basic quantities used during the calculation.
 
-**Workspace** Select the workspace for the transformation to be performed on.
+**Runs** Selects the run that will be transformed.
+
+**Periods** Selects the period for the transform to be performed on.
+
+**Calculate by** determines if to do the calculation by either:
+
+- **Groups** uses the selected groups from the **Grouping** tab
+- **All detectors** uses all of the individual detectors for a given run and period
 
 **Phase Table** Select a phase table to be used for the initial phase values.
 
@@ -63,6 +70,7 @@ the basic quantities used during the calculation.
 
 **Output (phase table/deadtimes/reconstructed data/phase convergence)** If these are checked it will output the chosen
 results in the appropriate workspace group.
+If **Output reconstructed data** is selected the data is plotted in the :ref:`Maxent Dual Plot <Frequency_Domain_Analysis_plotting-ref>`.
 
 The advanced property table contains variables for users that would like more control over the calculation.
 For large calculations the interface can be slow, therefore the ``Calculate`` button is disabled until the current calculation is complete.

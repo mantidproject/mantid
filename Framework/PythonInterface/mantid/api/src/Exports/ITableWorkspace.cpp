@@ -102,7 +102,6 @@ PyObject *getValue(const Mantid::API::Column_const_sptr &column, const std::type
 
   // -- Use the boost preprocessor to generate a list of else if clause to cut
   // out copy and pasted code.
-  // cppcheck-suppress unreadVariable
   PyObject *result(nullptr);
   if (false) {
   } // So that it always falls through to the list checking

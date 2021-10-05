@@ -7,8 +7,7 @@
 #include "MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 
-namespace Mantid {
-namespace PythonInterface {
+namespace Mantid::PythonInterface {
 
 AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self) : API::AlgorithmObserver(), m_self(self) {}
 
@@ -48,5 +47,4 @@ void AlgorithmObserverAdapter::errorHandle(const API::IAlgorithm *alg, const std
   }
 }
 
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface

@@ -35,7 +35,7 @@ boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace)
 }
 
 QString getIndexString(const MatrixWorkspace_sptr &workspace) {
-  const auto maximum = maximumIndex(std::move(workspace));
+  const auto maximum = maximumIndex(workspace);
   if (maximum) {
     if (*maximum > 0)
       return QString("0-%1").arg(*maximum);
@@ -65,9 +65,7 @@ const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
 const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectAddWorkspaceDialog::IndirectAddWorkspaceDialog(QWidget *parent) : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
@@ -131,6 +129,8 @@ void IndirectAddWorkspaceDialog::setAllSpectraSelectionEnabled(bool doEnable) {
   m_uiForm.ckAllSpectra->setEnabled(doEnable);
 }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+std::string IndirectAddWorkspaceDialog::getFileName() const {
+  return m_uiForm.dsWorkspace->getFullFilePath().toStdString();
+}
+
+} // namespace MantidQt::CustomInterfaces::IDA

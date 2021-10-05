@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/BankPulseTimes.h"
@@ -16,6 +17,8 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -37,6 +40,7 @@
 #include <memory>
 #include <mutex>
 #include <numeric>
+#include <Poco/Path.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -220,6 +224,9 @@ private:
   void runLoadMonitors();
   /// Set the filters on TOF.
   void setTimeFilters(const bool monitors);
+  template <typename T>
+  T filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
+                       Mantid::Types::Core::DateAndTime &stopTime);
 
   /// Load a spectra mapping from the given file
   std::unique_ptr<std::pair<std::vector<int32_t>, std::vector<int32_t>>>
@@ -394,10 +401,10 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
-      std::string entry_name(it->first);
+      std::string entryName(it->first);
       std::string entry_class(it->second);
       if (entry_class == classType) {
-        bankNames.emplace_back(entry_name);
+        bankNames.emplace_back(entryName);
       }
     }
     for (size_t i = 0; i < bankNames.size(); ++i) {
@@ -533,6 +540,20 @@ bool LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, T local
     nxfile.close();
   }
 
+  if (instFilename.empty()) {
+    try {
+      instFilename =
+          API::InstrumentFileFinder::getInstrumentFilename(instrument, localWorkspace->getWorkspaceStartDate());
+    } catch (Kernel::Exception::NotFoundError) {
+      if (instFilename.empty()) {
+        Poco::Path directory(Kernel::ConfigService::Instance().getInstrumentDirectory());
+        Poco::Path file(instrument + "_Definition.xml");
+        Poco::Path fullPath(directory, file);
+        instFilename = fullPath.toString();
+      }
+    }
+  }
+
   // do the actual work
   auto loadInst = alg->createChildAlgorithm("LoadInstrument");
 
@@ -618,7 +639,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     if (file.getInfo().type == ::NeXus::CHAR) {
       std::string notes = file.getStrData();
       if (!notes.empty())
-        WS->mutableRun().addProperty("file_notes", notes);
+        WS->mutableRun().addProperty("file_notes", notes, true);
     }
     file.closeData();
   }
@@ -637,7 +658,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
         run = std::to_string(value[0]);
     }
     if (!run.empty()) {
-      WS->mutableRun().addProperty("run_number", run);
+      WS->mutableRun().addProperty("run_number", run, true);
     }
     file.closeData();
   }
@@ -650,7 +671,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
       expId = file.getStrData();
     }
     if (!expId.empty()) {
-      WS->mutableRun().addProperty("experiment_identifier", expId);
+      WS->mutableRun().addProperty("experiment_identifier", expId, true);
     }
     file.closeData();
   }
@@ -706,7 +727,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
       // clang-format on
 
       // set the property
-      WS->mutableRun().addProperty("duration", duration[0], units);
+      WS->mutableRun().addProperty("duration", duration[0], units, true);
     }
     file.closeData();
   }

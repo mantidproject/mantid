@@ -17,9 +17,7 @@
 
 #include "MantidGeometry/Math/BnId.h"
 
-namespace Mantid {
-
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /** Output as a stream
  *  @param of :: Reference to the output stream
@@ -346,6 +344,4 @@ std::string BnId::display() const
 
 void BnId::write(std::ostream &os) const { os << display(); }
 
-} // NAMESPACE Geometry
-
-} // NAMESPACE Mantid
+} // namespace Mantid::Geometry

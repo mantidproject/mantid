@@ -61,7 +61,7 @@ class MANTID_PARALLEL_DLL EventsListsShmemManager {
 public:
   // Constructor for client usage: "sets" Manager to the piece of shared memory
   // with existed GuardedEventLists in it
-  EventsListsShmemManager(const std::string &segmentName, const std::string &elName);
+  EventsListsShmemManager(std::string segmentName, std::string elName);
 
   virtual ~EventsListsShmemManager() = default;
 
@@ -75,7 +75,7 @@ public:
 protected:
   // Constructor for internal usage in  that just sets up the names, instance
   // for m_eventLists is defined later in derivated class constructor.
-  EventsListsShmemManager(const std::string &segmentName, const std::string &elName, int);
+  EventsListsShmemManager(std::string segmentName, std::string elName, int);
 
   const VoidAllocator &alloc() const;
 

@@ -25,9 +25,7 @@ namespace {
 Mantid::Kernel::Logger g_log("IsoRotDiff");
 }
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 DECLARE_FUNCTION(InelasticIsoRotDiff)
 
@@ -100,6 +98,4 @@ void InelasticIsoRotDiff::function1D(double *out, const double *xValues, const s
   }
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

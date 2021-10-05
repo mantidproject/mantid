@@ -24,8 +24,7 @@
 #include <cmath>
 #include <memory>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 const std::string LoadNexus::muonTD = "muonTD";
 const std::string LoadNexus::pulsedTD = "pulsedTD";
@@ -121,6 +120,7 @@ void LoadNexus::runLoadMuonNexus() {
   loadMuonNexus->setPropertyValue(outputWorkspace, m_workspace);
   loadMuonNexus->setPropertyValue("DeadTimeTable", m_workspace + "_DeadTimeTable");
   loadMuonNexus->setPropertyValue("DetectorGroupingTable", m_workspace + "DetectorGroupingTable");
+  loadMuonNexus->setPropertyValue("TimeZeroTable", m_workspace + "TimeZeroTable");
 
   // Get the array passed in the spectrum_list, if an empty array was passed use
   // the default
@@ -256,5 +256,4 @@ void LoadNexus::setOutputWorkspace(const API::IAlgorithm_sptr &loader) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

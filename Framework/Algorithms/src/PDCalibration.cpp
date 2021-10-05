@@ -41,8 +41,7 @@
 #include <limits>
 #include <numeric>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
@@ -534,7 +533,7 @@ void PDCalibration::exec() {
   // Scan the table containing the fit parameters for every peak, retrieve the
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
-  // cppcheck-suppress syntaxError
+
    PRAGMA_OMP(parallel for schedule(dynamic, 1))
    for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
      PARALLEL_START_INTERUPT_REGION
@@ -547,8 +546,9 @@ void PDCalibration::exec() {
      // object to hold the information about the peak positions, detid, and wksp
      // index
      PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-     auto [difc, difa, tzero] = getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
-     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, difa, difc, tzero);
+     const auto [dif_c, dif_a, tzero] =
+         getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
+     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, dif_a, dif_c, tzero);
 
      // includes peaks that aren't used in the fit
      // The following data structures will hold information for the peaks
@@ -1370,5 +1370,4 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
   return std::make_pair(peak_pos_ws, peak_window_ws);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

@@ -14,8 +14,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ITableWorkspace;
@@ -221,5 +220,4 @@ void ConvertDiffCal::exec() {
   setProperty("OutputWorkspace", configWksp);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

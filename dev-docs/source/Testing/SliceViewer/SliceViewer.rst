@@ -30,6 +30,7 @@ Data
 	# Create a histogrammed (binned) workspace with 100 bins in each of the H, K and L dimensions
 	mdHisto_3D = BinMD(InputWorkspace=md_4D, AlignedDim0='H,-1,1,100', AlignedDim1='K,-1,1,100', AlignedDim2='L,-1,1,100') # 3D cut
 	mdHisto_2D = BinMD(InputWorkspace=md_4D, AlignedDim0='H,-1,1,100', AlignedDim1='K,-1,1,100') # 2D cut
+
 - Create an MD workspace with non-orthogonal axes:
 
 .. code-block:: python

@@ -12,9 +12,7 @@
 
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting::Algorithms;
 
@@ -147,6 +145,4 @@ void ComptonPeakProfile::setAttribute(const std::string &name, const Attribute &
     m_voigtCutOff = value.asDouble();
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

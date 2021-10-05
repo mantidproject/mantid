@@ -9,9 +9,7 @@
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}
 
@@ -139,6 +137,4 @@ bool containsGroups(Clipboard const &clipboard) {
 
   return containsGroups(clipboard.subtreeRoots());
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

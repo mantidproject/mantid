@@ -4,10 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidKernel/MDAxisValidator.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -15,8 +16,8 @@ namespace Kernel {
  *  @param nDimensions Number of dimensions of input workspace for algorithm
  *  @param checkIfEmpty Whether validator will check if the axes vector is empty
  */
-MDAxisValidator::MDAxisValidator(const std::vector<int> &axes, const size_t nDimensions, const bool checkIfEmpty)
-    : m_axes(axes), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
+MDAxisValidator::MDAxisValidator(std::vector<int> axes, const size_t nDimensions, const bool checkIfEmpty)
+    : m_axes(std::move(axes)), m_wsDimensions(nDimensions), m_emptyCheck(checkIfEmpty) {}
 
 /**
  * @brief Checks the MD axes given against the given number of dimensions of the
@@ -56,5 +57,4 @@ std::map<std::string, std::string> MDAxisValidator::validate() const {
   return invalidProperties;
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

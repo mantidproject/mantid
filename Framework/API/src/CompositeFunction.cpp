@@ -21,8 +21,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 /// static logger
@@ -990,5 +989,4 @@ size_t CompositeFunction::getAttributeOffset(size_t attributeIndex) const {
                        m_attributeIndex.begin() + attributeIndex);
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

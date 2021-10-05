@@ -9,7 +9,7 @@ set ( PLUGINS_DIR plugins )
 
 set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
 set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
-set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} CACHE PATH "Location of site packages")
 set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
 # Determine the version of macOS that we are running
@@ -132,7 +132,7 @@ if(NOT HDF5_ROOT)
     set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!
 endif()
 
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(CPACK_GENERATOR DragNDrop)
   set(CMAKE_INSTALL_PREFIX "")
   # Replace hdiutil command to retry on detach failure

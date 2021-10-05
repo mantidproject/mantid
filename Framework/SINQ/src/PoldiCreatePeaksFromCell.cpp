@@ -15,8 +15,7 @@
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 
-namespace Mantid {
-namespace Poldi {
+namespace Mantid::Poldi {
 
 using API::ITableWorkspace;
 using API::WorkspaceProperty;
@@ -210,5 +209,4 @@ void PoldiCreatePeaksFromCell::exec() {
   setProperty("OutputWorkspace", peaks->asTableWorkspace());
 }
 
-} // namespace Poldi
-} // namespace Mantid
+} // namespace Mantid::Poldi

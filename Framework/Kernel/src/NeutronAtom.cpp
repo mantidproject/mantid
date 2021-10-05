@@ -15,9 +15,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace Mantid {
-
-namespace PhysicalConstants {
+namespace Mantid::PhysicalConstants {
 
 /// Reference wavelength for absorption cross section values.
 const double NeutronAtom::ReferenceLambda = 1.7982;
@@ -742,5 +740,4 @@ NeutronAtom getNeutronNoExceptions(const NeutronAtom &other) {
   }
 }
 
-} // namespace PhysicalConstants
-} // namespace Mantid
+} // namespace Mantid::PhysicalConstants

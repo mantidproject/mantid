@@ -8,8 +8,7 @@
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/HistogramValidator.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskBinsFromWorkspace)
@@ -58,5 +57,4 @@ void MaskBinsFromWorkspace::exec() {
   }
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

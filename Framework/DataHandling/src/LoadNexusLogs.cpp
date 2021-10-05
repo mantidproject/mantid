@@ -23,8 +23,7 @@
 
 #include <algorithm>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadNexusLogs)
 
@@ -880,6 +879,8 @@ void LoadNexusLogs::loadNXLog(::NeXus::File &file, const std::string &absolute_e
     }
   } catch (::NeXus::Exception &e) {
     g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading:'" << e.what() << "'.\n";
+  } catch (std::invalid_argument &e) {
+    g_log.warning() << "NXlog entry " << entry_name << " gave an error when loading:'" << e.what() << "'.\n";
   }
 
   file.closeGroup();
@@ -976,5 +977,4 @@ void LoadNexusLogs::loadSELog(::NeXus::File &file, const std::string &absolute_e
   file.closeGroup();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

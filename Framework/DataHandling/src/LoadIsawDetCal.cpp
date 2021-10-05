@@ -31,8 +31,7 @@
 #include <sstream>
 #include <utility>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(LoadIsawDetCal)
@@ -342,7 +341,7 @@ void LoadIsawDetCal::exec() {
 void LoadIsawDetCal::center(const double x, const double y, const double z, const std::string &detname,
                             const API::Workspace_sptr &ws, Geometry::ComponentInfo &componentInfo) {
 
-  Instrument_sptr inst = getCheckInst(std::move(ws));
+  Instrument_sptr inst = getCheckInst(ws);
 
   IComponent_const_sptr comp = inst->getComponentByName(detname);
   if (comp == nullptr) {
@@ -477,5 +476,4 @@ void LoadIsawDetCal::applyScalings(Workspace_sptr &ws,
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

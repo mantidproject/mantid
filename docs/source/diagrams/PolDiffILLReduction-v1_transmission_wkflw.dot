@@ -4,8 +4,8 @@ digraph Transmission {
   subgraph params {
     $param_style
     Run
-    AbsorberTransmissionInputWorkspace
-    BeamInputWorkspace
+    CadmiumTransmissionWorkspace
+    EmptyBeamWorkspace
   }
 
   subgraph values {
@@ -15,18 +15,17 @@ digraph Transmission {
 
   subgraph algorithms {
     $algorithm_style
-    Load
-    Divide
+    LoadAndMerge
+    Divide [label="Normalize to monitor/time"]
+    Divide2 [label="Divide"]
     Minus
-    Minus2 [label="Minus"]
   }
 
-  Run -> Load
-  Load -> Minus
-  AbsorberTransmissionInputWorkspace -> Minus
+  Run -> LoadAndMerge
+  LoadAndMerge -> Divide
+  Divide -> Minus
+  CadmiumTransmissionWorkspace -> Minus
+  EmptyBeamWorkspace -> Divide
   Minus -> Divide
-  BeamInputWorkspace -> Minus2
-  AbsorberTransmissionInputWorkspace -> Minus2
-  Minus2 -> Divide
   Divide -> OutputWorkspace
 }

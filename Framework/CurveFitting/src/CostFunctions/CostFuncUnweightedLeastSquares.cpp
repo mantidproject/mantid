@@ -9,9 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include <cmath>
 
-namespace Mantid {
-namespace CurveFitting {
-namespace CostFunctions {
+namespace Mantid::CurveFitting::CostFunctions {
 
 namespace {
 /// static logger
@@ -85,6 +83,4 @@ double CostFuncUnweightedLeastSquares::getResidualVariance() const {
   return residualVariance;
 }
 
-} // namespace CostFunctions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::CostFunctions

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/PreviewManager.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 std::vector<std::string> PreviewManagerImpl::getPreviews(const std::string &facility,
                                                          const std::string &technique) const {
@@ -50,5 +49,4 @@ bool PreviewManagerImpl::checkPreview(const std::string &facility, const std::st
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

@@ -16,6 +16,8 @@
 
 #include <algorithm>
 
+#include "IndirectAddWorkspaceDialog.h"
+
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
@@ -79,16 +81,98 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filepath, std::string const &ou
   return loadAlg;
 }
 
+namespace Regexes {
+const QString EMPTY = "^$";
+const QString SPACE = "(\\s)*";
+const QString COMMA = SPACE + "," + SPACE;
+const QString NATURAL_NUMBER = "(0|[1-9][0-9]*)";
+const QString REAL_NUMBER = "(-?" + NATURAL_NUMBER + "(\\.[0-9]*)?)";
+const QString REAL_RANGE = "(" + REAL_NUMBER + COMMA + REAL_NUMBER + ")";
+const QString MASK_LIST = "(" + REAL_RANGE + "(" + COMMA + REAL_RANGE + ")*" + ")|" + EMPTY;
+} // namespace Regexes
+
+class ExcludeRegionDelegate : public QItemDelegate {
+public:
+  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & /*option*/,
+                        const QModelIndex & /*index*/) const override {
+    auto lineEdit = std::make_unique<QLineEdit>(parent);
+    auto validator = std::make_unique<QRegExpValidator>(QRegExp(Regexes::MASK_LIST), parent);
+    lineEdit->setValidator(validator.release());
+    return lineEdit.release();
+  }
+
+  void setEditorData(QWidget *editor, const QModelIndex &index) const override {
+    const auto value = index.model()->data(index, Qt::EditRole).toString();
+    static_cast<QLineEdit *>(editor)->setText(value);
+  }
+
+  void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override {
+    auto *lineEdit = static_cast<QLineEdit *>(editor);
+    model->setData(index, lineEdit->text(), Qt::EditRole);
+  }
+
+  void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,
+                            const QModelIndex & /*index*/) const override {
+    editor->setGeometry(option.rect);
+  }
+};
+
+QStringList defaultHeaders() {
+  QStringList headers;
+  headers << "Workspace"
+          << "WS Index";
+  return headers;
+}
+
+class ScopedFalse {
+  bool &m_ref;
+  bool m_oldValue;
+
+public:
+  // this sets the input bool to false whilst this object is in scope and then
+  // resets it to its old value when this object drops out of scope.
+  explicit ScopedFalse(bool &variable) : m_ref(variable), m_oldValue(variable) { m_ref = false; }
+  ~ScopedFalse() { m_ref = m_oldValue; }
+};
+
+QStringList getSampleWSSuffices() {
+  QStringList const wsSampleSuffixes{"red", "sqw"};
+  return wsSampleSuffixes;
+}
+
+QStringList getSampleFBSuffices() {
+  QStringList const fbSampleSuffixes{"red.*", "sqw.*"};
+  return fbSampleSuffixes;
+}
+
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
-    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr) {
+    : IndirectDataAnalysisTab(parent), m_elwTree(nullptr), m_dataModel(std::make_unique<IndirectFitDataModel>()) {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(
       std::make_unique<IndirectPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
+  connect(m_uiForm.inputChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
+
+  // data selected changes
+  connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+
+  connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
+
+  connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
+  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
+  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SIGNAL(dataRemoved()));
+
+  m_parent = dynamic_cast<IndirectDataAnalysis *>(parent);
+  m_dataTable = getDataTable();
+
+  const QStringList headers = defaultHeaders();
+  setHorizontalHeaders(headers);
+  m_dataTable->setItemDelegateForColumn(headers.size() - 1, std::make_unique<ExcludeRegionDelegate>().release());
+  m_dataTable->verticalHeader()->setVisible(false);
+
+  connect(m_dataTable, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
 }
 
 IndirectDataAnalysisElwinTab::~IndirectDataAnalysisElwinTab() {
@@ -133,13 +217,13 @@ void IndirectDataAnalysisElwinTab::setup() {
   // We always want one range selector... the second one can be controlled from
   // within the elwinTwoRanges(bool state) function
   auto integrationRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinIntegrationRange");
-  integrationRangeSelector->setBounds(-1.0, 1.0);
+  integrationRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   connect(integrationRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
   connect(integrationRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
   // create the second range
   auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(Qt::darkGreen); // dark green for background
-  backgroundRangeSelector->setBounds(-1.0, 1.0);
+  backgroundRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
   connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
           SLOT(setRange(double, double)));
   connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
@@ -149,12 +233,12 @@ void IndirectDataAnalysisElwinTab::setup() {
   connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(twoRanges(QtProperty *, bool)));
   twoRanges(m_properties["BackgroundSubtraction"], false);
 
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(newInputFiles()));
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(plotInput()));
-  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(updateIntegrationRange()));
-  connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(newPreviewFileSelected(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
+  connect(m_uiForm.dsInputFiles, SIGNAL(filesFound()), this, SLOT(checkLoadedFiles()));
+  connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(checkNewPreviewSelected(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(setSelectedSpectrum(int)));
+  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(handlePreviewSpectrumChanged()));
 
   // Handle plot and save
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
@@ -167,9 +251,19 @@ void IndirectDataAnalysisElwinTab::setup() {
 
   m_dblManager->setValue(m_properties["BackgroundStart"], -0.24);
   m_dblManager->setValue(m_properties["BackgroundEnd"], -0.22);
+
+  updateAvailableSpectra();
 }
 
 void IndirectDataAnalysisElwinTab::run() {
+  if (m_uiForm.inputChoice->currentIndex() == 0) {
+    runFileInput();
+  } else {
+    runWorkspaceInput();
+  }
+}
+
+void IndirectDataAnalysisElwinTab::runFileInput() {
   setRunIsRunning(true);
 
   QStringList inputFilenames = m_uiForm.dsInputFiles->getFilenames();
@@ -264,6 +358,87 @@ void IndirectDataAnalysisElwinTab::run() {
   m_pythonExportWsName = qSquaredWorkspace;
 }
 
+void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
+  setRunIsRunning(true);
+
+  // Get workspace names
+  std::string inputGroupWsName = "IDA_Elwin_Input";
+
+  auto workspaceBaseName = m_uiForm.cbPreviewFile->currentText();
+
+  workspaceBaseName += "_elwin_";
+
+  const auto qWorkspace = (workspaceBaseName + "eq").toStdString();
+  const auto qSquaredWorkspace = (workspaceBaseName + "eq2").toStdString();
+  const auto elfWorkspace = (workspaceBaseName + "elf").toStdString();
+  const auto eltWorkspace = (workspaceBaseName + "elt").toStdString();
+
+  // Load input files
+  std::string inputWorkspacesString = m_uiForm.cbPreviewFile->currentText().toStdString();
+
+  // Group input workspaces
+  auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
+  groupWsAlg->initialize();
+  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
+  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
+  groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
+
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
+
+  // Configure ElasticWindowMultiple algorithm
+  auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
+  elwinMultAlg->initialize();
+
+  elwinMultAlg->setProperty("OutputInQ", qWorkspace);
+  elwinMultAlg->setProperty("OutputInQSquared", qSquaredWorkspace);
+  elwinMultAlg->setProperty("OutputELF", elfWorkspace);
+
+  elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
+  elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_uiForm.leLogValue->currentText().toStdString());
+
+  elwinMultAlg->setProperty("IntegrationRangeStart", m_dblManager->value(m_properties["IntegrationStart"]));
+  elwinMultAlg->setProperty("IntegrationRangeEnd", m_dblManager->value(m_properties["IntegrationEnd"]));
+
+  if (m_blnManager->value(m_properties["BackgroundSubtraction"])) {
+    elwinMultAlg->setProperty("BackgroundRangeStart", m_dblManager->value(m_properties["BackgroundStart"]));
+    elwinMultAlg->setProperty("BackgroundRangeEnd", m_dblManager->value(m_properties["BackgroundEnd"]));
+  }
+
+  if (m_blnManager->value(m_properties["Normalise"])) {
+    elwinMultAlg->setProperty("OutputELT", eltWorkspace);
+  }
+
+  BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
+  elwinInputProps["InputWorkspaces"] = inputGroupWsName;
+
+  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
+
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
+  m_batchAlgoRunner->executeBatchAsync();
+
+  // Set the result workspace for Python script export
+  m_pythonExportWsName = qSquaredWorkspace;
+}
+
+/**
+ * Handles when the view changes between workspace and file selection
+ *
+ * @param index :: The index the stacked widget has been switched too.
+ */
+void IndirectDataAnalysisElwinTab::handleViewChanged(int index) {
+  // Index indicates which view is visible.
+  m_uiForm.stackedInputWidget->setCurrentIndex(index);
+
+  // 0 is always file view
+  switch (index) {
+  case 0:
+    emit fileViewVisible();
+    break;
+  case 1:
+    emit workspaceViewVisible();
+    break;
+  }
+}
 /**
  * Ungroups the output after the execution of the algorithm
  */
@@ -299,7 +474,12 @@ void IndirectDataAnalysisElwinTab::checkForELTWorkspace() {
 bool IndirectDataAnalysisElwinTab::validate() {
   UserInputValidator uiv;
 
-  uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
+  if (m_uiForm.inputChoice->currentIndex() == 0) {
+    uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
+    auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
+    if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
+      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+  }
 
   auto rangeOne = std::make_pair(m_dblManager->value(m_properties["IntegrationStart"]),
                                  m_dblManager->value(m_properties["IntegrationEnd"]));
@@ -312,10 +492,6 @@ bool IndirectDataAnalysisElwinTab::validate() {
     uiv.checkValidRange("Range Two", rangeTwo);
     uiv.checkRangesDontOverlap(rangeOne, rangeTwo);
   }
-
-  auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
-  if (std::adjacent_find(suffixes.begin(), suffixes.end(), std::not_equal_to<>()) != suffixes.end())
-    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
 
   QString error = uiv.generateErrorMessage();
   showMessageBox(error);
@@ -423,23 +599,43 @@ void IndirectDataAnalysisElwinTab::newInputFiles() {
  *
  * @param index Index of the new selected file
  */
-void IndirectDataAnalysisElwinTab::newPreviewFileSelected(int index) {
+
+void IndirectDataAnalysisElwinTab::checkNewPreviewSelected(int index) {
   auto const workspaceName = m_uiForm.cbPreviewFile->itemText(index);
   auto const filename = m_uiForm.cbPreviewFile->itemData(index).toString();
 
-  if (!filename.isEmpty()) {
-    auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
+  if (!workspaceName.isEmpty()) {
+    if (!filename.isEmpty())
+      newPreviewFileSelected(workspaceName, filename);
+    else
+      newPreviewWorkspaceSelected(workspaceName);
+  }
+}
 
-    if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-      auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+void IndirectDataAnalysisElwinTab::newPreviewFileSelected(const QString &workspaceName, const QString &filename) {
+  auto const loadHistory = m_uiForm.ckLoadHistory->isChecked();
+  if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
+    auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+
+    setInputWorkspace(workspace);
+
+    if (m_uiForm.inputChoice->currentIndex() == 0) {
       int const numHist = static_cast<int>(workspace->getNumberHistograms()) - 1;
-
-      setInputWorkspace(workspace);
-      m_uiForm.spPreviewSpec->setMaximum(numHist);
-      m_uiForm.spPreviewSpec->setValue(0);
-      plotInput();
+      m_uiForm.spPlotSpectrum->setMaximum(numHist);
+      m_uiForm.spPlotSpectrum->setValue(0);
     } else
-      g_log.error("Failed to load input workspace.");
+      updateAvailableSpectra();
+
+    plotInput();
+  }
+}
+
+void IndirectDataAnalysisElwinTab::newPreviewWorkspaceSelected(const QString &workspaceName) {
+  if (m_uiForm.inputChoice->currentIndex() == 1) {
+    auto const workspace = getADSMatrixWorkspace(workspaceName.toStdString());
+    setInputWorkspace(workspace);
+    updateAvailableSpectra();
+    plotInput();
   }
 }
 
@@ -452,6 +648,8 @@ void IndirectDataAnalysisElwinTab::plotInput() {
 }
 
 void IndirectDataAnalysisElwinTab::handlePreviewSpectrumChanged() {
+  if (m_uiForm.elwinPreviewSpec->currentIndex() == 1)
+    setSelectedSpectrum(m_uiForm.cbPlotSpectrum->currentText().toInt());
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
 }
 
@@ -569,6 +767,205 @@ void IndirectDataAnalysisElwinTab::setRunEnabled(const bool &enabled) { m_uiForm
 
 void IndirectDataAnalysisElwinTab::setSaveResultEnabled(const bool &enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+std::unique_ptr<IAddWorkspaceDialog> IndirectDataAnalysisElwinTab::getAddWorkspaceDialog(QWidget *parent) const {
+  return std::make_unique<IndirectAddWorkspaceDialog>(parent);
+}
+
+void IndirectDataAnalysisElwinTab::showAddWorkspaceDialog() {
+  if (!m_addWorkspaceDialog)
+    m_addWorkspaceDialog = getAddWorkspaceDialog(m_parent);
+  m_addWorkspaceDialog->setWSSuffices(getSampleWSSuffices());
+  m_addWorkspaceDialog->setFBSuffices(getSampleFBSuffices());
+  m_addWorkspaceDialog->updateSelectedSpectra();
+  m_addWorkspaceDialog->show();
+  connect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
+}
+
+void IndirectDataAnalysisElwinTab::closeDialog() {
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(addData()), this, SLOT(addData()));
+  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeDialog()));
+  m_addWorkspaceDialog->close();
+  m_addWorkspaceDialog = nullptr;
+}
+
+void IndirectDataAnalysisElwinTab::addData() { addData(m_addWorkspaceDialog.get()); }
+
+void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
+  try {
+    UserInputValidator uiv;
+    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    QList<QString> allFiles;
+    allFiles.append(QString::fromStdString(indirectDialog->getFileName()));
+    auto const suffixes = getFilteredSuffixes(allFiles);
+    if (suffixes.size() < 1) {
+      uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+      m_uiForm.dsInputFiles->clear();
+      closeDialog();
+    }
+    QString error = uiv.generateErrorMessage();
+    showMessageBox(error);
+
+    if (error.isEmpty()) {
+      addDataToModel(dialog);
+      updateTableFromModel();
+      emit dataAdded();
+      emit dataChanged();
+      newInputFilesFromDialog(dialog);
+      plotInput();
+    }
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
+
+void IndirectDataAnalysisElwinTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog))
+    m_dataModel->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+}
+
+void IndirectDataAnalysisElwinTab::updateTableFromModel() {
+  ScopedFalse _signalBlock(m_emitCellChanged);
+  m_dataTable->setRowCount(0);
+  for (auto domainIndex = FitDomainIndex{0}; domainIndex < m_dataModel->getNumberOfDomains(); domainIndex++) {
+    addTableEntry(domainIndex);
+  }
+}
+
+QTableWidget *IndirectDataAnalysisElwinTab::getDataTable() const { return m_uiForm.tbElwinData; }
+
+void IndirectDataAnalysisElwinTab::addTableEntry(FitDomainIndex row) {
+  m_dataTable->insertRow(static_cast<int>(row.value));
+  const auto &name = m_dataModel->getWorkspace(row)->getName();
+  auto cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(name));
+  auto flags = cell->flags();
+  flags ^= Qt::ItemIsEditable;
+  cell->setFlags(flags);
+  setCell(std::move(cell), row.value, 0);
+
+  cell = std::make_unique<QTableWidgetItem>(QString::number(m_dataModel->getSpectrum(row)));
+  cell->setFlags(flags);
+  setCell(std::move(cell), row.value, workspaceIndexColumn());
+}
+
+void IndirectDataAnalysisElwinTab::setCell(std::unique_ptr<QTableWidgetItem> cell, FitDomainIndex row, int column) {
+  m_dataTable->setItem(static_cast<int>(row.value), column, cell.release());
+}
+
+void IndirectDataAnalysisElwinTab::setCellText(const QString &text, FitDomainIndex row, int column) {
+  m_dataTable->item(static_cast<int>(row.value), column)->setText(text);
+}
+
+int IndirectDataAnalysisElwinTab::workspaceIndexColumn() const { return 1; }
+
+void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &headers) {
+  m_dataTable->setColumnCount(headers.size());
+  m_dataTable->setHorizontalHeaderLabels(headers);
+
+  auto header = m_dataTable->horizontalHeader();
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  header->setResizeMode(0, QHeaderView::Stretch);
+#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  header->setSectionResizeMode(0, QHeaderView::Stretch);
+#endif
+}
+
+void IndirectDataAnalysisElwinTab::removeSelectedData() {
+  auto selectedIndices = m_dataTable->selectionModel()->selectedIndexes();
+  std::sort(selectedIndices.begin(), selectedIndices.end());
+  for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
+    --item;
+    m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
+  }
+  updateTableFromModel();
+  updateAvailableSpectra();
+}
+
+/**
+ * Handles a new set of input files being entered.
+ *
+ * Updates preview selection combo box.
+ */
+void IndirectDataAnalysisElwinTab::newInputFilesFromDialog(IAddWorkspaceDialog const *dialog) {
+  // Clear the existing list of files
+  if (m_dataModel->getNumberOfWorkspaces().value < 2)
+    m_uiForm.cbPreviewFile->clear();
+
+  // Populate the combo box with the filenames
+  QString workspaceNames;
+  QString filename;
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    workspaceNames = QString::fromStdString(indirectDialog->workspaceName());
+    filename = QString::fromStdString(indirectDialog->getFileName());
+  }
+
+  m_uiForm.cbPreviewFile->addItem(workspaceNames, filename);
+
+  // Default to the first file
+  m_uiForm.cbPreviewFile->setCurrentIndex(0);
+  QString const wsname = m_uiForm.cbPreviewFile->currentText();
+  auto const inputWs = getADSMatrixWorkspace(wsname.toStdString());
+  setInputWorkspace(inputWs);
+
+  const auto range = getXRangeFromWorkspace(inputWs);
+
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
+                   m_properties["IntegrationEnd"], range);
+  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
+                   m_properties["BackgroundEnd"], range);
+}
+
+void IndirectDataAnalysisElwinTab::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
+  m_uiForm.elwinPreviewSpec->setCurrentIndex(0);
+  m_uiForm.spPlotSpectrum->setMinimum(boost::numeric_cast<int>(minimum.value));
+  m_uiForm.spPlotSpectrum->setMaximum(boost::numeric_cast<int>(maximum.value));
+}
+
+void IndirectDataAnalysisElwinTab::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
+                                                       const std::vector<WorkspaceIndex>::const_iterator &to) {
+  m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
+  m_uiForm.cbPlotSpectrum->clear();
+
+  for (auto spectrum = from; spectrum < to; ++spectrum)
+    m_uiForm.cbPlotSpectrum->addItem(QString::number(spectrum->value));
+}
+
+void IndirectDataAnalysisElwinTab::updateAvailableSpectra() {
+  auto spectra = m_dataModel->getSpectra(findWorkspaceID());
+  if (m_uiForm.inputChoice->currentIndex() == 1) {
+    if (spectra.isContinuous()) {
+      auto const minmax = spectra.getMinMax();
+      setAvailableSpectra(minmax.first, minmax.second);
+    } else {
+      setAvailableSpectra(spectra.begin(), spectra.end());
+    }
+  }
+}
+
+size_t IndirectDataAnalysisElwinTab::findWorkspaceID() {
+  auto currentWorkspace = m_uiForm.cbPreviewFile->currentText().toStdString();
+  auto allWorkspaces = m_dataModel->getWorkspaceNames();
+  auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
+  size_t workspaceID = findWorkspace - allWorkspaces.begin();
+  return workspaceID;
+}
+
+void IndirectDataAnalysisElwinTab::checkLoadedFiles() {
+  UserInputValidator uiv;
+  size_t noOfFiles = m_uiForm.dsInputFiles->getFilenames().size();
+  auto const suffixes = getFilteredSuffixes(m_uiForm.dsInputFiles->getFilenames());
+  if (suffixes.size() != noOfFiles) {
+    uiv.addErrorMessage("The input files must be all _red or all _sqw.");
+    m_uiForm.dsInputFiles->clear();
+  }
+  QString error = uiv.generateErrorMessage();
+  showMessageBox(error);
+
+  if (error.isEmpty()) {
+    newInputFiles();
+    plotInput();
+    updateIntegrationRange();
+  }
+}
+
+} // namespace MantidQt::CustomInterfaces::IDA

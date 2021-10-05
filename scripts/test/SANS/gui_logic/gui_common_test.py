@@ -87,6 +87,10 @@ class GuiCommonTest(unittest.TestCase):
         check_all_match(merged_strings, ReductionMode.MERGED)
         check_all_match(all_strings, ReductionMode.ALL)
 
+    def test_get_reduction_mode_ignores_blank_str(self):
+        for blank_str in ["", "   ", "\t"]:
+            self.assertEqual(ReductionMode.NOT_SET, get_reduction_mode_from_gui_selection(blank_str))
+
     def test_that_batch_file_dir_returns_none_if_no_forwardslash(self):
         a_path = "test_batch_file_path.csv"
         result = get_batch_file_dir_from_path(a_path)

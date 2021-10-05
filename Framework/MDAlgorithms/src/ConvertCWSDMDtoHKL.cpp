@@ -30,8 +30,7 @@
 
 #include <fstream>
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -363,5 +362,4 @@ void ConvertCWSDMDtoHKL::getRange(const std::vector<Kernel::V3D> &vec_hkl, std::
   }
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

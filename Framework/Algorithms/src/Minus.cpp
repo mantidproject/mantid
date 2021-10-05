@@ -10,8 +10,7 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Minus)
 
@@ -185,5 +184,4 @@ std::string Minus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr 
   } else
     return BinaryOperation::checkSizeCompatibility(lhs, rhs);
 }
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

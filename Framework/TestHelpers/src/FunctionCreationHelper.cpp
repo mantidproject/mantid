@@ -7,8 +7,7 @@
 #include "MantidTestHelpers/FunctionCreationHelper.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid {
-namespace TestHelpers {
+namespace Mantid::TestHelpers {
 
 std::string FunctionChangesNParams::name() const { return "FunctionChangesNParams"; }
 
@@ -56,5 +55,4 @@ void FunctionChangesNParams::functionDeriv1D(Mantid::API::Jacobian *out, const d
   }
 }
 
-} // namespace TestHelpers
-} // namespace Mantid
+} // namespace Mantid::TestHelpers

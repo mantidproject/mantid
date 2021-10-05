@@ -27,9 +27,7 @@
 
 using namespace Mantid::CurveFitting::Functions;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Algorithms {
+namespace Mantid::CurveFitting::Algorithms {
 
 void setMultiDataProperties(const Mantid::API::IAlgorithm &fittingAlgorithm, Mantid::API::IAlgorithm &fit,
                             const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &suffix) {
@@ -273,8 +271,8 @@ void DoublePulseFit::setOutputProperties() {
   m_multiDomain = function->getNumberDomains() > 1;
 }
 
-void DoublePulseFit::runFitAlgorith(Mantid::API::IAlgorithm_sptr fitAlg, Mantid::API::IFunction_sptr function,
-                                    int maxIterations) {
+void DoublePulseFit::runFitAlgorith(const Mantid::API::IAlgorithm_sptr &fitAlg,
+                                    const Mantid::API::IFunction_sptr &function, int maxIterations) {
   const bool convolveMembers = getProperty("ConvolveMembers");
   const bool ignoreInvalidData = getProperty("IgnoreInvalidData");
   const bool calcErrors = getProperty("CalcErrors");
@@ -303,7 +301,8 @@ void DoublePulseFit::runFitAlgorith(Mantid::API::IAlgorithm_sptr fitAlg, Mantid:
   fitAlg->executeAsChildAlg();
 }
 
-void DoublePulseFit::createOutput(Mantid::API::IAlgorithm_sptr fitAlg, Mantid::API::IFunction_sptr function) {
+void DoublePulseFit::createOutput(const Mantid::API::IAlgorithm_sptr &fitAlg,
+                                  const Mantid::API::IFunction_sptr &function) {
   Mantid::API::IFunction_sptr extractedFunction;
   if (auto convFunction = std::dynamic_pointer_cast<Mantid::CurveFitting::Functions::Convolution>(function)) {
     extractedFunction = extractInnerFunction(convFunction);
@@ -341,6 +340,4 @@ void DoublePulseFit::createOutput(Mantid::API::IAlgorithm_sptr fitAlg, Mantid::A
   setProperty("Function", extractedFunction);
 }
 
-} // namespace Algorithms
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Algorithms

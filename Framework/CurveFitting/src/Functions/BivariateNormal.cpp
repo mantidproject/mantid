@@ -26,9 +26,7 @@
 
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace CurveFitting {
-namespace Functions {
+namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
 using namespace Constraints;
@@ -645,6 +643,4 @@ double BivariateNormal::initCoeff(const HistogramY &D, const HistogramY &X, cons
   return penalty;
 }
 
-} // namespace Functions
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting::Functions

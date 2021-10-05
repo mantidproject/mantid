@@ -11,8 +11,7 @@
 #include <QStyle>
 #include <QToolButton>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 LineEditWithClear::LineEditWithClear(QWidget *parent) : QLineEdit(parent) {
   clearButton = new QToolButton(this);
@@ -38,5 +37,4 @@ void LineEditWithClear::resizeEvent(QResizeEvent * /*unused*/) {
 }
 
 void LineEditWithClear::updateCloseButton(const QString &text) { clearButton->setVisible(!text.isEmpty()); }
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

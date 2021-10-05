@@ -32,8 +32,7 @@
 
 #include <boost/math/distributions/students_t.hpp>
 
-namespace Mantid {
-namespace CurveFitting {
+namespace Mantid::CurveFitting {
 
 namespace {
 
@@ -157,8 +156,6 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(const std::string &su
   m_errorColumnPropertyName = "ErrColumn" + suffix;
 
   if (addProp) {
-    auto mustBePositive = std::make_shared<BoundedValidator<int>>();
-    mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
                     "A value of x in, or on the low x boundary of, the first bin to "
                     "include in\n"
@@ -169,6 +166,7 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(const std::string &su
                     "(default the highest value of x)");
     if (m_domainType != Simple && !m_manager->existsProperty(m_maxSizePropertyName)) {
       auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+      mustBePositive->setLower(0);
       declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
                       "The maximum number of values per a simple domain.");
     }
@@ -783,5 +781,4 @@ void TableWorkspaceDomainCreator::setAndValidateWorkspace(const API::Workspace_s
     throw std::invalid_argument("X or Y Columns not found");
   }
 }
-} // namespace CurveFitting
-} // namespace Mantid
+} // namespace Mantid::CurveFitting

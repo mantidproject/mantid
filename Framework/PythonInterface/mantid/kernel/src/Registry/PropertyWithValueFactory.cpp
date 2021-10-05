@@ -30,9 +30,7 @@ using namespace boost::python;
 using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface;
 
-namespace Mantid {
-namespace PythonInterface {
-namespace Registry {
+namespace Mantid::PythonInterface::Registry {
 namespace {
 /// Lookup map type
 using PyTypeIndex = std::map<const PyTypeObject *, std::shared_ptr<PropertyValueHandler>>;
@@ -271,6 +269,4 @@ const std::string PropertyWithValueFactory::isArray(PyObject *const object) {
     return std::string("");
   }
 }
-} // namespace Registry
-} // namespace PythonInterface
-} // namespace Mantid
+} // namespace Mantid::PythonInterface::Registry

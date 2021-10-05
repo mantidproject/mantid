@@ -59,6 +59,8 @@ public:
     TS_ASSERT_EQUALS(goodfrm, 14320);
     double firstGoodData = ld.getProperty("FirstGoodData");
     TS_ASSERT_EQUALS(firstGoodData, 0.384);
+    double lastGoodData = ld.getProperty("LastGoodData");
+    TS_ASSERT_EQUALS(lastGoodData, 32.768);
     double timeZero = ld.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
     std::vector<double> timeZeroVector = ld.getProperty("TimeZeroList");
@@ -340,6 +342,8 @@ public:
     TS_ASSERT_EQUALS(goodfrm, 25000);
     double firstGoodData = ld.getProperty("FirstGoodData");
     TS_ASSERT_EQUALS(firstGoodData, 0.384);
+    double lastGoodData = ld.getProperty("LastGoodData");
+    TS_ASSERT_EQUALS(lastGoodData, 32.768);
     double timeZero = ld.getProperty("TimeZero");
     TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
 
@@ -363,6 +367,28 @@ public:
     // Check spectrum 49 is none zero
     TS_ASSERT_DELTA(output2D->y(48).sum(), 25000, 1e-5);
     TS_ASSERT_DELTA(output2D->y(49).sum(), 0, 1e-5);
+
+    // check loaded period info
+    std::string labels = run.getProperty("period_labels")->value();
+    TS_ASSERT_EQUALS(labels, "ch49 1 ch50 1;ch49 1 ch50 0;ch49 0 ch50 1;ch49 0 ch50 0");
+
+    std::string sequences = run.getProperty("period_sequences")->value();
+    TS_ASSERT_EQUALS(sequences, "50;50;50;50");
+
+    std::string type = run.getProperty("period_type")->value();
+    TS_ASSERT_EQUALS(type, "1;1;1;1");
+
+    std::string requested = run.getProperty("frames_period_requested")->value();
+    TS_ASSERT_EQUALS(requested, "500;500;500;500");
+
+    std::string raw = run.getProperty("frames_period_raw")->value();
+    TS_ASSERT_EQUALS(raw, "25002;25000;25000;25004");
+
+    std::string output = run.getProperty("period_output")->value();
+    TS_ASSERT_EQUALS(output, "0;1;2;3");
+
+    std::string counts = run.getProperty("total_counts_period")->value();
+    TS_ASSERT_EQUALS(counts, "0.050002;0.025000;0.025000;0.000000");
   }
   void testExecMultiPeriodAllPeriods() {
     LoadMuonNexusV2 ld;
@@ -392,6 +418,8 @@ public:
       TS_ASSERT_EQUALS(goodfrm, goodFrames[i]);
       double firstGoodData = ld.getProperty("FirstGoodData");
       TS_ASSERT_EQUALS(firstGoodData, 0.384);
+      double lastGoodData = ld.getProperty("LastGoodData");
+      TS_ASSERT_EQUALS(lastGoodData, 32.768);
       double timeZero = ld.getProperty("TimeZero");
       TS_ASSERT_DELTA(timeZero, 0.1599999, 1e-5);
 
@@ -416,6 +444,28 @@ public:
       // above
       TS_ASSERT_DELTA(output2D->y(48).sum(), histogram_49_data[i], 1e-5);
       TS_ASSERT_DELTA(output2D->y(49).sum(), histogram_50_data[i], 1e-5);
+
+      // check loaded period info
+      std::string labels = run.getProperty("period_labels")->value();
+      TS_ASSERT_EQUALS(labels, "ch49 1 ch50 1;ch49 1 ch50 0;ch49 0 ch50 1;ch49 0 ch50 0");
+
+      std::string sequences = run.getProperty("period_sequences")->value();
+      TS_ASSERT_EQUALS(sequences, "50;50;50;50");
+
+      std::string type = run.getProperty("period_type")->value();
+      TS_ASSERT_EQUALS(type, "1;1;1;1");
+
+      std::string requested = run.getProperty("frames_period_requested")->value();
+      TS_ASSERT_EQUALS(requested, "500;500;500;500");
+
+      std::string raw = run.getProperty("frames_period_raw")->value();
+      TS_ASSERT_EQUALS(raw, "25002;25000;25000;25004");
+
+      std::string output = run.getProperty("period_output")->value();
+      TS_ASSERT_EQUALS(output, "0;1;2;3");
+
+      std::string counts = run.getProperty("total_counts_period")->value();
+      TS_ASSERT_EQUALS(counts, "0.050002;0.025000;0.025000;0.000000");
     }
   }
   void testExecMultiPeriodWithDeadtimeTable() {

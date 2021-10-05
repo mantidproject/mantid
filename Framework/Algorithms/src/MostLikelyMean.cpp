@@ -12,8 +12,7 @@
 
 #include "boost/multi_array.hpp"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
@@ -74,5 +73,4 @@ void MostLikelyMean::exec() {
   setProperty("Output", input[std::distance(sums.cbegin(), minIndex)]);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

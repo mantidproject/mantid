@@ -16,8 +16,7 @@
 
 #include <sstream>
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 using namespace API;
 using namespace DataObjects;
 using namespace Kernel;
@@ -378,8 +377,8 @@ void ResampleX::exec() {
         el.generateHistogram(xValues, y_data, e_data);
 
         // Copy the data over.
-        outputWS->mutableY(wkspIndex) = std::move(y_data);
-        outputWS->mutableE(wkspIndex) = std::move(e_data);
+        outputWS->mutableY(wkspIndex) = y_data;
+        outputWS->mutableE(wkspIndex) = e_data;
 
         // Report progress
         prog.report(name());
@@ -488,5 +487,4 @@ void ResampleX::exec() {
   } // end if (inputeventWS != NULL)
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

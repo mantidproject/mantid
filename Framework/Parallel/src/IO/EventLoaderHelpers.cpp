@@ -6,10 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 
-namespace Mantid {
-namespace Parallel {
-namespace IO {
-namespace EventLoader {
+namespace Mantid::Parallel::IO::EventLoader {
 
 std::vector<size_t> readBankSizes(const H5::Group &group, const std::vector<std::string> &bankNames) {
   std::vector<size_t> bankSizes;
@@ -25,7 +22,4 @@ H5::DataType readDataType(const H5::Group &group, const std::vector<std::string>
   return group.openDataSet(bankNames.front() + "/" + name).getDataType();
 }
 
-} // namespace EventLoader
-} // namespace IO
-} // namespace Parallel
-} // namespace Mantid
+} // namespace Mantid::Parallel::IO::EventLoader

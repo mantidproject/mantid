@@ -556,12 +556,12 @@ TMDE(void MDBox)::generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFu
  *from these
  *        dimensions to the distance (squared) from the center of the sphere.
  * @param radiusSquared :: radius^2 below which to integrate
- * @param[out] signal :: set to the integrated signal
+ * @param[out] integratedSignal :: set to the integrated signal
  * @param[out] errorSquared :: set to the integrated squared error.
  * @param innerRadiusSquared :: radius^2 above which to integrate
  */
 TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform, const coord_t radiusSquared,
-                                  signal_t &signal, signal_t &errorSquared, const coord_t innerRadiusSquared,
+                                  signal_t &integratedSignal, signal_t &errorSquared, const coord_t innerRadiusSquared,
                                   const bool useOnePercentBackgroundCorrection) const {
   // If the box is cached to disk, you need to retrieve it
   const std::vector<MDE> &events = this->getConstEvents();
@@ -571,7 +571,7 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform, 
       coord_t out[nd];
       radiusTransform.apply(it.getCenter(), out);
       if (out[0] < radiusSquared) {
-        signal += static_cast<signal_t>(it.getSignal());
+        integratedSignal += static_cast<signal_t>(it.getSignal());
         errorSquared += static_cast<signal_t>(it.getErrorSquared());
       }
     }
@@ -597,7 +597,7 @@ TMDE(void MDBox)::integrateSphere(Mantid::API::CoordTransform &radiusTransform, 
         useOnePercentBackgroundCorrection ? static_cast<size_t>(0.99 * static_cast<double>(vals.size())) : vals.size();
 
     for (size_t k = 0; k < endIndex; k++) {
-      signal += vals[k].first;
+      integratedSignal += vals[k].first;
       errorSquared += vals[k].second;
     }
   }

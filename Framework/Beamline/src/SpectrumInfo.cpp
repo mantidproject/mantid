@@ -8,8 +8,7 @@
 #include "MantidKernel/make_cow.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-namespace Mantid {
-namespace Beamline {
+namespace Mantid::Beamline {
 
 SpectrumInfo::SpectrumInfo(const size_t numberOfDetectors)
     : m_spectrumDefinition(Kernel::make_cow<std::vector<SpectrumDefinition>>(numberOfDetectors)) {}
@@ -47,5 +46,4 @@ const Kernel::cow_ptr<std::vector<SpectrumDefinition>> &SpectrumInfo::sharedSpec
   return m_spectrumDefinition;
 }
 
-} // namespace Beamline
-} // namespace Mantid
+} // namespace Mantid::Beamline

@@ -18,8 +18,7 @@
 #include <cstdio>
 #include <fstream>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SavePHX)
@@ -107,5 +106,4 @@ void SavePHX::exec() {
   outPHX_file.close();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

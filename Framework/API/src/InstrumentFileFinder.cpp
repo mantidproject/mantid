@@ -31,8 +31,8 @@ class DummyException {
 public:
   std::string m_validFrom;
   std::string m_validTo;
-  DummyException(const std::string &validFrom, const std::string &validTo)
-      : m_validFrom(validFrom), m_validTo(validTo) {}
+  DummyException(std::string validFrom, std::string validTo)
+      : m_validFrom(std::move(validFrom)), m_validTo(std::move(validTo)) {}
 };
 // SAX content handler for grapping stuff quickly from IDF
 class myContentHandler : public Poco::XML::ContentHandler {

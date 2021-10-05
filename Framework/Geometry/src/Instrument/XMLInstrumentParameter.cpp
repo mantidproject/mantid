@@ -17,9 +17,9 @@
 #include <boost/regex.hpp>
 #include <ctime>
 #include <fstream>
+#include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 namespace {
 Kernel::Logger g_log("XMLInstrumentParameter");
 }
@@ -51,18 +51,21 @@ using namespace Kernel;
  *  @param description :: text description of the parameter
  *  @param visible :: whether the parameter should be visible in InstrumentViewer
  */
-XMLInstrumentParameter::XMLInstrumentParameter(
-    const std::string &logfileID, const std::string &value, const std::shared_ptr<Kernel::Interpolation> &interpolation,
-    const std::string &formula, const std::string &formulaUnit, const std::string &resultUnit,
-    const std::string &paramName, const std::string &type, const std::string &tie,
-    const std::vector<std::string> &constraint, std::string &penaltyFactor, const std::string &fitFunc,
-    const std::string &extractSingleValueAs, const std::string &eq, const Geometry::IComponent *comp,
-    double angleConvertConst, const std::string &description, const std::string &visible)
-    : m_logfileID(logfileID), m_value(value), m_paramName(paramName), m_type(type), m_tie(tie),
-      m_constraint(constraint), m_penaltyFactor(penaltyFactor), m_fittingFunction(fitFunc), m_formula(formula),
-      m_formulaUnit(formulaUnit), m_resultUnit(resultUnit), m_interpolation(interpolation),
-      m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp), m_angleConvertConst(angleConvertConst),
-      m_description(""), m_visible(visible) {
+XMLInstrumentParameter::XMLInstrumentParameter(std::string logfileID, std::string value,
+                                               std::shared_ptr<Kernel::Interpolation> interpolation,
+                                               std::string formula, std::string formulaUnit, std::string resultUnit,
+                                               std::string paramName, std::string type, std::string tie,
+                                               std::vector<std::string> constraint, std::string &penaltyFactor,
+                                               std::string fitFunc, std::string extractSingleValueAs, std::string eq,
+                                               const Geometry::IComponent *comp, double angleConvertConst,
+                                               const std::string &description, std::string visible)
+    : m_logfileID(std::move(logfileID)), m_value(std::move(value)), m_paramName(std::move(paramName)),
+      m_type(std::move(type)), m_tie(std::move(tie)), m_constraint(std::move(constraint)),
+      m_penaltyFactor(penaltyFactor), m_fittingFunction(std::move(fitFunc)), m_formula(std::move(formula)),
+      m_formulaUnit(std::move(formulaUnit)), m_resultUnit(std::move(resultUnit)),
+      m_interpolation(std::move(interpolation)), m_extractSingleValueAs(std::move(extractSingleValueAs)),
+      m_eq(std::move(eq)), m_component(comp), m_angleConvertConst(angleConvertConst), m_description(""),
+      m_visible(std::move(visible)) {
   if (!description.empty()) { // remove multiple spaces
     static const boost::regex re("\\s+");
     std::string desc = boost::regex_replace(description, re, " ");
@@ -198,5 +201,4 @@ double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logD
   }
 }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

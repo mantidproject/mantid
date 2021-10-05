@@ -14,8 +14,7 @@ using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Kernel::Exception::InternetError;
 using Mantid::Kernel::Exception::NotImplementedError;
 
-namespace Mantid {
-namespace TestHelpers {
+namespace Mantid::TestHelpers {
 
 MockONCatAPI::MockONCatAPI(const MockResponseMap &responseMap)
     : Mantid::Kernel::InternetHelper(), m_responseMap(responseMap), m_responseCallCounts() {
@@ -91,5 +90,4 @@ IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
   return tokenStore;
 }
 
-} // namespace TestHelpers
-} // namespace Mantid
+} // namespace Mantid::TestHelpers

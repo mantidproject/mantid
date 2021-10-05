@@ -22,8 +22,7 @@ namespace {
 const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", "PANTHER", "SHARP"}};
 } // namespace
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 using namespace Kernel;
 using namespace API;
@@ -345,11 +344,11 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry, const std::vec
   // load the counts from the file into memory
   data.load();
 
-  NXClass monitor = entry.openNXGroup(m_monitorName);
+  NXClass moni = entry.openNXGroup(m_monitorName);
 
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
-  if (monitor.containsDataSet("time_of_flight")) {
+  if (moni.containsDataSet("time_of_flight")) {
     if (convertToTOF) {
       for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
         X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
@@ -444,5 +443,4 @@ void LoadILLTOF2::runLoadInstrument() {
   loadInst->execute();
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

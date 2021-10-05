@@ -17,8 +17,7 @@
 #include <iterator>
 #include <utility>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 using Kernel::V3D;
 
@@ -175,5 +174,4 @@ void InstrumentRayTracer::fireRay(Track &testRay) const {
 //  */
 // void slowIntersectCheck(std::shared_ptr<IComponent> component, Track &
 // testRay) const;
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

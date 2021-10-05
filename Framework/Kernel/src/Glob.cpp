@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Glob.h"
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 
 /**
  *    Creates a set of files that match the given pathPattern.
@@ -47,5 +46,4 @@ void Glob::glob(const Poco::Path &pathPattern, std::set<std::string> &files, int
 #endif
 }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

@@ -39,7 +39,7 @@ private:
   void applyDetailedBalance(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Get temperature
-  std::string getTemperature(API::IMDEventWorkspace_sptr mdws);
+  std::string getTemperature(const API::IMDEventWorkspace_sptr &mdws);
   /// Check input workspace dimension
   std::string checkInputMDDimension();
 

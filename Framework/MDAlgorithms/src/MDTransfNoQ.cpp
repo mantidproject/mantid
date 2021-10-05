@@ -8,8 +8,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
 
-namespace Mantid {
-namespace MDAlgorithms {
+namespace Mantid::MDAlgorithms {
 
 // register the class, whith conversion factory under NoQ name
 DECLARE_MD_TRANSFID(MDTransfNoQ, CopyToMD)
@@ -182,5 +181,4 @@ void MDTransfNoQ::setDisplayNormalization(Mantid::API::IMDWorkspace_sptr mdWorks
   setter(mdWorkspace, underlyingWorkspace, isQ);
 }
 
-} // namespace MDAlgorithms
-} // namespace Mantid
+} // namespace Mantid::MDAlgorithms

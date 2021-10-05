@@ -29,8 +29,12 @@ namespace Kernel {
 class MANTID_KERNEL_DLL MultiFileValidator : public TypedValidator<std::vector<std::vector<std::string>>> {
 public:
   MultiFileValidator();
-  MultiFileValidator(const MultiFileValidator &mfv);
   explicit MultiFileValidator(const std::vector<std::string> &extensions, bool testFilesExist = true);
+
+  // Copy constructor / operator
+  friend void swap(MultiFileValidator &obj1, MultiFileValidator &obj2);
+  MultiFileValidator(const MultiFileValidator &mfv);
+  MultiFileValidator &operator=(MultiFileValidator);
 
   IValidator_sptr clone() const override;
 

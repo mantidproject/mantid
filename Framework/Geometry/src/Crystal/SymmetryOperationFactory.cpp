@@ -11,8 +11,7 @@
 #include <boost/algorithm/string.hpp>
 #include <memory>
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Creates a SymmetryOperation object from its identifier.
 SymmetryOperation SymmetryOperationFactoryImpl::createSymOp(const std::string &identifier) {
@@ -82,5 +81,4 @@ void SymmetryOperationFactoryImpl::subscribe(const std::string &alias, const Sym
 /// Private default constructor.
 SymmetryOperationFactoryImpl::SymmetryOperationFactoryImpl() : m_prototypes() { Kernel::LibraryManager::Instance(); }
 
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

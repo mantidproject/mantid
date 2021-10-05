@@ -85,8 +85,7 @@ void addColumnHeadings(Mantid::DataObjects::TableWorkspace &vertexes, const std:
   }
 }
 } // namespace
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 /**
  * Constructor
@@ -102,12 +101,12 @@ namespace DataObjects {
  * @param d1NumBins : number of bins in the second dimension
  * @param calc : Pointer to CalculateReflectometry object.
  */
-ReflectometryTransform::ReflectometryTransform(const std::string &d0Label, const std::string &d0ID, double d0Min,
-                                               double d0Max, const std::string &d1Label, const std::string &d1ID,
-                                               double d1Min, double d1Max, size_t d0NumBins, size_t d1NumBins,
-                                               CalculateReflectometry *calc)
+ReflectometryTransform::ReflectometryTransform(std::string d0Label, std::string d0ID, double d0Min, double d0Max,
+                                               std::string d1Label, std::string d1ID, double d1Min, double d1Max,
+                                               size_t d0NumBins, size_t d1NumBins, CalculateReflectometry *calc)
     : m_d0NumBins(d0NumBins), m_d1NumBins(d1NumBins), m_d0Min(d0Min), m_d1Min(d1Min), m_d0Max(d0Max), m_d1Max(d1Max),
-      m_d0Label(d0Label), m_d1Label(d1Label), m_d0ID(d0ID), m_d1ID(d1ID), m_calculator(calc) {
+      m_d0Label(std::move(d0Label)), m_d1Label(std::move(d1Label)), m_d0ID(std::move(d0ID)), m_d1ID(std::move(d1ID)),
+      m_calculator(calc) {
   if (d0Min >= d0Max || d1Min >= d1Max)
     throw std::invalid_argument("The supplied minimum values must be less than the maximum values.");
 }
@@ -124,8 +123,8 @@ ReflectometryTransform::createMDWorkspace(const Mantid::Geometry::IMDDimension_s
                                           const BoxController_sptr &boxController) const {
   auto ws = std::make_shared<MDEventWorkspace2Lean>();
 
-  ws->addDimension(std::move(a));
-  ws->addDimension(std::move(b));
+  ws->addDimension(a);
+  ws->addDimension(b);
 
   BoxController_sptr wsbc = ws->getBoxController(); // Get the box controller
   wsbc->setSplitInto(boxController->getSplitInto(0));
@@ -275,7 +274,7 @@ ReflectometryTransform::executeMD(const Mantid::API::MatrixWorkspace_const_sptr 
   auto dim1 = std::make_shared<MDHistoDimension>(m_d1Label, m_d1ID, *frame, static_cast<Mantid::coord_t>(m_d1Min),
                                                  static_cast<Mantid::coord_t>(m_d1Max), m_d1NumBins);
 
-  auto ws = createMDWorkspace(dim0, dim1, std::move(boxController));
+  auto ws = createMDWorkspace(dim0, dim1, boxController);
 
   auto spectraAxis = inputWs->getAxis(1);
   for (size_t index = 0; index < inputWs->getNumberHistograms(); ++index) {
@@ -283,8 +282,8 @@ ReflectometryTransform::executeMD(const Mantid::API::MatrixWorkspace_const_sptr 
     auto wavelengths = inputWs->readX(index);
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
-    const double theta_final = spectraAxis->getValue(index);
-    m_calculator->setThetaFinal(theta_final);
+    const double twoTheta = spectraAxis->getValue(index);
+    m_calculator->setTwoTheta(twoTheta);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double &wavelength = 0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
@@ -334,8 +333,8 @@ ReflectometryTransform::execute(const Mantid::API::MatrixWorkspace_const_sptr &i
     auto wavelengths = inputWs->readX(index);
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
-    const double theta_final = spectraAxis->getValue(index);
-    m_calculator->setThetaFinal(theta_final);
+    const double twoTheta = spectraAxis->getValue(index);
+    m_calculator->setTwoTheta(twoTheta);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength = 0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
@@ -488,5 +487,4 @@ ReflectometryTransform::executeNormPoly(const MatrixWorkspace_const_sptr &inputW
 
   return outWS;
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

@@ -68,6 +68,9 @@ public:
   /// Function to return all of the seeAlso algorithms related to this algorithm
   virtual const std::vector<std::string> seeAlso() const = 0;
 
+  /// Expiration date (in ISO8601 format) for the algorithm aliases. Empty if no expiration date
+  virtual const std::string aliasDeprecated() const = 0;
+
   /// function to return any aliases of the algorithm.
   virtual const std::string alias() const = 0;
 

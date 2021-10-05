@@ -11,10 +11,7 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/NexusShapeFactory.h"
 
-namespace Mantid {
-namespace NexusGeometry {
-
-namespace detail {
+namespace Mantid::NexusGeometry::detail {
 
 TubeBuilder::TubeBuilder(const Mantid::Geometry::IObject &pixelShape, const Eigen::Vector3d &firstDetectorPosition,
                          int firstDetectorId)
@@ -104,6 +101,4 @@ bool TubeBuilder::checkCoLinear(const Eigen::Vector3d &pos) const {
 
   return denomVec.norm() == 0.0;
 }
-} // namespace detail
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry::detail

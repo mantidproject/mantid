@@ -66,6 +66,15 @@ def _get_splash_image():
                                                                 Qt.SmoothTransformation)
 
 
+def _get_interface_dir():
+    """
+    Returns the path to the directory containing the mantidqt interfaces launch scripts
+    This is the path to the mantidqtinterfaces package
+    """
+    import mantidqtinterfaces
+    return os.path.dirname(mantidqtinterfaces.__file__)
+
+
 SPLASH = QSplashScreen(_get_splash_image(), Qt.WindowStaysOnTopHint)
 SPLASH.show()
 SPLASH.showMessage("Starting...", int(Qt.AlignBottom | Qt.AlignLeft
@@ -369,7 +378,8 @@ class MainWindow(QMainWindow):
     def populate_interfaces_menu(self):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
-        interface_dir = ConfigService['mantidqt.python_interfaces_directory']
+        interface_dir = _get_interface_dir()
+
         self.interface_list, registers_to_run = self._discover_python_interfaces(interface_dir)
         self._discover_cpp_interfaces(self.interface_list)
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')

@@ -30,8 +30,7 @@ using Types::Core::time_duration;
 
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 DECLARE_ALGORITHM(GenerateEventsFilter)
 
 /** Constructor
@@ -51,8 +50,7 @@ void GenerateEventsFilter::init() {
       "An input Matrix workspace.");
 
   declareProperty(std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Direction::Output),
-                  "The name to use for the output SplittersWorkspace object, "
-                  "i.e., the filter.");
+                  "The name to use for the output SplittersWorkspace object, ie the filter.");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>("InformationWorkspace", "", Direction::Output),
@@ -62,42 +60,38 @@ void GenerateEventsFilter::init() {
 
   // Time (general) range
   declareProperty("StartTime", "",
-                  "The start time, such that all events before this time are filtered out. "
-                  "It could be (1) relative time to run start time "
-                  "in unit as specified property 'UnitOfTime' or "
-                  "(2) absolute time. "
-                  "Absolute time takes a string in format as 1990-01-01T00:00:00, "
-                  "while the relative time takes integer or float. ");
+                  "The start time, such that all events before this time are filtered out: it could be \n"
+                  "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
+                  "(2) absolute time\n"
+                  "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
+                  "integer or float.");
 
   declareProperty("StopTime", "",
-                  "The stop time, such that all events after this time are filtered out. "
-                  "It could be (1) relative time to run start time "
-                  "in unit as specified property 'UnitOfTime' or "
-                  "(2) absolute time. "
-                  "Absolute time takes a string in format as 1990-01-01T00:00:00, "
-                  "while the relative time takes integer or float. ");
+                  "The stop time, such that all events after this time are filtered out: it could be \n"
+                  "(1) relative time to run start time in unit as specified property 'UnitOfTime'\n"
+                  "(2) absolute time\n"
+                  "Absolute time takes a string in format as 1990-01-01T00:00:00, while the relative time takes "
+                  "integer or float.");
 
   // Split by time (only) in steps
-  declareProperty(std::make_unique<ArrayProperty<double>>("TimeInterval"),
-                  "Array for lengths of time intervals for splitters.  "
-                  "If the array is empty, then there will be one splitter "
-                  "created from StartTime and StopTime. "
-                  "If the array has one value, then all splitters will have "
-                  "same time intervals. "
-                  "If the size of the array is larger than one, then the "
-                  "splitters can have various time interval values.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("TimeInterval"),
+      "Array for lengths of time intervals for splitters: \n"
+      "if the array is empty, then there will be one splitter created from StartTime and StopTime; \n"
+      "if the array has one value, then if this value is positive, all splitters will have same time intervals, else "
+      "the time intervals will be exponentially increasing;\n"
+      "if the size of the array is larger than one, then the splitters can have various time interval values.");
   setPropertySettings("TimeInterval", std::make_unique<VisibleWhenProperty>("LogName", IS_EQUAL_TO, ""));
 
   std::vector<std::string> timeoptions{"Seconds", "Nanoseconds", "Percent"};
   declareProperty("UnitOfTime", "Seconds", std::make_shared<Kernel::StringListValidator>(timeoptions),
-                  "StartTime, StopTime and DeltaTime can be given in various unit."
-                  "The unit can be 'Seconds' or 'Nanoseconds' from run start time."
-                  "They can also be defined as 'Percentage' of total run time.");
+                  "StartTime, StopTime and DeltaTime can be given in various unit; the unit can be 'Seconds' or "
+                  "'Nanoseconds' from run start time or can also be defined as 'Percentage' of total run time.");
 
   // Split by log value (only) in steps
-  declareProperty("LogName", "",
-                  "Name of the sample log to use to filter.\n"
-                  "For example, the pulse charge is recorded in 'ProtonCharge'.");
+  declareProperty(
+      "LogName", "",
+      "Name of the sample log to use to filter - for example, the pulse charge is recorded in 'ProtonCharge'.");
 
   declareProperty("MinimumLogValue", EMPTY_DBL(), "Minimum log value for which to keep events.");
   setPropertySettings("MinimumLogValue", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
@@ -105,38 +99,38 @@ void GenerateEventsFilter::init() {
   declareProperty("MaximumLogValue", EMPTY_DBL(), "Maximum log value for which to keep events.");
   setPropertySettings("MaximumLogValue", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
-  declareProperty("LogValueInterval", EMPTY_DBL(),
-                  "Delta of log value to be sliced into from min log value and "
-                  "max log value.\n"
-                  "If not given, then only value ");
+  declareProperty(
+      "LogValueInterval", EMPTY_DBL(),
+      "Delta of log value to be sliced into from min log value and max log value; if not given, then only value ");
   setPropertySettings("LogValueInterval", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   std::vector<std::string> filteroptions{"Both", "Increase", "Decrease"};
   declareProperty("FilterLogValueByChangingDirection", "Both",
                   std::make_shared<Kernel::StringListValidator>(filteroptions),
-                  "d(log value)/dt can be positive and negative.  They can be put to "
-                  "different splitters."
-                  "There are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to "
-                  "d(log value)/dt can be any value, positive only and negative only "
-                  "respectively.");
+                  "d(log value)/dt can be positive and negative, they can be put to different splitters\n"
+                  "there are 3 options, 'Both', 'Increase' and 'Decrease' corresponding to d(log value)/dt being any "
+                  "value, positive only and negative only respectively.");
   setPropertySettings("FilterLogValueByChangingDirection",
                       std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   declareProperty("TimeTolerance", 0.0,
-                  "Tolerance in time for the event times to keep. "
-                  "It is used in the case to filter by single value.");
+                  "Tolerance, in seconds, for the event times to keep.  It is used in the case to filter by single "
+                  "value. How TimeTolerance is applied is highly correlated to LogBoundary and PulseFilter.  Check the "
+                  "help or algorithm documents for details.");
   setPropertySettings("TimeTolerance", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   vector<string> logboundoptions{"Centre", "Left", "Other"};
   auto logvalidator = std::make_shared<StringListValidator>(logboundoptions);
   declareProperty("LogBoundary", "Centre", logvalidator,
                   "How to treat log values as being measured in the centre of time. "
-                  "There are three options, 'Centre', 'Left' and 'Other'. ");
+                  "There are three options, 'Centre', 'Left' and 'Other'. "
+                  "This value must be set to Left if the sample log is recorded upon changing,"
+                  "which applies to most of the sample environment devices in SNS.");
   setPropertySettings("LogBoundary", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
-  declareProperty("LogValueTolerance", EMPTY_DBL(),
-                  "Tolerance of the log value to be included in filter.  It is "
-                  "used in the case to filter by multiple values.");
+  declareProperty(
+      "LogValueTolerance", EMPTY_DBL(),
+      "Tolerance of the log value to be included in filter, used in the case to filter by multiple values.");
   setPropertySettings("LogValueTolerance", std::make_unique<VisibleWhenProperty>("LogName", IS_NOT_EQUAL_TO, ""));
 
   // Output workspaces' title and name
@@ -146,11 +140,12 @@ void GenerateEventsFilter::init() {
   vector<string> processoptions{"Serial", "Parallel"};
   auto procvalidator = std::make_shared<StringListValidator>(processoptions);
   declareProperty("UseParallelProcessing", "Serial", procvalidator,
-                  "Use multiple cores to generate events filter by log values. \n"
-                  "Serial: Use a single core. Good for slow log. \n"
-                  "Parallel: Use multiple cores. Appropriate for fast log. ");
+                  "Use multiple cores to generate events filter by log values: \n"
+                  "Serial: Use a single core, good for slow log; \n"
+                  "Parallel: Use multiple cores, appropriate for fast log. ");
 
   declareProperty("NumberOfThreads", EMPTY_INT(), "Number of threads forced to use in the parallel mode. ");
+  declareProperty("UseReverseLogarithmic", false, "Use reverse logarithm for the time filtering.");
 }
 
 /** Main execute body
@@ -203,7 +198,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
     // Using default
     title = "Splitters";
   }
-  m_filterInfoWS = m_filterInfoWS = std::make_shared<TableWorkspace>();
+  m_filterInfoWS = std::make_shared<TableWorkspace>();
   m_filterInfoWS->setTitle(title);
   m_filterInfoWS->addColumn("int", "workspacegroup");
   m_filterInfoWS->addColumn("str", "title");
@@ -348,8 +343,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
   // Progress
   int64_t totaltime = m_stopTime.totalNanoseconds() - m_startTime.totalNanoseconds();
 
-  g_log.warning() << "Filter by time: start @ " << m_startTime.totalNanoseconds() << "; "
-                  << "stop @ " << m_stopTime.totalNanoseconds() << "\n";
+  g_log.information() << "Filter by time: start @ " << m_startTime.totalNanoseconds() << "; "
+                      << "stop @ " << m_stopTime.totalNanoseconds() << "\n";
 
   if (singleslot) {
     int wsindex = 0;
@@ -362,31 +357,107 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     double timeinterval = vec_timeintervals[0];
     int64_t timeslot = 0;
 
-    // Explicitly N time intervals
-    auto deltatime_ns = static_cast<int64_t>(timeinterval * m_timeUnitConvertFactorToNS);
+    int64_t runStartTime = m_dataWS->run().startTime().totalNanoseconds();
+    bool isLogarithmic = (timeinterval < 0);
+    m_isReverseLogarithmic = this->getProperty("UseReverseLogarithmic");
 
-    int64_t curtime_ns = m_startTime.totalNanoseconds();
-    int wsindex = 0;
-    while (curtime_ns < m_stopTime.totalNanoseconds()) {
-      // Calculate next.time
-      int64_t nexttime_ns = curtime_ns + deltatime_ns;
-      if (nexttime_ns > m_stopTime.totalNanoseconds())
-        nexttime_ns = m_stopTime.totalNanoseconds();
+    if (m_isReverseLogarithmic && !isLogarithmic) {
+      g_log.warning("UseReverseLogarithmic checked but linear time interval provided. Using linear time interval.");
+      m_isReverseLogarithmic = false;
+    }
+
+    if (isLogarithmic && m_startTime.totalNanoseconds() == runStartTime)
+      throw runtime_error("Cannot do logarithmic time interval if the start time is the same as the start of the run.");
+
+    auto deltatime_ns = static_cast<int64_t>(timeinterval * m_timeUnitConvertFactorToNS);
+    double factor = std::fabs(timeinterval);
+
+    int64_t startTime_ns = m_startTime.totalNanoseconds();
+    int64_t endTime_ns = m_stopTime.totalNanoseconds();
+
+    double relativeStartTime_ns = static_cast<double>(startTime_ns - runStartTime);
+    double relativeEndTime_ns = static_cast<double>(endTime_ns - runStartTime);
+
+    int64_t curtime_ns = !m_isReverseLogarithmic ? startTime_ns - runStartTime : endTime_ns - runStartTime;
+
+    int64_t initialReverseLogStep = startTime_ns - runStartTime;
+
+    int totalNumberOfSlices;
+
+    // we compute the total expected number of slices
+    if (isLogarithmic) {
+      // if logarithmic, first an approximation of the value, then the final value depends if reverseLogarithmic is
+      // used, because of the way the last bin is managed
+      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log1p(factor);
+      if (!m_isReverseLogarithmic) {
+        totalNumberOfSlices = static_cast<int>(std::ceil(logSize));
+      } else {
+        if (logSize < 1) {
+          totalNumberOfSlices = 1;
+        } else {
+          double previousBin = std::pow(1 + factor, std::floor(logSize) - 1);
+
+          // we check if the last bin can fit without being smaller than the previous one
+          if (relativeEndTime_ns - relativeStartTime_ns * previousBin * (1 + factor) >
+              relativeStartTime_ns * previousBin * factor) {
+            // case where it can
+            totalNumberOfSlices = static_cast<int>(std::ceil(logSize));
+          } else {
+            // case where it cannot and is merged with the previous one
+            totalNumberOfSlices = static_cast<int>(std::floor(logSize));
+          }
+        }
+      }
+    } else {
+      // nice linear case
+      totalNumberOfSlices =
+          static_cast<int>((relativeEndTime_ns - relativeStartTime_ns) / static_cast<double>(deltatime_ns));
+    }
+
+    int wsindex = !m_isReverseLogarithmic ? 0 : totalNumberOfSlices - 1;
+
+    while ((!m_isReverseLogarithmic && curtime_ns + runStartTime < endTime_ns) ||
+           (m_isReverseLogarithmic && curtime_ns + runStartTime > startTime_ns)) {
+      // Calculate next time
+      int64_t nexttime_ns; // note that this is the time since the start of the run
+
+      if (isLogarithmic) {
+        if (m_isReverseLogarithmic) {
+          int64_t step = initialReverseLogStep + endTime_ns - runStartTime - curtime_ns;
+          nexttime_ns = curtime_ns - static_cast<int64_t>(static_cast<double>(step) * factor);
+        } else
+          nexttime_ns = static_cast<int64_t>(static_cast<double>(curtime_ns) * (1 + factor));
+
+      } else
+        nexttime_ns = curtime_ns + deltatime_ns;
+
+      if (nexttime_ns + runStartTime > m_stopTime.totalNanoseconds())
+        nexttime_ns = m_stopTime.totalNanoseconds() - runStartTime;
+
+      // in the reverseLog case, we make sure that the "last" bin cannot be smaller than the previous one.
+      if (runStartTime + nexttime_ns - (curtime_ns - nexttime_ns) < m_startTime.totalNanoseconds())
+        nexttime_ns = m_startTime.totalNanoseconds() - runStartTime;
 
       // Create splitter and information
-      Types::Core::DateAndTime t0(curtime_ns);
-      Types::Core::DateAndTime tf(nexttime_ns);
+      Types::Core::DateAndTime t0(std::min(curtime_ns, nexttime_ns) + runStartTime);
+      Types::Core::DateAndTime tf(std::max(curtime_ns, nexttime_ns) + runStartTime);
       std::stringstream ss;
       ss << "Time.Interval.From." << t0 << ".to." << tf;
 
       addNewTimeFilterSplitter(t0, tf, wsindex, ss.str());
 
-      // Update loop variable
+      // Update loop variable and progress
       curtime_ns = nexttime_ns;
-      wsindex++;
 
-      // Update progress
-      int64_t newtimeslot = (curtime_ns - m_startTime.totalNanoseconds()) * 90 / totaltime;
+      int64_t newtimeslot;
+      if (!m_isReverseLogarithmic) {
+        wsindex++;
+        newtimeslot = (endTime_ns - (curtime_ns + runStartTime)) * 90 / totaltime;
+      } else {
+        wsindex--;
+        newtimeslot = (curtime_ns + runStartTime - startTime_ns) * 90 / totaltime;
+      }
+
       if (newtimeslot > timeslot) {
         // There is change and update progress
         timeslot = newtimeslot;
@@ -394,7 +465,8 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
         progress(prog);
       }
     } // END-WHILE
-  }   // END-IF-ELSE
+
+  } // END-IF-ELSE
   else {
     // Explicitly N time intervals with various interval
 
@@ -449,7 +521,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
       } // END-FOR
     }   // END-WHILE
   }
-}
+} // namespace Algorithms
 
 //----------------------------------------------------------------------------------------------
 /** Generate filters by log values.
@@ -490,6 +562,7 @@ void GenerateEventsFilter::setFilterByLogValue(const std::string &logname) {
     filterIncrease = true;
     filterDecrease = true;
   } else if (filterdirection == "Increase") {
+
     filterIncrease = true;
     filterDecrease = false;
   } else {
@@ -1002,7 +1075,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesParallel(const map<size_t,
   }
 
   // Create event filters/splitters in parallel
-  // cppcheck-suppress syntaxError
+
     PRAGMA_OMP(parallel for schedule(dynamic, 1) )
     for (int i = 0; i < numThreads; ++i) {
       PARALLEL_START_INTERUPT_REGION
@@ -1095,7 +1168,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   const Types::Core::DateAndTime ZeroTime(0);
   int lastindex = -1;
   int currindex = -1;
-  DateAndTime lastTime;
   DateAndTime currTime = ZeroTime;
   DateAndTime start, stop;
   // size_t progslot = 0;
@@ -1113,7 +1185,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     bool breakloop = false;
     bool createsplitter = false;
 
-    lastTime = currTime;
     currTime = m_dblLog->nthTime(i);
     double currValue = m_dblLog->nthValue(i);
 
@@ -1261,7 +1332,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
       currindex = -1;
 
       // Condition to generate a Splitter (close parenthesis)
-      if (!correctdir && start.totalNanoseconds() > 0) {
+      if (start.totalNanoseconds() > 0) {
         stop = currTime;
         createsplitter = true;
       }
@@ -1357,8 +1428,8 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     // belonged to.
     if (currvalue >= minvalue && currvalue <= maxvalue) {
       // Log value is in specified range
-      if ((i == 0) || (i >= 1 && ((filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
-                                  (filterDecrease && vecValue[i] <= vecValue[i - 1])))) {
+      if ((i == 0) || (filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
+          (filterDecrease && vecValue[i] <= vecValue[i - 1])) {
         // First entry (regardless direction) and other entries considering
         // change of value
         if (singlevaluemode) {
@@ -1569,8 +1640,14 @@ void GenerateEventsFilter::addNewTimeFilterSplitter(Types::Core::DateAndTime sta
 
   // Information
   if (!info.empty()) {
-    API::TableRow row = m_filterInfoWS->appendRow();
-    row << wsindex << info;
+    if (!m_isReverseLogarithmic) {
+      API::TableRow row = m_filterInfoWS->appendRow();
+      row << wsindex << info;
+    } else {
+      m_filterInfoWS->insertRow(0);
+      API::TableRow row = m_filterInfoWS->getRow(0);
+      row << wsindex << info;
+    }
   }
 }
 
@@ -1799,5 +1876,4 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
   return runendtime;
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

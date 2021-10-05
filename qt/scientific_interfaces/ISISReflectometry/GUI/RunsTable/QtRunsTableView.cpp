@@ -11,12 +11,12 @@
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 #include <QString>
+#include <utility>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments) : m_jobs(), m_instruments(instruments) {
+QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
+    : m_jobs(), m_instruments(std::move(instruments)) {
   m_ui.setupUi(this);
   m_ui.progressBar->setRange(0, 100);
   m_jobs = std::make_unique<MantidQt::MantidWidgets::Batch::JobTreeView>(
@@ -237,13 +237,12 @@ void QtRunsTableView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> const &instruments) : m_instruments(instruments) {}
+RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> instruments)
+    : m_instruments(std::move(instruments)) {}
 
 QtRunsTableView *RunsTableViewFactory::operator()() const { return new QtRunsTableView(m_instruments); }
 
 int RunsTableViewFactory::indexOfElseFirst(std::string const &instrument) const {
   return indexOf(m_instruments, [&instrument](std::string const &inst) { return instrument == inst; }).get_value_or(0);
 }
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

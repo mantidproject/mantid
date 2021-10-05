@@ -24,8 +24,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace std;
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 DECLARE_ALGORITHM(FindPeakBackground)
 
@@ -358,5 +357,4 @@ void FindPeakBackground::createOutputWorkspaces() {
   m_outPeakTableWS->appendRow();
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

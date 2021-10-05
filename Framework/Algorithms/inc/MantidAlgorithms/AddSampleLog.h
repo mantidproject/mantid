@@ -66,7 +66,7 @@ private:
   void setTimeSeriesData(API::Run &run_obj, const std::string &property_name, bool value_is_int);
 
   /// get run start time
-  Types::Core::DateAndTime getRunStart(API::Run &run_obj);
+  Types::Core::DateAndTime getRunStart(const API::Run &run_obj);
 
   /// get value vector of the integer TimeSeriesProperty entries
   std::vector<int> getIntValues(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index);

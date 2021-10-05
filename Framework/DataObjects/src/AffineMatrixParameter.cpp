@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/AffineMatrixParameter.h"
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -165,5 +164,4 @@ void AffineMatrixParameter::setMatrix(const AffineMatrixType &newMatrix) {
   copyRawMatrix();
   this->m_isValid = true;
 }
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

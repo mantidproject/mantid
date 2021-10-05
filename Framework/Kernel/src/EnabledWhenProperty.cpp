@@ -18,8 +18,7 @@
 
 using namespace Mantid::Kernel;
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /** Constructor
  * @param otherPropName :: Name of the OTHER property that we will check.
  * @param when :: Criterion to evaluate
@@ -207,5 +206,4 @@ void EnabledWhenProperty::modify_allowed_values(Property *const /*unused*/) {}
  */
 IPropertySettings *EnabledWhenProperty::clone() const { return new EnabledWhenProperty(*this); }
 
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

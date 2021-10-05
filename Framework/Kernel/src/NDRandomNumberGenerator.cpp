@@ -10,8 +10,7 @@
 #include "MantidKernel/NDRandomNumberGenerator.h"
 #include <cassert>
 
-namespace Mantid {
-namespace Kernel {
+namespace Mantid::Kernel {
 /**
  * Construct an object
  */
@@ -47,5 +46,4 @@ void NDRandomNumberGenerator::cacheNextPoint(const std::vector<double> &nextPoin
   assert(nextPoint.size() == m_ndims);
   m_nextPoint = nextPoint;
 }
-} // namespace Kernel
-} // namespace Mantid
+} // namespace Mantid::Kernel

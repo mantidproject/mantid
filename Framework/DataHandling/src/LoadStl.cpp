@@ -10,8 +10,7 @@
 
 #include <functional>
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 bool LoadStl::areEqualVertices(Kernel::V3D const &v1, Kernel::V3D const &v2) const {
   const Kernel::V3D diff = v1 - v2;
@@ -26,5 +25,4 @@ void LoadStl::changeToVector() {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

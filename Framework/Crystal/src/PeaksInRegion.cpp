@@ -12,8 +12,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace Crystal {
+namespace Mantid::Crystal {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PeaksInRegion)
@@ -168,5 +167,4 @@ void PeaksInRegion::exec() {
   executePeaksIntersection(checkPeakExtents);
 }
 
-} // namespace Crystal
-} // namespace Mantid
+} // namespace Mantid::Crystal

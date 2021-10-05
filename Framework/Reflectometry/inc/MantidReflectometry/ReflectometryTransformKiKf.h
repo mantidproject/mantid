@@ -20,7 +20,7 @@ namespace Reflectometry {
 */
 class DLLExport ReflectometryTransformKiKf : public DataObjects::ReflectometryTransform {
 public:
-  ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta,
+  ReflectometryTransformKiKf(double kiMin, double kiMax, double kfMin, double kfMax, double incidentTheta, int version,
                              int numberOfBinsQx = 100, int numberOfBinsQz = 100);
 
   /// Disable default constructor

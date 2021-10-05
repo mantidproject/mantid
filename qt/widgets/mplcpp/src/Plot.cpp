@@ -18,9 +18,7 @@
 using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
-namespace MantidQt {
-namespace Widgets {
-namespace MplCpp {
+namespace MantidQt::Widgets::MplCpp {
 
 namespace {
 
@@ -139,6 +137,4 @@ Python::Object pcolormesh(const QStringList &workspaces, boost::optional<Python:
   }
 }
 
-} // namespace MplCpp
-} // namespace Widgets
-} // namespace MantidQt
+} // namespace MantidQt::Widgets::MplCpp

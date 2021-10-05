@@ -27,8 +27,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataObjects {
+namespace Mantid::DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Constructor given the 4 dimensions
  * @param dimX :: X dimension binning parameters
@@ -1320,5 +1319,4 @@ void MDHistoWorkspace::setDisplayNormalization(const Mantid::API::MDNormalizatio
   m_displayNormalization = preferredNormalization;
 }
 
-} // namespace DataObjects
-} // namespace Mantid
+} // namespace Mantid::DataObjects

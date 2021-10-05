@@ -279,8 +279,7 @@ std::vector<std::unique_ptr<Json::Value>> moveToUniquePtrVec(std::vector<Json::V
 
 } // namespace
 
-namespace Mantid {
-namespace NexusGeometry {
+namespace Mantid::NexusGeometry {
 
 JSONGeometryParser::JSONGeometryParser(const std::string &json) { parse(json); }
 
@@ -554,5 +553,4 @@ void JSONGeometryParser::parse(const std::string &jsonGeometry) {
 double JSONGeometryParser::degreesToRadians(const double degrees) noexcept {
   return degrees * M_PI / DEGREES_IN_SEMICIRCLE;
 }
-} // namespace NexusGeometry
-} // namespace Mantid
+} // namespace Mantid::NexusGeometry

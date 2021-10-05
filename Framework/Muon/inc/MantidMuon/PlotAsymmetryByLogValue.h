@@ -73,11 +73,11 @@ private:
   // Load dead-time corrections from specified file
   API::Workspace_sptr loadCorrectionsFromFile(const std::string &deadTimeFile);
   // Apply dead-time corrections
-  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs, API::Workspace_sptr deadTimes);
+  void applyDeadtimeCorr(API::Workspace_sptr &loadedWs, const API::Workspace_sptr &deadTimes);
   /// Create custom detector grouping
   API::Workspace_sptr createCustomGrouping(const std::vector<int> &fwd, const std::vector<int> &bwd);
   /// Group detectors
-  void groupDetectors(API::Workspace_sptr &loadedWs, API::Workspace_sptr grouping);
+  void groupDetectors(API::Workspace_sptr &loadedWs, const API::Workspace_sptr &grouping);
   /// Calculate the integral asymmetry for a workspace (single period)
   void calcIntAsymmetry(const API::MatrixWorkspace_sptr &ws, double &Y, double &E);
   /// Calculate the integral asymmetry for a workspace (red & green)
@@ -88,7 +88,9 @@ private:
   /// Get log value
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
-  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots);
+  void populateOutputWorkspace(API::MatrixWorkspace_sptr &outWS, int nplots, const std::string &units);
+  /// get log units
+  const std::string getLogUnits(const std::string &fileName);
   /// Populate the hidden ws storing current results
   void saveResultsToADS(API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties

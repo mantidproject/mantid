@@ -12,8 +12,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/VectorHelper.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 /** Constructor
  * @param length the size of the text axis
@@ -128,5 +127,4 @@ double TextAxis::getMax() const {
   }
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

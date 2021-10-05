@@ -18,8 +18,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include <boost/algorithm/string/predicate.hpp>
-namespace Mantid {
-namespace WorkflowAlgorithms {
+namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SetupHFIRReduction)
@@ -993,5 +992,4 @@ void SetupHFIRReduction::setupTransmission(const std::shared_ptr<PropertyManager
   }
 }
 
-} // namespace WorkflowAlgorithms
-} // namespace Mantid
+} // namespace Mantid::WorkflowAlgorithms

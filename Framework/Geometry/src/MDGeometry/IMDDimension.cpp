@@ -15,12 +15,3 @@ the concrete implementation.
 */
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-
-namespace Mantid {
-namespace Geometry {
-/*  IMDDimension::~IMDDimension()
-  {
-
-  }*/
-}
-} // namespace Mantid

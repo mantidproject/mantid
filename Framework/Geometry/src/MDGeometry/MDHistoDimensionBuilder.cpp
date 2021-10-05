@@ -11,8 +11,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-namespace Mantid {
-namespace Geometry {
+namespace Mantid::Geometry {
 
 /// Constructor
 MDHistoDimensionBuilder::MDHistoDimensionBuilder()
@@ -112,5 +111,4 @@ Creational method
 pointer.
 */
 IMDDimension_sptr MDHistoDimensionBuilder::create() { return IMDDimension_sptr(createRaw()); }
-} // namespace Geometry
-} // namespace Mantid
+} // namespace Mantid::Geometry

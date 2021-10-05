@@ -663,7 +663,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         dir_name = self.getProperty('ConfigSaveDir').value
         if len(dir_name) <= 0:  # default directory
             run_number = self.getProperty('RunNumbers').value[0]  # first run number
-            dir_name = Path(self.get_IPTS_Local(run_number)) / 'shared' / 'autoreduction' / 'configurations'
+            dir_name = Path(self.get_IPTS_Local(run_number)) / 'shared' / 'autoreduce' / 'configurations'
             dir_name.mkdir(parents=True, exist_ok=True)  # in case it has not yet been created
         filename = str(Path(dir_name) / f'{basename}.json')
         #
