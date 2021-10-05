@@ -89,31 +89,21 @@ public:
 
   void test_notify_inst_view_select_rect_requested() {
     auto mockView = makeView();
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(true))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewSelectRectMode()).Times(1);
-
+    expectInstViewSetToSelectRectMode(*mockView);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyInstViewSelectRectRequested();
   }
 
   void test_notify_inst_view_pan_requested() {
     auto mockView = makeView();
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(true))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewPanMode()).Times(1);
+    expectInstViewSetToPanMode(*mockView);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyInstViewPanRequested();
   }
 
   void test_notify_inst_view_zoom_requested() {
     auto mockView = makeView();
-    EXPECT_CALL(*mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewPanState(Eq(false))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewZoomState(Eq(true))).Times(1);
-    EXPECT_CALL(*mockView, setInstViewZoomMode()).Times(1);
+    expectInstViewSetToZoomMode(*mockView);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
     presenter.notifyInstViewZoomRequested();
   }
@@ -152,16 +142,50 @@ private:
 
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
                                     MockInstViewModel &mockInstViewModel) {
-    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    auto samplePos = V3D(1, 2, 3);
-    auto axes = V3D(4, 5, 6);
+    expectInstViewModelUpdatedWithLoadedWorkspace(mockModel, mockInstViewModel);
+    expectPlotInstView(mockView, mockInstViewModel);
+    expectInstViewToolbarEnabled(mockView);
+    expectInstViewSetToZoomMode(mockView);
+  }
 
+  void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
+                                                     MockInstViewModel &mockInstViewModel) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
+  }
+
+  void expectPlotInstView(MockPreviewView &mockView, MockInstViewModel &mockInstViewModel) {
+    auto samplePos = V3D(1, 2, 3);
+    auto axes = V3D(4, 5, 6);
     EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
     EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axes));
     EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes)));
+  }
+
+  void expectInstViewToolbarEnabled(MockPreviewView &mockView) {
     EXPECT_CALL(mockView, setInstViewToolbarEnabled(Eq(true))).Times(1);
+  }
+
+  void expectInstViewSetToZoomMode(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewZoomState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewZoomMode()).Times(1);
+  }
+
+  void expectInstViewSetToPanMode(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewPanState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewPanMode()).Times(1);
+  }
+
+  void expectInstViewSetToSelectRectMode(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
   }
 };

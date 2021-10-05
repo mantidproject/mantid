@@ -49,6 +49,8 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
                        m_instViewModel->getAxis());
   m_view->setInstViewToolbarEnabled(true);
+  // Reset the instrument view to zoom mode
+  notifyInstViewZoomRequested();
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
