@@ -48,9 +48,9 @@ Usage
 .. testcode:: LoadDNSEventex1
 
     # data file.
-    filename = "C:/data/psd_data/00796651.mdat"
+    filename = "pulser_ON473_31.mdat"
 
-    eventWS = LoadDNSEvent(InputFile=filename, ChopperChannel='2', MonitorChannel='0')
+    eventWS = LoadDNSEvent(InputFile=filename, ChopperChannel='2')
     print("Number of events: {}".format(eventWS.getNumberEvents()))
     print("Maximum time of flight: {}".format(eventWS.getTofMax()))
     print("Number of detector pixels: {}".format(eventWS.getNumberHistograms()))
@@ -66,11 +66,11 @@ Usage
 .. testoutput:: LoadDNSEventex1
    :options: +NORMALIZE_WHITESPACE
 
-    Number of events: 100
-    Maximum time of flight: 400
-    Number of detector pixels: 12404
+    Number of events: 9998
+    Maximum time of flight: 99471.3
+    Number of detector pixels: 131072
     Number of bins: 1
-    Number of bins after rebinning: 100
+    Number of bins after rebinning: 995
 
 .. categories::
 
