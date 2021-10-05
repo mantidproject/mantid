@@ -75,8 +75,6 @@ class DrillExportModelTest(unittest.TestCase):
     def test_init(self):
         self.assertDictEqual(self.exportModel._exportAlgorithms,
                              self.EXPORT_ALGORITHMS["a1"])
-        # self.mTasksPool.signals.taskError.connect.assert_called_once()
-        # self.mTasksPool.signals.taskSuccess.connect.assert_called_once()
         self.assertEqual(self.exportModel._exports, {})
         self.assertEqual(self.exportModel._successExports, {})
 
