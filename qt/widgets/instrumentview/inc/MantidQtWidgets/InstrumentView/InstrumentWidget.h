@@ -258,7 +258,7 @@ protected:
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
-  void createTabs(QSettings &settings);
+  void createTabs(const QSettings &settings);
   void saveSettings();
 
   QString asString(const std::vector<int> &numbers) const;

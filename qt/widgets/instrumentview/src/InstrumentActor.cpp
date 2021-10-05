@@ -428,7 +428,8 @@ void InstrumentActor::sumDetectors(const std::vector<size_t> &dets, std::vector<
 
   Mantid::API::MatrixWorkspace_const_sptr ws = getWorkspace();
   const auto blocksize = ws->blocksize();
-  if (size > blocksize || size == 0) {
+  assert(size > 0);
+  if (size > blocksize) {
     size = blocksize;
   }
 
@@ -1054,12 +1055,9 @@ QString InstrumentActor::getParameterInfo(size_t index) const {
     // build the data structure I need Map comp id -> vector of names
     std::string paramName = itParamName.first;
     Mantid::Geometry::ComponentID paramCompId = itParamName.second;
-    // attempt to insert this will fail silently if the key already exists
-    if (mapCmptToNameVector.find(paramCompId) == mapCmptToNameVector.end()) {
-      mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
-    }
+    mapCmptToNameVector.emplace(paramCompId, std::vector<std::string>());
     // get the vector out and add the name
-    mapCmptToNameVector[paramCompId].emplace_back(paramName);
+    mapCmptToNameVector[paramCompId].emplace_back(std::move(paramName));
   }
 
   // walk out from the selected component

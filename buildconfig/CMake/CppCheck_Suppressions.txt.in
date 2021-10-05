@@ -910,11 +910,8 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/WorkspacePresenter/Work
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:66
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:340
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:184
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentActor.cpp:436
-stlFindInsert:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentActor.cpp:1068
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:277
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
-constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidget.cpp:1296
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/UnwrappedDetector.cpp:16
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1618
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1651
