@@ -55,7 +55,7 @@ class RundexSettings(object):
             D11:    [SANS_ACQ, SANS_MULTI],
             D11B:    [SANS_ACQ],
             D16:    [SANS_ACQ, SANS_PSCAN],
-            D22:    [SANS_ACQ],
+            D22:    [SANS_ACQ, SANS_MULTI],
             D22B:    [SANS_ACQ],
             D33:    [SANS_ACQ],
             D17:    [REFL_POL, REFL_NPOL],
