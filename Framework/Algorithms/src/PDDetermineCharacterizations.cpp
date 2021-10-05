@@ -213,7 +213,7 @@ void PDDetermineCharacterizations::getInformationFromTable(const double frequenc
  * @param propName
  * @return
  */
-double PDDetermineCharacterizations::getLogValue(API::Run &run, const std::string &propName) {
+double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std::string &propName) {
   std::vector<std::string> names = getProperty(propName);
 
   std::string label = "frequency";
