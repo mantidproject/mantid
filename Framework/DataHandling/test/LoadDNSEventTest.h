@@ -171,8 +171,8 @@ public:
   }
 
 private:
-  const std::string m_fileName = "C:/data/psd_data/pulser_ON473_31.mdat";
+  const std::string m_fileName = "pulser_ON473_31.mdat";
 
-  const std::string m_badFileName = "C:/data/psd_data/service_774708.d_dat"; // some random file
+  const std::string m_badFileName = "dnstof.d_dat"; // some random file
 };
 #endif /* MANTID_MDALGORITHMS_LOADDNSSCDEWEST_H_ */
