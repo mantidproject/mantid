@@ -151,10 +151,10 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * contain this string
    * @returns A python list created from the set of strings
    */
-  static boost::python::list getObjectNamesAsList(SvcType &self, const std::string &contain) {
+  static boost::python::list getObjectNamesAsList(SvcType const *const self, const std::string &contain) {
     boost::python::list names;
-    const auto keys = self.getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
-                                          Mantid::Kernel::DataServiceHidden::Auto, contain);
+    const auto keys = self->getObjectNames(Mantid::Kernel::DataServiceSort::Unsorted,
+                                           Mantid::Kernel::DataServiceHidden::Auto, contain);
     for (auto itr = keys.begin(); itr != keys.end(); ++itr) {
       names.append(*itr);
     }

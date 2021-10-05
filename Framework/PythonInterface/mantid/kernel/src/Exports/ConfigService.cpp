@@ -41,21 +41,22 @@ void setDataSearchDirs(ConfigServiceImpl &self, const object &paths) {
 }
 
 /// Forward call from __getitem__ to getString with use_cache_true
-std::string getStringUsingCache(ConfigServiceImpl &self, const std::string &key) { return self.getString(key, true); }
+std::string getStringUsingCache(ConfigServiceImpl const *const self, const std::string &key) {
+  return self->getString(key, true);
+}
 
-const InstrumentInfo &getInstrument(ConfigServiceImpl &self, const object &name = object()) {
+const InstrumentInfo &getInstrument(ConfigServiceImpl const *const self, const object &name = object()) {
   if (name.is_none())
-    return self.getInstrument();
+    return self->getInstrument();
   else
-    return self.getInstrument(ExtractStdString(name)());
+    return self->getInstrument(ExtractStdString(name)());
 }
 
 /// duck typing emulating dict.get method
-std::string getStringUsingCacheElseDefault(ConfigServiceImpl &self, const std::string &key,
+std::string getStringUsingCacheElseDefault(ConfigServiceImpl const *const self, const std::string &key,
                                            const std::string &defaultValue) {
-  std::vector<std::string> keys = self.keys();
-  if (self.hasProperty(key))
-    return self.getString(key, true);
+  if (self->hasProperty(key))
+    return self->getString(key, true);
   else
     return defaultValue;
 }

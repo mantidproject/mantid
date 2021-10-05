@@ -85,7 +85,7 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
  * Returns the signal array from the workspace as a numpy array
  * @param self :: A reference to the calling object
  */
-PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
+PyObject *getSignalArrayAsNumpyArray(const IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
   return WrapReadOnlyNumpyFArray(self.getSignalArray(), dims);
 }
@@ -94,7 +94,7 @@ PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * Returns the error squared array from the workspace as a numpy array
  * @param self :: A reference to the calling object
  */
-PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
+PyObject *getErrorSquaredArrayAsNumpyArray(const IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
   return WrapReadOnlyNumpyFArray(self.getErrorSquaredArray(), dims);
 }
@@ -103,7 +103,7 @@ PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * Returns the number of events array from the workspace as a numpy array
  * @param self :: A reference to the calling object
  */
-PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
+PyObject *getNumEventsArrayAsNumpyArray(const IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
   return WrapReadOnlyNumpyFArray(self.getNumEventsArray(), dims);
 }
@@ -115,7 +115,7 @@ PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
  * @param signal :: The new values
  * @param fnLabel :: A message prefix to pass if the sizes are incorrect
  */
-void throwIfSizeIncorrect(IMDHistoWorkspace &self, const NDArray &signal, const std::string &fnLabel) {
+void throwIfSizeIncorrect(const IMDHistoWorkspace &self, const NDArray &signal, const std::string &fnLabel) {
   auto wsShape = countDimensions(self);
   const size_t ndims = wsShape.size();
   auto arrShape = signal.attr("shape");

@@ -128,7 +128,7 @@ PropertyVector apiOrderedProperties(const IAlgorithm &propMgr) {
  * @return A Python list of strings
  */
 
-list getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
+list getInputPropertiesWithMandatoryFirst(const IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
   GlobalInterpreterLock gil;
@@ -149,7 +149,7 @@ list getInputPropertiesWithMandatoryFirst(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-list getAlgorithmPropertiesOrdered(IAlgorithm &self) {
+list getAlgorithmPropertiesOrdered(const IAlgorithm &self) {
   PropertyVector properties(apiOrderedProperties(self));
 
   GlobalInterpreterLock gil;
@@ -166,7 +166,7 @@ list getAlgorithmPropertiesOrdered(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-list getOutputProperties(IAlgorithm &self) {
+list getOutputProperties(const IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
   GlobalInterpreterLock gil;
@@ -185,7 +185,7 @@ list getOutputProperties(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm.
  * @return A Python list of strings
  */
-list getInOutProperties(IAlgorithm &self) {
+list getInOutProperties(const IAlgorithm &self) {
   const PropertyVector &properties(self.getProperties()); // No copy
 
   GlobalInterpreterLock gil;
@@ -204,7 +204,7 @@ list getInOutProperties(IAlgorithm &self) {
  * @param self :: A pointer to the python object wrapping and Algorithm
  * @return A string that documents an algorithm
  */
-std::string createDocString(IAlgorithm &self) {
+std::string createDocString(const IAlgorithm &self) {
   const std::string EOL = "\n";
 
   // Put in the quick overview message
@@ -301,7 +301,7 @@ bool executeProxy(object &self) {
  * Execute the algorithm asynchronously
  * @param self :: A reference to the calling object
  */
-void executeAsync(object &self) {
+void executeAsync(const object &self) {
   auto &calg = extract<IAlgorithm &>(self)();
   calg.executeAsync();
 }
@@ -311,7 +311,7 @@ void executeAsync(object &self) {
  * @return An AlgorithmID wrapped in a AlgorithmIDProxy container or None if
  * there is no ID
  */
-PyObject *getAlgorithmID(IAlgorithm &self) {
+PyObject *getAlgorithmID(const IAlgorithm &self) {
   AlgorithmID id = self.getAlgorithmID();
   if (id)
     return to_python_value<AlgorithmIDProxy>()(AlgorithmIDProxy(id));
@@ -326,7 +326,7 @@ PyObject *getAlgorithmID(IAlgorithm &self) {
  * @param self Reference to the calling object
  * @return Algorithm summary
  */
-std::string getOptionalMessage(IAlgorithm &self) {
+std::string getOptionalMessage(const IAlgorithm &self) {
   PyErr_Warn(PyExc_DeprecationWarning, ".getOptionalMessage() is deprecated. Use .summary() instead.");
   return self.summary();
 }
@@ -335,7 +335,7 @@ std::string getOptionalMessage(IAlgorithm &self) {
  * @param self Reference to the calling object
  * @return Algorithm summary
  */
-std::string getWikiSummary(IAlgorithm &self) {
+std::string getWikiSummary(const IAlgorithm &self) {
   PyErr_Warn(PyExc_DeprecationWarning, ".getWikiSummary() is deprecated. Use .summary() instead.");
   return self.summary();
 }
@@ -361,6 +361,7 @@ void export_ialgorithm() {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init).def(self == self);
 
   register_ptr_to_python<std::shared_ptr<IAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<const IAlgorithm>>();
 
   class_<IAlgorithm, bases<IPropertyManager>, boost::noncopyable>("IAlgorithm", "Interface for all algorithms", no_init)
       .def("name", &IAlgorithm::name, arg("self"), "Returns the name of the algorithm")

@@ -93,7 +93,7 @@ public:
   const CrystalStructure &getCrystalStructure() const;
 
   HKLFilter_const_sptr getDRangeFilter(double dMin, double dMax) const;
-  HKLFilter_const_sptr getReflectionConditionFilter(ReflectionConditionFilter filter);
+  HKLFilter_const_sptr getReflectionConditionFilter(ReflectionConditionFilter filter) const;
 
   std::vector<Kernel::V3D> getHKLs(double dMin, double dMax) const;
   std::vector<Kernel::V3D> getHKLs(double dMin, double dMax,

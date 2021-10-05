@@ -37,7 +37,7 @@ enum DataField { XValues = 0, YValues = 1, EValues = 2, DxValues = 3 };
  *reading the data (similar to .end() for STL)
  *
  */
-PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field, const size_t start, const size_t endp1) {
+PyArrayObject *cloneArray(const MatrixWorkspace &workspace, DataField field, const size_t start, const size_t endp1) {
   const npy_intp numHist(endp1 - start);
   npy_intp stride{0};
 
@@ -85,7 +85,7 @@ PyArrayObject *cloneArray(MatrixWorkspace &workspace, DataField field, const siz
  * @param self :: A pointer to a PyObject representing the calling object
  * @return A 2D numpy array created from the X values
  */
-PyObject *cloneX(MatrixWorkspace &self) {
+PyObject *cloneX(const MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(cloneArray(self, XValues, 0, self.getNumberHistograms()));
 }
 /* Create a numpy array from the Y values of the given workspace reference
@@ -93,7 +93,7 @@ PyObject *cloneX(MatrixWorkspace &self) {
  * @param self :: A pointer to a PyObject representing the calling object
  * @return A 2D numpy array created from the Y values
  */
-PyObject *cloneY(MatrixWorkspace &self) {
+PyObject *cloneY(const MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(cloneArray(self, YValues, 0, self.getNumberHistograms()));
 }
 
@@ -102,7 +102,7 @@ PyObject *cloneY(MatrixWorkspace &self) {
  * @param self :: A pointer to a PyObject representing the calling object
  * @return A 2D numpy array created from the E values
  */
-PyObject *cloneE(MatrixWorkspace &self) {
+PyObject *cloneE(const MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(cloneArray(self, EValues, 0, self.getNumberHistograms()));
 }
 
@@ -111,7 +111,7 @@ PyObject *cloneE(MatrixWorkspace &self) {
  * @param self :: A pointer to a PyObject representing the calling object
  * @return A 2D numpy array created from the E values
  */
-PyObject *cloneDx(MatrixWorkspace &self) {
+PyObject *cloneDx(const MatrixWorkspace &self) {
   return reinterpret_cast<PyObject *>(cloneArray(self, DxValues, 0, self.getNumberHistograms()));
 }
 } // namespace Mantid::PythonInterface

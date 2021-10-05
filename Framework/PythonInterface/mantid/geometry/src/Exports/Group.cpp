@@ -24,8 +24,8 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(Group)
 
 namespace {
-std::vector<std::string> getSymmetryOperationStrings(Group &self) {
-  const std::vector<SymmetryOperation> &symOps = self.getSymmetryOperations();
+std::vector<std::string> getSymmetryOperationStrings(const Group &self) {
+  const auto &symOps = self.getSymmetryOperations();
 
   std::vector<std::string> pythonSymOps;
   pythonSymOps.reserve(symOps.size());
@@ -54,11 +54,11 @@ Group_sptr constructGroupFromPythonList(const boost::python::list &symOpList) {
   return std::const_pointer_cast<Group>(GroupFactory::create<Group>(operations));
 }
 
-bool isInvariantDefault(Group &self, const boost::python::object &tensor) {
+bool isInvariantDefault(const Group &self, const boost::python::object &tensor) {
   return self.isInvariant(PyObjectToMatrix(tensor)());
 }
 
-bool isInvariantTolerance(Group &self, const boost::python::object &tensor, double tolerance) {
+bool isInvariantTolerance(const Group &self, const boost::python::object &tensor, double tolerance) {
   return self.isInvariant(PyObjectToMatrix(tensor)(), tolerance);
 }
 } // namespace

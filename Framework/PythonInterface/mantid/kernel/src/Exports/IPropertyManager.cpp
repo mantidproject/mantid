@@ -114,7 +114,7 @@ void deleteProperty(IPropertyManager &self, const std::string &propName) { self.
  * @param self The calling object
  * @return The list of keys.
  */
-boost::python::list getKeys(IPropertyManager &self) {
+boost::python::list getKeys(const IPropertyManager &self) {
   const std::vector<Property *> &props = self.getProperties();
   const size_t numProps = props.size();
 
@@ -138,7 +138,7 @@ boost::python::list getKeys(IPropertyManager &self) {
  * @return      The property with the specified key. If no
  *              such property exists, return the default value.
  */
-Property *get(IPropertyManager &self, const std::string &name, const boost::python::object &value) {
+Property *get(const IPropertyManager &self, const std::string &name, const boost::python::object &value) {
   try {
     return self.getPointerToProperty(name);
   } catch (Exception::NotFoundError &) {
