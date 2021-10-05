@@ -356,10 +356,10 @@ class DrillPresenter:
             return
         self._resetTable()
         self.model.setIOFile(filename[0])
-        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.model.importRundexData()
         self._syncViewHeader()
         self.view.setVisualSettings(self.model.getVisualSettings())
+        self.view.setWindowTitle(os.path.split(filename[0])[1] + " [*]")
         self.view.setWindowModified(False)
 
     def onSave(self):
