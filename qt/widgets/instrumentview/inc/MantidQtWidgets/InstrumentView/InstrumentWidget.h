@@ -260,6 +260,7 @@ public slots:
   void updateInfoText(const QString &text = QString());
 
   void initWidget(bool resetGeometry, bool setDefaultView);
+  void threadFinished();
 
 private slots:
   void helpClicked();

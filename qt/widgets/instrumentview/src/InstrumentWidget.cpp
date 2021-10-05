@@ -359,6 +359,7 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
                                                         scaleMin, scaleMax);
   m_instrumentActor->moveToThread(&m_thread);
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
+  m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
   m_thread.start();
   QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
                             Q_ARG(bool, setDefaultView));
@@ -379,6 +380,11 @@ void InstrumentWidget::cancelThread() {
     m_thread.wait();
   }
 }
+
+/**
+ * Callback from InstrumentActor whenever it is destroyed so that waitForThread can exit
+ */
+void InstrumentWidget::threadFinished() { m_finished = true; }
 
 /**
  * Select the tab to be displayed
