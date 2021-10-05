@@ -126,6 +126,9 @@ class DrillTask(QRunnable):
         self.observer.observeError(self.alg)
         self.observer.signals.finished.connect(self._onFinished)
         self.observer.observeProgress(self.alg)
+        self.observer.signals.progress.connect(
+                lambda p : self.signals.progress.emit(self, p)
+                )
         try:
             ret = self.alg.execute()
             if not ret:
