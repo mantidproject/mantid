@@ -7,7 +7,9 @@
 #include "IAsciiSaver.h"
 
 #include <utility>
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
 InvalidSavePath::InvalidSavePath(std::string const &path)
     : std::runtime_error("The path" + path + "does not exist or is not a directory."), m_path(path) {}
 

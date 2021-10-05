@@ -685,7 +685,9 @@ void FilterEvents::splitTimeSeriesLogs(const std::vector<TimeSeriesProperty<int>
       g_log.information() << "Workspace target (indexed as " << tindex << ") does not have workspace associated.\n";
     } else {
       DataObjects::EventWorkspace_sptr ws_i = wsiter->second;
-      ws_i->mutableRun().integrateProtonCharge();
+      if (ws_i->run().hasProperty("proton_charge")) {
+        ws_i->mutableRun().integrateProtonCharge();
+      }
     }
   }
 
@@ -1854,10 +1856,10 @@ void FilterEvents::mapSplitterTSPtoWorkspaces(
   g_log.debug() << "There are " << split_tsp_vec.size() << " TimeSeriesPropeties.\n"
                 << "There are " << m_outputWorkspacesMap.size() << " Output worskpaces.\n";
 
-  if (split_tsp_vec.size() != m_outputWorkspacesMap.size()) {
+  if (split_tsp_vec.size() != m_outputWorkspacesMap.size() - 1) {
     g_log.warning() << "Number of Splitter vector (" << split_tsp_vec.size()
-                    << ") does not match number of output workspace (" << m_outputWorkspacesMap.size() << ")"
-                    << "\n";
+                    << ") does not match number of filtered output workspaces (" << m_outputWorkspacesMap.size() - 1
+                    << ")\n";
   }
 
   for (int itarget = 0; itarget < static_cast<int>(split_tsp_vec.size()); ++itarget) {

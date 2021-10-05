@@ -13,7 +13,9 @@
 #include "IndirectDataAnalysisIqtTab.h"
 #include "IndirectDataAnalysisMSDFitTab.h"
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
 DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
@@ -124,4 +126,6 @@ void IndirectDataAnalysis::exportTabPython() {
   m_tabs[currentTab]->exportPythonScript();
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

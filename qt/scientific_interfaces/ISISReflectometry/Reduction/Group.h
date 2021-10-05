@@ -26,6 +26,7 @@ public:
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
   bool isGroup() const override;
+  bool isPreview() const override;
   std::string const &name() const;
   void setName(std::string const &name);
   bool hasPostprocessing() const;

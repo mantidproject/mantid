@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BatchPresenter.h"
-#include "BatchJobRunner.h"
+#include "BatchJobManager.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
@@ -32,19 +32,20 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
  */
-BatchPresenter::BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IRunsPresenter> runsPresenter,
+BatchPresenter::BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+                               std::unique_ptr<IRunsPresenter> runsPresenter,
                                std::unique_ptr<IEventPresenter> eventPresenter,
                                std::unique_ptr<IExperimentPresenter> experimentPresenter,
                                std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                                std::unique_ptr<ISavePresenter> savePresenter,
                                std::unique_ptr<IPreviewPresenter> previewPresenter)
-    : m_view(view), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
+    : m_view(view), m_model(std::move(model)), m_mainPresenter(), m_runsPresenter(std::move(runsPresenter)),
       m_eventPresenter(std::move(eventPresenter)), m_experimentPresenter(std::move(experimentPresenter)),
       m_instrumentPresenter(std::move(instrumentPresenter)), m_savePresenter(std::move(savePresenter)),
-      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false),
-      m_jobRunner(new BatchJobRunner(model)) {
+      m_previewPresenter(std::move(previewPresenter)), m_unsavedBatchFlag(false), m_jobRunner(jobRunner),
+      m_jobManager(new BatchJobManager(*m_model)) {
 
-  m_view->subscribe(this);
+  m_jobRunner->subscribe(this);
 
   // Tell the tab presenters that this is going to be the main presenter
   m_savePresenter->acceptMainPresenter(this);
@@ -97,7 +98,7 @@ void BatchPresenter::notifyBatchComplete(bool error) {
   UNUSED_ARG(error);
 
   // Continue processing the next batch of algorithms, if there is more to do
-  auto algorithms = m_jobRunner->getAlgorithms();
+  auto algorithms = m_jobManager->getAlgorithms();
   if (algorithms.size() > 0) {
     startBatch(std::move(algorithms));
     return;
@@ -112,47 +113,59 @@ void BatchPresenter::notifyBatchCancelled() {
   notifyAutoreductionPaused();
 }
 
-void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
-  auto const &item = m_jobRunner->algorithmStarted(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm) {
+  auto item = m_jobManager->getRunsTableItem(algorithm);
+  if (!item) {
+    return;
+  }
+  m_jobManager->algorithmStarted(algorithm);
+  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
-void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
-  auto const &item = m_jobRunner->algorithmComplete(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
+  auto item = m_jobManager->getRunsTableItem(algorithm);
+  if (!item) {
+    return;
+  }
+  m_jobManager->algorithmComplete(algorithm);
+  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowStateChanged(item.value());
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
-    auto const workspaces = m_jobRunner->algorithmOutputWorkspacesToSave(algorithm);
+    auto const workspaces = m_jobManager->algorithmOutputWorkspacesToSave(algorithm);
     m_savePresenter->saveWorkspaces(workspaces);
   }
 }
 
 void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
-  auto const &item = m_jobRunner->algorithmError(algorithm, message);
-  m_runsPresenter->notifyRowOutputsChanged(item);
-  m_runsPresenter->notifyRowStateChanged(item);
+  auto item = m_jobManager->getRunsTableItem(algorithm);
+  if (!item) {
+    return;
+  }
+  m_jobManager->algorithmError(algorithm, message);
+  m_runsPresenter->notifyRowOutputsChanged(item.value());
+  m_runsPresenter->notifyRowStateChanged(item.value());
 }
 
 /** Start processing the next batch of algorithms.
  * @returns : true if processing was started, false if there was nothing to do
  */
 bool BatchPresenter::startBatch(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
-  m_view->clearAlgorithmQueue();
-  m_view->setAlgorithmQueue(std::move(algorithms));
-  m_view->executeAlgorithmQueue();
+  m_jobRunner->clearAlgorithmQueue();
+  m_jobRunner->setAlgorithmQueue(std::move(algorithms));
+  m_jobRunner->executeAlgorithmQueue();
   return true;
 }
 
 void BatchPresenter::resumeReduction() {
   // Update the model
-  m_jobRunner->notifyReductionResumed();
+  m_jobManager->notifyReductionResumed();
   // Get the algorithms to process
-  auto algorithms = m_jobRunner->getAlgorithms();
-  if (algorithms.size() < 1 || (m_jobRunner->getProcessAll() && m_mainPresenter->isProcessAllPrevented()) ||
-      (m_jobRunner->getProcessPartial() && m_mainPresenter->isProcessPartialGroupPrevented())) {
+  auto algorithms = m_jobManager->getAlgorithms();
+  if (algorithms.size() < 1 || (m_jobManager->getProcessAll() && m_mainPresenter->isProcessAllPrevented()) ||
+      (m_jobManager->getProcessPartial() && m_mainPresenter->isProcessPartialGroupPrevented())) {
     notifyReductionPaused();
     return;
   }
@@ -171,11 +184,11 @@ void BatchPresenter::notifyReductionResumed() {
   m_mainPresenter->notifyAnyBatchReductionResumed();
 }
 
-void BatchPresenter::pauseReduction() { m_view->cancelAlgorithmQueue(); }
+void BatchPresenter::pauseReduction() { m_jobRunner->cancelAlgorithmQueue(); }
 
 void BatchPresenter::notifyReductionPaused() {
   // Update the model
-  m_jobRunner->notifyReductionPaused();
+  m_jobManager->notifyReductionPaused();
   // Notify child presenters
   m_savePresenter->notifyReductionPaused();
   m_eventPresenter->notifyReductionPaused();
@@ -190,14 +203,14 @@ void BatchPresenter::notifyReductionPaused() {
 
 void BatchPresenter::resumeAutoreduction() {
   // Update the model first to ensure the autoprocessing flag is set
-  m_jobRunner->notifyAutoreductionResumed();
+  m_jobManager->notifyAutoreductionResumed();
   // The runs presenter starts autoreduction. This sets off a search to find
   // new runs, if there are any. When the search completes, we'll receive
   // a separate callback to notifyReductionResumed.
   if (m_runsPresenter->resumeAutoreduction())
     notifyAutoreductionResumed();
   else
-    m_jobRunner->notifyAutoreductionPaused();
+    m_jobManager->notifyAutoreductionPaused();
 }
 
 void BatchPresenter::notifyAutoreductionResumed() {
@@ -214,7 +227,7 @@ void BatchPresenter::notifyAutoreductionResumed() {
 
 void BatchPresenter::pauseAutoreduction() {
   // Update the model
-  m_jobRunner->notifyAutoreductionPaused();
+  m_jobManager->notifyAutoreductionPaused();
   // Stop all processing
   pauseReduction();
   // Notify child presenters
@@ -258,14 +271,14 @@ void BatchPresenter::settingsChanged() {
    Checks whether or not data is currently being processed in this batch
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isProcessing() const { return m_jobRunner->isProcessing(); }
+bool BatchPresenter::isProcessing() const { return m_jobManager->isProcessing(); }
 
 /**
    Checks whether or not autoprocessing is currently running in this batch
    * i.e. whether we are polling for new runs
    * @return : Bool on whether data is being processed
    */
-bool BatchPresenter::isAutoreducing() const { return m_jobRunner->isAutoreducing(); }
+bool BatchPresenter::isAutoreducing() const { return m_jobManager->isAutoreducing(); }
 
 /**
    Checks whether or not processing is currently running in any batch
@@ -304,24 +317,26 @@ void BatchPresenter::notifyResetRoundPrecision() { m_runsPresenter->resetRoundPr
 /** Get the percent of jobs that have been completed out of the current
     processing list
  */
-int BatchPresenter::percentComplete() const { return m_jobRunner->percentComplete(); }
+int BatchPresenter::percentComplete() const { return m_jobManager->percentComplete(); }
 
-AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const { return m_jobRunner->rowProcessingProperties(); }
+API::IConfiguredAlgorithm::AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
+  return m_jobManager->rowProcessingProperties();
+}
 
 void BatchPresenter::postDeleteHandle(const std::string &wsName) {
-  auto const item = m_jobRunner->notifyWorkspaceDeleted(wsName);
+  auto const item = m_jobManager->notifyWorkspaceDeleted(wsName);
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::renameHandle(const std::string &oldName, const std::string &newName) {
-  auto const item = m_jobRunner->notifyWorkspaceRenamed(oldName, newName);
+  auto const item = m_jobManager->notifyWorkspaceRenamed(oldName, newName);
   m_runsPresenter->notifyRowOutputsChanged(item);
   m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::clearADSHandle() {
-  m_jobRunner->notifyAllWorkspacesDeleted();
+  m_jobManager->notifyAllWorkspacesDeleted();
   m_runsPresenter->notifyRowOutputsChanged();
   m_runsPresenter->notifyRowStateChanged();
 }

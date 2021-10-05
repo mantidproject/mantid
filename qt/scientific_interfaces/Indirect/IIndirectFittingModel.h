@@ -10,7 +10,6 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/FittingMode.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "ParameterEstimation.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,6 +32,8 @@ public:
                                                                              WorkspaceIndex spectrum) const = 0;
 
   virtual void setFitFunction(Mantid::API::MultiDomainFunction_sptr function) = 0;
+  virtual void setFWHM(double fwhm, WorkspaceID WorkspaceID) = 0;
+  virtual void setBackground(double fwhm, WorkspaceID WorkspaceID) = 0;
   virtual void setDefaultParameterValue(const std::string &name, double value, WorkspaceID workspaceID) = 0;
 
   // IIndirectFittingModel
@@ -40,40 +41,17 @@ public:
                                                                            WorkspaceIndex spectrum) const = 0;
   virtual std::unordered_map<std::string, ParameterValue> getDefaultParameters(WorkspaceID workspaceID) const = 0;
 
-  // Functions that interact with IndirectFitDataTableModel
-  virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
-  virtual FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const = 0;
-  virtual bool isMultiFit() const = 0;
-  virtual WorkspaceID getNumberOfWorkspaces() const = 0;
-  virtual size_t getNumberOfSpectra(WorkspaceID workspaceID) const = 0;
-  virtual size_t getNumberOfDomains() const = 0;
-  virtual FitDomainIndex getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
-  virtual std::vector<double> getQValuesForData() const = 0;
-  virtual std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const = 0;
+  // Functions that interact with IndirectFitDataModel
   virtual void clearWorkspaces() = 0;
-  virtual void clear() = 0;
-
-  virtual void setSpectra(const std::string &spectra, WorkspaceID workspaceID) = 0;
-  virtual void setSpectra(FunctionModelSpectra &&spectra, WorkspaceID workspaceID) = 0;
-  virtual void setSpectra(const FunctionModelSpectra &spectra, WorkspaceID workspaceID) = 0;
-  virtual void addWorkspace(const std::string &workspaceName) = 0;
-  virtual void addWorkspace(const std::string &workspaceName, const std::string &spectra) = 0;
-  virtual void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) = 0;
-  virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) = 0;
-  virtual void removeWorkspace(WorkspaceID workspaceID) = 0;
-  virtual std::pair<double, double> getFittingRange(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
-  virtual std::string getExcludeRegion(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
-  virtual void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
-  virtual void setStartX(double startX, WorkspaceID workspaceID) = 0;
-  virtual void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
-  virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
-  virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getWorkspace(WorkspaceID workspaceID) const = 0;
+  virtual WorkspaceID getNumberOfWorkspaces() const = 0;
+  virtual bool isMultiFit() const = 0;
 
   // IIndirectFitOutput
   virtual void addSingleFitOutput(const Mantid::API::IAlgorithm_sptr &fitAlgorithm, WorkspaceID workspaceID,
                                   WorkspaceIndex spectrum) = 0;
   virtual void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) = 0;
+  virtual IIndirectFitOutput *getFitOutput() const = 0;
 
   // Generic
   virtual void setFittingMode(FittingMode mode) = 0;
@@ -84,19 +62,17 @@ public:
                                                                WorkspaceIndex spectrum) const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const = 0;
   virtual Mantid::API::WorkspaceGroup_sptr getResultGroup() const = 0;
-  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm() const = 0;
+  virtual Mantid::API::IAlgorithm_sptr getFittingAlgorithm(FittingMode mode) const = 0;
   virtual Mantid::API::IAlgorithm_sptr getSingleFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual Mantid::API::IFunction_sptr getSingleFunction(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual std::string getOutputBasename() const = 0;
-  virtual std::string createDisplayName(WorkspaceID workspaceID) const = 0;
 
   virtual void cleanFailedRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm) = 0;
   virtual void cleanFailedSingleRun(const Mantid::API::IAlgorithm_sptr &fittingAlgorithm, WorkspaceID workspaceID) = 0;
-  virtual DataForParameterEstimationCollection
-  getDataForParameterEstimation(const EstimationDataSelector &selector) const = 0;
   virtual void removeFittingData() = 0;
-
-  virtual IIndirectFitDataTableModel *getFitDataModel() = 0;
+  virtual void addDefaultParameters() = 0;
+  virtual void removeDefaultParameters() = 0;
+  virtual IIndirectFitDataModel *getFitDataModel() = 0;
 };
 
 } // namespace IDA

@@ -46,7 +46,8 @@ Row makeSimpleRow(std::string const &run, double theta) {
 Row makeRow(std::string const &run, double theta, std::string const &trans1, std::string const &trans2,
             boost::optional<double> qMin, boost::optional<double> qMax, boost::optional<double> qStep,
             boost::optional<double> scale, ReductionOptionsMap const &optionsMap) {
-  return Row({run}, theta, TransmissionRunPair({trans1, trans2}), RangeInQ(qMin, qMax, qStep), scale, optionsMap,
+  return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
+             RangeInQ(std::move(qMin), std::move(qMax), std::move(qStep)), std::move(scale), optionsMap,
              ReductionWorkspaces({run}, TransmissionRunPair({trans1, trans2})));
 }
 

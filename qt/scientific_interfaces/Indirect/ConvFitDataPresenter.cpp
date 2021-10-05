@@ -6,53 +6,38 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitDataPresenter.h"
 #include "ConvFitAddWorkspaceDialog.h"
-#include "ConvFitDataTablePresenter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 
 namespace MantidQt::CustomInterfaces::IDA {
 
-ConvFitDataPresenter::ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view)
-    : IndirectFitDataPresenter(model, view, std::make_unique<ConvFitDataTablePresenter>(model, view->getDataTable())),
-      m_convModel(model) {
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SLOT(setModelResolution(const QString &)));
-  connect(view, SIGNAL(resolutionLoaded(const QString &)), this, SIGNAL(singleResolutionLoaded()));
-}
-
-void ConvFitDataPresenter::setModelResolution(const QString &name) {
-  auto const workspaceCount = m_convModel->getNumberOfWorkspaces();
-  auto const index = m_convModel->getWorkspace(WorkspaceID{0}) ? workspaceCount - WorkspaceID{1} : workspaceCount;
-  setModelResolution(name.toStdString(), index);
-}
-
-void ConvFitDataPresenter::setModelResolution(std::string const &name, WorkspaceID const &workspaceID) {
-  try {
-    m_convModel->setResolution(name, workspaceID);
-    emit modelResolutionAdded(name, workspaceID);
-  } catch (std::exception const &ex) {
-    displayWarning(ex.what());
-  }
-}
-
-void ConvFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto convDialog = dynamic_cast<ConvFitAddWorkspaceDialog const *>(dialog)) {
-    addWorkspace(*convDialog, *m_convModel);
-    auto const name = convDialog->resolutionName();
-    auto const index = m_convModel->getNumberOfWorkspaces() - WorkspaceID{1};
-    m_convModel->setResolution(name, index);
-    emit modelResolutionAdded(name, index);
-  }
-}
-
-void ConvFitDataPresenter::addWorkspace(ConvFitAddWorkspaceDialog const &dialog, IndirectFittingModel &model) {
-  model.addWorkspace(dialog.workspaceName(), dialog.workspaceIndices());
-}
+ConvFitDataPresenter::ConvFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view)
+    : IndirectFitDataPresenter(model, view) {}
 
 std::unique_ptr<IAddWorkspaceDialog> ConvFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<ConvFitAddWorkspaceDialog>(parent);
   dialog->setResolutionWSSuffices(getResolutionWSSuffices());
   dialog->setResolutionFBSuffices(getResolutionFBSuffices());
   return dialog;
+}
+
+void ConvFitDataPresenter::addTableEntry(FitDomainIndex row) {
+  const auto &name = m_model->getWorkspace(row)->getName();
+  auto resolutionVector = m_model->getResolutionsForFit();
+  const auto resolution = resolutionVector.at(row.value).first;
+  const auto workspaceIndex = m_model->getSpectrum(row);
+  const auto range = m_model->getFittingRange(row);
+  const auto exclude = m_model->getExcludeRegion(row);
+
+  FitDataRow newRow;
+  newRow.name = name;
+  newRow.workspaceIndex = workspaceIndex;
+  newRow.resolution = resolution;
+  newRow.startX = range.first;
+  newRow.endX = range.second;
+  newRow.exclude = exclude;
+
+  m_view->addTableEntry(row.value, newRow);
 }
 
 } // namespace MantidQt::CustomInterfaces::IDA

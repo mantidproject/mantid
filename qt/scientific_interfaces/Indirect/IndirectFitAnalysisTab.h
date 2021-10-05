@@ -6,16 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitDataTableModel.h"
 #include "IndirectDataAnalysisTab.h"
 #include "IndirectFitDataPresenter.h"
-#include "IndirectFitDataTableModel.h"
 #include "IndirectFitOutputOptionsPresenter.h"
-#include "IndirectFitOutputOptionsView.h"
 #include "IndirectFitPlotPresenter.h"
 #include "IndirectFitPropertyBrowser.h"
 #include "IndirectFittingModel.h"
-#include "IndirectSpectrumSelectionView.h"
 
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
@@ -81,6 +77,8 @@ protected:
   std::unique_ptr<IndirectFitDataPresenter> m_dataPresenter;
   std::unique_ptr<IndirectFitPlotPresenter> m_plotPresenter;
   IndirectFitPropertyBrowser *m_fitPropertyBrowser{nullptr};
+  WorkspaceID m_activeWorkspaceID;
+  WorkspaceIndex m_activeSpectrumIndex;
 
 private:
   void setup() override;
@@ -100,22 +98,20 @@ private:
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
   void updateParameterEstimationData();
+  virtual void addDataToModel(IAddWorkspaceDialog const *dialog) = 0;
 
   std::unique_ptr<IndirectFittingModel> m_fittingModel;
   std::unique_ptr<IndirectFitOutputOptionsPresenter> m_outOptionsPresenter;
   Mantid::API::IAlgorithm_sptr m_fittingAlgorithm;
-  WorkspaceID m_activeWorkspaceID;
-  WorkspaceIndex m_activeSpectrumIndex;
 
 protected slots:
   void setModelFitFunction();
   void setModelStartX(double startX);
   void setModelEndX(double endX);
-  void updateDataInTable();
   void tableStartXChanged(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   void tableEndXChanged(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
-  void startXChanged(double startX);
-  void endXChanged(double endX);
+  void handleStartXChanged(double startX);
+  void handleEndXChanged(double endX);
   void updateFitOutput(bool error);
   void updateSingleFitOutput(bool error);
   void fitAlgorithmComplete(bool error);
@@ -136,7 +132,7 @@ private slots:
   void plotSelectedSpectra();
   void respondToSingleResolutionLoaded();
   void respondToDataChanged();
-  void respondToDataAdded();
+  void respondToDataAdded(IAddWorkspaceDialog const *dialog);
   void respondToDataRemoved();
   void respondToPlotSpectrumChanged();
   void respondToFwhmChanged(double);

@@ -62,7 +62,7 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
   return result;
 }
 
-LookupRow const *Experiment::findLookupRow(boost::optional<double> thetaAngle, double tolerance) const {
+LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const {
   LookupTable::const_iterator match;
   if (thetaAngle) {
     match = std::find_if(

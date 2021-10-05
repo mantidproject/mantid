@@ -573,7 +573,6 @@ int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
   }
 
   throw std::runtime_error("Object::complement :: " + Part);
-  return 0;
 }
 
 /**

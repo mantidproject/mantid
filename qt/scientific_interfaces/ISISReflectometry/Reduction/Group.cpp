@@ -23,6 +23,8 @@ Group::Group(
 
 bool Group::isGroup() const { return true; }
 
+bool Group::isPreview() const { return false; }
+
 std::string const &Group::name() const { return m_name; }
 
 /** Returns true if postprocessing is applicable for this group, i.e. if it

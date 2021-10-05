@@ -29,7 +29,9 @@ QHash<QString, QVariant> tightLayoutKwargs() {
 
 #endif
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
 
 using namespace MantidWidgets;
 
@@ -359,4 +361,6 @@ void IndirectFitPlotView::emitPlotSpectrumChanged(const QString &spectrum) {
 
 void IndirectFitPlotView::emitPlotGuessChanged(int doPlotGuess) { emit plotGuessChanged(doPlotGuess == Qt::Checked); }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

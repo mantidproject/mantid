@@ -291,7 +291,7 @@ constVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Expor
 constVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmObserver.cpp:23
 constVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmObserver.cpp:28
 constVariable:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/AlgorithmObserver.cpp:33
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:86
+unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/Algorithm.cpp:64
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/InstrumentFileFinder.cpp:36
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:798
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometrySave.cpp:895
@@ -914,11 +914,11 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Instru
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentActor.cpp:1068
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:277
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
-constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidget.cpp:1296
+constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidget.cpp:1269
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/UnwrappedDetector.cpp:16
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1618
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1651
-constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:792
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1541
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1574
+constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:743
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:248
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadDialog.cpp:137
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:178
@@ -1029,4 +1029,3 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Stretch.cpp
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:281
-

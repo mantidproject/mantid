@@ -62,19 +62,19 @@ private:
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
-  std::string m_instrumentName = ""; ///< Name of the instrument
-  std::string m_instrumentPath = ""; ///< Name of the instrument path
+  std::string m_instrumentName; ///< Name of the instrument
+  std::string m_instrumentPath; ///< Name of the instrument path
 
   // Variables describing the data in the detector
-  size_t m_numberOfTubes = 0;         // number of tubes - X
-  size_t m_numberOfPixelsPerTube = 0; // number of pixels per tube - Y
-  size_t m_numberOfChannels = 0;      // time channels - Z
-  size_t m_numberOfHistograms = 0;
+  size_t m_numberOfTubes;         // number of tubes - X
+  size_t m_numberOfPixelsPerTube; // number of pixels per tube - Y
+  size_t m_numberOfChannels;      // time channels - Z
+  size_t m_numberOfHistograms;
 
   /* Values parsed from the nexus file */
-  double m_wavelength = 0;
-  double m_channelWidth = 0;
-  double m_timeOfFlightDelay = 0;
+  double m_wavelength;
+  double m_channelWidth;
+  double m_timeOfFlightDelay;
   std::string m_monitorName;
 
   LoadHelper m_loader;
