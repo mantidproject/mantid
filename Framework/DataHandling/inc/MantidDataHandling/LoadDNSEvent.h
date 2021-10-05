@@ -83,7 +83,6 @@ private:
     uint64_t timestamp;
   };
 
-
 public:
   enum event_id_e { NEUTRON = 0, TRIGGER = 1 };
 
@@ -103,8 +102,7 @@ private:
   bool discardPreChopperEvents;
   bool setBinBoundary;
 
-  void runLoadInstrument(std::string instrumentName,
-                         DataObjects::EventWorkspace_sptr &eventWS);
+  void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
 
   void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
                                EventAccumulator &finalEventAccumulator);
@@ -112,25 +110,20 @@ private:
   EventAccumulator parse_File(FileByteStream &file, const std::string fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
-  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file,
-                                               const unsigned maxChunckCount);
+  std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const unsigned maxChunckCount);
 
-  void parse_BlockList(VectorByteStream &file,
-                       EventAccumulator &eventAccumulator);
+  void parse_BlockList(VectorByteStream &file, EventAccumulator &eventAccumulator);
   void parse_Block(VectorByteStream &file, EventAccumulator &eventAccumulator);
   void parse_BlockSeparator(VectorByteStream &file);
-  void parse_DataBuffer(VectorByteStream &file,
-                        EventAccumulator &eventAccumulator);
+  void parse_DataBuffer(VectorByteStream &file, EventAccumulator &eventAccumulator);
   BufferHeader parse_DataBufferHeader(VectorByteStream &file);
 
   inline size_t getWsIndex(const uint8_t &channel, const uint16_t &position) {
-  const uint32_t channelIndex =  ((channel & 0b11100000u) >> 2u) |
-                                  (channel & 0b00000111u);
+    const uint32_t channelIndex = ((channel & 0b11100000u) >> 2u) | (channel & 0b00000111u);
     return channelIndex * 1024 + position;
   }
 
-  inline void parse_andAddEvent(VectorByteStream &file,
-                                const BufferHeader &bufferHeader,
+  inline void parse_andAddEvent(VectorByteStream &file, const BufferHeader &bufferHeader,
                                 EventAccumulator &eventAccumulator);
 
   void parse_EndSignature(FileByteStream &file);
