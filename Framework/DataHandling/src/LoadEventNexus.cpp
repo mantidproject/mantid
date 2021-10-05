@@ -1119,10 +1119,10 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     } else {
 
       struct ExceptionOutput {
-        static void out(decltype(g_log) &log, const std::exception &e, int level = 0) {
-          log.warning() << std::string(level, ' ') << "exception: " << e.what() << '\n';
+        static void out(decltype(g_log) &log, const std::exception &except, int level = 0) {
+          log.warning() << std::string(level, ' ') << "exception: " << except.what() << '\n';
           try {
-            std::rethrow_if_nested(e);
+            std::rethrow_if_nested(except);
           } catch (const std::exception &e) {
             ExceptionOutput::out(log, e, level + 1);
           } catch (...) {

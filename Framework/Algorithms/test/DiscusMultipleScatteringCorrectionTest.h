@@ -319,43 +319,8 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr SetupFlatPlateWorkspace(const int nlat, const int nlong, const int nbins,
                                                             const double thickness) {
-    Mantid::API::MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, 0.5 /*x0*/);
-    inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    V3D samplePosition(0., 0., 0.);
-    V3D sourcePosition(0., 0., -14.);
 
-    Instrument_sptr instrument = std::make_shared<Instrument>();
-    instrument->setReferenceFrame(
-        std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
-
-    InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
-    InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
-
-    // set up detectors with one degree spacing in latitude and longitude (to match geographical angles
-    // approach used in the spatial interpolation\sparse instrument functionality)
-    int i = 0;
-    constexpr double deg2rad = M_PI / 180.0;
-    auto R = 1.0;
-    for (int lat = 0; lat < nlat; ++lat) {
-      for (int lng = 0; lng < nlong; ++lng) {
-        std::stringstream buffer;
-        buffer << "detector_" << i;
-        V3D detPos;
-        auto latrad = lat * deg2rad;
-        auto longrad = lng * deg2rad;
-        detPos[1] = R * sin(latrad);
-        const double ct = R * cos(latrad);
-        detPos[2] = ct * cos(longrad);
-        detPos[0] = ct * sin(longrad);
-
-        InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str());
-        // Link it to the workspace
-        inputWorkspace->getSpectrum(i).addDetectorID(i);
-        i++;
-      }
-    }
-    inputWorkspace->setInstrument(instrument);
+    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(nlat, nlong, 1.0, nbins);
 
     // create flat plate that is 1mm thick
     auto flatPlateShape = ComponentCreationHelper::createCuboid((10 * thickness) / 2, (10 * thickness) / 2,

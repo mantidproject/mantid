@@ -198,7 +198,7 @@ void GenerateEventsFilter::processInOutWorkspaces() {
     // Using default
     title = "Splitters";
   }
-  m_filterInfoWS = m_filterInfoWS = std::make_shared<TableWorkspace>();
+  m_filterInfoWS = std::make_shared<TableWorkspace>();
   m_filterInfoWS->setTitle(title);
   m_filterInfoWS->addColumn("int", "workspacegroup");
   m_filterInfoWS->addColumn("str", "title");
@@ -388,7 +388,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
     if (isLogarithmic) {
       // if logarithmic, first an approximation of the value, then the final value depends if reverseLogarithmic is
       // used, because of the way the last bin is managed
-      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log(1 + factor);
+      double logSize = std::log(relativeEndTime_ns / relativeStartTime_ns) / std::log1p(factor);
       if (!m_isReverseLogarithmic) {
         totalNumberOfSlices = static_cast<int>(std::ceil(logSize));
       } else {
@@ -1168,7 +1168,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
   const Types::Core::DateAndTime ZeroTime(0);
   int lastindex = -1;
   int currindex = -1;
-  DateAndTime lastTime;
   DateAndTime currTime = ZeroTime;
   DateAndTime start, stop;
   // size_t progslot = 0;
@@ -1186,7 +1185,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
     bool breakloop = false;
     bool createsplitter = false;
 
-    lastTime = currTime;
     currTime = m_dblLog->nthTime(i);
     double currValue = m_dblLog->nthValue(i);
 
@@ -1334,7 +1332,7 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
       currindex = -1;
 
       // Condition to generate a Splitter (close parenthesis)
-      if (!correctdir && start.totalNanoseconds() > 0) {
+      if (start.totalNanoseconds() > 0) {
         stop = currTime;
         createsplitter = true;
       }
@@ -1430,8 +1428,8 @@ void GenerateEventsFilter::processIntegerValueFilter(int minvalue, int maxvalue,
     // belonged to.
     if (currvalue >= minvalue && currvalue <= maxvalue) {
       // Log value is in specified range
-      if ((i == 0) || (i >= 1 && ((filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
-                                  (filterDecrease && vecValue[i] <= vecValue[i - 1])))) {
+      if ((i == 0) || (filterIncrease && vecValue[i] >= vecValue[i - 1]) ||
+          (filterDecrease && vecValue[i] <= vecValue[i - 1])) {
         // First entry (regardless direction) and other entries considering
         // change of value
         if (singlevaluemode) {

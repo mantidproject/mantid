@@ -61,19 +61,18 @@ std::map<std::string, std::string> ConvertPeaksWorkspace::validateInputs() {
   PeaksWorkspace_sptr pws = std::dynamic_pointer_cast<PeaksWorkspace>(ipws);
   LeanElasticPeaksWorkspace_sptr lpws = std::dynamic_pointer_cast<LeanElasticPeaksWorkspace>(ipws);
 
-  // case I: missing instrument when converting to PeaksWorkspace
   if (lpws && !pws) {
+    // case I: missing instrument when converting to PeaksWorkspace
     if (getPointerToProperty("InstrumentWorkspace")->isDefault()) {
       issues["InstrumentWorkspace"] = "Need a PeaksWorkspace with proper instrument attached to assist conversion.";
     }
-  }
-
-  // case II: instrument cannot be found within donor workspace
-  if (lpws && !pws) {
-    Workspace_sptr ws = getProperty("InstrumentWorkspace");
-    ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
-    if (!inputExperimentInfo) {
-      issues["InstrumentWorkspace"] = "Invalid instrument found in donor workspace.";
+    // case II: instrument cannot be found within donor workspace
+    else {
+      Workspace_sptr ws = getProperty("InstrumentWorkspace");
+      ExperimentInfo_sptr inputExperimentInfo = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+      if (!inputExperimentInfo) {
+        issues["InstrumentWorkspace"] = "Invalid instrument found in donor workspace.";
+      }
     }
   }
 

@@ -63,7 +63,6 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type, const std::s
   }
   if (name.empty()) {
     throw std::invalid_argument("Empty string passed as name argument of addColumn.");
-    return c;
   }
   // Check that there is no column with the same name.
   auto ci = std::find_if(m_columns.begin(), m_columns.end(), FindName(name));

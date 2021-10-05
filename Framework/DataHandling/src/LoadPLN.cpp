@@ -876,10 +876,10 @@ void LoadPLN::exec() {
     // but if the file is missing, try relpath/{source}.bin
     std::stringstream buffer;
     buffer << eventDir.c_str() << "/DATASET_" << dataset << "/EOS.bin";
-    fs::path path = evtPath;
-    path /= buffer.str();
-    path = fs::absolute(path);
-    std::string nomPath = path.generic_string();
+    fs::path filePath = evtPath;
+    filePath /= buffer.str();
+    filePath = fs::absolute(filePath);
+    std::string nomPath = filePath.generic_string();
     if (fs::is_regular_file(nomPath)) {
       evtPath = nomPath;
     } else {

@@ -804,7 +804,7 @@ public:
   /**  Opens the dataset within this NXData with signal=1 attribute.
    */
   template <typename T> NXDataSetTyped<T> openData() {
-    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); it++) {
+    for (std::vector<NXInfo>::const_iterator it = datasets().begin(); it != datasets().end(); ++it) {
       NXDataSet dset(*this, it->nxname);
       dset.open();
       // std::cerr << "NXData signal of " << it->nxname << " = " <<

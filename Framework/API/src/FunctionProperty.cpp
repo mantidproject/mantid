@@ -37,7 +37,6 @@ FunctionProperty &FunctionProperty::operator=(const std::shared_ptr<IFunction> &
 /// Add the value of another property
 FunctionProperty &FunctionProperty::operator+=(Kernel::Property const * /*right*/) {
   throw Kernel::Exception::NotImplementedError("+= operator is not implemented for FunctionProperty.");
-  return *this;
 }
 
 /** Get the function definition
