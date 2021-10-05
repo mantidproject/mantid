@@ -57,6 +57,10 @@ class AddModelAnalysis(AddFeature):
 
             GUI.model_fitting_tab.model_fitting_tab_presenter.disable_editing_notifier.add_subscriber(
                 GUI.disable_observer)
+
+            GUI.context.data_context.instrumentNotifier.add_subscriber(
+                GUI.model_fitting_tab.model_fitting_tab_presenter.instrument_changed_notifier)
+
             #plotting
         if TABANDPLOT in self.feature_list:
             GUI.model_fitting_tab.model_fitting_tab_presenter.remove_plot_guess_notifier.add_subscriber(

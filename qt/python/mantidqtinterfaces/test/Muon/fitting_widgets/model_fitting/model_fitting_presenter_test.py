@@ -199,6 +199,10 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
+    def test_that_handle_instrument_changed_clears_results_tables(self):
+        self.presenter.handle_instrument_changed()
+        self.view.update_result_table_names.assert_called_once_with([])
+
     def test_that_update_dataset_names_in_view_and_model_will_update_the_datasets_in_the_model_and_view(self):
         self.presenter.update_dataset_names_in_view_and_model()
 
