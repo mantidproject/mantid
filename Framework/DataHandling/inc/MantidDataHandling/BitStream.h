@@ -67,8 +67,7 @@ static endian getMachineEndianess() {
   } arrayValue;
   arrayValue.val = {0x00u, 0x00u, 0xFFu, 0xFFu};
   const uint32_t mixInt = 0x0000FFFFu;
-  const endian machineEndianess =
-      (arrayValue.asUint == mixInt) ? endian::big : endian::little;
+  const endian machineEndianess = (arrayValue.asUint == mixInt) ? endian::big : endian::little;
   return machineEndianess;
 }
 } // namespace
@@ -96,32 +95,23 @@ private:
     return rc == 0 ? stat_buf.st_size : -1;
   }
 
-  template <typename T>
-  inline char *getResultPointer(T *const result,
-                                const std::size_t &bytecount) const {
-    return reinterpret_cast<char *>(result) + sizeof(T) -
-           std::min(sizeof(T), bytecount);
+  template <typename T> inline char *getResultPointer(T *const result, const std::size_t &bytecount) const {
+    return reinterpret_cast<char *>(result) + sizeof(T) - std::min(sizeof(T), bytecount);
   }
 
 public:
-  template <typename T>
-  inline FileByteStream &readRaw(T &result, const std::size_t &bytecount) {
+  template <typename T> inline FileByteStream &readRaw(T &result, const std::size_t &bytecount) {
     stream_.read(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
-  template <std::size_t bytecount, typename T>
-  inline FileByteStream &readRaw(T &result) {
-    static_assert(
-        sizeof(T) >= bytecount,
-        "byte count of result needs to be greater or equal to bytecount");
+  template <std::size_t bytecount, typename T> inline FileByteStream &readRaw(T &result) {
+    static_assert(sizeof(T) >= bytecount, "byte count of result needs to be greater or equal to bytecount");
     stream_.read(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
-  template <typename T> inline FileByteStream &readRaw(T &result) {
-    return readRaw<sizeof(T)>(result);
-  }
+  template <typename T> inline FileByteStream &readRaw(T &result) { return readRaw<sizeof(T)>(result); }
 
   template <typename T> inline T readRaw(T &&result) {
     readRaw<sizeof(result)>(result);
@@ -130,20 +120,20 @@ public:
 
   // template <std::size_t bytecount, typename T>
   // inline FileByteStream &read(T &result) {
-    // readRaw<bytecount>(result);
-    // if (endianess() != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
-      // result = convert_endianness(result);
-    // }
-    // return *this;
+  // readRaw<bytecount>(result);
+  // if (endianess() != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
+  // result = convert_endianness(result);
+  // }
+  // return *this;
   // }
 
   // template <typename T> inline FileByteStream &read(T &result) {
-    // return read<sizeof(result)>(result);
+  // return read<sizeof(result)>(result);
   // }
 
   // template <typename T> inline T read(T &&result) {
-    // read<sizeof(result)>(result);
-    // return result;
+  // read<sizeof(result)>(result);
+  // return result;
   // }
 
   inline uint8_t peek() { return static_cast<uint8_t>(stream_.peek()); }
@@ -163,8 +153,7 @@ public:
 
 class VectorByteStream {
 public:
-  explicit VectorByteStream(const std::vector<uint8_t> &vector,
-                            const endian endianess)
+  explicit VectorByteStream(const std::vector<uint8_t> &vector, const endian endianess)
       : endianess(endianess), pos(vector.begin()), end(vector.end()) {}
 
   const endian endianess;
@@ -173,9 +162,7 @@ private:
   typename std::vector<uint8_t>::const_iterator pos;
   typename std::vector<uint8_t>::const_iterator end;
 
-  template <typename T>
-  inline char *getResultPointer(T *const result,
-                                const std::size_t &bytecount) const {
+  template <typename T> inline char *getResultPointer(T *const result, const std::size_t &bytecount) const {
     return reinterpret_cast<char *>(result) + sizeof(T) - bytecount;
   }
 
@@ -184,42 +171,33 @@ private:
     pos += static_cast<long>(bytecount);
   }
 
-  inline void streamignore(const std::size_t &bytecount) {
-    pos += static_cast<long>(bytecount);
-  }
+  inline void streamignore(const std::size_t &bytecount) { pos += static_cast<long>(bytecount); }
 
   inline unsigned streampeek() const { return *pos; }
 
   inline bool streameof() const { return pos >= end; }
 
 public:
-  template <typename T>
-  inline VectorByteStream &readRaw(T &result, const std::size_t &bytecount) {
+  template <typename T> inline VectorByteStream &readRaw(T &result, const std::size_t &bytecount) {
 
     streamread(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
-  template <std::size_t bytecount, typename T>
-  inline VectorByteStream &readRaw(T &result) {
-    static_assert(
-        sizeof(T) >= bytecount,
-        "byte count of result needs to be greater or equal to bytecount");
+  template <std::size_t bytecount, typename T> inline VectorByteStream &readRaw(T &result) {
+    static_assert(sizeof(T) >= bytecount, "byte count of result needs to be greater or equal to bytecount");
     streamread(getResultPointer(&result, bytecount), bytecount);
     return *this;
   }
 
-  template <typename T> inline VectorByteStream &readRaw(T &result) {
-    return readRaw<sizeof(T)>(result);
-  }
+  template <typename T> inline VectorByteStream &readRaw(T &result) { return readRaw<sizeof(T)>(result); }
 
   template <typename T> inline T readRaw(T &&result) {
     readRaw<sizeof(result)>(result);
     return result;
   }
 
-  template <std::size_t bytecount, typename T>
-  inline VectorByteStream &read(T &result) {
+  template <std::size_t bytecount, typename T> inline VectorByteStream &read(T &result) {
     readRaw<bytecount>(result);
     if (endianess != MACHINE_ENDIANESS /*&& endianess != endian::native*/) {
       result = convert_endianness(result);
@@ -227,15 +205,12 @@ public:
     return *this;
   }
 
-  template <typename T> inline VectorByteStream &read(T &result) {
-    return read<sizeof(result)>(result);
-  }
+  template <typename T> inline VectorByteStream &read(T &result) { return read<sizeof(result)>(result); }
 
   template <typename T> inline T read(T &&result) {
     read<sizeof(result)>(result);
     return result;
   }
-
 
   inline uint8_t peek() { return static_cast<uint8_t>(streampeek()); }
 
@@ -246,9 +221,7 @@ public:
     return *this;
   }
 
-  template <typename T> VectorByteStream &operator>>(T &val) {
-    return read(val);
-  }
+  template <typename T> VectorByteStream &operator>>(T &val) { return read(val); }
 };
 
 #endif /* MANTID_DATAHANDLING_BIT_STREAM_H_ */

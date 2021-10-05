@@ -37,27 +37,22 @@ public:
     return alg;
   }
 
-  std::shared_ptr<LoadDNSEvent>
-  makeAlgorithm(const std::string &inputFile,
-                const std::string &outputWorkspace, bool doesThrow = true) {
+  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, const std::string &outputWorkspace,
+                                              bool doesThrow = true) {
     auto alg = makeAlgorithm(doesThrow);
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputFile", inputFile));
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setPropertyValue("OutputWorkspace", outputWorkspace));
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputWorkspace));
     return alg;
   }
 
-  std::shared_ptr<LoadDNSEvent>
-  makeAlgorithm(const std::string &inputFile, uint32_t chopperChannel, bool SetBinBoundary,
-                const std::string &outputWorkspace,
-                bool doesThrow = true) {
+  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, uint32_t chopperChannel,
+                                              bool SetBinBoundary, const std::string &outputWorkspace,
+                                              bool doesThrow = true) {
     auto alg = makeAlgorithm(inputFile, outputWorkspace, doesThrow);
-    TS_ASSERT_THROWS_NOTHING(
-        alg->setProperty("chopperChannel", chopperChannel));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("chopperChannel", chopperChannel));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SetBinBoundary", SetBinBoundary));
     return alg;
   }
-
 
   void test_Init() {
     LoadDNSEvent alg;
@@ -74,9 +69,7 @@ public:
   void test_Properties() {
     auto alg = makeAlgorithm();
     TS_ASSERT_EQUALS(alg->getPropertyValue("chopperChannel"), "2");
-    TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5),
-                     std::invalid_argument);
-
+    TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5), std::invalid_argument);
   }
 
   void test_Executes_1() {
@@ -110,9 +103,7 @@ public:
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(
-        iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            outWSName));
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
@@ -137,10 +128,9 @@ public:
 
     // test event count:
     const auto rng = boost::irange(static_cast<size_t>(0), iws->size());
-    const size_t eventCount = std::accumulate(
-        rng.begin(), rng.end(), static_cast<size_t>(0), [&](auto a, auto b) {
-          return a + iws->getSpectrum(b).getEvents().size();
-        });
+    const size_t eventCount = std::accumulate(rng.begin(), rng.end(), static_cast<size_t>(0), [&](auto a, auto b) {
+      return a + iws->getSpectrum(b).getEvents().size();
+    });
     TS_ASSERT_EQUALS(eventCount, 9998)
     TS_ASSERT_EQUALS(iws->getNumberEvents(), 9998);
     TS_ASSERT_EQUALS(iws->getTofMax(), 99471.3);
