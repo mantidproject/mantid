@@ -463,7 +463,6 @@ class DrillModel(QObject):
             indexes (list(int)): list of sample indexes
         """
         groups = list()
-        processingParams = dict()
         for index in indexes:
             sample = self._samples[index]
             group = sample.getGroup()
@@ -473,6 +472,7 @@ class DrillModel(QObject):
         if not groups:
             return False
         for group in groups:
+            processingParams = dict()
             samples = group.getSamples()
             master = group.getMaster()
             for sample in samples:
