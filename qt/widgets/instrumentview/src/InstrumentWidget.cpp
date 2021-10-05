@@ -8,9 +8,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -1226,14 +1223,11 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
 
 /// Return the size of the OpenGL display widget in logical pixels
 QSize InstrumentWidget::glWidgetDimensions() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize { return QSize(w->width(), w->height()); };
-#else
   auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
     const auto devicePixelRatio = w->window()->devicePixelRatio();
     return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
   };
-#endif
+
   if (m_instrumentDisplay->getGLDisplay())
     return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
   else if (m_instrumentDisplay->getQtDisplay())
@@ -1542,24 +1536,7 @@ bool InstrumentWidget::isCurrentTab(InstrumentWidgetTab *tab) const {
  * @return string representing the current state of the instrumet widget.
  */
 std::string InstrumentWidget::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  TSVSerialiser tsv;
-
-  // serialise widget properties
-  tsv.writeLine("WorkspaceName") << getWorkspaceNameStdString();
-  tsv.writeLine("SurfaceType") << getSurfaceType();
-  tsv.writeSection("surface", getSurface()->saveToProject());
-  tsv.writeLine("CurrentTab") << getCurrentTab();
-  tsv.writeLine("EnergyTransfer") << m_xIntegration->getMinimum() << m_xIntegration->getMaximum();
-
-  // serialise widget subsections
-  tsv.writeSection("actor", m_instrumentActor->saveToProject());
-  tsv.writeSection("tabs", saveTabs());
-
-  return tsv.outputLines();
-#else
   throw std::runtime_error("InstrumentWidget::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -1590,53 +1567,8 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  * file.
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  TSVSerialiser tsv(lines);
-
-  if (tsv.selectLine("SurfaceType")) {
-    int surfaceType;
-    tsv >> surfaceType;
-    setSurfaceType(surfaceType);
-  }
-
-  if (tsv.selectSection("actor")) {
-    std::string actorLines;
-    tsv >> actorLines;
-    m_instrumentActor->loadFromProject(actorLines);
-  }
-
-  if (tsv.selectLine("CurrentTab")) {
-    int tab;
-    tsv >> tab;
-    selectTab(tab);
-  }
-
-  if (tsv.selectLine("EnergyTransfer")) {
-    double min, max;
-    bool isIntegrable = true;
-    tsv >> min >> max >> isIntegrable;
-    if (isIntegrable) {
-      setBinRange(min, max);
-    }
-  }
-
-  if (tsv.selectSection("Surface")) {
-    std::string surfaceLines;
-    tsv >> surfaceLines;
-    getSurface()->loadFromProject(surfaceLines);
-  }
-
-  if (tsv.selectSection("tabs")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    loadTabs(tabLines);
-  }
-
-  updateInstrumentView();
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentWidget::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidQt::MantidWidgets
