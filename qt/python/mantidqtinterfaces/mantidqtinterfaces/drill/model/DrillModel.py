@@ -485,6 +485,8 @@ class DrillModel(QObject):
                             processingParams[name] = str(value)
                     elif sample == master:
                         processingParams[name] = value
+                    elif master is None:
+                        processingParams[name] = value
             for p in self._parameters:
                 if p.getName() not in processingParams:
                     processingParams[p.getName()] = p.getValue()
