@@ -171,7 +171,7 @@ public:
   }
 
 private:
-  const std::string m_fileName = "pulser_ON473_31.mdat";
+  const std::string m_fileName = "DNS_psd_pulser_ON473_31.mdat";
 
   const std::string m_badFileName = "dnstof.d_dat"; // some random file
 };
