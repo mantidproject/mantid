@@ -48,7 +48,7 @@ Usage
 .. testcode:: LoadDNSEventex1
 
     # data file.
-    filename = "pulser_ON473_31.mdat"
+    filename = "DNS_psd_pulser_ON473_31.mdat"
 
     eventWS = LoadDNSEvent(InputFile=filename, ChopperChannel='2')
     print("Number of events: {}".format(eventWS.getNumberEvents()))
