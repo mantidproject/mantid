@@ -64,35 +64,35 @@ class CalibrationModel(object):
         :param spec_index: list of indices to save (e.g. can specify a particular bank)
         """
         if not spec_nums:
-            spec_nums = range(ws_foc.getNumberHistograms())
+            spec_nums = range(ws_foc.getNumberHistograms())  # one block per spectrum in ws
         nspec = len(spec_nums)
         # read header
         with open(path.join(CALIB_FOLDER, "template_ENGINX_prm_header.prm")) as fheader:
             lines = fheader.readlines()
-        lines[1] = lines[1].replace('2', f'{nspec}') # replace with nspectra in header
+        lines[1] = lines[1].replace('2', f'{nspec}')  # replace with nspectra in header
         lines[13] = lines[13].replace('241391', f'{ws_foc.run().get("run_number").value}')  # replace run num
         # add blocks
         si = ws_foc.spectrumInfo()
         inst = ws_foc.getInstrument()
-        newln = lines[0][-1]  # new line char
+        endl = lines[0][-1]  # new line char
         for iblock, ispec in enumerate(spec_nums):
             # detector parameters
             l2 = si.l2(ispec)
             phi, tth = degrees(si.geographicalAngles(ispec))
             dc = si.diffractometerConstants(ispec)
             difa, difc, tzero = [dc[param] for param in [UnitParams.difa, UnitParams.difc, UnitParams.tzero]]
-            block = [f'INS  {iblock+1}I ITYP\t0\t1.0000\t80.0000\t0{newln}']
-            block.extend(f'INS  {iblock+1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{newln}')
-            block.extend(f'INS  {iblock+1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{newln}')
+            block = [f'INS  {iblock+1}I ITYP\t0\t1.0000\t80.0000\t0{endl}']
+            block.extend(f'INS  {iblock+1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{endl}')
+            block.extend(f'INS  {iblock+1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{endl}')
             # TOF peak profile parameters
             alpha0, beta0, beta1, sig0_sq, sig1_sq, sig2_sq = self.getParametersFromDetector(inst,
                                                                                              ws_foc.getDetector(ispec))
-            block.extend(f'INS  {iblock+1}PRCF1 \t3\t21\t0.00050{newln}')
-            block.extend(f'INS  {iblock+1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{newln}')
-            block.extend(f'INS  {iblock+1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{newln}')
+            block.extend(f'INS  {iblock+1}PRCF1 \t3\t21\t0.00050{endl}')
+            block.extend(f'INS  {iblock+1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{endl}')
+            block.extend(f'INS  {iblock+1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
             for iblank in [3, 4, 5]:
-                block.extend(f'INS  {iblock+1}PRCF1{iblank}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}{newln}')
-            block.extend(f'INS  {iblock+1}PRCF16\t{0.0:.6E}{newln}')
+                block.extend(f'INS  {iblock+1}PRCF1{iblank}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
+            block.extend(f'INS  {iblock+1}PRCF16\t{0.0:.6E}{endl}')
             # append to lines
             lines.extend(block)
         # write lines to prm file
@@ -208,8 +208,8 @@ class CalibrationModel(object):
         """
         Create output files (.prm for GSAS and .nxs of calibration table) from the algorithms in the specified directory
         :param calibration_dir: The directory to save the files into.
-        :param CalibrationInfo object with details of calibration and grouping
-        :param focused ceria workspace
+        :param calibration: CalibrationInfo object with details of calibration and grouping
+        :param ws_foc: focused ceria workspace
         """
         # create calibration dir of not exist
         if not path.exists(calibration_dir):
@@ -220,7 +220,7 @@ class CalibrationModel(object):
             calibration.save_grouping_workspace(calibration_dir)
 
         # save prm file(s)
-        prm_filepath = calibration_dir + calibration.generate_output_file_name()
+        prm_filepath = path.join(calibration_dir, calibration.generate_output_file_name())
         self.write_prm_file(ws_foc, prm_filepath)
         set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                     "last_calibration_path", prm_filepath)
@@ -236,7 +236,7 @@ class CalibrationModel(object):
                 # create temp group to get prm template for the bank
                 bank_group = CalibrationInfo(EnggUtils.GROUP(str(ibank + 1)),
                                              calibration.get_instrument(), calibration.get_ceria_path())
-                prm_filepath_bank = calibration_dir + bank_group.generate_output_file_name()
+                prm_filepath_bank = path.join(calibration_dir, bank_group.generate_output_file_name())
                 self.write_prm_file(ws_foc, prm_filepath_bank, spec_nums=[ibank])
                 # copy pdcal output nxs for both banks
                 filepath, ext = path.splitext(prm_filepath_bank)
