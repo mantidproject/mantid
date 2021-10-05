@@ -237,7 +237,7 @@ private:
                           size_t size) const;
 
   /// The workspace whose data are shown
-  const std::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but
   /// not applied to the data workspace.
   mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
