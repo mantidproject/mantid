@@ -237,6 +237,84 @@ public:
       std::cout << "\n";
     }
 
+    // Set up function parameters values
+    testfunc.setParameter("ScaleX", 1.1);
+    testfunc.setParameter("ScaleY", 0.9);
+    // calcualte function value for bank27 (related to the object function)
+    testfunc.function1D(out.get(), useless, order);
+
+    std::cout << "Scale (1.1, 0.9)\n";
+    for (size_t i = 0; i < peakindexes.size(); ++i) {
+      // Assert detector IDs
+      int ipeak = peakindexes[i];
+      long int det_i = pws->getPeak(ipeak).getDetectorID();
+      TS_ASSERT_EQUALS(det_i, detids[i]);
+
+      std::cout << ipeak << ": ";
+      for (size_t d = 0; d < 3; ++d) {
+        std::cout << out[ipeak * 3 + d] << "  ";
+      }
+      std::cout << "\n";
+    }
+
+    std::cout << "Scale (0.9, 1.1)\n";
+    testfunc.setParameter("ScaleX", 0.9);
+    testfunc.setParameter("ScaleY", 1.1);
+    // calcualte function value for bank27 (related to the object function)
+    testfunc.function1D(out.get(), useless, order);
+
+    // show result
+    // Peak indexes
+    //    std::vector<int> peakindexes{64, 65, 66, 67, 254, 255, 256, 257, 10955, 10956, 10957, 10958};
+    //    std::vector<long int> detids{1780254, 1800379, 1814619, 1790397, 1811588, 1825313,
+    //                                 1788132, 1801093, 1803923, 1788915, 1771352, 1824577};
+    for (size_t i = 0; i < peakindexes.size(); ++i) {
+      // Assert detector IDs
+      int ipeak = peakindexes[i];
+      long int det_i = pws->getPeak(ipeak).getDetectorID();
+      TS_ASSERT_EQUALS(det_i, detids[i]);
+
+      std::cout << ipeak << ": ";
+      for (size_t d = 0; d < 3; ++d) {
+        std::cout << out[ipeak * 3 + d] << "  ";
+      }
+      std::cout << "\n";
+    }
+    TS_ASSERT_EQUALS(135, 246);
+
+    // TODO - write these into unit tests!
+
+    /*
+     * Scale (1.1, 0.9)
+64: -4.04172  1.91418  -4.04384
+65: -4.37725  0.988898  -3.80048
+66: -3.71589  0.927614  -3.78026
+67: -3.69851  0.996146  -3.09986
+254: -4.38616  0.944574  -3.79285
+255: -3.72545  0.896009  -3.77312
+256: -4.37156  1.02298  -3.11404
+257: -3.70605  0.964197  -3.09218
+10955: 3.70692  0.961802  3.78894
+10956: 4.36969  1.03149  3.80559
+10957: 4.02371  1.94577  4.05188
+10958: 3.72025  0.903004  4.4747
+Scale (0.9, 1.1)
+64: -4.04381  1.92244  -4.20213
+65: -4.38515  0.930843  -3.75479
+66: -3.69941  0.989064  -3.77225
+67: -3.71802  0.91721  -3.08782
+254: -4.37735  0.970865  -3.75927
+255: -3.68901  1.02111  -3.77964
+256: -4.39288  0.892533  -3.0754
+257: -3.70793  0.957278  -3.09125
+10955: 3.70922  0.951834  3.76849
+10956: 4.39379  0.878827  3.7513
+10957: 4.06492  1.88495  4.1947
+10958: 3.6933  1.01796  4.45579
+     *
+     *
+     */
+
     //      for (int i = 0; i < n_peaks; ++i) {
     //          // search bank27
     //          if (1769472 <= pws->getPeak(i).getDetectorID() && pws->getPeak(i).getDetectorID() < 1835008) {

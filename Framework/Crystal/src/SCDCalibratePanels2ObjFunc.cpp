@@ -55,6 +55,8 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaSampleX", 0.0, "relative shift of sample position along X.");
   declareParameter("DeltaSampleY", 0.0, "relative shift of sample position along Y.");
   declareParameter("DeltaSampleZ", 0.0, "relative shift of sample position along Z.");
+  declareParameter("ScaleX", 1.0, "Scale of detector along X-direction (i.e., width).");
+  declareParameter("ScaleY", 1.0, "Scale of detector along Y-direction (i.e., height).");
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string &componentName,
@@ -102,6 +104,9 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   const double dsx = getParameter("DeltaSampleX");
   const double dsy = getParameter("DeltaSampleY");
   const double dsz = getParameter("DeltaSampleZ");
+  //-- scale of the detector size
+  const double scalex = getParameter("ScaleX");
+  const double scaley = getParameter("ScaleY");
 
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
@@ -121,6 +126,8 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   bool calibrateT0 = (m_cmpt == "none/sixteenpack") || (m_cmpt == "none");
   // we don't need to move the instrument if we are calibrating T0
   if (!calibrateT0) {
+    pws = scaleRectagularDetectorSize(scalex, scaley, m_cmpt, pws);
+
     // translation
     pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
 
@@ -277,17 +284,6 @@ SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, co
   std::shared_ptr<const Geometry::RectangularDetector> rectDet =
       std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
   if (rectDet) {
-    Geometry::ParameterMap &pmap = pws->instrumentParameters();
-    auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
-    auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
-    double relscalex = scalex;
-    double relscaley = scaley;
-    if (!oldscalex.empty())
-      relscalex /= oldscalex[0];
-    if (!oldscaley.empty())
-      relscaley /= oldscaley[0];
-    pmap.addDouble(rectDet.get(), "scalex", scalex);
-    pmap.addDouble(rectDet.get(), "scaley", scaley);
     applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), scalex,
                                                  scaley);
   }
