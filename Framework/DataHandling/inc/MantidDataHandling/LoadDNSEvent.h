@@ -3,8 +3,10 @@
 
 #include "BitStream.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/System.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
@@ -49,12 +51,8 @@ namespace Mantid::DataHandling {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class DLLExport LoadDNSEvent : public API::Algorithm {
+class DLLExport LoadDNSEvent : public API::IFileLoader<Kernel::FileDescriptor> {
 public:
-  /// (Empty) Constructor
-  LoadDNSEvent() : Mantid::API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~LoadDNSEvent() {}
   ///
   const std::string name() const override { return "LoadDNSEvent"; }
   /// Summary of algorithms purpose
@@ -67,6 +65,8 @@ public:
   const std::vector<std::string> seeAlso() const override { return {}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling"; }
+  /// Returns a confidence value that this algorithm can load a file
+  int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
   static const std::string INSTRUMENT_NAME;

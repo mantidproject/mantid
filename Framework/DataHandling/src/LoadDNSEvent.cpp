@@ -1,6 +1,7 @@
 ﻿#include "MantidDataHandling/LoadDNSEvent.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -54,7 +55,20 @@ using namespace Mantid::API;
 
 namespace Mantid::DataHandling {
 
-DECLARE_ALGORITHM(LoadDNSEvent)
+DECLARE_FILELOADER_ALGORITHM(LoadDNSEvent)
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
+int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
+  const std::string &extn = descriptor.extension();
+  if (extn != ".mdat")
+    return 0;
+  return 90;
+}
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
 const unsigned MAX_BUFFER_BYTES_SIZE = 1500;      // maximum buffer size in data file
