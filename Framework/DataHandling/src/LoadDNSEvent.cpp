@@ -13,7 +13,6 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-
 #include <stdexcept>
 #include <vector>
 
@@ -53,8 +52,7 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 DECLARE_ALGORITHM(LoadDNSEvent)
 
@@ -548,5 +546,4 @@ void LoadDNSEvent::parse_EndSignature(FileByteStream &file) {
   }
 }
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling

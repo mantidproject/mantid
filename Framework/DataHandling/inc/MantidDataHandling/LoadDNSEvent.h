@@ -16,8 +16,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-namespace Mantid {
-namespace DataHandling {
+namespace Mantid::DataHandling {
 
 /**
   LoadDNSEvent
@@ -52,6 +51,10 @@ namespace DataHandling {
 
 class DLLExport LoadDNSEvent : public API::Algorithm {
 public:
+  /// (Empty) Constructor
+  LoadDNSEvent() : Mantid::API::Algorithm() {}
+  /// Virtual destructor
+  virtual ~LoadDNSEvent() {}
   ///
   const std::string name() const override { return "LoadDNSEvent"; }
   /// Summary of algorithms purpose
@@ -129,7 +132,6 @@ private:
   void parse_EndSignature(FileByteStream &file);
 };
 
-} // namespace DataHandling
-} // namespace Mantid
+} // namespace Mantid::DataHandling
 
 #endif /* MANTID_DATAHANDLING_LoadDNSEvent_H_ */
