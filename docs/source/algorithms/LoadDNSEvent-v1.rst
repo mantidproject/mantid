@@ -46,7 +46,7 @@ Usage
 **Example 1 - Load TOF PSD data:**
 
 .. testcode:: LoadDNSEventex1
-
+    from mantid.simpleapi import *
     # data file.
     filename = "DNS_psd_pulser_ON473_31.mdat"
 
