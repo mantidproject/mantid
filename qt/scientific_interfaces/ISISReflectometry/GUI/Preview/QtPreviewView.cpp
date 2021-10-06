@@ -66,16 +66,14 @@ void QtPreviewView::setInstViewSelectRectMode() {
 }
 
 void QtPreviewView::setInstViewPanMode() {
-  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
+  m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
 }
 
 void QtPreviewView::setInstViewZoomMode() {
   m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::MoveMode);
 }
 
-void QtPreviewView::onInstViewShapeChanged() const {
-  // m_notifyee->notifyInstViewShapeChanged();
-}
+void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
 
 void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_rect_select_button->setEnabled(enable);

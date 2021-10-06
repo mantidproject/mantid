@@ -110,8 +110,9 @@ public:
 
   void test_notify_inst_view_shape_changed() {
     auto mockView = makeView();
-    // TODO check that the model is called to sum banks
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    expectInstViewSetToPanMode(*mockView);
+    // TODO check that the model is called to sum banks
     presenter.notifyInstViewShapeChanged();
   }
 

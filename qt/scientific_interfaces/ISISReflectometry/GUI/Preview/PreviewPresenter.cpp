@@ -74,6 +74,8 @@ void PreviewPresenter::notifyInstViewZoomRequested() {
 }
 
 void PreviewPresenter::notifyInstViewShapeChanged() {
+  // Change to shape editing after a selection has been done to match instrument viewer default behaviour
+  notifyInstViewPanRequested();
   // TODO start the algorithm that will sum banks horizontally
   // m_model->sumBanksAsync(*m_jobManager);
 }
