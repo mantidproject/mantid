@@ -66,6 +66,7 @@ mtd_add_qt_library(
     ${PYTHON_LIBRARIES}
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
+    MantidQtWidgetsInstrumentView
     MantidQtIcons
     MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}

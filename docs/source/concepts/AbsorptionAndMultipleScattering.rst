@@ -90,7 +90,8 @@ Methods for calculating the absorption corrections (and also the multiple scatte
 
 3) Monte Carlo integration
 
-* Generally a more computationally demanding calculation and slower to solution. Monte Carlo is used for the numerical integration technique.
+* Monte Carlo is used for the numerical integration technique.
+* The performance relative to classical numerical integration depends on the number of dimensions in the integration. Monte Carlo integration is faster for a large number of dimensions
 * Relaxation of most assumptions needed by analytical solutions.
 * More flexible than the analytical techniques for shapes, beam profiles, and mixed number of scattering processes.
 * Implemented in Mantid
@@ -101,6 +102,7 @@ Methods for calculating the absorption corrections (and also the multiple scatte
 * Relatively no assumptions needed. Can simulate mixed numbers of scattering, complex scattering processes (ie scattering sample to sample environment back to sample then to detector), moderator and guides included.
 * Most flexible but mainly a tool for designing new instruments than for calculating sample corrections.
 * Typically calculated in another program specific to ray tracing and then imported into Mantid.
+* Some ray tracing solutions reduce the cost of simulating neutrons that never reach a detector by forcing neutrons into certain trajectories and assigning weights. This type of enhanced ray tracing approach is very similar to a Monte Carlo integration
 
 The analytical and numerical integration methods generally provide a quicker solution, but at the expense of having to make assumptions about sample geometries and scattering processes that make them less flexible than the Monte Carlo techniques (integration and ray-tracing).
 However, in many cases analytical and numerical integration solutions are satisfactory and allow much more efficient analysis of results.
@@ -112,7 +114,7 @@ Absorption
 
 .. plot:: concepts/AbsorptionAndMultipleScattering_plot_abs.py
 
-   Comparison of absorption methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors. The sample is Vanadium rod 4cm tall with 0.25cm diameter with standard number density. Algorithms compared are :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`, :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`, :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` (numerical integration), and :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>` (monte carlo ray tracing).
+   Comparison of absorption methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors. The sample is Vanadium rod 4cm tall with 0.25cm diameter with standard number density. Algorithms compared are :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`, :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`, :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` (numerical integration), and :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`.
 
 
 
@@ -255,8 +257,10 @@ Indicates the technique used for calculating the absorption correction:
 +------------+-------------------------+
 |  NI        | Numerical Integration   |
 +------------+-------------------------+
-|  MC        | Monte Carlo Integration |
+|  MC        | Monte Carlo             |
 +------------+-------------------------+
+
+Due to the overlap between the Monte Carlo integration and Monte Carlo ray tracing techniques a single classification of "Monte Carlo" is used
 
 Options that describe what functions the algorithm is capable of and the output types:
 
@@ -371,7 +375,7 @@ Multiple Scattering
 
 .. plot:: concepts/AbsorptionAndMultipleScattering_plot_ms.py
 
-   Comparison of multiple scattering methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors. The sample is Vanadium rod 4cm tall with 0.25cm diameter with standard number density. Algorithms compared are :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`, :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`, :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` (numerical integration), and :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>` (monte carlo ray tracing).
+   Comparison of multiple scattering methods with the assumptions of elastic scattering and isotropic scattering for in-plane detectors. The sample is Vanadium rod 4cm tall with 0.25cm diameter with standard number density. Algorithms compared are :ref:`MayersSampleCorrection <algm-MayersSampleCorrection>`, :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`, :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` (numerical integration), and :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>`.
 
 Introduction
 ############
@@ -664,7 +668,7 @@ Indicates the technique used for calculating the absorption correction:
 +============+=========================+
 |  NI        | Numerical Integration   |
 +------------+-------------------------+
-|  MC        | Monte Carlo Integration |
+|  MC        | Monte Carlo             |
 +------------+-------------------------+
 
 Options that describe what functions the algorithm is capable of, assumptions, and the output types:
@@ -694,10 +698,13 @@ Multiple Scattering Correction Algorithms in Mantid Table
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | Algorithm                                                                           | Energy Mode | Technique  | Geometry                        | Input Units          | Functions           | Notes                                                                                 |
 +=====================================================================================+=============+============+=================================+======================+=====================+=======================================================================================+
-| :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` | E           | NI         | Cylinder                        | Wavelength           | IA,EA,FI            ||  Only applicable to Vanadium                                                         |
+| :ref:`CalculateCarpenterSampleCorrection <algm-CalculateCarpenterSampleCorrection>` | E           | A          | Cylinder                        | Wavelength           | IA,EA,FI            ||  Only applicable to Vanadium                                                         |
 |                                                                                     |             |            |                                 |                      |                     ||  In-plane only                                                                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`CalculateMultipleScattering <algm-CalculateMultipleScattering>`               | E           | MC         | Any Shape                       | Wavelength           | EA, FI, PI          ||  Based on Monte Carlo program DISCUS [16]_ (or MINUS). [17]_                         |
+| :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`                   | E           | A          | Cylinder                        | Wavelength           | IA,EA,FI,W          ||  Only applicable to Vanadium                                                         |
+|                                                                                     |             |            |                                 |                      |                     ||  In-plane only                                                                       |
++-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
+| :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` | E           | MC         | Any Shape                       | Wavelength           | EA, FI, PI          ||  Based on Monte Carlo program DISCUS [16]_ (or MINUS). [17]_                         |
 |                                                                                     |             |            |                                 |                      |                     ||  This algorithm shares a similar heritage to MuscatData\\MuscatFunc (see below)      |
 |                                                                                     |             |            |                                 |                      |                     ||  It has been ported to C++ and integrated in to the Mantid framework featuring:      |
 |                                                                                     |             |            |                                 |                      |                     ||  - Mantid geometry (mesh\\CSG shape descriptions)                                    |
@@ -705,9 +712,6 @@ Multiple Scattering Correction Algorithms in Mantid Table
 |                                                                                     |             |            |                                 |                      |                     ||  - spatial interpolation and wavelength interpolation                                |
 |                                                                                     |             |            |                                 |                      |                     ||  So far it only supports elastic scattering but it will be extended                  |
 |                                                                                     |             |            |                                 |                      |                     ||  shortly to run on inelastic instruments also                                        |
-+-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
-| :ref:`CarpenterSampleCorrection <algm-CarpenterSampleCorrection>`                   | E           | NI         | Cylinder                        | Wavelength           | IA,EA,FI,W          ||  Only applicable to Vanadium                                                         |
-|                                                                                     |             |            |                                 |                      |                     ||  In-plane only                                                                       |
 +-------------------------------------------------------------------------------------+-------------+------------+---------------------------------+----------------------+---------------------+---------------------------------------------------------------------------------------+
 | :ref:`LoadMcStas <algm-LoadMcStas>`                                                 | E,D,I       | MC         | Any Shape                       | -                    | L                   ||  Loads McStas [15]_ v2.1 histogram or event data files.                              |
 |                                                                                     |             |            |                                 |                      |                     ||  Can extract multiple scattering and subtract from scattering in Mantid              |

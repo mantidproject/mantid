@@ -12,7 +12,7 @@ set(
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
   IndirectFitDataModelTest.h
-  IndirectFitOutputModelTest.h
+  IndirectFitOutputTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
   IndirectFitPlotModelTest.h
@@ -46,11 +46,11 @@ mtd_add_qt_tests(
     ../IndirectDataValidationHelper.cpp
   LINK_LIBS
     ${CORE_MANTIDLIBS}
-    DataObjects
+    Mantid::DataObjects
     gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
     ${PYTHON_LIBRARIES}
   QT5_LINK_LIBS
     Qt5::OpenGL

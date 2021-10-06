@@ -8,7 +8,9 @@ set(COMMON_SRC_FILES
 set(
   COMMON_INC_FILES
   IFileHandler.h
-  IMessageHandler.h
+  IJobRunner.h
+  IJobManager.h
+  IReflMessageHandler.h
   IPythonRunner.h
   IPlotter.h
   Plotter.h

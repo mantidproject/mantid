@@ -391,7 +391,7 @@ public:
     TS_ASSERT(alg.isExecuted());
     MatrixWorkspace_const_sptr outputWS = alg.getProperty("OutputWorkspace");
     TS_ASSERT(outputWS);
-    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(outputWS->isHistogramData())
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320));
     TS_ASSERT(outputWS->detectorInfo().isMonitor(320 * 320 + 1));
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)

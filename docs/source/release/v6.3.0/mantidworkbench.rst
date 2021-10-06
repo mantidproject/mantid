@@ -13,12 +13,15 @@ New and Improved
 .. figure:: ../../images/iview_insitu_rebin.png
     :width: 500px
     :align: center
+- The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
+- The algorithm browser has been tidied to reduce the number of single algorithm categories.
 
 - A users name and email can now be saved locally and prefilled in the Error Reporter
 
 Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
+- Fixed a bug where the option "SignedInPlaneTwoTheta" in :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` would not give signed results.
 
 
 :ref:`Release 6.3.0 <v6.3.0>`

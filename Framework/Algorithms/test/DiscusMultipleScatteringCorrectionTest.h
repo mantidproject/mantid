@@ -9,7 +9,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAlgorithms/CalculateMultipleScattering.h"
+#include "MantidAlgorithms/DiscusMultipleScatteringCorrection.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -24,24 +24,24 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-class CalculateMultipleScatteringHelper : public Mantid::Algorithms::CalculateMultipleScattering {
+class DiscusMultipleScatteringCorrectionHelper : public Mantid::Algorithms::DiscusMultipleScatteringCorrection {
 public:
   double interpolateGaussian(const Mantid::HistogramData::Histogram &histToInterpolate, double x) {
-    return CalculateMultipleScattering::interpolateGaussian(histToInterpolate, x);
+    return DiscusMultipleScatteringCorrection::interpolateGaussian(histToInterpolate, x);
   }
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
-    CalculateMultipleScattering::updateTrackDirection(track, cosT, phi);
+    DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
 };
 
-class CalculateMultipleScatteringTest : public CxxTest::TestSuite {
+class DiscusMultipleScatteringCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CalculateMultipleScatteringTest *createSuite() { return new CalculateMultipleScatteringTest(); }
-  static void destroySuite(CalculateMultipleScatteringTest *suite) { delete suite; }
+  static DiscusMultipleScatteringCorrectionTest *createSuite() { return new DiscusMultipleScatteringCorrectionTest(); }
+  static void destroySuite(DiscusMultipleScatteringCorrectionTest *suite) { delete suite; }
 
-  CalculateMultipleScatteringTest() {
+  DiscusMultipleScatteringCorrectionTest() {
     SofQWorkspace = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     SofQWorkspace->mutableY(0)[0] = 1.;
     SofQWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
@@ -228,7 +228,7 @@ public:
   }
 
   void test_interpolateGaussian() {
-    CalculateMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     const int NBINS = 10;
 
     auto ws2 = WorkspaceCreationHelper::create2DWorkspacePoints(1, NBINS, 0.5);
@@ -244,7 +244,7 @@ public:
   }
 
   void test_updateTrackDirection() {
-    CalculateMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     const double twoTheta = M_PI * 60. / 180.;
     const double cosTwoTheta = cos(twoTheta);
     const double sinTwoTheta = sin(twoTheta);
@@ -262,7 +262,7 @@ public:
   //---------------------------------------------------------------------------
 
   void test_invalidSOfQ() {
-    CalculateMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     const double THICKNESS = 0.001; // metres
     auto inputWorkspace = SetupFlatPlateWorkspace(5, 2, 1, THICKNESS);
     auto SofQWorkspaceTwoSp = WorkspaceCreationHelper::create2DWorkspace(2, 1);
@@ -293,7 +293,7 @@ public:
 
   void test_cant_run_withAlwaysStoreInADS_false() {
     const double THICKNESS = 0.001; // metres
-    CalculateMultipleScatteringHelper alg;
+    DiscusMultipleScatteringCorrectionHelper alg;
     alg.setAlwaysStoreInADS(false);
     alg.setRethrows(true);
     alg.initialize();
@@ -306,9 +306,9 @@ public:
 
 private:
   Mantid::API::IAlgorithm_sptr createAlgorithm() {
-    using Mantid::Algorithms::CalculateMultipleScattering;
+    using Mantid::Algorithms::DiscusMultipleScatteringCorrection;
     using Mantid::API::IAlgorithm;
-    auto alg = std::make_shared<CalculateMultipleScattering>();
+    auto alg = std::make_shared<DiscusMultipleScatteringCorrection>();
     alg->initialize();
     alg->setRethrows(true);
     TS_ASSERT(alg->isInitialized());
@@ -319,43 +319,8 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr SetupFlatPlateWorkspace(const int nlat, const int nlong, const int nbins,
                                                             const double thickness) {
-    Mantid::API::MatrixWorkspace_sptr inputWorkspace =
-        WorkspaceCreationHelper::create2DWorkspaceBinned(nlat * nlong, nbins, 0.5 /*x0*/);
-    inputWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
-    V3D samplePosition(0., 0., 0.);
-    V3D sourcePosition(0., 0., -14.);
 
-    Instrument_sptr instrument = std::make_shared<Instrument>();
-    instrument->setReferenceFrame(
-        std::make_shared<ReferenceFrame>(Mantid::Geometry::Y, Mantid::Geometry::Z, Right, "0,0,0"));
-
-    InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
-    InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
-
-    // set up detectors with one degree spacing in latitude and longitude (to match geographical angles
-    // approach used in the spatial interpolation\sparse instrument functionality)
-    int i = 0;
-    constexpr double deg2rad = M_PI / 180.0;
-    auto R = 1.0;
-    for (int lat = 0; lat < nlat; ++lat) {
-      for (int lng = 0; lng < nlong; ++lng) {
-        std::stringstream buffer;
-        buffer << "detector_" << i;
-        V3D detPos;
-        auto latrad = lat * deg2rad;
-        auto longrad = lng * deg2rad;
-        detPos[1] = R * sin(latrad);
-        const double ct = R * cos(latrad);
-        detPos[2] = ct * cos(longrad);
-        detPos[0] = ct * sin(longrad);
-
-        InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str());
-        // Link it to the workspace
-        inputWorkspace->getSpectrum(i).addDetectorID(i);
-        i++;
-      }
-    }
-    inputWorkspace->setInstrument(instrument);
+    auto inputWorkspace = WorkspaceCreationHelper::create2DWorkspaceWithGeographicalDetectors(nlat, nlong, 1.0, nbins);
 
     // create flat plate that is 1mm thick
     auto flatPlateShape = ComponentCreationHelper::createCuboid((10 * thickness) / 2, (10 * thickness) / 2,

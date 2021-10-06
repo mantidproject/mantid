@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "../../../ISISReflectometry/GUI/Batch/BatchJobRunner.h"
+#include "../../../ISISReflectometry/GUI/Batch/BatchJobManager.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "../ReflMockObjects.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -22,7 +22,6 @@ using Mantid::API::Workspace_sptr;
 using Mantid::DataObjects::Workspace2D_sptr;
 using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
-using WorkspaceCreationHelper::MockAlgorithm;
 
 using testing::_;
 using testing::AtLeast;
@@ -30,15 +29,16 @@ using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
 
-class BatchJobRunnerTest {
+class BatchJobManagerTest {
 public:
   // The boilerplate methods are not included because this is just a base
   // class
 
-  BatchJobRunnerTest()
+  BatchJobManagerTest()
       : m_instruments{"INTER", "OFFSPEC", "POLREF", "SURF", "CRISP"}, m_tolerance(0.1),
         m_experiment(makeEmptyExperiment()), m_instrument(makeEmptyInstrument()),
-        m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing() {
+        m_runsTable(m_instruments, m_tolerance, ReductionJobs()), m_slicing(),
+        m_batch(m_experiment, m_instrument, m_runsTable, m_slicing) {
     m_jobAlgorithm = std::make_shared<MockBatchJobAlgorithm>();
   }
 
@@ -49,16 +49,18 @@ protected:
   Instrument m_instrument;
   RunsTable m_runsTable;
   Slicing m_slicing;
+  Batch m_batch;
   std::shared_ptr<MockBatchJobAlgorithm> m_jobAlgorithm;
 
-  class BatchJobRunnerFriend : public BatchJobRunner {
-    friend class BatchJobRunnerTest;
-    friend class BatchJobRunnerProcessingTest;
-    friend class BatchJobRunnerProgressBarTest;
-    friend class BatchJobRunnerWorkspacesTest;
+  class BatchJobManagerFriend : public BatchJobManager {
+    friend class BatchJobManagerTest;
+    friend class BatchJobManagerProcessingTest;
+    friend class BatchJobManagerProgressBarTest;
+    friend class BatchJobManagerWorkspacesTest;
 
   public:
-    BatchJobRunnerFriend(Batch batch) : BatchJobRunner(batch) {}
+    BatchJobManagerFriend(Batch &batch, std::unique_ptr<IReflAlgorithmFactory> factory)
+        : BatchJobManager(batch, std::move(factory)) {}
   };
 
   void verifyAndClear() { TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobAlgorithm)); }
@@ -67,12 +69,18 @@ protected:
     return RunsTable(m_instruments, m_tolerance, std::move(reductionJobs));
   }
 
-  BatchJobRunnerFriend makeJobRunner(ReductionJobs reductionJobs = ReductionJobs()) {
-    m_experiment = makeEmptyExperiment();
-    m_instrument = makeEmptyInstrument();
+  BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs = ReductionJobs()) {
+    return makeJobManager(reductionJobs, nullptr);
+  }
+
+  BatchJobManagerFriend makeJobManager(std::unique_ptr<IReflAlgorithmFactory> mockFactory) {
+    return makeJobManager(ReductionJobs(), std::move(mockFactory));
+  }
+
+  BatchJobManagerFriend makeJobManager(ReductionJobs reductionJobs,
+                                       std::unique_ptr<IReflAlgorithmFactory> mockFactory) {
     m_runsTable = makeRunsTable(std::move(reductionJobs));
-    m_slicing = Slicing();
-    return BatchJobRunnerFriend(Batch(m_experiment, m_instrument, m_runsTable, m_slicing));
+    return BatchJobManagerFriend(m_batch, std::move(mockFactory));
   }
 
   Workspace2D_sptr createWorkspace() {
@@ -80,27 +88,27 @@ protected:
     return ws;
   }
 
-  Row *getRow(BatchJobRunnerFriend &jobRunner, int groupIndex, int rowIndex) {
-    auto &reductionJobs = jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+  Row *getRow(BatchJobManagerFriend &jobManager, int groupIndex, int rowIndex) {
+    auto &reductionJobs = jobManager.m_batch.mutableRunsTable().mutableReductionJobs();
     auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].get();
     return row;
   }
 
-  Group &getGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
-    auto &reductionJobs = jobRunner.m_batch.mutableRunsTable().mutableReductionJobs();
+  Group &getGroup(BatchJobManagerFriend &jobManager, int groupIndex) {
+    auto &reductionJobs = jobManager.m_batch.mutableRunsTable().mutableReductionJobs();
     auto &group = reductionJobs.mutableGroups()[groupIndex];
     return group;
   }
 
-  void selectGroup(BatchJobRunnerFriend &jobRunner, int groupIndex) {
-    jobRunner.m_rowLocationsToProcess.push_back(MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
+  void selectGroup(BatchJobManagerFriend &jobManager, int groupIndex) {
+    jobManager.m_rowLocationsToProcess.push_back(MantidQt::MantidWidgets::Batch::RowPath{groupIndex});
     auto selectedRowLocation = MantidQt::MantidWidgets::Batch::RowPath{groupIndex};
-    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations(std::move(selectedRowLocation));
+    jobManager.m_batch.mutableRunsTable().appendSelectedRowLocations(std::move(selectedRowLocation));
   }
 
-  void selectRow(BatchJobRunnerFriend &jobRunner, int groupIndex, int rowIndex) {
-    jobRunner.m_rowLocationsToProcess.push_back(MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
+  void selectRow(BatchJobManagerFriend &jobManager, int groupIndex, int rowIndex) {
+    jobManager.m_rowLocationsToProcess.push_back(MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex});
     auto selectedPath = MantidQt::MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-    jobRunner.m_batch.mutableRunsTable().appendSelectedRowLocations({std::move(selectedPath)});
+    jobManager.m_batch.mutableRunsTable().appendSelectedRowLocations({std::move(selectedPath)});
   }
 };

@@ -252,6 +252,8 @@ Corrected data
   subtracted, are displayed. These are the data passed to the PeakFitting
   step.
 
+.. _ALCPeakFitting:
+
 Peak Fitting
 ~~~~~~~~~~~~
 

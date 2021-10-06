@@ -1,6 +1,5 @@
-if(ENABLE_WORKBENCH)
-  # Defines a Python wrapper module for instrument view access This wraps the
-  # low- level classes.
+# Defines a Python wrapper module for instrument view access This wraps the
+# low- level classes.
 
   set(INSTRUMENTVIEW_INC_DIR ../../widgets/instrumentview/inc)
   set(_header_depends ${INSTRUMENTVIEW_INC_DIR}/InstrumentWidget.h)
@@ -11,7 +10,7 @@ if(ENABLE_WORKBENCH)
     TARGET_NAME mantidqt_instrumentviewqt5
     SIP_SRC _instrumentview.sip
     PYQT_VERSION 5
-    LINK_LIBS DataObjects
+    LINK_LIBS Mantid::DataObjects
               ${common_link_libs}
               MantidQtWidgetsInstrumentViewQt5
               MantidQtWidgetsCommonQt5
@@ -25,4 +24,3 @@ if(ENABLE_WORKBENCH)
     OSX_INSTALL_RPATH "@loader_path/../../.."
     FOLDER Qt5
   )
-endif()

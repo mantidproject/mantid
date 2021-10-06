@@ -25,11 +25,9 @@ template <> std::unique_ptr<API::MatrixWorkspace> createHelper() { return {nullp
 
 template <> std::unique_ptr<API::MatrixWorkspace> createConcreteHelper() {
   throw std::runtime_error("Attempt to create instance of abstract type MatrixWorkspace");
-  return {nullptr};
 }
 template <> std::unique_ptr<API::HistoWorkspace> createConcreteHelper() {
   throw std::runtime_error("Attempt to create instance of abstract type HistoWorkspace");
-  return {nullptr};
 }
 
 template <class UseIndexInfo>

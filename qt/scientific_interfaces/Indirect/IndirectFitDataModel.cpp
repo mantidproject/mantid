@@ -40,6 +40,8 @@ IndirectFitDataModel::IndirectFitDataModel()
       m_resolutions(std::make_unique<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>>()),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {}
 
+std::vector<IndirectFitData> *IndirectFitDataModel::getFittingData() { return m_fittingData.get(); }
+
 bool IndirectFitDataModel::hasWorkspace(std::string const &workspaceName) const {
   auto const names = getWorkspaceNames();
   auto const iter = std::find(names.cbegin(), names.cend(), workspaceName);
@@ -189,6 +191,11 @@ void IndirectFitDataModel::addWorkspace(Mantid::API::MatrixWorkspace_sptr worksp
   addNewWorkspace(workspace, spectra);
 }
 
+void IndirectFitDataModel::addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
+                                           const FunctionModelSpectra &spectra) {
+  m_fittingData->emplace_back(workspace, spectra);
+}
+
 FitDomainIndex IndirectFitDataModel::getDomainIndex(WorkspaceID workspaceID, WorkspaceIndex spectrum) const {
   FitDomainIndex index{0};
   for (size_t iws = 0; iws < m_fittingData->size(); ++iws) {
@@ -254,11 +261,6 @@ void IndirectFitDataModel::setExcludeRegion(const std::string &exclude, Workspac
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setExcludeRegionString(exclude, spectrum);
-}
-
-void IndirectFitDataModel::addNewWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                                           const FunctionModelSpectra &spectra) {
-  m_fittingData->emplace_back(workspace, spectra);
 }
 
 void IndirectFitDataModel::removeWorkspace(WorkspaceID workspaceID) {

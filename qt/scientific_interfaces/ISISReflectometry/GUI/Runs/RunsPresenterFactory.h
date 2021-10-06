@@ -20,7 +20,7 @@ namespace ISISReflectometry {
 class RunsPresenterFactory {
 public:
   RunsPresenterFactory(RunsTablePresenterFactory runsTablePresenterFactory, double thetaTolerance,
-                       std::vector<std::string> instruments, IMessageHandler *messageHandler)
+                       std::vector<std::string> instruments, IReflMessageHandler *messageHandler)
       : m_runsTablePresenterFactory(std::move(runsTablePresenterFactory)), m_thetaTolerance(std::move(thetaTolerance)),
         m_instruments(std::move(instruments)), m_messageHandler(messageHandler) {}
 
@@ -33,7 +33,7 @@ private:
   RunsTablePresenterFactory m_runsTablePresenterFactory;
   double m_thetaTolerance;
   std::vector<std::string> m_instruments;
-  IMessageHandler *m_messageHandler;
+  IReflMessageHandler *m_messageHandler;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

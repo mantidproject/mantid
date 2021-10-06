@@ -1,4 +1,6 @@
 set(PREVIEW_SRC_FILES
+        InstViewModel.cpp
+        PreviewJobManager.cpp
         PreviewPresenter.cpp
         QtPreviewView.cpp
         PreviewModel.cpp)
@@ -7,8 +9,11 @@ set(PREVIEW_SRC_FILES
 # IMPORTANT: Include files are required in the MOC_FILES set. Scroll down to
 # find it.
 set(PREVIEW_INC_FILES
+        InstViewModel.h
+        IInstViewModel.h
         IPreviewModel.h
         PreviewModel.h
+        PreviewJobManager.h
 
         IPreviewPresenter.h
         PreviewPresenterFactory.h

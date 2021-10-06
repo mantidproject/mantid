@@ -7,6 +7,7 @@
 #pragma once
 
 #include "IPreviewView.h"
+#include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <gmock/gmock.h>
 
@@ -18,5 +19,6 @@ class MockPreviewView : public IPreviewView {
 public:
   MOCK_METHOD(void, subscribe, (PreviewViewSubscriber *), (noexcept, override));
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
+  MOCK_METHOD(void, plotInstView, (std::shared_ptr<MantidWidgets::RotationSurface> &), (override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

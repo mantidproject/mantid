@@ -32,6 +32,7 @@ public:
       ReductionWorkspaces reducedWorkspaceNames);
 
   bool isGroup() const override;
+  bool isPreview() const override;
   std::vector<std::string> const &runNumbers() const;
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   double theta() const;

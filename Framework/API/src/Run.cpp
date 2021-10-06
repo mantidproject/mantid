@@ -55,6 +55,8 @@ Run::Run(const Run &other) : LogManager(other), m_histoBins(other.m_histoBins) {
 Run::~Run() = default;
 
 Run &Run::operator=(const Run &other) {
+  if (this == &other)
+    return *this;
   LogManager::operator=(other);
   copyGoniometers(other);
   m_histoBins = other.m_histoBins;

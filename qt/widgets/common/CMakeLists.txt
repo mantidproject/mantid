@@ -70,6 +70,7 @@ set(
   src/MantidWSIndexDialog.cpp
   src/Message.cpp
   src/MessageDisplay.cpp
+  src/MessageHandler.cpp
   src/MultifitSetupDialog.cpp
   src/MuonPeriodInfo.cpp
   src/NotificationService.cpp
@@ -280,11 +281,13 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
+    inc/MantidQtWidgets/Common/IMessageHandler.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
+    inc/MantidQtWidgets/Common/MessageHandler.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -885,8 +888,7 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 endif()
 
 # Target
-if(ENABLE_WORKBENCH)
-  # Additional components for this module
+# Additional components for this module
   find_package(
     Qt5
     COMPONENTS
@@ -914,7 +916,6 @@ if(ENABLE_WORKBENCH)
     endif()
   endif()
 
-endif()
 
 # If not sip header is defined we need to generate one with sip-module
 if (SIP_INCLUDE_DIR AND EXISTS ${SIP_INCLUDE_DIR}/sip.h)
@@ -950,7 +951,7 @@ mtd_add_qt_library(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     PUBLIC
-    PythonInterfaceCore
+    Mantid::PythonInterfaceCore
   QT5_LINK_LIBS
     Qt5::Concurrent
     Qt5::Help
@@ -1082,8 +1083,8 @@ mtd_add_qt_tests(
   LINK_LIBS
     ${TARGET_LIBRARIES}
     ${Boost_LIBRARIES}
-    PythonInterfaceCore
-    DataObjects
+    Mantid::PythonInterfaceCore
+    Mantid::DataObjects
     gmock
     Qt5::Test
     Python::Python

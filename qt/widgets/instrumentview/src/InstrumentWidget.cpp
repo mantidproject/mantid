@@ -8,9 +8,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -117,12 +115,16 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
-      m_qtConnect(std::move(deps.qtConnect)) {
+      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)) {
 
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
         std::make_unique<InstrumentDisplay>(aWidget, std::move(deps.glDisplay), std::move(deps.qtDisplay));
+  }
+
+  if (!m_messageHandler) {
+    m_messageHandler = std::make_unique<MessageHandler>();
   }
 
   setFocusPolicy(Qt::StrongFocus);
@@ -143,7 +145,8 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   m_mainLayout->addWidget(controlPanelLayout);
 
-  m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                        scaleMin, scaleMax);
 
   m_xIntegration = new XIntegrationControl(this);
   m_mainLayout->addWidget(m_xIntegration);
@@ -271,10 +274,9 @@ Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) cons
 void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
                             bool resetActor) {
   if (resetActor) {
-    m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+    m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                          scaleMin, scaleMax);
   }
-
-  updateIntegrationWidget(resetGeometry);
 
   auto surface = getSurface();
   if (resetGeometry || !surface) {
@@ -297,6 +299,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
     surface->resetInstrumentActor(m_instrumentActor.get());
     updateInfoText();
   }
+  updateIntegrationWidget(resetGeometry);
 }
 
 /**
@@ -579,7 +582,7 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
   renameWorkspace(newWs);
-  m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
+  m_instrumentActor = std::make_unique<InstrumentActor>(newWs, *m_messageHandler);
 
   // update the view and colormap
   auto surface = getSurface();
@@ -612,18 +615,35 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
 
 /**
  * @brief InstrumentWidget::updateIntegrationWidget
- * Update the range of the integration widget, and show or hide it is needed
- * @param init : boolean set to true if the integration widget is still being
- * initialized
+ * Update the range of the integration widget, and show or hide it if needed
+ * @param init : boolean set to true if the integration widget is still being initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
-  m_xIntegration->setTotalRange(m_instrumentActor->minWkspBinValue(), m_instrumentActor->maxWkspBinValue());
+  // discrete integration range is only used if all the bins are common and integers and not an event workspace, as a
+  // convention
+  auto ws = m_instrumentActor->getWorkspace();
+
+  bool isNotEventWs = ws->id() != "EventWorkspace";
+
+  bool isDiscrete = ws->isCommonBins() && ws->isIntegerBins() && isNotEventWs;
+
+  m_xIntegration->setDiscrete(isDiscrete);
+  double minRange = isDiscrete ? 0 : m_instrumentActor->minWkspBinValue();
+  double maxRange = isDiscrete ? static_cast<int>(ws->blocksize()) - 1 : m_instrumentActor->maxWkspBinValue();
+
+  m_xIntegration->setTotalRange(minRange, maxRange);
 
   if (!init) {
-    m_xIntegration->setRange(m_instrumentActor->minBinValue(), m_instrumentActor->maxBinValue());
+    // setRange needs the initialization of the instrument viewer to run, but is only needed when replacing a workspace,
+    // hence the check
+    if (!isDiscrete) {
+      m_xIntegration->setRange(minRange, maxRange);
+    } else {
+      m_xIntegration->setRange(0, 0);
+    }
   }
 
-  m_xIntegration->setUnits(QString::fromStdString(m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+  m_xIntegration->setUnits(QString::fromStdString(ws->getAxis(0)->unit()->caption()));
 
   bool integrable = isIntegrable();
 
@@ -936,6 +956,15 @@ void InstrumentWidget::setWireframe(bool on) {
  * control calls this slot)
  */
 void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
+  auto workspace = m_instrumentActor->getWorkspace();
+  bool isNotEventWorkspace = workspace->id() != "EventWorkspace";
+  bool isDiscrete = workspace->isCommonBins() && workspace->isIntegerBins() && isNotEventWorkspace;
+
+  if (isDiscrete) {
+    xmin = workspace->binEdges(0)[static_cast<int>(xmin)];
+    xmax = workspace->binEdges(0)[static_cast<int>(xmax) + 1];
+  }
+
   m_instrumentActor->setIntegrationRange(xmin, xmax);
   setupColorMap();
   updateInstrumentDetectors();
@@ -1194,14 +1223,11 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
 
 /// Return the size of the OpenGL display widget in logical pixels
 QSize InstrumentWidget::glWidgetDimensions() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize { return QSize(w->width(), w->height()); };
-#else
   auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
     const auto devicePixelRatio = w->window()->devicePixelRatio();
     return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
   };
-#endif
+
   if (m_instrumentDisplay->getGLDisplay())
     return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
   else if (m_instrumentDisplay->getQtDisplay())
@@ -1268,7 +1294,7 @@ bool InstrumentWidget::isGLEnabled() const { return m_useOpenGL; }
 /**
  * Create and add the tab widgets.
  */
-void InstrumentWidget::createTabs(QSettings &settings) {
+void InstrumentWidget::createTabs(const QSettings &settings) {
   // Render Controls
   m_renderTab = new InstrumentWidgetRenderTab(this);
   m_qtConnect->connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
@@ -1510,24 +1536,7 @@ bool InstrumentWidget::isCurrentTab(InstrumentWidgetTab *tab) const {
  * @return string representing the current state of the instrumet widget.
  */
 std::string InstrumentWidget::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  TSVSerialiser tsv;
-
-  // serialise widget properties
-  tsv.writeLine("WorkspaceName") << getWorkspaceNameStdString();
-  tsv.writeLine("SurfaceType") << getSurfaceType();
-  tsv.writeSection("surface", getSurface()->saveToProject());
-  tsv.writeLine("CurrentTab") << getCurrentTab();
-  tsv.writeLine("EnergyTransfer") << m_xIntegration->getMinimum() << m_xIntegration->getMaximum();
-
-  // serialise widget subsections
-  tsv.writeSection("actor", m_instrumentActor->saveToProject());
-  tsv.writeSection("tabs", saveTabs());
-
-  return tsv.outputLines();
-#else
   throw std::runtime_error("InstrumentWidget::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -1558,53 +1567,8 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  * file.
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  TSVSerialiser tsv(lines);
-
-  if (tsv.selectLine("SurfaceType")) {
-    int surfaceType;
-    tsv >> surfaceType;
-    setSurfaceType(surfaceType);
-  }
-
-  if (tsv.selectSection("actor")) {
-    std::string actorLines;
-    tsv >> actorLines;
-    m_instrumentActor->loadFromProject(actorLines);
-  }
-
-  if (tsv.selectLine("CurrentTab")) {
-    int tab;
-    tsv >> tab;
-    selectTab(tab);
-  }
-
-  if (tsv.selectLine("EnergyTransfer")) {
-    double min, max;
-    bool isIntegrable = true;
-    tsv >> min >> max >> isIntegrable;
-    if (isIntegrable) {
-      setBinRange(min, max);
-    }
-  }
-
-  if (tsv.selectSection("Surface")) {
-    std::string surfaceLines;
-    tsv >> surfaceLines;
-    getSurface()->loadFromProject(surfaceLines);
-  }
-
-  if (tsv.selectSection("tabs")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    loadTabs(tabLines);
-  }
-
-  updateInstrumentView();
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentWidget::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidQt::MantidWidgets

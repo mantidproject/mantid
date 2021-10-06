@@ -20,31 +20,29 @@ set(_header_depends
 )
 
 list(APPEND common_link_libs ${CORE_MANTIDLIBS} ${POCO_LIBRARIES}
-     PythonInterfaceCore
+     Mantid::PythonInterfaceCore
 )
 
 # Wrapper module linked against Qt5
-if(ENABLE_WORKBENCH)
-  mtd_add_sip_module(
-    MODULE_NAME _commonqt5
-    TARGET_NAME mantidqt_commonqt5
-    HEADER_DEPS ${_header_depends}
-    SIP_SRC _common.sip
-    PYQT_VERSION 5
-    INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR} ${COMMON_SIP_DIR}
-    LINK_LIBS MantidQtWidgetsCommonQt5
-              ${common_link_libs}
-              Qt5::Core
-              Qt5::Widgets
-              Qt5::Gui
-              Qt5::Qscintilla
-              API
-    INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt
-    LINUX_INSTALL_RPATH "\$ORIGIN/.."
-    OSX_INSTALL_RPATH "@loader_path/.."
-    FOLDER Qt5
-  )
-endif()
+mtd_add_sip_module(
+  MODULE_NAME _commonqt5
+  TARGET_NAME mantidqt_commonqt5
+  HEADER_DEPS ${_header_depends}
+  SIP_SRC _common.sip
+  PYQT_VERSION 5
+  INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR} ${COMMON_SIP_DIR}
+  LINK_LIBS MantidQtWidgetsCommonQt5
+            ${common_link_libs}
+            Qt5::Core
+            Qt5::Widgets
+            Qt5::Gui
+            Qt5::Qscintilla
+            Mantid::API
+  INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt
+  LINUX_INSTALL_RPATH "\$ORIGIN/.."
+  OSX_INSTALL_RPATH "@loader_path/.."
+  FOLDER Qt5
+)
 
 add_subdirectory(icons)
 add_subdirectory(widgets/instrumentview)

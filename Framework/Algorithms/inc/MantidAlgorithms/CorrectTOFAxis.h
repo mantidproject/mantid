@@ -44,7 +44,7 @@ private:
   void useReferenceWorkspace(const API::MatrixWorkspace_sptr &outputWs);
   void correctManually(const API::MatrixWorkspace_sptr &outputWs);
   double averageL2(const API::SpectrumInfo &spectrumInfo);
-  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2, double &epp);
+  void averageL2AndEPP(const API::SpectrumInfo &spectrumInfo, double &l2Average, double &eppAverage);
   std::vector<size_t> referenceWorkspaceIndices() const;
 };
 

@@ -479,7 +479,7 @@ can be used like a `CrystalField` object in this way, although `Temperatures` an
     cfms = CrystalFieldMultiSite(Ions='Ce', Symmetries='C2', Temperatures=[25], FWHMs=[1.0], PeakShape='Gaussian',
                                      BmolX=1.0, B40=-0.02)
 
-
+.. _cf_intensity_scaling:
 
 Intensity Scaling
 -----------------
