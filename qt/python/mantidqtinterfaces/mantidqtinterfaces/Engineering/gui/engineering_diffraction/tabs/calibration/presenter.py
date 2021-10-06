@@ -65,10 +65,11 @@ class CalibrationPresenter(object):
                 self.current_calibration.set_group(GROUP.BOTH)
 
     def on_calibrate_clicked(self):
-        self.update_calibration_from_view()
         if self.view.get_new_checked() and self._validate():
+            self.update_calibration_from_view()
             self.start_calibration_worker(self.view.get_plot_output())
         elif self.view.get_load_checked() and self.validate_path():
+            self.update_calibration_from_view()
             self.model.load_existing_calibration_files(self.current_calibration)
             self._notify_updated_calibration()
 
@@ -87,7 +88,7 @@ class CalibrationPresenter(object):
         logger.error(str(error_info))
         self.emit_enable_button_signal()
 
-    def _on_success(self, success_info):
+    def _on_success(self):
         self._notify_updated_calibration()
         self.emit_enable_button_signal()
 
