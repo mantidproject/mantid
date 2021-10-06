@@ -24,12 +24,6 @@ GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "ba
                 GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}  # prm suffix
 GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank 1", GROUP.SOUTH: "bank 2",
                        GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "grouping"}
-PRM_TEMPLATES = {GROUP.NORTH: "template_ENGINX_241391_North_bank.prm",
-                 GROUP.SOUTH: "template_ENGINX_241391_South_bank.prm",
-                 GROUP.BOTH: "template_ENGINX_241391_North_and_South_banks.prm",
-                 GROUP.CROPPED: "template_ENGINX_241391_North_bank.prm",
-                 GROUP.CUSTOM: "template_ENGINX_241391_North_bank.prm",
-                 GROUP.TEXTURE: "template_ENGINX_241391_Texture.prm"}
 
 
 class CalibrationInfo:
@@ -69,9 +63,6 @@ class CalibrationInfo:
     def get_group_file(self):
         if self.group:
             return GROUP_FILES[self.group]
-
-    def get_prm_template_file(self):
-        return PRM_TEMPLATES[self.group]
 
     def get_calibration_table(self):
         return self.calibration_table
@@ -203,7 +194,7 @@ class CalibrationInfo:
         Create grouping workspace for ROI defined in .cal file
         """
         grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OldCalFilename=self.cal_filepath,
-                                                      OutputWorkspace="Custom_calfile_grouping")
+                                               OutputWorkspace=GROUP_WS_NAMES[self.group])
         self.group_ws = grp_ws
 
     def create_grouping_workspace_from_spectra_list(self):
@@ -211,7 +202,7 @@ class CalibrationInfo:
         Create grouping workspace for ROI defined as a list of spectrum numbers
         """
         grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument,
-                                                      OutputWorkspace="Custom_spectra_grouping")
+                                               OutputWorkspace=GROUP_WS_NAMES[self.group])
         for spec in self.spectra_list:
             det_ids = grp_ws.getDetectorIDs(spec - 1)
             grp_ws.setValue(det_ids[0], 1)
