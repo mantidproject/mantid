@@ -118,8 +118,8 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
   } else if (pNL_archives->length() == 1) {
     Poco::AutoPtr<Poco::XML::NodeList> pNL_interfaces = elem->getElementsByTagName("archiveSearch");
     for (unsigned int i = 0; i < pNL_interfaces->length(); ++i) {
-      auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
-      std::string plugin = elem->getAttribute("plugin");
+      auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
+      std::string plugin = elemenent->getAttribute("plugin");
       if (!plugin.empty()) {
         m_archiveSearch.emplace_back(plugin);
       }
@@ -149,10 +149,10 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
   m_instruments.reserve(n);
 
   for (unsigned long i = 0; i < n; ++i) {
-    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
-    if (elem) {
+    auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_instrument->item(i));
+    if (elemenent) {
       try {
-        InstrumentInfo instr(this, elem);
+        InstrumentInfo instr(this, elemenent);
         m_instruments.emplace_back(instr);
       } catch (std::runtime_error &e) { /*skip this instrument*/
         g_log.warning("Failed to load instument for: " + m_name + ": " + e.what());
@@ -170,11 +170,11 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
   Poco::AutoPtr<Poco::XML::NodeList> pNL_compute = elem->getElementsByTagName("computeResource");
   unsigned long n = pNL_compute->length();
   for (unsigned long i = 0; i < n; i++) {
-    auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
+    auto *elemenent = dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
 
-    if (elem) {
+    if (elemenent) {
       try {
-        ComputeResourceInfo cr(this, elem);
+        ComputeResourceInfo cr(this, elemenent);
         m_computeResInfos.emplace_back(cr);
 
         g_log.debug() << "Compute resource found: " << cr << '\n';
@@ -182,11 +182,11 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
         g_log.warning("Failed to load compute resource for: " + m_name + ": " + e.what());
       }
 
-      std::string name = elem->getAttribute("name");
+      std::string name = elemenent->getAttribute("name");
       // TODO: this is a bit of duplicate effort at the moment, until
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
-      m_computeResources.emplace(name, std::make_shared<RemoteJobManager>(elem));
+      m_computeResources.emplace(name, std::make_shared<RemoteJobManager>(elemenent));
     }
   }
 }

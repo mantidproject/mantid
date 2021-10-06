@@ -142,8 +142,9 @@ void BoundaryConstraint::setPenaltyFactor(const double &c) {
     g_log.warning() << "Penalty factor <= 0 selected for boundary constraint."
                     << " Only positive penalty factor allowed. Penalty factor set to 1";
     m_penaltyFactor = 1;
+  } else {
+    m_penaltyFactor = c;
   }
-  { m_penaltyFactor = c; }
 }
 
 void BoundaryConstraint::setParamToSatisfyConstraint() {

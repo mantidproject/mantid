@@ -31,7 +31,6 @@ bool SassenaFFT::processGroups() {
   const std::string errMessg = "processGroups must not be called from SassenaFFT";
   this->g_log.error(errMessg);
   throw std::logic_error(errMessg);
-  return false;
 }
 
 /**

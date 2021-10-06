@@ -25,6 +25,8 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
 
 bool Row::isGroup() const { return false; }
 
+bool Row::isPreview() const { return false; }
+
 std::vector<std::string> const &Row::runNumbers() const { return m_runNumbers; }
 
 TransmissionRunPair const &Row::transmissionWorkspaceNames() const { return m_transmissionRuns; }
@@ -48,7 +50,7 @@ void Row::setOutputNames(std::vector<std::string> const &outputNames) {
   m_reducedWorkspaceNames.setOutputNames(outputNames[0], outputNames[1], outputNames[2]);
 }
 
-void Row::setOutputQRange(RangeInQ qRange) { m_qRangeOutput = qRange; }
+void Row::setOutputQRange(RangeInQ qRange) { m_qRangeOutput = std::move(qRange); }
 
 void Row::resetOutputs() {
   m_reducedWorkspaceNames.resetOutputNames();

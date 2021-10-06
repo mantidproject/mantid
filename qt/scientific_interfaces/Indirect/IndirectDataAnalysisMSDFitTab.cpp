@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisMSDFitTab.h"
 #include "IDAFunctionParameterEstimation.h"
+#include "IndirectAddWorkspaceDialog.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
@@ -34,7 +35,9 @@ const std::string MSDYIFUNC{"MsdYi"};
 
 } // namespace
 
-namespace MantidQt::CustomInterfaces::IDA {
+namespace MantidQt {
+namespace CustomInterfaces {
+namespace IDA {
 
 auto msdFunctionStrings =
     std::map<std::string, std::string>({{"None", ""},
@@ -49,7 +52,10 @@ IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
   m_uiForm->setupUi(parent);
 
   m_msdFittingModel = dynamic_cast<MSDFitModel *>(getFittingModel());
-  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_msdFittingModel, m_uiForm->dockArea->m_fitDataView));
+
+  m_uiForm->dockArea->setFitDataView(new IndirectFitDataView(m_uiForm->dockArea));
+  setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(m_msdFittingModel->getFitDataModel(),
+                                                                 m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
   auto parameterEstimation = createParameterEstimation();
@@ -153,4 +159,13 @@ IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEst
   return parameterEstimation;
 }
 
-} // namespace MantidQt::CustomInterfaces::IDA
+void IndirectDataAnalysisMSDFitTab::addDataToModel(IAddWorkspaceDialog const *dialog) {
+  if (const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog)) {
+    m_dataPresenter->addWorkspace(indirectDialog->workspaceName(), indirectDialog->workspaceIndices());
+    m_msdFittingModel->addDefaultParameters();
+  }
+}
+
+} // namespace IDA
+} // namespace CustomInterfaces
+} // namespace MantidQt

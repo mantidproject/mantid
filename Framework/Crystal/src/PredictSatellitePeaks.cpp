@@ -126,8 +126,6 @@ void PredictSatellitePeaks::exec() {
     lattice->setCrossTerm(crossTerms);
   }
 
-  const auto instrument = Peaks->getInstrument();
-
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
   outPeaks->copyExperimentInfoFrom(Peaks.get());
   outPeaks->mutableSample().setOrientedLattice(std::move(lattice));
@@ -144,9 +142,9 @@ void PredictSatellitePeaks::exec() {
   Geometry::HKLGenerator gen(outPeaks->sample().getOrientedLattice(), dMin);
   auto dSpacingFilter = std::make_shared<HKLFilterDRange>(outPeaks->sample().getOrientedLattice(), dMin, dMax);
 
-  V3D hkl = *(gen.begin());
-  g_log.information() << "HKL range for d_min of " << dMin << " to d_max of " << dMax << " is from " << hkl << " to "
-                      << hkl * -1.0 << ", a total of " << gen.size() << " possible HKL's\n";
+  V3D hkl_begin = *(gen.begin());
+  g_log.information() << "HKL range for d_min of " << dMin << " to d_max of " << dMax << " is from " << hkl_begin
+                      << " to " << hkl_begin * -1.0 << ", a total of " << gen.size() << " possible HKL's\n";
   if (gen.size() > MAX_NUMBER_HKLS)
     throw std::invalid_argument("More than 10 billion HKLs to search. Is "
                                 "your d_min value too small?");
@@ -167,8 +165,7 @@ void PredictSatellitePeaks::exec() {
   outPeaks->mutableRun().addProperty<std::vector<double>>("Offset1", offsets1, true);
   outPeaks->mutableRun().addProperty<std::vector<double>>("Offset2", offsets2, true);
   outPeaks->mutableRun().addProperty<std::vector<double>>("Offset3", offsets3, true);
-  for (auto it = possibleHKLs.begin(); it != possibleHKLs.end(); ++it) {
-    V3D hkl = *it;
+  for (auto &hkl : possibleHKLs) {
     if (crossTerms) {
       predictOffsetsWithCrossTerms(offsets1, offsets2, offsets3, maxOrder, run_number, goniometer, hkl, lambdaFilter,
                                    includePeaksInRange, includeOrderZero, AlreadyDonePeaks);
@@ -236,8 +233,6 @@ void PredictSatellitePeaks::exec_peaks() {
     g_log.error() << "There are No peaks in the input PeaksWorkspace\n";
     return;
   }
-
-  const auto instrument = Peaks->getInstrument();
 
   outPeaks = std::dynamic_pointer_cast<IPeaksWorkspace>(WorkspaceFactory::Instance().createPeaks(Peaks->id()));
   outPeaks->copyExperimentInfoFrom(Peaks.get());

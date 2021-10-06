@@ -288,11 +288,10 @@ MDHistoDimension_sptr LoadFlexiNexus::makeDimension(NeXus::File *fin, int index,
       }
     }
   }
-  coord_t min, max, tmp;
-  min = static_cast<coord_t>(dData[0]);
-  max = static_cast<coord_t>(dData[length - 1]);
+  auto min = static_cast<coord_t>(dData[0]);
+  auto max = static_cast<coord_t>(dData[length - 1]);
   if (min > max) {
-    tmp = max;
+    const auto tmp = max;
     max = min;
     min = tmp;
     g_log.notice("WARNING: swapped axis values on " + name);

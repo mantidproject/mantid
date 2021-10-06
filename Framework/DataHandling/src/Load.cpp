@@ -134,9 +134,9 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
 
       // If the first file has a loader ...
       if (loader) {
-        // ... store it's name and version and check that all other files have
+        // ... store its name and version and check that all other files have
         // loaders with the same name and version.
-        std::string name = loader->name();
+        const std::string loaderName = loader->name();
         int version = loader->version();
 
         // std::string ext =
@@ -160,7 +160,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
           } else {
             loader = getFileLoader(fileNames[i]);
 
-            if (name != loader->name() || version != loader->version())
+            if (loaderName != loader->name() || version != loader->version())
               throw std::runtime_error("Cannot load multiple files when more "
                                        "than one Loader is needed.");
           }

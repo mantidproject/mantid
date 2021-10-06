@@ -14,7 +14,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 LookupTableValidationError::LookupTableValidationError(
 
     std::vector<InvalidDefaultsError> validationErrors, boost::optional<ThetaValuesValidationError> fullTableError)
-    : m_validationErrors(std::move(validationErrors)), m_fullTableError(fullTableError) {}
+    : m_validationErrors(std::move(validationErrors)), m_fullTableError(std::move(fullTableError)) {}
 
 std::vector<InvalidDefaultsError> const &LookupTableValidationError::errors() const { return m_validationErrors; }
 

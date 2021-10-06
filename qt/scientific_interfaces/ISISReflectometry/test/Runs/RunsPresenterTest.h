@@ -27,6 +27,7 @@
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
+using namespace MantidQt::API;
 using testing::_;
 using testing::AtLeast;
 using testing::Mock;
@@ -697,7 +698,7 @@ public:
 
   void testStartMonitorSetsUserSpecifiedPostProcessingProperties() {
     auto presenter = makePresenter();
-    auto options = AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
+    auto options = IConfiguredAlgorithm::AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
     expectGetLiveDataOptions(options);
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
@@ -799,10 +800,11 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  AlgorithmRuntimeProps defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
-                                                           const int &updateInterval = 15) {
+  IConfiguredAlgorithm::AlgorithmRuntimeProps
+  defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
+                                     const int &updateInterval = 15) {
     const std::string updateIntervalString = std::to_string(updateInterval);
-    return AlgorithmRuntimeProps{
+    return IConfiguredAlgorithm::AlgorithmRuntimeProps{
         {"Instrument", instrument},
         {"OutputWorkspace", "IvsQ_binned_live"},
         {"AccumulationWorkspace", "TOF_live"},
@@ -813,10 +815,11 @@ private:
     };
   }
 
-  AlgorithmRuntimeProps defaultLiveMonitorReductionOptions(const std::string &instrument = std::string("OFFSPEC")) {
-    return AlgorithmRuntimeProps{{"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
-                                 {"InputWorkspace", "TOF_live"},
-                                 {"Instrument", instrument}};
+  IConfiguredAlgorithm::AlgorithmRuntimeProps
+  defaultLiveMonitorReductionOptions(const std::string &instrument = std::string("OFFSPEC")) {
+    return IConfiguredAlgorithm::AlgorithmRuntimeProps{{"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
+                                                       {"InputWorkspace", "TOF_live"},
+                                                       {"Instrument", instrument}};
   }
 
   void expectRunsTableWithContent(RunsTable &runsTable) {
@@ -1071,16 +1074,16 @@ private:
     EXPECT_CALL(m_view, getLiveDataUpdateInterval()).Times(AtLeast(1)).WillRepeatedly(Return(updateInterval));
   }
 
-  void expectGetLiveDataOptions(AlgorithmRuntimeProps options = AlgorithmRuntimeProps(),
-                                std::string const &instrument = std::string("OFFSPEC"),
-                                int const &updateInterval = 15) {
+  void expectGetLiveDataOptions(
+      IConfiguredAlgorithm::AlgorithmRuntimeProps options = IConfiguredAlgorithm::AlgorithmRuntimeProps(),
+      std::string const &instrument = std::string("OFFSPEC"), int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
     expectGetUpdateInterval(updateInterval);
     EXPECT_CALL(m_mainPresenter, rowProcessingProperties()).Times(1).WillOnce(Return(std::move(options)));
   }
 
   void expectGetLiveDataOptions(std::string const &instrument, const int &updateInterval) {
-    expectGetLiveDataOptions(AlgorithmRuntimeProps(), instrument, updateInterval);
+    expectGetLiveDataOptions(IConfiguredAlgorithm::AlgorithmRuntimeProps(), instrument, updateInterval);
   }
 
   std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
@@ -1102,7 +1105,7 @@ private:
     EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
-  void assertAlgorithmPropertiesContainOptions(AlgorithmRuntimeProps const &expected,
+  void assertAlgorithmPropertiesContainOptions(IConfiguredAlgorithm::AlgorithmRuntimeProps const &expected,
                                                std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     for (auto const &kvp : expected) {
@@ -1110,7 +1113,7 @@ private:
     }
   }
 
-  void assertPostProcessingPropertiesContainOptions(AlgorithmRuntimeProps &expected,
+  void assertPostProcessingPropertiesContainOptions(IConfiguredAlgorithm::AlgorithmRuntimeProps &expected,
                                                     std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     auto resultString = alg->getPropertyValue("PostProcessingProperties");

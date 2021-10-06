@@ -176,6 +176,9 @@ private:
   /// Processing algorithm type
   bool m_useParallel;
 
+  /// Flag if is reverse logarithmic time binning
+  bool m_isReverseLogarithmic = false;
+
   std::vector<std::vector<Types::Core::DateAndTime>> m_vecSplitterTimeSet;
   std::vector<std::vector<int>> m_vecGroupIndexSet;
 };
