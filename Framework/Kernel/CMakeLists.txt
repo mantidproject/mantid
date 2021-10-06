@@ -384,6 +384,7 @@ set(TEST_FILES
     MagneticIonTest.h
     MakeCowTest.h
     MandatoryValidatorTest.h
+    MantidVersionTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h
     MaterialTest.h
@@ -539,6 +540,7 @@ add_subdirectory(test)
 
 if(NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h.in ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h)
 endif()
 
 # This section deals with creating the PocoVersion implementation
