@@ -562,23 +562,13 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants
  * @param l1
  * @param l2
  * @param twoTheta scattering angle
- * @param offset
  * @return
  */
-double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta, const double offset) {
-  if (offset <= -1.) // not physically possible, means result is negative d-spacing
-  {
-    std::stringstream msg;
-    msg << "Encountered offset of " << offset << " which converts data to negative d-spacing\n";
-    throw std::logic_error(msg.str());
-  }
+double tofToDSpacingFactor(const double l1, const double l2, const double twoTheta) {
+  const auto sinTheta = std::sin(twoTheta / 2);
+  const auto totalFlightPath = (l1 + l2);
 
-  auto sinTheta = std::sin(twoTheta / 2);
-
-  const double numerator = (1.0 + offset);
-  sinTheta *= (l1 + l2);
-
-  return (numerator * CONSTANT) / sinTheta;
+  return CONSTANT / (sinTheta * totalFlightPath);
 }
 
 DECLARE_UNIT(dSpacing)
@@ -636,7 +626,7 @@ void dSpacing::init() {
           g_log.warning("Supplied difa ignored");
           difa = 0.;
         }
-        difc = 1. / tofToDSpacingFactor(l1, l2, twoTheta, 0.);
+        difc = 1. / tofToDSpacingFactor(l1, l2, twoTheta);
         if (tzero != 0.) {
           g_log.warning("Supplied tzero ignored");
           tzero = 0.;
@@ -862,7 +852,7 @@ void MomentumTransfer::init() {
     if (ParamPresentAndSet(m_params, UnitParams::l2, l2)) {
       double twoTheta;
       if (ParamPresentAndSet(m_params, UnitParams::twoTheta, twoTheta)) {
-        difc = 1. / tofToDSpacingFactor(l1, l2, twoTheta, 0.);
+        difc = 1. / tofToDSpacingFactor(l1, l2, twoTheta);
       }
     }
   }
