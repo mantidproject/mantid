@@ -1,10 +1,11 @@
-include (GenerateExportHeader)
-function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
-    string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
-    set (CUSTOM "\n")
+include(GenerateExportHeader)
+function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
+  string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
+  set(CUSTOM "\n")
 
-    if(MSVC)
-        set (CUSTOM "${CUSTOM}\n\
+  if(MSVC)
+    set(CUSTOM
+        "${CUSTOM}\n\
 #ifdef _WIN32\n\
     // 'identifier' : class 'type' needs to have dll-interface to be used by clients\n\
     // of class 'type2'\n\
@@ -21,20 +22,24 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
     // seem useful\n\
     #pragma warning(disable : 4373)\n\
 #endif\n\n\
-")
-    endif(MSVC)
+"
+    )
+  endif(MSVC)
 
-    set(CUSTOM "${CUSTOM}\
+  set(CUSTOM
+      "${CUSTOM}\
 #ifndef UNUSED_ARG\n\
     #define UNUSED_ARG(x) (void) x;\n\
 #endif\n\n\
 #ifndef ${TARGET_NAME}_DEPRECATED\n\
     #define ${TARGET_NAME}_DEPRECATED(func) MANTID_${TARGET_NAME}_DEPRECATED func\n\
 #endif\n\n\
-")
+"
+  )
 
-    if(GENERATE_EXTERN)
-        set(CUSTOM "${CUSTOM}\
+  if(GENERATE_EXTERN)
+    set(CUSTOM
+        "${CUSTOM}\
 // Use extern keyword in client code to suppress class template instantiation\n\
 #include \"MantidKernel/System.h\"\n\n\
 #ifdef ${TARGET_NAME}_EXPORTS\n\
@@ -42,15 +47,23 @@ function( GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 #else\n\
 #define EXTERN_MANTID_${TARGET_NAME} EXTERN_IMPORT\n\
 #endif /* ${TARGET_NAME}_EXPORTS*/\n\
- ")
-    endif(GENERATE_EXTERN)
-
-    generate_export_header("${TARGET_LIBRARY}"
-       BASE_NAME "MANTID_${TARGET_NAME}"
-       PREFIX_NAME ""
-       EXPORT_FILE_NAME "Mantid${TARGET_LIBRARY}/DllConfig.h"
-       EXPORT_MACRO_NAME "MANTID_${TARGET_NAME}_DLL"
-       DEPRECATED_MACRO_NAME "MANTID_${TARGET_NAME}_DEPRECATED"
-       CUSTOM_CONTENT_FROM_VARIABLE CUSTOM
+ "
     )
-endfunction( GENERATE_MANTID_EXPORT_HEADER )
+  endif(GENERATE_EXTERN)
+
+  generate_export_header(
+    "${TARGET_LIBRARY}"
+    BASE_NAME
+    "MANTID_${TARGET_NAME}"
+    PREFIX_NAME
+    ""
+    EXPORT_FILE_NAME
+    "Mantid${TARGET_LIBRARY}/DllConfig.h"
+    EXPORT_MACRO_NAME
+    "MANTID_${TARGET_NAME}_DLL"
+    DEPRECATED_MACRO_NAME
+    "MANTID_${TARGET_NAME}_DEPRECATED"
+    CUSTOM_CONTENT_FROM_VARIABLE
+    CUSTOM
+  )
+endfunction(GENERATE_MANTID_EXPORT_HEADER)

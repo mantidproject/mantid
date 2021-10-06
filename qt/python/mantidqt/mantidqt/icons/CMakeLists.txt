@@ -15,8 +15,7 @@ mtd_add_sip_module(
   SIP_SRC _icons.sip
   HEADER_DEPS ${_header_depends}
   PYQT_VERSION 5
-  INCLUDE_DIRS ${COMMON_SIP_DIR} ${ICONS_INC_DIR}
-               ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
+  INCLUDE_DIRS ${COMMON_SIP_DIR} ${ICONS_INC_DIR} ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
   LINK_LIBS ${WORKBENCH_LINK_LIBS}
   INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt/icons
   LINUX_INSTALL_RPATH "\$ORIGIN/../.."

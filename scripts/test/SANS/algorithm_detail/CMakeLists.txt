@@ -17,9 +17,8 @@ set(TEST_PY_FILES
     normalize_to_sans_monitor_test.py
     sans_slice_event_test.py
     strip_end_nans_test.py
-    )
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.SANS.algorithm_detail
-                    ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.SANS.algorithm_detail ${TEST_PY_FILES})

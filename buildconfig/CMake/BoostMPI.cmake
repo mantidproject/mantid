@@ -1,16 +1,17 @@
-message ( STATUS "This is an MPI-enabled build of the Mantid Framework!" )
+message(STATUS "This is an MPI-enabled build of the Mantid Framework!")
 
-find_package ( MPI REQUIRED )
+find_package(MPI REQUIRED)
 # The FindMPI module doesn't seem to respect the REQUIRED specifier (as of CMake 2.8.7)
-if ( NOT MPI_CXX_FOUND )
-  message ( SEND_ERROR "C++ MPI libraries could not be found" )
-endif ()
+if(NOT MPI_CXX_FOUND)
+  message(SEND_ERROR "C++ MPI libraries could not be found")
+endif()
 
-include_directories ( SYSTEM ${MPI_CXX_INCLUDE_PATH} )
-set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS} )
+include_directories(SYSTEM ${MPI_CXX_INCLUDE_PATH})
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${MPI_CXX_COMPILE_FLAGS})
 
-# Need to repeat date_time, regex, and serialization because otherwise the Boost variables are overwritten and miss those libraries required elsewhere.
-find_package ( Boost REQUIRED mpi date_time regex serialization)
-include_directories( ${Boost_INCLUDE_DIRS} )
+# Need to repeat date_time, regex, and serialization because otherwise the Boost variables are overwritten and miss
+# those libraries required elsewhere.
+find_package(Boost REQUIRED mpi date_time regex serialization)
+include_directories(${Boost_INCLUDE_DIRS})
 
-add_definitions ( -DMPI_EXPERIMENTAL )
+add_definitions(-DMPI_EXPERIMENTAL)
