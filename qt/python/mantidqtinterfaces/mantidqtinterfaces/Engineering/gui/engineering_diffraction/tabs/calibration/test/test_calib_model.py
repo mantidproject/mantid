@@ -47,14 +47,13 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         deltas = abs(diff_consts - array([[2.99, 18306.98, 14.44], [-29.68, 18497.75, -26.5]]))
         self.assertTrue((deltas < 1e-10).all())
 
-    @patch(file_path + ".set_setting")
     @patch(file_path + ".copy2")
     @patch(file_path + ".makedirs")
     @patch(file_path + ".path.exists")
     @patch(file_path + ".SaveNexus")
     @patch(file_path + ".CalibrationModel.write_prm_file")
     def test_create_output_files_makes_savdir_and_saves_both_banks(self, mock_write_prm, mock_save_nxs, mock_exists,
-                                                                   mock_mkdir, mock_copy, mock_set_setting):
+                                                                   mock_mkdir, mock_copy):
         mock_exists.return_value = False  # make new directory
         calibration = CalibrationInfo()  # easier to work with real calibration info object here
         prm_name = "ENGINX_193749_all_banks.prm"
@@ -67,7 +66,6 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_mkdir.assert_called_once_with(save_dir)
         self.calibration_info.save_grouping_workspace.assert_not_called()  # only called if not bank data
         prm_fpath = path.join(save_dir, prm_name)
-        mock_set_setting.assert_called_once()
         write_prm_calls = [call("ws", prm_fpath),
                            call("ws", prm_fpath.replace("all_banks", "bank_1"), spec_nums=[0]),
                            call("ws", prm_fpath.replace("all_banks", "bank_2"), spec_nums=[1])]
@@ -79,12 +77,10 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_copy.assert_has_calls(copy_calls)
 
     @patch(file_path + ".copy2")
-    @patch(file_path + ".set_setting")
     @patch(file_path + ".path")
     @patch(file_path + ".SaveNexus")
     @patch(file_path + ".CalibrationModel.write_prm_file")
-    def test_create_output_files_saves_custom_group_file(self, mock_write_prm, mock_save_nxs, mock_path,
-                                                         mock_set_setting, mock_copy):
+    def test_create_output_files_saves_custom_group_file(self, mock_write_prm, mock_save_nxs, mock_path, mock_copy):
         mock_path.exists.return_value = True
         prm_fname = "prm.prm"
         mock_path.join.return_value = prm_fname
@@ -97,7 +93,6 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self.model.create_output_files(save_dir, self.calibration_info, "ws")
 
         self.calibration_info.save_grouping_workspace.assert_called_once_with(save_dir)
-        mock_set_setting.assert_called_once()
         mock_write_prm.assert_called_once_with("ws", prm_fname)
         mock_save_nxs.assert_called_once_with(InputWorkspace="cal_table", Filename=prm_fname.replace(".prm", ".nxs"))
         mock_copy.assert_not_called()

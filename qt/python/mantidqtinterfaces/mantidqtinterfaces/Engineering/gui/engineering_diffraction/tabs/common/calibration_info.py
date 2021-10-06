@@ -77,7 +77,13 @@ class CalibrationInfo:
     def get_instrument(self):
         return self.instrument
 
+    def get_prm_filepath(self):
+        return self.prm_filepath
+
     # setters
+    def set_prm_filepath(self, prm_filepath):
+        self.prm_filepath = prm_filepath
+
     def set_calibration_table(self, cal_table):
         self.calibration_table = cal_table
 

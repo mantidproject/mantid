@@ -70,9 +70,7 @@ class CalibrationPresenter(object):
             self.start_calibration_worker(self.view.get_plot_output())
         elif self.view.get_load_checked() and self.validate_path():
             self.model.load_existing_calibration_files(self.current_calibration)
-            self.set_current_calibration()
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                    "last_calibration_path", self.view.get_path_filename())
+            self._notify_updated_calibration()
 
     def start_calibration_worker(self, plot_output):
         """
@@ -90,13 +88,13 @@ class CalibrationPresenter(object):
         self.emit_enable_button_signal()
 
     def _on_success(self, success_info):
-        self.set_current_calibration(success_info)
+        self._notify_updated_calibration()
         self.emit_enable_button_signal()
 
-    def set_current_calibration(self, success_info=None):
-        if success_info:
-            logger.information("Thread executed in " + str(success_info.elapsed_time) + " seconds.")
+    def _notify_updated_calibration(self):
         self.calibration_notifier.notify_subscribers(self.current_calibration)
+        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
+                    "last_calibration_path", self.current_calibration.get_prm_filepath())
 
     def set_field_value(self):
         self.view.set_sample_text(self.current_calibration.get_sample())

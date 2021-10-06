@@ -12,7 +12,7 @@ from mantid.kernel import logger, UnitParams
 from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussing, CreateDetectorTable,\
     CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal
 import Engineering.EnggUtils as EnggUtils
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import CALIB_FOLDER
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -222,8 +222,7 @@ class CalibrationModel(object):
         # save prm file(s)
         prm_filepath = path.join(calibration_dir, calibration.generate_output_file_name())
         self.write_prm_file(ws_foc, prm_filepath)
-        set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
-                    "last_calibration_path", prm_filepath)
+        calibration.set_prm_filepath(prm_filepath)
         # save pdcal output as nexus
         filepath, ext = path.splitext(prm_filepath)
         nxs_filepath = filepath + '.nxs'
