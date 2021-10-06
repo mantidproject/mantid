@@ -88,6 +88,10 @@ void MultipleScatteringCorrection::init() {
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
 
+  declareProperty("ContainerElementSize", EMPTY_DBL(),
+                  "The size of one side of an integration element cube in mm for container."
+                  "Default to be the same as ElementSize.");
+
   std::vector<std::string> methodOptions{"SampleOnly", "SampleAndContainer"};
   declareProperty("Method", "SampleOnly", std::make_shared<StringListValidator>(methodOptions),
                   "Correction method, use either SampleOnly or SampleAndContainer.");
@@ -147,7 +151,7 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
     const auto &sampleShape = m_inputWS->sample().getShape();
-    calculateSingleComponent(ws_sampleOnly, sampleShape);
+    calculateSingleComponent(ws_sampleOnly, sampleShape, m_sampleElementSize);
     //-- Package output to workspace group
     const std::string outWSName = getProperty("OutputWorkspace");
     std::vector<std::string> names;
@@ -176,7 +180,7 @@ void MultipleScatteringCorrection::exec() {
     ws_containerOnly->setDistribution(true); // The output of this is a distribution
     ws_containerOnly->setYUnitLabel("Multiple Scattering Correction factor");
     const auto &containerShape = m_inputWS->sample().getEnvironment().getContainer();
-    calculateSingleComponent(ws_containerOnly, containerShape);
+    calculateSingleComponent(ws_containerOnly, containerShape, m_containerElementSize);
     // 2. sample and container
     API::MatrixWorkspace_sptr ws_sampleAndContainer = create<HistoWorkspace>(*m_inputWS);
     ws_sampleAndContainer->setYUnit("");          // Need to explicitly set YUnit to nothing
@@ -229,8 +233,10 @@ void MultipleScatteringCorrection::parseInputs() {
   g_log.information() << msg.str();
 
   // Get the element size
-  m_elementSize = getProperty("ElementSize"); // in mm
-  m_elementSize = m_elementSize * 1e-3;       // convert to m
+  m_sampleElementSize = getProperty("ElementSize"); // in mm
+  m_sampleElementSize = m_sampleElementSize * 1e-3; // convert to m
+  m_containerElementSize = getProperty("ContainerElementSize");
+  m_containerElementSize = isDefault("ContainerElementSize") ? m_sampleElementSize : m_containerElementSize * 1e-3;
 }
 
 /**
@@ -240,12 +246,12 @@ void MultipleScatteringCorrection::parseInputs() {
  * @param shape
  */
 void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWorkspace_sptr &outws,
-                                                            const Geometry::IObject &shape) {
+                                                            const Geometry::IObject &shape, const double elementSize) {
   const auto material = shape.material();
   // Cache distances
   // NOTE: cannot use IObject_sprt for sample shape as the getShape() method dereferenced
   //       the shared pointer upon returning.
-  MultipleScatteringCorrectionDistGraber distGraber(shape, m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraber(shape, elementSize);
   distGraber.cacheLS1(m_beamDirection);
 
   const int64_t numVolumeElements = distGraber.m_numVolumeElements;
@@ -362,9 +368,9 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   const auto &sampleShape = sample.getShape();
   const auto &containerShape = sample.getEnvironment().getContainer();
 
-  MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_sampleElementSize);
   distGraberSample.cacheLS1(m_beamDirection);
-  MultipleScatteringCorrectionDistGraber distGraberContainer(containerShape, m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraberContainer(containerShape, m_containerElementSize);
   distGraberContainer.cacheLS1(m_beamDirection);
 
   // useful info to have
