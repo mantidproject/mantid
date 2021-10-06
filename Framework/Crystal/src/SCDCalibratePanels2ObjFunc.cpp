@@ -9,11 +9,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
@@ -261,6 +263,34 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(dou
   rot_alg->setProperty("Angle", rotZ);
   rot_alg->setProperty("RelativeRotation", true);
   rot_alg->executeAsChildAlg();
+
+  return pws;
+}
+
+IPeaksWorkspace_sptr
+SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, const double &scaley,
+                                                        const std::string &componentName,
+                                                        Mantid::API::IPeaksWorkspace_sptr &pws) const {
+
+  Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(pws->getInstrument());
+  Geometry::IComponent_const_sptr comp = inst->getComponentByName(componentName);
+  std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+  if (rectDet) {
+    Geometry::ParameterMap &pmap = pws->instrumentParameters();
+    auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
+    auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+    double relscalex = scalex;
+    double relscaley = scaley;
+    if (!oldscalex.empty())
+      relscalex /= oldscalex[0];
+    if (!oldscaley.empty())
+      relscaley /= oldscaley[0];
+    pmap.addDouble(rectDet.get(), "scalex", scalex);
+    pmap.addDouble(rectDet.get(), "scaley", scaley);
+    applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), scalex,
+                                                 scaley);
+  }
 
   return pws;
 }
