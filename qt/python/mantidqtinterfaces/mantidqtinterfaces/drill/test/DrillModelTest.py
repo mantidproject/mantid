@@ -253,7 +253,8 @@ class DrillModelTest(unittest.TestCase):
         s0 = mock.Mock()
         s0.getGroup.return_value = g0
         s0.getParameterValues.return_value = {"p1": "v0", "p2": "v0",
-                                              "p3": "v0"}
+                                              "p3": "v0",
+                                              "OutputWorkspace": "out"}
         s1 = mock.Mock()
         s1.getGroup.return_value = g0
         s1.getParameterValues.return_value = {"p1": "v1", "p2": "v1",
@@ -273,7 +274,8 @@ class DrillModelTest(unittest.TestCase):
         self.model._samples = [s0, s1, s2, s3]
         self.assertFalse(self.model.processGroupByGroup([3]))
         self.assertTrue(self.model.processGroupByGroup([0, 1, 2, 3]))
-        calls = [mock.call("g0", "algo", p1='v0,v1', p2='v0,v1', p3="v0"),
+        calls = [mock.call("g0", "algo", p1='v0,v1', p2='v0,v1', p3="v0",
+                           OutputWorkspace="out"),
                  mock.call("g1", "algo", p1='v2', p2='v2', p3="v2")]
         mTask.assert_has_calls(calls, any_order=True)
         self.model.tasksPool.addProcesses.assert_called_once()

@@ -495,6 +495,11 @@ class DrillModel(QObject):
                 task.addStartedCallback(sample.onProcessStarted)
                 task.addSuccessCallback(sample.onProcessSuccess)
                 task.addErrorCallback(sample.onProcessError)
+                if sample == master:
+                    # needed for the auto export
+                    # here we need to export only one sample per group
+                    sample.setOutputName(processingParams["OutputWorkspace"])
+
             tasks.append(task)
         self.tasksPool.addProcesses(tasks)
         return True
