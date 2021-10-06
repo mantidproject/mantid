@@ -99,21 +99,30 @@
           <enum>QLayout::SetMinimumSize</enum>
          </property>
          <item>
-          <widget class="QToolButton" name="iv_pan_button">
-           <property name="text">
-            <string>Pan</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QToolButton" name="iv_zoom_button">
+           <property name="toolTip">
+            <string>Move the instrument</string>
+           </property>
            <property name="text">
             <string>Zoom</string>
            </property>
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="iv_edit_button">
+           <property name="toolTip">
+            <string>Select and edit shapes</string>
+           </property>
+           <property name="text">
+            <string>Edit</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="iv_rect_select_button">
+           <property name="toolTip">
+            <string>Draw a rectangle</string>
+           </property>
            <property name="text">
             <string>Rect. Select</string>
            </property>

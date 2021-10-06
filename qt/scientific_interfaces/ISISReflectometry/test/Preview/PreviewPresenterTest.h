@@ -96,9 +96,9 @@ public:
 
   void test_notify_inst_view_pan_requested() {
     auto mockView = makeView();
-    expectInstViewSetToPanMode(*mockView);
+    expectInstViewSetToEditMode(*mockView);
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
-    presenter.notifyInstViewPanRequested();
+    presenter.notifyInstViewEditRequested();
   }
 
   void test_notify_inst_view_zoom_requested() {
@@ -111,7 +111,7 @@ public:
   void test_notify_inst_view_shape_changed() {
     auto mockView = makeView();
     auto presenter = PreviewPresenter(packDeps(mockView.get()));
-    expectInstViewSetToPanMode(*mockView);
+    expectInstViewSetToEditMode(*mockView);
     // TODO check that the model is called to sum banks
     presenter.notifyInstViewShapeChanged();
   }
@@ -171,20 +171,20 @@ private:
 
   void expectInstViewSetToZoomMode(MockPreviewView &mockView) {
     EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setInstViewZoomState(Eq(true))).Times(1);
     EXPECT_CALL(mockView, setInstViewZoomMode()).Times(1);
   }
 
-  void expectInstViewSetToPanMode(MockPreviewView &mockView) {
+  void expectInstViewSetToEditMode(MockPreviewView &mockView) {
     EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
-    EXPECT_CALL(mockView, setInstViewPanState(Eq(true))).Times(1);
-    EXPECT_CALL(mockView, setInstViewPanMode()).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditMode()).Times(1);
   }
 
   void expectInstViewSetToSelectRectMode(MockPreviewView &mockView) {
-    EXPECT_CALL(mockView, setInstViewPanState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(true))).Times(1);
     EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);

@@ -53,29 +53,29 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
-  m_view->setInstViewPanState(false);
   m_view->setInstViewZoomState(false);
+  m_view->setInstViewEditState(false);
   m_view->setInstViewSelectRectState(true);
   m_view->setInstViewSelectRectMode();
 }
 
-void PreviewPresenter::notifyInstViewPanRequested() {
-  m_view->setInstViewSelectRectState(false);
+void PreviewPresenter::notifyInstViewEditRequested() {
   m_view->setInstViewZoomState(false);
-  m_view->setInstViewPanState(true);
-  m_view->setInstViewPanMode();
+  m_view->setInstViewEditState(true);
+  m_view->setInstViewSelectRectState(false);
+  m_view->setInstViewEditMode();
 }
 
 void PreviewPresenter::notifyInstViewZoomRequested() {
-  m_view->setInstViewSelectRectState(false);
-  m_view->setInstViewPanState(false);
   m_view->setInstViewZoomState(true);
+  m_view->setInstViewEditState(false);
+  m_view->setInstViewSelectRectState(false);
   m_view->setInstViewZoomMode();
 }
 
 void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
-  notifyInstViewPanRequested();
+  notifyInstViewEditRequested();
   // TODO start the algorithm that will sum banks horizontally
   // m_model->sumBanksAsync(*m_jobManager);
 }

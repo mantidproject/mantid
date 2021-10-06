@@ -17,9 +17,9 @@ public:
   virtual ~PreviewViewSubscriber() = default;
   virtual void notifyLoadWorkspaceRequested() = 0;
 
-  virtual void notifyInstViewSelectRectRequested() = 0;
-  virtual void notifyInstViewPanRequested() = 0;
   virtual void notifyInstViewZoomRequested() = 0;
+  virtual void notifyInstViewEditRequested() = 0;
+  virtual void notifyInstViewSelectRectRequested() = 0;
   virtual void notifyInstViewShapeChanged() = 0;
 };
 
@@ -31,12 +31,12 @@ public:
   virtual void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                             Mantid::Kernel::V3D const &axis) = 0;
 
-  virtual void setInstViewSelectRectState(bool on) = 0;
-  virtual void setInstViewPanState(bool on) = 0;
   virtual void setInstViewZoomState(bool on) = 0;
-  virtual void setInstViewSelectRectMode() = 0;
-  virtual void setInstViewPanMode() = 0;
+  virtual void setInstViewEditState(bool on) = 0;
+  virtual void setInstViewSelectRectState(bool on) = 0;
   virtual void setInstViewZoomMode() = 0;
+  virtual void setInstViewEditMode() = 0;
+  virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

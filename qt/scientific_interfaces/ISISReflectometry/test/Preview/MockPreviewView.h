@@ -22,12 +22,12 @@ public:
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
   MOCK_METHOD(void, plotInstView,
               (MantidWidgets::InstrumentActor *, Mantid::Kernel::V3D const &, Mantid::Kernel::V3D const &), (override));
-  MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
-  MOCK_METHOD(void, setInstViewPanState, (bool), (override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
+  MOCK_METHOD(void, setInstViewEditState, (bool), (override));
+  MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
   MOCK_METHOD(void, setInstViewSelectRectMode, (), (override));
-  MOCK_METHOD(void, setInstViewPanMode, (), (override));
-  MOCK_METHOD(void, setInstViewZoomMode, (), (override));
   MOCK_METHOD(void, setInstViewToolbarEnabled, (bool), (override));
+  MOCK_METHOD(void, setInstViewZoomMode, (), (override));
+  MOCK_METHOD(void, setInstViewEditMode, (), (override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

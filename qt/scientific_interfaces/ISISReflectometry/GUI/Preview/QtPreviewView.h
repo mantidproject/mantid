@@ -34,12 +34,12 @@ public:
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
 
-  void setInstViewSelectRectState(bool isChecked) override;
-  void setInstViewPanState(bool isChecked) override;
   void setInstViewZoomState(bool isChecked) override;
-  void setInstViewSelectRectMode() override;
-  void setInstViewPanMode() override;
+  void setInstViewEditState(bool isChecked) override;
+  void setInstViewSelectRectState(bool isChecked) override;
   void setInstViewZoomMode() override;
+  void setInstViewEditMode() override;
+  void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
 
 private:
@@ -53,8 +53,8 @@ private:
 private slots:
   void onLoadWorkspaceRequested() const;
   void onInstViewSelectRectClicked() const;
-  void onInstViewPanClicked() const;
   void onInstViewZoomClicked() const;
+  void onInstViewEditClicked() const;
   void onInstViewShapeChanged() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
