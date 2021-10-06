@@ -204,6 +204,7 @@ set(TEST_FILES
     PredictPeaksTest.h
     PredictSatellitePeaksTest.h
     SCDCalibratePanels2Test.h
+    SCDCalibratePanels2ObjFuncTest.h
     SCDCalibratePanelsTest.h
     SaveHKLTest.h
     SaveIsawPeaksTest.h
