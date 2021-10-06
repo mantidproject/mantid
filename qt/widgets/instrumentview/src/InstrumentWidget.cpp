@@ -311,7 +311,6 @@ void InstrumentWidget::initWidget(bool resetGeometry, bool setDefaultView) {
   m_controlPanelLayout->setEnabled(true);
   m_xIntegration->setEnabled(true);
   init(resetGeometry, setDefaultView);
-  updateInstrumentDetectors();
 
   m_finished = true;
 }
@@ -361,6 +360,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
   m_instrumentActor->moveToThread(&m_thread);
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
+  m_qtConnect->connect(&m_thread, SIGNAL(destroyed()), this, SLOT(threadFinished()));
+  m_qtConnect->connect(&m_thread, SIGNAL(finished()), &m_thread, SLOT(deleteLater()));
   m_thread.start();
   m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
                                Q_ARG(bool, setDefaultView));
@@ -369,7 +370,7 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
 void InstrumentWidget::cancelThread() {
   if (m_instrumentActor) {
     m_instrumentActor->blockSignals(true);
-    QMetaObject::invokeMethod(m_instrumentActor.get(), "deleteLater", Qt::DirectConnection);
+    m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "cancel", Qt::DirectConnection);
   }
 
   m_thread.requestInterruption();
@@ -1183,7 +1184,7 @@ void InstrumentWidget::closeEvent(QCloseEvent *e) {
   // stop the background thread if it is running
   if (m_thread.isRunning()) {
     if (m_instrumentActor) {
-      QMetaObject::invokeMethod(m_instrumentActor.get(), "deleteLater");
+      m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "cancel");
     }
     m_thread.quit();
   }

@@ -224,7 +224,7 @@ signals:
 
 public slots:
   void initialize(bool resetGeometry, bool setDefaultView);
-  void deleteLater();
+  void cancel();
 
 private:
   static constexpr double TOLERANCE = 0.00001;

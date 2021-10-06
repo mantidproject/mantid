@@ -142,7 +142,7 @@ void InstrumentActor::initialize(bool resetGeometry, bool setDefaultView) {
  */
 InstrumentActor::~InstrumentActor() { saveSettings(); }
 
-void InstrumentActor::deleteLater() {
+void InstrumentActor::cancel() {
   blockSignals(true);
 
   // cancel any running mantid algorithms to help free the thread
