@@ -9,6 +9,7 @@
 #include "Common/DllConfig.h"
 #include "GUI/Batch/IBatchView.h"
 #include "GUI/Common/IJobManager.h"
+#include "IInstViewModel.h"
 #include "IPreviewModel.h"
 #include "IPreviewPresenter.h"
 #include "IPreviewView.h"
@@ -21,7 +22,14 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewPresenter : public IPreviewPresenter
                                                         public PreviewViewSubscriber,
                                                         public JobManagerSubscriber {
 public:
-  PreviewPresenter(IPreviewView *view, std::unique_ptr<IPreviewModel> model, std::unique_ptr<IJobManager> jobManager);
+  struct Dependencies {
+    IPreviewView *view{nullptr};
+    std::unique_ptr<IPreviewModel> model;
+    std::unique_ptr<IJobManager> jobManager;
+    std::unique_ptr<IInstViewModel> instViewModel;
+  };
+
+  PreviewPresenter(Dependencies dependencies);
   virtual ~PreviewPresenter() = default;
 
   // PreviewViewSubscriber overrides
@@ -34,5 +42,6 @@ private:
   IPreviewView *m_view{nullptr};
   std::unique_ptr<IPreviewModel> m_model;
   std::unique_ptr<IJobManager> m_jobManager;
+  std::unique_ptr<IInstViewModel> m_instViewModel;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

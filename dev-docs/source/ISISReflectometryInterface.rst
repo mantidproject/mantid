@@ -21,7 +21,7 @@ Structure
 :code:`GUI`
 ###########
 
-This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IMessageHandler` interface).
+This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IReflMessageHandler` interface).
 
 Briefly the structure is as follows:
 
@@ -186,13 +186,13 @@ Let's take the :code:`Event` component as an example.
 Dependency injection
 ####################
 
-A simple example of `Dependency inversion`_ is in the use of an :code:`IMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IMessageHandler` to all of the presenters that need it.
+A simple example of `Dependency inversion`_ is in the use of an :code:`IReflMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IReflMessageHandler` to all of the presenters that need it.
 
-- The :code:`IMessageHandler` interface defines the functions for displaying messages:
+- The :code:`IReflMessageHandler` interface defines the functions for displaying messages:
 
   .. code-block:: c++
 
-    class IMessageHandler {
+    class IReflMessageHandler {
     public:
       virtual void giveUserCritical(const std::string &prompt,
                                     const std::string &title) = 0;

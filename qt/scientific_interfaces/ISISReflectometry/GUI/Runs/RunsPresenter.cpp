@@ -7,8 +7,8 @@
 #include "RunsPresenter.h"
 #include "CatalogRunNotifier.h"
 #include "GUI/Batch/IBatchPresenter.h"
-#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPythonRunner.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "GUI/RunsTable/RunsTablePresenter.h"
 #include "IRunsView.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -43,7 +43,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
  */
 RunsPresenter::RunsPresenter(IRunsView *mainView, ProgressableView *progressableView,
                              const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                             std::vector<std::string> instruments, IMessageHandler *messageHandler)
+                             std::vector<std::string> instruments, IReflMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)), m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler), m_instruments(std::move(instruments)),

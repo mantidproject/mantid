@@ -74,11 +74,19 @@ void GLDisplay::initializeGL() {
   // Set the relevant OpenGL rendering options
   setRenderingOptions();
   glViewport(0, 0, width(), height());
+}
 
-  // Clear the memory buffers
+/**
+ * Resets the buffer to the current background color.
+ * The caller is responsible for ensuring the GL buffer is current
+ */
+void GLDisplay::resetBackgroundColor() {
   QColor bgColor = currentBackgroundColor();
   glClearColor(GLclampf(bgColor.red() / 255.0), GLclampf(bgColor.green() / 255.0), GLclampf(bgColor.blue() / 255.0),
                1.0);
+  // Since we're manually manipulating the current GL buffer (as we're double buffered)
+  // we need to ask Qt to redraw, else we get a corrupted display with an empty surface
+  updateGL();
 }
 
 void GLDisplay::setRenderingOptions() {
@@ -101,6 +109,11 @@ void GLDisplay::setRenderingOptions() {
   OpenGLError::check("setRenderingOptions");
 }
 
+void GLDisplay::paintGL() {
+  // Ask openGL to repaint the background color
+  glClear(GL_COLOR_BUFFER_BIT);
+}
+
 /**
  * This is overridden function which is called by Qt when the widget needs to be
  * repainted.
@@ -108,10 +121,11 @@ void GLDisplay::setRenderingOptions() {
 void GLDisplay::paintEvent(QPaintEvent *event) {
   UNUSED_ARG(event)
   makeCurrent();
-  if (m_surface) {
-    m_surface->draw(this);
+  if (!m_surface) {
+    resetBackgroundColor();
+    return;
   }
-
+  m_surface->draw(this);
   OpenGLError::check("paintEvent");
 
   if (m_firstFrame) {
