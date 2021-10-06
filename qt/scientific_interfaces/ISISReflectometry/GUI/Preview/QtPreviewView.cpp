@@ -48,8 +48,12 @@ void QtPreviewView::onInstViewZoomClicked() const { m_notifyee->notifyInstViewZo
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
 void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D const &samplePos, V3D const &axis) {
-  auto surface = std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis);
-  m_instDisplay->setSurface(surface);
+  // We need to recreate the surface so disconnect any existing signals first
+  if (m_instDisplay->getSurface()) {
+    disconnect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()));
+  }
+  m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis));
+  connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
 }
 
 void QtPreviewView::setInstViewSelectRectState(bool isChecked) { m_ui.iv_rect_select_button->setDown(isChecked); }
@@ -58,7 +62,6 @@ void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->
 
 void QtPreviewView::setInstViewSelectRectMode() {
   m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
-  connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
   m_instDisplay->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
 }
 

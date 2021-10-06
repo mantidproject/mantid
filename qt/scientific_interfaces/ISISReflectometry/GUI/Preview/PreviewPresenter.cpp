@@ -45,11 +45,10 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
 
   // Notify the instrument view model that the workspace has changed before we get the surface
   m_instViewModel->updateWorkspace(ws);
-  // TODO add calls to the view to make sure we clear any drawn shapes and reset back to default state (i.e. zoom)
   m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
                        m_instViewModel->getAxis());
+  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_view->setInstViewToolbarEnabled(true);
-  // Reset the instrument view to zoom mode
   notifyInstViewZoomRequested();
 }
 
