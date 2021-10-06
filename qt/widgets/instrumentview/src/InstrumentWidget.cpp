@@ -116,9 +116,9 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
-      m_qtConnect(std::move(deps.qtConnect)), m_messageHandler(std::move(deps.messageHandler)), m_finished(false),
-      m_autoscaling(autoscaling), m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView),
-      m_resetGeometry(resetGeometry) {
+      m_qtConnect(std::move(deps.qtConnect)), m_qtMetaObject(std::move(deps.qtMetaObject)),
+      m_messageHandler(std::move(deps.messageHandler)), m_finished(false), m_autoscaling(autoscaling),
+      m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView), m_resetGeometry(resetGeometry) {
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
@@ -362,8 +362,8 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
   m_thread.start();
-  QMetaObject::invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
-                            Q_ARG(bool, setDefaultView));
+  m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
+                               Q_ARG(bool, setDefaultView));
 }
 
 void InstrumentWidget::cancelThread() {

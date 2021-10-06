@@ -12,6 +12,7 @@
 #include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
+#include "QtMetaObject.h"
 #include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
@@ -71,6 +72,7 @@ struct Dependencies {
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
   std::unique_ptr<IGLDisplay> glDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+  std::unique_ptr<QtMetaObject> qtMetaObject = std::make_unique<QtMetaObject>();
   std::unique_ptr<IMessageHandler> messageHandler = nullptr;
 };
 
@@ -372,6 +374,8 @@ private:
 
   /// Wrapper around Qt connect function so we can mock it
   std::unique_ptr<QtConnect> m_qtConnect;
+  /// Wrapper around Qt meta object for mocking
+  std::unique_ptr<QtMetaObject> m_qtMetaObject;
 
   std::unique_ptr<IMessageHandler> m_messageHandler;
 
