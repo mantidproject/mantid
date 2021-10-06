@@ -36,9 +36,7 @@ std::vector<std::string> CONVFIT_HIDDEN_PROPS =
                               "IgnoreInvalidData", "Output", "PeakRadius", "PlotParameter"});
 } // namespace
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidQt::CustomInterfaces::IDA {
 
 IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent), m_uiForm(new Ui::IndirectFitTab) {
@@ -155,6 +153,4 @@ void IndirectDataAnalysisConvFitTab::setRunIsRunning(bool running) {
 
 void IndirectDataAnalysisConvFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
 
-} // namespace IDA
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::IDA

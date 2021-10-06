@@ -47,6 +47,7 @@ protected:
   void resetWidget();
   void MakeObject();
   void paintEvent(QPaintEvent *event) override;
+  void paintGL() override;
   void resizeGL(int /*w*/, int /*h*/) override;
   void contextMenuEvent(QContextMenuEvent * /*unused*/) override;
   void mousePressEvent(QMouseEvent * /*unused*/) override;
@@ -62,6 +63,7 @@ protected:
 
 private:
   void setRenderingOptions();
+  void resetBackgroundColor();
 
   // int m_lightingState;           ///< 0 = light off; 2 = light on
   bool m_isKeyPressed;

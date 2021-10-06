@@ -20,7 +20,9 @@ class IJobManager;
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewModel : public IPreviewModel {
 public:
   virtual ~PreviewModel() = default;
-  void loadWorkspace(std::string const &workspaceName, IJobManager &jobManager) override;
+
+  bool loadWorkspaceFromAds(std::string const &workspaceName) override;
+  void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
 
 private:
@@ -30,6 +32,5 @@ private:
   std::unique_ptr<PreviewRow> m_runDetails{nullptr};
 
   void createRunDetails(std::string const &workspaceName);
-  Mantid::API::MatrixWorkspace_sptr loadFromAds(std::string const &workspaceName) const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

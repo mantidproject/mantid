@@ -70,6 +70,7 @@ set(
   src/MantidWSIndexDialog.cpp
   src/Message.cpp
   src/MessageDisplay.cpp
+  src/MessageHandler.cpp
   src/MultifitSetupDialog.cpp
   src/MuonPeriodInfo.cpp
   src/NotificationService.cpp
@@ -280,11 +281,13 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
+    inc/MantidQtWidgets/Common/IMessageHandler.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
+    inc/MantidQtWidgets/Common/MessageHandler.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
