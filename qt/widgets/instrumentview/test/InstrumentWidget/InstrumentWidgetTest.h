@@ -62,7 +62,6 @@ public:
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
     auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
-
   }
 
   void test_constructor_gl_disabled() {

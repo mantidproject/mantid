@@ -26,15 +26,12 @@ class InstrumentWidgetDecoderTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static InstrumentWidgetDecoderTest *createSuite() {
-    return new InstrumentWidgetDecoderTest();
-  }
+  static InstrumentWidgetDecoderTest *createSuite() { return new InstrumentWidgetDecoderTest(); }
   static void destroySuite(InstrumentWidgetDecoderTest *suite) { delete suite; }
 
   void setUp() override {
     FrameworkManager::Instance();
-    auto alg =
-        AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
+    auto alg = AlgorithmManager::Instance().createUnmanaged("CreateSampleWorkspace");
     alg->initialize();
     alg->setProperty("OutputWorkspace", "ws");
     alg->execute();
@@ -52,8 +49,7 @@ public:
   }
 
   void test_decode() {
-    TS_ASSERT_THROWS_NOTHING(
-        m_decoder->decode(m_infoMap, *m_instrumentWidget, QString(""), false));
+    TS_ASSERT_THROWS_NOTHING(m_decoder->decode(m_infoMap, *m_instrumentWidget, QString(""), false));
     // Set to 2
     TS_ASSERT_EQUALS(m_instrumentWidget->getCurrentTab(), 2)
   }

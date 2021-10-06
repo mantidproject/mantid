@@ -221,10 +221,11 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
  * Destructor
  */
 InstrumentWidget::~InstrumentWidget() {
+  cancelThread();
+
   if (m_instrumentActor) {
     saveSettings();
   }
-  cancelThread();
   m_instrumentActor.reset();
 }
 
@@ -977,7 +978,11 @@ void InstrumentWidget::saveSettings() {
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
     settings.setValue("ShowPeakRelativeIntensities", getSurface()->getShowPeakRelativeIntensityFlag());
-    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+    // only save tab states if the instrument actor loading finished and this widget was updated
+    // through initWidget
+    if (m_finished) {
+      foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+    }
   }
   settings.endGroup();
 }
