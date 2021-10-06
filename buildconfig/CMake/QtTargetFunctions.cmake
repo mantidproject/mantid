@@ -177,7 +177,7 @@ function (mtd_add_qt_target)
     target_include_directories (${_target} SYSTEM PUBLIC ${PARSED_SYSTEM_INCLUDE_DIRS})
   endif()
 
-  target_link_libraries (${_target} PRIVATE ${_qt_link_libraries}
+  target_link_libraries (${_target} PUBLIC ${_qt_link_libraries}
                          ${PARSED_LINK_LIBS} ${_mtd_qt_libs})
   if(_all_defines)
     set_target_properties ( ${_target} PROPERTIES COMPILE_DEFINITIONS "${_all_defines}" )

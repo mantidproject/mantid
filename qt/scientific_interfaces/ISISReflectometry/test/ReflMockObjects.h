@@ -15,9 +15,9 @@
 #include "GUI/Common/IFileHandler.h"
 #include "GUI/Common/IJobManager.h"
 #include "GUI/Common/IJobRunner.h"
-#include "GUI/Common/IMessageHandler.h"
 #include "GUI/Common/IPlotter.h"
 #include "GUI/Common/IPythonRunner.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
@@ -254,9 +254,10 @@ public:
   MOCK_METHOD0(setSaved, void());
 };
 
-class MockMessageHandler : public IMessageHandler {
+class MockMessageHandler : public IReflMessageHandler {
 public:
   MOCK_METHOD2(giveUserCritical, void(const std::string &, const std::string &));
+  MOCK_METHOD2(giveUserWarning, void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
   MOCK_METHOD2(askUserOkCancel, bool(const std::string &, const std::string &));
   MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));

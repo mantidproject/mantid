@@ -39,6 +39,7 @@ set(TEST_FILES
   Reduction/GroupTest.h
   Reduction/ValidateRowTest.h
 
+  Preview/InstViewModelTest.h
   Preview/PreviewJobManagerTest.h
   Preview/PreviewModelTest.h
   Preview/PreviewPresenterTest.h
@@ -77,6 +78,7 @@ mtd_add_qt_tests(
     MantidScientificInterfacesISISReflectometry
     MantidQtWidgetsCommon
     MantidQtWidgetsPlotting
+    MantidQtWidgetsInstrumentView
     MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES
     GUITests)

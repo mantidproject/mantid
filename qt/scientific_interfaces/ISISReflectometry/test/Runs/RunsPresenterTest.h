@@ -758,7 +758,7 @@ private:
   public:
     RunsPresenterFriend(IRunsView *mainView, ProgressableView *progressView,
                         const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                        std::vector<std::string> const &instruments, IMessageHandler *messageHandler)
+                        std::vector<std::string> const &instruments, IReflMessageHandler *messageHandler)
         : RunsPresenter(mainView, progressView, makeRunsTablePresenter, thetaTolerance, instruments, messageHandler) {}
   };
 

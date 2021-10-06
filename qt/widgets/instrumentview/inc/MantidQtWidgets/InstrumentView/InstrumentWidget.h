@@ -21,6 +21,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidQtWidgets/Common/GraphOptions.h"
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <memory>
@@ -67,6 +68,7 @@ struct Dependencies {
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
   std::unique_ptr<IGLDisplay> glDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+  std::unique_ptr<IMessageHandler> messageHandler = nullptr;
 };
 
 } // namespace Detail
@@ -256,7 +258,7 @@ protected:
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
-  void createTabs(QSettings &settings);
+  void createTabs(const QSettings &settings);
   void saveSettings();
 
   QString asString(const std::vector<int> &numbers) const;
@@ -356,6 +358,8 @@ private:
 
   /// Wrapper around Qt connect function so we can mock it
   std::unique_ptr<QtConnect> m_qtConnect;
+
+  std::unique_ptr<IMessageHandler> m_messageHandler;
 };
 
 } // namespace MantidWidgets
