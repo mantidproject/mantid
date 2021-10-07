@@ -25,7 +25,7 @@ QtPreviewView::QtPreviewView(QWidget *parent) : QWidget(parent) {
 
 void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_zoom_button->setIcon(MantidQt::Icons::getIcon("mdi.magnify", "black", 1.3));
-  m_ui.iv_edit_button->setIcon(MantidQt::Icons::getIcon("mdi.arrow-all", "black", 1.3));
+  m_ui.iv_edit_button->setIcon(MantidQt::Icons::getIcon("mdi.pencil", "black", 1.3));
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
 }
 
