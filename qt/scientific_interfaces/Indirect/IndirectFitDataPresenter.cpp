@@ -240,11 +240,11 @@ void IndirectFitDataPresenter::removeSelectedData() {
 
 void IndirectFitDataPresenter::unifyRangeToSelectedData() {
   auto selectedIndices = m_view->getSelectedIndexes();
-  std::sort(selectedIndices.begin(), selectedIndices.end());
   if (selectedIndices.size() == 0) {
     // check that there are selected indexes.
     return;
   }
+  std::sort(selectedIndices.begin(), selectedIndices.end());
   auto fitRange = m_model->getFittingRange(FitDomainIndex(selectedIndices.begin()->row()));
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
     --item;
