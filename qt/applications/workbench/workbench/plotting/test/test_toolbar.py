@@ -15,6 +15,7 @@ matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.plotting.functions import plot_surface
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from mantid.plots.plotfunctions import plot
 from mantid.simpleapi import CreateSampleWorkspace
@@ -126,6 +127,27 @@ class ToolBarTest(unittest.TestCase):
         axes[0][1].grid()
         axes[1][0].grid()
         # Grid button should be OFF because not all subplots have grids.
+        self.assertFalse(self._is_grid_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_checked_for_3d_surface_plot_with_grid(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        ws = CreateSampleWorkspace()
+        fig = plt.figure()
+        plot_surface([ws], fig)
+        # Grid button should be on because grid is on by default in surface plot.
+        self.assertTrue(self._is_grid_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_unchecked_for_3d_surface_plot_without_grid(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        ws = CreateSampleWorkspace()
+        fig = plt.figure()
+        plot_surface([ws], fig)
+        ax = fig.get_axes()
+        # Turn grids off for the plot, they're on by default.
+        ax[0].grid(False)
+        # Grid button should be on because grid is on by default in surface plot.
         self.assertFalse(self._is_grid_button_checked(fig))
 
     @classmethod
