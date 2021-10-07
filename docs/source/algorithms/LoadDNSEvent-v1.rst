@@ -55,7 +55,7 @@ Usage
 
     # rebin spectra:
     test2 = Rebin(InputWorkspace='eventWS', Params='0, 100, {0}'.format(eventWS.getTofMax()))
-    print("Number of bins after rebinning: {}".format(eventWS.blocksize()))
+    print("Number of bins after rebinning: {}".format(test2.blocksize()))
 
 
 **Output:**
