@@ -24,6 +24,7 @@ public:
   bool loadWorkspaceFromAds(std::string const &workspaceName) override;
   void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
+  std::string indicesToString(std::vector<size_t> const &indices) const override;
 
 private:
   // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't

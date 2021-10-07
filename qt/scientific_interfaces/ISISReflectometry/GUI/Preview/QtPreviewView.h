@@ -42,6 +42,8 @@ public:
   void setInstViewSelectRectMode() override;
   void setInstViewToolbarEnabled(bool enable) override;
 
+  std::vector<size_t> getSelectedDetectors() const override;
+
 private:
   Ui::PreviewWidget m_ui;
   PreviewViewSubscriber *m_notifyee{nullptr};

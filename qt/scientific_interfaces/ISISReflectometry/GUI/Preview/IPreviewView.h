@@ -38,5 +38,7 @@ public:
   virtual void setInstViewEditMode() = 0;
   virtual void setInstViewSelectRectMode() = 0;
   virtual void setInstViewToolbarEnabled(bool enable) = 0;
+
+  virtual std::vector<size_t> getSelectedDetectors() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -76,7 +76,11 @@ void PreviewPresenter::notifyInstViewZoomRequested() {
 void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
-  // TODO start the algorithm that will sum banks horizontally
-  // m_model->sumBanksAsync(*m_jobManager);
+  // Get the masked workspace indices
+  auto indices = m_instViewModel->detIndicesToWsIndices(m_view->getSelectedDetectors());
+  auto selectionStr = m_model->indicesToString(indices);
+  // TODO Start the algorithm that will sum banks horizontally. For now just print out the masked indices.
+  g_log.information(selectionStr);
+  // m_model->sumBanksAsync(*m_jobManager, m_model->indicesToString(selectedIndices));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

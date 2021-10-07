@@ -23,5 +23,6 @@ public:
   MOCK_METHOD(MantidWidgets::InstrumentActor *, getInstrumentViewActor, (), (const, override));
   MOCK_METHOD(Mantid::Kernel::V3D, getSamplePos, (), (const, override));
   MOCK_METHOD(Mantid::Kernel::V3D, getAxis, (), (const, override));
+  MOCK_METHOD(std::vector<size_t>, detIndicesToWsIndices, (std::vector<size_t> const &), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

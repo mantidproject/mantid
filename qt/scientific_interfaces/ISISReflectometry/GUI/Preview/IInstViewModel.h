@@ -20,5 +20,6 @@ public:
   virtual MantidWidgets::InstrumentActor *getInstrumentViewActor() const = 0;
   virtual Mantid::Kernel::V3D getSamplePos() const = 0;
   virtual Mantid::Kernel::V3D getAxis() const = 0;
+  virtual std::vector<size_t> detIndicesToWsIndices(std::vector<size_t> const &detIndices) const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

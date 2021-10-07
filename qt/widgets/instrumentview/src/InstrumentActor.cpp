@@ -377,6 +377,11 @@ Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) con
  */
 size_t InstrumentActor::getWorkspaceIndex(size_t index) const { return m_detIndex2WsIndex[index]; }
 
+std::vector<size_t> InstrumentActor::getWorkspaceIndices(const std::vector<size_t> &dets) const {
+  auto detIDs = getDetIDs(dets);
+  return m_workspace->getIndicesFromDetectorIDs(detIDs);
+}
+
 /**
  * Set an interval in the data workspace x-vector's units in which the data are
  * to be

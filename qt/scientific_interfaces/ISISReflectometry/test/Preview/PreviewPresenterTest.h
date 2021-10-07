@@ -110,9 +110,14 @@ public:
 
   void test_notify_inst_view_shape_changed() {
     auto mockView = makeView();
-    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    auto mockModel = makeModel();
+    auto mockInstViewModel = makeInstViewModel();
     expectInstViewSetToEditMode(*mockView);
+    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel);
     // TODO check that the model is called to sum banks
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::make_unique<NiceMock<MockJobManager>>(),
+                                  std::move(mockInstViewModel)));
     presenter.notifyInstViewShapeChanged();
   }
 
@@ -154,6 +159,18 @@ private:
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
     EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
+  }
+
+  void expectSumBanksCalledOnSelectedDetectors(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                               MockInstViewModel &mockInstViewModel) {
+    auto detIndices = std::vector<size_t>{44, 45, 46};
+    auto wsIndices = std::vector<size_t>{2, 3, 4};
+    auto wsIndicesStr = std::string{"2, 3, 4"};
+    EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
+    EXPECT_CALL(mockInstViewModel, detIndicesToWsIndices(Eq(detIndices))).Times(1).WillOnce(Return(wsIndices));
+    EXPECT_CALL(mockModel, indicesToString(wsIndices)).Times(1).WillOnce(Return(wsIndicesStr));
+    // TODO uncomment test when sum banks is implemented
+    // EXPECT_CALL(mockModel, sumBanksAsync(wsIndicesStr)).Times(1);
   }
 
   void expectPlotInstView(MockPreviewView &mockView, MockInstViewModel &mockInstViewModel) {

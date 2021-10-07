@@ -81,4 +81,11 @@ void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_rect_select_button->setEnabled(enable);
 }
 
+std::vector<size_t> QtPreviewView::getSelectedDetectors() const {
+  std::vector<size_t> result;
+  // The name is confusing here but "masked" detectors refers to those selected by a "mask shape"
+  // (although weather it's treated as a mask or not is up to the caller)
+  m_instDisplay->getSurface()->getMaskedDetectors(result);
+  return result;
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -46,4 +46,8 @@ Mantid::Kernel::V3D InstViewModel::getAxis() const {
 }
 
 MantidWidgets::InstrumentActor *InstViewModel::getInstrumentViewActor() const { return m_actor.get(); }
+
+std::vector<size_t> InstViewModel::detIndicesToWsIndices(std::vector<size_t> const &detIndices) const {
+  return m_actor->getWorkspaceIndices(detIndices);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

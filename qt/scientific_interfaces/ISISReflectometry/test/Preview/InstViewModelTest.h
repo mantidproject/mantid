@@ -29,6 +29,10 @@ public:
     TS_ASSERT_EQUALS(result->getWorkspace(), ws)
   }
 
+  void test_convert_det_ids_to_ws_indices() {
+    // TODO
+  }
+
 private:
   Mantid::API::MatrixWorkspace_sptr createWorkspace() {
     return WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();

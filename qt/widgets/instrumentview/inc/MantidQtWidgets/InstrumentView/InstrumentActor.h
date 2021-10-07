@@ -168,6 +168,8 @@ public:
   GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector Index.
   size_t getWorkspaceIndex(size_t index) const;
+  /// Get the workspace indices of a list of detectors by their detector Index
+  std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const;
   /// Get the integrated counts of a detector by its detector Index.
   double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors

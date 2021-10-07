@@ -23,5 +23,6 @@ public:
   MOCK_METHOD(bool, loadWorkspaceFromAds, (std::string const &workspaceName), (override));
   MOCK_METHOD(void, loadAndPreprocessWorkspaceAsync, (std::string const &, IJobManager &), (override));
   MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
+  MOCK_METHOD(std::string, indicesToString, (std::vector<size_t> const &), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
