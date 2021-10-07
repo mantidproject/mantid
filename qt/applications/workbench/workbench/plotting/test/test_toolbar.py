@@ -15,7 +15,7 @@ matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.plotting.functions import plot_surface
+from mantidqt.plotting.functions import plot_surface, plot_wireframe
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from mantid.plots.plotfunctions import plot
 from mantid.simpleapi import CreateSampleWorkspace
@@ -147,7 +147,28 @@ class ToolBarTest(unittest.TestCase):
         ax = fig.get_axes()
         # Turn grids off for the plot, they're on by default.
         ax[0].grid(False)
-        # Grid button should be on because grid is on by default in surface plot.
+        # Grid button should be off because we turned it off.
+        self.assertFalse(self._is_grid_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_checked_for_3d_wireframe_plot_with_grid(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        ws = CreateSampleWorkspace()
+        fig = plt.figure()
+        plot_wireframe([ws], fig)
+        # Grid button should be on because grid is on by default in wireframe plot.
+        self.assertTrue(self._is_grid_button_checked(fig))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_button_unchecked_for_3d_wireframe_plot_without_grid(self, mock_qappthread):
+        mock_qappthread.return_value = mock_qappthread
+        ws = CreateSampleWorkspace()
+        fig = plt.figure()
+        plot_wireframe([ws], fig)
+        ax = fig.get_axes()
+        # Turn grids off for the plot, they're on by default.
+        ax[0].grid(False)
+        # Grid button should be on because we turned it off.
         self.assertFalse(self._is_grid_button_checked(fig))
 
     @classmethod
