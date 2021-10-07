@@ -45,12 +45,9 @@ Usage
 
 **Example 1 - Load TOF PSD data:**
 
-.. testcode:: LoadDNSEventex1
-    from mantid.simpleapi import *
-    # data file.
-    filename = "DNS_psd_pulser_ON473_31.mdat"
+.. testcode:: ExLoadDNSEvent
 
-    eventWS = LoadDNSEvent(InputFile=filename, ChopperChannel='2')
+    eventWS = LoadDNSEvent(InputFile="DNS_psd_pulser_ON473_31.mdat", ChopperChannel='2')
     print("Number of events: {}".format(eventWS.getNumberEvents()))
     print("Maximum time of flight: {}".format(eventWS.getTofMax()))
     print("Number of detector pixels: {}".format(eventWS.getNumberHistograms()))
@@ -63,7 +60,7 @@ Usage
 
 **Output:**
 
-.. testoutput:: LoadDNSEventex1
+.. testoutput:: ExLoadDNSEvent
    :options: +NORMALIZE_WHITESPACE
 
     Number of events: 9998
