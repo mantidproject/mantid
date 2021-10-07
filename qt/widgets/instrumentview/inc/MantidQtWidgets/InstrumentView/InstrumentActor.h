@@ -156,7 +156,7 @@ public:
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
-  QList<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
+  std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
