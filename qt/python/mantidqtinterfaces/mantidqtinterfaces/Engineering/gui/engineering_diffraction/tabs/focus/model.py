@@ -20,6 +20,7 @@ from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, Save
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 CURVES_PREFIX = "engggui_curves_"
+VAN_CURVE_REBINNED_NAME = "van_ws_foc_rb"
 
 XUNIT_SUFFIXES = {'d-Spacing': 'dSpacing', 'Time-of-flight': 'TOF'}  # to put in saved focused data filename
 
@@ -56,20 +57,23 @@ class FocusModel(object):
         output_workspaces = []  # List of focused workspaces to plot.
         for sample_path in sample_paths:
             ws_sample = self._load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
-            ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration)
-            ws_foc = self._apply_vanadium_norm(ws_foc, ws_van_foc)
-            self._save_output_files(ws_foc, calibration, van_run, rb_num)
-            # convert units to TOF and save again
-            ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
-            self._save_output_files(ws_foc, calibration, van_run, rb_num)
-            output_workspaces.append(ws_foc.name())
+            if ws_sample:
+                # None returned if no proton charge
+                ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration)
+                ws_foc = self._apply_vanadium_norm(ws_foc, ws_van_foc)
+                self._save_output_files(ws_foc, calibration, van_run, rb_num)
+                # convert units to TOF and save again
+                ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+                self._save_output_files(ws_foc, calibration, van_run, rb_num)
+                output_workspaces.append(ws_foc.name())
 
         # Plot the output
-        if plot_output:
+        if plot_output and output_workspaces:
             self._plot_focused_workspaces(output_workspaces)
 
         # delete temporary workspaces
-        DeleteWorkspace("van_ws_foc_rb")
+        if Ads.doesExist(VAN_CURVE_REBINNED_NAME):
+            DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
 
     def process_vanadium(self, vanadium_path, calibration, full_calib):
         van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
@@ -81,6 +85,9 @@ class FocusModel(object):
                 ws_van = Ads.retrieve(van_run)  # will exist if have only changed the ROI
             else:
                 ws_van = self._load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
+                if not ws_van:
+                    raise RuntimeError(f"vanadium run {van_run} has no proton_charge - "
+                                       f"please supply a valid vanadium run to focus.")
             ws_van_foc = self._focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
             ws_van_foc = self._smooth_vanadium(ws_van_foc)
         return ws_van_foc, van_run
@@ -103,7 +110,8 @@ class FocusModel(object):
         if ws.getRun().getProtonCharge() > 0:
             ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws.name())
         else:
-            logger.warning(f"Skipping focus of run {ws.name()} because it has invalid proton charge.")
+            logger.warning(f"Run {ws.name()} has invalid proton charge.")
+            DeleteWorkspace(ws)
             return None
         ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
         ws = ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target='dSpacing')
@@ -130,8 +138,8 @@ class FocusModel(object):
     def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
         # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
         sample_ws_foc = CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
-        van_ws_foc_rb = RebinToWorkspace(WorkspaceToRebin=van_ws_foc,
-                                         WorkspaceToMatch=sample_ws_foc)  # copy so as not to lose data at end
+        van_ws_foc_rb = RebinToWorkspace(WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc,
+                                         OutputWorkspace=VAN_CURVE_REBINNED_NAME)  # copy so as not to lose data
         sample_ws_foc = Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,
                                OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False)
         sample_ws_foc = ReplaceSpecialValues(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(),
