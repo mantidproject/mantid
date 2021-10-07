@@ -132,6 +132,14 @@ void SCDCalibratePanels2::init() {
   declareProperty("SearchradiusRotZBank", 1.0, mustBeNonNegative,
                   "This is the search radius (in deg) when calibrating component reorientation, used to constrain "
                   "optimization search space");
+  declareProperty("CalibrateSize", false, "Calibrate detector size for each bank.");
+  declareProperty("SearchRadiusSize", 0.0, mustBeNonNegative,
+                  "This is the search radius (unit less) of scale factor around at value 1.0 "
+                  "when calibrating component size if it is a rectangualr detector.");
+  declareProperty("FixAspectRatio", true,
+                  "If true, the scaling factor for detector along X- and Y-axis "
+                  "must be the same.  Otherwise, the 2 scaling factors are free.");
+
   // editability
   setPropertySettings("SearchRadiusTransBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
@@ -141,12 +149,19 @@ void SCDCalibratePanels2::init() {
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchradiusRotZBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("CalibrateSize", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
+  setPropertySettings("SearchRadiusSize", std::make_unique<EnabledWhenProperty>("CalibrateSize", IS_EQUAL_TO, "1"));
+  setPropertySettings("FixAspectRatio", std::make_unique<EnabledWhenProperty>("CalibrateSize", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateBanks", CALIBRATION);
   setPropertyGroup("SearchRadiusTransBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotXBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotYBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotZBank", CALIBRATION);
+  setPropertyGroup("CalibrateSize", CALIBRATION);
+  setPropertyGroup("SearchRadiusSize", CALIBRATION);
+  setPropertyGroup("FixAspectRatio", CALIBRATION);
+
   // --------------
   // ----- T0 -----
   // --------------
@@ -564,6 +579,10 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     fitBank_alg->setProperty("InputWorkspace", wsBankCali);
     fitBank_alg->setProperty("CreateOutput", true);
     fitBank_alg->setProperty("Output", "fit");
+
+    // TODO - make it an input option
+    fitBank_alg->setProperty("MaxIterations", 5);
+
     fitBank_alg->executeAsChildAlg();
 
     //---- cache results
