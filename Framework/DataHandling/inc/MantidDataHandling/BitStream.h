@@ -36,6 +36,7 @@
 */
 
 template <typename T> inline T convert_endianness(T value) {
+  // cppcheck-suppress  objectIndex
   const auto n = sizeof(value);
   uint8_t *data = reinterpret_cast<uint8_t *>(&value);
   for (size_t i = 0; i < n / 2; i++) {

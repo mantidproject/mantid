@@ -107,7 +107,7 @@ private:
   void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
                                EventAccumulator &finalEventAccumulator);
 
-  EventAccumulator parse_File(FileByteStream &file, const std::string fileName);
+  EventAccumulator parse_File(FileByteStream &file, const std::string &fileName);
   std::vector<uint8_t> parse_Header(FileByteStream &file);
 
   std::vector<std::vector<uint8_t>> split_File(FileByteStream &file, const unsigned maxChunckCount);

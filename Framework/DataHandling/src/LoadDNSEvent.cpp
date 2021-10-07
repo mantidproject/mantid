@@ -277,7 +277,6 @@ template <typename Iterable> const std::vector<uint8_t> buildSkipTable2(const It
 
 std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   // using Boyer-Moore String Search:
-  static constexpr std::array<uint8_t, 8> header_sep{0x00, 0x00, 0x55, 0x55, 0xAA, 0xAA, 0xFF, 0xFF};
   static const auto skipTable = buildSkipTable(header_sep);
 
   // search for header_sep and store actual header:
@@ -376,7 +375,7 @@ template <typename V1, typename V2> bool endsWith(const V1 &sequence, const V2 &
 
 } // namespace
 
-LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, const std::string fileName) {
+LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, const std::string &fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
 
@@ -387,7 +386,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
   }
 
   // Parse actual data:
-  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
+  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 8;
   // Split File:
   std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
   g_log.debug() << "filechuncks count = " << filechuncks.size() << std::endl;
