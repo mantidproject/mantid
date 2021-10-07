@@ -541,6 +541,7 @@ add_subdirectory(test)
 if(NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h.in ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/MantidVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/MantidVersion.h)
 endif()
 
 # This section deals with creating the PocoVersion implementation

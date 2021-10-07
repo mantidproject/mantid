@@ -1,3 +1,4 @@
 inc/MantidKernel/PocoVersion.h
+inc/MantidKernel/MantidVersion.h
 src/MantidVersion.cpp
 test/MantidVersionTest.h
