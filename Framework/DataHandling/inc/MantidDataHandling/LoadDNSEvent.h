@@ -1,6 +1,3 @@
-#ifndef MANTID_DATAHANDLING_LoadDNSEvent_H_
-#define MANTID_DATAHANDLING_LoadDNSEvent_H_
-
 #include "BitStream.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
@@ -133,5 +130,3 @@ private:
 };
 
 } // namespace Mantid::DataHandling
-
-#endif /* MANTID_DATAHANDLING_LoadDNSEvent_H_ */
