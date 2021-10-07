@@ -23,7 +23,7 @@ class CalibrationModelTest(unittest.TestCase):
         mock.NonCallableMock.assert_any_call_partial = assert_any_call_partial
 
     @patch(file_path + ".path")
-    @patch(file_path + ".CalibrationModel.load_full_instrument_calibration")
+    @patch(file_path + ".load_full_instrument_calibration")
     @patch(file_path + ".CalibrationModel.write_diff_consts_to_table_from_prm")
     def test_load_existing_calibration_files_valid_prm(self, mock_write_diff_consts, mock_load_full_calib, mock_path):
         mock_path.exists.return_value = True  # prm file exists

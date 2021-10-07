@@ -34,7 +34,7 @@ class CalibrationModel(object):
         ceria_workspace = path_handling.load_workspace(calibration.get_ceria_path())
 
         # load whole instrument calibration
-        full_calib = self.load_full_instrument_calibration()
+        full_calib = load_full_instrument_calibration()
 
         # run PDCalibration
         focused_ceria, cal_table, diag_ws = self.run_calibration(ceria_workspace, calibration, full_calib)
@@ -100,7 +100,7 @@ class CalibrationModel(object):
             fout.writelines(lines)
 
     def load_existing_calibration_files(self, calibration):
-        self.load_full_instrument_calibration()
+        load_full_instrument_calibration()
         # load prm
         prm_filepath = calibration.prm_filepath
         if not path.exists(prm_filepath):
@@ -191,19 +191,6 @@ class CalibrationModel(object):
 
         return focused_ceria, cal_table, diag_ws
 
-    def load_full_instrument_calibration(self):
-        if Ads.doesExist("full_inst_calib"):
-            full_calib = Ads.retrieve("full_inst_calib")
-        else:
-            full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                          output_settings.ENGINEERING_PREFIX, "full_calibration")
-            try:
-                full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-            except ValueError:
-                logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
-                return
-        return full_calib
-
     def create_output_files(self, calibration_dir, calibration, ws_foc):
         """
         Create output files (.prm for GSAS and .nxs of calibration table) from the algorithms in the specified directory
@@ -281,3 +268,17 @@ class CalibrationModel(object):
     @staticmethod
     def _generate_table_workspace_name(bank_num):
         return "engggui_calibration_bank_" + str(bank_num)
+
+
+def load_full_instrument_calibration():
+    if Ads.doesExist("full_inst_calib"):
+        full_calib = Ads.retrieve("full_inst_calib")
+    else:
+        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
+                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
+        try:
+            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
+        except ValueError:
+            logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
+            return
+    return full_calib

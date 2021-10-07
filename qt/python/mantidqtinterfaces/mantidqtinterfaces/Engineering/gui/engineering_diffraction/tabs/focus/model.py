@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 from shutil import copy2
 
 from Engineering.common import path_handling
-
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import \
+    load_full_instrument_calibration
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
     ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, ExtractSingleSpectrum, \
@@ -40,9 +40,8 @@ class FocusModel(object):
         :param sample_paths: The paths to the data to be focused.
         :param vanadium_path: Path to the vanadium file from the current calibration
         :param plot_output: True if the output should be plotted.
-        :param instrument: The instrument that the data came from.
         :param rb_num: Number to signify the user who is running this focus
-        :param regions_dict: dict region name -> grp_ws_name, defining region(s) of interest to focus over
+        :param calibration: CalibrationInfo object that holds all info needed about ROI and instrument
         """
 
         # check correct region calibration(s) and grouping workspace(s) exists
@@ -50,16 +49,7 @@ class FocusModel(object):
             return
 
         # check if full instrument calibration exists, if not load it
-        if not Ads.doesExist("full_inst_calib"):
-            try:
-                full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                              output_settings.ENGINEERING_PREFIX, "full_calibration")
-                full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-            except RuntimeError:
-                logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
-                return
-        else:
-            full_calib = Ads.retrieve("full_inst_calib")
+        full_calib = load_full_instrument_calibration()
 
         # 1) load, focus and process vanadium
         van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())

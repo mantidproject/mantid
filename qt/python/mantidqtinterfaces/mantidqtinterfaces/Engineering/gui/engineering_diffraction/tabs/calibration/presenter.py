@@ -88,7 +88,7 @@ class CalibrationPresenter(object):
         logger.error(str(error_info))
         self.emit_enable_button_signal()
 
-    def _on_success(self):
+    def _on_success(self, success_info):
         self._notify_updated_calibration()
         self.emit_enable_button_signal()
 
