@@ -18,8 +18,8 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 
 class InstViewModelTest : public CxxTest::TestSuite {
 public:
-  void test_notify_workspace_updated_updates_actor() {
-    auto model = InstViewModel(makeMessageHandler());
+  void test_update_workspace_updates_actor() {
+    auto model = makeInstViewModel();
     auto previousActor = model.getInstrumentViewActor();
     auto ws = createWorkspace();
     model.updateWorkspace(ws);
@@ -29,13 +29,43 @@ public:
     TS_ASSERT_EQUALS(result->getWorkspace(), ws)
   }
 
+  void test_get_sample_pos() {
+    auto model = makeInstViewModel();
+    auto ws = createWorkspace();
+    model.updateWorkspace(ws);
+
+    auto samplePos = model.getSamplePos();
+    // The sample is at 15, 0, 0 in the workspace created by the helper
+    TS_ASSERT_EQUALS(samplePos, Mantid::Kernel::V3D(15, 0, 0));
+  }
+
+  void test_get_axis() {
+    auto model = makeInstViewModel();
+    auto axis = model.getAxis();
+    // Currently this just returns a hard-coded value but we may change it to be configurable in future
+    TS_ASSERT_EQUALS(axis, Mantid::Kernel::V3D(0, 1, 0));
+  }
+
   void test_convert_det_ids_to_ws_indices() {
-    // TODO
+    auto model = makeInstViewModelWithWorkspace();
+    auto ws = createWorkspaceMultiDetector();
+    model.updateWorkspace(ws);
+
+    auto const detIndices = std::vector<size_t>{1, 2, 3};
+    auto const expected = std::vector<size_t>{1, 2, 3};
+    auto const workspaceIndices = model.detIndicesToWsIndices(detIndices);
+    TS_ASSERT_EQUALS(workspaceIndices, expected);
   }
 
 private:
+  InstViewModel makeInstViewModel() { return InstViewModel(makeMessageHandler()); }
+
   Mantid::API::MatrixWorkspace_sptr createWorkspace() {
     return WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
+  }
+
+  Mantid::API::MatrixWorkspace_sptr createWorkspaceMultiDetector() {
+    return WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrumentMultiDetector();
   }
 
   std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> makeMessageHandler() {
