@@ -86,7 +86,7 @@ private:
   void generateUnknownAxis();
   void makeDeadTimeTable(const size_t &numSpec);
   void setEmptyDetectorGroupingTable(const size_t &numSpec);
-
+  API::MatrixWorkspace_sptr extractSpectra(DataObjects::Workspace2D_sptr &ws);
   // Temperature file processing
   void readInTemperatureFile(DataObjects::Workspace2D_sptr &ws);
   std::string detectTempFile();

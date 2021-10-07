@@ -344,6 +344,8 @@ std::vector<std::string> ALCDataLoadingView::getFiles() {
   return files;
 }
 
+void ALCDataLoadingView::setFileExtensions(const QStringList &extensions) { m_ui.runs->setFileExtensions(extensions); }
+
 std::string ALCDataLoadingView::getFirstFile() { return m_ui.runs->getFirstFilename().toStdString(); }
 
 void ALCDataLoadingView::setAvailableInfoToEmpty() {

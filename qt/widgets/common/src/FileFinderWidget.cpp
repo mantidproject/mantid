@@ -8,7 +8,7 @@
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileFinder.h"
+//#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -237,6 +237,15 @@ void FileFinderWidget::setAlgorithmProperty(const QString &text) { m_algorithmPr
  * @return list of file extensions
  */
 QStringList FileFinderWidget::getFileExtensions() const { return m_fileExtensions; }
+
+std::vector<std::string> FileFinderWidget::getStringFileExtensions() const {
+  std::vector<std::string> extensions;
+  for (auto extension : m_fileExtensions) {
+    extensions.push_back(extension.toStdString());
+  }
+  return extensions;
+}
+
 /**
  * Sets the list of file extensions the dialog will search for. Only taken
  * notice of if AlgorithmProperty not set.
@@ -495,7 +504,6 @@ void FileFinderWidget::findFiles() { findFiles(m_uiForm.fileEditor->isModified()
  */
 void FileFinderWidget::findFiles(bool isModified) {
   auto searchText = m_uiForm.fileEditor->text();
-
   if (m_isForDirectory) {
     m_foundFiles.clear();
     if (searchText.isEmpty()) {
@@ -946,11 +954,14 @@ FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(cons
   parameters.searchText = text;
   parameters.isOptional = isOptional();
   parameters.isForRunFiles = isForRunFiles();
+  parameters.extensions = getStringFileExtensions();
 
   // parse the algorithm - property name string
   QStringList elements = m_algorithmProperty.split("|");
   if (elements.size() == 2) {
     parameters.algorithmName = elements[0].toStdString();
+    auto a = elements[0].toStdString();
+    auto b = elements[1].toStdString();
     parameters.algorithmProperty = elements[1].toStdString();
   }
 
