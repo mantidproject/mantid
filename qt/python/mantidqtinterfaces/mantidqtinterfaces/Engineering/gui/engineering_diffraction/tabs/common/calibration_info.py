@@ -23,7 +23,7 @@ GROUP_WS_NAMES = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthB
 GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
                 GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}  # prm suffix
 GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank 1", GROUP.SOUTH: "bank 2",
-                       GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "grouping"}
+                       GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
 
 
 class CalibrationInfo:

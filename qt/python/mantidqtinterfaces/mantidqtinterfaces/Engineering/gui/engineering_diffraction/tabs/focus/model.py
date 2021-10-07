@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path, makedirs
 import matplotlib.pyplot as plt
-from shutil import copy2
 
 from Engineering.common import path_handling
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import \
@@ -22,7 +21,7 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
 CURVES_PREFIX = "engggui_curves_"
 
-XUNIT_SUFFIXES = {'d-Spacing': '_dSpacing', 'Time-of-flight': '_TOF'}  # to put in saved focused data filename
+XUNIT_SUFFIXES = {'d-Spacing': 'dSpacing', 'Time-of-flight': 'TOF'}  # to put in saved focused data filename
 
 
 class FocusModel(object):
@@ -54,7 +53,7 @@ class FocusModel(object):
         ws_van_foc, van_run = self.process_vanadium(vanadium_path, calibration, full_calib)
 
         # Loop over runs and focus
-        output_workspaces = []  # List of collated workspaces to plot.
+        output_workspaces = []  # List of focused workspaces to plot.
         for sample_path in sample_paths:
             ws_sample = self._load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
             ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration)
@@ -140,14 +139,25 @@ class FocusModel(object):
         return sample_ws_foc
 
     def _save_output_files(self, sample_ws_foc, calibration, van_run, rb_num=None):
-        focus_dir = path.join(output_settings.get_output_path(), "Focus")
+        if rb_num:
+            focus_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
+        else:
+            focus_dir = path.join(output_settings.get_output_path(), "Focus")
         if not path.exists(focus_dir):
             makedirs(focus_dir)
+
         # set bankid for use in fit tab
         foc_suffix = calibration.get_foc_ws_suffix()
-        xunit = sample_ws_foc.getDimension(0).getName()
+        xunit = sample_ws_foc.getDimension(0).name
         xunit_suffix = XUNIT_SUFFIXES[xunit]
         sample_run_no = sample_ws_foc.run().get('run_number').value
+        # save all spectra to single ASCII files
+        ascii_fname = self._generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run,
+                                                      calibration.get_group_suffix(), xunit_suffix, ext='')
+        SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'), SplitFiles=False,
+                UseSpectrumNumberAsBankID=True)
+        SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
+                       SplitFiles=False, Format="TOPAS")
         for ispec in range(sample_ws_foc.getNumberHistograms()):
             ws_spec = ExtractSingleSpectrum(InputWorkspace=sample_ws_foc, WorkspaceIndex=ispec)
             # add a bankid and vanadium to log that is read by fitting model
@@ -157,25 +167,13 @@ class FocusModel(object):
             ws_spec.getRun().addProperty("bankid", bankid, True)  # overwrites previous if exists
             # save spectrum as nexus
             filename = self._generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
-                                                       xunit_suffix)
-            nxs_path = path.join(focus_dir, filename + ".nxs")
+                                                       xunit_suffix, ext=".nxs")
+            nxs_path = path.join(focus_dir, filename)
             SaveNexus(InputWorkspace=ws_spec, Filename=nxs_path)
             if xunit == "Time-of-flight":
                 self._last_focused_files.append(nxs_path)
-            # save spectrum in ASCII formats
-            SaveGSS(InputWorkspace=ws_spec, Filename=path.join(focus_dir, filename + ".gss"))
-            SaveFocusedXYE(InputWorkspace=ws_spec, Filename=path.join(focus_dir, filename + ".abc"),
-                           SplitFiles=False, Format="TOPAS")
-            # copy file to rb folder if present
-            if rb_num:
-                rb_focus_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
-                if not path.exists(rb_focus_dir):
-                    makedirs(rb_focus_dir)
-                for ext in [".nxs", ".gss", ".abc"]:
-                    copy2(path.join(focus_dir, filename + ext),
-                          path.join(rb_focus_dir, filename + ext))
         DeleteWorkspace(ws_spec.name())
 
     @staticmethod
-    def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, ext=""):
-        return "_".join([inst,  sample_run_no, van_run_no, suffix]) + ext
+    def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):
+        return "_".join([inst,  sample_run_no, van_run_no, suffix, xunit]) + ext
