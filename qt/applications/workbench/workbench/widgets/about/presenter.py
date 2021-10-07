@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 from qtpy.QtCore import Qt, QSettings
 
-from mantid.kernel import ConfigService, logger, version_str, release_notes_url, release_date
+from mantid.kernel import ConfigService, logger, version_str, release_notes_url, release_date, version_info
 from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.about.view import AboutView
 from workbench.widgets.about.usage_verification_view import UsageReportingVerificationView
@@ -19,7 +19,7 @@ class AboutPresenter(object):
     USAGE_REPORTING = "usagereports.enabled"
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"
-    LAST_VERSION = "LastVersion"
+    LAST_VERSION = "PreviousVersion"
     FACILITY = "default.facility"
     INSTRUMENT = "default.instrument"
 
@@ -83,14 +83,15 @@ class AboutPresenter(object):
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
         doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
         lastVersion = settings.value(AboutPresenter.LAST_VERSION, "")
+        print(version_info().major + "." + version_info().minor)
+        current_version = version_info().major + "." + version_info().minor
         settings.endGroup()
 
         if not doNotShowUntilNextRelease:
             return True
 
         # Now check if the version has changed since last time
-        version = release_notes_url()
-        return version != lastVersion
+        return current_version != lastVersion
 
     def setup_facilities_group(self):
         facilities = sorted(ConfigService.getFacilityNames())
@@ -190,7 +191,7 @@ class AboutPresenter(object):
         # make sure the Last Version is updated on closing
         settings = QSettings()
         settings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        settings.setValue(self.LAST_VERSION, release_notes_url())
+        settings.setValue(self.LAST_VERSION, version_info().major + "." + version_info().minor)
         settings.endGroup()
         self.store_facility(self.view.about_widget.cb_facility.currentText())
         self.action_instrument_changed(self.view.about_widget.cb_instrument.currentText())
