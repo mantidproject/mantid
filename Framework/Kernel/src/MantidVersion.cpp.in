@@ -30,7 +30,7 @@ const char* MantidVersion::versionShort()
 }
 
 const MantidVersion::VersionInfo MantidVersion::versionInfo() {
-  return info;
+  return {"@VERSION_MAJOR@", "@VERSION_MINOR@", "@VERSION_PATCH@@VERSION_TWEAK@"};
 }
 
 std::string MantidVersion::releaseNotes()

@@ -538,10 +538,10 @@ add_subdirectory(test)
 # DON'T try to update the MantidVersion source file if we were not able to determine it from git and the file already
 # exists. This makes sure the version number is correct when building off the source tarball
 
-if(NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
+if(NOT NOT_GIT_REPO
+   OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h.in ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/MantidVersion.h.in ${CMAKE_CURRENT_SOURCE_DIR}/inc/MantidKernel/MantidVersion.h)
 endif()
 
 # This section deals with creating the PocoVersion implementation

@@ -21,12 +21,10 @@ namespace Kernel {
 class MANTID_KERNEL_DLL MantidVersion {
 public:
   struct VersionInfo {
-    static constexpr char *major = "@VERSION_MAJOR@";
-    static constexpr char *minor = "@VERSION_MINOR@";
-    static constexpr char *patch = "@VERSION_PATCH@@VERSION_TWEAK@";
+    std::string major;
+    std::string minor;
+    std::string patch;
   };
-
-  static const VersionInfo info;
 
   static const char *version();           ///< The full version number
   static const char *versionShort();      ///< The version number of the last full version
