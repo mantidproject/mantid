@@ -150,24 +150,6 @@ public:
                                      2.40752, 4.04829,  -3.82838, 2.74896};
     for (size_t i = 33219; i < 33228; ++i)
       TS_ASSERT_DELTA(out[i], golderrorend[i - 33219], 0.00001);
-
-    //    // Peak indexes
-    //    std::vector<int> peakindexes{64,    65,    66,    67,    254,   255,   256,   257,   10955, 10956, 10957,
-    //    10958}; std::vector<long int> detids{1780254, 1800379, 1814619, 1790397, 1811588, 1825313, 1788132, 1801093,
-    //    1803923, 1788915, 1771352, 1824577}; for (size_t i = 0; i < peakindexes.size(); ++i) {
-    //        // Assert detector IDs
-    //        int ipeak = peakindexes[i];
-    //        long int det_i = pws->getPeak(ipeak).getDetectorID();
-    //        TS_ASSERT_EQUALS(det_i, detids[i]);
-
-    //        std::cout << ipeak << ": ";
-    //        for (size_t d = 0; d < 3; ++d) {
-    //            std::cout << out[ipeak * 3 + d] << "  ";
-    //        }
-    //        std::cout << "\n";
-    //    }
-    //    TS_ASSERT_EQUALS(121, 212);
-    return;
   }
 
   void test_detector_resize() {
@@ -206,8 +188,6 @@ public:
     testfunc.initialize();
     testfunc.setPeakWorkspace(ipws, bankname, tofs);
 
-    std::cout << "Name: " << testfunc.name() << "\n";
-
     const int n_peaks = pws->getNumberPeaks();
     TS_ASSERT_EQUALS(n_peaks, 11076);
 
@@ -237,37 +217,37 @@ public:
       std::cout << "\n";
     }
 
-    // Set up function parameters values
+    // Calculate value with scaling (1.1, 0.9) on  bank27
     testfunc.setParameter("ScaleX", 1.1);
     testfunc.setParameter("ScaleY", 0.9);
-    // calcualte function value for bank27 (related to the object function)
     testfunc.function1D(out.get(), useless, order);
-
-    std::cout << "Scale (1.1, 0.9)\n";
+    // verify values
+    std::vector<double> goldvalue1{-4.04172, 1.914180, -4.04384, -4.37725, 0.988898, -3.80048, -3.71589, 0.927614,
+                                   -3.78026, -3.69851, 0.996146, -3.09986, -4.38616, 0.944574, -3.79285, -3.72545,
+                                   0.896009, -3.77312, -4.37156, 1.022980, -3.11404, -3.70605, 0.964197, -3.09218,
+                                   3.70692,  0.961802, 3.78894,  4.36969,  1.031490, 3.80559,  4.02371,  1.945770,
+                                   4.05188,  3.72025,  0.903004, 4.47470};
     for (size_t i = 0; i < peakindexes.size(); ++i) {
       // Assert detector IDs
       int ipeak = peakindexes[i];
       long int det_i = pws->getPeak(ipeak).getDetectorID();
       TS_ASSERT_EQUALS(det_i, detids[i]);
 
-      std::cout << ipeak << ": ";
       for (size_t d = 0; d < 3; ++d) {
-        std::cout << out[ipeak * 3 + d] << "  ";
+        TS_ASSERT_DELTA(out[ipeak * 3 + d], goldvalue1[i * 3 + d], 0.00001);
       }
-      std::cout << "\n";
     }
 
-    std::cout << "Scale (0.9, 1.1)\n";
+    // Evalulate with detector of bank27 scaled to (0.9, 1.1)
     testfunc.setParameter("ScaleX", 0.9);
     testfunc.setParameter("ScaleY", 1.1);
-    // calcualte function value for bank27 (related to the object function)
     testfunc.function1D(out.get(), useless, order);
-
-    // show result
-    // Peak indexes
-    //    std::vector<int> peakindexes{64, 65, 66, 67, 254, 255, 256, 257, 10955, 10956, 10957, 10958};
-    //    std::vector<long int> detids{1780254, 1800379, 1814619, 1790397, 1811588, 1825313,
-    //                                 1788132, 1801093, 1803923, 1788915, 1771352, 1824577};
+    // verify values
+    std::vector<double> goldvalue2{-4.04381, 1.922440, -4.20213, -4.38515, 0.930843, -3.75479, -3.69941, 0.989064,
+                                   -3.77225, -3.71802, 0.917210, -3.08782, -4.37735, 0.970865, -3.75927, -3.68901,
+                                   1.021110, -3.77964, -4.39288, 0.892533, -3.07540, -3.70793, 0.957278, -3.09125,
+                                   3.70922,  0.951834, 3.76849,  4.39379,  0.878827, 3.75130,  4.06492,  1.884950,
+                                   4.19470,  3.69330,  1.017960, 4.45579};
     for (size_t i = 0; i < peakindexes.size(); ++i) {
       // Assert detector IDs
       int ipeak = peakindexes[i];
@@ -276,98 +256,10 @@ public:
 
       std::cout << ipeak << ": ";
       for (size_t d = 0; d < 3; ++d) {
-        std::cout << out[ipeak * 3 + d] << "  ";
+        TS_ASSERT_DELTA(out[ipeak * 3 + d], goldvalue2[i * 3 + d], 0.00001);
       }
       std::cout << "\n";
     }
-    TS_ASSERT_EQUALS(135, 246);
-
-    // TODO - write these into unit tests!
-
-    /*
-     * Scale (1.1, 0.9)
-64: -4.04172  1.91418  -4.04384
-65: -4.37725  0.988898  -3.80048
-66: -3.71589  0.927614  -3.78026
-67: -3.69851  0.996146  -3.09986
-254: -4.38616  0.944574  -3.79285
-255: -3.72545  0.896009  -3.77312
-256: -4.37156  1.02298  -3.11404
-257: -3.70605  0.964197  -3.09218
-10955: 3.70692  0.961802  3.78894
-10956: 4.36969  1.03149  3.80559
-10957: 4.02371  1.94577  4.05188
-10958: 3.72025  0.903004  4.4747
-Scale (0.9, 1.1)
-64: -4.04381  1.92244  -4.20213
-65: -4.38515  0.930843  -3.75479
-66: -3.69941  0.989064  -3.77225
-67: -3.71802  0.91721  -3.08782
-254: -4.37735  0.970865  -3.75927
-255: -3.68901  1.02111  -3.77964
-256: -4.39288  0.892533  -3.0754
-257: -3.70793  0.957278  -3.09125
-10955: 3.70922  0.951834  3.76849
-10956: 4.39379  0.878827  3.7513
-10957: 4.06492  1.88495  4.1947
-10958: 3.6933  1.01796  4.45579
-     *
-     *
-     */
-
-    //      for (int i = 0; i < n_peaks; ++i) {
-    //          // search bank27
-    //          if (1769472 <= pws->getPeak(i).getDetectorID() && pws->getPeak(i).getDetectorID() < 1835008) {
-    //             std::cout << i << ": " << pws->getPeak(i).getDetectorID() << "\n";
-    //          }
-    //      }
-
-    // TS_ASSERT_EQUALS(1, 123321123);
-  }
-
-  // NOTE: skipped to prevent time out on build server
-  void NotUsed_run_Exec() {
-    // Shall not run this now
-    TS_ASSERT_EQUALS(1, 12321);
-
-    // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testExec_%%%%%%%%");
-    // Make a clone of the standard peak workspace
-    PeaksWorkspace_sptr pws = m_pws->clone();
-
-    // Adjust L1 and banks
-    //-- source
-    const double dL1 = boost::math::constants::e<double>() / 100;
-    //-- bank27
-    const std::string bank27 = "bank27";
-    double dx1 = 1.1e-3;
-    double dy1 = -0.9e-3;
-    double dz1 = 1.5e-3;
-    double theta1 = PI / 3;
-    double phi1 = PI / 8;
-    double rvx1 = sin(theta1) * cos(phi1);
-    double rvy1 = sin(theta1) * sin(phi1);
-    double rvz1 = cos(theta1);
-    double ang1 = 0.01; // degrees
-    //-- bank16
-    const std::string bank16 = "bank16";
-    double dx2 = 0.5e-3;
-    double dy2 = 1.3e-3;
-    double dz2 = -1.9e-3;
-    double theta2 = PI / 4;
-    double phi2 = PI / 3;
-    double rvx2 = sin(theta2) * cos(phi2);
-    double rvy2 = sin(theta2) * sin(phi2);
-    double rvz2 = cos(theta2);
-    double ang2 = 0.01; // degrees
-
-    // source
-    adjustComponent(0.0, 0.0, dL1, 1.0, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
-    // bank27
-    adjustComponent(dx1, dy1, dz1, rvx1, rvy1, rvz1, ang1, bank27, pws);
-    // bank16
-    adjustComponent(dx2, dy2, dz2, rvx2, rvy2, rvz2, ang2, bank16, pws);
   }
 
 private:
