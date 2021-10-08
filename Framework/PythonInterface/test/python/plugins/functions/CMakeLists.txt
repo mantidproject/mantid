@@ -42,10 +42,10 @@ set(TEST_PY_FILES
     ZFprotonDipoleTest.py
     ZFdipoleTest.py
     ZFelectronDipoleTest.py
-    ZFMuoniumTest.py)
+    ZFMuoniumTest.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonFunctions
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.functions
-                    ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.functions ${TEST_PY_FILES})

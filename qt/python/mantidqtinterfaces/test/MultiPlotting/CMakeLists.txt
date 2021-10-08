@@ -11,7 +11,8 @@ set(TEST_PY_FILES
     Subplot_test.py
     SubPlotContext_test.py
     Gridspec_test.py
-    DefaultGridspec_test.py)
+    DefaultGridspec_test.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

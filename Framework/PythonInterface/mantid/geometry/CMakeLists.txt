@@ -62,35 +62,26 @@ set(INC_FILES inc/MantidPythonInterface/geometry/ComponentInfoPythonIterator.h
 )
 
 # Add a precompiled header where they are supported
-list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/geometry/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
-add_library(
-  PythonGeometryModule ${ALL_FILES} ${MODULE_DEFINITION}
-                       ${INC_FILES} ${PYTHON_INSTALL_FILES}
-)
+add_library(PythonGeometryModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 add_library(Mantid::PythonGeometryModule ALIAS PythonGeometryModule)
 set_python_properties(PythonGeometryModule _geometry)
 
-target_include_directories(PythonGeometryModule PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  PythonGeometryModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Add the required dependencies
-target_link_libraries(PythonGeometryModule
-          PUBLIC Mantid::Geometry
-          PRIVATE
-          Mantid::PythonInterfaceCore
-          Mantid::PythonKernelModule
-          Mantid::Beamline
-          Mantid::Types
+target_link_libraries(
+  PythonGeometryModule
+  PUBLIC Mantid::Geometry
+  PRIVATE Mantid::PythonInterfaceCore Mantid::PythonKernelModule Mantid::Beamline Mantid::Types
 )
 
 # Installation settings
-set_target_properties(PythonGeometryModule
-    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
+set_target_properties(PythonGeometryModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
 mtd_install_targets(
-  TARGETS PythonGeometryModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/geometry
-  ${WORKBENCH_SITE_PACKAGES}/mantid/geometry
+  TARGETS PythonGeometryModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/geometry ${WORKBENCH_SITE_PACKAGES}/mantid/geometry
 )
