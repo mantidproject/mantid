@@ -98,7 +98,7 @@ public:
   void test_DataWSStructure() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
     alg->execute();
 
     // Retrieve the workspace from data service.
@@ -142,7 +142,7 @@ public:
   void test_DiscardPreChopperEvents() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("DiscardPreChopperEvents", false));
     alg->execute();
     EventWorkspace_sptr iws;
@@ -153,7 +153,7 @@ public:
   void test_SetBinBoundary() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 0, true, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 2, true, outWSName);
     alg->execute();
     EventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
