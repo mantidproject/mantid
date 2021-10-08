@@ -682,9 +682,6 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, const Wor
   auto alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
   alg->initialize();
   alg->setLogging(false);
-  auto a = inWS.name();
-  auto b = grWS.name();
-  auto c = outWS.name();
   alg->setPropertyValue("InputWorkspace", inWS.name());
   alg->setPropertyValue("DetectorGroupingTable", grWS.name());
   alg->setPropertyValue("OutputWorkspace", outWS.name());
