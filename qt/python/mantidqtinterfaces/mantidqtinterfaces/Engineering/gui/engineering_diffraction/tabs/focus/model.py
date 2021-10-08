@@ -67,12 +67,10 @@ class FocusModel(object):
                 output_workspaces.append(ws_foc.name())
 
         # Plot the output
-        if plot_output and output_workspaces:
-            self._plot_focused_workspaces(output_workspaces)
-
-        # delete temporary workspaces
-        if Ads.doesExist(VAN_CURVE_REBINNED_NAME):
+        if output_workspaces:
             DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
+            if plot_output:
+                self._plot_focused_workspaces(output_workspaces)
 
     def process_vanadium(self, vanadium_path, calibration, full_calib):
         van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
@@ -170,7 +168,7 @@ class FocusModel(object):
         for ispec in range(sample_ws_foc.getNumberHistograms()):
             # add a bankid and vanadium to log that is read by fitting model
             bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec+1}'
-            AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid)  # overwrites previous values
+            AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid.replace('_', ' '))  # overwrites
             # save spectrum as nexus
             filename = self._generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
                                                        xunit_suffix, ext=".nxs")
