@@ -386,7 +386,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
   }
 
   // Parse actual data:
-  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 1;
+  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 8;
   // Split File:
   std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
   g_log.debug() << "filechuncks count = " << filechuncks.size() << std::endl;
