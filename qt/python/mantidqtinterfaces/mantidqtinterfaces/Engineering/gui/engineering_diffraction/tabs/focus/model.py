@@ -14,8 +14,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cali
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
-    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, ExtractSingleSpectrum, \
-    CropWorkspace
+    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace
 
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
 CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
@@ -166,21 +165,19 @@ class FocusModel(object):
                 UseSpectrumNumberAsBankID=True)
         SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
                        SplitFiles=False, Format="TOPAS")
+        # Save nxs per spectrum
+        AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
         for ispec in range(sample_ws_foc.getNumberHistograms()):
-            ws_spec = ExtractSingleSpectrum(InputWorkspace=sample_ws_foc, WorkspaceIndex=ispec)
             # add a bankid and vanadium to log that is read by fitting model
-            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else foc_suffix + ' ' + str(ispec+1)
-            AddSampleLog(Workspace=ws_spec, LogName="bankid", LogText=bankid)
-            AddSampleLog(Workspace=ws_spec, LogName="Vanadium Run", LogText=van_run)
-            ws_spec.getRun().addProperty("bankid", bankid, True)  # overwrites previous if exists
+            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec+1}'
+            AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid)  # overwrites previous values
             # save spectrum as nexus
             filename = self._generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
                                                        xunit_suffix, ext=".nxs")
             nxs_path = path.join(focus_dir, filename)
-            SaveNexus(InputWorkspace=ws_spec, Filename=nxs_path)
+            SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
             if xunit == "Time-of-flight":
                 self._last_focused_files.append(nxs_path)
-        DeleteWorkspace(ws_spec.name())
 
     @staticmethod
     def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):
