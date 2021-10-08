@@ -137,6 +137,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DetectorGroupingTable", "DetTable"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     double firstGoodData = std::stod(alg.getPropertyValue("FirstGoodData"));
@@ -146,6 +147,19 @@ public:
     TS_ASSERT_DELTA(firstGoodData, 0.167, 0.001);
     TS_ASSERT_DELTA(lastGoodData, 9.989, 0.001);
     TS_ASSERT_DELTA(timeZero, 0.160, 0.001);
+
+    ITableWorkspace_sptr tbl = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("DetTable");
+
+    TS_ASSERT_EQUALS(tbl->columnCount(), 1);
+    TS_ASSERT_EQUALS(tbl->getColumnNames(), std::vector<std::string>{"detector"});
+    TS_ASSERT_EQUALS(tbl->rowCount(), 4);
+
+    TS_ASSERT_EQUALS(tbl->cell<std::vector<int>>(0, 0)[0], 1);
+    TS_ASSERT_EQUALS(tbl->cell<std::vector<int>>(1, 0)[0], 2);
+    TS_ASSERT_EQUALS(tbl->cell<std::vector<int>>(2, 0)[0], 3);
+    TS_ASSERT_EQUALS(tbl->cell<std::vector<int>>(3, 0)[0], 4);
+
+    AnalysisDataService::Instance().remove("detTable");
   }
 
   void test_temperatureFileLoaded() {
