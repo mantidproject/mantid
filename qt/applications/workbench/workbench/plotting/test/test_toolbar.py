@@ -15,7 +15,7 @@ matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.plotting.functions import plot_surface, plot_wireframe
+from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
 from mantid.plots.plotfunctions import plot
 from mantid.simpleapi import CreateSampleWorkspace
@@ -130,46 +130,27 @@ class ToolBarTest(unittest.TestCase):
         self.assertFalse(self._is_grid_button_checked(fig))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
-    def test_button_checked_for_3d_surface_plot_with_grid(self, mock_qappthread):
-        mock_qappthread.return_value = mock_qappthread
-        ws = CreateSampleWorkspace()
-        fig = plt.figure()
-        plot_surface([ws], fig)
-        # Grid button should be on because grid is on by default in surface plot.
-        self.assertTrue(self._is_grid_button_checked(fig))
+    def test_grid_button_state_for_3d_plots(self, mock_qappthread):
+        """Check that the gris on/off toolbar button is correctly checked or unchecked for different types of 3D plot"""
+        plot_types = ['surface', 'wireframe', 'contour']
+        for plot_type in plot_types:
+            # Check that the button state is correct when the grids are on and off.
+            for is_grid in (True, False):
+                self._test_grid_button_state_for_3d_plot(plot_type, is_grid, mock_qappthread)
 
-    @patch("workbench.plotting.figuremanager.QAppThreadCall")
-    def test_button_unchecked_for_3d_surface_plot_without_grid(self, mock_qappthread):
+    def _test_grid_button_state_for_3d_plot(self, plot_type, is_grid, mock_qappthread):
+        """Check whether grid button check state is correct for a given plot type"""
         mock_qappthread.return_value = mock_qappthread
         ws = CreateSampleWorkspace()
-        fig = plt.figure()
-        plot_surface([ws], fig)
+        plot_function = getattr(functions, f'plot_{plot_type}', None)
+        self.assertIsNotNone(plot_function)
+        fig = plot_function([ws])
         ax = fig.get_axes()
-        # Turn grids off for the plot, they're on by default.
-        ax[0].grid(False)
-        # Grid button should be off because we turned it off.
-        self.assertFalse(self._is_grid_button_checked(fig))
-
-    @patch("workbench.plotting.figuremanager.QAppThreadCall")
-    def test_button_checked_for_3d_wireframe_plot_with_grid(self, mock_qappthread):
-        mock_qappthread.return_value = mock_qappthread
-        ws = CreateSampleWorkspace()
-        fig = plt.figure()
-        plot_wireframe([ws], fig)
-        # Grid button should be on because grid is on by default in wireframe plot.
-        self.assertTrue(self._is_grid_button_checked(fig))
-
-    @patch("workbench.plotting.figuremanager.QAppThreadCall")
-    def test_button_unchecked_for_3d_wireframe_plot_without_grid(self, mock_qappthread):
-        mock_qappthread.return_value = mock_qappthread
-        ws = CreateSampleWorkspace()
-        fig = plt.figure()
-        plot_wireframe([ws], fig)
-        ax = fig.get_axes()
-        # Turn grids off for the plot, they're on by default.
-        ax[0].grid(False)
-        # Grid button should be on because we turned it off.
-        self.assertFalse(self._is_grid_button_checked(fig))
+        # Explicitly set grids on or off. In plots with a colour bar, ax[1] is the colour bar.
+        ax[0].grid(is_grid)
+        # Create a figure manager with a toolbar and check that the grid toggle button has the correct state.
+        self.assertEqual(self._is_grid_button_checked(fig), is_grid,
+                         "Wrong grid button toggle state for " + plot_type + " plot")
 
     @classmethod
     def _is_grid_button_checked(cls, fig):
