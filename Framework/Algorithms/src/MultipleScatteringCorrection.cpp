@@ -229,7 +229,8 @@ void MultipleScatteringCorrection::parseInputs() {
   m_xStep = std::max(int64_t(1), specSize / m_num_lambda); // Bin step between points to calculate
   // -- notify the user of the bin step
   std::ostringstream msg;
-  msg << "Numerical integration performed every " << m_xStep << " wavelength points\n";
+  msg << "Numerical integration performed every " << m_xStep << " wavelength points";
+  g_log.information(msg.str());
   g_log.information() << msg.str();
 
   // Get the element size
