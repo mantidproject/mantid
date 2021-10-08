@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import (CalculatePlaczekSelfScattering, ConvertToDistribution, ConvertUnits, CreateWorkspace,
-                              DeleteWorkspace, DiffractionFocussing, Divide, ExtractSpectra, FitIncidentSpectrum,
-                              LoadCalFile, SetSample)
+from mantid.simpleapi import (CalculatePlaczekSelfScattering, ConvertUnits, CreateWorkspace,
+                              DeleteWorkspace, Divide, ExtractSpectra, FitIncidentSpectrum,
+                              LoadCalFile, SetSample, GroupDetectors, Rebin)
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty)
 from mantid.kernel import Direction
 import numpy as np
@@ -79,18 +79,36 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
                                           BinningForFit=[min_x, 10 * width_x, max_x],
                                           FitSpectrumWith="CubicSpline")
         self_scattering_correction = CalculatePlaczekSelfScattering(InputWorkspace=raw_ws,
-                                                                    IncidentSpecta=fit_spectra,
-                                                                    CrystalDensity=crystal_density)
+                                                                    IncidentSpectra=fit_spectra,
+                                                                    CrystalDensity=crystal_density,
+                                                                    Version=1)
+        # Convert to Q
+        self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,
+                                                  Target="MomentumTransfer", EMode='Elastic')
         cal_workspace = LoadCalFile(InputWorkspace=self_scattering_correction,
                                     CalFileName=cal_file_name,
                                     Workspacename='cal_workspace',
                                     MakeOffsetsWorkspace=False,
-                                    MakeMaskWorkspace=False)
-        self_scattering_correction = DiffractionFocussing(InputWorkspace=self_scattering_correction,
-                                                          GroupingFilename=cal_file_name)
-
+                                    MakeMaskWorkspace=False,
+                                    MakeGroupingWorkspace=True)
+        ssc_min_x, ssc_max_x = float('inf'), float('-inf')
+        for index in range(self_scattering_correction.getNumberHistograms()):
+            spec_info = self_scattering_correction.spectrumInfo()
+            if not spec_info.isMasked(index) and not spec_info.isMonitor(index):
+                ssc_x_data = np.ma.masked_invalid(self_scattering_correction.dataX(index))
+                if np.min(ssc_x_data) < ssc_min_x:
+                    ssc_min_x = np.min(ssc_x_data)
+                if np.max(ssc_x_data) > ssc_max_x:
+                    ssc_max_x = np.max(ssc_x_data)
+        ssc_width_x = (ssc_max_x - ssc_min_x) / ssc_x_data.size
+        # TO DO: calculate rebin parameters per group
+        # and run GroupDetectors on each separately
+        self_scattering_correction = Rebin(InputWorkspace=self_scattering_correction,
+                                           Params=[ssc_min_x, ssc_width_x, ssc_max_x],
+                                           IgnoreBinErrors=True)
+        self_scattering_correction = GroupDetectors(InputWorkspace=self_scattering_correction,
+                                                    CopyGroupingFromWorkspace='cal_workspace_group')
         n_pixel = np.zeros(self_scattering_correction.getNumberHistograms())
-
         for i in range(cal_workspace.getNumberHistograms()):
             grouping = cal_workspace.dataY(i)
             if grouping[0] > 0:
@@ -98,9 +116,6 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         correction_ws = CreateWorkspace(DataY=n_pixel, DataX=[0, 1],
                                         NSpec=self_scattering_correction.getNumberHistograms())
         self_scattering_correction = Divide(LHSWorkspace=self_scattering_correction, RHSWorkspace=correction_ws)
-        ConvertToDistribution(Workspace=self_scattering_correction)
-        self_scattering_correction = ConvertUnits(InputWorkspace=self_scattering_correction,
-                                                  Target="MomentumTransfer", EMode='Elastic')
         DeleteWorkspace('cal_workspace_group')
         DeleteWorkspace(correction_ws)
         DeleteWorkspace(fit_spectra)
