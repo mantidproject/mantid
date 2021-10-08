@@ -9,21 +9,15 @@
 #include "DllConfig.h"
 #include "IClipboard.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class DLLExport IClipboardFactory {
 public:
   virtual ~IClipboardFactory(){};
-  virtual IClipboard *createClipboard(
-      boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>>
-          subtrees,
-      boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>>
-          subtreeRoots) const = 0;
+  virtual IClipboard *
+  createClipboard(boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> subtrees,
+                  boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> subtreeRoots) const = 0;
   virtual IClipboard *createClipboard() const = 0;
 };
 
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

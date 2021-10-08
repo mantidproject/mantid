@@ -13,19 +13,15 @@
 #include <string>
 #include <vector>
 
-namespace MantidQt {
-namespace CustomInterfaces {
-namespace ISISReflectometry {
+namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 class IRunsTableView;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsTablePresenterFactory {
 public:
-  RunsTablePresenterFactory(std::vector<std::string> const &instruments,
-                            double thetaTolerance, IClipboardFactory *cbf,
+  RunsTablePresenterFactory(std::vector<std::string> instruments, double thetaTolerance, IClipboardFactory *cbf,
                             Plotter plotter);
-  virtual std::unique_ptr<IRunsTablePresenter>
-  operator()(IRunsTableView *view) const;
+  virtual std::unique_ptr<IRunsTablePresenter> operator()(IRunsTableView *view) const;
 
 protected:
   std::vector<std::string> m_instruments;
@@ -33,6 +29,4 @@ protected:
   IClipboardFactory *m_cbf;
   Plotter m_plotter;
 };
-} // namespace ISISReflectometry
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry
