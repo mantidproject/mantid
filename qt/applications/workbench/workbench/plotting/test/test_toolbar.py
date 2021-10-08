@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
 from mantid.simpleapi import CreateSampleWorkspace
 
@@ -128,6 +129,17 @@ class ToolBarTest(unittest.TestCase):
         axes[1][0].grid()
         # Grid button should be OFF because not all subplots have grids.
         self.assertFalse(self._is_grid_button_checked(fig))
+
+    def test_is_colorbar(self):
+        """Verify the functionality of _is_colorbar, which determines whether a set of axes is a colorbar."""
+        ws = CreateSampleWorkspace()
+        fig = plt.figure()
+        fig = functions.plot_surface([ws], fig=fig)
+        axes = fig.get_axes()
+        # First set of axes is the surface plot
+        self.assertFalse(WorkbenchNavigationToolbar._is_colorbar(axes[0]))
+        # Second set of axes is the colorbar
+        self.assertTrue(WorkbenchNavigationToolbar._is_colorbar(axes[1]))
 
     @patch("workbench.plotting.figuremanager.QAppThreadCall")
     def test_grid_button_state_for_3d_plots(self, mock_qappthread):
