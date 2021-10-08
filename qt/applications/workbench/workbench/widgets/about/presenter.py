@@ -83,7 +83,6 @@ class AboutPresenter(object):
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
         doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
         lastVersion = settings.value(AboutPresenter.LAST_VERSION, "")
-        print(version_info().major + "." + version_info().minor)
         current_version = version_info().major + "." + version_info().minor
         settings.endGroup()
 
