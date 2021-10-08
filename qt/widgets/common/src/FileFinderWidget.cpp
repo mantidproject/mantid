@@ -240,9 +240,9 @@ QStringList FileFinderWidget::getFileExtensions() const { return m_fileExtension
 
 std::vector<std::string> FileFinderWidget::getStringFileExtensions() const {
   std::vector<std::string> extensions;
-  for (auto extension : m_fileExtensions) {
-    extensions.push_back(extension.toStdString());
-  }
+  std::transform(m_fileExtensions.begin(), m_fileExtensions.end(), std::back_inserter(extensions),
+                 [](const QString &extension) { return extension.toStdString(); });
+
   return extensions;
 }
 
@@ -960,8 +960,6 @@ FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(cons
   QStringList elements = m_algorithmProperty.split("|");
   if (elements.size() == 2) {
     parameters.algorithmName = elements[0].toStdString();
-    auto a = elements[0].toStdString();
-    auto b = elements[1].toStdString();
     parameters.algorithmProperty = elements[1].toStdString();
   }
 
