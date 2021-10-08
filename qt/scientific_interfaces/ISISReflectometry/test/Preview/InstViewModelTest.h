@@ -15,14 +15,17 @@
 #include <gmock/gmock.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using ::testing::_;
 
 class InstViewModelTest : public CxxTest::TestSuite {
 public:
   void test_update_workspace_updates_actor() {
-    auto model = makeInstViewModel();
+    auto model = makeInstViewModelWithWorkspace();
+
     auto previousActor = model.getInstrumentViewActor();
     auto ws = createWorkspace();
     model.updateWorkspace(ws);
+
     const auto result = model.getInstrumentViewActor();
     TS_ASSERT(result);
     TS_ASSERT_DIFFERS(previousActor, result)
@@ -30,7 +33,7 @@ public:
   }
 
   void test_get_sample_pos() {
-    auto model = makeInstViewModel();
+    auto model = makeInstViewModelWithWorkspace();
     auto ws = createWorkspace();
     model.updateWorkspace(ws);
 
@@ -60,6 +63,13 @@ public:
 private:
   InstViewModel makeInstViewModel() { return InstViewModel(makeMessageHandler()); }
 
+  InstViewModel makeInstViewModelWithWorkspace() {
+    auto mockMessageHandler = makeMessageHandler();
+    // We get a warning due to extract mask failing for our dummy workspace
+    expectExtractMaskFails(*mockMessageHandler);
+    return InstViewModel(std::move(mockMessageHandler));
+  }
+
   Mantid::API::MatrixWorkspace_sptr createWorkspace() {
     return WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
   }
@@ -68,7 +78,9 @@ private:
     return WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrumentMultiDetector();
   }
 
-  std::unique_ptr<MantidQt::MantidWidgets::IMessageHandler> makeMessageHandler() {
-    return std::make_unique<MockMessageHandler>();
+  std::unique_ptr<MockMessageHandler> makeMessageHandler() { return std::make_unique<MockMessageHandler>(); }
+
+  void expectExtractMaskFails(MockMessageHandler &mockMessageHandler) {
+    EXPECT_CALL(mockMessageHandler, giveUserWarning(_, _)).Times(1);
   }
 };
