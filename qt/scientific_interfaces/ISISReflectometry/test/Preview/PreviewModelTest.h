@@ -33,7 +33,7 @@ public:
     auto workspaceName = std::string("test workspace");
     AnalysisDataService::Instance().addOrReplace(workspaceName, createWorkspace());
 
-    model.loadWorkspace(workspaceName, mockJobManager);
+    TS_ASSERT(model.loadWorkspaceFromAds(workspaceName));
     auto workspace = model.getLoadedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace->getName(), workspaceName);
@@ -49,12 +49,8 @@ public:
 
     PreviewModel model;
     auto workspaceName = std::string("not there");
-    auto &adsInstance = AnalysisDataService::Instance();
-    if (adsInstance.doesExist(workspaceName)) {
-      adsInstance.remove(workspaceName);
-    }
 
-    model.loadWorkspace(workspaceName, mockJobManager);
+    model.loadAndPreprocessWorkspaceAsync(workspaceName, mockJobManager);
     auto workspace = model.getLoadedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);

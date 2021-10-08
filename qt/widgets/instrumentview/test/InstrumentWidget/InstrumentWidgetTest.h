@@ -12,6 +12,7 @@
 
 #include "MockGLDisplay.h"
 #include "MockInstrumentDisplay.h"
+#include "MockMessageHandler.h"
 #include "MockProjectionSurface.h"
 #include "MockQtConnect.h"
 #include "MockQtDisplay.h"
@@ -40,6 +41,7 @@ public:
   using GLMock = StrictMock<MockGLDisplay>;
   using ConnectMock = StrictMock<MockQtConnect>;
   using DisplayMock = NiceMock<MockInstrumentDisplay>;
+  using MessageMock = NiceMock<MockMessageHandler>;
 
   void setUp() override {
     FrameworkManager::Instance();
@@ -159,6 +161,7 @@ private:
   std::unique_ptr<QtMock> makeQtDisplay() const { return std::make_unique<QtMock>(); }
   std::unique_ptr<GLMock> makeGL() const { return std::make_unique<GLMock>(); }
   std::unique_ptr<DisplayMock> makeDisplay() const { return std::make_unique<DisplayMock>(); }
+  std::unique_ptr<MessageMock> makeMessage() const { return std::make_unique<MessageMock>(); }
 
   void setGl(bool state) {
     m_glEnabled = state;
@@ -213,7 +216,8 @@ private:
     EXPECT_CALL(*displayMock, setSurfaceProxy(_)).Times(1);
     EXPECT_CALL(*displayMock, installEventFilter(NotNull())).Times(1);
 
-    InstrumentWidget::Dependencies deps{std::move(displayMock), nullptr, nullptr, std::move(connectMock)};
+    InstrumentWidget::Dependencies deps{std::move(displayMock), nullptr, nullptr, std::move(connectMock),
+                                        makeMessage()};
 
     return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(deps));
   }

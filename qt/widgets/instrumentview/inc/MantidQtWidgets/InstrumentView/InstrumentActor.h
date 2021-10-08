@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/ColorMap.h"
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
@@ -20,6 +21,7 @@
 
 #include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 //------------------------------------------------------------------
@@ -63,9 +65,13 @@ public:
   static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
-  InstrumentActor(const QString &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler, bool autoscaling = true,
+                  double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
+                  bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
+
   /// Draw the instrument in 3D
   void draw(bool picking = false) const;
   /// Return the bounding box in 3D
@@ -136,6 +142,10 @@ public:
   double minBinValue() const { return m_BinMinValue; }
   /// Get the upper bound of the integration range.
   double maxBinValue() const { return m_BinMaxValue; }
+  /// Get the workspace min bin
+  double minWkspBinValue() const { return m_WkspBinMinValue; }
+  /// Get the workspace max bin
+  double maxWkspBinValue() const { return m_WkspBinMaxValue; }
   /// Return true if the integration range covers the whole of the x-axis in the
   /// data workspace.
   bool wholeRange() const;
@@ -227,7 +237,7 @@ private:
                           size_t size) const;
 
   /// The workspace whose data are shown
-  const std::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but
   /// not applied to the data workspace.
   mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
@@ -271,6 +281,7 @@ private:
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
+  MantidWidgets::IMessageHandler &m_messageHandler;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;

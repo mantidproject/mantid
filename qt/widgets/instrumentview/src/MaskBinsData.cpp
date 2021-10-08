@@ -25,15 +25,15 @@ void MaskBinsData::addXRange(double start, double end, const std::vector<size_t>
 
 /// Mask a given workspace according to the stored ranges.
 /// @param wsName :: A workspace to mask.
-void MaskBinsData::mask(const std::string &wsName) const {
+void MaskBinsData::mask(std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace) const {
   for (const auto &mask : m_masks) {
     auto &spectra = mask.spectra;
     std::vector<int64_t> spectraList(spectra.size());
     std::transform(spectra.cbegin(), spectra.cend(), spectraList.begin(),
                    [](const size_t spec) -> int { return static_cast<int>(spec); });
     auto alg = Mantid::API::AlgorithmManager::Instance().create("MaskBins", -1);
-    alg->setPropertyValue("InputWorkspace", wsName);
-    alg->setPropertyValue("OutputWorkspace", wsName);
+    alg->setProperty("InputWorkspace", workspace);
+    alg->setProperty("OutputWorkspace", workspace);
     alg->setProperty("InputWorkspaceIndexSet", spectraList);
     alg->setProperty("XMin", mask.start);
     alg->setProperty("XMax", mask.end);

@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "GUI/Common/IJobManager.h"
-#include "IPreviewModel.h"
+#include "IInstViewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <gmock/gmock.h>
@@ -18,10 +17,9 @@ using Mantid::API::MatrixWorkspace_sptr;
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-class MockPreviewModel : public IPreviewModel {
+class MockInstViewModel : public IInstViewModel {
 public:
-  MOCK_METHOD(bool, loadWorkspaceFromAds, (std::string const &workspaceName), (override));
-  MOCK_METHOD(void, loadAndPreprocessWorkspaceAsync, (std::string const &, IJobManager &), (override));
-  MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
+  MOCK_METHOD(void, notifyWorkspaceUpdated, (Mantid::API::MatrixWorkspace_sptr &), (override));
+  MOCK_METHOD(std::shared_ptr<MantidWidgets::RotationSurface>, getInstrumentViewSurface, (), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

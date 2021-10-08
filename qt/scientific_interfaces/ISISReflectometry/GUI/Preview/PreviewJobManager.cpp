@@ -52,7 +52,7 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
 void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &message) {
   // TODO when full implementation is added we'll need to update this to give the relevant error for the algorithm case.
   // TODO It would probably be good to report this as a popup instead of in the log. We can do this by
-  //  injecting IMessageHandler as other tabs do. This is not urgent for the initial implementation though.
+  //  injecting IReflMessageHandler as other tabs do. This is not urgent for the initial implementation though.
   g_log.error(std::string("Error loading workspace: ") + message);
 }
 
