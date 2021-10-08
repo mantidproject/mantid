@@ -36,7 +36,6 @@ public:
   void setWireframe(bool on);
 
   void componentSelected(size_t componentIndex) override;
-  void getSelectedDetectors(std::vector<size_t> &detIndices) override;
   void getMaskedDetectors(std::vector<size_t> &detIndices) const override;
   void resize(int /*unused*/, int /*unused*/) override;
   QString getInfoText() const override;

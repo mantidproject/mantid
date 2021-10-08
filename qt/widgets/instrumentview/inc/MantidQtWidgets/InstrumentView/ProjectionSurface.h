@@ -116,9 +116,6 @@ public:
   virtual size_t getDetector(int x, int y) const;
   /// NULL deselects components and selects the whole instrument
   virtual void componentSelected(size_t componentIndex) = 0;
-  /// fill in a list of detector indices which were selected by the selction
-  /// tool
-  virtual void getSelectedDetectors(std::vector<size_t> &detIndices) = 0;
   /// fill in a list of detector indices which were masked by the mask shapes
   virtual void getMaskedDetectors(std::vector<size_t> &detIndices) const = 0;
 

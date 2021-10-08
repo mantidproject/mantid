@@ -256,64 +256,6 @@ void UnwrappedSurface::componentSelected(size_t componentIndex) {
   }
 }
 
-void UnwrappedSurface::getSelectedDetectors(std::vector<size_t> &detIndices) {
-  if (m_selectRect.isNull()) {
-    return;
-  }
-  QRect rect = selectionRect();
-
-  double vtop = m_v_min;
-  double vbottom = m_v_min;
-  double uleft = m_u_min;
-  double uright = m_u_min;
-
-  // find the first picking colours different from black (0,0,0) to get the
-  // top-left
-  // and bottom-right detectors
-  int rwidth = rect.width();
-  int rheight = rect.height();
-  for (int i = 0; i < rwidth; ++i) {
-    bool stop = false;
-    for (int j = 0; j < rheight; ++j) {
-      int x = rect.x() + i;
-      int y = rect.y() + j;
-      size_t ind = getPickID(x, y);
-      if (ind < m_unwrappedDetectors.size()) {
-        uleft = m_unwrappedDetectors[ind].u - m_unwrappedDetectors[ind].width / 2;
-        vtop = m_unwrappedDetectors[ind].v + m_unwrappedDetectors[ind].height / 2;
-        stop = true;
-        break;
-      }
-    }
-    if (stop)
-      break;
-  }
-
-  for (int i = rwidth - 1; i >= 0; --i) {
-    bool stop = false;
-    for (int j = rheight - 1; j >= 0; --j) {
-      int x = rect.x() + i;
-      int y = rect.y() + j;
-      size_t ind = getPickID(x, y);
-      if (ind < m_unwrappedDetectors.size()) {
-        uright = m_unwrappedDetectors[ind].u + m_unwrappedDetectors[ind].width / 2;
-        vbottom = m_unwrappedDetectors[ind].v - m_unwrappedDetectors[ind].height / 2;
-        stop = true;
-        break;
-      }
-    }
-    if (stop)
-      break;
-  }
-
-  // select detectors with u,v within the allowed boundaries
-  for (auto &udet : m_unwrappedDetectors) {
-    if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom && udet.v <= vtop) {
-      detIndices.emplace_back(udet.detIndex);
-    }
-  }
-}
-
 void UnwrappedSurface::getMaskedDetectors(std::vector<size_t> &detIndices) const {
   detIndices.clear();
   if (m_maskShapes.isEmpty())

@@ -195,37 +195,6 @@ void Projection3D::set3DAxesState(bool on) { m_drawAxes = on; }
 void Projection3D::setWireframe(bool on) { m_wireframe = on; }
 
 //-----------------------------------------------------------------------------
-/** This seems to be called when the user has selected a rectangle
- * using the mouse.
- *
- * @param detIndices :: returns a list of detector Indices selected.
- */
-void Projection3D::getSelectedDetectors(std::vector<size_t> &detIndices) {
-  detIndices.clear();
-  if (!hasSelection())
-    return;
-  double xmin, xmax, ymin, ymax, zmin, zmax;
-  m_viewport.getInstantProjection(xmin, xmax, ymin, ymax, zmin, zmax);
-  QRect rect = selectionRect();
-  auto size = m_viewport.dimensions();
-  const auto w(size.width()), h(size.height());
-
-  double xLeft = xmin + (xmax - xmin) * rect.left() / w;
-  double xRight = xmin + (xmax - xmin) * rect.right() / w;
-  double yBottom = ymin + (ymax - ymin) * (h - rect.bottom()) / h;
-  double yTop = ymin + (ymax - ymin) * (h - rect.top()) / h;
-  size_t ndet = m_instrActor->ndetectors();
-
-  for (size_t i = 0; i < ndet; ++i) {
-    V3D pos = m_instrActor->getDetPos(i);
-    m_viewport.transform(pos);
-    if (pos.X() >= xLeft && pos.X() <= xRight && pos.Y() >= yBottom && pos.Y() <= yTop) {
-      detIndices.emplace_back(i);
-    }
-  }
-}
-
-//-----------------------------------------------------------------------------
 /** Select detectors to mask, using the mouse.
  * From the Instrument Window's mask tab.
  *
