@@ -249,13 +249,13 @@ public:
     TS_ASSERT_EQUALS(c1->getPenaltyFactor(), c1->getDefaultPenaltyFactor());
 
     funa->clearConstraints();
-    funa->addConstraints("0<a0<0.2,a1>10,penalty=0.");
+    funa->addConstraints("0<a0<0.2,a1>10,penalty=0.1");
     IConstraint *c2 = funa->getConstraint(0);
     IConstraint *c3 = funa->getConstraint(1);
     TS_ASSERT(c2);
     TS_ASSERT(c3);
     TS_ASSERT_EQUALS(c2->asString(), "0<a0<0.2");
-    TS_ASSERT_EQUALS(c3->asString(), "10<a1,penalty=0");
+    TS_ASSERT_EQUALS(c3->asString(), "10<a1,penalty=0.1");
   }
 
   void testCreateCompositeWithConstraints() {

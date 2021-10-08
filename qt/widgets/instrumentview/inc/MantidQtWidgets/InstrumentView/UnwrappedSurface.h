@@ -10,6 +10,7 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidQtWidgets/Common/WidgetDllOption.h"
 #include "ProjectionSurface.h"
 #include "UnwrappedDetector.h"
 #include <memory>
@@ -57,7 +58,7 @@ namespace MantidWidgets {
  *
  */
 
-class UnwrappedSurface : public ProjectionSurface {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW UnwrappedSurface : public ProjectionSurface {
   Q_OBJECT
 public:
   explicit UnwrappedSurface(const InstrumentActor *rootActor);

@@ -126,8 +126,9 @@ void PDDetermineCharacterizations::init() {
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<std::string>>(FREQ_PROP_NAME, std::move(defaultFrequencyNames)),
       "Candidate log names for frequency");
-
-  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda", "skf12.lambda"};
+  // NOTE: beamline specific log names goes to the end of the list
+  std::vector<std::string> defaultWavelengthNames{"LambdaRequest", "lambda", "skf12.lambda", "BL1B:Det:TH:BL:Lambda",
+                                                  "freq"};
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(WL_PROP_NAME, std::move(defaultWavelengthNames)),
                   "Candidate log names for wave length");
 }
@@ -212,7 +213,7 @@ void PDDetermineCharacterizations::getInformationFromTable(const double frequenc
  * @param propName
  * @return
  */
-double PDDetermineCharacterizations::getLogValue(API::Run &run, const std::string &propName) {
+double PDDetermineCharacterizations::getLogValue(const API::Run &run, const std::string &propName) {
   std::vector<std::string> names = getProperty(propName);
 
   std::string label = "frequency";

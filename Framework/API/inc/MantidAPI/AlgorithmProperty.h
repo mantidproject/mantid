@@ -56,7 +56,6 @@ public:
   /// Add the value of another property. Doesn't make sense here.
   AlgorithmProperty &operator+=(Kernel::Property const *) override {
     throw Kernel::Exception::NotImplementedError("+= operator is not implemented for AlgorithmProperty.");
-    return *this;
   }
   /// Return the algorithm as string
   std::string value() const override;

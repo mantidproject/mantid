@@ -272,8 +272,8 @@ void LoadILLIndirect2::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
   int *monitor_p = &dataMon(0, 0);
   m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
   // Assign Error
-  MantidVec &E = m_localWorkspace->dataE(0);
-  std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
+  MantidVec &dataE = m_localWorkspace->dataE(0);
+  std::transform(monitor_p, monitor_p + m_numberOfChannels, dataE.begin(), [](const double v) { return std::sqrt(v); });
   // Then Tubes
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
@@ -328,8 +328,8 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
   int *monitor_p = &dataMon(0, 0);
   m_localWorkspace->dataY(0).assign(monitor_p, monitor_p + m_numberOfChannels);
   // Assign Error
-  MantidVec &E = m_localWorkspace->dataE(0);
-  std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(), [](const double v) { return std::sqrt(v); });
+  MantidVec &dataE = m_localWorkspace->dataE(0);
+  std::transform(monitor_p, monitor_p + m_numberOfChannels, dataE.begin(), [](const double v) { return std::sqrt(v); });
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {

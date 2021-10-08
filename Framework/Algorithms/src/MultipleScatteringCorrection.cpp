@@ -239,7 +239,7 @@ void MultipleScatteringCorrection::parseInputs() {
  * @param outws
  * @param shape
  */
-void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace_sptr outws,
+void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWorkspace_sptr &outws,
                                                             const Geometry::IObject &shape) {
   const auto material = shape.material();
   // Cache distances
@@ -352,7 +352,7 @@ void MultipleScatteringCorrection::calculateSingleComponent(API::MatrixWorkspace
  * @param outws pointer for workspace containing the multiple scattering correction factor
  *              for each detector.
  */
-void MultipleScatteringCorrection::calculateSampleAndContainer(API::MatrixWorkspace_sptr outws) {
+void MultipleScatteringCorrection::calculateSampleAndContainer(const API::MatrixWorkspace_sptr &outws) {
   // retrieve container related properties as they are relevant now
   const auto &sample = m_inputWS->sample();
   const auto &sampleMaterial = sample.getShape().material();

@@ -61,10 +61,12 @@ Kernel::Logger g_log("GeometryTriangulator");
 } // namespace
 
 GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
-    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj) {
+    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj)
 #ifdef ENABLE_OPENCASCADE
-  m_objSurface = nullptr;
+      ,
+      m_objSurface(nullptr)
 #endif
+{
 }
 
 GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> obj)

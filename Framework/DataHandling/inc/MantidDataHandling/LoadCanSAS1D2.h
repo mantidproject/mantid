@@ -72,7 +72,7 @@ protected:
   std::vector<API::MatrixWorkspace_sptr> trans_gp, trans_can_gp;
 
 private:
-  void processTransmission(std::vector<API::MatrixWorkspace_sptr> &trans_gp, const std::string &name,
+  void processTransmission(std::vector<API::MatrixWorkspace_sptr> &trans_gp, const std::string &trans_name,
                            const std::string &output_name);
 };
 } // namespace DataHandling

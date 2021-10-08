@@ -101,9 +101,9 @@ Using Existing Data
 
 There are two places files may be found:
 
-- `.../Testing/Data/ <https://github.com/mantidproject/mantid/tree/master/Testing/Data>`__
+- `.../Testing/Data/ <https://github.com/mantidproject/mantid/tree/main/Testing/Data>`__
   for :ref:`unit test <RunningTheUnitTests>`, :ref:`doc test <DocumentationGuideForDevs>`, and :ref:`system test <SystemTests>` data
-- `.../instrument/unit_testing <https://github.com/mantidproject/mantid/tree/master/instrument/unit_testing>`__
+- `.../instrument/unit_testing <https://github.com/mantidproject/mantid/tree/main/instrument/unit_testing>`__
   for test :ref:`IDF <InstrumentDefinitionFile>` files
 
 
@@ -168,7 +168,7 @@ To add the ``add-test-data`` command alias to git run
    git config alias.add-test-data '!bash -c "tools/Development/git/git-add-test-data $*"'
 
 in the git bash shell
-(`script source <https://github.com/mantidproject/mantid/blob/master/tools/Development/git/git-add-test-data>`_).
+(`script source <https://github.com/mantidproject/mantid/blob/main/tools/Development/git/git-add-test-data>`_).
 The single quotes are important so that bash doesn't expand the exclamation mark as a variable.
 
 It is advised that CMake is told where to put the "real" data as the
