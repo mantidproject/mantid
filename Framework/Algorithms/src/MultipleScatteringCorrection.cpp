@@ -505,7 +505,7 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
       // debug output
 #ifndef NDEBUG
       std::ostringstream msg_debug;
-      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << "\n"
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << '\n'
                 << "-containerLinearCoefAbs[wvBinsIndex] = " << -containerLinearCoefAbs[wvBinsIndex] << '\n'
                 << "-sampleLinearCoefAbs[wvBinsIndex] = " << -sampleLinearCoefAbs[wvBinsIndex] << '\n'
                 << "numVolumeElementsContainer = " << numVolumeElementsContainer << '\n'
