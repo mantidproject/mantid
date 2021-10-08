@@ -247,7 +247,6 @@ private:
 
     mockConnect(*mock, SIGNAL(initWidget(bool, bool)), SLOT(initWidget(bool, bool)));
     EXPECT_CALL(*mock, connect(_, StrEq(SIGNAL(destroyed())), _, StrEq(SLOT(threadFinished())))).Times(2);
-    mockConnect(*mock, SIGNAL(finished()), SLOT(deleteLater()));
 
     EXPECT_CALL(*mock,
                 connect(_, StrEq(SIGNAL(updateInfoText())), _, StrEq(SLOT(updateInfoText())), Qt::QueuedConnection))

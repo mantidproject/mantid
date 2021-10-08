@@ -361,7 +361,6 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
   m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
   m_qtConnect->connect(&m_thread, SIGNAL(destroyed()), this, SLOT(threadFinished()));
-  m_qtConnect->connect(&m_thread, SIGNAL(finished()), &m_thread, SLOT(deleteLater()));
   m_thread.start();
   m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
                                Q_ARG(bool, setDefaultView));
@@ -509,6 +508,12 @@ void InstrumentWidget::waitForThread() const {
     QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
   }
 }
+
+/**
+ * Returns whether the remaining initialization of the widget
+ * after the background thread finished is done
+ */
+bool InstrumentWidget::isFinished() const { return m_finished; }
 
 /**
  * Update the info text displayed at the bottom of the window.

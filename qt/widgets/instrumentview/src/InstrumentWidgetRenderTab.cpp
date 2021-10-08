@@ -574,8 +574,8 @@ void InstrumentWidgetRenderTab::enableGL(bool on) {
 }
 
 void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
-  auto &actor = m_instrWidget->getInstrumentActor();
-  if (!actor.isInitialized()) {
+  // check if the widget is fully initialized before continuing
+  if (!m_instrWidget->isFinished()) {
     return;
   }
 

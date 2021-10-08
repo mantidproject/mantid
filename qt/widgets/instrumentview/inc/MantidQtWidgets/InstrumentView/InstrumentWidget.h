@@ -191,6 +191,8 @@ public:
   bool isThreadRunning() const;
   /// Block until thread is finished
   void waitForThread() const;
+  /// Whether the window has been fully initialized
+  bool isFinished() const;
 
 signals:
   void enableLighting(bool /*_t1*/);
