@@ -5,10 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.
- * ***********************/
-/********** Source = kernel.cpp.in
- * *******************************************************/
+@AUTO_GENERATE_WARNING@
+/********** Source = kernel.cpp.in **********************************************************/
 
 #include <boost/python/def.hpp>
 #include <boost/python/docstring_options.hpp>

@@ -81,6 +81,9 @@ set(CONDA_BUILD
 # Ensure that if we are running any sanitizers the compiler options are known in sub targets
 include(Sanitizers)
 
+# Set an auto generate warning for .in files.
+set(AUTO_GENERATE_WARNING "/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/")
+
 # Quick exit if we only want data targets
 if(DATA_TARGETS_ONLY)
   include(SetupDataTargets)
