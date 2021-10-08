@@ -122,7 +122,7 @@ public:
         TS_ASSERT_EQUALS(is.str(), expectedHeader[lineNumber]);
       } else if (lineNumber < expectedHeader.size() + nbins || lineNumber > expectedHeader.size() + nbins + 2) {
         // entered the second spectrum block - note blocks are separated by 2 lines of additional header
-        if (bin_no > nbins) {
+        if (static_cast<size_t>(bin_no) > nbins) {
           bin_no = 1;
           twoSpectraWritten = true;
         }
