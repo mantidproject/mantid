@@ -1,12 +1,9 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM
-                      ${CXXTEST_INCLUDE_DIR}
-)
+  include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
   include_directories(../../TestHelpers/inc)
-  # This variable is used within the cxxtest_add_test macro to build this helper
-  # class into the test executable. It will go out of scope at the end of this
-  # file so doesn't need un-setting
+  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable. It will
+  # go out of scope at the end of this file so doesn't need un-setting
   set(TESTHELPER_SRCS
       KafkaTesting.h
       KafkaTestThreadHelper.h
@@ -16,13 +13,11 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/ComponentCreationHelper.cpp
       ../../TestHelpers/src/InstrumentCreationHelper.cpp
       ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-      ../../TestHelpers/src/StartFrameworkManager.cpp)
+      ../../TestHelpers/src/StartFrameworkManager.cpp
+  )
 
   cxxtest_add_test(LiveDataTest ${TEST_FILES})
-  target_link_libraries(LiveDataTest
-                        PRIVATE
-                        Mantid::LiveData
-                        gmock)
+  target_link_libraries(LiveDataTest PRIVATE Mantid::LiveData gmock)
   target_include_directories(LiveDataTest PRIVATE ../src/)
   add_dependencies(LiveDataTest DataHandling Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests LiveDataTest)

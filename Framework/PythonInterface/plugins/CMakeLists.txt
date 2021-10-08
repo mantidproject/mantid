@@ -1,6 +1,5 @@
-# This file generates two .txt files that contain relative and absolute paths
-# to remove the need for searching for all of the algorithms and fit functions
-# on startup.
+# This file generates two .txt files that contain relative and absolute paths to remove the need for searching for all
+# of the algorithms and fit functions on startup.
 
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
@@ -370,7 +369,6 @@ set(PYTHON_PLUGINS
     functions/ZFprotonDipole.py
     functions/Examples/Example1DFunction.py
     functions/Examples/ExamplePeakFunction.py
-
 )
 
 # Generate an absolute path for each relative one.
@@ -378,7 +376,6 @@ set(ABS_PATHS)
 foreach(RELPATH ${PYTHON_PLUGINS})
   list(APPEND ABS_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/${RELPATH}\n)
 endforeach()
-
 
 # Write out absolute file for developer builds.
 set(BUILD_FILE ${CMAKE_CURRENT_BINARY_DIR}/python-plugin-manifest.txt)
@@ -390,7 +387,11 @@ list(JOIN PYTHON_PLUGINS "\n" PYTHON_PLUGINS)
 file(WRITE ${PACKAGE_FILE} ${PYTHON_PLUGINS})
 
 mtd_install_files(
-    FILES ${PACKAGE_FILE}
-    INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
-    RENAME "python-plugin-manifest.txt"
+  FILES
+  ${PACKAGE_FILE}
+  INSTALL_DIRS
+  ${PLUGINS_DIR}/python
+  ${WORKBENCH_PLUGINS_DIR}/python
+  RENAME
+  "python-plugin-manifest.txt"
 )

@@ -3,9 +3,8 @@
 # Create the targets for this directory
 set(FRAMEWORK_DIR ../../..)
 include_directories(
-  ${FRAMEWORK_DIR}/CurveFitting/inc ${FRAMEWORK_DIR}/DataHandling/inc
-  ${FRAMEWORK_DIR}/DataObjects/inc ${FRAMEWORK_DIR}/Nexus/inc
-  ${FRAMEWORK_DIR}/TestHelpers/inc
+  ${FRAMEWORK_DIR}/CurveFitting/inc ${FRAMEWORK_DIR}/DataHandling/inc ${FRAMEWORK_DIR}/DataObjects/inc
+  ${FRAMEWORK_DIR}/Nexus/inc ${FRAMEWORK_DIR}/TestHelpers/inc
 )
 
 # WorkspaceCreationHelper
@@ -20,13 +19,10 @@ add_library(PythonWorkspaceCreationHelper ${SRC_FILES} ${INC_FILES})
 set_python_properties(PythonWorkspaceCreationHelper _WorkspaceCreationHelper)
 
 # Override folder
-set_property(
-  TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python"
-)
+set_property(TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python")
 target_link_libraries(
   PythonWorkspaceCreationHelper
-  PRIVATE
-          PythonInterfaceCore
+  PRIVATE PythonInterfaceCore
           PythonAPIModule
           DataObjects
           DataHandling
@@ -41,23 +37,17 @@ target_link_libraries(
           gmock
 )
 
-# Overall testhelpers target .pth file for discovery (only needed for
-# development)
+# Overall testhelpers target .pth file for discovery (only needed for development)
 set(_testhelpers_pth_src "${CMAKE_CURRENT_BINARY_DIR}/testhelpers.pth")
-set(_testhelpers_pth_dest
-    "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers.pth"
-)
+set(_testhelpers_pth_dest "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/testhelpers.pth")
 file(WRITE ${_testhelpers_pth_src} "${CMAKE_CURRENT_LIST_DIR}/..\n")
 add_custom_command(
   OUTPUT ${_testhelpers_pth_dest}
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_testhelpers_pth_src}
-          ${_testhelpers_pth_dest}
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${_testhelpers_pth_src} ${_testhelpers_pth_dest}
   DEPENDS ${_testhelpers_pth_src}
   COMMENT "Generating testhelpers .pth file"
 )
-add_custom_target(
-  testhelpers DEPENDS PythonWorkspaceCreationHelper ${_testhelpers_pth_dest}
-)
+add_custom_target(testhelpers DEPENDS PythonWorkspaceCreationHelper ${_testhelpers_pth_dest})
 add_dependencies(PythonInterface ScriptsDotPth)
 
 add_dependencies(FrameworkTests testhelpers)

@@ -19,9 +19,7 @@ set(_header_depends
     ${COMMON_INC_DIR}/MantidQtWidgets/Common/InstrumentSelector.h
 )
 
-list(APPEND common_link_libs ${CORE_MANTIDLIBS} ${POCO_LIBRARIES}
-     Mantid::PythonInterfaceCore
-)
+list(APPEND common_link_libs ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} Mantid::PythonInterfaceCore)
 
 # Wrapper module linked against Qt5
 mtd_add_sip_module(
