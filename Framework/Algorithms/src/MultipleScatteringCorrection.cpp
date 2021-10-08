@@ -229,7 +229,7 @@ void MultipleScatteringCorrection::parseInputs() {
   m_xStep = std::max(int64_t(1), specSize / m_num_lambda); // Bin step between points to calculate
   // -- notify the user of the bin step
   std::ostringstream msg;
-  msg << "Numerical integration performed every " << m_xStep << " wavelength points";
+  msg << "Numerical integration performed every " << m_xStep << " wavelength points\n";
   g_log.information() << msg.str();
 
   // Get the element size
@@ -321,11 +321,11 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
       // debug output
 #ifndef NDEBUG
       std::ostringstream msg_debug;
-      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
-                << "\trho = " << rho << ", sigma_s = " << sigma_s << "\n"
-                << "\tA1 = " << A1 << "\n"
-                << "\tA2 = " << A2 << "\n"
-                << "\tms_factor = " << output[wvBinsIndex] << "\n";
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << '\n'
+                << "\trho = " << rho << ", sigma_s = " << sigma_s << '\n'
+                << "\tA1 = " << A1 << '\n'
+                << "\tA2 = " << A2 << '\n'
+                << "\tms_factor = " << output[wvBinsIndex] << '\n';
       g_log.notice(msg_debug.str());
 #endif
 
@@ -417,8 +417,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
       const auto idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
       const auto l12 = L12_container[idx] + L12_sample[idx];
       if (l12 < 1e-9) {
-        g_log.notice() << "L12_container(" << i << "," << j << ")=" << L12_container[idx] << "\n"
-                       << "L12_sample(" << i << "," << j << ")=" << L12_sample[idx] << "\n";
+        g_log.notice() << "L12_container(" << i << "," << j << ")=" << L12_container[idx] << '\n'
+                       << "L12_sample(" << i << "," << j << ")=" << L12_sample[idx] << '\n';
       }
     }
   }
@@ -432,17 +432,17 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
 #ifndef NDEBUG
   for (size_t i = 0; i < elementVolumes.size(); ++i) {
     if (elementVolumes[i] < 1e-16) {
-      g_log.notice() << "Element_" << i << " has near zero volume: " << elementVolumes[i] << "\n";
+      g_log.notice() << "Element_" << i << " has near zero volume: " << elementVolumes[i] << '\n';
     }
   }
   g_log.notice() << "V_container = "
                  << std::accumulate(distGraberContainer.m_elementVolumes.begin(),
                                     distGraberContainer.m_elementVolumes.end(), 0.0)
-                 << "\n"
+                 << '\n'
                  << "V_sample = "
                  << std::accumulate(distGraberSample.m_elementVolumes.begin(), distGraberSample.m_elementVolumes.end(),
                                     0.0)
-                 << "\n";
+                 << '\n';
 #endif
 
   // NOTE: Unit is important
@@ -505,16 +505,16 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
       // debug output
 #ifndef NDEBUG
       std::ostringstream msg_debug;
-      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
-                << "-containerLinearCoefAbs[wvBinsIndex] = " << -containerLinearCoefAbs[wvBinsIndex] << "\n"
-                << "-sampleLinearCoefAbs[wvBinsIndex] = " << -sampleLinearCoefAbs[wvBinsIndex] << "\n"
-                << "numVolumeElementsContainer = " << numVolumeElementsContainer << "\n"
-                << "numVolumeElements = " << numVolumeElements << "\n"
-                << "totScatterCoef_container = " << totScatterCoef_container << "\n"
-                << "totScatterCoef_sample = " << totScatterCoef_sample << "\n"
-                << "\tA1 = " << A1 << "\n"
-                << "\tA2 = " << A2 << "\n"
-                << "\tms_factor = " << output[wvBinsIndex] << "\n";
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << "\n"
+                << "-containerLinearCoefAbs[wvBinsIndex] = " << -containerLinearCoefAbs[wvBinsIndex] << '\n'
+                << "-sampleLinearCoefAbs[wvBinsIndex] = " << -sampleLinearCoefAbs[wvBinsIndex] << '\n'
+                << "numVolumeElementsContainer = " << numVolumeElementsContainer << '\n'
+                << "numVolumeElements = " << numVolumeElements << '\n'
+                << "totScatterCoef_container = " << totScatterCoef_container << '\n'
+                << "totScatterCoef_sample = " << totScatterCoef_sample << '\n'
+                << "\tA1 = " << A1 << '\n'
+                << "\tA2 = " << A2 << '\n'
+                << "\tms_factor = " << output[wvBinsIndex] << '\n';
       g_log.notice(msg_debug.str());
 #endif
 
@@ -604,13 +604,13 @@ void MultipleScatteringCorrection::calculateLS1s(const MultipleScatteringCorrect
 #ifndef NDEBUG
     // debug
     std::ostringstream msg_debug;
-    msg_debug << "idx=" << idx << ", pos=" << pos << ", vec=" << vec << "\n";
+    msg_debug << "idx=" << idx << ", pos=" << pos << ", vec=" << vec << '\n';
     if (idx < numVolumeElementsContainer) {
-      msg_debug << "Container element " << idx << "\n";
+      msg_debug << "Container element " << idx << '\n';
     } else {
-      msg_debug << "Sample element " << idx - numVolumeElementsContainer << "\n";
+      msg_debug << "Sample element " << idx - numVolumeElementsContainer << '\n';
     }
-    msg_debug << "LS1_container=" << LS1sContainer[idx] << ", LS1_sample=" << LS1sSample[idx] << "\n";
+    msg_debug << "LS1_container=" << LS1sContainer[idx] << ", LS1_sample=" << LS1sSample[idx] << '\n';
     g_log.notice(msg_debug.str());
 #endif
   }
