@@ -238,18 +238,20 @@ void LoadPSIMuonBin::exec() {
   }
 
   // Set DetectorGroupingTable if needed
-  setEmptyDetectorGroupingTable(m_histograms.size());
+  setDetectorGroupingTable(m_histograms.size());
 }
 
-void LoadPSIMuonBin::setEmptyDetectorGroupingTable(const size_t &numSpec) {
+void LoadPSIMuonBin::setDetectorGroupingTable(const size_t &numSpec) {
   if (getPropertyValue("DetectorGroupingTable").empty())
     return;
   Mantid::DataObjects::TableWorkspace_sptr detectorTable =
       std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
           Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
-  detectorTable->addColumn("int", "detector");
+  detectorTable->addColumn("vector_int", "detector");
   for (size_t i = 0; i < numSpec; i++) {
+    std::vector<int> dets{static_cast<int>(i) + 1};
     Mantid::API::TableRow row = detectorTable->appendRow();
+    row << dets;
   }
   setProperty("DetectorGroupingTable", detectorTable);
 }

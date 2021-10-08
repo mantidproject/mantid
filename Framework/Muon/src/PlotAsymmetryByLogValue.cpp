@@ -387,8 +387,9 @@ void PlotAsymmetryByLogValue::checkProperties(size_t &firstRunNumber, size_t &la
 Workspace_sptr PlotAsymmetryByLogValue::doLoad(const std::string &fileName) {
 
   // Load run
-  auto load = createChildAlgorithm("LoadMuonNexus");
+  auto load = createChildAlgorithm("Load");
   load->setPropertyValue("Filename", fileName);
+  load->setPropertyValue("OutputWorkspace", "tmp");
   load->setPropertyValue("DetectorGroupingTable", "detGroupTable");
   load->setPropertyValue("DeadTimeTable", "deadTimeTable");
   load->execute();
@@ -681,6 +682,9 @@ void PlotAsymmetryByLogValue::groupDetectors(Workspace_sptr &loadedWs, const Wor
   auto alg = AlgorithmManager::Instance().createUnmanaged("MuonGroupDetectors");
   alg->initialize();
   alg->setLogging(false);
+  auto a = inWS.name();
+  auto b = grWS.name();
+  auto c = outWS.name();
   alg->setPropertyValue("InputWorkspace", inWS.name());
   alg->setPropertyValue("DetectorGroupingTable", grWS.name());
   alg->setPropertyValue("OutputWorkspace", outWS.name());
