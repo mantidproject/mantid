@@ -912,9 +912,9 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidg
 constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:277
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/UnwrappedDetector.cpp:16
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1541
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1574
-constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:743
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1618
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1651
+constVariable:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:792
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:248
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadDialog.cpp:137
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:178
