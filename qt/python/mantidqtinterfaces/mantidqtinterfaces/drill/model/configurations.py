@@ -260,6 +260,7 @@ class RundexSettings(object):
     THREADS_NUMBER = {
             SANS_ACQ:     1,
             SANS_PSCAN:   1,
+            SANS_MULTI:   1,
             REFL_POL:     1,
             REFL_NPOL:    1,
             POWDER_DSCAN: 1,
