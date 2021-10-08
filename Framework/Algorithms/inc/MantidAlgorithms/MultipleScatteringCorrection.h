@@ -33,7 +33,7 @@ public:
   /// Algorithm's summary
   const std::string summary() const override {
     return "Calculate Multiple Scattering Correction using numerical integration with the assumption of"
-           "elastic scattering only, and isotropic scattering within the sample.";
+           "elastic and isotropic scattering only.";
   };
 
   /// Algorithm's see also
