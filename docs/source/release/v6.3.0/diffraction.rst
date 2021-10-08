@@ -15,6 +15,7 @@ Powder Diffraction
 - `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
 - Extending :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to the sample and container case.
 - `absorptioncorrutils` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
+- Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
 
 Bugfixes
 ########
