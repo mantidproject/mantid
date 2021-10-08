@@ -244,6 +244,7 @@ void MultipleScatteringCorrection::parseInputs() {
  *
  * @param outws
  * @param shape
+ * @param elementSize length of cube size used to rasterize given shape
  */
 void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWorkspace_sptr &outws,
                                                             const Geometry::IObject &shape, const double elementSize) {
