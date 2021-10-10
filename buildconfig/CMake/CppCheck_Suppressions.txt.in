@@ -731,7 +731,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.c
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.cpp:330
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.cpp:333
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.cpp:334
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2ObjFunc.cpp:114
+//--> Disable unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2ObjFunc.cpp:114
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IntegratePeakTimeSlices.cpp:100
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
@@ -746,9 +746,9 @@ nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManag
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:404
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SetSpecialCoordinates.cpp:86
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SetSpecialCoordinates.cpp:98
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1046
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:799
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:856
+//--> Disable constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1046
+//--> Disable unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:799
+//--> Disable unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:856
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/ICat/test/ICatTestHelper.cpp:16
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:220

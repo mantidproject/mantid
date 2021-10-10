@@ -20,6 +20,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Logger.h"
@@ -32,6 +33,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <utility>
 
 namespace Mantid::Crystal {
@@ -139,8 +141,12 @@ void SCDCalibratePanels2::init() {
   declareProperty("FixAspectRatio", true,
                   "If true, the scaling factor for detector along X- and Y-axis "
                   "must be the same.  Otherwise, the 2 scaling factors are free.");
+  declareProperty("BankName", "",
+                  "If given, only the specified bank/component will be calibrated."
+                  "Otherwise, all banks will be calibrated.");
 
   // editability
+  setPropertySettings("BankName", std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchRadiusTransBank",
                       std::make_unique<EnabledWhenProperty>("CalibrateBanks", IS_EQUAL_TO, "1"));
   setPropertySettings("SearchradiusRotXBank",
@@ -154,6 +160,7 @@ void SCDCalibratePanels2::init() {
   setPropertySettings("FixAspectRatio", std::make_unique<EnabledWhenProperty>("CalibrateSize", IS_EQUAL_TO, "1"));
   // grouping
   setPropertyGroup("CalibrateBanks", CALIBRATION);
+  setPropertyGroup("BankName", CALIBRATION);
   setPropertyGroup("SearchRadiusTransBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotXBank", CALIBRATION);
   setPropertyGroup("SearchradiusRotYBank", CALIBRATION);
@@ -222,6 +229,12 @@ void SCDCalibratePanels2::init() {
   setPropertyGroup("ProfileBanks", ADVCNTRL);
   setPropertyGroup("ProfileT0", ADVCNTRL);
   setPropertyGroup("ProfileL1T0", ADVCNTRL);
+
+  // About fitting
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
+  mustBePositive->setLower(0);
+  declareProperty("MaxFitIterations", 500, mustBePositive,
+                  "Stop after this number of iterations if a good fit is not found");
 }
 
 /**
@@ -276,7 +289,7 @@ void SCDCalibratePanels2::exec() {
   bool calibrateL1 = getProperty("CalibrateL1");
   bool calibrateBanks = getProperty("CalibrateBanks");
   bool tuneSamplePos = getProperty("TuneSamplePosition");
-
+  mCalibBankName = getPropertyValue("BankName");
   bool profL1 = getProperty("ProfileL1");
   bool profBanks = getProperty("ProfileBanks");
   bool profT0 = getProperty("ProfileT0");
@@ -286,6 +299,7 @@ void SCDCalibratePanels2::exec() {
   const std::string XmlFilename = getProperty("XmlFilename");
   const std::string CSVFilename = getProperty("CSVFilename");
 
+  maxFitIterations = getProperty("MaxFitIterations");
   LOGCHILDALG = getProperty("VerboseOutput");
 
   // STEP_0: sort the peaks
@@ -373,11 +387,12 @@ void SCDCalibratePanels2::exec() {
   // STEP_4: generate a table workspace to save the calibration results
   g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated = std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
-  ITableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated);
+  Geometry::ParameterMap &pmap = m_pws->instrumentParameters();
+  ITableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated, pmap);
 
   // STEP_5: Write to disk if required
   if (!XmlFilename.empty()) {
-    saveXmlFile(XmlFilename, m_BankNames, instCalibrated);
+    saveXmlFile(XmlFilename, m_BankNames, instCalibrated, pmap);
   }
 
   if (!DetCalFilename.empty()) {
@@ -473,9 +488,11 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
   double dsz_optimized = rst->getRef<double>("Value", 9);
 
   // apply the cali results (for output cali table and file)
-  adjustComponent(0.0, 0.0, dL1_optimized, 0.0, 0.0, 0.0, pws->getInstrument()->getSource()->getName(), pws);
+  adjustComponent(0.0, 0.0, dL1_optimized, 0.0, 0.0, 0.0, EMPTY_DBL(), EMPTY_DBL(),
+                  pws->getInstrument()->getSource()->getName(), pws);
   m_T0 = dT0_optimized;
-  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, EMPTY_DBL(), EMPTY_DBL(),
+                  "sample-position", pws);
   // logging
   int npks = pws->getNumberPeaks();
   calilog << "-- Fit L1 results using " << npks << " peaks:\n"
@@ -495,12 +512,33 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  */
 void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWorkspace_sptr &pws_original) {
 
+  // Resize rectangular detector size
+  bool docalibsize = getProperty("CalibrateSize");
+  double sizesearchradius = getProperty("SearchRadiusSize");
+  bool fixdetxyratio = getProperty("FixAspectRatio");
+
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
     // prepare local copies to work with
     const std::string bankname = *std::next(m_BankNames.begin(), i);
     const std::string pwsBankiName = "_pws_" + bankname;
+
+    // Find out whether to skip the calibration by user's specification
+    // This check is only requied when mCalibBankName is not empty string
+    if (mCalibBankName != "") {
+      bool isbank = (bankname == mCalibBankName);
+      std::stringstream ss;
+      ss << "i = " << i << " m bank name = " << bankname;
+      if (isbank)
+        ss << " ... True ...";
+      else
+        ss << " ... Stop ...";
+      g_log.notice(ss.str());
+      // continue/skip if bank name is not what is specified
+      if (!isbank)
+        continue;
+    }
 
     //-- step 0: extract peaks that lies on the current bank
     IPeaksWorkspace_sptr pwsBanki = selectPeaksByBankName(pws, bankname, pwsBankiName);
@@ -572,16 +610,66 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
                      << -searchRadiusTran << "<DeltaY<" << searchRadiusTran << "," // restrict tranlastion along Y
                      << -searchRadiusTran << "<DeltaZ<" << searchRadiusTran;       // restrict tranlastion along Z
     }
+    // calibration of detector size
+    // docalibsize, sizesearchradius, fixdetxyratio
+    Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(pws->getInstrument());
+    Geometry::IComponent_const_sptr comp = inst->getComponentByName(bankname);
+    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+
+    double bankscalex{1.}, bankscaley{1.};
+    if (rectDet) {
+      // retrieve the (scalex, scaley) stored in the workspace for this bank/component
+      Geometry::ParameterMap &pmap = pws->instrumentParameters();
+      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
+      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
+      if (!scalexparams.empty())
+        bankscalex = scalexparams[0];
+      if (!scaleyparams.empty())
+        bankscaley = scaleyparams[0];
+    }
+
+    std::ostringstream scaleconstraints;
+    std::ostringstream scaleties;
+    if (rectDet && docalibsize) {
+      // set up constraints
+      scaleconstraints << bankscalex - sizesearchradius << " <=ScaleX<" << bankscalex + sizesearchradius;
+      if (fixdetxyratio) {
+        scaleties << "ScaleX=ScaleY";
+      } else {
+        scaleconstraints << "," << bankscaley - sizesearchradius << " <=ScaleY<" << bankscaley + sizesearchradius;
+      }
+    } else {
+      // fix the scalex and scaley to its
+      scaleties << "ScaleX=" << bankscalex << ", ScaleY=" << bankscaley;
+    }
+
+    // construct the final constraint and tie
+    std::string fitconstraint{constraint_str.str()};
+    if (scaleconstraints.str() != "") {
+      if (fitconstraint == "")
+        fitconstraint += scaleconstraints.str();
+      else
+        fitconstraint += "," + scaleconstraints.str();
+    }
+    std::string fittie{tie_str.str()};
+    if (scaleties.str() != "") {
+      if (fittie == "")
+        fittie += scaleties.str();
+      else
+        fittie += "," + scaleties.str();
+    }
+    g_log.notice("Final constraint: " + fitconstraint + "\n\t tie: " + fittie);
 
     //---- set&go
-    fitBank_alg->setProperty("Ties", tie_str.str());
-    fitBank_alg->setProperty("Constraints", constraint_str.str());
+    if (fittie != "")
+      fitBank_alg->setProperty("Ties", fittie);
+    if (fitconstraint != "")
+      fitBank_alg->setProperty("Constraints", fitconstraint);
     fitBank_alg->setProperty("InputWorkspace", wsBankCali);
     fitBank_alg->setProperty("CreateOutput", true);
     fitBank_alg->setProperty("Output", "fit");
-
-    // TODO - make it an input option
-    fitBank_alg->setProperty("MaxIterations", 5);
+    fitBank_alg->setProperty("MaxIterations", maxFitIterations);
 
     fitBank_alg->executeAsChildAlg();
 
@@ -594,6 +682,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     double drx = rstFitBank->getRef<double>("Value", 3);
     double dry = rstFitBank->getRef<double>("Value", 4);
     double drz = rstFitBank->getRef<double>("Value", 5);
+    double scalex = rstFitBank->getRef<double>("Value", 10);
+    double scaley = rstFitBank->getRef<double>("Value", 11);
 
     //-- step 4: update the instrument with optimization results
     std::string bn = bankname;
@@ -602,14 +692,21 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
       bn.append("/sixteenpack");
     }
     // update instrument for output
-    adjustComponent(dx, dy, dz, drx, dry, drz, bn, pws);
+    if (rectDet && docalibsize) {
+      // adjust detector size only if it is to be set to refine
+      adjustComponent(dx, dy, dz, drx, dry, drz, scalex, scaley, bn, pws);
+    } else {
+      // (1) no rectangular det or (2) not to refine detector size:
+      // do not set any physically possible scalex or scaley
+      adjustComponent(dx, dy, dz, drx, dry, drz, EMPTY_DBL(), EMPTY_DBL(), bn, pws);
+    }
     // logging
     V3D dtrans(dx, dy, dz);
     V3D drots(drx, dry, drz);
     calilog << "-- Fit " << bn << " results using " << nBankPeaks << " peaks:\n"
             << "    d(x,y,z) = " << dtrans << "\n"
             << "    r(x,y,z) = " << drots << "\n"
-            << "    chi2/DOF = " << chi2OverDOF << "\n";
+            << "    scale(x, y) = " << scalex << ", " << scaley << "    chi2/DOF = " << chi2OverDOF << "\n";
     g_log.notice() << calilog.str();
 
     // -- cleanup
@@ -731,7 +828,8 @@ void SCDCalibratePanels2::optimizeSamplePos(IPeaksWorkspace_sptr pws, IPeaksWork
   double dsz_optimized = rst->getRef<double>("Value", 9);
 
   // apply the calibration results to pws for ouptut file
-  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, "sample-position", pws);
+  adjustComponent(dsx_optimized, dsy_optimized, dsz_optimized, 0.0, 0.0, 0.0, EMPTY_DBL(), EMPTY_DBL(),
+                  "sample-position", pws);
   int npks = pws->getNumberPeaks();
   // logging
   calilog << "-- Tune SamplePos results using " << npks << " peaks:\n"
@@ -815,7 +913,6 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::removeUnindexedPeaks(const Mantid::API
   fltpk_alg->executeAsChildAlg();
 
   IPeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
-  IPeaksWorkspace_sptr ows = std::dynamic_pointer_cast<IPeaksWorkspace>(outWS);
   return outWS;
 }
 
@@ -872,7 +969,6 @@ IPeaksWorkspace_sptr SCDCalibratePanels2::selectPeaksByBankName(const IPeaksWork
   fltpk_alg->executeAsChildAlg();
 
   IPeaksWorkspace_sptr outWS = fltpk_alg->getProperty("OutputWorkspace");
-  IPeaksWorkspace_sptr ows = std::dynamic_pointer_cast<IPeaksWorkspace>(outWS);
   return outWS;
 }
 
@@ -946,11 +1042,14 @@ MatrixWorkspace_sptr SCDCalibratePanels2::getIdealQSampleAsHistogram1D(const IPe
  * @param drx
  * @param dry
  * @param drz
+ * @package scalex: detector size scale at x-direction
+ * @package scaley: detector size scale at y-direction
  * @param cmptName
  * @param pws
  */
 void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz,
-                                          const std::string &cmptName, IPeaksWorkspace_sptr &pws) {
+                                          double scalex, double scaley, const std::string &cmptName,
+                                          IPeaksWorkspace_sptr &pws) {
   // translation
   auto mv_alg = createChildAlgorithm("MoveInstrumentComponent", -1, -1, false);
   mv_alg->setLogging(LOGCHILDALG);
@@ -992,6 +1091,19 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
   rot_alg->setProperty("Angle", drz);
   rot_alg->setProperty("RelativeRotation", true);
   rot_alg->executeAsChildAlg();
+
+  // scale detector size
+  if (scalex != Mantid::EMPTY_DBL() && scaley != Mantid::EMPTY_DBL()) {
+    auto resizeAlg = createChildAlgorithm("ResizeRectangularDetector", -1, -1, false);
+    resizeAlg->initialize();
+    resizeAlg->setProperty("Workspace", pws);
+    resizeAlg->setProperty("ComponentName", cmptName);
+    resizeAlg->setProperty("ScaleX", scalex);
+    resizeAlg->setProperty("ScaleY", scaley);
+    resizeAlg->execute();
+
+    g_log.notice() << "Resize " << cmptName << " by (absolute) " << scalex << ", " << scaley << "\n";
+  }
 }
 
 /**
@@ -1000,7 +1112,8 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
  * @param instrument  :: calibrated instrument
  * @return DataObjects::TableWorkspace_sptr
  */
-ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument) {
+ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument,
+                                                                   Geometry::ParameterMap &pmap) {
   g_log.notice() << "Generate a TableWorkspace to store calibration results.\n";
 
   // Create table workspace
@@ -1008,7 +1121,7 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
   // TableWorkspace_sptr tablews =
   //     std::dynamic_pointer_cast<TableWorkspace>(itablews);
 
-  for (int i = 0; i < 8; ++i)
+  for (size_t i = 0; i < calibrationTableColumnNames.size(); ++i)
     itablews->addColumn(calibrationTableColumnTypes[i], calibrationTableColumnNames[i]);
 
   // The first row is always the source
@@ -1018,7 +1131,7 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
   // NOTE: source should not have any rotation, so we pass a zero
   //       rotation with a fixed axis
   sourceRow << instrument->getSource()->getName() << sourceRelPos.X() << sourceRelPos.Y() << sourceRelPos.Z() << 1.0
-            << 0.0 << 0.0 << 0.0;
+            << 0.0 << 0.0 << 0.0 << 0.0 << 0.0;
 
   // Loop through banks and set row values
   for (auto bankName : m_BankNames) {
@@ -1036,10 +1149,26 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
     double deg, xAxis, yAxis, zAxis;
     relRot.getAngleAxis(deg, xAxis, yAxis, zAxis);
 
+    // Detector scaling
+    // FIXME TODO - Duplicate with line 1273
+    double scalex{1.}, scaley{1.};
+    Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankName);
+    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    if (rectDet) {
+      // get instrument parameter map and find out whether the
+      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
+      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
+      if (!scalexparams.empty())
+        scalex = scalexparams[0];
+      if (!scaleyparams.empty())
+        scaley = scaleyparams[0];
+    }
+
     // Append a new row
     Mantid::API::TableRow bankRow = itablews->appendRow();
     // Row and positions
-    bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis << zAxis << deg;
+    bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis << zAxis << deg << scalex << scaley;
   }
 
   g_log.notice() << "finished generating tables\n";
@@ -1063,7 +1192,7 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
  */
 void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
                                       boost::container::flat_set<std::string> &AllBankNames,
-                                      std::shared_ptr<Instrument> &instrument) {
+                                      std::shared_ptr<Instrument> &instrument, Geometry::ParameterMap &pmap) {
   g_log.notice() << "Generating xml tree \n";
 
   using boost::property_tree::ptree;
@@ -1147,9 +1276,21 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
     Quat relRot = bank->getRelativeRot();
     std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
     V3D pos1 = bank->getRelativePos();
-    // TODO: no handling of scaling for now, will add back later
-    double scalex = 1.0;
-    double scaley = 1.0;
+    // scale X and scale Y: retrieve from component if it is rectangualr detector
+    double scalex{1.0}, scaley{1.0};
+    Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankName);
+    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    if (rectDet) {
+      // get instrument parameter map and find out whether the
+      // Geometry::ParameterMap &pmap = pws->instrumentParameters();
+      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
+      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
+      if (!scalexparams.empty())
+        scalex = scalexparams[0];
+      if (!scaleyparams.empty())
+        scaley = scaleyparams[0];
+    }
 
     // prepare node
     ptree bank_root;

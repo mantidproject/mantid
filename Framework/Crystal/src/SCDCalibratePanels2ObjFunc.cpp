@@ -55,6 +55,7 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaSampleX", 0.0, "relative shift of sample position along X.");
   declareParameter("DeltaSampleY", 0.0, "relative shift of sample position along Y.");
   declareParameter("DeltaSampleZ", 0.0, "relative shift of sample position along Z.");
+  // Detector size scale factors
   declareParameter("ScaleX", 1.0, "Scale of detector along X-direction (i.e., width).");
   declareParameter("ScaleY", 1.0, "Scale of detector along Y-direction (i.e., height).");
 }
@@ -116,9 +117,6 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
 
   // -- always working on a copy only
   IPeaksWorkspace_sptr pws = m_pws->clone();
-
-  // Debugging related
-  IPeaksWorkspace_sptr pws_ref = m_pws->clone();
 
   // NOTE: when optimizing T0, a none component will be passed in.
   //       -- For Corelli, this will be none/sixteenpack
@@ -284,6 +282,16 @@ SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, co
   std::shared_ptr<const Geometry::RectangularDetector> rectDet =
       std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
   if (rectDet) {
+    // get instrument parameter map and find out whether the
+    Geometry::ParameterMap &pmap = pws->instrumentParameters();
+    auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
+    auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+    double relscalex = scalex;
+    double relscaley = scaley;
+    if (!oldscalex.empty())
+      relscalex /= oldscalex[0];
+    if (!oldscaley.empty())
+      relscaley /= oldscaley[0];
     applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), scalex,
                                                  scaley);
   }

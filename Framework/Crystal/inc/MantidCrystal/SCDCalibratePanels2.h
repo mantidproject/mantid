@@ -100,15 +100,16 @@ private:
   Mantid::API::MatrixWorkspace_sptr getIdealQSampleAsHistogram1D(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Helper functions for adjusting components
-  void adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz, const std::string &cmptName,
-                       Mantid::API::IPeaksWorkspace_sptr &pws);
+  void adjustComponent(double dx, double dy, double dz, double drx, double dry, double drz, double scalex,
+                       double scaley, const std::string &cmptName, Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Generate a Table workspace to store the calibration results
-  Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument);
+  Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument,
+                                                             Geometry::ParameterMap &pmap);
 
   /// Save to xml file for Mantid to load by manual crafting
   void saveXmlFile(const std::string &FileName, boost::container::flat_set<std::string> &AllBankNames,
-                   std::shared_ptr<Geometry::Instrument> &instrument);
+                   std::shared_ptr<Geometry::Instrument> &instrument, Geometry::ParameterMap &pmap);
 
   /// Save to ISAW type det calibration output for backward compatiblity
   void saveIsawDetCal(const std::string &filename, boost::container::flat_set<std::string> &AllBankName,
@@ -127,16 +128,18 @@ private:
   double m_a, m_b, m_c, m_alpha, m_beta, m_gamma;
   double m_T0 = 0.0;
   bool LOGCHILDALG{true};
+  int maxFitIterations{500};
   const int MINIMUM_PEAKS_PER_BANK{6};
+  std::string mCalibBankName{""};
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
   static constexpr double Tolerance = std::numeric_limits<double>::epsilon();
 
   // Column names and types
-  const std::string calibrationTableColumnNames[8] = {"ComponentName",    "Xposition",        "Yposition",
-                                                      "Zposition",        "XdirectionCosine", "YdirectionCosine",
-                                                      "ZdirectionCosine", "RotationAngle"};
-  const std::string calibrationTableColumnTypes[8] = {"str",    "double", "double", "double",
-                                                      "double", "double", "double", "double"};
+  const std::vector<std::string> calibrationTableColumnNames = {
+      "ComponentName",    "Xposition",        "Yposition",     "Zposition", "XdirectionCosine",
+      "YdirectionCosine", "ZdirectionCosine", "RotationAngle", "ScaleX",    "ScaleY"};
+  const std::string calibrationTableColumnTypes[10] = {"str",    "double", "double", "double", "double",
+                                                       "double", "double", "double", "double", "double"};
 
   boost::container::flat_set<std::string> m_BankNames;
   Mantid::API::ITableWorkspace_sptr mCaliTable;
