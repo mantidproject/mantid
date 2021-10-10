@@ -371,6 +371,9 @@ public:
     alg.setProperty("DetCalFilename", isawFilename);
     alg.setProperty("XmlFilename", xmlFilename);
     alg.setProperty("CSVFilename", csvFilename);
+
+    alg.setProperty("MaxFitIterations", 5);
+    alg.setProperty("BankName", "bank27");
     alg.execute();
     TS_ASSERT(alg.isExecuted());
   }
