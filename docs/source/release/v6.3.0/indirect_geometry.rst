@@ -10,7 +10,7 @@ Indirect Geometry Changes
     improvements, followed by bug fixes.
 
 New Features
-############
+------------
 
 - In Indirect Data Analysis fitting tabs a button has been added that will unify the fit range for all spectra selected.
 

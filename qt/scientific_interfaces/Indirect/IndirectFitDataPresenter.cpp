@@ -248,8 +248,8 @@ void IndirectFitDataPresenter::unifyRangeToSelectedData() {
   auto fitRange = m_model->getFittingRange(FitDomainIndex(selectedIndices.begin()->row()));
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
     --item;
-    m_model->setStartX(fitRange.first, FitDomainIndex(item->row()));
-    m_model->setEndX(fitRange.second, FitDomainIndex(item->row()));
+    setModelStartXAndEmit(fitRange.first, FitDomainIndex(item->row()));
+    setModelEndXAndEmit(fitRange.second, FitDomainIndex(item->row()));
   }
   updateTableFromModel();
 }
