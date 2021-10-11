@@ -387,7 +387,7 @@ void SCDCalibratePanels2::exec() {
   // STEP_4: generate a table workspace to save the calibration results
   g_log.notice() << "-- Generate calibration table\n";
   Instrument_sptr instCalibrated = std::const_pointer_cast<Geometry::Instrument>(m_pws->getInstrument());
-  Geometry::ParameterMap &pmap = m_pws->instrumentParameters();
+  const Geometry::ParameterMap &pmap = m_pws->instrumentParameters();
   ITableWorkspace_sptr tablews = generateCalibrationTable(instCalibrated, pmap);
 
   // STEP_5: Write to disk if required
