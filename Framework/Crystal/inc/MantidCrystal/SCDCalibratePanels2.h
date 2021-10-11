@@ -105,11 +105,11 @@ private:
 
   /// Generate a Table workspace to store the calibration results
   Mantid::API::ITableWorkspace_sptr generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument,
-                                                             Geometry::ParameterMap &pmap);
+                                                             const Geometry::ParameterMap &pmap);
 
   /// Save to xml file for Mantid to load by manual crafting
-  void saveXmlFile(const std::string &FileName, boost::container::flat_set<std::string> &AllBankNames,
-                   std::shared_ptr<Geometry::Instrument> &instrument, Geometry::ParameterMap &pmap);
+  void saveXmlFile(const std::string &FileName, const boost::container::flat_set<std::string> &AllBankNames,
+                   std::shared_ptr<Geometry::Instrument> &instrument, const Geometry::ParameterMap &pmap);
 
   /// Save to ISAW type det calibration output for backward compatiblity
   void saveIsawDetCal(const std::string &filename, boost::container::flat_set<std::string> &AllBankName,

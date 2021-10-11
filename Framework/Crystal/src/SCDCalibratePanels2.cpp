@@ -1113,7 +1113,7 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
  * @return DataObjects::TableWorkspace_sptr
  */
 ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument,
-                                                                   Geometry::ParameterMap &pmap) {
+                                                                   const Geometry::ParameterMap &pmap) {
   g_log.notice() << "Generate a TableWorkspace to store calibration results.\n";
 
   // Create table workspace
@@ -1191,8 +1191,8 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
  * in Groups
  */
 void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
-                                      boost::container::flat_set<std::string> &AllBankNames,
-                                      std::shared_ptr<Instrument> &instrument, Geometry::ParameterMap &pmap) {
+                                      const boost::container::flat_set<std::string> &AllBankNames,
+                                      std::shared_ptr<Instrument> &instrument, const Geometry::ParameterMap &pmap) {
   g_log.notice() << "Generating xml tree \n";
 
   using boost::property_tree::ptree;

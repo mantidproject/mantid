@@ -286,14 +286,13 @@ SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, co
     Geometry::ParameterMap &pmap = pws->instrumentParameters();
     auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
     auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
-    double relscalex = scalex;
-    double relscaley = scaley;
+    double relscalex{scalex}, relscaley{scaley};
     if (!oldscalex.empty())
       relscalex /= oldscalex[0];
     if (!oldscaley.empty())
       relscaley /= oldscaley[0];
-    applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), scalex,
-                                                 scaley);
+    applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
+                                                 relscaley);
   }
 
   return pws;
