@@ -13,6 +13,7 @@ New and Improved
 .. figure:: ../../images/iview_insitu_rebin.png
     :width: 500px
     :align: center
+- Normalisation (by maximum value) is available in Superplot
 
 Bugfixes
 --------
