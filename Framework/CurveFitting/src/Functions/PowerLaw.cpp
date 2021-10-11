@@ -10,6 +10,8 @@
 #include "MantidCurveFitting/Functions/PowerLaw.h"
 #include "MantidAPI/FunctionFactory.h"
 
+#include <cmath>
+
 namespace Mantid::CurveFitting::Functions {
 
 using namespace CurveFitting;
