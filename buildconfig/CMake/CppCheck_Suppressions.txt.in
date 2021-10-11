@@ -977,8 +977,7 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/R
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/PreviewRow.cpp:14
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:145
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:128
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:170
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:121
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectCorrections.cpp:80
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataAnalysis.cpp:91
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFunctionBrowser/ConvTypes.h:170

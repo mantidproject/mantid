@@ -10,6 +10,7 @@ dependencies:
   - cmake>=3.20.*
   - doxygen>=1.9.*
   - eigen=3.3.*
+  - euphonic=0.6.*
   - graphviz>=2.47.0
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
   - h5py>=2.10.0,<3 # Pinned back due to api differences
