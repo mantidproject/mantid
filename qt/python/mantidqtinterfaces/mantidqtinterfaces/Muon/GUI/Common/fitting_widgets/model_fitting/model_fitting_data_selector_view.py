@@ -46,6 +46,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
     def add_results_table_name(self, results_table_name: str) -> None:
         """Add a results table to the results table combo box."""
         self.result_table_selector.add_dataset_name(results_table_name)
+        self.result_table_selector.set_current_dataset_index(self.result_table_selector.number_of_datasets()-1)
 
     def update_result_table_names(self, table_names: list) -> None:
         """Update the data in the parameter display combo box."""
