@@ -7,7 +7,6 @@
 import unittest
 import tempfile
 import shutil
-from os import path
 
 from unittest.mock import patch, MagicMock, call, create_autospec
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model
@@ -174,15 +173,11 @@ class FocusModelTest(unittest.TestCase):
                          call(Workspace=ws_foc, LogName="bankid", LogText='bank 1'),
                          call(Workspace=ws_foc, LogName="bankid", LogText='bank 2')]
         mock_add_log.assert_has_calls(add_log_calls)
-        save_nxs_calls = [call(InputWorkspace=ws_foc,
-                               Filename=path.join('dir', 'Focus', 'ENGINX_193749_123456_bank_1_TOF.nxs'),
+        save_nxs_calls = [call(InputWorkspace=ws_foc, Filename=self.model._last_focused_files[0],
                                WorkspaceIndexList=[0]),
-                          call(InputWorkspace=ws_foc,
-                               Filename=path.join('dir', 'Focus', 'ENGINX_193749_123456_bank_2_TOF.nxs'),
+                          call(InputWorkspace=ws_foc, Filename=self.model._last_focused_files[1],
                                WorkspaceIndexList=[1])]
         mock_save_nxs.assert_has_calls(save_nxs_calls)
-        self.model._last_focused_files = [mock_save_nxs.call_args_list[0].kwargs['Filename'],
-                                          mock_save_nxs.call_args_list[1].kwargs['Filename']]
 
     @patch(file_path + '.makedirs')
     @patch(file_path + '.output_settings')
@@ -216,11 +211,8 @@ class FocusModelTest(unittest.TestCase):
         add_log_calls = [call(Workspace=ws_foc, LogName="Vanadium Run", LogText=van_run),
                          call(Workspace=ws_foc, LogName="bankid", LogText='bank 1')]
         mock_add_log.assert_has_calls(add_log_calls)
-        mock_save_nxs.assert_called_once_with(InputWorkspace=ws_foc,
-                                              Filename=path.join('dir', 'User', rb_num, 'Focus',
-                                                                 'ENGINX_193749_123456_bank_1_TOF.nxs'),
+        mock_save_nxs.assert_called_once_with(InputWorkspace=ws_foc, Filename=self.model._last_focused_files[0],
                                               WorkspaceIndexList=[0])
-        self.model._last_focused_files = [mock_save_nxs.call_args_list[0].kwargs['Filename']]
 
 
 if __name__ == '__main__':
