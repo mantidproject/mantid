@@ -220,7 +220,7 @@ public:
     const std::vector<double> WIDTHS{0.0007, 0.0009, 0.0001, 0.0012, 0.0013, 0.0012, 0.0013, 0.0011, 0.0015,
                                      0.0030, 0.0023, 0.0038, 0.0021, 0.0034, 0.0042, 0.0062, 0.0099};
     // peaks that have different values on differnt operating systems
-    const std::vector<int> BAD{4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
+    const std::vector<int> BAD{1, 4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
 
     loadNexusProcessed("PG3_4866_focussed_vanadium.nxs", WKSP_NAME_INPUT);
 
