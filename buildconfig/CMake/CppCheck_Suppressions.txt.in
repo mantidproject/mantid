@@ -457,11 +457,11 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:52
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:98
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed2.cpp:33
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed2.cpp:43
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:811
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:739
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:856
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:208
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:235
+shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:810
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:738
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:855
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:206
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPSIMuonBin.cpp:233
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:592
 objectIndex:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:593
