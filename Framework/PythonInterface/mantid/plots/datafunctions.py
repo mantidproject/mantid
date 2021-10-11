@@ -106,6 +106,7 @@ def get_spectrum_normalisation(**kwargs):
         norm = kwargs.pop("normalise_spectrum")
     return norm, kwargs
 
+
 def get_normalization(md_workspace, **kwargs):
     """
     Gets the normalization flag of an MDHistoWorkspace. For workspaces
