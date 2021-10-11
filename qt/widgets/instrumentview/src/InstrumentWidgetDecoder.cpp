@@ -40,8 +40,6 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map, Instrum
 
   m_workspaceName = map[QString("workspaceName")].toString();
 
-  // have to call this to finish underlying surface and widget setup before proceeding
-  obj.resetInstrumentActor(true, true, 0.0, 0.0, false);
   obj.waitForThread();
 
   const auto surfaceType = map[QString("surfaceType")].toInt();
