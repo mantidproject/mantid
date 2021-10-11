@@ -175,8 +175,6 @@ void LoadPSIMuonBin::exec() {
   assignOutputWorkspaceParticulars(outputWorkspace);
 
   // Set up for the Muon PreProcessor
-  setProperty("OutputWorkspace", extractSpectra(outputWorkspace));
-
   // create empty dead time table
   makeDeadTimeTable(m_histograms.size());
 
@@ -236,6 +234,7 @@ void LoadPSIMuonBin::exec() {
       }
     }
   }
+  setProperty("OutputWorkspace", extractSpectra(outputWorkspace));
 
   // Set DetectorGroupingTable if needed
   setDetectorGroupingTable(m_histograms.size());

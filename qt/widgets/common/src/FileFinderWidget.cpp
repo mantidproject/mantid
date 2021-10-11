@@ -8,7 +8,6 @@
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-//#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/MultipleFileProperty.h"

@@ -151,6 +151,8 @@ public:
     MockALCDataLoadingView view;
     ALCDataLoadingPresenter presenter(&view);
     EXPECT_CALL(view, initialize());
+    QStringList expected{".nxs_v2", ".bin"};
+    EXPECT_CALL(view, setFileExtensions(expected));
     presenter.initialize();
   }
 
