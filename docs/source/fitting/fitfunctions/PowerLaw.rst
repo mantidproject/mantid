@@ -9,7 +9,7 @@ PowerLaw
 Description
 -----------
 
-A power law background function is defined as:
+A power law may be used to describe:
 
 .. math:: y = a*x^b + c
 

@@ -31,7 +31,7 @@ public:
   std::string name() const override { return "PowerLaw"; }
   void function1D(double *out, const double *xValues, const size_t nData) const override;
   void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
-  const std::string category() const override { return "Muon\\MuonModelling"; }
+  const std::string category() const override { return "General; Muon\\MuonModelling"; }
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
