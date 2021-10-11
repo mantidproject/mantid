@@ -33,7 +33,7 @@ public:
   /// Algorithm's summary
   const std::string summary() const override {
     return "Calculate Multiple Scattering Correction using numerical integration with the assumption of"
-           "elastic scattering only, and isotropic scattering within the sample.";
+           "elastic and isotropic scattering only.";
   };
 
   /// Algorithm's see also
@@ -45,7 +45,8 @@ protected:
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
   Kernel::V3D m_beamDirection;         ///< The direction of the beam.
   int64_t m_num_lambda;                ///< The number of points in wavelength, the rest is interpolated linearly
-  double m_elementSize;                ///< The size of the sample in meters
+  double m_sampleElementSize;          ///< The size of the integration element for sample in meters
+  double m_containerElementSize;       ///< the size of the integration element for container in meters
 
 private:
   void init() override;
@@ -53,7 +54,8 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
-  void calculateSingleComponent(const API::MatrixWorkspace_sptr &outws, const Geometry::IObject &shape);
+  void calculateSingleComponent(const API::MatrixWorkspace_sptr &outws, const Geometry::IObject &shape,
+                                const double elementSize);
   void calculateSampleAndContainer(const API::MatrixWorkspace_sptr &outws);
   // For single component case
   void calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraber, //

@@ -63,4 +63,12 @@ Bugfixes
 ########
 -
 
+..
+  Model Fitting
+  #############
+
+  BugFixes
+  --------
+  - A bug has been fixed that caused Model fitting to not update it's results table list.
+
 :ref:`Release 6.3.0 <v6.3.0>`

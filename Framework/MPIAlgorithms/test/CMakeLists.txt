@@ -3,10 +3,9 @@ if(CXXTEST_FOUND)
 
   include_directories(../../TestHelpers/inc)
   set(TESTHELPER_SRCS
-      ../../TestHelpers/src/TearDownWorld.cpp
-      ../../TestHelpers/src/ComponentCreationHelper.cpp
-      ../../TestHelpers/src/InstrumentCreationHelper.cpp
-      ../../TestHelpers/src/WorkspaceCreationHelper.cpp)
+      ../../TestHelpers/src/TearDownWorld.cpp ../../TestHelpers/src/ComponentCreationHelper.cpp
+      ../../TestHelpers/src/InstrumentCreationHelper.cpp ../../TestHelpers/src/WorkspaceCreationHelper.cpp
+  )
 
   cxxtest_add_test(MPIAlgorithmsTest ${TEST_FILES})
   target_link_libraries(MPIAlgorithmsTest Mantid::MPIAlgorithms)
