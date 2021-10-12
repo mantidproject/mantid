@@ -110,6 +110,7 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
+
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
 
@@ -119,11 +120,14 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
+        self.view.get_new_checked.return_value = True
         self.view.get_load_checked.return_value = False
         self.presenter.cropping_widget.is_spectra_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_not_called()
+
+        self.model.load_existing_calibration_files.assert_not_called()  # called if loaded calibration
+        worker_method.assert_not_called()  # called if created new one
         self.assertEqual(err_msg.call_count, 1)
 
     def test_controls_disabled_disables_both(self):
@@ -208,12 +212,14 @@ class CalibrationPresenterTest(unittest.TestCase):
     def test_calibrate_clicked_new_invalid_calibration(self, mock_validate, mock_start_worker):
         self.view.get_new_checked.return_value = True
         self.view.get_plot_output.return_value = True
+        self.view.get_load_checked.return_value = False
         mock_validate.return_value = False
         self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
 
         self.presenter.on_calibrate_clicked()
 
-        mock_start_worker.assert_not_called()
+        mock_start_worker.assert_not_called()  # called if created new one
+        self.model.load_existing_calibration_files.assert_not_called()  # called if loaded calibration
 
     def test_create_new_enabled_true(self):
         self.presenter.set_create_new_enabled(True)
