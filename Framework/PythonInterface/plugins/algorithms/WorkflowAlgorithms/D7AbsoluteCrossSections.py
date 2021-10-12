@@ -811,6 +811,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         elif output_unit == 'Qxy':
             ws = self._qxy_rebin(ws)
         elif output_unit == 'Qw':
+            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
+                self._merge_data(ws)
             q_binning = self._get_q_binning(ws)
             SofQWCentre(InputWorkspace=ws, OutputWorkspace=ws,
                         EMode='Direct', EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
