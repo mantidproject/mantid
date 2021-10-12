@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from os import pathsep, path
+from os import path
 from qtpy import QtCore, QtWidgets
 from mantid import config
 from mantidqt.icons import get_icon
@@ -70,7 +70,8 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         # add calib folder to path
         self._calib_dir_added = CALIB_DIR not in config['datasearch.directories']
         if self._calib_dir_added:
-            config['datasearch.directories'] = pathsep.join([CALIB_FOLDER, config['datasearch.directories']])
+            # don't use os.pathsep as always ';' even on linux
+            config['datasearch.directories'] = ';'.join([CALIB_FOLDER, config['datasearch.directories']])
 
         # Usage Reporting
         try:
@@ -113,7 +114,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         if self._calib_dir_added:
             # remove (note can't replace f"{CALIB_FOLDER};" as last entry doesn't end with ;
             config['datasearch.directories'] = config['datasearch.directories'].replace(CALIB_DIR, "", 1).replace(
-                2*pathsep, pathsep, 1)
+                2*';', ';', 1)
             # will be a double ; if not last directory
         self.presenter.handle_close()
         self.setParent(None)
