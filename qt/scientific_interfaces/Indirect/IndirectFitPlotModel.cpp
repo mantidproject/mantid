@@ -39,7 +39,8 @@ IFunction_sptr firstFunctionWithParameter(const CompositeFunction_sptr &composit
 
 IFunction_sptr firstFunctionWithParameter(IFunction_sptr function, const std::string &category,
                                           const std::string &parameterName) {
-  if (function->category() == category && function->hasParameter(parameterName))
+  auto checkCategory = function->category().find(category);
+  if (checkCategory != std::string::npos && function->hasParameter(parameterName))
     return function;
 
   const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);

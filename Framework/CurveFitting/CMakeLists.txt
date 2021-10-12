@@ -445,6 +445,7 @@ set(TEST_FILES
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
     Functions/PolynomialTest.h
+    Functions/PowerLawTest.h
     Functions/ProcessBackgroundTest.h
     Functions/ProductFunctionTest.h
     Functions/ProductLinearExpTest.h

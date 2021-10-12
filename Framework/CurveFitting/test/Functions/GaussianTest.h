@@ -48,7 +48,7 @@ class GaussianTest : public CxxTest::TestSuite {
 public:
   void test_category() {
     Gaussian fn;
-    TS_ASSERT_EQUALS(fn.category(), "Peak");
+    TS_ASSERT_EQUALS(fn.category(), "Peak; Muon\\MuonModelling");
   }
 
   void test_with_Levenberg_Marquardt() {

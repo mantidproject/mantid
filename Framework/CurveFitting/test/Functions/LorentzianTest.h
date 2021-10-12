@@ -49,8 +49,9 @@ public:
   void test_categories() {
     Lorentzian forCat;
     const std::vector<std::string> categories = forCat.categories();
-    TS_ASSERT(categories.size() == 1);
+    TS_ASSERT(categories.size() == 2);
     TS_ASSERT(categories[0] == "Peak");
+    TS_ASSERT(categories[1] == "Muon\\MuonModelling");
   }
 
   void test_FWHM() {
