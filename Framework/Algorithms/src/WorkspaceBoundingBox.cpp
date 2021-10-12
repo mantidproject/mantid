@@ -1,14 +1,13 @@
 #include "MantidAlgorithms/WorkspaceBoundingBox.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-namespace Mantid {
-namespace Algorithms {
+namespace Mantid::Algorithms {
 
 namespace {
 constexpr int HISTOGRAM_INDEX{0};
 }
 
-WorkspaceBoundingBox::WorkspaceBoundingBox(API::MatrixWorkspace_const_sptr workspace) : m_workspace(workspace) {
+WorkspaceBoundingBox::WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace) : m_workspace(workspace) {
   if (m_workspace->y(0).size() != 1)
     throw std::runtime_error("This object only works with integrated workspaces");
 
@@ -176,5 +175,4 @@ bool WorkspaceBoundingBox::containsPoint(double x, double y) {
   return (x <= this->xMax && x >= this->xMin && y <= yMax && y >= yMin);
 }
 
-} // namespace Algorithms
-} // namespace Mantid
+} // namespace Mantid::Algorithms

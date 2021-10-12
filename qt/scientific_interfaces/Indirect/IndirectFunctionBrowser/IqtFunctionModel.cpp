@@ -108,8 +108,8 @@ void IqtFunctionModel::addFunction(const QString &prefix, const QString &funStr)
     if (ne > 1)
       throw std::runtime_error("Cannot add more exponentials.");
     setNumberOfExponentials(ne + 1);
-    if (auto const prefix = getExp2Prefix()) {
-      newPrefix = *prefix;
+    if (auto const exp2Prefix = getExp2Prefix()) {
+      newPrefix = *exp2Prefix;
     } else {
       newPrefix = *getExp1Prefix();
     }

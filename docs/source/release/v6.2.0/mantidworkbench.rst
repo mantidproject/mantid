@@ -62,18 +62,20 @@ Sliceviewer
 Improvements
 ############
 
-- Peaks can now be added or removed from a PeaksWorkspace using the :ref:`peaks overlay <sliceviewer_peaks_overlay>` in :ref:`sliceviewer`.
-- Added tooltips to all the widgets in the :ref:`sliceviewer`. Please contact the developers if any are missing.
-- Added a help button to the :ref:`sliceviewer`.
-- :ref:`sliceviewer` uses a more visible divider between the main data view and the peaks table view.
-- :ref:`sliceviewer` can toggle between different scales again without any issue.
-- :ref:`sliceviewer` now loads customized colormap from the colorbar directory upon starting.
+- Peaks can now be added or removed from a PeaksWorkspace using the :ref:`PeaksWorkspace overlay <sliceviewer_peaks_overlay>`.
+- Added tooltips to all the widgets. Please contact the developers if any are missing.
+- Added a help button.
+- There is now a more visible divider between the main data view and the peaks table view.
+- Users can load a customized colormap from the colorbar directory upon starting.
 
 Bugfixes
 ########
-- :ref:`sliceviewer` now doesn't normalise basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0.
-- Fixed a bug in the :ref:`sliceviewer` when transposing MDE workspaces multiple times would cause the data to become all zeros.
-- Fixed out of range errors in the :ref:`sliceviewer` that sometimes occurred whilst hovering over transposed data.
-- :ref:`sliceviewer` can toggle between different scales again without any issue.
+- No longer normalises basis vectors for HKL data such that Bragg peaks appear at integer HKL for cuts along e.g. HH0.
+- Fixed a bug that when transposing MDE workspaces multiple times it would cause the data to become all zeros.
+- Fixed out of range errors that sometimes occurred whilst hovering over transposed data.
+- Users can toggle between different scales again without any issue.
+- Fix bug where non-orthogonal view was enabled on an orthogonal workspace with no UB.
+- Fixed cursor tracking from getting stuck and displaying incorrect signals when viewing MDHistogram workspaces.
+- Fixed bug in resetting axes limits in non-orthogonal view when a plot is updated.
 
 :ref:`Release 6.2.0 <v6.2.0>`

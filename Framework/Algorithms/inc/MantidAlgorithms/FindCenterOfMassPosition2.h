@@ -66,7 +66,7 @@ private:
   /// Execution code
   void exec() override;
   /// Helper functions
-  void findCenterOfMass(API::MatrixWorkspace_sptr inputWS, double &centerX, double &centerY, const int numSpec,
+  void findCenterOfMass(const API::MatrixWorkspace_sptr &inputWS, double &centerX, double &centerY, const int numSpec,
                         API::Progress &progress);
   void storeOutputWorkspace(double centerX, double centerY);
   // Iteration cutoff

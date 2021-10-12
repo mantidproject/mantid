@@ -8,9 +8,13 @@
 
 #include "Common/DllConfig.h"
 #include "Experiment.h"
+#include "IBatch.h"
 #include "Instrument.h"
 #include "RunsTable.h"
 #include "Slicing.h"
+
+#include <boost/optional.hpp>
+#include <vector>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -21,7 +25,7 @@ namespace ISISReflectometry {
     The Batch model holds the entire reduction configuration for a batch of
     runs.
 */
-class MANTIDQT_ISISREFLECTOMETRY_DLL Batch {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Batch : public IBatch {
 public:
   Batch(Experiment const &experiment, Instrument const &instrument, RunsTable &runsTable, Slicing const &slicing);
 

@@ -46,7 +46,8 @@ set(TEST_PY_FILES
     UsageServiceTest.py
     V3DTest.py
     VisibleWhenPropertyTest.py
-    VMDTest.py)
+    VMDTest.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

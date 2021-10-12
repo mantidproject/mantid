@@ -14,30 +14,26 @@ set(TEST_FILES
     PanZoomToolTest.h
     PlotTest.h
     QBackendExtractTest.h
-    ScalarMappableTest.h)
+    ScalarMappableTest.h
+)
 
-set(CXXTEST_EXTRA_HEADER_INCLUDE
-    ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
+set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
 
-mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
-                 QT_VERSION 5
-                 INCLUDE_DIRS
-                   ${CMAKE_CURRENT_LIST_DIR}/../inc
-                 SRC
-                   ${TEST_FILES}
-                 LINK_LIBS
-                   API
-                   DataObjects
-                   HistogramData
-                   Kernel
-                   PythonInterfaceCore
-                   Types
-                   ${Boost_LIBRARIES}
-                   ${POCO_LIBRARIES}
-                   Python::Python
-                   gmock
-                 MTD_QT_LINK_LIBS
-                   MantidQtWidgetsMplCpp
-                   MantidQtWidgetsCommon
-                 PARENT_DEPENDENCIES
-                   GUITests)
+mtd_add_qt_tests(
+  TARGET_NAME MantidQtWidgetsMplCppTest
+  QT_VERSION 5
+  INCLUDE_DIRS ${CMAKE_CURRENT_LIST_DIR}/../inc
+  SRC ${TEST_FILES}
+  LINK_LIBS Mantid::API
+            Mantid::DataObjects
+            Mantid::HistogramData
+            Mantid::Kernel
+            Mantid::PythonInterfaceCore
+            Mantid::Types
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            Python::Python
+            gmock
+  MTD_QT_LINK_LIBS MantidQtWidgetsMplCpp MantidQtWidgetsCommon
+  PARENT_DEPENDENCIES GUITests
+)

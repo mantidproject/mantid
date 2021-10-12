@@ -127,10 +127,10 @@ def addComboToTable(table,row,options,col=1):
     return combo
 
 
-def addDoubleToTable(table, value, row, col=1, minimum=0.0):
+def addDoubleToTable(table, value, row, col=1, minimum=None):
     number_widget = QtWidgets.QLineEdit(str(value))
     validator = LineEditDoubleValidator(number_widget, float(value))
-    validator.setBottom(minimum)
+    validator.setBottom(minimum if minimum is not None else -sys.float_info.max)
     validator.setTop(sys.float_info.max)
     validator.setDecimals(3)
     number_widget.setValidator(validator)

@@ -77,6 +77,7 @@ public:
 class MockIndirectFitDataModel : public IIndirectFitDataModel {
 public:
   /// Public Methods
+  MOCK_METHOD0(getFittingData, std::vector<IndirectFitData> *());
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const std::string &spectra));
   MOCK_METHOD2(addWorkspace, void(const std::string &workspaceName, const FunctionModelSpectra &spectra));
   MOCK_METHOD2(addWorkspace, void(MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra));
@@ -121,6 +122,7 @@ public:
   MOCK_CONST_METHOD2(getExcludeRegionVector, std::vector<double>(WorkspaceID workspaceID, WorkspaceIndex spectrum));
   MOCK_CONST_METHOD1(getExcludeRegionVector, std::vector<double>(FitDomainIndex index));
 };
+
 MATCHER_P(NoCheck, selector, "") { return arg != selector; }
 
 EstimationDataSelector getEstimationDataSelector() {

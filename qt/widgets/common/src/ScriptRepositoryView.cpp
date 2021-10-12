@@ -23,8 +23,7 @@
 #include <QTime>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptRepositoryView");
@@ -619,5 +618,4 @@ void ScriptRepositoryView::openFolderLink(const QString &link) {
     g_log.error() << error_msg << "Could not find directory.\n";
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

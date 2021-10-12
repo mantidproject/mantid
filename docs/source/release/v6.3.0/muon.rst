@@ -10,3 +10,11 @@ MuSR Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 6.3.0 <v6.3.0>`
+
+..
+  Model Fitting
+  #############
+
+  BugFixes
+  --------
+  - A bug has been fixed that caused Model fitting to not update it's results table list.

@@ -231,8 +231,8 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB, size_t form_nu
     // Get exact form requested and not permutations
     UB_list.emplace_back(UB);
   }
-  for (auto &UB : UB_list) {
-    IndexingUtils::GetLatticeParameters(UB, l_params);
+  for (auto &ub : UB_list) {
+    IndexingUtils::GetLatticeParameters(ub, l_params);
 
     form_0 = ReducedCell(0, l_params[0], l_params[1], l_params[2], l_params[3], l_params[4], l_params[5]);
 
@@ -240,7 +240,7 @@ ConventionalCell ScalarUtils::GetCellForForm(const DblMatrix &UB, size_t form_nu
 
     double error = form_0.WeightedDistance(form);
     if (error < min_error) {
-      info = ConventionalCell(UB, form_num, allowPermutations);
+      info = ConventionalCell(ub, form_num, allowPermutations);
       min_error = error;
     }
   }

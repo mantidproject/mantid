@@ -50,6 +50,7 @@ class StateMove(metaclass=JsonSerializable):
 
         # The sample offset direction is Z for the ISIS instruments
         self.sample_offset_direction = CanonicalCoordinates.Z
+        self.monitor_4_offset: float = 0.0
 
     def validate(self):
         # If the detectors are empty, then we raise
@@ -88,8 +89,6 @@ class StateMoveSANS2D(StateMove):
         self.lab_detector_x = 0.0  # : Float
         self.lab_detector_z = 0.0  # : Float
 
-        self.monitor_4_offset = 0.0  # : Float
-
         # Setup the detectors
         self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
                           DetectorType.HAB.value: StateMoveDetectors()}
@@ -116,9 +115,7 @@ class StateMoveZOOM(StateMove):
     def __init__(self):
         super(StateMoveZOOM, self).__init__()
         self.lab_detector_default_sd_m = 0.0  # : Float
-
-        self.monitor_4_offset = 0.0  # : Float
-        self.monitor_5_offset = 0.0  # : Float
+        self.monitor_5_offset: float = 0.0
 
         # Setup the detectors
         self.detectors = {DetectorType.LAB.value: StateMoveDetectors()}
@@ -131,7 +128,6 @@ class StateMoveNoInst(StateMove):
     def __init__(self):
         super(StateMoveNoInst, self).__init__()
         self.lab_detector_default_sd_m = 0.0  # : Float
-        self.monitor_4_offset = 0.0  # : Float
 
         # Setup the detectors
         self.detectors = {DetectorType.LAB.value: StateMoveDetectors(),

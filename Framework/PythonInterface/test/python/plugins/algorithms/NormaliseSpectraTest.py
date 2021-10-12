@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import platform
+import numpy
 from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
@@ -45,6 +46,11 @@ class NormaliseSpectraTest(unittest.TestCase):
         out_ws = NormaliseSpectra(InputWorkspace=in_ws)
         self._check_workspace_is_within_boundaries(out_ws, 1, 0)
 
+    def test_with_nan(self):
+        in_ws = self._create_workspace(1, 'test', "nan,2,3,4,5")
+        out_ws = NormaliseSpectra(InputWorkspace=in_ws)
+        self._check_workspace_is_within_boundaries(out_ws, 1, 0)
+
 #--------------------------------Validate results-----------------------------------------
 
     def _check_workspace_is_within_boundaries(self, matrixWs, max, min):
@@ -54,10 +60,14 @@ class NormaliseSpectraTest(unittest.TestCase):
 
     def _check_spectrum_less_than(self, y_data, upper_boundary):
         for i in range(len(y_data)):
+            if numpy.isnan(y_data[i]):
+                continue
             self.assertLessEqual(y_data[i], upper_boundary)
 
     def _check_spectrum_more_than(self, y_data, lower_boundary):
         for i in range(len(y_data)):
+            if numpy.isnan(y_data[i]):
+                continue
             self.assertGreaterEqual(y_data[i], lower_boundary)
 
 #--------------------------------Helper Functions-----------------------------------------

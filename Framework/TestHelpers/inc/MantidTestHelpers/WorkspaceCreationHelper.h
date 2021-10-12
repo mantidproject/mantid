@@ -30,6 +30,11 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument/Detector.h"
 
+#include <gmock/gmock.h>
+
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
@@ -55,10 +60,10 @@ public:
     return out;
   }
 };
-/** mock algorithm for doing logging/progress reporting*/
-class MockAlgorithm : public Mantid::API::Algorithm {
+/** Stub algorithm for doing logging/progress reporting*/
+class StubAlgorithm : public Mantid::API::Algorithm {
 public:
-  MockAlgorithm(size_t nSteps = 100);
+  StubAlgorithm(size_t nSteps = 100);
   /// Algorithm's name for identification
   const std::string name() const override { return "MockAlgorithm"; }
   /// Algorithm's version for identification
@@ -232,6 +237,10 @@ create2DDetectorScanWorkspaceWithFullInstrument(int nhist, int nbins, size_t nTi
                                                 size_t firstInterval = 1, bool includeMonitors = false,
                                                 bool startYNegative = false, bool isHistogram = true,
                                                 const std::string &instrumentName = std::string("testInst"));
+
+Mantid::DataObjects::Workspace2D_sptr
+create2DWorkspaceWithGeographicalDetectors(const int nlat, const int nlong, const double anginc, int nbins,
+                                           const std::string &instrumentName = std::string("testInst"));
 
 /**
  * Create a test workspace with a Theta numeric axis instead of a spectrum axis

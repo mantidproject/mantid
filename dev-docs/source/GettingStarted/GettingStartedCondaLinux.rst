@@ -41,3 +41,23 @@ How to build
 * Navigate to the build directory.
 * To build Mantid Workbench use: ``ninja``
 * To build Unit Tests use: ``ninja AllTests``
+
+Building with CLion
+-------------------
+CLion will fail to find the build targets if the conda environment is not enabled:
+
+* Open a terminal and run ``conda activate mantid-developer``
+* Launch CLion through that terminal (``<CLION_INSTALL>/bin/clion.sh``)
+
+It is also useful to have your terminals in CLion also run with this environment:
+
+* In your ``home`` directory create a file named ``.clionrc`` and open in your favourite text editor, adding these lines:
+
+.. code-block:: text
+
+    source ~/.bashrc
+    source ~/mambaforge/bin/activate mantid-developer
+
+* Start CLion using the above steps
+* Navigate to ``File > Settings > Tools > Terminal``.
+* To the end of the ``Shell path`` option, add: ``--rcfile ~/.clionrc``.

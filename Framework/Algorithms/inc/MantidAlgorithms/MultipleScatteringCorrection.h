@@ -31,10 +31,9 @@ public:
   const std::string category() const override { return "CorrectionFunctions"; };
 
   /// Algorithm's summary
-  /// TODO: the summary needs to be updated as we add more features
   const std::string summary() const override {
-    return "Calculate Multiple Scattering Correction using numerical integration with the assumption of sample only, "
-           "elastic scattering only, and isotropic scattering within the sample.";
+    return "Calculate Multiple Scattering Correction using numerical integration with the assumption of"
+           "elastic and isotropic scattering only.";
   };
 
   /// Algorithm's see also
@@ -43,11 +42,11 @@ public:
   };
 
 protected:
-  API::MatrixWorkspace_sptr m_inputWS;  ///< A pointer to the input workspace
-  API::MatrixWorkspace_sptr m_outputWS; ///< A pointer to the output workspace
-  Kernel::V3D m_beamDirection;          ///< The direction of the beam.
-  int64_t m_num_lambda;                 ///< The number of points in wavelength, the rest is interpolated linearly
-  double m_elementSize;                 ///< The size of the sample in meters
+  API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
+  Kernel::V3D m_beamDirection;         ///< The direction of the beam.
+  int64_t m_num_lambda;                ///< The number of points in wavelength, the rest is interpolated linearly
+  double m_sampleElementSize;          ///< The size of the integration element for sample in meters
+  double m_containerElementSize;       ///< the size of the integration element for container in meters
 
 private:
   void init() override;
@@ -55,17 +54,56 @@ private:
   std::map<std::string, std::string> validateInputs() override;
 
   void parseInputs();
-  void setupOutput();
-  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, const IDetector &detector,
-                     std::vector<double> &sample_L2Ds) const;
-  void pairWiseSum(double &A1, double &A2, const double linearCoefAbs,
-                   const MultipleScatteringCorrectionDistGraber &distGraber, const std::vector<double> &L2Ds,
-                   const std::vector<double> &L12s, const size_t startIndex, const size_t endIndex) const;
+  void calculateSingleComponent(const API::MatrixWorkspace_sptr &outws, const Geometry::IObject &shape,
+                                const double elementSize);
+  void calculateSampleAndContainer(const API::MatrixWorkspace_sptr &outws);
+  // For single component case
+  void calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                     std::vector<double> &LS1s,                                //
+                     const Geometry::IObject &shape) const;
+  void calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                     std::vector<double> &L12s,                                //
+                     const Geometry::IObject &shape);
+  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraber, //
+                     const IDetector &detector,                                //
+                     std::vector<double> &L2Ds,                                //
+                     const Geometry::IObject &shape) const;
+  void pairWiseSum(double &A1, double &A2,                                   //
+                   const double linearCoefAbs,                               //
+                   const MultipleScatteringCorrectionDistGraber &distGraber, //
+                   const std::vector<double> &LS1s,                          //
+                   const std::vector<double> &L12s,                          //
+                   const std::vector<double> &L2Ds,                          //
+                   const int64_t startIndex, const int64_t endIndex) const;
+  // For sample and container case
+  void calculateLS1s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                     const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                     std::vector<double> &LS1sContainer,                                //
+                     std::vector<double> &LS1sSample,                                   //
+                     const Geometry::IObject &shapeContainer,                           //
+                     const Geometry::IObject &shapeSample) const;
+  void calculateL12s(const MultipleScatteringCorrectionDistGraber &distGraberContainer, //
+                     const MultipleScatteringCorrectionDistGraber &distGraberSample,    //
+                     std::vector<double> &L12sContainer,                                //
+                     std::vector<double> &L12sSample,                                   //
+                     const Geometry::IObject &shapeContainer,                           //
+                     const Geometry::IObject &shapeSample);
+  void calculateL2Ds(const MultipleScatteringCorrectionDistGraber &distGraberContainer,     //
+                     const MultipleScatteringCorrectionDistGraber &distGraberSample,        //
+                     const IDetector &detector,                                             //
+                     std::vector<double> &container_L2Ds, std::vector<double> &sample_L2Ds, //
+                     const Geometry::IObject &shapeContainer, const Geometry::IObject &shapeSample) const;
 
-  Kernel::Material m_material;
-  double m_sampleLinearCoefTotScatt; ///< The total scattering cross-section in
-                                     ///< 1/m for the sample
-  int64_t m_xStep;                   ///< The step in bin number between adjacent points for linear interpolation
+  void pairWiseSum(double &A1, double &A2,                                                         //
+                   const double linearCoefAbsContainer, const double linearCoefAbsSample,          //
+                   const int64_t numVolumeElementsContainer, const int64_t numVolumeElementsTotal, //
+                   const double totScatterCoefContainer, const double totScatterCoefSample,        //
+                   const std::vector<double> &elementVolumes, const std::vector<double> &LS1sContainer,
+                   const std::vector<double> &LS1sSample, const std::vector<double> &L12sContainer,
+                   const std::vector<double> &L12sSample, const std::vector<double> &L2DsContainer,
+                   const std::vector<double> &L2DsSample, const int64_t startIndex, const int64_t endIndex) const;
+
+  int64_t m_xStep; ///< The step in bin number between adjacent points for linear interpolation
 };
 
 } // namespace Algorithms
