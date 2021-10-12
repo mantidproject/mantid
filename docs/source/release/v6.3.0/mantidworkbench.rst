@@ -20,6 +20,6 @@ Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
 - Fixed a bug where the option "SignedInPlaneTwoTheta" in :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` would not give signed results.
-
+- Fixed a bug where the toggle state of the "Grids on/off" toolbar button was incorrect when opening a 3D surface plot.
 
 :ref:`Release 6.3.0 <v6.3.0>`
