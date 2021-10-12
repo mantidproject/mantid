@@ -844,11 +844,7 @@ void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &heade
   m_dataTable->setHorizontalHeaderLabels(headers);
 
   auto header = m_dataTable->horizontalHeader();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  header->setResizeMode(0, QHeaderView::Stretch);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   header->setSectionResizeMode(0, QHeaderView::Stretch);
-#endif
 }
 
 void IndirectDataAnalysisElwinTab::removeSelectedData() {
