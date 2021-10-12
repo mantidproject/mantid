@@ -20,4 +20,7 @@ Improvements
   currently included in the Mantid release, an installer is provided
   in the Script Repository.
 
+- The Abins algorithm can also import force constants data from CASTEP
+  or Phonopy calculations, using the Euphonic library. (See above.)
+
 :ref:`Release 6.3.0 <v6.3.0>`
