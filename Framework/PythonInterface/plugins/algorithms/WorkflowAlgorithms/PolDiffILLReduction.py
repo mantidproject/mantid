@@ -603,9 +603,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Extracts time-independent and time-dependent contributions to the background from the provided
         workspace (empty container or vanadium) measured in the TOF mode."""
         # number of channels around the peak, if X-axis data unit is time channels
-        peak_width = self._sampleAndEnvironmentProperties['EPWidth'] \
+        peak_width = self._sampleAndEnvironmentProperties['EPWidth'].value \
             if 'EPWidth' in self._sampleAndEnvironmentProperties else 15
-        epp_table = mtd[self._elastic_channels_ws]
+        peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
+            if 'EPCentre' in self._sampleAndEnvironmentProperties else None
+        epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
         bckg_list = []
         to_clean = []
         transmission = mtd[transmission_ws].readY(0)[0]
@@ -614,7 +616,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             background = "{}_bckg".format(empty.name())
             bckg_list.append(background)
             CloneWorkspace(InputWorkspace=empty, OutputWorkspace=background)
-            elastic_peaks = epp_table.column("PeakCentre")
+            elastic_peaks = epp_table.column("PeakCentre") \
+                if peak_centre is None else np.full(mtd[background].getNumberHistograms(), peak_centre)
             for pixel_no in range(mtd[background].getNumberHistograms()):
                 time_channels = mtd[background].readX(pixel_no)
                 counts = mtd[background].dataY(pixel_no)
@@ -1235,7 +1238,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
             if measurement_technique == 'TOF':
-                if process == 'Vanadium':
+                if process == 'Vanadium' and 'EPCentre' not in self._sampleAndEnvironmentProperties:
                     progress.report('Calibrating the elastic peak energy')
                     self._find_elastic_peak_channels(ws)
                 else:
@@ -1245,6 +1248,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             progress.report('Subtracting backgrounds')
             if transmission_ws:
                 self._subtract_background(ws, transmission_ws)
+                if measurement_technique == 'TOF' and process == 'Vanadium':
+                    self._find_elastic_peak_channels(ws)  # re-runs finding epp, after background is corrected
 
             if process == 'Quartz':
                 progress.report('Calculating polarising efficiencies')
