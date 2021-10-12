@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 import isis_powder.routines.common as common
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
@@ -26,6 +27,20 @@ def attenuate_workspace(attenuation_file_path, ws_to_correct):
 
 
 def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
+
+    def generate_det_id_list(ws):
+        det_id_list = []
+        for i in range(0, ws.getNumberHistograms()):
+            try:
+                det_ids = ws.getSpectrum(i).getDetectorIDs()
+
+            except RuntimeError:
+                pass
+            else:
+                for det_id in det_ids:
+                    det_id_list.append(det_id)
+        return det_id_list
+
     if absorb_ws is None:
         absorb_ws = mantid.Load(Filename=run_details.vanadium_absorption_path)
 
@@ -33,6 +48,21 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
     absorb_units = absorb_ws.getAxis(0).getUnit().unitID()
     if van_original_units != absorb_units:
         van_ws = mantid.ConvertUnits(InputWorkspace=van_ws, Target=absorb_units, OutputWorkspace=van_ws)
+
+    # PEARL sometimes do special runs with different detector cards so extract common spectra before doing
+    # RebinToWorkspace to ensure histogram by histogram by rebin
+    abs_det_id_list = generate_det_id_list(absorb_ws)
+    van_det_id_list = generate_det_id_list(van_ws)
+
+    common_det_ids = [det_id for det_id in abs_det_id_list if det_id in van_det_id_list]
+
+    MSG_STEM = "Vanadium workspace and absorption workspaces have different spectra. "
+    if common_det_ids != van_det_id_list:
+        logger.warning(MSG_STEM + "Removing unmatched spectra from the Vanadium workspace")
+        van_ws = mantid.ExtractSpectra(InputWorkspace=van_ws, DetectorList=common_det_ids)
+    if common_det_ids != abs_det_id_list:
+        logger.warning(MSG_STEM + "Removing unmatched spectra from the absorption workspace")
+        absorb_ws = mantid.ExtractSpectra(InputWorkspace=absorb_ws, DetectorList=common_det_ids)
 
     absorb_ws = mantid.RebinToWorkspace(WorkspaceToRebin=absorb_ws, WorkspaceToMatch=van_ws, OutputWorkspace=absorb_ws)
     van_ws = mantid.Divide(LHSWorkspace=van_ws, RHSWorkspace=absorb_ws, OutputWorkspace=van_ws, AllowDifferentNumberSpectra=True)

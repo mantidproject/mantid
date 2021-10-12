@@ -16,6 +16,7 @@ Powder Diffraction
 - Extending :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to the sample and container case.
 - `absorptioncorrutils` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
 - Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
+- PEARL powder diffraction scripts now cope if absorption correction workspace is different size to the Vanadium workspace without generating NaN values
 
 Bugfixes
 ########
