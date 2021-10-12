@@ -257,7 +257,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              doc='Manual Q-binning parameters.')
 
         self.setPropertySettings('QBinning', EnabledWhenProperty('MeasurementTechnique',
-                                                                      PropertyCriterion.IsEqualTo, 'TOF'))
+                                                                 PropertyCriterion.IsEqualTo, 'TOF'))
 
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
@@ -304,7 +304,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             neutron_mass = physical_constants['neutron mass'][0]  # in0 kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
-            self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+            self._sampleAndEnvironmentProperties['InitialEnergy'] = \
+                joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
         if self.getPropertyValue('NormalisationMethod') != 'None' and 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
