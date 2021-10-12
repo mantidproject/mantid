@@ -49,7 +49,6 @@
 		    OmegaOffset:/entry0/instrument/Omega/offset_value:f,
 		    Wavelength:/entry0/instrument/Beam/wavelength:f,
 		    Det:/entry0/instrument/Det/value:f,
-		    AcquisitionMode:/entry0/acquisition_mode:d,
 		    Mode:/entry0/mode:d,
 		    BeamStopYOffset:/entry0/instrument/BStopY/offset_value:f,
 		    BeamStopYValue:/entry0/instrument/BStopY/value:f,
