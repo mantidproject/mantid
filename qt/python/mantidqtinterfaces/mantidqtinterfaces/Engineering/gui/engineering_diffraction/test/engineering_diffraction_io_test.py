@@ -111,7 +111,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
     def create_test_settings_presenter(self):
-        settings_model = SettingsModel()
+        settings_model = mock.create_autospec(SettingsModel)
         settings_view = mock.create_autospec(SettingsView)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
