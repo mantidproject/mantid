@@ -121,7 +121,7 @@ endif()
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidParallelTargets")
   mtd_install_framework_lib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
