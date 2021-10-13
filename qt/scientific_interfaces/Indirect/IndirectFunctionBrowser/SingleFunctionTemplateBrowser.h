@@ -7,7 +7,6 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "FQFitConstants.h"
 #include "FunctionTemplateBrowser.h"
 #include "IFQFitObserver.h"
 #include "SingleFunctionTemplatePresenter.h"
@@ -63,9 +62,6 @@ public:
   void setParameterValueQuietly(const QString &parameterName, double parameterValue, double parameterError);
   void setDataType(const QStringList &allowedFunctionsList);
   void setEnumValue(int enumIndex);
-
-signals:
-  void dataTypeChanged(DataType dataType);
 
 protected slots:
   void enumChanged(QtProperty *) override;

@@ -45,6 +45,11 @@ shape <HowToDefineGeometricShape>` to a :ref:`Run <Run>` property called
 (and the sample) is integrated, because this is all the detector can
 'see'. The full sample is still used for the neutron paths.
 
+It is worth pointing out that the parameter ``ContainerElementSize`` has very
+limited impact on the final absorption correction factor, therefore it is generally
+safe to use the same element size for both sample and container regardless of
+the actual geometry difference when running this algorithm.
+
 Usage
 -----
 

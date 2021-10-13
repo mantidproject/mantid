@@ -21,7 +21,7 @@ Structure
 :code:`GUI`
 ###########
 
-This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IMessageHandler` interface).
+This directory contains all of the GUI code for the interface. Each separate component e.g. the Experiment tab, has its own subdirectory. Each of these components has its own view and presenter. There is also a :code:`Common` subdirectory for GUI components/interfaces common to more than one widget (e.g. the :code:`IReflMessageHandler` interface).
 
 Briefly the structure is as follows:
 
@@ -60,7 +60,7 @@ Reduction back-end
 
 The back-end is primarily a set of algorithms, with the entry points from the GUI being :ref:`algm-ReflectometryISISLoadAndProcess` (for reducing a row) and :ref:`algm-Stitch1DMany` (for post-processing a group). Any additional processing should be added to these algorithms, or a new wrapper algorithm could be added if appropriate (this might be necessary in future if post-processing will involve more than just stitching).
 
-The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobRunner`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
+The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobManager`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
 
 Unfortunately the whole batch cannot be farmed off to a single algorithm because we need to update the GUI after each row completes, and we must be able to interrupt processing so that we can cancel a large batch operation. We also need to know whether rows completed successfully before we can set up the group post-processing algorithms. Some queue management is therefore done by the :code:`BatchPresenter`, with the help of the :code:`BatchAlgorithmRunner`.
 
@@ -186,13 +186,13 @@ Let's take the :code:`Event` component as an example.
 Dependency injection
 ####################
 
-A simple example of `Dependency inversion`_ is in the use of an :code:`IMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IMessageHandler` to all of the presenters that need it.
+A simple example of `Dependency inversion`_ is in the use of an :code:`IReflMessageHandler` interface to provide a service to display messages to the user. These messages must be displayed by a Qt view. Rather than each view having to implement this, we use one object (in this case the :code:`QtMainWindowView`) to implement this functionality and inject it as an :code:`IReflMessageHandler` to all of the presenters that need it.
 
-- The :code:`IMessageHandler` interface defines the functions for displaying messages:
+- The :code:`IReflMessageHandler` interface defines the functions for displaying messages:
 
   .. code-block:: c++
 
-    class IMessageHandler {
+    class IReflMessageHandler {
     public:
       virtual void giveUserCritical(const std::string &prompt,
                                     const std::string &title) = 0;

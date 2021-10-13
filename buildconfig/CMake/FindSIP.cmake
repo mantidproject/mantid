@@ -1,9 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge
-# National Laboratory, European Spallation Source, Institut Laue - Langevin &
-# CSNS, Institute of High Energy Physics, CAS SPDX - License - Identifier: GPL -
-# 3.0 +
+# Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI, NScD Oak Ridge National Laboratory, European
+# Spallation Source, Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS SPDX - License - Identifier:
+# GPL - 3.0 +
 
 #[=======================================================================[.rst:
 FindSIP
@@ -45,9 +44,8 @@ Directory holding the SIP C++ header file.
 #]=======================================================================]
 include(FindPackageHandleStandardArgs)
 
-
-if (EXISTS "$ENV{CONDA_PREFIX}")
-set(_path_opt NO_DEFAULT_PATH)
+if(EXISTS "$ENV{CONDA_PREFIX}")
+  set(_path_opt NO_DEFAULT_PATH)
 endif()
 
 # First look for sip-build, indicating the newer v6 build system
@@ -66,20 +64,15 @@ if(SIP_BUILD_EXECUTABLE)
   find_program(SIP_MODULE_EXECUTABLE sip-module)
 
   # pyproject.toml template
-  find_file(SIP_PYPROJECT_TOML_TEMPLATE NAME pyproject.toml.in
-            PATHS ${CMAKE_MODULE_PATH}/sip-build
-  )
+  find_file(SIP_PYPROJECT_TOML_TEMPLATE NAME pyproject.toml.in PATHS ${CMAKE_MODULE_PATH}/sip-build)
 
   # project.py template
-  find_file(SIP_PROJECT_PY_TEMPLATE NAME project.py.in
-            PATHS ${CMAKE_MODULE_PATH}/sip-build
-  )
+  find_file(SIP_PROJECT_PY_TEMPLATE NAME project.py.in PATHS ${CMAKE_MODULE_PATH}/sip-build)
 
   # Set expected variables for find_package
   find_package_handle_standard_args(
     SIP
-    REQUIRED_VARS SIP_BUILD_EXECUTABLE SIP_MODULE_EXECUTABLE
-                  SIP_PYPROJECT_TOML_TEMPLATE SIP_PROJECT_PY_TEMPLATE
+    REQUIRED_VARS SIP_BUILD_EXECUTABLE SIP_MODULE_EXECUTABLE SIP_PYPROJECT_TOML_TEMPLATE SIP_PROJECT_PY_TEMPLATE
     VERSION_VAR SIP_VERSION
   )
 endif()
@@ -87,9 +80,7 @@ endif()
 if(NOT SIP_FOUND)
   # Python development is required for the older system
   if(NOT Python_Development_FOUND)
-    message(
-      FATAL_ERROR "FindSIP requires find_package(Python) to be called first"
-    )
+    message(FATAL_ERROR "FindSIP requires find_package(Python) to be called first")
   endif()
 
   # Look for older sip build system. CentOS has this prefixed with python3

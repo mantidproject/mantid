@@ -7,7 +7,7 @@ performance within algorithms by parallelizing ``for`` loops. A tutorial
 devoted to the technology can be found `here <https://computing.llnl.gov/tutorials/openMP/>`__.
 
 Access to the OpenMP API is via a set of macros defined in
-`MultiThreading.h <https://github.com/mantidproject/mantid/blob/master/Framework/Kernel/inc/MantidKernel/MultiThreaded.h>`__.
+`MultiThreading.h <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/MultiThreaded.h>`__.
 This accomplishes seamless fall-back to single-threaded behaviour for
 compilers that don't have OpenMP available, as well as providing
 protection against multithreading when non-thread-safe workspaces are in use.

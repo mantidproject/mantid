@@ -102,7 +102,7 @@ Plotting Utils
 Handles the gridspec layouts: further gridspecs can be defined in ``plotting_utils.py``, but ``self.gridspecs`` must be updated in ``plotting_view.py``
 
 
-.. _Plotting: https://github.com/mantidproject/mantid/tree/master/scripts/Muon/GUI/ElementalAnalysis/Plotting
+.. _Plotting: https://github.com/mantidproject/mantid/tree/main/scripts/Muon/GUI/ElementalAnalysis/Plotting
 
 TODO
 ^^^^

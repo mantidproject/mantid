@@ -27,6 +27,8 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitDataModel 
 public:
   IndirectFitDataModel();
   virtual ~IndirectFitDataModel() = default;
+  std::vector<IndirectFitData> *getFittingData() override;
+
   void addWorkspace(const std::string &workspaceName, const std::string &spectra) override;
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &spectra) override;
   void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace, const FunctionModelSpectra &spectra) override;
@@ -58,8 +60,10 @@ public:
 
   void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setStartX(double startX, WorkspaceID workspaceID) override;
+  void setStartX(double startX, FitDomainIndex fitDomainIndex) override;
   void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setEndX(double endX, WorkspaceID workspaceID) override;
+  void setEndX(double startX, FitDomainIndex fitDomainIndex) override;
   void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setExcludeRegion(const std::string &exclude, FitDomainIndex index) override;
   void setResolution(const std::string &name) override;
@@ -76,9 +80,6 @@ private:
 
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
-
-  std::unique_ptr<std::vector<IndirectFitData>> m_fittingDataMultiple;
-  std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutionsMultiple;
   Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
 };
 

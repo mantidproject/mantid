@@ -223,7 +223,9 @@ class RunTabPresenterTest(unittest.TestCase):
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
     def test_state_retrieved_from_model(self):
+        # Set values which trigger operators, such as divide or parsing, in StateModels
         self._mock_view.q_1d_step = 1.0
+        self._mock_view.transmission_mn_4_shift = 1.0
 
         expected = self.mock_run_tab_model.get_save_types().to_all_states()
         all_states = self.presenter.update_model_from_view()

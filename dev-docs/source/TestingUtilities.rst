@@ -21,7 +21,7 @@ C++
 ---
 
 The following helper files have been found in the
-`Mantid/Framework/TestHelpers <http://github.com/mantidproject/mantid/tree/master/Framework/TestHelpers>`__
+`Mantid/Framework/TestHelpers <http://github.com/mantidproject/mantid/tree/main/Framework/TestHelpers>`__
 package:
 
 -  `BinaryOperationMDTestHelper <http://doxygen.mantidproject.org/d1/d4f/namespaceBinaryOperationMDTestHelper.html>`__

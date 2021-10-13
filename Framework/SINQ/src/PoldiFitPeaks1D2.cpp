@@ -264,9 +264,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sp
         throw std::runtime_error("Not a composite function!");
       }
 
-      std::vector<PoldiPeak_sptr> peaks = currentRange->getPeaks();
-      for (size_t i = 0; i < peaks.size(); ++i) {
-        setValuesFromProfileFunction(peaks[i], composite->getFunction(i));
+      std::vector<PoldiPeak_sptr> currentRangePeaks = currentRange->getPeaks();
+      for (size_t i = 0; i < currentRangePeaks.size(); ++i) {
+        setValuesFromProfileFunction(currentRangePeaks[i], composite->getFunction(i));
         MatrixWorkspace_sptr fpg = fit->getProperty("OutputWorkspace");
         m_fitplots->addWorkspace(fpg);
       }

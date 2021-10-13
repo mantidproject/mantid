@@ -10,11 +10,14 @@
 #include <string>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+class IJobManager;
+
 class IPreviewModel {
 public:
   IPreviewModel() = default;
   virtual ~IPreviewModel() = default;
-  virtual void loadWorkspace(std::string const &workspaceName) = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr getInstViewWorkspace() const = 0;
+  virtual bool loadWorkspaceFromAds(std::string const &workspaceName) = 0;
+  virtual void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

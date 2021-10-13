@@ -10,8 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidTypes/Core/DateAndTimeHelpers.h"
 
-namespace Mantid {
-namespace API {
+namespace Mantid::API {
 
 namespace {
 Kernel::Logger g_log("DeprecatedAlias");
@@ -49,7 +48,7 @@ std::string DeprecatedAlias::deprecationMessage(const IAlgorithm *algo) {
   auto alias = algo->alias();
 
   if (alias.empty()) {
-    throw std::runtime_error("Cannot find the deprecated alias for this algorithm.");
+    throw std::logic_error("Cannot find the deprecated alias for this algorithm.");
   } else {
     msg << "The algorithm '" << alias << "' is deprecated on " << m_deprecationDate << "."
         << "Please use '" << algo->name() << "' instead.";
@@ -58,5 +57,4 @@ std::string DeprecatedAlias::deprecationMessage(const IAlgorithm *algo) {
   return msg.str();
 }
 
-} // namespace API
-} // namespace Mantid
+} // namespace Mantid::API

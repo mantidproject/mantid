@@ -9,7 +9,7 @@
 #include "GUI/Common/IDecoder.h"
 #include "GUI/Common/IEncoder.h"
 #include "GUI/Common/IFileHandler.h"
-#include "GUI/Common/IMessageHandler.h"
+#include "GUI/Common/IReflMessageHandler.h"
 #include "GUI/Options/IOptionsDialogPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "IMainWindowView.h"
@@ -43,7 +43,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
  * @param batchPresenterFactory :: [input] A factory to create the batches
  * we will manage
  */
-MainWindowPresenter::MainWindowPresenter(IMainWindowView *view, IMessageHandler *messageHandler,
+MainWindowPresenter::MainWindowPresenter(IMainWindowView *view, IReflMessageHandler *messageHandler,
                                          IFileHandler *fileHandler, std::unique_ptr<IEncoder> encoder,
                                          std::unique_ptr<IDecoder> decoder,
                                          std::unique_ptr<ISlitCalculator> slitCalculator,

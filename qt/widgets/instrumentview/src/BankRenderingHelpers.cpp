@@ -432,8 +432,8 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo, size_
   setBankNormal(baseShapeInfo.points()[1], baseShapeInfo.points()[3], basePos);
 
   for (size_t x = 0; x < colWidth; x += 3) {
-    auto index = x / 3;
-    const auto &column = compInfo.children(columns[index]);
+    auto columnIndex = x / 3;
+    const auto &column = compInfo.children(columns[columnIndex]);
     for (auto y : column) {
       extractHexahedron(compInfo.shape(y), hex);
       auto rot = compInfo.rotation(y);

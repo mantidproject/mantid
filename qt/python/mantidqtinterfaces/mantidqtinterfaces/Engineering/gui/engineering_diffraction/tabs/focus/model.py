@@ -16,7 +16,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 from Engineering import EnggUtils
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
     Load, NormaliseByCurrent, Divide, DiffractionFocussing, RebinToWorkspace, DeleteWorkspace, ApplyDiffCal, \
-    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog
+    ConvertUnits, ReplaceSpecialValues, EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace
 
 SAMPLE_RUN_WORKSPACE_NAME = "engggui_focusing_input_ws"
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
@@ -159,6 +159,7 @@ class FocusModel(object):
         else:
             run.addProperty("bankid", 3, True)
         # output in both dSpacing and TOF
+        CropWorkspace(InputWorkspace=focused_sample, OutputWorkspace=focused_sample, XMin=0.45)
         ConvertUnits(InputWorkspace=focused_sample, OutputWorkspace=tof_output_name, Target='TOF')
         DeleteWorkspace(curves_rebinned)
 

@@ -50,8 +50,8 @@ public slots:
   void averageTube();
 
 private:
-  Observable *m_extractSingleTubeObservable;
-  Observable *m_averageTubeObservable;
+  std::unique_ptr<Observable> m_extractSingleTubeObservable;
+  std::unique_ptr<Observable> m_averageTubeObservable;
   QAction *m_extractAction;
   QAction *m_averageAction;
   MantidWidgets::IPlotFitAnalysisPaneView *m_analysisPane;
