@@ -259,10 +259,12 @@ public:
       TS_ASSERT(singleScatterY[1] > analyticResult1 || singleScatterY[1] > analyticResult2);
       // no analytical result for double scatter so just check against current result that we assume is correct
       auto doubleScatterY = doubleScatterResult->y(SPECTRUMINDEXTOTEST);
-      TS_ASSERT_DELTA(doubleScatterY[0], 0.001977, delta);
-      TS_ASSERT_DELTA(doubleScatterY[2], 0.001819, delta);
-      TS_ASSERT(doubleScatterY[1] < 0.001977 || doubleScatterY[1] < 0.001819);
-      TS_ASSERT(doubleScatterY[1] > 0.001977 || doubleScatterY[1] > 0.001819);
+      double expResult0 = 0.001977;
+      double expResult2 = 0.001810;
+      TS_ASSERT_DELTA(doubleScatterY[0], expResult0, delta);
+      TS_ASSERT_DELTA(doubleScatterY[2], expResult2, delta);
+      TS_ASSERT(doubleScatterY[1] < expResult0 || doubleScatterY[1] < expResult2);
+      TS_ASSERT(doubleScatterY[1] > expResult0 || doubleScatterY[1] > expResult2);
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
   }
