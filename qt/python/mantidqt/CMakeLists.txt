@@ -77,6 +77,10 @@ set(PYTHON_TEST_FILES
     mantidqt/utils/qt/test/test_line_edit_double_validator.py
     mantidqt/utils/qt/test/test_qappthreadcall.py
     mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_scriptrepository.py
+    mantidqt/widgets/test/test_fittingmode.py
+    mantidqt/widgets/test/waterfallplotfillareadialog/test/test_waterfallplotfillareadialogpresenter.py
+    mantidqt/widgets/test/waterfallplotoffsetdialog/test/test_waterfallplotoffsetdialogpresenter.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
     mantidqt/widgets/test/test_fitpropertybrowserbase.py
     mantidqt/widgets/test/test_fitpropertybrowserplotinteraction.py
@@ -93,6 +97,7 @@ set(PYTHON_TEST_FILES
 set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/algorithmselector/test/test_algorithm_factory_observer.py
     mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
+    mantidqt/widgets/codeeditor/test/test_codecommenter.py
     mantidqt/widgets/codeeditor/test/test_codeeditor.py
     mantidqt/widgets/codeeditor/test/test_completion.py
     mantidqt/widgets/codeeditor/test/test_execution.py
@@ -101,6 +106,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/codeeditor/test/test_interpreter_view.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
+    mantidqt/widgets/codeeditor/test/test_scriptcompatibility.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
@@ -120,6 +126,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_lineplots.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
@@ -160,6 +167,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_tableworkspace_item.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_table_model.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py

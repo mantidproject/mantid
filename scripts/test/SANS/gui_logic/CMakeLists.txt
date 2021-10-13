@@ -24,7 +24,6 @@ set(TEST_PY_FILES
     table_model_test.py
     test_run_tab_presenter.py
     wavelength_interval_test.py
-    save_other_presenter_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
