@@ -37,6 +37,10 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.,
         cutoff in Angstrom.
     :param gamma:
         Shift sampling grid to include the Gamma-point.
+    :param asr:
+        Apply acoustic sum rule correction to force constants: options are
+        'realspace' and 'reciprocal', specifying different implementations of
+        the correction. If None, no correction is applied.
 
     :returns: euphonic.QpointPhononModes
 
@@ -66,7 +70,8 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.,
     return modes
 
 
-def get_data_with_euphonic(filename: str, cutoff: float = 20.):
+def get_data_with_euphonic(filename: str, cutoff: float = 20.,
+                           gamma: bool = True, asr: Optional[str] = None):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
@@ -74,12 +79,19 @@ def get_data_with_euphonic(filename: str, cutoff: float = 20.):
     :param cutoff:
         Sampling density of Brillouin-zone. Specified as real-space length
         cutoff.
+    :param gamma:
+        Shift sampling grid to include the Gamma-point.
+    :param asr:
+        Apply acoustic sum rule correction to force constants: options are
+        'realspace' and 'reciprocal', specifying different implementations of
+        the correction. If None, no correction is applied.
 
     :returns: 2-tuple (dict of structure and vibration data,
                        dict of elements and isotopes)
 
     """
-    modes = euphonic_calculate_modes(filename=filename, cutoff=cutoff)
+    modes = euphonic_calculate_modes(filename=filename, cutoff=cutoff,
+                                     gamma=gamma, asr=asr)
 
     file_data = {'num_ions': len(modes.crystal.atom_type),
                  'num_branches': modes.frequencies.magnitude.shape[1],
