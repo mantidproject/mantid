@@ -7,18 +7,18 @@ if(CXXTEST_FOUND)
     set(BCRYPT bcrypt)
   endif()
 
-  target_link_libraries(APITest
-                        PRIVATE
-                        Mantid::Types
-                        Mantid::API
-                        Mantid::DataHandling
-                        Mantid::Nexus
-                        Mantid::NexusGeometry
-                        ${BCRYPT}
-                        Boost::filesystem
-                        gmock
-                        Python::Python
-                        )
+  target_link_libraries(
+    APITest
+    PRIVATE Mantid::Types
+            Mantid::API
+            Mantid::DataHandling
+            Mantid::Nexus
+            Mantid::NexusGeometry
+            ${BCRYPT}
+            Boost::filesystem
+            gmock
+            Python::Python
+  )
 
   add_framework_test_helpers(APITest)
 

@@ -17,17 +17,14 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsInstrumentWidgetTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ${MOCK_HEADER_DIRS}
-    ../../../../Framework/DataObjects/inc
-  LINK_LIBS
-    Python::Python
-    ${CORE_MANTIDLIBS}
-    Mantid::PythonInterfaceCore
-    Mantid::DataObjects
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    gmock
+  INCLUDE_DIRS ${MOCK_HEADER_DIRS} ../../../../Framework/DataObjects/inc
+  LINK_LIBS Python::Python
+            ${CORE_MANTIDLIBS}
+            Mantid::PythonInterfaceCore
+            Mantid::DataObjects
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            gmock
   QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   PARENT_DEPENDENCIES GUITests

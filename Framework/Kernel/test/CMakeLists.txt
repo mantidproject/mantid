@@ -1,19 +1,11 @@
 if(CXXTEST_FOUND)
 
-  # This variable is used within the cxxtest_add_test macro to build this helper
-  # class into the test executable. It will go out of scope at the end of this
-  # file so doesn't need un-setting
+  # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable. It will
+  # go out of scope at the end of this file so doesn't need un-setting
 
   cxxtest_add_test(KernelTest ${TEST_FILES})
-  target_include_directories(KernelTest SYSTEM PRIVATE
-                             ${CXXTEST_INCLUDE_DIR})
-  target_link_libraries(KernelTest
-                        PRIVATE
-                        Mantid::Types
-                        Mantid::Kernel
-                        Mantid::Json
-                        gmock
-                        Boost::filesystem)
+  target_include_directories(KernelTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
+  target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json gmock Boost::filesystem)
   add_framework_test_helpers(KernelTest)
   add_dependencies(FrameworkTests KernelTest)
   # Test data
