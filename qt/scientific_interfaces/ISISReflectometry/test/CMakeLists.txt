@@ -48,27 +48,18 @@ mtd_add_qt_tests(
   TARGET_NAME MantidScientificInterfacesISISReflectometryTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ../../../../Framework/CurveFitting/inc
-    ../../../../Framework/DataObjects/inc
-    ../GUI/Preview
-    Preview
-    Reduction
-  LINK_LIBS
-    ${CORE_MANTIDLIBS}
-    Mantid::DataObjects
-    gmock
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    Mantid::PythonInterfaceCore
-    Python::Python
-  MTD_QT_LINK_LIBS
-    MantidScientificInterfacesISISReflectometry
-    MantidQtWidgetsCommon
-    MantidQtWidgetsPlotting
-    MantidQtWidgetsInstrumentView
-    MantidQtWidgetsMplCpp
-  PARENT_DEPENDENCIES
-    GUITests)
+  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../GUI/Preview Preview
+               Reduction
+  LINK_LIBS ${CORE_MANTIDLIBS}
+            Mantid::DataObjects
+            gmock
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            Mantid::PythonInterfaceCore
+            Python::Python
+  MTD_QT_LINK_LIBS MantidScientificInterfacesISISReflectometry MantidQtWidgetsCommon MantidQtWidgetsPlotting
+                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp
+  PARENT_DEPENDENCIES GUITests
+)
 
 add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt5)

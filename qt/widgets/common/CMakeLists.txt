@@ -68,7 +68,6 @@ set(QT5_SRC_FILES
     src/MantidWSIndexDialog.cpp
     src/Message.cpp
     src/MessageDisplay.cpp
-    src/MessageHandler.cpp
     src/MultifitSetupDialog.cpp
     src/MuonPeriodInfo.cpp
     src/NotificationService.cpp
@@ -279,13 +278,11 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
-    inc/MantidQtWidgets/Common/IMessageHandler.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
-    inc/MantidQtWidgets/Common/MessageHandler.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -864,8 +861,26 @@ set(TEST_PY_FILES test/FileFinderWidgetTest.py)
 
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
-# Target
-# Additional components for this module
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")
+endif()
+
+# Target Additional components for this module
+find_package(
+  Qt5
+  COMPONENTS Concurrent Help Network PrintSupport
+  REQUIRED
+)
+# Prefer WebEngineWidgets over WebkitWidgets
+unset(Qt5_FOUND)
+find_package(
+  Qt5
+  COMPONENTS WebEngineWidgets
+  QUIET
+)
+if(Qt5_FOUND)
+  set(_webwidgets_tgt Qt5::WebEngineWidgets)
+else()
   find_package(
     Qt5
     COMPONENTS WebKitWidgets
@@ -900,31 +915,13 @@ mtd_add_qt_library(
   MOC ${QT5_MOC_FILES}
   NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
-  DEFS
-    IN_MANTIDQT_COMMON
-    QSCINTILLA_DLL
-    QT5_DEFS
-    ${_webengine_def}
-  PRECOMPILED inc/MantidQtWidgets/Common/PrecompiledHeader.h
-  INCLUDE_DIRS
-    inc
-  SYSTEM_INCLUDE_DIRS
-    ${Boost_INCLUDE_DIRS}
-    ${_sip_include_dir}
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    PUBLIC
-    Mantid::PythonInterfaceCore
-  QT5_LINK_LIBS
-    Qt5::Core
-    Qt5::Concurrent
-    Qt5::Help
-    Qt5::Network
-    Qt5::PrintSupport
-    ${_webwidgets_tgt}
-    Qt5::Qscintilla
-  MTD_QT_LINK_LIBS
-    MantidQtIcons
+  DEFS IN_MANTIDQT_COMMON QSCINTILLA_DLL QT5_DEFS ${_webengine_def} PRECOMPILED
+       inc/MantidQtWidgets/Common/PrecompiledHeader.h
+  INCLUDE_DIRS inc
+  SYSTEM_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${_sip_include_dir}
+  LINK_LIBS ${TARGET_LIBRARIES} PUBLIC Mantid::PythonInterfaceCore
+  QT5_LINK_LIBS Qt5::Concurrent Qt5::Help Qt5::Network Qt5::PrintSupport ${_webwidgets_tgt} Qt5::Qscintilla
+  MTD_QT_LINK_LIBS MantidQtIcons
   INSTALL_DIR ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
@@ -1023,17 +1020,14 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsCommonTest
   QT_VERSION 5
   SRC ${QT5_TEST_FILES}
-  INCLUDE_DIRS
-    ../../../Framework/DataObjects/inc
-    ../../../Framework/Crystal/inc
-  LINK_LIBS
-    ${TARGET_LIBRARIES}
-    ${Boost_LIBRARIES}
-    Mantid::PythonInterfaceCore
-    Mantid::DataObjects
-    gmock
-    Qt5::Test
-    Python::Python
+  INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
+  LINK_LIBS ${TARGET_LIBRARIES}
+            ${Boost_LIBRARIES}
+            Mantid::PythonInterfaceCore
+            Mantid::DataObjects
+            gmock
+            Qt5::Test
+            Python::Python
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

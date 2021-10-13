@@ -42,26 +42,17 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestIni
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsPlottingTest
   QT_VERSION 5
-  INCLUDE_DIRS
-    inc
-    ../common/inc
-    ../../../Framework/DataObjects/inc
-  SRC
-    ${TEST_FILES}
-  LINK_LIBS
-    ${CORE_MANTIDLIBS}
-    Mantid::DataObjects
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    Mantid::PythonInterfaceCore
-    gmock
-    Python::Python
-  MTD_QT_LINK_LIBS
-    MantidQtWidgetsCommon
-    MantidQtWidgetsPlotting
-    MantidQtWidgetsMplCpp
-  PARENT_DEPENDENCIES
-    GUITests
+  INCLUDE_DIRS inc ../common/inc ../../../Framework/DataObjects/inc
+  SRC ${TEST_FILES}
+  LINK_LIBS ${CORE_MANTIDLIBS}
+            Mantid::DataObjects
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            Mantid::PythonInterfaceCore
+            gmock
+            Python::Python
+  MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
+  PARENT_DEPENDENCIES GUITests
 )
 
 add_framework_test_helpers(MantidQtWidgetsPlottingTestQt5)

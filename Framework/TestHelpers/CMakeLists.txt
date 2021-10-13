@@ -61,17 +61,13 @@ set(INC_FILES
 
 if(COVERAGE)
   foreach(loop_var ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
-# We use an object lib to avoid the problems with static libs and dynamic
-# factories. As the linker will only pull in the static init if the symbol
-# is used in the executable.
-# A DLL could be used but it requires each helper to be labelled with DLL export
-# and complexity one CMake file < DLL exports in every test helper header
+# We use an object lib to avoid the problems with static libs and dynamic factories. As the linker will only pull in the
+# static init if the symbol is used in the executable. A DLL could be used but it requires each helper to be labelled
+# with DLL export and complexity one CMake file < DLL exports in every test helper header
 add_library(FrameworkTestHelpers OBJECT ${SRC_FILES} ${INC_FILES})
 add_library(FrameWorkTestHelpersHeaders INTERFACE)
 
@@ -80,29 +76,24 @@ add_library(Mantid::FrameWorkTestHelpersHeaders ALIAS FrameWorkTestHelpersHeader
 set_property(TARGET FrameworkTestHelpers PROPERTY FOLDER "UnitTests")
 
 # Unfortunately the INTERFACE property does not propegate through
-target_include_directories(FrameworkTestHelpers PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
+target_include_directories(FrameworkTestHelpers PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>)
+
+target_include_directories(FrameWorkTestHelpersHeaders INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>)
+
+target_link_libraries(
+  FrameworkTestHelpers
+  PRIVATE Mantid::API
+          Boost::boost
+          Boost::filesystem
+          Mantid::DataObjects
+          Mantid::Catalog
+          Mantid::DataHandling
+          Mantid::Geometry
+          Mantid::Kernel
+          Mantid::MDAlgorithms
+          Mantid::Muon
+          Mantid::NexusGeometry
+          gmock
 )
 
-target_include_directories(FrameWorkTestHelpersHeaders INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-)
-
-target_link_libraries(FrameworkTestHelpers
-                        PRIVATE
-                        Mantid::API
-                        Boost::boost
-                        Boost::filesystem
-                        Mantid::DataObjects
-                        Mantid::Catalog
-                        Mantid::DataHandling
-                        Mantid::Geometry
-                        Mantid::Kernel
-                        Mantid::MDAlgorithms
-                        Mantid::Muon
-                        Mantid::NexusGeometry
-			gmock
-)
-
-target_include_directories(FrameworkTestHelpers PRIVATE
-                           ${CXXTEST_INCLUDE_DIR})
+target_include_directories(FrameworkTestHelpers PRIVATE ${CXXTEST_INCLUDE_DIR})
