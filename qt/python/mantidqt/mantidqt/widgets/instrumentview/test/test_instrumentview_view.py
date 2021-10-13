@@ -55,7 +55,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         QApplication.sendPostedEvents()
 
         # recreate the workspace to trigger the wksp replacement event
-        LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap=False)
+        ws = CreateSampleWorkspace()
         QApplication.sendPostedEvents()
         p.wait()
 
