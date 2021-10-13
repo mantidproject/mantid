@@ -43,9 +43,9 @@ public:
     const double b = 4.0;
     const double c = 7.2;
 
-    pl.setParameter("magnitude", a);
-    pl.setParameter("exponent", b);
-    pl.setParameter("constant", c);
+    pl.setParameter("Magnitude", a);
+    pl.setParameter("Exponent", b);
+    pl.setParameter("Constant", c);
 
     const std::size_t numPoints = 100;
     std::array<double, numPoints> xValues;

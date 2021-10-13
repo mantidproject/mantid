@@ -19,9 +19,9 @@ Provide Power Law function interface to IFunction.
 I.e. the function: y = ax^b +c.
 PowerLaw parameters:
 <UL>
-<LI> magnitude - coefficient for linear term (default 1.0)</LI>
-<LI> exponent - exponent (default 1.0)</LI>
-<LI> constant - coefficient for constant term (default 0.0)</LI>
+<LI> Magnitude - coefficient for linear term (default 1.0)</LI>
+<LI> Exponent - exponent (default 1.0)</LI>
+<LI> Constant - coefficient for constant term (default 0.0)</LI>
 </UL>
 */
 

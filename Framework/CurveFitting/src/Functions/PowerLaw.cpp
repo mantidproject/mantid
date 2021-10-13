@@ -23,15 +23,15 @@ using namespace API;
 DECLARE_FUNCTION(PowerLaw)
 
 void PowerLaw::init() {
-  declareParameter("magnitude", 1.0, "coefficient for linear term");
-  declareParameter("exponent", 1.0, "exponent");
-  declareParameter("constant", 0.0, "coefficient for constant term");
+  declareParameter("Magnitude", 1.0, "coefficient for linear term");
+  declareParameter("Exponent", 1.0, "exponent");
+  declareParameter("Constant", 0.0, "coefficient for constant term");
 }
 
 void PowerLaw::function1D(double *out, const double *xValues, const size_t nData) const {
-  const double a = getParameter("magnitude");
-  const double b = getParameter("exponent");
-  const double c = getParameter("constant");
+  const double a = getParameter("Magnitude");
+  const double b = getParameter("Exponent");
+  const double c = getParameter("Constant");
 
   for (size_t i = 0; i < nData; i++) {
     out[i] = c + a * pow(xValues[i], b);
@@ -39,8 +39,8 @@ void PowerLaw::function1D(double *out, const double *xValues, const size_t nData
 }
 
 void PowerLaw::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-  const double a = getParameter("magnitude");
-  const double b = getParameter("exponent");
+  const double a = getParameter("Magnitude");
+  const double b = getParameter("Exponent");
 
   for (size_t i = 0; i < nData; i++) {
     double diffa = pow(xValues[i], b);
