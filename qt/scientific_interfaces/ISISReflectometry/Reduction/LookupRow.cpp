@@ -54,23 +54,23 @@ bool operator!=(LookupRow const &lhs, LookupRow const &rhs) { return !(lhs == rh
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow) {
   auto result = LookupRow::ValueArray();
   if (lookupRow.thetaOrWildcard())
-    result[0] = std::to_string(*lookupRow.thetaOrWildcard());
-  result[1] = lookupRow.transmissionWorkspaceNames().firstRunList();
-  result[2] = lookupRow.transmissionWorkspaceNames().secondRunList();
+    result[LookupRow::Column::THETA] = std::to_string(*lookupRow.thetaOrWildcard());
+  result[LookupRow::Column::FIRST_TRANS] = lookupRow.transmissionWorkspaceNames().firstRunList();
+  result[LookupRow::Column::SECOND_TRANS] = lookupRow.transmissionWorkspaceNames().secondRunList();
   if (lookupRow.transmissionProcessingInstructions())
-    result[3] = *lookupRow.transmissionProcessingInstructions();
+    result[LookupRow::Column::TRANS_SPECTRA] = *lookupRow.transmissionProcessingInstructions();
   if (lookupRow.qRange().min())
-    result[4] = std::to_string(*lookupRow.qRange().min());
+    result[LookupRow::Column::QMIN] = std::to_string(*lookupRow.qRange().min());
   if (lookupRow.qRange().max())
-    result[5] = std::to_string(*lookupRow.qRange().max());
+    result[LookupRow::Column::QMAX] = std::to_string(*lookupRow.qRange().max());
   if (lookupRow.qRange().step())
-    result[6] = std::to_string(*lookupRow.qRange().step());
+    result[LookupRow::Column::QSTEP] = std::to_string(*lookupRow.qRange().step());
   if (lookupRow.scaleFactor())
-    result[7] = std::to_string(*lookupRow.scaleFactor());
+    result[LookupRow::Column::SCALE] = std::to_string(*lookupRow.scaleFactor());
   if (lookupRow.processingInstructions())
-    result[8] = *lookupRow.processingInstructions();
+    result[LookupRow::Column::RUN_SPECTRA] = *lookupRow.processingInstructions();
   if (lookupRow.backgroundProcessingInstructions())
-    result[9] = *lookupRow.backgroundProcessingInstructions();
+    result[LookupRow::Column::BACKGROUND_SPECTRA] = *lookupRow.backgroundProcessingInstructions();
   return result;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
