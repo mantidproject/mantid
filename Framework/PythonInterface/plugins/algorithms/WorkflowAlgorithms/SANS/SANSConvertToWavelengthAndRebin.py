@@ -62,36 +62,37 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
     def PyExec(self):
         workspace = get_input_workspace_as_copy_if_not_same_as_output_workspace(self)
-
-        progress = Progress(self, start=0.0, end=1.0, nreports=3)
+        wavelength_pairs: List[Tuple[float, float]] = json.loads(self.getProperty(self.WAV_PAIRS).value)
+        progress = Progress(self, start=0.0, end=1.0, nreports=1 + len(wavelength_pairs))  # 1 - convert units
 
         # Convert the units into wavelength
         progress.report("Converting workspace to wavelength units.")
         workspace = self._convert_units_to_wavelength(workspace)
 
-        wavelength_pairs: List[Tuple[float, float]] = json.loads(self.getProperty(self.WAV_PAIRS).value)
-
         # Get the rebin option
-        rebin_type = RebinType(self.getProperty("RebinMode").value)
         output_group = WorkspaceGroup()
         for pair in wavelength_pairs:
             rebin_string = self._get_rebin_string(workspace, *pair)
-            if rebin_type is RebinType.REBIN:
-                rebin_options = {"InputWorkspace": workspace,
-                                 "PreserveEvents": True,
-                                 "Params": rebin_string}
-            else:
-                rebin_options = {"InputWorkspace": workspace,
-                                 "Params": rebin_string}
+            progress.report(f"Converting wavelength range: {rebin_string}")
 
             # Perform the rebin
-            progress.report("Performing rebin.")
-            out_ws = self._perform_rebin(rebin_type, rebin_options)
+            rebin_options = self._get_rebin_params(rebin_string, workspace)
+            out_ws = self._perform_rebin(rebin_options)
 
             append_to_sans_file_tag(out_ws, "_toWavelength")
             output_group.addWorkspace(out_ws)
-            progress.report("Finished converting to wavelength.")
         self.setProperty("OutputWorkspace", output_group)
+
+    def _get_rebin_params(self, rebin_string, workspace):
+        rebin_type = RebinType(self.getProperty("RebinMode").value)
+        if rebin_type is RebinType.REBIN:
+            rebin_options = {"InputWorkspace": workspace,
+                             "PreserveEvents": True,
+                             "Params": rebin_string}
+        else:
+            rebin_options = {"InputWorkspace": workspace,
+                             "Params": rebin_string}
+        return rebin_options
 
     def validateInputs(self):
         errors = dict()
@@ -157,7 +158,8 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         wavelength_step *= pre_factor
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
 
-    def _perform_rebin(self, rebin_type, rebin_options):
+    def _perform_rebin(self, rebin_options):
+        rebin_type = RebinType(self.getProperty("RebinMode").value)
         rebin_name = "Rebin" if rebin_type is RebinType.REBIN else "InterpolatingRebin"
         rebin_alg = create_unmanaged_algorithm(rebin_name, **rebin_options)
         rebin_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
