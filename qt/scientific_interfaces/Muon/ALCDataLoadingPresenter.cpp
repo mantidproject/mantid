@@ -29,7 +29,7 @@
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
 // must include the "."
-const QStringList ADDITIONAL_EXTENSIONS{".nxs_v2", ".bin"};
+const std::vector<std::string> ADDITIONAL_EXTENSIONS{".nxs_v2", ".bin"};
 } // namespace
 
 using namespace Mantid::Kernel;
