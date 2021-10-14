@@ -30,6 +30,7 @@ public:
   virtual void notifyLoadBatchRequested(int) = 0;
   virtual void notifyShowOptionsRequested() = 0;
   virtual void notifyShowSlitCalculatorRequested() = 0;
+  virtual void notifyCloseEvent(QCloseEvent *&event) = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 

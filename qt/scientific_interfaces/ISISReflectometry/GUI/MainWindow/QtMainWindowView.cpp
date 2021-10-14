@@ -164,14 +164,7 @@ std::string QtMainWindowView::runPythonAlgorithm(const std::string &pythonCode) 
 Handles attempt to close main window
 * @param event : [input] The close event
 */
-void QtMainWindowView::closeEvent(QCloseEvent *event) {
-  // Don't close if anything is running or
-  // user does not want to discard unsaved changes
-  if (m_presenter->isCloseEventPrevented())
-    event->ignore();
-  else
-    event->accept();
-}
+void QtMainWindowView::closeEvent(QCloseEvent *event) { m_notifyee->notifyCloseEvent(event); }
 
 void QtMainWindowView::giveUserCritical(const std::string &prompt, const std::string &title) {
   QMessageBox::critical(this, QString::fromStdString(title), QString::fromStdString(prompt), QMessageBox::Ok,

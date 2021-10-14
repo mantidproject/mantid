@@ -63,6 +63,7 @@ public:
   void notifyAnyBatchReductionResumed() override;
   void notifyAnyBatchReductionPaused() override;
   void notifyChangeInstrumentRequested(std::string const &instrumentName) override;
+  void notifyCloseEvent(QCloseEvent *&event) override;
   void notifyUpdateInstrumentRequested() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
