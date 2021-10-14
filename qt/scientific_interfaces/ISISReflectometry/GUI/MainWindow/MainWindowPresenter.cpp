@@ -130,6 +130,14 @@ void MainWindowPresenter::notifyChangeInstrumentRequested(std::string const &new
     onInstrumentChanged();
 }
 
+void MainWindowPresenter::notifyCloseEvent(QCloseEvent *&event) {
+  if (isCloseEventPrevented()) {
+    event->ignore();
+  } else {
+    event->accept();
+  }
+}
+
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
   // An instrument should have been set up before any calls to this function.
   if (!instrument())
