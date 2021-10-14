@@ -24,5 +24,6 @@ Improvements
   requires the Euphonic library to be installed; as it is not
   currently included in the Mantid release, an installer is provided
   in the Script Repository.
+- In indirect Data analysis the Elwin Tab has had its UI updated to be more user friendly.
 
 :ref:`Release 6.3.0 <v6.3.0>`
