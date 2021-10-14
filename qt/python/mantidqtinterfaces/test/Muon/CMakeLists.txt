@@ -127,6 +127,7 @@ set(TEST_PY_FILES
     plotting_canvas/plotting_canvas_presenter_test.py
     plotting_canvas/plotting_canvas_utils_test.py
     plotting_canvas/plotting_canvas_view_test.py
+    plot_widget/frequency_analysis_plot_widget_test.py
     plot_widget/muon_analysis_plot_widget_test.py
     quick_edit/dual_quick_edit_test.py
     quick_edit/quick_edit_presenter_test.py
