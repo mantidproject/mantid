@@ -118,7 +118,7 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
 
         presenter = self._make_presenter()
         presenter._handle_selection_changed(run_selection=runs)
-        assert_called(self.view.enable_summation_settings)
+        self.view.enable_summation_settings.assert_called_once()
 
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_enables_summation_settings_when_event_and_histogram_data(self, _):
@@ -131,7 +131,7 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
 
         presenter = self._make_presenter()
         presenter._handle_selection_changed(run_selection=runs)
-        assert_called(self.view.enable_summation_settings)
+        self.view.enable_summation_settings.assert_called_once()
 
 
 class SummationConfigurationTest(AddRunsPagePresenterTestCase):
@@ -300,6 +300,7 @@ class SumButtonTest(AddRunsPagePresenterTestCase):
         fake_run_selection = mock.Mock()
         fake_run_selection.has_any_runs.return_value = False
 
+        self.view.disable_sum.reset_mock()
         self.presenter._handle_selection_changed(run_selection=fake_run_selection)
         self.view.disable_sum.assert_called_once()
 

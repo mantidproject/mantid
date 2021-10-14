@@ -79,8 +79,6 @@ set(PYTHON_TEST_FILES
     mantidqt/widgets/test/test_messagedisplay.py
     mantidqt/widgets/test/test_scriptrepository.py
     mantidqt/widgets/test/test_fittingmode.py
-    mantidqt/widgets/test/waterfallplotfillareadialog/test/test_waterfallplotfillareadialogpresenter.py
-    mantidqt/widgets/test/waterfallplotoffsetdialog/test/test_waterfallplotoffsetdialogpresenter.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
     mantidqt/widgets/test/test_fitpropertybrowserbase.py
     mantidqt/widgets/test/test_fitpropertybrowserplotinteraction.py
@@ -91,6 +89,8 @@ set(PYTHON_TEST_FILES
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
     mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
+    mantidqt/widgets/waterfallplotfillareadialog/test/test_waterfallplotfillareadialogpresenter.py
+    mantidqt/widgets/waterfallplotoffsetdialog/test/test_waterfallplotoffsetdialogpresenter.py
 )
 
 # ctest target for widgets that only get tested in qt5, because they are only used in the workbench

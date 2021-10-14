@@ -130,7 +130,6 @@ set(TEST_PY_FILES
     plot_fit_panes/plot_model_fit_pane_model_test.py
     plot_fit_panes/plot_model_fit_pane_presenter_test.py
     plot_fit_panes/plot_widget_test.py
-    PlottingView_test.py
     plotting_canvas/plot_color_queue_test.py
     plotting_canvas/plotting_canvas_model_test.py
     plotting_canvas/plotting_canvas_presenter_test.py

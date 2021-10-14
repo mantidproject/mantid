@@ -857,9 +857,6 @@ foreach(_header ${OLD_UI_HEADERS})
   file(REMOVE ${_header})
 endforeach()
 
-# Python unit tests
-set(TEST_PY_FILES test/FileFinderWidgetTest.py)
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -1012,8 +1009,6 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
-
-set(TEST_PY_FILES FileFinderWidgetTest.py)
 
 if(NOT APPLE)
   list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
