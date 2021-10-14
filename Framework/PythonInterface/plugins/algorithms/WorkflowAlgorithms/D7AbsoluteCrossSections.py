@@ -884,10 +884,21 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_output_names(self, output_ws):
         """Renames output workspaces with unique names based on the provided output workspace name
         and the input name."""
+        input_ws = self.getPropertyValue("InputWorkspace")
+        possible_polarisations = ['XPO', 'YPO', 'ZPO']
         for entry in mtd[output_ws]:  # renames individual ws to contain the output name
             entry_name = entry.name()
             if entry_name[:2] == "__":
                 entry_name = entry_name[2:]
+            if input_ws in entry_name:
+                entry_name = entry_name[len(input_ws)+1:]  # assuming the verbose input name is at the beginning
+            if any([polarisation in entry_name for polarisation in possible_polarisations]):
+                pol_length = len(max(possible_polarisations, key=len))
+                if 'ON' in entry_name:
+                    pol_length += 4  # length of '_ON_'
+                else:  # == 'OFF'
+                    pol_length += 5  # length of '_OFF_'
+                entry_name = entry_name[pol_length:]
             output_name = self.getPropertyValue("OutputWorkspace")
             if output_name not in entry_name:
                 new_name = "{}_{}".format(output_name, entry_name)
