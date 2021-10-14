@@ -531,7 +531,7 @@ void setCell(ITableWorkspace &self, const object &col_or_row, const int row_or_c
  * @param column Name or index of column
  * @return True if read only, False otherwise.
  */
-int getColumnReadOnly(ITableWorkspace &self, const object &column) {
+bool isColumnReadOnly(ITableWorkspace &self, const object &column) {
   // Find the column
   Mantid::API::Column_const_sptr colptr;
   if (STR_CHECK(column.ptr())) {
@@ -539,7 +539,6 @@ int getColumnReadOnly(ITableWorkspace &self, const object &column) {
   } else {
     colptr = self.getColumn(extract<int>(column)());
   }
-
   return colptr->getReadOnly();
 }
 
@@ -761,7 +760,7 @@ void export_ITableWorkspace() {
            "Sets whether or not a given column of this workspace should be read-only. Columns can be "
            "selected by name or by index")
 
-      .def("getColumnReadOnly", &getColumnReadOnly, (arg("self"), arg("column")),
+      .def("isColumnReadOnly", &isColumnReadOnly, (arg("self"), arg("column")),
            "Gets whether or not a given column of this workspace is be read-only. Columns can be "
            "selected by name or by index");
 

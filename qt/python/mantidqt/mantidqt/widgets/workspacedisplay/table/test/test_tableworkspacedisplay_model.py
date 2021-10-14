@@ -166,9 +166,9 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
     def test_is_editable_column(self):
         ws = MockWorkspace()
         model = TableWorkspaceDisplayModel(ws)
-        ws.getColumnReadOnly = StrictMock(return_value=False)
+        ws.isColumnReadOnly = StrictMock(return_value=False)
         self.assertTrue(model.is_editable_column(0))
-        ws.getColumnReadOnly = StrictMock(return_value=True)
+        ws.isColumnReadOnly = StrictMock(return_value=True)
         self.assertFalse(model.is_editable_column(0))
 
 
