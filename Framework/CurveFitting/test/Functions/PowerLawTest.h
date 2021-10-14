@@ -39,13 +39,13 @@ public:
     TS_ASSERT_THROWS(pl.setParameter("X", 1.0), const std::invalid_argument &);
     TS_ASSERT_THROWS(pl.setParameter("A9", 1.0), const std::invalid_argument &);
 
-    const double a = 2.3;
-    const double b = 4.0;
-    const double c = 7.2;
+    const double magnitude = 2.3;
+    const double exponent = 4.0;
+    const double constant = 7.2;
 
-    pl.setParameter("Magnitude", a);
-    pl.setParameter("Exponent", b);
-    pl.setParameter("Constant", c);
+    pl.setParameter("Magnitude", magnitude);
+    pl.setParameter("Exponent", exponent);
+    pl.setParameter("Constant", constant);
 
     const std::size_t numPoints = 100;
     std::array<double, numPoints> xValues;
@@ -54,7 +54,7 @@ public:
     pl.function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_DELTA(yValues[i], c + a * pow(i, b), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], constant + magnitude * pow(i, exponent), 1e-12);
     }
   }
 };
