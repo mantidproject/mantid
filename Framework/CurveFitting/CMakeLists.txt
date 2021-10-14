@@ -443,6 +443,7 @@ set(TEST_FILES
     Functions/LorentzianTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
+    Functions/MuoniumDecouplingCurveTest.h
     Functions/NeutronBk2BkExpConvPVoigtTest.h
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
