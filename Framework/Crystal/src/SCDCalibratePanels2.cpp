@@ -617,31 +617,21 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
     std::shared_ptr<const Geometry::RectangularDetector> rectDet =
         std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
 
-    double bankscalex{1.}, bankscaley{1.};
-    if (rectDet) {
-      // retrieve the (scalex, scaley) stored in the workspace for this bank/component
-      Geometry::ParameterMap &pmap = pws->instrumentParameters();
-      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
-      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
-      if (!scalexparams.empty())
-        bankscalex = scalexparams[0];
-      if (!scaleyparams.empty())
-        bankscaley = scaleyparams[0];
-    }
+    std::pair<double, double> scales = getRectangularDetectorScaleFactors(inst, bankname, pws->instrumentParameters());
 
     std::ostringstream scaleconstraints;
     std::ostringstream scaleties;
     if (rectDet && docalibsize) {
       // set up constraints
-      scaleconstraints << bankscalex - sizesearchradius << " <=ScaleX<" << bankscalex + sizesearchradius;
+      scaleconstraints << scales.first - sizesearchradius << " <=ScaleX<" << scales.first + sizesearchradius;
       if (fixdetxyratio) {
         scaleties << "ScaleX=ScaleY";
       } else {
-        scaleconstraints << "," << bankscaley - sizesearchradius << " <=ScaleY<" << bankscaley + sizesearchradius;
+        scaleconstraints << "," << scales.second - sizesearchradius << " <=ScaleY<" << scales.second + sizesearchradius;
       }
     } else {
       // fix the scalex and scaley to its
-      scaleties << "ScaleX=" << bankscalex << ", ScaleY=" << bankscaley;
+      scaleties << "ScaleX=" << scales.first << ", ScaleY=" << scales.second;
     }
 
     // construct the final constraint and tie
@@ -1151,25 +1141,13 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
     relRot.getAngleAxis(deg, xAxis, yAxis, zAxis);
 
     // Detector scaling
-    // FIXME TODO - Duplicate with line 1273
-    double scalex{1.}, scaley{1.};
-    Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankName);
-    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-    if (rectDet) {
-      // get instrument parameter map and find out whether the
-      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
-      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
-      if (!scalexparams.empty())
-        scalex = scalexparams[0];
-      if (!scaleyparams.empty())
-        scaley = scaleyparams[0];
-    }
+    std::pair<double, double> scales = getRectangularDetectorScaleFactors(instrument, bankName, pmap);
 
     // Append a new row
     Mantid::API::TableRow bankRow = itablews->appendRow();
     // Row and positions
-    bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis << zAxis << deg << scalex << scaley;
+    bankRow << bankName << pos1.X() << pos1.Y() << pos1.Z() << xAxis << yAxis << zAxis << deg << scales.first
+            << scales.second;
   }
 
   g_log.notice() << "finished generating tables\n";
@@ -1281,20 +1259,22 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
     std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
     V3D pos1 = bank->getRelativePos();
     // scale X and scale Y: retrieve from component if it is rectangualr detector
-    double scalex{1.0}, scaley{1.0};
-    Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankName);
-    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
-        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-    if (rectDet) {
-      // get instrument parameter map and find out whether the
-      // Geometry::ParameterMap &pmap = pws->instrumentParameters();
-      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
-      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
-      if (!scalexparams.empty())
-        scalex = scalexparams[0];
-      if (!scaleyparams.empty())
-        scaley = scaleyparams[0];
-    }
+    //    double scalex{1.0}, scaley{1.0};
+    //    Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankName);
+    //    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+    //        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+    //    if (rectDet) {
+    //      // get instrument parameter map and find out whether the
+    //      // Geometry::ParameterMap &pmap = pws->instrumentParameters();
+    //      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
+    //      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
+    //      if (!scalexparams.empty())
+    //        scalex = scalexparams[0];
+    //      if (!scaleyparams.empty())
+    //        scaley = scaleyparams[0];
+    //    }
+
+    std::pair<double, double> scales = getRectangularDetectorScaleFactors(instrument, bankName, pmap);
 
     // prepare node
     ptree bank_root;
@@ -1320,8 +1300,8 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
     bank_droty.put("<xmlattr>.name", "roty");
     bank_drotz.put("<xmlattr>.name", "rotz");
 
-    bank_sx_val.put("<xmlattr>.val", scalex);
-    bank_sy_val.put("<xmlattr>.val", scaley);
+    bank_sx_val.put("<xmlattr>.val", scales.first);
+    bank_sy_val.put("<xmlattr>.val", scales.second);
     bank_sx.put("<xmlattr>.name", "scalex");
     bank_sy.put("<xmlattr>.name", "scaley");
 
@@ -1784,6 +1764,43 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
   g_log.notice() << "Profile data is saved at:\n"
                  << filenamebase << "\n"
                  << "END of profiling objective func along L1 and T0\n";
+}
+
+/**
+ * @brief Retrieve "scalex" and "scaley" from a workspace's parameter map if the component is rectangular detector
+ *
+ * The default cases for the return value includes
+ * 1. the bank is not a rectagular detector OR
+ * 2. the component does not have "scalex" and "scaley" in parameter map
+ *
+ * @param instrument :: Instrument geometry
+ * @param bankname :: bank name (component name)
+ * @param pmap :: parameter map from the same workspace where instrument is belonged to
+ * @return :: pair as scalex and scaley. Default is (1., 1.)
+ */
+std::pair<double, double>
+SCDCalibratePanels2::getRectangularDetectorScaleFactors(std::shared_ptr<Geometry::Instrument> &instrument,
+                                                        const std::string &bankname,
+                                                        const Geometry::ParameterMap &pmap) {
+
+  std::pair<double, double> scales{1.0, 1.0};
+
+  // docalibsize, sizesearchradius, fixdetxyratio
+  Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankname);
+  std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+
+  if (rectDet) {
+    // retrieve the (scalex, scaley) stored in the workspace for this bank/component
+    auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
+    auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
+    if (!scalexparams.empty())
+      scales.first = scalexparams[0];
+    if (!scaleyparams.empty())
+      scales.second = scaleyparams[0];
+  }
+
+  return scales;
 }
 
 } // namespace Mantid::Crystal
