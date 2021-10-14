@@ -1258,22 +1258,6 @@ void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
     Quat relRot = bank->getRelativeRot();
     std::vector<double> relRotAngles = relRot.getEulerAngles("XYZ");
     V3D pos1 = bank->getRelativePos();
-    // scale X and scale Y: retrieve from component if it is rectangualr detector
-    //    double scalex{1.0}, scaley{1.0};
-    //    Geometry::IComponent_const_sptr comp = instrument->getComponentByName(bankName);
-    //    std::shared_ptr<const Geometry::RectangularDetector> rectDet =
-    //        std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
-    //    if (rectDet) {
-    //      // get instrument parameter map and find out whether the
-    //      // Geometry::ParameterMap &pmap = pws->instrumentParameters();
-    //      auto scalexparams = pmap.getDouble(rectDet->getName(), "scalex");
-    //      auto scaleyparams = pmap.getDouble(rectDet->getName(), "scaley");
-    //      if (!scalexparams.empty())
-    //        scalex = scalexparams[0];
-    //      if (!scaleyparams.empty())
-    //        scaley = scaleyparams[0];
-    //    }
-
     std::pair<double, double> scales = getRectangularDetectorScaleFactors(instrument, bankName, pmap);
 
     // prepare node
