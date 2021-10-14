@@ -469,6 +469,13 @@ class PolDiffILLReduction(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=entry, OutputWorkspace=output_name)
         return ws
 
+    @staticmethod
+    def _set_as_distribution(ws):
+        """Wrapper to set distribution flag to all entries in a workspace group."""
+        for entry in mtd[ws]:
+            entry.setDistribution(True)
+        return ws
+
     def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
         of a single crystal measurement, it also merges the omega scan data into one workspace per polarisation
@@ -1072,6 +1079,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         self._sampleAndEnvironmentProperties['NeutronSpeed'] = float(neutron_speed)
         tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_speed  # in us
         tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_speed  # in us
+        if not self._elastic_channels_ws:
+            self._find_elastic_peak_channels(ws)
         peak_positions = mtd[self._elastic_channels_ws].column('PeakCentre')
         for entry in mtd[ws]:
             for pixel_no in range(entry.getNumberHistograms()):
@@ -1124,6 +1133,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         polarisation_directions = 0.5 * self._data_structure_helper()
         absolute_normalisation = self.getProperty('AbsoluteNormalisation').value
         output_treatment = self.getPropertyValue('OutputTreatment')
+        self._set_as_distribution(ws)
         if absolute_normalisation:
             # expected total cross-section of unpolarised neutrons in V is 1/N sum of N polarisation directions (flipper
             # ON and OFF), for uniaxial: N = 1, for 6-p: N = 3,  and normalised to 0.404 barns times the number
