@@ -23,15 +23,15 @@ using namespace API;
 DECLARE_FUNCTION(MuoniumDecouplingCurve)
 
 void MuoniumDecouplingCurve::init() {
-  declareParameter("magnitude", 1.0, "coefficient for linear term");
-  declareParameter("b", 1.0, "exponent");
-  declareParameter("constant", 0.0, "coefficient for constant term");
+  declareParameter("RepolarisingAsymmetry", 1.0, "coefficient for linear term");
+  declareParameter("DecouplingField", 1.0, "??");
+  declareParameter("BaselineAsymmetry", 0.0, "coefficient for constant term");
 }
 
 void MuoniumDecouplingCurve::function1D(double *out, const double *xValues, const size_t nData) const {
-  const double a = getParameter("magnitude");
-  const double b = getParameter("b");
-  const double c = getParameter("constant");
+  const double a = getParameter("RepolarisingAsymmetry");
+  const double b = getParameter("DecouplingField");
+  const double c = getParameter("BaselineAsymmetry");
 
   for (size_t i = 0; i < nData; i++) {
     out[i] = a * (0.5 + pow(xValues[i] / b, 2)) / (1 + pow(xValues[i] / b, 2)) + c;
@@ -39,12 +39,12 @@ void MuoniumDecouplingCurve::function1D(double *out, const double *xValues, cons
 }
 
 void MuoniumDecouplingCurve::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-  const double a = getParameter("magnitude");
-  const double b = getParameter("b");
+  const double a = getParameter("RepolarisingAsymmetry");
+  const double b = getParameter("DecouplingField");
 
   for (size_t i = 0; i < nData; i++) {
-    double diffa = (0.5 + pow(xValues[i] / b, 2)) / (1 + pow(xValues[i] / b, 2));
-    double diffb = a * (0.5 + pow(xValues[i], 2)) / (1 + pow(xValues[i], 2));
+    double diffa = (0.5 * pow(b, 2) + pow(xValues[i], 2)) / (pow(b, 2) + pow(xValues[i], 2));
+    double diffb = a * b * pow(xValues[i], 2) / pow(pow(b, 2) + pow(xValues[i], 2), 2);
     out->set(i, 0, diffa);
     out->set(i, 1, diffb);
     out->set(i, 2, 1);

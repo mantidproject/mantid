@@ -16,12 +16,16 @@ namespace CurveFitting {
 namespace Functions {
 /**
 Provide Muonium-style decoupling curve  function interface to IFunction.
-I.e. the function:y = a (0.5+(x/b)^2)/(1+(x/b)^2)+c.
-PowerLaw parameters:
+I.e. the function:y = a(0.5+(x/b0)^2)/(1+(x/b0)^2)+c.
+Where a = repolarising asymmetry
+b0 = decoupling field
+c = baseline asymmetry
+
+MuoniumDecouplingCurve parameters:
 <UL>
-<LI> magnitude - coefficient for linear term (default 1.0)</LI>
-<LI> b - ?? (default 1.0)</LI>
-<LI> constant - coefficient for constant term (default 0.0)</LI>
+<LI> RepolarisingAsymmetry - coefficient for the repolarising asymmetry (default 1.0)</LI>
+<LI> DecouplingField - coefficient for the decoupling field (default 1.0)</LI>
+<LI> BaselineAsymmetry - coefficient for the baseline asymmetry (default 0.0)</LI>
 </UL>
 */
 
