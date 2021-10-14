@@ -383,6 +383,18 @@ public:
     verifyAndClear();
   }
 
+  void testCloseEventChecksIfPrevented() {
+    auto presenter = makePresenter();
+    auto event = new QCloseEvent();
+    EXPECT_CALL(*m_batchPresenters[0], isProcessing).Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], isProcessing).Times(1);
+    EXPECT_CALL(*m_batchPresenters[0], isAutoreducing).Times(1);
+    EXPECT_CALL(*m_batchPresenters[1], isAutoreducing).Times(1);
+    presenter.notifyCloseEvent(event);
+    verifyAndClear();
+    delete event;
+  }
+
   void testSaveBatch() {
     auto presenter = makePresenter();
     auto const batchIndex = 1;
