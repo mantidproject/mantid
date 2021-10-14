@@ -1192,7 +1192,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Finalizes the reduction step by removing special values, calling merging functions and setting unique names
          to the output workspaces."""
         output_treatment = self.getPropertyValue('OutputTreatment')
-        if process not in ['Vanadium']:
+        if not (process == 'Vanadium' and output_treatment == 'Sum'):
             if output_treatment == 'AverageTwoTheta':
                 ws = self._merge_twoTheta_positions(ws)
             if self.getPropertyValue('OutputTreatment') in ['AveragePol', 'Sum']:
