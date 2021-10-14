@@ -44,7 +44,7 @@ void PowerLaw::functionDeriv1D(Jacobian *out, const double *xValues, const size_
 
   for (size_t i = 0; i < nData; i++) {
     double diffa = pow(xValues[i], b);
-    double diffb = a * b * pow(xValues[i], b) * log(xValues[i]);
+    double diffb = a * pow(xValues[i], b) * log(xValues[i]);
     out->set(i, 0, diffa);
     out->set(i, 1, diffb);
     out->set(i, 2, 1);
