@@ -1110,6 +1110,7 @@ void SCDCalibratePanels2::adjustComponent(double dx, double dy, double dz, doubl
  * @brief Generate a tableworkspace to store the calibration results
  *
  * @param instrument  :: calibrated instrument
+ * @package pmap :: parameter map from workspace
  * @return DataObjects::TableWorkspace_sptr
  */
 ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_ptr<Geometry::Instrument> &instrument,
@@ -1189,6 +1190,9 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
  *
  * @param instrument   The instrument with the new values for the banks
  * in Groups
+ *
+ * @param pmap :: parameter map from workspace
+ *
  */
 void SCDCalibratePanels2::saveXmlFile(const std::string &FileName,
                                       const boost::container::flat_set<std::string> &AllBankNames,

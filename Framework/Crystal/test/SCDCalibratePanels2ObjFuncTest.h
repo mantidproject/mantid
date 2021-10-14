@@ -62,18 +62,8 @@ public:
    */
   SCDCalibratePanels2ObjFuncTest()
       : wsname("wsSCDCalibratePanels2ObjFuncTest"), pwsname("pwsSCDCalibratePanels2ObjFuncTest"),
-        tmppwsname("tmppwsSCDCalibratePanels2ObjFuncTest"),     // fixed workspace name
-        silicon_a(5.431), silicon_b(5.431), silicon_c(5.431),   // angstrom
-        silicon_alpha(90), silicon_beta(90), silicon_gamma(90), // degree
-        silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02")), dspacing_min(1.0),
-        dspacing_max(10.0),                      //
-        wavelength_min(0.1), wavelength_max(10), //
-        omega_step(6.0),                         //
-        TOLERANCE_L(1e-3),                       // this calibration has intrinsic accuracy limit of
-                                                 // 1 mm for translation on a panel detector
-        TOLERANCE_R(1e-1),                       // this calibration has intrinsic accuracy limit of
-                                                 // 0.1 deg for rotation on a panel detector
-        LOGCHILDALG(false) {
+        tmppwsname("tmppwsSCDCalibratePanels2ObjFuncTest"), // fixed workspace name
+        silicon_cs(CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02")), LOGCHILDALG(false) {
 
     // NOTE:
     // PredictPeaks
@@ -325,27 +315,10 @@ private:
   MatrixWorkspace_sptr m_ws;
   PeaksWorkspace_sptr m_pws;
 
-  // lattice constants of silicon
-  const double silicon_a;
-  const double silicon_b;
-  const double silicon_c;
-  const double silicon_alpha;
-  const double silicon_beta;
-  const double silicon_gamma;
-
   // silicon crystal structure
   CrystalStructure silicon_cs;
 
-  // constants that select the recriprocal space
-  const double dspacing_min;
-  const double dspacing_max;
-  const double wavelength_min;
-  const double wavelength_max;
-  const double omega_step;
-
   // check praramerter
-  const double TOLERANCE_L; // distance
-  const double TOLERANCE_R; // rotation angle
-  const bool LOGCHILDALG;   // whether to show individual alg log
+  const bool LOGCHILDALG; // whether to show individual alg log
   const double PI{3.1415926535897932384626433832795028841971693993751058209};
 };
