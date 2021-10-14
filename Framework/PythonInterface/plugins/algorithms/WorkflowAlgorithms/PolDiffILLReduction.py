@@ -623,8 +623,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 counts = mtd[background].dataY(pixel_no)
                 errors = mtd[background].dataE(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
-                lower_peak_edge = ep_index - peak_width
-                upper_peak_edge = ep_index + peak_width
+                lower_peak_edge = int(ep_index - peak_width)
+                upper_peak_edge = int(ep_index + peak_width)
                 n_time_channels = lower_peak_edge + (np.size(counts) - upper_peak_edge + 1)
                 # first, the time independent contribution (outside elastic peak) to background is calculated
                 time_indep_component = np.mean(np.concatenate((counts[:lower_peak_edge], counts[upper_peak_edge+1:])))
