@@ -118,8 +118,6 @@ public:
     testfunc.initialize();
     testfunc.setPeakWorkspace(ipws, bankname, tofs);
 
-    std::cout << "Name: " << testfunc.name() << "\n";
-
     const int n_peaks = pws->getNumberPeaks();
     TS_ASSERT_EQUALS(n_peaks, 11076);
 
@@ -199,12 +197,6 @@ public:
       int ipeak = peakindexes[i];
       long int det_i = pws->getPeak(ipeak).getDetectorID();
       TS_ASSERT_EQUALS(det_i, detids[i]);
-
-      std::cout << ipeak << ": ";
-      for (size_t d = 0; d < 3; ++d) {
-        std::cout << out[ipeak * 3 + d] << "  ";
-      }
-      std::cout << "\n";
     }
 
     // Calculate value with scaling (1.1, 0.9) on  bank27
@@ -244,11 +236,9 @@ public:
       long int det_i = pws->getPeak(ipeak).getDetectorID();
       TS_ASSERT_EQUALS(det_i, detids[i]);
 
-      std::cout << ipeak << ": ";
       for (size_t d = 0; d < 3; ++d) {
         TS_ASSERT_DELTA(out[ipeak * 3 + d], goldvalue2[i * 3 + d], 0.00001);
       }
-      std::cout << "\n";
     }
   }
 

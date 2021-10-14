@@ -649,7 +649,8 @@ void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWo
       else
         fittie += "," + scaleties.str();
     }
-    g_log.notice("Final constraint: " + fitconstraint + "\n\t tie: " + fittie);
+
+    g_log.information("Fitting " + bankname + ": constraint = " + fitconstraint + "\n\t tie = " + fittie);
 
     //---- set&go
     if (fittie != "")
