@@ -19,7 +19,7 @@ class RedfieldTest(unittest.TestCase):
 
 	def test_function_output(self):
 		input = [0.0, 4.0, 8.0, 12.0]
-		expected = [0.2, -0.05237002010607009, 0.061888393844228465, -0.03887640266005458]
+		expected = [7.34780775e-08, 7.34759179e-08, 7.34694400e-08, 7.34586461e-08]
 		tolerance = 1.0e-05
 		status, output = check_output("Redfield", input, expected, tolerance, A0 = 0.2, Hloc = 0.1, Tau = 0.1)
 		if not status:

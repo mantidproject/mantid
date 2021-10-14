@@ -6,7 +6,6 @@ set(TEST_PY_FILES
     CrystalFieldTest.py
     DirectEnergyConversionTest.py
     DirectPropertyManagerTest.py
-    DirectPropertyManater_OldInterfaceXest.py
     DirectReductionHelpersTest.py
     DoublePulseFitTest.py
     IndirectCommonTests.py
@@ -23,7 +22,6 @@ set(TEST_PY_FILES
     SettingsTest.py
     StitchingTest.py
     VesuvioBackgroundTest.py
-    VesuvioCorrectionsTest.py
     VesuvioFittingTest.py
     VesuvioProfileTest.py
 )

@@ -8,8 +8,6 @@
 
 import unittest
 
-from matplotlib.pyplot import figure
-
 from mantid.plots import MantidAxes # noqa
 from unittest.mock import Mock
 from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOffsetDialogPresenter
@@ -18,10 +16,10 @@ from mantidqt.widgets.waterfallplotoffsetdialog.presenter import WaterfallPlotOf
 class WaterfallPlotOffsetDialogPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        self.fig = figure()
-        self.ax = self.fig.add_subplot(111, projection='mantid')
-        self.ax.plot([0, 0], [1, 1])
-        self.ax.plot([0, 1], [1, 2])
+        self.fig = Mock()
+        self.ax = Mock()
+
+        self.fig.get_axes.return_value = [self.ax]
 
         self.ax.set_waterfall(True)
 

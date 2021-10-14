@@ -26,15 +26,6 @@ class IndexPeaksTest(unittest.TestCase):
         # defualt args
         IndexPeaks(PeaksWorkspace="test", Tolerance=0.12)
 
-        # testing zero (default) modVec with maxOrder=1
-        IndexPeaks(
-            PeaksWorkspace="test",
-            Tolerance=0.12,
-            RoundHKLs=False,
-            SaveModulationInfo=True,
-            MaxOrder=1,
-        )
-
         # testing one non-zero modVec with maxOrder=1
         IndexPeaks(
             PeaksWorkspace="test",
@@ -42,15 +33,6 @@ class IndexPeaksTest(unittest.TestCase):
             RoundHKLs=False,
             SaveModulationInfo=True,
             MaxOrder=1,
-            ModVector1="0,0,0.33333",
-        )
-
-        # testing one non-zero modVec with maxOrder=0
-        IndexPeaks(
-            PeaksWorkspace="test",
-            Tolerance=0.12,
-            RoundHKLs=False,
-            SaveModulationInfo=True,
             ModVector1="0,0,0.33333",
         )
 
