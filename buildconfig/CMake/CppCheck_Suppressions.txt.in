@@ -871,7 +871,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/G
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/InstrumentPresenter.cpp:18
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:145
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
-constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/JobsViewUpdater.h:81
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:97
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:40
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:63
