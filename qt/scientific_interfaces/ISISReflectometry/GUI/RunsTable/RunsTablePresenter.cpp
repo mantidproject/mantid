@@ -7,7 +7,6 @@
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
-#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
@@ -17,14 +16,6 @@
 #include <boost/regex.hpp>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-namespace Colour {
-constexpr const char *DEFAULT = "#ffffff"; // white
-constexpr const char *INVALID = "#dddddd"; // very pale grey
-constexpr const char *RUNNING = "#f0e442"; // pale yellow
-constexpr const char *SUCCESS = "#d0f4d0"; // pale green
-constexpr const char *WARNING = "#e69f00"; // pale orange
-constexpr const char *FAILURE = "#accbff"; // pale blue
-} // namespace Colour
 
 namespace { // unnamed
 void clearStateStyling(MantidWidgets::Batch::Cell &cell) {
