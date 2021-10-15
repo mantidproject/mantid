@@ -153,9 +153,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 issues['NormalisationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
                 issues['CrossSectionSeparationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
 
-            if normalisation_method == 'Paramagnetic' and self.getPropertyValue('CrossSectionSeparationMethod') == 'Uniaxial':
-                issues['NormalisationMethod'] = 'Paramagnetic normalisation is not compatible with uniaxial measurement.'
-                issues['CrossSectionSeparationMethod'] = 'Paramagnetic normalisation is not compatible with uniaxial measurement.'
+            if normalisation_method == 'Paramagnetic' and self.getPropertyValue('CrossSectionSeparationMethod') == 'Z':
+                issues['NormalisationMethod'] = 'Paramagnetic normalisation is not compatible with Z-only measurement.'
+                issues['CrossSectionSeparationMethod'] = 'Paramagnetic normalisation is not compatible with Z-only measurement.'
 
         if normalisation_method != 'None' or self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
@@ -201,7 +201,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="CrossSectionSeparationMethod",
                              defaultValue="None",
-                             validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
+                             validator=StringListValidator(["None", "Z", "XYZ", "10p"]),
                              direction=Direction.Input,
                              doc="What type of cross-section separation to perform.")
 
@@ -291,7 +291,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             if user_method == 'XYZ':
                 raise RuntimeError(error_msg.format(user_method))
         if nMeasurements not in [2, 6, 10]:
-            raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
+            raise RuntimeError("The analysis options are: Z, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
         return nMeasurements, nComponents
 

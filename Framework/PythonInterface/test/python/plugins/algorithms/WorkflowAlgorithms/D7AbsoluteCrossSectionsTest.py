@@ -48,7 +48,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     def test_uniaxial_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
-                                CrossSectionSeparationMethod='Uniaxial')
+                                CrossSectionSeparationMethod='Z')
         self._check_output('uniaxial', 132, 1, 2, onlySeparation=True)
 
     def test_xyz_separation(self):
@@ -91,7 +91,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     def test_tof_data_normalisation(self):
         D7AbsoluteCrossSections(InputWorkspace='sample_tof_data', OutputWorkspace='normalised_tof',
-                                CrossSectionSeparationMethod='Uniaxial', NormalisationMethod='Vanadium',
+                                CrossSectionSeparationMethod='Z', NormalisationMethod='Vanadium',
                                 SampleAndEnvironmentProperties=self._sampleProperties, AbsoluteUnitsNormalisation=False,
                                 VanadiumInputWorkspace='vanadium_data', MeasurementTechnique='TOF')
         self._check_output('normalised_tof', 132, 339, 3, onlySeparation=False)
