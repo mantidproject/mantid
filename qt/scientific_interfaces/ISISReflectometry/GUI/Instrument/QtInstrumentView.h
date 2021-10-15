@@ -69,9 +69,6 @@ public slots:
   void onRestoreDefaultsRequested();
 
 private:
-  QString messageFor(std::vector<MissingInstrumentParameterValue> const &missingValues) const;
-  QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
-
   /// Initialise the interface
   void initLayout();
   void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
