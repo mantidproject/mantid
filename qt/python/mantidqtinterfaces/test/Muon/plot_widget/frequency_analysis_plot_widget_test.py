@@ -291,4 +291,4 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main(buffer=False, verbosity=2)
+    unittest.main()
