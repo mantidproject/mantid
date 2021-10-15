@@ -255,7 +255,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
     def d7_reduction_test_sample_sum(self):
         PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_sum',
                             SampleAndEnvironmentProperties=self._sampleProperties,
-                            ScatteringAngleBinSize = 1.0,
+                            ScatteringAngleBinSize=1.0,
                             OutputTreatment='Sum')
         self._check_output(mtd['sample_sum'], 132, 1, 6, 'Scattering Angle', 'Label', 'Height', 'Label')
         self._check_process_flag(mtd['sample_sum'], 'Sample')

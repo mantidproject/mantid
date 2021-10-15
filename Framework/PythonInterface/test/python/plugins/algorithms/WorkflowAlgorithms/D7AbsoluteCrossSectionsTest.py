@@ -93,10 +93,11 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         D7AbsoluteCrossSections(InputWorkspace='sample_tof_data', OutputWorkspace='normalised_tof',
                                 CrossSectionSeparationMethod='Z', NormalisationMethod='Vanadium',
                                 SampleAndEnvironmentProperties=self._sampleProperties, AbsoluteUnitsNormalisation=False,
-                                VanadiumInputWorkspace='vanadium_data', MeasurementTechnique='TOF')
-        self._check_output('normalised_tof', 132, 339, 3, onlySeparation=False)
+                                VanadiumInputWorkspace='vanadium_data', MeasurementTechnique='TOF',
+                                OutputUnits='Qw')
+        self._check_output('normalised_tof', 225, 339, 3, onlySeparation=False, isHistogram=True)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, onlySeparation):
+    def _check_output(self, ws, blocksize, spectra, nEntries, onlySeparation, isHistogram=False):
         self.assertTrue(mtd[ws])
         self.assertTrue(isinstance(mtd[ws], WorkspaceGroup))
         self.assertTrue(mtd[ws].getNumberOfEntries(), nEntries)
@@ -106,8 +107,9 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
             if onlySeparation:
                 name = entry.name()
                 name = name[name.rfind("_")+1:]
-                self.assertTrue(name in ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic', 'SFMagnetic'])
-            self.assertTrue(not entry.isHistogramData())
+                self.assertTrue(name in ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic',
+                                         'SFMagnetic'])
+            self.assertEquals(entry.isHistogramData(), isHistogram)
             self.assertTrue(entry.isDistribution())
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)

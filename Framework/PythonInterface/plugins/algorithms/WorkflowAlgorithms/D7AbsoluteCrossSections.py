@@ -206,12 +206,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              doc="What type of cross-section separation to perform.")
 
         self.declareProperty(name="OutputUnits",
-                             defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q", "Qxy", "Qw"]),
+                             defaultValue="Default",
+                             validator=StringListValidator(["Default", "TwoTheta", "Q", "Qxy", "Qw"]),
                              direction=Direction.Input,
                              doc="The choice to display the output as a function of detector twoTheta,"
                                  " the momentum exchange, the 2D momentum exchange, or as a function of momentum"
-                                 " and energy exchange.")
+                                 " and energy exchange. Default will provide output appropriate to the technique used.")
 
         self.declareProperty(name="NormalisationMethod",
                              defaultValue="None",
@@ -779,44 +779,74 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 q_binning = [qMin, q_binning[0], qMax]
         return q_binning
 
+    @staticmethod
+    def _convert_to_2theta(ws_in, ws_out, merged_data):
+        if merged_data:
+            ConvertAxisByFormula(InputWorkspace=ws_in, OutputWorkspace=ws_out, Axis='X', Formula='-x')
+        else:
+            ConvertSpectrumAxis(InputWorkspace=ws_in, OutputWorkspace=ws_out, Target='SignedTheta', OrderAxis=False)
+            ConvertAxisByFormula(InputWorkspace=ws_out, OutputWorkspace=ws_out, Axis='Y', Formula='-y')
+            Transpose(InputWorkspace=ws_out, OutputWorkspace=ws_out)
+        return ws_out
+
+    def _convert_to_q(self, ws_in, ws_out, merged_data):
+        if merged_data:
+            wavelength = mtd[ws_in][0].getRun().getLogData('monochromator.wavelength').value  # in Angstrom
+            # flips axis sign and converts detector 2theta to momentum exchange
+            formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
+            ConvertAxisByFormula(InputWorkspace=ws_in, OutputWorkspace=ws_out, Axis='X', Formula=formula)
+            # manually set the correct x-axis unit
+            for entry in mtd[ws_out]:
+                entry.getAxis(0).setUnit('MomentumTransfer')
+        else:
+            ConvertSpectrumAxis(InputWorkspace=ws_in, OutputWorkspace=ws_out, Target='ElasticQ',
+                                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+                                OrderAxis=False)
+            Transpose(InputWorkspace=ws_out, OutputWorkspace=ws_out)
+        return ws_out
+
     def _set_units(self, ws, nMeasurements):
         """Sets units for the output workspace."""
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
         unit = r'd$\sigma$/d$\Omega$'
         self._set_as_distribution(ws)
+        perform_merge = mtd[ws].getNumberOfEntries() / nMeasurements > 1 \
+                        and self.getPropertyValue('OutputTreatment') == 'Merge'
+        if perform_merge:
+            self._merge_data(ws)
+
         if output_unit == 'TwoTheta':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_data(ws)
-                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
-            else:
-                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
-                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
-                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
-        elif output_unit == 'Q':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_data(ws)
-                wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
-                # flips axis sign and converts detector 2theta to momentum exchange
-                formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
-                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula)
-                # manually set the correct x-axis unit
-                for entry in mtd[ws]:
-                    entry.getAxis(0).setUnit('MomentumTransfer')
-            else:
-                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
-                                    EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
-                                    OrderAxis=False)
-                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
-        elif output_unit == 'Qxy':
+            self._convert_to_2theta(ws_in=ws, ws_out=ws, merged_data=perform_merge)
+        elif output_unit == 'Q' or (output_unit == 'Default' and measurement_technique == 'Powder'):
+            self._convert_to_q(ws_in=ws, ws_out=ws, merged_data=perform_merge)
+        elif output_unit == 'Qxy' or (output_unit == 'Default' and measurement_technique == 'SingleCrystal'):
             ws = self._qxy_rebin(ws)
-        elif output_unit == 'Qw':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_data(ws)
+        elif output_unit == 'Qw' or (output_unit == 'Default' and measurement_technique == 'TOF'):
+            group_list = []
+            if output_unit == 'Default':  # provide SofQW, and distributions as a function of Q and 2theta
+                twoTheta_distribution = self._convert_to_2theta(ws_in=ws, ws_out='2theta', merged_data=perform_merge)
+                q_distribution = self._convert_to_q(ws_in=ws, ws_out='q', merged_data=perform_merge)
+                # interleave output names so that SofQW, 2theta, and q distributions for the same input are together:
+                group_list = [ws_name for name_tuple in zip(mtd[ws].getNames(),
+                                                            mtd[twoTheta_distribution].getNames(),
+                                                            mtd[q_distribution].getNames())
+                              for ws_name in name_tuple]
+
             q_binning = self._get_q_binning(ws)
-            SofQWCentre(InputWorkspace=ws, OutputWorkspace=ws,
-                        EMode='Direct', EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
-                        QAxisBinning=q_binning)
+            SofQWCentre(
+                InputWorkspace=ws, OutputWorkspace=ws,
+                EMode='Direct',
+                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+                QAxisBinning=q_binning
+            )
+            Transpose(InputWorkspace=ws, OutputWorkspace=ws)  # users prefer omega to be the vertical axis
+
+            if len(group_list) > 0:
+                UnGroupWorkspace(InputWorkspace='2theta')
+                UnGroupWorkspace(InputWorkspace='q')
+                GroupWorkspaces(InputWorkspaces=group_list, OutputWorkspace=ws)
 
         if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
             unit = 'Normalized intensity'
