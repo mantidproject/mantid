@@ -159,7 +159,25 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
   searcher->m_searchCriteria.instrument = map[QString("textInstrument")].toString().toStdString();
 }
 
-namespace HIDDEN_LOCAL {
+namespace {
+using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+
+MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
+                                               ValueFunction valueFunction, boost::optional<int> precision) {
+  auto maybeValue = (qRangeInput.*valueFunction)();
+  auto useOutputValue = false;
+  if (!maybeValue.is_initialized()) {
+    maybeValue = (qRangeOutput.*valueFunction)();
+    useOutputValue = true;
+  }
+  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue, precision));
+  if (useOutputValue)
+    result.setOutput();
+  else
+    result.setInput();
+  return result;
+}
+
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
@@ -172,7 +190,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions()))});
 }
-} // namespace HIDDEN_LOCAL
+} // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
                                            const boost::optional<int> &precision) {
@@ -199,7 +217,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        jobTreeView->setCellsAt({location}, HIDDEN_LOCAL::cellsFromRow(row.get(), precision));
+        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precision));
       }
     }
   }
