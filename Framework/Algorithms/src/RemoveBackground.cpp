@@ -199,9 +199,9 @@ void BackgroundHelper::initialize(const API::MatrixWorkspace_const_sptr &bkgWS,
   if (bkgWS->getNumberHistograms() <= 1)
     m_singleValueBackground = true;
 
-  auto &dataX = bkgWS->x(0);
-  auto &dataY = bkgWS->y(0);
-  auto &dataE = bkgWS->e(0);
+  const auto &dataX = bkgWS->x(0);
+  const auto &dataY = bkgWS->y(0);
+  const auto &dataE = bkgWS->e(0);
   m_NBg = dataY[0];
   m_dtBg = dataX[1] - dataX[0];
   m_ErrSq = dataE[0] * dataE[0]; // needs further clarification

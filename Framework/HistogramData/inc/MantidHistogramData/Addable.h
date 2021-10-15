@@ -46,7 +46,7 @@ public:
 
   /// Element-wise addition of lhs and rhs.
   T operator+(T rhs) const {
-    auto &derived = static_cast<const T &>(*this);
+    const auto &derived = static_cast<const T &>(*this);
     return rhs += derived;
   }
 

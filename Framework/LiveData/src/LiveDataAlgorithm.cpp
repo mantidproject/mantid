@@ -35,7 +35,7 @@ void LiveDataAlgorithm::initProps() {
   // Add all the instruments (in the default facility) that have a listener
   // specified
   std::vector<std::string> instruments;
-  auto &instrInfo = Kernel::ConfigService::Instance().getFacility().instruments();
+  const auto &instrInfo = Kernel::ConfigService::Instance().getFacility().instruments();
   for (const auto &instrument : instrInfo) {
     if (instrument.hasLiveListenerInfo()) {
       instruments.emplace_back(instrument.name());
