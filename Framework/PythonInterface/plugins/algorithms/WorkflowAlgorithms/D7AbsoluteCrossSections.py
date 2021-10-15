@@ -886,8 +886,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         and the input name."""
         input_ws = self.getPropertyValue("InputWorkspace")
         possible_polarisations = ['XPO', 'YPO', 'ZPO']
+        old_names = []
+        new_names = []
         for entry in mtd[output_ws]:  # renames individual ws to contain the output name
             entry_name = entry.name()
+            old_names.append(entry_name)
             if entry_name[:2] == "__":
                 entry_name = entry_name[2:]
             if input_ws in entry_name:
@@ -902,7 +905,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             output_name = self.getPropertyValue("OutputWorkspace")
             if output_name not in entry_name:
                 new_name = "{}_{}".format(output_name, entry_name)
-                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
+                new_names.append(new_name)
+
+        for old_name, new_name in zip(old_names, new_names):
+            if old_name != new_name:
+                RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
 
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=self._get_number_reports())
