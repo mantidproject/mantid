@@ -110,6 +110,17 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.presenter.close()
         self.m_view.close.assert_called_once()
 
+    @mock.patch("mantidqt.widgets.superplot.presenter.ConfigService")
+    @mock.patch("mantidqt.widgets.superplot.presenter.MARKER_MAP")
+    def test_get_kwargs_from_settings(self, m_marker_map, m_config_service):
+        m_marker_map.__getitem__.return_value = "test"
+        m_config_service.getString.return_value = "test"
+        kwargs = self.presenter.get_kwargs_from_settings()
+        self.assertDictEqual(kwargs, {"linestyle": "test",
+                                        "drawstyle": "test",
+                                        "linewidth": "test",
+                                        "marker": "test"})
+
     def test_on_visibility_changed(self):
         self.m_canvas.reset_mock()
         self.m_figure.resetMock()
