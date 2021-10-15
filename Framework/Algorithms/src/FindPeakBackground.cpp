@@ -62,9 +62,9 @@ void FindPeakBackground::init() {
 }
 
 void FindPeakBackground::findWindowIndex(const HistogramData::Histogram &histogram, size_t &l0, size_t &n) {
-  auto &inpX = histogram.x();
-  auto &inpY = histogram.y();
-  size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
+  const auto &inpX = histogram.x();
+  const auto &inpY = histogram.y();
+  const size_t sizey = inpY.size(); // inpWS->y(inpwsindex).size();
 
   // determine the fit window with their index in X (or Y)
   n = sizey;
