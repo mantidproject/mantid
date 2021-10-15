@@ -20,6 +20,7 @@ Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
 - Fixed a bug where the option "SignedInPlaneTwoTheta" in :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` would not give signed results.
+- Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 
 
 :ref:`Release 6.3.0 <v6.3.0>`
