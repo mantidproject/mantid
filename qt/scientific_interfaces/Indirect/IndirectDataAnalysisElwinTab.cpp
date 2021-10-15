@@ -770,9 +770,38 @@ void IndirectDataAnalysisElwinTab::closeDialog() {
   m_addWorkspaceDialog = nullptr;
 }
 
-void IndirectDataAnalysisElwinTab::addData() { addData(m_addWorkspaceDialog.get()); }
+void IndirectDataAnalysisElwinTab::addData() { checkData(m_addWorkspaceDialog.get()); }
+
+// This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
+// A File requiresd additional checks to ensure a file of the correct type is being loaded. The Workspace list is
+// already filtered.
+void IndirectDataAnalysisElwinTab::checkData(IAddWorkspaceDialog const *dialog) {
+  try {
+    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
+    if (indirectDialog->getFileName().empty()) {
+      addData(dialog);
+    } else
+      addDataFromFile(dialog);
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
 
 void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
+  try {
+    addDataToModel(dialog);
+    updateTableFromModel();
+    emit dataAdded();
+    emit dataChanged();
+    newInputFilesFromDialog(dialog);
+    plotInput();
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
+
+void IndirectDataAnalysisElwinTab::addDataFromFile(IAddWorkspaceDialog const *dialog) {
   try {
     UserInputValidator uiv;
     const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
@@ -788,12 +817,7 @@ void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
     showMessageBox(error);
 
     if (error.isEmpty()) {
-      addDataToModel(dialog);
-      updateTableFromModel();
-      emit dataAdded();
-      emit dataChanged();
-      newInputFilesFromDialog(dialog);
-      plotInput();
+      addData(dialog);
     }
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());

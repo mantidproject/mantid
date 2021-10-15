@@ -26,4 +26,9 @@ Improvements
   in the Script Repository.
 - In indirect Data analysis the Elwin Tab has had its UI updated to be more user friendly.
 
+Bugfixes
+--------
+
+- Fixed a bug which prevented workspaces being loaded into Elwin.
+
 :ref:`Release 6.3.0 <v6.3.0>`
