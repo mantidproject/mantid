@@ -86,7 +86,8 @@ private:
   void optimizeL1(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
 
   /// Private function for calibrating banks
-  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original);
+  void optimizeBanks(Mantid::API::IPeaksWorkspace_sptr pws, const Mantid::API::IPeaksWorkspace_sptr &pws_original,
+                     const bool &docalibsize, const double &sizesearchradius, const bool &fixdetxyratio);
 
   /// Private function for fine tunning sample position
   void optimizeSamplePos(Mantid::API::IPeaksWorkspace_sptr pws, Mantid::API::IPeaksWorkspace_sptr pws_original);
@@ -140,11 +141,11 @@ private:
   static constexpr double Tolerance = std::numeric_limits<double>::epsilon();
 
   // Column names and types
-  const std::vector<std::string> calibrationTableColumnNames = {
+  const std::vector<std::string> calibrationTableColumnNames{
       "ComponentName",    "Xposition",        "Yposition",     "Zposition", "XdirectionCosine",
       "YdirectionCosine", "ZdirectionCosine", "RotationAngle", "ScaleX",    "ScaleY"};
-  const std::string calibrationTableColumnTypes[10] = {"str",    "double", "double", "double", "double",
-                                                       "double", "double", "double", "double", "double"};
+  const std::vector<std::string> calibrationTableColumnTypes{"str",    "double", "double", "double", "double",
+                                                             "double", "double", "double", "double", "double"};
 
   boost::container::flat_set<std::string> m_BankNames;
   Mantid::API::ITableWorkspace_sptr mCaliTable;

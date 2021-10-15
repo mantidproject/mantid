@@ -261,6 +261,10 @@ std::map<std::string, std::string> SCDCalibratePanels2::validateInputs() {
                               "workspace without a UB mattrix";
   }
 
+  // sanity check
+  if (calibrationTableColumnNames.size() != calibrationTableColumnTypes.size())
+    throw std::runtime_error("calibrationTableColumnTypes and calibrationTableColumnTypes have different size.");
+
   return issues;
 }
 
@@ -298,6 +302,11 @@ void SCDCalibratePanels2::exec() {
   const std::string DetCalFilename = getProperty("DetCalFilename");
   const std::string XmlFilename = getProperty("XmlFilename");
   const std::string CSVFilename = getProperty("CSVFilename");
+
+  // Properties for resizing rectangular detector size
+  bool docalibsize = getProperty("CalibrateSize");
+  double sizesearchradius = getProperty("SearchRadiusSize");
+  bool fixdetxyratio = getProperty("FixAspectRatio");
 
   maxFitIterations = getProperty("MaxFitIterations");
   LOGCHILDALG = getProperty("VerboseOutput");
@@ -342,7 +351,7 @@ void SCDCalibratePanels2::exec() {
 
   if (calibrateBanks) {
     g_log.notice() << "** Calibrating L2 and orientation (bank) as requested\n";
-    optimizeBanks(m_pws, pws_original);
+    optimizeBanks(m_pws, pws_original, docalibsize, sizesearchradius, fixdetxyratio);
   }
 
   if (calibrateL1 && calibrateBanks) {
@@ -509,13 +518,13 @@ void SCDCalibratePanels2::optimizeL1(IPeaksWorkspace_sptr pws, IPeaksWorkspace_s
  *
  * @param pws
  * @param pws_original
+ * @param docalibsize :: flag to calibrate rectangular detector size
+ * @param sizesearchradius  :: searching radius for detector size calibration
+ * @param fixdetxyratio:: flag to tie the rectangular detector
  */
-void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWorkspace_sptr &pws_original) {
-
-  // Resize rectangular detector size
-  bool docalibsize = getProperty("CalibrateSize");
-  double sizesearchradius = getProperty("SearchRadiusSize");
-  bool fixdetxyratio = getProperty("FixAspectRatio");
+void SCDCalibratePanels2::optimizeBanks(IPeaksWorkspace_sptr pws, const IPeaksWorkspace_sptr &pws_original,
+                                        const bool &docalibsize, const double &sizesearchradius,
+                                        const bool &fixdetxyratio) {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*pws))
   for (int i = 0; i < static_cast<int>(m_BankNames.size()); ++i) {
@@ -1110,9 +1119,6 @@ ITableWorkspace_sptr SCDCalibratePanels2::generateCalibrationTable(std::shared_p
 
   // Create table workspace
   ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
-  // TableWorkspace_sptr tablews =
-  //     std::dynamic_pointer_cast<TableWorkspace>(itablews);
-
   for (size_t i = 0; i < calibrationTableColumnNames.size(); ++i)
     itablews->addColumn(calibrationTableColumnTypes[i], calibrationTableColumnNames[i]);
 
