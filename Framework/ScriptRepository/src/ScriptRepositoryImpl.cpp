@@ -164,7 +164,7 @@ DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
 ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const std::string &remote) : valid(false) {
   // get the local path and the remote path
   std::string loc, rem;
-  ConfigServiceImpl &config = ConfigService::Instance();
+  const ConfigServiceImpl &config = ConfigService::Instance();
   remote_upload = config.getString("UploaderWebServer");
   if (local_rep.empty() || remote.empty()) {
     loc = config.getString("ScriptLocalRepository");
@@ -1241,9 +1241,8 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
  @todo describe
  */
 std::string ScriptRepositoryImpl::ignorePatterns() {
-  ConfigServiceImpl &config = ConfigService::Instance();
-  std::string ignore_string = config.getString("ScriptRepositoryIgnore", false);
-  return ignore_string;
+  const ConfigServiceImpl &config = ConfigService::Instance();
+  return config.getString("ScriptRepositoryIgnore", false);
 }
 
 /**

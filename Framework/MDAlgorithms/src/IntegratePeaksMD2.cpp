@@ -1263,7 +1263,7 @@ void IntegratePeaksMD2::runMaskDetectors(const Mantid::DataObjects::PeaksWorkspa
 void IntegratePeaksMD2::checkOverlap(int i, const IPeaksWorkspace_sptr &peakWS,
                                      Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse, double radius) {
   // Get a direct ref to that peak.
-  IPeak &p1 = peakWS->getPeak(i);
+  const IPeak &p1 = peakWS->getPeak(i);
   V3D pos1;
   if (CoordinatesToUse == Kernel::QLab) //"Q (lab frame)"
     pos1 = p1.getQLabFrame();
@@ -1273,7 +1273,7 @@ void IntegratePeaksMD2::checkOverlap(int i, const IPeaksWorkspace_sptr &peakWS,
     pos1 = p1.getHKL();
   for (int j = i + 1; j < peakWS->getNumberPeaks(); ++j) {
     // Get a direct ref to rest of peaks peak.
-    IPeak &p2 = peakWS->getPeak(j);
+    const IPeak &p2 = peakWS->getPeak(j);
     V3D pos2;
     if (CoordinatesToUse == Kernel::QLab) //"Q (lab frame)"
       pos2 = p2.getQLabFrame();

@@ -511,7 +511,7 @@ void FilterEvents::groupOutputWorkspace() {
         "Name of the workspace to be created as the output of grouping ");
   }
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   API::WorkspaceGroup_sptr workspace_group = std::dynamic_pointer_cast<WorkspaceGroup>(ads.retrieve(groupname));
   if (!workspace_group) {
     g_log.error("Unable to retrieve output workspace from algorithm GroupWorkspaces");

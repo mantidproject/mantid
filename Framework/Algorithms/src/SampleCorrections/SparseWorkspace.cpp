@@ -342,14 +342,13 @@ HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const doub
  */
 HistogramData::HistogramE SparseWorkspace::esq(const HistogramData::HistogramE &e) const { return e * e; }
 
-/** Square the error values in a histogram
+/** Square root the error values in a histogram
  *  @param e A HistgramE object
  *  @return A HistogramE object containing the square root values
  */
 HistogramData::HistogramE SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
-  auto &derived = e;
   std::transform(e.cbegin(), e.cend(), e.begin(), [](double f) -> double { return sqrt(f); });
-  return derived;
+  return e;
 }
 
 /** Spatially interpolate a single histogram from nearby detectors using
