@@ -241,9 +241,12 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         if figure_type(fig) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.adjust_for_3d_plots()
 
-        # Toggle grid on/off button in case plot is created from a script.
+        # Determine the toggle state of the grid button. If all subplots have grids, then set it to on.
         is_major_grid_on = False
         for ax in fig.get_axes():
+            # Don't look for grids on colour bars.
+            if self._is_colorbar(ax):
+                continue
             if hasattr(ax, 'grid_on'):
                 is_major_grid_on = ax.grid_on()
             else:
@@ -254,13 +257,18 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         self._actions['toggle_grid'].setChecked(is_major_grid_on)
 
     def is_colormap(self, fig):
-        """Identify as a single colopur map if it has a axes, one with the plot and the other the colorbar"""
+        """Identify as a single colour map if it has a axes, one with the plot and the other the colorbar"""
         if figure_type(fig) in [FigureType.Image] and len(fig.get_axes()) == 2:
             if len(fig.get_axes()[0].get_images()) == 1 and len(fig.get_axes()[1].get_images()) == 0 \
-                    and not hasattr(fig.get_axes()[1], 'get_subplotspec'):
+                    and self._is_colorbar(fig.get_axes()[1]):
                 return True
         else:
             return False
+
+    @classmethod
+    def _is_colorbar(cls, ax):
+        """Determine whether an axes object is a colorbar"""
+        return not hasattr(ax, 'get_subplotspec')
 
     def set_up_color_selector_toolbar_button(self, fig):
         # check if the action is already in the toolbar

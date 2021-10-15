@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>822</width>
-    <height>731</height>
+    <width>589</width>
+    <height>602</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,248 +19,162 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_5">
-   <item>
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="0" column="0">
     <widget class="QSplitter" name="splitter">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
      <widget class="QScrollArea" name="scrollArea">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>275</height>
-       </size>
-      </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents_2">
+      <widget class="QWidget" name="scrollAreaWidgetContents_3">
        <property name="geometry">
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>798</width>
-         <height>294</height>
+         <width>569</width>
+         <height>232</height>
         </rect>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>0</width>
-         <height>275</height>
-        </size>
        </property>
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="0">
-         <widget class="QGroupBox" name="gbInput">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QTabWidget" name="inputChoice">
+          <property name="currentIndex">
+           <number>0</number>
           </property>
-          <property name="title">
-           <string>Input</string>
-          </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_16">
-           <item alignment="Qt::AlignLeft">
-            <widget class="QFrame" name="frame_3">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>50</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <layout class="QHBoxLayout" name="horizontalLayout_2">
-              <item>
-               <widget class="QComboBox" name="inputChoice">
-                <item>
-                 <property name="text">
-                  <string>File</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Workspace</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QStackedWidget" name="stackedInputWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <widget class="QWidget" name="page">
+          <widget class="QWidget" name="file">
+           <attribute name="title">
+            <string>File</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,0">
+            <item row="0" column="0">
+             <widget class="MantidQt::API::FileFinderWidget" name="dsInputFiles" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>41</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="findRunFiles" stdset="0">
+               <bool>false</bool>
+              </property>
+              <property name="label" stdset="0">
+               <string>Input File</string>
+              </property>
+              <property name="multipleFiles" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="fileExtensions" stdset="0">
+               <stringlist>
+                <string>_red.nxs</string>
+                <string>_sqw.nxs</string>
+               </stringlist>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QFrame" name="frame">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0">
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <property name="spacing">
+                <number>3</number>
+               </property>
+               <property name="leftMargin">
+                <number>0</number>
+               </property>
+               <property name="topMargin">
+                <number>0</number>
+               </property>
+               <property name="rightMargin">
+                <number>0</number>
+               </property>
+               <property name="bottomMargin">
+                <number>0</number>
+               </property>
                <item>
-                <widget class="MantidQt::API::FileFinderWidget" name="dsInputFiles" native="true">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>41</verstretch>
-                  </sizepolicy>
+                <widget class="QCheckBox" name="ckGroupInput">
+                 <property name="text">
+                  <string>Group Input</string>
                  </property>
-                 <property name="findRunFiles" stdset="0">
-                  <bool>false</bool>
-                 </property>
-                 <property name="label" stdset="0">
-                  <string>Input File</string>
-                 </property>
-                 <property name="multipleFiles" stdset="0">
+                 <property name="checked">
                   <bool>true</bool>
                  </property>
-                 <property name="fileExtensions" stdset="0">
-                  <stringlist>
-                   <string>_red.nxs</string>
-                   <string>_sqw.nxs</string>
-                  </stringlist>
-                 </property>
                 </widget>
                </item>
                <item>
-                <widget class="QFrame" name="frame">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                <widget class="QCheckBox" name="ckLoadHistory">
+                 <property name="text">
+                  <string>Load History</string>
                  </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_2">
-                  <property name="spacing">
-                   <number>3</number>
-                  </property>
-                  <property name="leftMargin">
-                   <number>0</number>
-                  </property>
-                  <property name="topMargin">
-                   <number>0</number>
-                  </property>
-                  <property name="rightMargin">
-                   <number>0</number>
-                  </property>
-                  <property name="bottomMargin">
-                   <number>0</number>
-                  </property>
-                  <item>
-                   <widget class="QCheckBox" name="ckGroupInput">
-                    <property name="text">
-                     <string>Group Input</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QCheckBox" name="ckLoadHistory">
-                    <property name="text">
-                     <string>Load History</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
                 </widget>
                </item>
               </layout>
              </widget>
-             <widget class="QWidget" name="page_2">
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="workspace">
+           <attribute name="title">
+            <string>Workspace</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_2" columnstretch="1,0">
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="tbElwinData">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
-              <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QFrame" name="frame_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
                <item>
-                <widget class="QTableWidget" name="tbElwinData">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>400</width>
-                   <height>0</height>
-                  </size>
+                <widget class="QPushButton" name="wkspAdd">
+                 <property name="text">
+                  <string>Add Workspace</string>
                  </property>
                 </widget>
                </item>
                <item>
-                <widget class="QFrame" name="frame_2">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                <widget class="QPushButton" name="wkspRemove">
+                 <property name="text">
+                  <string>Remove</string>
                  </property>
-                 <property name="frameShape">
-                  <enum>QFrame::StyledPanel</enum>
-                 </property>
-                 <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_4">
-                  <item>
-                   <widget class="QPushButton" name="wkspAdd">
-                    <property name="text">
-                     <string>Add Workspace</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="wkspRemove">
-                    <property name="text">
-                     <string>Remove</string>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
                 </widget>
                </item>
               </layout>
              </widget>
-            </widget>
-           </item>
-          </layout>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
@@ -281,8 +195,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>798</width>
-         <height>405</height>
+         <width>569</width>
+         <height>343</height>
         </rect>
        </property>
        <property name="minimumSize">
@@ -293,12 +207,15 @@
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
-         <layout class="QHBoxLayout" name="loElwinOptions">
-          <item>
+         <widget class="QSplitter" name="splitter_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QWidget" name="">
            <layout class="QVBoxLayout" name="properties"/>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="loPlotAndOptions">
+          </widget>
+          <widget class="QWidget" name="">
+           <layout class="QVBoxLayout" name="loPlotAndOptions" stretch="0,1">
             <item>
              <layout class="QHBoxLayout" name="loPreviewSelection">
               <item>
@@ -386,48 +303,31 @@
              </layout>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="loPlots" stretch="5,3">
-              <item>
-               <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
-                  <horstretch>0</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>0</width>
-                  <height>125</height>
-                 </size>
-                </property>
-                <property name="canvasColour" stdset="0">
-                 <color>
-                  <red>255</red>
-                  <green>255</green>
-                  <blue>255</blue>
-                 </color>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="verticalSpacer">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
+             <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlot" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>125</height>
+               </size>
+              </property>
+              <property name="canvasColour" stdset="0">
+               <color>
+                <red>255</red>
+                <green>255</green>
+                <blue>255</blue>
+               </color>
+              </property>
+             </widget>
             </item>
            </layout>
-          </item>
-         </layout>
+          </widget>
+         </widget>
         </item>
         <item>
          <layout class="QHBoxLayout" name="loSampleLog">
@@ -618,22 +518,5 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections>
-  <connection>
-   <sender>inputChoice</sender>
-   <signal>currentIndexChanged(QString)</signal>
-   <receiver>stackedInputWidget</receiver>
-   <slot>show()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>71</x>
-     <y>101</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>428</x>
-     <y>162</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

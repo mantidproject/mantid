@@ -9,7 +9,59 @@ MuSR Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-:ref:`Release 6.3.0 <v6.3.0>`
+Frequency Domain Analysis
+-------------------------
+
+New Features
+############
+
+Improvements
+############
+
+Bugfixes
+########
+
+Muon Analysis
+-------------
+
+New Features
+############
+
+
+Muon Analysis and Frequency Domain Analysis
+-------------------------------------------
+
+New Features
+############
+
+Improvements
+############
+
+Bugfixes
+########
+
+ALC
+---
+
+New Features
+############
+
+- Can now read `nxs_v2` files.
+
+Improvements
+############
+
+Algorithms
+----------
+
+Improvements
+############
+
+- :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can now load a subset of the spectra.
+
+Bugfixes
+########
+-
 
 ..
   Model Fitting
@@ -18,3 +70,5 @@ MuSR Changes
   BugFixes
   --------
   - A bug has been fixed that caused Model fitting to not update it's results table list.
+
+:ref:`Release 6.3.0 <v6.3.0>`
