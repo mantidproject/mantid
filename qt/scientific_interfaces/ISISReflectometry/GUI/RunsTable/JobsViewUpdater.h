@@ -26,7 +26,7 @@ public:
 
   void rowModified(int groupIndex, int rowIndex, Row const &row);
 
-  void setPrecision(int &precision);
+  void setPrecision(const int &precision);
 
   void resetPrecision();
 
