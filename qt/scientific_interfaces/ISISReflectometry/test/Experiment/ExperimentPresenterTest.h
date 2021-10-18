@@ -65,7 +65,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectProcessing();
-    presenter.notifyReductionResumed();
+    presenter.notifyResumeReductionRequested();
 
     verifyAndClear();
   }

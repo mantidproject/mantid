@@ -26,7 +26,7 @@ public:
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void notifyPauseReductionRequested() override;
-  void notifyReductionResumed() override;
+  void notifyResumeReductionRequested() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
 

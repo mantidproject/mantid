@@ -34,7 +34,7 @@ public:
   void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
   bool shouldAutosave() const override;
   void notifyPauseReductionRequested() override;
-  void notifyReductionResumed() override;
+  void notifyResumeReductionRequested() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
 

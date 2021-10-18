@@ -88,7 +88,7 @@ void InstrumentPresenter::updateWidgetValidState() {
 
 void InstrumentPresenter::notifyPauseReductionRequested() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyResumeReductionRequested() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 

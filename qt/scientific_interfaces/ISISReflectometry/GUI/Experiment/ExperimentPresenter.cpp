@@ -95,7 +95,7 @@ void ExperimentPresenter::updateWidgetEnabledState() {
 
 void ExperimentPresenter::notifyPauseReductionRequested() { updateWidgetEnabledState(); }
 
-void ExperimentPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyResumeReductionRequested() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 

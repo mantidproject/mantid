@@ -25,7 +25,7 @@ public:
   virtual ~IEventPresenter() = default;
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
   virtual void notifyPauseReductionRequested() = 0;
-  virtual void notifyReductionResumed() = 0;
+  virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual Slicing const &slicing() const = 0;

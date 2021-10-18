@@ -72,7 +72,7 @@ void EventPresenter::updateWidgetEnabledState() const {
 
 void EventPresenter::notifyPauseReductionRequested() { updateWidgetEnabledState(); }
 
-void EventPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
+void EventPresenter::notifyResumeReductionRequested() { updateWidgetEnabledState(); }
 
 void EventPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 

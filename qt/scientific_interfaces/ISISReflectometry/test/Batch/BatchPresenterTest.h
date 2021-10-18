@@ -585,10 +585,10 @@ private:
   }
 
   void expectReductionResumed() {
-    EXPECT_CALL(*m_savePresenter, notifyReductionResumed()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, notifyReductionResumed()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, notifyReductionResumed()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, notifyReductionResumed()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyResumeReductionRequested()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyResumeReductionRequested()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyResumeReductionRequested()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyResumeReductionRequested()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, notifyAnyBatchReductionResumed()).Times(1);
   }

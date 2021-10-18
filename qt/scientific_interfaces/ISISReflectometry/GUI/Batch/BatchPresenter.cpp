@@ -176,10 +176,10 @@ void BatchPresenter::resumeReduction() {
 
 void BatchPresenter::notifyReductionResumed() {
   // Notify child presenters
-  m_savePresenter->notifyReductionResumed();
-  m_eventPresenter->notifyReductionResumed();
-  m_experimentPresenter->notifyReductionResumed();
-  m_instrumentPresenter->notifyReductionResumed();
+  m_savePresenter->notifyResumeReductionRequested();
+  m_eventPresenter->notifyResumeReductionRequested();
+  m_experimentPresenter->notifyResumeReductionRequested();
+  m_instrumentPresenter->notifyResumeReductionRequested();
   m_runsPresenter->notifyReductionResumed();
   m_mainPresenter->notifyAnyBatchReductionResumed();
 }
@@ -206,7 +206,7 @@ void BatchPresenter::resumeAutoreduction() {
   m_jobManager->notifyAutoreductionResumed();
   // The runs presenter starts autoreduction. This sets off a search to find
   // new runs, if there are any. When the search completes, we'll receive
-  // a separate callback to notifyReductionResumed.
+  // a separate callback to notifyResumeReductionRequested.
   if (m_runsPresenter->resumeAutoreduction())
     notifyAutoreductionResumed();
   else

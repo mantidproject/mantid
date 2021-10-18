@@ -57,7 +57,7 @@ public:
   void notifyLookupRowChanged(int row, int column) override;
 
   void notifyPauseReductionRequested() override;
-  void notifyReductionResumed() override;
+  void notifyResumeReductionRequested() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
