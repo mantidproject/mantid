@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (crea
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
-from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_parameter_units import parameter_units
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import is_equal_to_n_decimals
 
 
@@ -249,15 +248,10 @@ class ModelFittingModel(BasicFittingModel):
         workspace.getAxis(0).setUnit("Label").setLabel(axis_label, unit)
 
     def _set_y_label(self, workspace_name: str, axis_label: str) -> None:
-        """Sets the label and unit for the X axis of a workspace."""
+        """Sets the label and unit for the Y axis of a workspace."""
         workspace = retrieve_ws(workspace_name)
         unit = self._get_parameter_unit(axis_label)
-        workspace.getAxis(1).setUnit("Label").setLabel(axis_label, unit)
-
-    def _create_y_label(self, parameter_name: str) -> str:
-        """Returns the string to use for the y label of a workspace."""
-        unit = self._get_parameter_unit(parameter_name)
-        return f"{parameter_name} ({unit})" if unit != "" else f"{parameter_name}"
+        workspace.setYUnitLabel(f"{axis_label} ({unit})" if unit != "" else f"{axis_label}")
 
     def _get_parameter_unit(self, parameter_name: str) -> str:
         """Returns the units of a parameter by searching the Dictionary, UnitFactory and Sample logs."""
@@ -268,11 +262,10 @@ class ModelFittingModel(BasicFittingModel):
             unit = self._get_unit_from_unit_factory(parameter_name)
         return unit
 
-    @staticmethod
-    def _get_unit_from_unit_dictionary(parameter_name: str) -> str:
+    def _get_unit_from_unit_dictionary(self, parameter_name: str) -> str:
         """Returns the units of a parameter if it exists in the model fitting unit dictionary."""
-        if parameter_name in parameter_units:
-            return parameter_units[parameter_name]
+        if parameter_name in self.fitting_context.parameter_units:
+            return self.fitting_context.parameter_units[parameter_name]
         return ""
 
     def _get_unit_from_unit_factory(self, parameter_name: str) -> str:
