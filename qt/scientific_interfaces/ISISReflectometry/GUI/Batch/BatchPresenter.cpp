@@ -236,10 +236,10 @@ void BatchPresenter::pauseAutoreduction() {
 
 void BatchPresenter::notifyAutoreductionPaused() {
   // Notify child presenters
-  m_savePresenter->notifyAutoreductionPaused();
-  m_eventPresenter->notifyAutoreductionPaused();
-  m_experimentPresenter->notifyAutoreductionPaused();
-  m_instrumentPresenter->notifyAutoreductionPaused();
+  m_savePresenter->notifyPauseAutoreductionRequested();
+  m_eventPresenter->notifyPauseAutoreductionRequested();
+  m_experimentPresenter->notifyPauseAutoreductionRequested();
+  m_instrumentPresenter->notifyPauseAutoreductionRequested();
   m_runsPresenter->notifyAutoreductionPaused();
 
   m_mainPresenter->notifyAnyBatchAutoreductionPaused();

@@ -117,7 +117,7 @@ void SavePresenter::notifyPauseReductionRequested() {
 
 void SavePresenter::notifyResumeReductionRequested() { updateWidgetEnabledState(); }
 
-void SavePresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
+void SavePresenter::notifyPauseAutoreductionRequested() { updateWidgetEnabledState(); }
 
 void SavePresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 

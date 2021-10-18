@@ -29,7 +29,7 @@ public:
   virtual Instrument const &instrument() const = 0;
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyResumeReductionRequested() = 0;
-  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void restoreDefaults() = 0;

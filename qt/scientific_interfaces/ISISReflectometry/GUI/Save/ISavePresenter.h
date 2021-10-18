@@ -28,7 +28,7 @@ public:
   /// Tell the presenter something happened
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyResumeReductionRequested() = 0;
-  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyAutoreductionResumed() = 0;
 };
 } // namespace ISISReflectometry

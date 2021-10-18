@@ -220,7 +220,7 @@ public:
 
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
-    presenter.notifyAutoreductionPaused();
+    presenter.notifyPauseAutoreductionRequested();
 
     verifyAndClear();
   }

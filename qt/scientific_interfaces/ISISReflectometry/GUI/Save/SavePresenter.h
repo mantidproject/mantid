@@ -35,7 +35,7 @@ public:
   bool shouldAutosave() const override;
   void notifyPauseReductionRequested() override;
   void notifyResumeReductionRequested() override;
-  void notifyAutoreductionPaused() override;
+  void notifyPauseAutoreductionRequested() override;
   void notifyAutoreductionResumed() override;
 
   // SaveViewSubscriber overrides
