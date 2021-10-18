@@ -57,7 +57,7 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::strin
   setWindowTitle("Mantid - Select workspace");
   m_wsList = new QListWidget(parent);
 
-  Mantid::API::AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+  const Mantid::API::AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   using VecWorkspaces = std::vector<Mantid::API::Workspace_sptr>;
   VecWorkspaces workspaces = ADS.getObjects();
   WorkspaceIsNotOfType comparitor(typeFilter);
