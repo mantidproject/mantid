@@ -97,7 +97,8 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             Transmission='vanadium_transmission',
                             QuartzWorkspace='pol_corrections',
                             SampleAndEnvironmentProperties=self._sampleProperties,
-                            OutputTreatment='Sum')
+                            OutputTreatment='Sum',
+                            MaskDetectors=[30, 50, 127])
         self._check_output(mtd['vanadium_full'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
                            post_processed=True)
         self._check_process_flag(mtd['vanadium_full'], 'Vanadium')

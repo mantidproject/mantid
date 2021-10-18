@@ -9,8 +9,8 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     MultipleFileProperty, ITableWorkspaceProperty, PropertyMode, \
     Progress, PythonAlgorithm, WorkspaceGroupProperty
 from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, \
-    FloatBoundedValidator, LogicOperator, PropertyCriterion, PropertyManagerProperty, \
-    RebinParamsValidator, StringListValidator
+    FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, LogicOperator, \
+    PropertyCriterion, PropertyManagerProperty, RebinParamsValidator, StringListValidator
 from mantid.simpleapi import *
 
 from scipy.constants import physical_constants
@@ -295,6 +295,10 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('DetectorEnergyEfficiencyCorrection', tofMeasurement)
 
+        arrvalidator = IntArrayBoundedValidator(lower=1, upper=132)
+        self.declareProperty(IntArrayProperty(name="MaskDetectors", validator=arrvalidator),
+                             doc='Which detectors should be masked.')
+
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
@@ -476,6 +480,14 @@ class PolDiffILLReduction(PythonAlgorithm):
             entry.setDistribution(True)
         return ws
 
+    @staticmethod
+    def _correct_bin_widths(ws, max_energy):
+        """Corrects zero bin widths in masked spectra caused by integrating elastic peak."""
+        for spec_no in range(mtd[ws].getNumberHistograms()):
+            dataX = mtd[ws].readX(spec_no)
+            if any(dataX[:-1] - dataX[1:] == 0):  # any zero bin width
+                mtd[ws].setX(spec_no, np.linspace(-max_energy, max_energy, len(dataX)))
+
     def _load_and_prepare_data(self, measurement_technique, process, progress):
         """Loads the data, sets the instrument, and runs function to check the measurement method. In the case
         of a single crystal measurement, it also merges the omega scan data into one workspace per polarisation
@@ -490,6 +502,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                      LoaderOptions={'PositionCalibration': calibration_setting,
                                     'YIGFileName': self.getPropertyValue('InstrumentCalibration')},
                      OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
+        masked_detectors = self.getProperty('MaskDetectors').value
+        if len(masked_detectors) > 0:
+            MaskDetectors(Workspace=ws, SpectraList=masked_detectors)
         self._instrument = mtd[ws][0].getInstrument().getName()
         self._figure_out_measurement_method(ws)
         if measurement_technique == 'SingleCrystal':
@@ -1081,7 +1096,9 @@ class PolDiffILLReduction(PythonAlgorithm):
         tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_speed  # in us
         if not self._elastic_channels_ws:
             self._find_elastic_peak_channels(ws)
-        peak_positions = mtd[self._elastic_channels_ws].column('PeakCentre')
+        peak_positions = np.array(mtd[self._elastic_channels_ws].column('PeakCentre'))
+        # pad peak positions in case of masked bins:
+        peak_positions[peak_positions == 0] = np.mean(peak_positions[peak_positions != 0])
         for entry in mtd[ws]:
             for pixel_no in range(entry.getNumberHistograms()):
                 tof_deltaE_0 = tof_deltaE_0_odd if pixel_no % 2 == 0 else tof_deltaE_0_even
@@ -1121,6 +1138,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         for entry in mtd[ws]:
             Integration(InputWorkspace=entry, OutputWorkspace=entry,
                         RangeLowerList=-sigmaE, RangeUpperList=sigmaE)
+            self._correct_bin_widths(entry.name(), max_energy)
             Rebin(InputWorkspace=entry, OutputWorkspace=entry,
                   Params='{},{},{}'.format(-max_energy, bin_width, max_energy))  # rebins vanadium to a common bin
         return ws
