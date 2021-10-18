@@ -206,7 +206,7 @@ bool addColumnSimple(ITableWorkspace &self, const std::string &type, const std::
 bool addReadOnlyColumn(ITableWorkspace &self, const std::string &type, const std::string &name) {
   auto newColumn = self.addColumn(type, name);
   newColumn->setReadOnly(true);
-  return newColumn != nullptr;
+  return true;
 }
 
 /**
