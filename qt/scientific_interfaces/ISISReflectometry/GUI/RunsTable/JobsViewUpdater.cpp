@@ -71,7 +71,7 @@ void JobsViewUpdater::rowModified(int groupIndex, int rowIndex, Row const &row) 
                     cellsFromRow(row, m_precision));
 }
 
-void JobsViewUpdater::setPrecision(int &precision) { m_precision = precision; }
+void JobsViewUpdater::setPrecision(const int &precision) { m_precision = precision; }
 
 void JobsViewUpdater::resetPrecision() { m_precision = boost::none; }
 

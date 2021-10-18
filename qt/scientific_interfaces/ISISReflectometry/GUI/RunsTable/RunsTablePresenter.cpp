@@ -85,16 +85,16 @@ void makePastedGroupNamesUnique(Clipboard &clipboard, int rootIndex,
   if (!clipboard.isGroupLocation(rootIndex))
     return;
 
-  auto groupName = clipboard.groupName(rootIndex);
-  if (groupName.empty())
+  auto clipGroupName = clipboard.groupName(rootIndex);
+  if (clipGroupName.empty())
     return;
 
   // Replace the group name until it is unique in the model and clipboard
-  while (groupNameExists(groupName, jobs, replacementRoots) || groupNameExists(groupName, clipboard, rootIndex))
-    groupName.append(" (copy)");
+  while (groupNameExists(clipGroupName, jobs, replacementRoots) || groupNameExists(clipGroupName, clipboard, rootIndex))
+    clipGroupName.append(" (copy)");
 
   // Set the new name
-  clipboard.setGroupName(rootIndex, groupName);
+  clipboard.setGroupName(rootIndex, clipGroupName);
 }
 
 void makePastedGroupNamesUnique(Clipboard &clipboard,
