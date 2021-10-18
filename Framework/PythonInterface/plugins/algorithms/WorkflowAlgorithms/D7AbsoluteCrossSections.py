@@ -925,13 +925,16 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 entry_name = entry_name[2:]
             if input_ws in entry_name:
                 entry_name = entry_name[len(input_ws)+1:]  # assuming the verbose input name is at the beginning
-            if any([polarisation in entry_name for polarisation in possible_polarisations]):
+            pol_present = [polarisation in entry_name for polarisation in possible_polarisations]
+            if any(pol_present):
                 pol_length = len(max(possible_polarisations, key=len))
                 if 'ON' in entry_name:
                     pol_length += 4  # length of '_ON_'
                 else:  # == 'OFF'
                     pol_length += 5  # length of '_OFF_'
-                entry_name = entry_name[pol_length:]
+                pol_type = np.array(possible_polarisations)[pol_present]
+                pol_pos = entry_name.find(pol_type[0])
+                entry_name = "{}{}".format(entry_name[:pol_pos], entry_name[pol_pos+pol_length:])
             output_name = self.getPropertyValue("OutputWorkspace")
             if output_name not in entry_name:
                 new_name = "{}_{}".format(output_name, entry_name)
