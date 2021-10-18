@@ -7,6 +7,7 @@
 #pragma once
 
 #include "GUI/Batch/IBatchView.h"
+#include <QCloseEvent>
 #include <string>
 #include <vector>
 
