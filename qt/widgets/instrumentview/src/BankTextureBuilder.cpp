@@ -330,15 +330,15 @@ void BankTextureBuilder::uploadGridBankTexture(bool picking, GridTextureFace gri
     return;
   }
 
-  auto textureIndex = static_cast<size_t>(gridBankFace);
-  auto &texture = picking ? m_detPickTextures[textureIndex] : m_detColorTextures[textureIndex];
+  const auto textureIndex = static_cast<size_t>(gridBankFace);
+  const auto &texture = picking ? m_detPickTextures[textureIndex] : m_detColorTextures[textureIndex];
   auto &textureID = picking ? m_pickTextureIDs[textureIndex] : m_colorTextureIDs[textureIndex];
 
   upload2DTexture(m_textSizes[textureIndex], textureID, texture);
 }
 
 void BankTextureBuilder::uploadRectangularBankTextures(bool picking) {
-  auto &texture = picking ? m_detPickTextures[0] : m_detColorTextures[0];
+  const auto &texture = picking ? m_detPickTextures[0] : m_detColorTextures[0];
   auto &textureID = picking ? m_pickTextureIDs[0] : m_colorTextureIDs[0];
 
   upload2DTexture(m_textSizes[0], textureID, texture);
