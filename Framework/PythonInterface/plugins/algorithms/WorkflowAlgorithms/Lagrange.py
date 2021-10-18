@@ -39,10 +39,11 @@ def format_values(data):
     return data
 
 
-def merge_and_average(data):
+def merge_adjacent_points(data):
     """
-    Merge points that are close to one another together, averaging their values
-    @param data the data, a (nb of points, 3)-shaped numpy array.
+    Merge points that are close to one another together, summing their values
+    @param data a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
+    @return a (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
     """
     # max difference between two identical points
     epsilon = 1e-2
@@ -50,17 +51,14 @@ def merge_and_average(data):
     # sort by incident energy
     data = data[data[:, 0].argsort()]
 
-    # merge adjacent data points together
-    current_sum = 0
+    # sum adjacent data points
     current_writing_index = 0
     for point in data:
         if point[0] - data[current_writing_index][0] < epsilon:
-            data[current_writing_index] = (data[current_writing_index] * current_sum + point) / (current_sum + 1)
-            # TODO how to average errors ?
+            data[current_writing_index][1] = point[1]
+            data[current_writing_index][2] = point[2]
             # TODO decide on a merging behaviour for multiple points
-            current_sum += 1
         else:
-            current_sum = 1
             current_writing_index += 1
             data[current_writing_index] = point
 
@@ -114,8 +112,8 @@ class LagrangeTMP(DataProcessorAlgorithm):
         # empty cell treatment, if there is any
         if empty_cell_file[0]:
             self.empty_cell = load_and_concatenate(empty_cell_file)
+            self.empty_cell = merge_adjacent_points(self.empty_cell)
             self.empty_cell = format_values(self.empty_cell)
-            self.empty_cell = merge_and_average(self.empty_cell)
 
             if self.correction_data is not None:
                 self.correct_data(self.empty_cell)
@@ -123,8 +121,8 @@ class LagrangeTMP(DataProcessorAlgorithm):
         # sample load and formatting
         sample_file = self.getPropertyValue('SampleRuns').split(',')
         self.sample = load_and_concatenate(sample_file)
+        self.sample = merge_adjacent_points(self.sample)
         self.sample = format_values(self.sample)
-        self.sample = merge_and_average(self.sample)
 
         # sample corrections
         if self.correction_data is not None:
