@@ -107,9 +107,13 @@ public:
 
 /**
  * Constructor.
+ * @param useThread :: Controls whether the InstrumentActor is created in a background thread. Set to false to keep
+ * original behavior where full instrument is loaded with the window. If using the thread, then use waitForThread()
+ * after creating the widget.
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
-                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps)
+                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps,
+                                   bool useThread)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(std::move(wsName)), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(
@@ -118,7 +122,8 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
       m_qtConnect(std::move(deps.qtConnect)), m_qtMetaObject(std::move(deps.qtMetaObject)),
       m_messageHandler(std::move(deps.messageHandler)), m_finished(false), m_autoscaling(autoscaling),
-      m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView), m_resetGeometry(resetGeometry) {
+      m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView), m_resetGeometry(resetGeometry),
+      m_useThread(useThread) {
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
@@ -167,9 +172,17 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
 
-  // disable all controls until background thread has finished
-  m_controlPanelLayout->setEnabled(false);
-  resetInstrumentActor(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
+  if (m_useThread) {
+    // disable all controls until background thread has finished
+    m_controlPanelLayout->setEnabled(false);
+    resetInstrumentActor(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
+  } else {
+    // create and setup the instrument actor immediately if not using the background thread
+    m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                          scaleMin, scaleMax);
+    m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::DirectConnection,
+                                 Q_ARG(bool, resetGeometry), Q_ARG(bool, setDefaultView));
+  }
 
   // Background colour
   setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
@@ -215,13 +228,20 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   setAcceptDrops(true);
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
+
+  // finish widget init now if not using the background thread
+  if (!m_useThread) {
+    initWidget(true, true);
+  }
 }
 
 /**
  * Destructor
  */
 InstrumentWidget::~InstrumentWidget() {
-  cancelThread();
+  if (m_useThread) {
+    cancelThread();
+  }
 
   if (m_instrumentActor) {
     saveSettings();
@@ -268,13 +288,7 @@ Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) cons
  * Must be called straight after constructor.
  * @param resetGeometry :: Set true for resetting the view's geometry: the
  * bounding box and rotation. Default is true.
- * @param autoscaling :: True to start with autoscaling option on.
- * @param scaleMin :: Minimum value of the colormap scale. Ignored if
- * autoscaling == true.
- * @param scaleMax :: Maximum value of the colormap scale. Ignored if
- * autoscaling == true.
  * @param setDefaultView :: Set the default surface type
- * @param resetActor :: If true reset the instrumentActor object
  */
 void InstrumentWidget::init(bool resetGeometry, bool setDefaultView) {
 
@@ -344,7 +358,7 @@ void InstrumentWidget::resetSurface() {
  */
 void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax,
                                             bool setDefaultView) {
-  if (m_thread.isRunning()) {
+  if (m_useThread && m_thread.isRunning()) {
     cancelThread();
   }
 
@@ -357,11 +371,15 @@ void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling
 
   m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
                                                         scaleMin, scaleMax);
-  m_instrumentActor->moveToThread(&m_thread);
-  m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
-  m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
-  m_qtConnect->connect(&m_thread, SIGNAL(destroyed()), this, SLOT(threadFinished()));
-  m_thread.start();
+  if (m_useThread) {
+    m_instrumentActor->moveToThread(&m_thread);
+    m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
+    m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
+    m_qtConnect->connect(&m_thread, SIGNAL(destroyed()), this, SLOT(threadFinished()));
+    m_thread.start();
+  } else {
+    m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
+  }
   m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
                                Q_ARG(bool, setDefaultView));
 }

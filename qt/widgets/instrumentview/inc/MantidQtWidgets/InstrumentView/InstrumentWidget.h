@@ -117,7 +117,7 @@ public:
 
   explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, Dependencies deps = Dependencies());
+                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = true);
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -388,6 +388,7 @@ private:
   double m_scaleMax;
   bool m_setDefaultView;
   bool m_resetGeometry;
+  bool m_useThread;
 
   QSplitter *m_controlPanelLayout;
 };
