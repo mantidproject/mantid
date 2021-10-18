@@ -29,7 +29,7 @@ public:
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyPauseAutoreductionRequested() = 0;
-  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyResumeAutoreductionRequested() = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

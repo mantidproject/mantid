@@ -25,7 +25,7 @@ public:
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyPauseAutoreductionRequested() = 0;
-  virtual void notifyAutoreductionResumed() = 0;
+  virtual void notifyResumeAutoreductionRequested() = 0;
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void restoreDefaults() = 0;
 };

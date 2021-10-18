@@ -76,7 +76,7 @@ void EventPresenter::notifyResumeReductionRequested() { updateWidgetEnabledState
 
 void EventPresenter::notifyPauseAutoreductionRequested() { updateWidgetEnabledState(); }
 
-void EventPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
+void EventPresenter::notifyResumeAutoreductionRequested() { updateWidgetEnabledState(); }
 
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());

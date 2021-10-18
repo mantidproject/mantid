@@ -148,7 +148,7 @@ public:
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
   MOCK_CONST_METHOD0(slicing, Slicing &());
 };
 
@@ -159,7 +159,7 @@ public:
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(restoreDefaults, void());
 };
@@ -171,7 +171,7 @@ public:
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(restoreDefaults, void());
 };
@@ -184,7 +184,7 @@ public:
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseAutoreductionRequested, void());
-  MOCK_METHOD0(notifyAutoreductionResumed, void());
+  MOCK_METHOD0(notifyResumeAutoreductionRequested, void());
 };
 
 /**** Progress ****/

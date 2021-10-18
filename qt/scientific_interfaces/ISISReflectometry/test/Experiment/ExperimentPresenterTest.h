@@ -85,7 +85,7 @@ public:
 
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectAutoreducing();
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
 
     verifyAndClear();
   }

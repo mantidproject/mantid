@@ -277,10 +277,10 @@ public:
   void testChildPresentersNotUpdatedWhenAutoreductionCanelled() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsPresenter, resumeAutoreduction()).Times(1).WillOnce(Return(false));
-    EXPECT_CALL(*m_savePresenter, notifyAutoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_eventPresenter, notifyAutoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionResumed()).Times(0);
-    EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(0);
+    EXPECT_CALL(*m_savePresenter, notifyResumeAutoreductionRequested()).Times(0);
+    EXPECT_CALL(*m_eventPresenter, notifyResumeAutoreductionRequested()).Times(0);
+    EXPECT_CALL(*m_experimentPresenter, notifyResumeAutoreductionRequested()).Times(0);
+    EXPECT_CALL(*m_instrumentPresenter, notifyResumeAutoreductionRequested()).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(0);
     presenter->notifyResumeAutoreductionRequested();
     verifyAndClear();
@@ -602,10 +602,10 @@ private:
   }
 
   void expectAutoreductionResumed() {
-    EXPECT_CALL(*m_savePresenter, notifyAutoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, notifyAutoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, notifyAutoreductionResumed()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyResumeAutoreductionRequested()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyResumeAutoreductionRequested()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyResumeAutoreductionRequested()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyResumeAutoreductionRequested()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
     EXPECT_CALL(m_mainPresenter, notifyAnyBatchAutoreductionResumed()).Times(1);

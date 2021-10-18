@@ -215,10 +215,10 @@ void BatchPresenter::resumeAutoreduction() {
 
 void BatchPresenter::notifyAutoreductionResumed() {
   // Notify child presenters
-  m_savePresenter->notifyAutoreductionResumed();
-  m_eventPresenter->notifyAutoreductionResumed();
-  m_experimentPresenter->notifyAutoreductionResumed();
-  m_instrumentPresenter->notifyAutoreductionResumed();
+  m_savePresenter->notifyResumeAutoreductionRequested();
+  m_eventPresenter->notifyResumeAutoreductionRequested();
+  m_experimentPresenter->notifyResumeAutoreductionRequested();
+  m_instrumentPresenter->notifyResumeAutoreductionRequested();
   m_runsPresenter->notifyAutoreductionResumed();
 
   m_runsPresenter->notifyRowStateChanged();

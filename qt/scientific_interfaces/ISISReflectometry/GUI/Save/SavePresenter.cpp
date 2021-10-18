@@ -119,7 +119,7 @@ void SavePresenter::notifyResumeReductionRequested() { updateWidgetEnabledState(
 
 void SavePresenter::notifyPauseAutoreductionRequested() { updateWidgetEnabledState(); }
 
-void SavePresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
+void SavePresenter::notifyResumeAutoreductionRequested() { updateWidgetEnabledState(); }
 
 void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {

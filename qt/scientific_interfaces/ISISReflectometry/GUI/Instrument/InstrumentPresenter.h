@@ -36,7 +36,7 @@ public:
   void notifyPauseReductionRequested() override;
   void notifyResumeReductionRequested() override;
   void notifyPauseAutoreductionRequested() override;
-  void notifyAutoreductionResumed() override;
+  void notifyResumeAutoreductionRequested() override;
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 

@@ -28,7 +28,7 @@ public:
   void notifyPauseReductionRequested() override;
   void notifyResumeReductionRequested() override;
   void notifyPauseAutoreductionRequested() override;
-  void notifyAutoreductionResumed() override;
+  void notifyResumeAutoreductionRequested() override;
 
   void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;

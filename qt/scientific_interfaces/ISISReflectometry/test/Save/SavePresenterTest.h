@@ -274,7 +274,7 @@ public:
     enableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -283,7 +283,7 @@ public:
     enableAutosave(presenter);
     expectAutoreducing();
     expectFileFormatAndLocationControlsDisabled();
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -292,7 +292,7 @@ public:
     disableAutosave(presenter);
     expectAutoreducing();
     expectFileFormatAndLocationControlsEnabled();
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 
@@ -301,7 +301,7 @@ public:
     disableAutosave(presenter);
     expectAutoreducing();
     EXPECT_CALL(m_view, disableAutosaveControls()).Times(1);
-    presenter.notifyAutoreductionResumed();
+    presenter.notifyResumeAutoreductionRequested();
     verifyAndClear();
   }
 

@@ -92,7 +92,7 @@ void InstrumentPresenter::notifyResumeReductionRequested() { updateWidgetEnabled
 
 void InstrumentPresenter::notifyPauseAutoreductionRequested() { updateWidgetEnabledState(); }
 
-void InstrumentPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyResumeAutoreductionRequested() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
