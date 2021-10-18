@@ -813,7 +813,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         unit = r'd$\sigma$/d$\Omega$'
         self._set_as_distribution(ws)
         perform_merge = mtd[ws].getNumberOfEntries() / nMeasurements > 1 \
-                        and self.getPropertyValue('OutputTreatment') == 'Merge'
+            and self.getPropertyValue('OutputTreatment') == 'Merge'
         if perform_merge:
             self._merge_data(ws)
 
@@ -835,7 +835,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                               for ws_name in name_tuple]
 
             q_binning = self._get_q_binning(ws)
-            SofQWCentre(
+            SofQWNormalisedPolygon(
                 InputWorkspace=ws, OutputWorkspace=ws,
                 EMode='Direct',
                 EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
