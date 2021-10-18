@@ -1,5 +1,5 @@
 ============
-MuSR Changes
+Muon Changes
 ============
 
 .. contents:: Table of Contents
@@ -8,6 +8,7 @@ MuSR Changes
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
+
 
 Frequency Domain Analysis
 -------------------------
@@ -61,14 +62,26 @@ Improvements
 
 Bugfixes
 ########
--
+
+Fitting Functions
+-----------------
+New Features
+############
+- Added a :ref:`Power Law <func-PowerLaw>` function to MuonModelling Fit Functions.
+
+Improvements
+############
+- :ref:`Gaussian <func-Gaussian>`, :ref:`Lorentzian <func-Lorentzian>` and :ref:`Polynomial fitting <func-Polynomial>` functions can now also be found under MuonModelling in the Fitting Functions Tree.
+
+:ref:`Release 6.3.0 <v6.3.0>`
+
 
 ..
   Model Fitting
-  #############
+  -------------
 
   BugFixes
-  --------
+  ########
   - A bug has been fixed that caused Model fitting to not update it's results table list.
 
-:ref:`Release 6.3.0 <v6.3.0>`
+

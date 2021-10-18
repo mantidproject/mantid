@@ -118,6 +118,7 @@ set(SRC_FILES
     src/Functions/PawleyFunction.cpp
     src/Functions/PeakParameterFunction.cpp
     src/Functions/Polynomial.cpp
+    src/Functions/PowerLaw.cpp
     src/Functions/ProcessBackground.cpp
     src/Functions/ProductFunction.cpp
     src/Functions/ProductLinearExp.cpp
@@ -444,6 +445,7 @@ set(TEST_FILES
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
     Functions/PolynomialTest.h
+    Functions/PowerLawTest.h
     Functions/ProcessBackgroundTest.h
     Functions/ProductFunctionTest.h
     Functions/ProductLinearExpTest.h
