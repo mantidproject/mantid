@@ -62,7 +62,7 @@ void FindFilesWorker::run() {
     return;
   }
 
-  Mantid::API::FileFinderImpl &fileSearcher = Mantid::API::FileFinder::Instance();
+  const Mantid::API::FileFinderImpl &fileSearcher = Mantid::API::FileFinder::Instance();
 
   try {
     // Use the property of the algorithm to find files, if one has been
