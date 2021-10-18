@@ -93,7 +93,7 @@ void ExperimentPresenter::updateWidgetEnabledState() {
   updateFloodCorrectionEnabledState();
 }
 
-void ExperimentPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
+void ExperimentPresenter::notifyPauseReductionRequested() { updateWidgetEnabledState(); }
 
 void ExperimentPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 

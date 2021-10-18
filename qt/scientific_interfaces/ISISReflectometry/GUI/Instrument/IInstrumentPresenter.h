@@ -27,7 +27,7 @@ public:
 
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
   virtual Instrument const &instrument() const = 0;
-  virtual void notifyReductionPaused() = 0;
+  virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyReductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void notifyAutoreductionResumed() = 0;

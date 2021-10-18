@@ -56,7 +56,7 @@ public:
   void notifyRemoveLookupRowRequested(int index) override;
   void notifyLookupRowChanged(int row, int column) override;
 
-  void notifyReductionPaused() override;
+  void notifyPauseReductionRequested() override;
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;

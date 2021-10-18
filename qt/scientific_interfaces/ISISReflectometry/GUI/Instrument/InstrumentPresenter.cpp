@@ -86,7 +86,7 @@ void InstrumentPresenter::updateWidgetValidState() {
     m_view->showMonitorIntegralRangeInvalid();
 }
 
-void InstrumentPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyPauseReductionRequested() { updateWidgetEnabledState(); }
 
 void InstrumentPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 

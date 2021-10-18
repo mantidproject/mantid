@@ -594,10 +594,10 @@ private:
   }
 
   void expectReductionPaused() {
-    EXPECT_CALL(*m_savePresenter, notifyReductionPaused()).Times(1);
-    EXPECT_CALL(*m_eventPresenter, notifyReductionPaused()).Times(1);
-    EXPECT_CALL(*m_experimentPresenter, notifyReductionPaused()).Times(1);
-    EXPECT_CALL(*m_instrumentPresenter, notifyReductionPaused()).Times(1);
+    EXPECT_CALL(*m_savePresenter, notifyPauseReductionRequested()).Times(1);
+    EXPECT_CALL(*m_eventPresenter, notifyPauseReductionRequested()).Times(1);
+    EXPECT_CALL(*m_experimentPresenter, notifyPauseReductionRequested()).Times(1);
+    EXPECT_CALL(*m_instrumentPresenter, notifyPauseReductionRequested()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyReductionPaused()).Times(1);
   }
 

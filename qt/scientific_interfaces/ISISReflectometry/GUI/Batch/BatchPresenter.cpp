@@ -190,10 +190,10 @@ void BatchPresenter::notifyReductionPaused() {
   // Update the model
   m_jobManager->notifyReductionPaused();
   // Notify child presenters
-  m_savePresenter->notifyReductionPaused();
-  m_eventPresenter->notifyReductionPaused();
-  m_experimentPresenter->notifyReductionPaused();
-  m_instrumentPresenter->notifyReductionPaused();
+  m_savePresenter->notifyPauseReductionRequested();
+  m_eventPresenter->notifyPauseReductionRequested();
+  m_experimentPresenter->notifyPauseReductionRequested();
+  m_instrumentPresenter->notifyPauseReductionRequested();
   m_runsPresenter->notifyReductionPaused();
   m_mainPresenter->notifyAnyBatchReductionPaused();
   // If autoreducing, notify

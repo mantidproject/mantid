@@ -33,7 +33,7 @@ public:
 
   // IInstrumentPresenver overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void notifyReductionPaused() override;
+  void notifyPauseReductionRequested() override;
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;

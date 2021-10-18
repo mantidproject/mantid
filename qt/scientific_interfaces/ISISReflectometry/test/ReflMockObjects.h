@@ -145,7 +145,7 @@ public:
 class MockEventPresenter : public IEventPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
@@ -156,7 +156,7 @@ class MockExperimentPresenter : public IExperimentPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_CONST_METHOD0(experiment, Experiment const &());
-  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
@@ -168,7 +168,7 @@ class MockInstrumentPresenter : public IInstrumentPresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_CONST_METHOD0(instrument, Instrument const &());
-  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());
@@ -181,7 +181,7 @@ public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
   MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
-  MOCK_METHOD0(notifyReductionPaused, void());
+  MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD0(notifyAutoreductionResumed, void());

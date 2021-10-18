@@ -33,7 +33,7 @@ public:
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
   bool shouldAutosave() const override;
-  void notifyReductionPaused() override;
+  void notifyPauseReductionRequested() override;
   void notifyReductionResumed() override;
   void notifyAutoreductionPaused() override;
   void notifyAutoreductionResumed() override;

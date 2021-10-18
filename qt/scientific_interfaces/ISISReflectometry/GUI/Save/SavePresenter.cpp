@@ -110,7 +110,7 @@ void SavePresenter::updateWidgetEnabledState() const {
   }
 }
 
-void SavePresenter::notifyReductionPaused() {
+void SavePresenter::notifyPauseReductionRequested() {
   populateWorkspaceList();
   updateWidgetEnabledState();
 }

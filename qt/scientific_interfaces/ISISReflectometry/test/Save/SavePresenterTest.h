@@ -229,7 +229,7 @@ public:
     expectNotProcessingOrAutoreducing();
     EXPECT_CALL(m_view, enableAutosaveControls()).Times(1);
     expectFileFormatAndLocationControlsEnabled();
-    presenter.notifyReductionPaused();
+    presenter.notifyPauseReductionRequested();
     verifyAndClear();
   }
 
