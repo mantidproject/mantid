@@ -25,6 +25,12 @@ class PreviewModelTest : public CxxTest::TestSuite {
 public:
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
+  void test_run_details_created_by_default() {
+    PreviewModel model;
+    // This will throw if the underlying RunDetails is null
+    TS_ASSERT_THROWS_NOTHING(model.getSelectedBanks())
+  }
+
   void test_load_workspace_from_ads() {
     auto mockJobManager = MockJobManager();
     EXPECT_CALL(mockJobManager, startPreprocessing(_)).Times(0);
@@ -52,6 +58,27 @@ public:
 
     model.loadAndPreprocessWorkspaceAsync(workspaceName, mockJobManager);
     auto workspace = model.getLoadedWs();
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
+
+  void test_set_and_get_selected_banks() {
+    PreviewModel model;
+    const std::vector<size_t> inputRoi{56, 57, 58, 59};
+    model.setSelectedBanks(inputRoi);
+    TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
+  }
+
+  void test_sum_banks() {
+    auto mockJobManager = MockJobManager();
+    auto expectedWs = createWorkspace();
+    auto wsSumBanksEffect = [&expectedWs](PreviewRow &row) { row.setSummedWs(expectedWs); };
+    EXPECT_CALL(mockJobManager, startSumBanks(_)).Times(1).WillOnce(Invoke(wsSumBanksEffect));
+
+    PreviewModel model;
+    model.sumBanksAsync(mockJobManager);
+
+    auto workspace = model.getSummedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }

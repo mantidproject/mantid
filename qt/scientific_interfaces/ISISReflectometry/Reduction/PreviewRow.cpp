@@ -26,6 +26,14 @@ int PreviewRow::totalItems() const { return 1; }
 int PreviewRow::completedItems() const { return 1; }
 
 Mantid::API::MatrixWorkspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
+Mantid::API::MatrixWorkspace_sptr PreviewRow::getSummedWs() const noexcept { return m_summedWs; }
 
-void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = ws; }
+void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
+void PreviewRow::setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
+
+std::vector<size_t> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
+
+void PreviewRow::setSelectedBanks(std::vector<size_t> selectedBanks) noexcept {
+  m_selectedBanks = std::move(selectedBanks);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

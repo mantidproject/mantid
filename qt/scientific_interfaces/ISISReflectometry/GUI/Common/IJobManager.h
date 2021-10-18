@@ -25,5 +25,6 @@ public:
 
   virtual void subscribe(JobManagerSubscriber *notifyee) = 0;
   virtual void startPreprocessing(PreviewRow &row) = 0;
+  virtual void startSumBanks(PreviewRow &row) = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

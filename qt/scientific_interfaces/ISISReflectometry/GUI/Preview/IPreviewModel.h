@@ -19,7 +19,14 @@ public:
   virtual ~IPreviewModel() = default;
   virtual bool loadWorkspaceFromAds(std::string const &workspaceName) = 0;
   virtual void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) = 0;
+  virtual void sumBanksAsync(IJobManager &jobManager) = 0;
+
   virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
+  virtual std::vector<size_t> getSelectedBanks() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getSummedWs() const = 0;
+
+  virtual void setSelectedBanks(std::vector<size_t> selectedBanks) = 0;
+
   virtual std::string indicesToString(std::vector<size_t> const &indices) const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -25,6 +25,11 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
+PreviewModel::PreviewModel() {
+  // This simplifies testing greatly
+  createRunDetails("");
+}
+
 /** Set the loaded workspace from the ADS if it exists
  *
  * @param workspaceName : the workspace name to look for
@@ -54,7 +59,21 @@ void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceN
   jobManager.startPreprocessing(*m_runDetails);
 }
 
+/** Sum spectra across banks
+ *
+ * @param wsIndices : the workspace indices of the spectra to sum
+ * @param jobManager : the job manager that will execute the algorithm
+ */
+void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumBanks(*m_runDetails); }
+
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
+MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
+
+std::vector<size_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
+
+void PreviewModel::setSelectedBanks(std::vector<size_t> selectedBanks) {
+  m_runDetails->setSelectedBanks(std::move(selectedBanks));
+}
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});

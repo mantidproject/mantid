@@ -23,6 +23,12 @@ public:
   MOCK_METHOD(bool, loadWorkspaceFromAds, (std::string const &workspaceName), (override));
   MOCK_METHOD(void, loadAndPreprocessWorkspaceAsync, (std::string const &, IJobManager &), (override));
   MOCK_METHOD(MatrixWorkspace_sptr, getLoadedWs, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, getSummedWs, (), (const, override));
+  MOCK_METHOD(std::vector<size_t>, getSelectedBanks, (), (const, override));
+
+  MOCK_METHOD(void, setSelectedBanks, (std::vector<size_t>), (override));
+
+  MOCK_METHOD(void, sumBanksAsync, (IJobManager &), (override));
   MOCK_METHOD(std::string, indicesToString, (std::vector<size_t> const &), (const, override));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

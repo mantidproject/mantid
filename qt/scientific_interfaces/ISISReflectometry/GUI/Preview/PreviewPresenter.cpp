@@ -79,8 +79,9 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToWsIndices(m_view->getSelectedDetectors());
   auto selectionStr = m_model->indicesToString(indices);
-  // TODO Start the algorithm that will sum banks horizontally. For now just print out the masked indices.
-  g_log.information(selectionStr);
-  // m_model->sumBanksAsync(*m_jobManager, m_model->indicesToString(selectedIndices));
+  g_log.debug(selectionStr);
+
+  m_model->setSelectedBanks(indices);
+  m_model->sumBanksAsync(*m_jobManager);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
