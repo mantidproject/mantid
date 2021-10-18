@@ -29,7 +29,7 @@ class RundexSettings(object):
     # acquisition modes
     SANS_ACQ =     "SANS"
     SANS_PSCAN =   "Sample scan"
-    SANS_MULTI =   "SANS multiProcess"
+    SANS_MULTI =   "Kinetic SANS"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
