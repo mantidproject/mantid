@@ -379,7 +379,7 @@ void JSONGeometryParser::extractTransformations(const Json::Value &transformatio
   Eigen::Vector3d orientationVector(0, 0, 1);
   double angle = 0.0;
 
-  auto &children = transformations[CHILDREN];
+  const auto &children = transformations[CHILDREN];
 
   for (const auto &transformation : children) {
     double value;

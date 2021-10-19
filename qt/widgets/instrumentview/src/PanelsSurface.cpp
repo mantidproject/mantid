@@ -273,8 +273,8 @@ void PanelsSurface::project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
 
 void PanelsSurface::rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const {
   const auto &detectorInfo = m_instrActor->detectorInfo();
-  int index = m_detector2bankMap[udet.detIndex];
-  FlatBankInfo &info = *m_flatBanks[index];
+  const int index = m_detector2bankMap[udet.detIndex];
+  const FlatBankInfo &info = *m_flatBanks[index];
   R = info.rotation * detectorInfo.rotation(udet.detIndex);
 }
 

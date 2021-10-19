@@ -56,13 +56,13 @@ void CopyLogs::exec() {
   MatrixWorkspace_sptr outputWs = getProperty("OutputWorkspace");
 
   // get logs from input workspace
-  Run &inputRun = inputWs->mutableRun();
+  const Run &inputRun = inputWs->run();
   const auto &inputLogs = inputRun.getLogData();
 
   // get run from output workspace
   Run &outputRun = outputWs->mutableRun();
 
-  std::string mode = getProperty("MergeStrategy");
+  const std::string mode = getProperty("MergeStrategy");
 
   if (mode == "WipeExisting") {
     wipeExisting(inputLogs, outputRun);
