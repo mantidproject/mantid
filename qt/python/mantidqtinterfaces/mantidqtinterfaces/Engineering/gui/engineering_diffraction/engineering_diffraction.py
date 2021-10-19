@@ -5,18 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from os import path
 from qtpy import QtCore, QtWidgets
-from mantid import config
 from mantidqt.icons import get_icon
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.presenter import EngineeringDiffractionPresenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import CALIB_FOLDER
 from .tabs.common import SavedirObserver
 
 Ui_main_window, _ = load_ui(__file__, "main_window.ui")
-CALIB_DIR = CALIB_FOLDER.replace(path.sep, '/') + '/'  # ensure unix style dir as used in config
 
 
 class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
@@ -67,12 +63,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.set_rb_no(self.presenter.get_saved_rb_number())
         self.set_on_rb_num_changed(self.presenter.set_saved_rb_number)
 
-        # add calib folder to path
-        self._calib_dir_added = CALIB_DIR not in config['datasearch.directories']
-        if self._calib_dir_added:
-            # don't use os.pathsep as always ';' even on linux
-            config['datasearch.directories'] = ';'.join([CALIB_FOLDER, config['datasearch.directories']])
-
         # Usage Reporting
         try:
             import mantid
@@ -111,11 +101,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         self.savedir_label.setText(savedir_text)
 
     def closeEvent(self, event):
-        if self._calib_dir_added:
-            # remove (note can't replace f"{CALIB_FOLDER};" as last entry doesn't end with ;
-            config['datasearch.directories'] = config['datasearch.directories'].replace(CALIB_DIR, "", 1).replace(
-                2*';', ';', 1)
-            # will be a double ; if not last directory
         self.presenter.handle_close()
         self.setParent(None)
         event.accept()

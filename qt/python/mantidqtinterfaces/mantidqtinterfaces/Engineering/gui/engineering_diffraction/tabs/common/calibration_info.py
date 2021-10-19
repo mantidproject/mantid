@@ -11,6 +11,8 @@ from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
 
+GROUP_XML_DIR = path.join(path.abspath(path.join(__file__, path.sep.join(5*['..']))), "calib")
+
 GROUP_FILES = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
                GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
 GROUP_BANK_ARGS = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
@@ -183,12 +185,13 @@ class CalibrationInfo:
         ws_name = GROUP_WS_NAMES[self.group]
         grp_ws = None
         try:
-            grp_ws = LoadDetectorsGroupingFile(InputFile=GROUP_FILES[self.group], OutputWorkspace=ws_name)
+            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(GROUP_XML_DIR, GROUP_FILES[self.group]),
+                                               OutputWorkspace=ws_name)
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")
             if self.group.banks and self.group != GROUP.TEXTURE:
                 grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=ws_name,
-                                                              GroupNames=GROUP_BANK_ARGS[self.group])
+                                                       GroupNames=GROUP_BANK_ARGS[self.group])
         if grp_ws:
             self.group_ws = grp_ws
         else:
