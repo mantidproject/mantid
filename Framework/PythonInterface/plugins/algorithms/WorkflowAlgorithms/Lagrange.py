@@ -72,10 +72,13 @@ def merge_adjacent_points(data):
 class LagrangeTMP(DataProcessorAlgorithm):
 
     progress = None
+    output_ws = None
+    output_name = None
     sample = None
     empty_cell = None
     correction_data = None
     output = None
+    intermediate_workspaces = []
 
     @staticmethod
     def category():
@@ -106,6 +109,7 @@ class LagrangeTMP(DataProcessorAlgorithm):
     def PyExec(self):
 
         correction_file = self.getPropertyValue('CorrectionFile')
+        self.output_name = self.getPropertyValue('OutputWorkspace')
 
         # load correction
         if correction_file:
@@ -119,8 +123,26 @@ class LagrangeTMP(DataProcessorAlgorithm):
             self.empty_cell = merge_adjacent_points(self.empty_cell)
             self.empty_cell = format_values(self.empty_cell)
 
+            rawECname = "__" + self.output_name + "_rawEC"
+
+            CreateWorkspace(outputWorkspace=rawECname,
+                            DataX=self.empty_cell[:, 0],
+                            DataY=self.empty_cell[:, 1],
+                            DataE=self.empty_cell[:, 2],
+                            UnitX="meV")
+
+            self.intermediate_workspaces.append(rawECname)
+
             if self.correction_data is not None:
+                correctedECname = "__" + self.output_name + "_waterCorrectedEC"
                 self.correct_data(self.empty_cell)
+                CreateWorkspace(outputWorkspace=correctedECname,
+                                DataX=self.empty_cell[:, 0],
+                                DataY=self.empty_cell[:, 1],
+                                DataE=self.empty_cell[:, 2],
+                                UnitX="meV")
+
+                self.intermediate_workspaces.append(correctedECname)
 
         # sample load and formatting
         sample_file = self.getPropertyValue('SampleRuns').split(',')
@@ -128,21 +150,39 @@ class LagrangeTMP(DataProcessorAlgorithm):
         self.sample = merge_adjacent_points(self.sample)
         self.sample = format_values(self.sample)
 
+        raw_sample_ws = "__" + self.output_name + "_rawSample"
+        CreateWorkspace(outputWorkspace=raw_sample_ws,
+                        DataX=self.sample[:, 0],
+                        DataY=self.sample[:, 1],
+                        DataE=self.sample[:, 2],
+                        UnitX="meV")
+        self.intermediate_workspaces.append(raw_sample_ws)
+
         # sample corrections
         if self.correction_data is not None:
+
+            water_corrected_ws_name = "__" + self.output_name + "_waterCorrectedSample"
             self.correct_data(self.sample)
+            CreateWorkspace(outputWorkspace=water_corrected_ws_name,
+                            DataX=self.sample[:, 0],
+                            DataY=self.sample[:, 1],
+                            DataE=self.sample[:, 2],
+                            UnitX="meV")
+
+            self.intermediate_workspaces.append(water_corrected_ws_name)
 
         if self.empty_cell is not None:
             self.subtract_empty_cell()
 
         # putting the values in a workspace
-        CreateWorkspace(outputWorkspace=self.getPropertyValue('OutputWorkspace'),
+        CreateWorkspace(outputWorkspace=self.output_name,
                         DataX=self.sample[:, 0],
                         DataY=self.sample[:, 1],
                         DataE=self.sample[:, 2],
                         UnitX="meV")
 
-        self.setProperty('OutputWorkspace', mtd[self.getPropertyValue('OutputWorkspace')])
+        self.setProperty('OutputWorkspace', self.output_name)
+        GroupWorkspaces(OutputWorkspace='__' + self.output_name, InputWorkspaces=self.intermediate_workspaces)
 
     def load_correction(self, file):
         """
