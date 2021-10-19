@@ -49,7 +49,7 @@ public:
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Lorentzian"; }
-  const std::string category() const override { return "Peak"; }
+  const std::string category() const override { return "Peak; Muon\\MuonModelling"; }
 
 protected:
   void functionLocal(double *out, const double *xValues, const size_t nData) const override;

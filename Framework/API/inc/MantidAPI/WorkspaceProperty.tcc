@@ -112,7 +112,6 @@ WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::operator=(const std::shared_pt
 /// Add the value of another property
 template <typename TYPE> WorkspaceProperty<TYPE> &WorkspaceProperty<TYPE>::operator+=(Kernel::Property const *) {
   throw Kernel::Exception::NotImplementedError("+= operator is not implemented for WorkspaceProperty.");
-  return *this;
 }
 
 /// 'Virtual copy constructor'

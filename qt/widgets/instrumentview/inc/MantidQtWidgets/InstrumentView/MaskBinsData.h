@@ -31,7 +31,7 @@ Class for storing information on masked bins in a workspace.
 class MaskBinsData {
 public:
   void addXRange(double start, double end, const std::vector<size_t> &indices);
-  void mask(const std::string &wsName) const;
+  void mask(std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace) const;
   bool isEmpty() const;
   void subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace,
                                  std::vector<double> &spectraIntgrs) const;

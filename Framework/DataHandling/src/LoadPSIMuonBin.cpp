@@ -20,6 +20,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BinaryStreamReader.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
@@ -121,6 +122,13 @@ void LoadPSIMuonBin::init() {
           "DetectorGroupingTable", "", Mantid::Kernel::Direction::Output, Mantid::API::PropertyMode::Optional),
       "Table or a group of tables with information about the "
       "detector grouping stored in the file (if any).");
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<specnum_t>>();
+  mustBePositive->setLower(0);
+  declareProperty("SpectrumMin", static_cast<specnum_t>(0), mustBePositive,
+                  "Index number of the first spectrum to read\n");
+  declareProperty("SpectrumMax", static_cast<specnum_t>(EMPTY_INT()), mustBePositive,
+                  "Index of last spectrum to read\n"
+                  "(default the last spectrum)");
 }
 
 void LoadPSIMuonBin::exec() {
@@ -167,8 +175,6 @@ void LoadPSIMuonBin::exec() {
   assignOutputWorkspaceParticulars(outputWorkspace);
 
   // Set up for the Muon PreProcessor
-  setProperty("OutputWorkspace", outputWorkspace);
-
   // create empty dead time table
   makeDeadTimeTable(m_histograms.size());
 
@@ -228,20 +234,23 @@ void LoadPSIMuonBin::exec() {
       }
     }
   }
+  setProperty("OutputWorkspace", extractSpectra(outputWorkspace));
 
   // Set DetectorGroupingTable if needed
-  setEmptyDetectorGroupingTable(m_histograms.size());
+  setDetectorGroupingTable(m_histograms.size());
 }
 
-void LoadPSIMuonBin::setEmptyDetectorGroupingTable(const size_t &numSpec) {
+void LoadPSIMuonBin::setDetectorGroupingTable(const size_t &numSpec) {
   if (getPropertyValue("DetectorGroupingTable").empty())
     return;
   Mantid::DataObjects::TableWorkspace_sptr detectorTable =
       std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
           Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
-  detectorTable->addColumn("int", "detector");
+  detectorTable->addColumn("vector_int", "detector");
   for (size_t i = 0; i < numSpec; i++) {
+    std::vector<int> dets{static_cast<int>(i) + 1};
     Mantid::API::TableRow row = detectorTable->appendRow();
+    row << dets;
   }
   setProperty("DetectorGroupingTable", detectorTable);
 }
@@ -465,6 +474,16 @@ Mantid::API::Algorithm_sptr LoadPSIMuonBin::createSampleLogAlgorithm(DataObjects
   Mantid::API::Algorithm_sptr logAlg = createChildAlgorithm("AddSampleLog");
   logAlg->setProperty("Workspace", ws);
   return logAlg;
+}
+
+API::MatrixWorkspace_sptr LoadPSIMuonBin::extractSpectra(DataObjects::Workspace2D_sptr &ws) {
+  Mantid::API::Algorithm_sptr alg = createChildAlgorithm("ExtractSpectra");
+  alg->setProperty("InputWorkspace", ws);
+  alg->setProperty("OutputWorkspace", "not_used");
+  alg->setProperty("StartWorkspaceIndex", getPropertyValue("SpectrumMin"));
+  alg->setProperty("EndWorkspaceIndex", getPropertyValue("SpectrumMax"));
+  alg->executeAsChildAlg();
+  return alg->getProperty("OutputWorkspace");
 }
 
 void LoadPSIMuonBin::addToSampleLog(const std::string &logName, const std::string &logText,

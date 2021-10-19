@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FQFitConstants.h"
 #include "FqFitAddWorkspaceDialog.h"
 #include "FqFitDataView.h"
 #include "IFQFitObserver.h"

@@ -106,6 +106,15 @@ void SaveFocusedXYE::exec() {
 
   const auto &detectorInfo = inputWS->detectorInfo();
 
+  if (!split) {
+    const std::string file(std::string(filename).append(".").append(ext));
+    Poco::File fileObj(file);
+    const bool exists = fileObj.exists();
+    out.open(file.c_str(), mode);
+    if (headers && (!exists || !append))
+      writeHeaders(out, inputWS);
+  }
+
   Progress progress(this, 0.0, 1.0, nHist);
   for (size_t i = 0; i < nHist; i++) {
     const auto &X = inputWS->x(i);
@@ -130,17 +139,8 @@ void SaveFocusedXYE::exec() {
       }
     }
 
-    if ((!split) && out) // Assign only one file
-    {
-      const std::string file(std::string(filename).append(".").append(ext));
-      Poco::File fileObj(file);
-      const bool exists = fileObj.exists();
-      out.open(file.c_str(), mode);
-      if (headers && (!exists || !append))
-        writeHeaders(out, inputWS);
-    } else if (split) // Several files will be created with names:
-                      // filename-i.ext
-    {
+    if (split) {
+      // Several files will be created with names filename-i.ext
       number << "-" << i + startingbank;
       const std::string file(std::string(filename).append(number.str()).append(".").append(ext));
       Poco::File fileObj(file);

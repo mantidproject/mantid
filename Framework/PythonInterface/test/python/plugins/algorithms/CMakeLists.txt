@@ -133,11 +133,11 @@ set(TEST_PY_FILES
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
     SaveYDATest.py
-    SaveP2DTest.py)
+    SaveP2DTest.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
 set(PYUNITTEST_PYTHONPATH_EXTRA ${PYTHONINTERFACE_PLUGINS_DIR}/algorithms)
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.algorithms
-                    ${TEST_PY_FILES})
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.algorithms ${TEST_PY_FILES})

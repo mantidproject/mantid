@@ -7,10 +7,9 @@
 #pragma once
 
 #include "IAddWorkspaceDialog.h"
-#include "IIndirectFitDataView.h"
+#include "IndirectFitDataModel.h"
 #include "IndirectFitDataView.h"
-#include "IndirectFittingModel.h"
-#include "MantidQtWidgets/Common/IndexTypes.h"
+#include "ParameterEstimation.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
@@ -29,21 +28,29 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter : public QObject, public An
 public:
   IndirectFitDataPresenter(IIndirectFitDataModel *model, IIndirectFitDataView *view);
   ~IndirectFitDataPresenter();
+  std::vector<IndirectFitData> *getFittingData();
   void addWorkspace(const std::string &workspaceName, const std::string &spectra);
   void setResolution(const std::string &name);
   void setSampleWSSuffices(const QStringList &suffices);
   void setSampleFBSuffices(const QStringList &suffices);
   void setResolutionWSSuffices(const QStringList &suffices);
   void setResolutionFBSuffices(const QStringList &suffices);
+  void setStartX(double startX, WorkspaceID workspaceID);
+  void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
+  void setEndX(double startX, WorkspaceID workspaceID);
+  void setEndX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum);
   std::vector<std::pair<std::string, size_t>> getResolutionsForFit() const;
   QStringList getSampleWSSuffices() const;
   QStringList getSampleFBSuffices() const;
   QStringList getResolutionWSSuffices() const;
   QStringList getResolutionFBSuffices() const;
   void updateTableFromModel();
-  size_t getNumberOfDomains();
+  WorkspaceID getNumberOfWorkspaces() const;
+  size_t getNumberOfDomains() const;
+  FunctionModelSpectra getSpectra(WorkspaceID workspaceID) const;
+  DataForParameterEstimationCollection getDataForParameterEstimation(const EstimationDataSelector &selector) const;
   std::vector<double> getQValuesForData() const;
-
+  std::vector<std::string> createDisplayNames() const;
   UserInputValidator &validate(UserInputValidator &validator);
 
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
@@ -95,6 +102,7 @@ private slots:
   void addData();
   void handleCellChanged(int row, int column);
   void removeSelectedData();
+  void unifyRangeToSelectedData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;

@@ -144,7 +144,7 @@ if "%BUILDPKG%" == "yes" (
     echo Using PACKAGE_SUFFIX=%PACKAGE_SUFFIX% from job parameter
   ) else if not "%JOB_NAME%" == "%JOB_NAME:release=%" (
     set PACKAGE_SUFFIX=
-  ) else if not "%JOB_NAME%" == "%JOB_NAME:master=%" (
+  ) else if not "%JOB_NAME%" == "%JOB_NAME:main=%" (
     set PACKAGE_SUFFIX=nightly
   ) else (
     set PACKAGE_SUFFIX=unstable

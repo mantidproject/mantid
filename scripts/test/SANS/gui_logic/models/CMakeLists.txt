@@ -1,9 +1,5 @@
-set(TEST_PY_FILES
-    test_file_loading.py
-    test_row_entries.py
-    test_settings_adjustment_model.py
-    test_save_options.py
-    test_run_tab_model.py
+set(TEST_PY_FILES test_file_loading.py test_row_entries.py test_settings_adjustment_model.py test_save_options.py
+                  test_run_tab_model.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

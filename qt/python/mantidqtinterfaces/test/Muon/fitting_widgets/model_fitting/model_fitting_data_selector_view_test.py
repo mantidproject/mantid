@@ -52,9 +52,11 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.update_result_table_names(result_table_names)
         self.assertEqual(self.view.number_of_result_tables(), 3)
+        self.assertEqual(self.view.current_result_table_index, 0)
 
         self.view.add_results_table_name("Name4")
         self.assertEqual(self.view.number_of_result_tables(), 4)
+        self.assertEqual(self.view.current_result_table_index, 3)
 
     def test_that_update_x_and_y_parameters_will_update_the_x_and_y_parameters(self):
         x_parameters = ["workspace_name", "A0", "A1"]

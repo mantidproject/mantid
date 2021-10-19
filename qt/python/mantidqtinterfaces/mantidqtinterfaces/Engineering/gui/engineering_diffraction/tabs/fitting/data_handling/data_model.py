@@ -221,9 +221,12 @@ class FittingDataModel(object):
                         # param corresponds to a peak centre in TOF which we also need in dspacing
                         # add another entry into the results dictionary
                         key_d = key + "_dSpacing"
-                        dcen = self._convert_TOF_to_d(params_dict['Value'][irow], wsname)
-                        dcen_er = self._convert_TOFerror_to_derror(params_dict['Error'][irow], dcen, wsname)
-                        self._fit_results[wsname]['results'][key_d].append([dcen, dcen_er])
+                        try:
+                            dcen = self._convert_TOF_to_d(params_dict['Value'][irow], wsname)
+                            dcen_er = self._convert_TOFerror_to_derror(params_dict['Error'][irow], dcen, wsname)
+                            self._fit_results[wsname]['results'][key_d].append([dcen, dcen_er])
+                        except (ValueError, RuntimeError) as e:
+                            logger.warning(f"Unable to output {key_d} parameters for TOF={params_dict['Value'][irow]}: " + str(e))
                 istart += nparams[ifunc]
             # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
             # always last row in parameters table

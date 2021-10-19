@@ -74,7 +74,7 @@ void FindFilesWorker::run() {
     }
     // Else if we are loading run files, then use findRuns.
     else if (m_parameters.isForRunFiles) {
-      filenames = fileSearcher.findRuns(m_parameters.searchText);
+      filenames = fileSearcher.findRuns(m_parameters.searchText, m_parameters.extensions);
       valueForProperty = "";
       for (auto &filename : filenames) {
         valueForProperty += QString::fromStdString(filename) + ",";

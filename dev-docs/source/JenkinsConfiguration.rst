@@ -24,7 +24,7 @@ Setting up a New Agent
 ######################
 
 .. note::
-  If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/master/jenkins-node>`__.
+  If you are deploying a new Linux based agent, it is recommended that you use the container based approach as described `here <https://github.com/mantidproject/dockerfiles/tree/main/jenkins-node>`__.
 
 Machine Setup
 -------------
@@ -145,7 +145,7 @@ Linux/Mac Connection Notes
 --------------------------
 
 The Jenkins JNLP connections are maintained by a crontab entry.
-The script is in the `mantid repository <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/jenkins-slave.sh>`__.
+The script is in the `mantid repository <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/jenkins-slave.sh>`__.
 
 The comments at the top describe a typical crontab entry for the script.
 This needs to be manually set for each agent. Ensure the script is marked executable after downloading it.
@@ -158,7 +158,7 @@ Misc Groovy Scripts
 The following is a collection of groovy scripts that can be run either at https://builds.mantidproject.org/script (for master node) or on a given node, e.g `isis-mantidx3 <https://builds.mantidproject.org/computer/isis-mantidlx3/script>`__.
 You must have admin privileges to run them.
 
-https://github.com/jenkinsci/jenkins-scripts/tree/master/scriptler was helpful for coming up with some of these.
+https://github.com/jenkinsci/jenkins-scripts/tree/main/scriptler was helpful for coming up with some of these.
 
 Print the Value of an Environment Variable on All Nodes
 -------------------------------------------------------

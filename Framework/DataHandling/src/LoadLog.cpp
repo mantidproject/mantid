@@ -491,14 +491,14 @@ bool LoadLog::isOldDateTimeFormat(std::ifstream &logFileStream) const {
 
 /**
  * Read a line of a SNS-style text file.
- * @param str :: The string to test
+ * @param input :: The string to test
  * @param out :: a vector that will be filled with the double values.
  * @return false if the format is NOT SNS style or a conversion failed.
  */
-bool LoadLog::SNSTextFormatColumns(const std::string &str, std::vector<double> &out) const {
+bool LoadLog::SNSTextFormatColumns(const std::string &input, std::vector<double> &out) const {
   std::vector<std::string> strs;
   out.clear();
-  boost::split(strs, str, boost::is_any_of("\t "));
+  boost::split(strs, input, boost::is_any_of("\t "));
   double val;
   // Every column must evaluate to a double
   for (auto &str : strs) {

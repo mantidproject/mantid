@@ -19,6 +19,7 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.phase_table_context import Phas
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.plot_pane_context import PlotPanesContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.model_fitting_context import ModelFittingContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.results_context import ResultsContext
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 
@@ -39,9 +40,13 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget im
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.frequency_analysis_plot_widget import FrequencyAnalysisPlotWidget
 from mantidqtinterfaces.Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDockWidget
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
+from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelAnalysis
+from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
+from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
+
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
-TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results"]
+TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results", "Model Fitting"]
 
 
 def check_facility():
@@ -77,6 +82,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             check_facility()
         except AttributeError as error:
             self.warning_popup(error.args[0])
+        # load the feature flags
+        feature_dict = load_features()
 
         # initialise the data storing classes of the interface
         self.loaded_data = MuonLoadData()
@@ -91,6 +98,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.phase_context = PhaseTableContext()
         self.fitting_context = BasicFittingContext(allow_double_pulse_fitting=True)
         self.results_context = ResultsContext()
+        self.model_fitting_context = ModelFittingContext(allow_double_pulse_fitting=False)
 
         self.frequency_context = FrequencyContext()
 
@@ -99,7 +107,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             muon_group_context=self.group_pair_context, corrections_context=self.corrections_context,
             muon_phase_context=self.phase_context, plot_panes_context=self.plot_panes_context,
             fitting_context=self.fitting_context, results_context=self.results_context,
-            frequency_context=self.frequency_context)
+            model_fitting_context = self.model_fitting_context, frequency_context=self.frequency_context)
 
         # create the dockable widget
         self.plot_widget = FrequencyAnalysisPlotWidget(self.context, parent=self)
@@ -127,7 +135,12 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.seq_fitting_tab = SeqFittingTabWidget(self.context, self.fitting_tab.fitting_tab_model, self)
         self.results_tab = ResultsTabWidget(self.context.fitting_context, self.context, self)
 
+        self.add_model_analysis = AddModelAnalysis(self, feature_dict)
+        self.add_raw_plots = AddRawPlots(self, feature_dict)
+
         self.setup_tabs()
+        self.plot_widget.insert_plot_panes()
+
         self.help_widget = HelpWidget(self.context.window_title)
 
         central_widget = QtWidgets.QWidget()
@@ -181,6 +194,11 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.context.data_context.message_notifier.add_subscriber(
             self.grouping_tab_widget.group_tab_presenter.message_observer)
 
+        self.add_model_analysis.add_observers_to_feature(self)
+        self.add_model_analysis.set_feature_observables(self)
+
+        self.add_raw_plots.add_observers_to_feature(self)
+
     def setup_transform(self):
         self.transform.set_up_calculation_observers(
             self.fitting_tab.fitting_tab_view.enable_tab_observer,
@@ -212,6 +230,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.seq_fitting_tab.seq_fitting_tab_view, 'Sequential Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
+        self.add_model_analysis.add_to_tab(self)
+
         self.transform_finished_observer = GenericObserverWithArgPassing(self.handle_transform_performed)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
         self.tabs.setElideMode(QtCore.Qt.ElideNone)
@@ -222,7 +242,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         if TAB_ORDER[index] in ["Home", "Grouping", "Corrections", "Phase Table"]:  # Plot all the selected data
             plot_mode = self.plot_widget.data_index
         elif TAB_ORDER[index] in ["Fitting", "Sequential Fitting", "Transform"]:  # Plot the displayed workspace
-            plot_mode = self.plot_widget.frequency_index
+            plot_mode = self.plot_widget.fit_index
+        elif TAB_ORDER[index] in ["Model Fitting"]:
+            plot_mode = self.plot_widget.model_fit_index
         else:
             return
 
@@ -292,9 +314,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.fitting_tab.fitting_tab_view.disable_tab_observer)
-
-        #self.load_widget.load_widget.loadNotifier.add_subscriber(
-        #    self.plot_widget.raw_mode.new_data_observer)
 
         self.load_widget.load_widget.loadNotifier.add_subscriber(
             self.seq_fitting_tab.seq_fitting_tab_presenter.disable_tab_observer)

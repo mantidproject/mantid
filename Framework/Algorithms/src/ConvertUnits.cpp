@@ -411,19 +411,19 @@ MatrixWorkspace_sptr ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUni
 
   // Perform Sanity Validation before creating workspace
   const double checkdelta = 0.0;
-  UnitParametersMap pmap = {{UnitParams::delta, checkdelta}};
+  UnitParametersMap upmap = {{UnitParams::delta, checkdelta}};
   if (efixedProp != EMPTY_DBL()) {
-    pmap[UnitParams::efixed] = efixedProp;
+    upmap[UnitParams::efixed] = efixedProp;
   }
   size_t checkIndex = 0;
-  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, pmap);
+  spectrumInfo.getDetectorValues(*fromUnit, *outputUnit, emode, signedTheta, checkIndex, upmap);
   // copy the X values for the check
   auto checkXValues = inputWS->readX(checkIndex);
   try {
     // Convert the input unit to time-of-flight
-    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, pmap);
+    checkFromUnit->toTOF(checkXValues, emptyVec, l1, emode, upmap);
     // Convert from time-of-flight to the desired unit
-    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, pmap);
+    checkOutputUnit->fromTOF(checkXValues, emptyVec, l1, emode, upmap);
   } catch (std::runtime_error &) { // if it's a detector specific problem then ignore
   }
 

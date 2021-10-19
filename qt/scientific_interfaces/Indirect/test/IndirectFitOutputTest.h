@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <utility>
 
-#include "IndirectFitOutputModel.h"
+#include "IndirectFitOutput.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -65,16 +65,16 @@ std::shared_ptr<WorkspaceType> getWorkspaceOutput(const IAlgorithm_sptr &algorit
 
 } // namespace
 
-class IndirectFitOutputModelTest : public CxxTest::TestSuite {
+class IndirectFitOutputTest : public CxxTest::TestSuite {
 public:
   /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  IndirectFitOutputModelTest() { FrameworkManager::Instance(); }
+  IndirectFitOutputTest() { FrameworkManager::Instance(); }
 
-  static IndirectFitOutputModelTest *createSuite() { return new IndirectFitOutputModelTest(); }
+  static IndirectFitOutputTest *createSuite() { return new IndirectFitOutputTest(); }
 
-  static void destroySuite(IndirectFitOutputModelTest *suite) { delete suite; }
+  static void destroySuite(IndirectFitOutputTest *suite) { delete suite; }
 
-  void setUp() override { m_model = std::make_unique<IndirectFitOutputModel>(); }
+  void setUp() override { m_model = std::make_unique<IndirectFitOutput>(); }
 
   void tearDown() override {
     AnalysisDataService::Instance().clear();
@@ -160,5 +160,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IndirectFitOutputModel> m_model;
+  std::unique_ptr<IndirectFitOutput> m_model;
 };

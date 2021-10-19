@@ -1,17 +1,14 @@
 set(SRC_FILES src/BroadcastWorkspace.cpp src/GatherWorkspaces.cpp)
 
-set(INC_FILES
-    inc/MantidMPIAlgorithms/BroadcastWorkspace.h
-    inc/MantidMPIAlgorithms/GatherWorkspaces.h
-    inc/MantidMPIAlgorithms/MPISerialization.h)
+set(INC_FILES inc/MantidMPIAlgorithms/BroadcastWorkspace.h inc/MantidMPIAlgorithms/GatherWorkspaces.h
+              inc/MantidMPIAlgorithms/MPISerialization.h
+)
 
 set(TEST_FILES BroadcastWorkspaceTest.h GatherWorkspacesTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -19,10 +16,8 @@ endif()
 add_library(MPIAlgorithms ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::MPIAlgorithms ALIAS MPIAlgorithms)
 
-
-target_include_directories(MPIAlgorithms PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  MPIAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Set the name of the generated library
@@ -30,14 +25,14 @@ set_target_properties(MPIAlgorithms PROPERTIES OUTPUT_NAME MantidMPIAlgorithms)
 # Add to the 'Framework' group in VS
 set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(MPIAlgorithms PUBLIC Mantid::API Mantid::DataObjects PRIVATE Mantid::Kernel ${MPI_CXX_LIBRARIES})
+target_link_libraries(
+  MPIAlgorithms
+  PUBLIC Mantid::API Mantid::DataObjects
+  PRIVATE Mantid::Kernel ${MPI_CXX_LIBRARIES}
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-mtd_install_targets(TARGETS
-                    MPIAlgorithms
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+mtd_install_targets(TARGETS MPIAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
