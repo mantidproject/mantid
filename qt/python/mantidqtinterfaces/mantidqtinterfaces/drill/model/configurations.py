@@ -245,7 +245,7 @@ class RundexSettings(object):
             POWDER_DSCAN: "PowderILLDetectorScan",
             POWDER_PSCAN: "PowderILLParameterScan",
             DIRECT_TOF:   "DirectILLAutoProcess",
-            SPECTRO_PSCAN:"LagrangeTMP"
+            SPECTRO_PSCAN:"ILLLagrange"
             }
 
     # export algos for each acquisition mode. Each algo has a boolean to set
