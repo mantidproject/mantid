@@ -43,8 +43,10 @@ class CalibrationModel(object):
         self.make_diff_consts_table(focused_ceria)
 
         if plot_output:
+            title_prefix = f"{calibration.get_foc_ws_suffix().replace('_', ' ')} spec: "
             EnggUtils.plot_tof_vs_d_from_calibration(diag_ws, focused_ceria,
-                                                     EnggUtils.default_ceria_expected_peaks(final=True))
+                                                     EnggUtils.default_ceria_expected_peaks(final=True),
+                                                     title_prefix=title_prefix)
 
         # save output
         if rb_num:
