@@ -1125,7 +1125,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         neutron_speed = self._sampleAndEnvironmentProperties['NeutronSpeed'].value  # in m / s
         Ei = self._sampleAndEnvironmentProperties['InitialEnergy'].value  # in meV
         c1 = 0.5 * np.power(L2, 2) * m_n / light_speed ** 2  # in meV * m^2
-        n_sigmas = 2.0  # number of peak widths to take
+        n_sigmas = self._sampleAndEnvironmentProperties['EPPNSigmas'].value \
+            if 'EPPNSigmas' in self._sampleAndEnvironmentProperties else 5.0  # number of peak widths to take
         us_2_s = 1e-6  # microseconds to seconds conversion
 
         return Ei - c1 / np.power((L2 / neutron_speed) + n_sigmas * ep_sigmas_tof * us_2_s, 2)
