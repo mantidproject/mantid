@@ -57,7 +57,7 @@ class FakeQSettings(object):
     def value_depending_on_str(self, p_str, defaultValue=None, type=None):
         if p_str == AboutPresenter.DO_NOT_SHOW:
             return "2"
-        elif p_str == AboutPresenter.LAST_VERSION:
+        elif p_str == AboutPresenter.PREVIOUS_VERSION:
             return self.string_value
         else:
             return "unknown p_str"

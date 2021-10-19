@@ -19,7 +19,7 @@ class AboutPresenter(object):
     USAGE_REPORTING = "usagereports.enabled"
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"
-    LAST_VERSION = "PreviousVersion"
+    PREVIOUS_VERSION = "PreviousVersion"
     FACILITY = "default.facility"
     INSTRUMENT = "default.instrument"
 
@@ -82,7 +82,7 @@ class AboutPresenter(object):
         settings = QSettings()
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
         doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
-        lastVersion = settings.value(AboutPresenter.LAST_VERSION, "")
+        lastVersion = settings.value(AboutPresenter.PREVIOUS_VERSION, "")
         current_version = version_info().major + "." + version_info().minor
         settings.endGroup()
 
@@ -190,7 +190,7 @@ class AboutPresenter(object):
         # make sure the Last Version is updated on closing
         settings = QSettings()
         settings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        settings.setValue(self.LAST_VERSION, version_info().major + "." + version_info().minor)
+        settings.setValue(self.PREVIOUS_VERSION, version_info().major + "." + version_info().minor)
         settings.endGroup()
         self.store_facility(self.view.about_widget.cb_facility.currentText())
         self.action_instrument_changed(self.view.about_widget.cb_instrument.currentText())
