@@ -291,7 +291,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
  * @param peakLoc :: The location of the peak
  */
 IFunction_sptr GetDetectorOffsets::createFunction(const double peakHeight, const double peakLoc) {
-  FunctionFactoryImpl &creator = FunctionFactory::Instance();
+  const FunctionFactoryImpl &creator = FunctionFactory::Instance();
   auto background = creator.createFunction("LinearBackground");
   auto peak = std::dynamic_pointer_cast<IPeakFunction>(creator.createFunction(getProperty("PeakFunction")));
   peak->setHeight(peakHeight);

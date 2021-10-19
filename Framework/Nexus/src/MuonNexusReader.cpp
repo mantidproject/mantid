@@ -368,9 +368,9 @@ void MuonNexusReader::getLogValues(const int &logNumber, const int &logSequence,
 void MuonNexusReader::getLogStringValues(const int &logNumber, const int &logSequence, std::time_t &logTime,
                                          string &value) {
   // for the given log find the logTime and value at given sequence in log
-  double time = m_logTimes[logNumber][logSequence];
+  const double time = m_logTimes[logNumber][logSequence];
   logTime = static_cast<std::time_t>(time) + m_startTime_time_t;
-  std::vector<string> &strings = m_logStringValues[logNumber];
+  const std::vector<string> &strings = m_logStringValues[logNumber];
   if (logSequence < int(strings.size())) {
     value = strings[logSequence];
   } else {

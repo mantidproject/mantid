@@ -789,7 +789,7 @@ void InstrumentWidgetPickTab::shapeCreated() {
 void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
   if (!isVisible())
     return;
-  ProjectionSurface &surface = *getSurface();
+  const ProjectionSurface &surface = *getSurface();
   if (surface.hasMasks()) {
     std::vector<size_t> dets;
     surface.getMaskedDetectors(dets);

@@ -1326,7 +1326,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
 // workspace has been initialized...)
 bool SNSLiveEventDataListener::haveRequiredLogs() {
   bool allFound = true;
-  Run &run = m_eventBuffer->mutableRun();
+  const Run &run = m_eventBuffer->run();
   auto it = m_requiredLogs.begin();
   while (it != m_requiredLogs.end() && allFound) {
     if (!run.hasProperty(*it)) {

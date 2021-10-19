@@ -124,7 +124,7 @@ void InstrumentSelector::handleConfigChange(Mantid::Kernel::ConfigValChangeNotif
  * the list. An empty string uses the default facility defined in Mantid.
  */
 void InstrumentSelector::fillWithInstrumentsFromFacility(const QString &name) {
-  ConfigServiceImpl &mantidSettings = ConfigService::Instance();
+  const ConfigServiceImpl &mantidSettings = ConfigService::Instance();
 
   this->blockSignals(true);
   this->clear();

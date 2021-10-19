@@ -715,7 +715,7 @@ void CrystalFieldFunction::buildSingleSiteSingleSpectrum() const {
 
   auto xVec = m_control.getAttribute("FWHMX").asVector();
   auto yVec = m_control.getAttribute("FWHMY").asVector();
-  auto &FWHMs = m_control.FWHMs();
+  const auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
 
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
@@ -740,8 +740,8 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
   hamiltonian += hamiltonianZeeman;
 
   const auto nSpec = nSpectra();
-  auto &temperatures = m_control.temperatures();
-  auto &FWHMs = m_control.FWHMs();
+  const auto &temperatures = m_control.temperatures();
+  const auto &FWHMs = m_control.FWHMs();
   const bool addBackground = true;
   for (size_t i = 0; i < nSpec; ++i) {
     auto intensityScaling = m_control.getFunction(i)->getParameter("IntensityScaling");
@@ -749,7 +749,7 @@ void CrystalFieldFunction::buildSingleSiteMultiSpectrum() const {
                                    addBackground, intensityScaling));
     fun->setDomainIndex(i, i);
   }
-  auto &physProps = m_control.physProps();
+  const auto &physProps = m_control.physProps();
   size_t i = nSpec;
   for (auto &prop : physProps) {
     auto physPropFun = buildPhysprop(nre, energies, waveFunctions, hamiltonian, prop);
@@ -774,7 +774,7 @@ void CrystalFieldFunction::buildMultiSiteSingleSpectrum() const {
     spectrum->addFunction(background);
   }
 
-  auto &FWHMs = m_control.FWHMs();
+  const auto &FWHMs = m_control.FWHMs();
   auto defaultFWHM = FWHMs.empty() ? 0.0 : FWHMs[0];
   auto fwhmVariation = getAttribute("FWHMVariation").asDouble();
   auto peakShape = getAttribute("PeakShape").asString();
@@ -1058,9 +1058,9 @@ void CrystalFieldFunction::updateSingleSiteMultiSpectrum() const {
   hamiltonian += hamiltonianZeeman;
   size_t iFirst = hasBackground() ? 1 : 0;
 
-  auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
-  auto &temperatures = m_control.temperatures();
-  auto &FWHMs = m_control.FWHMs();
+  const auto &fun = dynamic_cast<MultiDomainFunction &>(*m_target);
+  const auto &temperatures = m_control.temperatures();
+  const auto &FWHMs = m_control.FWHMs();
   for (size_t iSpec = 0; iSpec < temperatures.size(); ++iSpec) {
     auto intensityScaling = m_control.getFunction(iSpec)->getParameter("IntensityScaling");
     updateSpectrum(*fun.getFunction(iSpec), nre, energies, waveFunctions, temperatures[iSpec],
