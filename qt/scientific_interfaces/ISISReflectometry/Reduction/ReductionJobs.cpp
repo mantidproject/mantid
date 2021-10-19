@@ -27,8 +27,9 @@ Group &findOrMakeGroupWithName(ReductionJobs &jobs, std::string const &groupName
  * postprocessing associated with them */
 int countItems(ReductionJobs const &jobs, Item::ItemCountFunction countFunction) {
   auto const &groups = jobs.groups();
-  return std::accumulate(groups.cbegin(), groups.cend(), 0,
-                         [countFunction](int &count, Group const &group) { return count + (group.*countFunction)(); });
+  return std::accumulate(groups.cbegin(), groups.cend(), 0, [countFunction](const int &count, Group const &group) {
+    return count + (group.*countFunction)();
+  });
 }
 } // namespace
 
