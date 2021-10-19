@@ -15,6 +15,7 @@ New and Improved
     :align: center
 - The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
 - The algorithm browser has been tidied to reduce the number of single algorithm categories.
+- Table workspaces can now have read-only columns added to them (`ws.addReadOnlyColumn(<TYPE>, <NAME>)`). Existing columns can also be set to be read-only (`ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)`).
 
 Bugfixes
 --------
