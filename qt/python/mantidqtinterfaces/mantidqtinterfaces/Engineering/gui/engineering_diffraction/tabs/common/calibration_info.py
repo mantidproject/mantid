@@ -122,7 +122,7 @@ class CalibrationInfo:
     # functional
     def load_relevant_calibration_files(self, output_prefix="engggui"):
         """
-        Load calibration table ws output from second step of calibration (PDCalibrtation of ROI focused spectra)
+        Load calibration table ws output from second step of calibration (PDCalibration of ROI focused spectra)
         :param output_prefix: prefix for workspace
         """
         filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
