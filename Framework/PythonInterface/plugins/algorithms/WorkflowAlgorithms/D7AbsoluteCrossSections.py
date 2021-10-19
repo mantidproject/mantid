@@ -805,12 +805,34 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             Transpose(InputWorkspace=ws_out, OutputWorkspace=ws_out)
         return ws_out
 
+    def _convert_to_sofqw(self, ws):
+        q_binning = self._get_q_binning(ws)
+        SofQWNormalisedPolygon(
+            InputWorkspace=ws, OutputWorkspace=ws,
+            EMode='Direct',
+            EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+            QAxisBinning=q_binning
+        )
+        Transpose(InputWorkspace=ws, OutputWorkspace=ws)  # users prefer omega to be the vertical axis
+        # add _SofQW suffix to all workspaces in the group:
+        name_list = mtd[ws].getNames()
+        new_names = []
+        for entry_name in name_list:
+            new_name = "{}_{}".format(entry_name, 'SofQW')
+            new_names.append(new_name)
+            RenameWorkspace(InputWorkspace=entry_name, OutputWorkspace=new_name)
+        GroupWorkspaces(InputWorkspaces=new_names, OutputWorkspace=ws)
+        return ws
+
     def _set_units(self, ws, nMeasurements):
         """Sets units for the output workspace."""
         measurement_technique = self.getPropertyValue('MeasurementTechnique')
         output_unit = self.getPropertyValue('OutputUnits')
-        unit_symbol = 'barn / sr / formula unit'
+        unit_symbol = 'barn / sr / mol'
         unit = r'd$\sigma$/d$\Omega$'
+        if measurement_technique == 'TOF':
+            unit_symbol_sofqw = '{} / meV'.format(unit_symbol)
+            unit_sofqw = r'{}/dE'.format(unit)
         self._set_as_distribution(ws)
         perform_merge = mtd[ws].getNumberOfEntries() / nMeasurements > 1 \
             and self.getPropertyValue('OutputTreatment') == 'Merge'
@@ -828,20 +850,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             if output_unit == 'Default':  # provide SofQW, and distributions as a function of Q and 2theta
                 twoTheta_distribution = self._convert_to_2theta(ws_in=ws, ws_out='2theta', merged_data=perform_merge)
                 q_distribution = self._convert_to_q(ws_in=ws, ws_out='q', merged_data=perform_merge)
+                ws = self._convert_to_sofqw(ws)
                 # interleave output names so that SofQW, 2theta, and q distributions for the same input are together:
                 group_list = [ws_name for name_tuple in zip(mtd[ws].getNames(),
                                                             mtd[twoTheta_distribution].getNames(),
                                                             mtd[q_distribution].getNames())
                               for ws_name in name_tuple]
-
-            q_binning = self._get_q_binning(ws)
-            SofQWNormalisedPolygon(
-                InputWorkspace=ws, OutputWorkspace=ws,
-                EMode='Direct',
-                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
-                QAxisBinning=q_binning
-            )
-            Transpose(InputWorkspace=ws, OutputWorkspace=ws)  # users prefer omega to be the vertical axis
+            else:
+                ws = self._convert_to_sofqw(ws)
 
             if len(group_list) > 0:
                 UnGroupWorkspace(InputWorkspace='2theta')
@@ -853,7 +869,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             unit_symbol = ''
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
-                entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
+                if 'SofQW' in entry.name():
+                    entry.setYUnitLabel("{} ({})".format(unit_sofqw, unit_symbol_sofqw))
+                else:
+                    entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         else:
             mtd[ws].setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
