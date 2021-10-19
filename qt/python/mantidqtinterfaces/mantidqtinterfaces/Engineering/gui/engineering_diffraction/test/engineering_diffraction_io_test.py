@@ -166,7 +166,8 @@ class EngineeringDiffractionDecoderTest(unittest.TestCase):
         _create_fit_workspace()
 
     def tearDown(self):
-        self.gui.close()
+        if hasattr(self, 'gui'):
+            self.gui.close()
 
     def test_blank_gui_decodes(self):
         blank_dict = {'encoder_version': IO_VERSION, 'current_tab': 0, 'settings_dict': SETTINGS_DICT}
