@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 from qtpy.QtCore import Qt, QSettings
 
-from mantid.kernel import ConfigService, logger, version_str, release_notes_url, release_date, version_info
+from mantid.kernel import ConfigService, logger, release_notes_url, release_date, version
 from mantidqt.interfacemanager import InterfaceManager
 from workbench.widgets.about.view import AboutView
 from workbench.widgets.about.usage_verification_view import UsageReportingVerificationView
@@ -24,7 +24,7 @@ class AboutPresenter(object):
     INSTRUMENT = "default.instrument"
 
     def __init__(self, parent, view=None, usage_reporting_verification_view = None):
-        self.view = view if view else AboutView(parent, self, version_str(), release_date().strip())
+        self.view = view if view else AboutView(parent, self, str(version()), release_date().strip())
         self.usage_reporting_verification_view = usage_reporting_verification_view \
             if usage_reporting_verification_view else UsageReportingVerificationView(parent, self)
         self.parent = parent
@@ -83,7 +83,7 @@ class AboutPresenter(object):
         settings.beginGroup(AboutPresenter.DO_NOT_SHOW_GROUP)
         doNotShowUntilNextRelease = int(settings.value(AboutPresenter.DO_NOT_SHOW, '0'))
         lastVersion = settings.value(AboutPresenter.PREVIOUS_VERSION, "")
-        current_version = version_info().major + "." + version_info().minor
+        current_version = version().major + "." + version().minor
         settings.endGroup()
 
         if not doNotShowUntilNextRelease:
@@ -190,7 +190,7 @@ class AboutPresenter(object):
         # make sure the Last Version is updated on closing
         settings = QSettings()
         settings.beginGroup(self.DO_NOT_SHOW_GROUP)
-        settings.setValue(self.PREVIOUS_VERSION, version_info().major + "." + version_info().minor)
+        settings.setValue(self.PREVIOUS_VERSION, version().major + "." + version().minor)
         settings.endGroup()
         self.store_facility(self.view.about_widget.cb_facility.currentText())
         self.action_instrument_changed(self.view.about_widget.cb_instrument.currentText())

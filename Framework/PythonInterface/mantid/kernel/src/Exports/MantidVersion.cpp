@@ -25,6 +25,8 @@ std::string getMinor(const MantidVersion::VersionInfo &self) { return self.minor
 
 std::string getPatch(const MantidVersion::VersionInfo &self) { return self.patch; }
 
+std::string getStr(const MantidVersion::VersionInfo &self) { return self.major + "." + self.minor + "." + self.patch; }
+
 } // namespace
 
 void export_MantidVersion() {
@@ -32,11 +34,12 @@ void export_MantidVersion() {
   class_<MantidVersion::VersionInfo>("VersionInfo")
       .add_property("major", make_function(&getMajor), "The major release version")
       .add_property("minor", make_function(&getMinor), "The minor release version")
-      .add_property("patch", make_function(&getPatch), "The patch release version");
+      .add_property("patch", make_function(&getPatch), "The patch release version")
+      .def("__str__", make_function(&getStr), "The version in the standard form: Maj.Min.Pat");
 
   def("version_str", &Mantid::Kernel::MantidVersion::version,
       "Returns the Mantid version string in the form \"major.minor.patch\"");
-  def("version_info", &Mantid::Kernel::MantidVersion::versionInfo,
+  def("version", &Mantid::Kernel::MantidVersion::versionInfo,
       "Returns a data structure containing the major, minor, and patch parts of the version.");
   def("release_notes_url", &Mantid::Kernel::MantidVersion::releaseNotes,
       "Returns the url to the most applicable release notes");

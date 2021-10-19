@@ -68,7 +68,7 @@ class AboutPresenterTest(TestCase):
     CONFIG_SERVICE_CLASSPATH = "workbench.widgets.about.presenter.ConfigService"
     QSETTINGS_CLASSPATH = "workbench.widgets.about.presenter.QSettings"
     RELEASE_NOTES_URL_CLASSPATH = "workbench.widgets.about.presenter.release_notes_url"
-    VERSION_INFO_CLASSPATH = "workbench.widgets.about.presenter.version_info"
+    VERSION_INFO_CLASSPATH = "workbench.widgets.about.presenter.version"
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_no_facility(self, MockConfigService):
