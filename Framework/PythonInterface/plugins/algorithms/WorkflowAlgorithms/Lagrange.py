@@ -34,7 +34,11 @@ def format_values(data):
     @param data the data to format
     @return a (nb of points, 3)-shaped numpy array, with values (incident energy, normalized counts, errors)
     """
+
+    # we offset by the incident energy
+    incident_energy = 4.5
     for line in data:
+        line[0] -= incident_energy
         line[1], line[2] = line[2] / line[1], np.sqrt(line[2]) / line[1]
     return data
 
@@ -132,8 +136,11 @@ class LagrangeTMP(DataProcessorAlgorithm):
             self.subtract_empty_cell()
 
         # putting the values in a workspace
-        CreateWorkspace(outputWorkspace=self.getPropertyValue('OutputWorkspace'), DataX=self.sample[:, 0],
-                        DataY=self.sample[:, 1], DataE=self.sample[:, 2])
+        CreateWorkspace(outputWorkspace=self.getPropertyValue('OutputWorkspace'),
+                        DataX=self.sample[:, 0],
+                        DataY=self.sample[:, 1],
+                        DataE=self.sample[:, 2],
+                        UnitX="meV")
 
         self.setProperty('OutputWorkspace', mtd[self.getPropertyValue('OutputWorkspace')])
 
@@ -152,8 +159,8 @@ class LagrangeTMP(DataProcessorAlgorithm):
         # interpolating, because the correction's binning is not the same as the data
         interpolated_corr = np.interp(data[:, 0], self.correction_data[:, 0], self.correction_data[:, 1])
         for data_point, corr_factor in zip(data, interpolated_corr):
+            # no need to correct errors
             data_point[1] *= corr_factor
-            # TODO what about errors ?
 
     def subtract_empty_cell(self):
         """
