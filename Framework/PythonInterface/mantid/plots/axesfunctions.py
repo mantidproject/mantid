@@ -113,6 +113,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
             workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
+            # get_bin returns the bin *without the monitor data*
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
             vertical_axis = workspace.getAxis(1)
             if isinstance(vertical_axis, mantid.api.NumericAxis):
@@ -121,7 +122,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                 if isinstance(vertical_axis, mantid.api.BinEdgeAxis):
                     # for bin edge axis we have one more edge than content
                     values = (values[0:-1] + values[1:])/2.
-                x = values
+                # only take spectra not associated with a monitor
+                x = [values[i] for i in x]
             if isinstance(vertical_axis, mantid.api.SpectraAxis):
                 spectrum_numbers = workspace.getSpectrumNumbers()
                 x = [spectrum_numbers[i] for i in x]

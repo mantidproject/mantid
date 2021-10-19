@@ -156,9 +156,9 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   connect(m_uiForm.inputChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
 
   // data selected changes
-  connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+  connect(m_uiForm.file, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
 
-  connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
+  connect(m_uiForm.workspace, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
 
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
@@ -420,25 +420,6 @@ void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
   m_pythonExportWsName = qSquaredWorkspace;
 }
 
-/**
- * Handles when the view changes between workspace and file selection
- *
- * @param index :: The index the stacked widget has been switched too.
- */
-void IndirectDataAnalysisElwinTab::handleViewChanged(int index) {
-  // Index indicates which view is visible.
-  m_uiForm.stackedInputWidget->setCurrentIndex(index);
-
-  // 0 is always file view
-  switch (index) {
-  case 0:
-    emit fileViewVisible();
-    break;
-  case 1:
-    emit workspaceViewVisible();
-    break;
-  }
-}
 /**
  * Ungroups the output after the execution of the algorithm
  */
@@ -863,11 +844,7 @@ void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &heade
   m_dataTable->setHorizontalHeaderLabels(headers);
 
   auto header = m_dataTable->horizontalHeader();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  header->setResizeMode(0, QHeaderView::Stretch);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   header->setSectionResizeMode(0, QHeaderView::Stretch);
-#endif
 }
 
 void IndirectDataAnalysisElwinTab::removeSelectedData() {

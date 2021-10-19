@@ -1,5 +1,4 @@
-# This file manages building/installation of the mantidqt and mantidqtpython
-# Python wrappers.
+# This file manages building/installation of the mantidqt and mantidqtpython Python wrappers.
 
 include(PythonPackageTargetFunctions)
 
@@ -23,8 +22,7 @@ if(BUILD_MANTIDFRAMEWORK)
   add_dependencies(mantidqt PythonInterface)
 endif()
 
-# Configure resources data in place for ease of development. The output file is
-# added to the toplevel gitignore
+# Configure resources data in place for ease of development. The output file is added to the toplevel gitignore
 set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
 configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
@@ -36,10 +34,7 @@ add_custom_command(
 )
 add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
 
-add_dependencies(
-  mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5
-  mantidqt_iconsqt5
-)
+add_dependencies(mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5)
 if(MSVC)
   # Debug builds need libraries that are linked with MSVC debug runtime
   add_custom_command(
@@ -94,8 +89,7 @@ set(PYTHON_TEST_FILES
     mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
 )
 
-# ctest target for widgets that only get tested in qt5, because they are only
-# used in the workbench
+# ctest target for widgets that only get tested in qt5, because they are only used in the workbench
 set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/algorithmselector/test/test_algorithm_factory_observer.py
     mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
@@ -174,7 +168,4 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
 
 # Tests
 set(PYUNITTEST_QT_API pyqt5)
-pyunittest_add_test(
-  ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES}
-  ${PYTHON_WIDGET_QT5_ONLY_TESTS}
-)
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS})

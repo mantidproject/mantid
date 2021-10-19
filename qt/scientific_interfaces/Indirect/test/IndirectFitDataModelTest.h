@@ -181,6 +181,7 @@ public:
   void test_that_setting_startX_on_non_existent_workspace_throws_exception() {
     TS_ASSERT_THROWS(m_fitData->setStartX(0, WorkspaceID{2}), const std::out_of_range &)
     TS_ASSERT_THROWS(m_fitData->setStartX(0, WorkspaceID{2}, WorkspaceIndex{10}), const std::out_of_range &)
+    TS_ASSERT_THROWS(m_fitData->setStartX(0, FitDomainIndex{20}), const std::runtime_error &)
   }
 
 private:

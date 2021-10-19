@@ -22,28 +22,28 @@ using Mantid::HistogramData::Exception::InvalidBinEdgesError;
 
 namespace {
 Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
-  auto &xold = input.x();
-  auto &yold = input.y();
-  auto &eold = input.e();
+  const auto &xold = input.x();
+  const auto &yold = input.y();
+  const auto &eold = input.e();
 
-  auto &xnew = binEdges.rawData();
+  const auto &xnew = binEdges.rawData();
   Counts newCounts(xnew.size() - 1);
   CountVariances newCountVariances(xnew.size() - 1);
   auto &ynew = newCounts.mutableData();
   auto &enew = newCountVariances.mutableData();
 
-  auto size_yold = yold.size();
-  auto size_ynew = ynew.size();
+  const auto size_yold = yold.size();
+  const auto size_ynew = ynew.size();
   size_t iold = 0;
   size_t inew = 0;
 
   while ((inew < size_ynew) && (iold < size_yold)) {
-    auto xo_low = xold[iold];
-    auto xo_high = xold[iold + 1];
-    auto xn_low = xnew[inew];
-    auto xn_high = xnew[inew + 1];
-    auto owidth = xo_high - xo_low;
-    auto nwidth = xn_high - xn_low;
+    const auto xo_low = xold[iold];
+    const auto xo_high = xold[iold + 1];
+    const auto xn_low = xnew[inew];
+    const auto xn_high = xnew[inew + 1];
+    const auto owidth = xo_high - xo_low;
+    const auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0) {
       if (xo_high == -DBL_MAX && xo_low == -DBL_MAX) {
@@ -80,29 +80,29 @@ Histogram rebinCounts(const Histogram &input, const BinEdges &binEdges) {
 }
 
 Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
-  auto &xold = input.x();
-  auto &yold = input.y();
-  auto &eold = input.e();
+  const auto &xold = input.x();
+  const auto &yold = input.y();
+  const auto &eold = input.e();
 
-  auto &xnew = binEdges.rawData();
+  const auto &xnew = binEdges.rawData();
   Frequencies newFrequencies(xnew.size() - 1);
   FrequencyStandardDeviations newFrequencyStdDev(xnew.size() - 1);
   auto &ynew = newFrequencies.mutableData();
   auto &enew = newFrequencyStdDev.mutableData();
 
-  auto size_yold = yold.size();
-  auto size_ynew = ynew.size();
+  const auto size_yold = yold.size();
+  const auto size_ynew = ynew.size();
   size_t iold = 0;
   size_t inew = 0;
 
   while ((inew < size_ynew) && (iold < size_yold)) {
-    auto xo_low = xold[iold];
-    auto xo_high = xold[iold + 1];
-    auto xn_low = xnew[inew];
-    auto xn_high = xnew[inew + 1];
+    const auto xo_low = xold[iold];
+    const auto xo_high = xold[iold + 1];
+    const auto xn_low = xnew[inew];
+    const auto xn_high = xnew[inew + 1];
 
-    auto owidth = xo_high - xo_low;
-    auto nwidth = xn_high - xn_low;
+    const auto owidth = xo_high - xo_low;
+    const auto nwidth = xn_high - xn_low;
 
     if (owidth <= 0.0 || nwidth <= 0.0)
       throw InvalidBinEdgesError("Negative or zero bin widths not allowed.");
@@ -128,8 +128,8 @@ Histogram rebinFrequencies(const Histogram &input, const BinEdges &binEdges) {
   }
 
   for (size_t i = 0; i < size_ynew; ++i) {
-    auto width = xnew[i + 1] - xnew[i];
-    auto factor = 1 / width;
+    const auto width = xnew[i + 1] - xnew[i];
+    const auto factor = 1 / width;
     ynew[i] *= factor;
     enew[i] = sqrt(enew[i]) * factor;
   }

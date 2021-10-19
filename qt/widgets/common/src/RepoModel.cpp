@@ -152,7 +152,7 @@ bool RepoModel::RepoItem::removeChild(int row) {
     the setuptModelData.
  */
 RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
-  ConfigServiceImpl &config = ConfigService::Instance();
+  const ConfigServiceImpl &config = ConfigService::Instance();
   repo_path = QString::fromStdString(config.getString("ScriptLocalRepository"));
   rootItem = new RepoItem("/");
   using Mantid::API::ScriptRepository;

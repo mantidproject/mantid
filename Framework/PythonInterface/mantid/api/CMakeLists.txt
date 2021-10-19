@@ -2,9 +2,8 @@
 
 set(MODULE_TEMPLATE src/api.cpp.in)
 
-# Files containing export definitions, these are automatically processed -- Do
-# NOT sort this list. The order defines the order in which the export
-# definitions occur and some depend on their base classes being exported first
+# Files containing export definitions, these are automatically processed -- Do NOT sort this list. The order defines the
+# order in which the export definitions occur and some depend on their base classes being exported first
 set(EXPORT_FILES
     src/Exports/IAlgorithm.cpp
     src/Exports/AlgorithmObserver.cpp
@@ -125,43 +124,35 @@ set(INC_FILES
 )
 
 # Add a precompiled header where they are supported
-list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/api/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
 set(FRAMEWORK_DIR ../../..)
 include_directories(${FRAMEWORK_DIR}/CurveFitting/inc)
 
-add_library(
-  PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION}
-                  ${INC_FILES} ${PYTHON_INSTALL_FILES}
-)
+add_library(PythonAPIModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 add_library(Mantid::PythonAPIModule ALIAS PythonAPIModule)
 
-target_include_directories(PythonAPIModule PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  PythonAPIModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 set_python_properties(PythonAPIModule _api)
 
-
 # Add the required dependencies
-target_link_libraries(PythonAPIModule
-          PUBLIC Mantid::API
-          PRIVATE
-          Mantid::PythonInterfaceCore
-          Mantid::PythonGeometryModule
-          Mantid::PythonKernelModule
-          Mantid::HistogramData
-          Mantid::Indexing
-          Mantid::Types
+target_link_libraries(
+  PythonAPIModule
+  PUBLIC Mantid::API
+  PRIVATE Mantid::PythonInterfaceCore Mantid::PythonGeometryModule Mantid::PythonKernelModule Mantid::HistogramData
+          Mantid::Indexing Mantid::Types
 )
 
 # Installation settings
-set_target_properties(PythonAPIModule
-    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/")
+set_target_properties(
+  PythonAPIModule PROPERTIES INSTALL_RPATH
+                             "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/"
+)
 mtd_install_targets(
-  TARGETS PythonAPIModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/api
-  ${WORKBENCH_SITE_PACKAGES}/mantid/api
+  TARGETS PythonAPIModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/api ${WORKBENCH_SITE_PACKAGES}/mantid/api
 )

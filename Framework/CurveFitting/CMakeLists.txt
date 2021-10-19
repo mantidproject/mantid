@@ -118,6 +118,7 @@ set(SRC_FILES
     src/Functions/PawleyFunction.cpp
     src/Functions/PeakParameterFunction.cpp
     src/Functions/Polynomial.cpp
+    src/Functions/PowerLaw.cpp
     src/Functions/ProcessBackground.cpp
     src/Functions/ProductFunction.cpp
     src/Functions/ProductLinearExp.cpp
@@ -163,7 +164,8 @@ set(SRC_FILES
     src/SeqDomain.cpp
     src/SeqDomainSpectrumCreator.cpp
     src/SpecialFunctionHelper.cpp
-    src/TableWorkspaceDomainCreator.cpp)
+    src/TableWorkspaceDomainCreator.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp)
 
@@ -333,7 +335,8 @@ set(INC_FILES
     inc/MantidCurveFitting/SeqDomain.h
     inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
     inc/MantidCurveFitting/SpecialFunctionSupport.h
-    inc/MantidCurveFitting/TableWorkspaceDomainCreator.h)
+    inc/MantidCurveFitting/TableWorkspaceDomainCreator.h
+)
 
 set(TEST_FILES
     Algorithms/CalculateChiSquaredTest.h
@@ -442,6 +445,7 @@ set(TEST_FILES
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
     Functions/PolynomialTest.h
+    Functions/PowerLawTest.h
     Functions/ProcessBackgroundTest.h
     Functions/ProductFunctionTest.h
     Functions/ProductLinearExpTest.h
@@ -483,13 +487,12 @@ set(TEST_FILES
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
     SpecialFunctionSupportTest.h
-    TableWorkspaceDomainCreatorTest.h)
+    TableWorkspaceDomainCreatorTest.h
+)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -504,50 +507,40 @@ enable_precompiled_headers(inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES)
 add_library(CurveFitting ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::CurveFitting ALIAS CurveFitting)
 
-target_include_directories(CurveFitting PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  CurveFitting PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
-
 # Set the name of the generated library
-set_target_properties(CurveFitting
-                      PROPERTIES OUTPUT_NAME
-                                 MantidCurveFitting
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_CURVEFITTING)
+set_target_properties(CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(CurveFitting
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(CurveFitting
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET CurveFitting PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(CurveFitting PUBLIC Mantid::API Mantid::Kernel Mantid::DataObjects PRIVATE Mantid::HistogramData Mantid::Geometry)
+target_link_libraries(
+  CurveFitting
+  PUBLIC Mantid::API Mantid::Kernel Mantid::DataObjects
+  PRIVATE Mantid::HistogramData Mantid::Geometry
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(CurveFitting PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/CurveFitting>
-  $<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  CurveFitting PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/CurveFitting> $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)
+if(CONDA_BUILD)
+  mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    CurveFitting
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS CurveFitting INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()

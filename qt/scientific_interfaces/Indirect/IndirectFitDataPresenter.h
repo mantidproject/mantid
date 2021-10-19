@@ -102,6 +102,7 @@ private slots:
   void addData();
   void handleCellChanged(int row, int column);
   void removeSelectedData();
+  void unifyRangeToSelectedData();
 
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog> getAddWorkspaceDialog(QWidget *parent) const;

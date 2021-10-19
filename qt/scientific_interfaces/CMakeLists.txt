@@ -1,5 +1,4 @@
-# Ugly hack to get around issue in Boost version 1.48.0 in conjunction with Qt
-# 4.7.4 or greater
+# Ugly hack to get around issue in Boost version 1.48.0 in conjunction with Qt 4.7.4 or greater
 set(qt_version ${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}.${QT_VERSION_PATCH})
 if(${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3)
   set(extra_options "-DBOOST_TT_HAS_OPERATOR_HPP_INCLUDED")

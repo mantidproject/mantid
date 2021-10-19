@@ -130,10 +130,8 @@ void EQSANSMonitorTOF::exec() {
   // Keep a copy of the input data since we may end up overwriting it
   // if the input workspace is equal to the output workspace.
   // This is necessary since we are shuffling around the TOF bins.
-  MantidVec YCopy = MantidVec(inputWS->readY(0));
-  MantidVec &YIn = YCopy;
-  MantidVec ECopy = MantidVec(inputWS->readE(0));
-  MantidVec &EIn = ECopy;
+  const MantidVec YIn = MantidVec(inputWS->readY(0));
+  const MantidVec EIn = MantidVec(inputWS->readE(0));
 
   MantidVec &XOut = outputWS->dataX(0);
   MantidVec &YOut = outputWS->dataY(0);
