@@ -103,7 +103,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396016', ProcessAs='Vanadium', OutputWorkspace='vanadium_tof',
                             SampleAndEnvironmentProperties=sampleProperties,
                             SampleGeometry='None',
-                            OutputTreatment='Individual',
+                            OutputTreatment='Sum',
                             InstrumentCalibration=yig_calibration_file,
                             MeasurementTechnique='TOF')
         self.assertTrue('vanadium_tof' in mtd)
