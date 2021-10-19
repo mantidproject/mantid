@@ -25,5 +25,8 @@ Improvements
   currently included in the Mantid release, an installer is provided
   in the Script Repository.
 - In indirect Data analysis the Elwin Tab has had its UI updated to be more user friendly.
+- Based on existing options for AnalysisMode in the VesuvioAnalysis algorithm two new
+  options were introduced to allow reduction and analysis of spectra in the TOF domain
+  without automatically carrying out a Y space analysis afterwards.
 
 :ref:`Release 6.3.0 <v6.3.0>`
