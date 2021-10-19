@@ -194,21 +194,25 @@ Usage
    sampleProperties = {'SampleMass': 2.932, 'FormulaUnitMass': 50.942}
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
-   D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
-                           SampleAndEnvironmentProperties=sampleProperties,
-                           OutputTreatment='Merge', OutputWorkspace='xyz')
+   D7AbsoluteCrossSections(
+	      InputWorkspace='vanadium_xyz',
+	      CrossSectionSeparationMethod='XYZ',
+              SampleAndEnvironmentProperties=sampleProperties,
+	      OutputTreatment='Merge',
+	      OutputWorkspace='xyz',
+	      OutputUnits='TwoTheta')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_coherent')
    Integration(InputWorkspace=mtd['xyz'][2], OutputWorkspace='sum_incoherent')
    Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
-   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.1f}".format(mtd['ratio'].readY(0)[0]))
+   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.0f}".format(mtd['ratio'].readY(0)[0]))
 
 Output:
 
 .. testoutput:: ExD7AbsoluteCrossSections_XYZ_separation
 
    Number of separated cross-sections: 6
-   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.9
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 170
 
 .. testcleanup:: ExD7AbsoluteCrossSections_XYZ_separation
 

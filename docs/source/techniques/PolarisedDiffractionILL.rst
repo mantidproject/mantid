@@ -64,9 +64,13 @@ A very basic powder data reduction would include a vanadium reference and a samp
                             SampleAndEnvironmentProperties=sampleProperties)
 
     # normalise sample and set the output to absolute units with vanadium
-    D7AbsoluteCrossSections(InputWorkspace='reduced_sample', OutputWorkspace='normalised_sample',
-                            SampleAndEnvironmentProperties=sampleProperties,
-                            NormalisationMethod='Vanadium', VanadiumInputWorkspace='reduced_vanadium')
+    D7AbsoluteCrossSections(
+	      InputWorkspace='reduced_sample',
+	      OutputWorkspace='normalised_sample',
+	      SampleAndEnvironmentProperties=sampleProperties,
+	      NormalisationMethod='Vanadium',
+	      VanadiumInputWorkspace='reduced_vanadium',
+	      OutputUnits='TwoTheta')
 
     SofQ = mtd['normalised_sample']
     xAxis = SofQ[0].readX(0)  # TwoTheta axis
