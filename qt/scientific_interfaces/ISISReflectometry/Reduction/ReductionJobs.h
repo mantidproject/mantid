@@ -39,9 +39,9 @@ public:
   Group const &operator[](int index) const;
   std::string nextEmptyGroupName();
 
-  MantidWidgets::Batch::RowPath getPath(Item const &item) const;
-  MantidWidgets::Batch::RowPath getPath(Group const &group) const;
-  MantidWidgets::Batch::RowPath getPath(Row const &row) const;
+  MantidWidgets::Batch::RowLocation getPath(Item const &item) const;
+  MantidWidgets::Batch::RowLocation getPath(Group const &group) const;
+  MantidWidgets::Batch::RowLocation getPath(Row const &row) const;
   Group const &getParentGroup(Row const &row) const;
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 

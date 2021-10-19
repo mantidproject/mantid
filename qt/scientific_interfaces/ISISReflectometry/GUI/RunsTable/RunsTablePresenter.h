@@ -133,7 +133,7 @@ private:
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location, UpdateCellFunc updateFunc);
   void forAllCellsAt(MantidWidgets::Batch::RowLocation const &location, UpdateCellWithTooltipFunc updateFunc,
                      std::string const &tooltip);
-  void setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath, Item const &item);
+  void setRowStylingForItem(MantidWidgets::Batch::RowLocation const &rowLocation, Item const &item);
   void updateProgressBar();
 
   void notifyTableChanged();
