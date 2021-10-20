@@ -59,14 +59,16 @@ def is_pip_version_of_libs():
     Which will import the binaries from the python path,
     most likely the site-packages folder
     """
-    # Test if one of the fortran libs is already imported
+    # Test if one of the fortran libs is importable
     name = 'Quest'
-    if name in sys.modules:
-        return True
-    elif importlib.util.find_spec(name) is not None:
-        return True
+    # Early version of library placed extensions in sitepackages, so importable through the extension name
+    if importlib.util.find_spec(name) is not None:
+        return True, ""
+    # now they are nested in mantidindirect.bayes.
+    elif importlib.util.find_spec("mantidindirect.bayes." + name) is not None:
+        return True, "mantidindirect.bayes."
     else:
-        return False
+        return False, ""
 
 
 def _lib_suffix():
@@ -82,7 +84,8 @@ def _lib_suffix():
     import QLdata_win64
     Thefore, if we are using the pip versions we don't add a suffix.
     """
-    if is_pip_version_of_libs():
+    is_pip, _ = is_pip_version_of_libs()
+    if is_pip:
         return ""
     else:
         if platform.system() == "Windows":
@@ -123,7 +126,7 @@ def is_supported_f2py_platform():
     # check if we have pip installed the fortran libraries
     # first check the numpy abi is correct
     if _numpy_abi_ver() == F2PY_MODULES_REQUIRED_C_ABI:
-        return is_pip_version_of_libs()
+        return is_pip_version_of_libs()[0]
     return False
 
 
@@ -150,9 +153,9 @@ def import_f2py(lib_base_name):
         sys.path.insert(0, directory)
         yield
         sys.path.pop(0)
-
-    lib_name = lib_base_name + _lib_suffix()
-    return __import__(lib_name)
+    _, package_base = is_pip_version_of_libs()
+    lib_name = package_base + lib_base_name + _lib_suffix()
+    return __import__(lib_name, fromlist=[None])
 
 
 def run_f2py_compatibility_test():
