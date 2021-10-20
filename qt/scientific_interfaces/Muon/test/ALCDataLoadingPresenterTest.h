@@ -151,7 +151,7 @@ public:
     MockALCDataLoadingView view;
     ALCDataLoadingPresenter presenter(&view);
     EXPECT_CALL(view, initialize());
-    std::vector<std::string> expected{".nxs_v2", ".bin"};
+    std::vector<std::string> expected{".nxs", ".nxs_v2", ".bin"};
     EXPECT_CALL(view, setFileExtensions(expected));
     presenter.initialize();
   }
