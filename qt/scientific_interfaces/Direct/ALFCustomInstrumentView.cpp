@@ -27,7 +27,9 @@ void ALFCustomInstrumentView::setUpInstrument(const std::string &fileName,
   m_extractSingleTubeObservable = std::make_unique<Observable>();
   m_averageTubeObservable = std::make_unique<Observable>();
 
-  auto instrumentWidget = new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+  auto instrumentWidget =
+      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
+                                          MantidWidgets::InstrumentWidget::Dependencies(), false);
   instrumentWidget->removeTab("Instrument");
   instrumentWidget->removeTab("Draw");
   instrumentWidget->hideHelp();

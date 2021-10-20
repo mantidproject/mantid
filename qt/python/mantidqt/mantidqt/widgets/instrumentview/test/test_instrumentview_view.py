@@ -46,6 +46,23 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
 
+    def test_workspace_replacement(self):
+        ws = CreateSampleWorkspace()
+        LoadInstrument(ws, InstrumentName='MARI', RewriteSpectraMap=False)
+
+        p = InstrumentViewPresenter(ws)
+        self.assert_widget_created()
+        QApplication.sendPostedEvents()
+
+        # recreate the workspace to trigger the wksp replacement event
+        ws = CreateSampleWorkspace()
+        QApplication.sendPostedEvents()
+        p.wait()
+
+        p.close(ws.name())
+        QApplication.sendPostedEvents()
+        self.assert_no_toplevel_widgets()
+
     def test_select_and_get_tab(self):
         """Test launch and close instrument view with ARCS data
         """
@@ -59,6 +76,9 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         # create instrument view presenter
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
+
+        # wait for the background loading to finish setting up the widget
+        iv_presenter.wait()
 
         # select pick tab
         iv_presenter.select_pick_tab()
@@ -94,6 +114,9 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         # create instrument view presenter
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
+
+        # wait for the background loading to finish setting up the widget
+        iv_presenter.wait()
 
         # get render tab
         render_tab = iv_presenter.get_render_tab()

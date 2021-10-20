@@ -16,6 +16,7 @@
 #include "MockProjectionSurface.h"
 #include "MockQtConnect.h"
 #include "MockQtDisplay.h"
+#include "MockQtMetaObject.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -40,6 +41,7 @@ public:
   using QtMock = StrictMock<MockQtDisplay>;
   using GLMock = StrictMock<MockGLDisplay>;
   using ConnectMock = StrictMock<MockQtConnect>;
+  using MetaObjectMock = StrictMock<MockQtMetaObject>;
   using DisplayMock = NiceMock<MockInstrumentDisplay>;
   using MessageMock = NiceMock<MockMessageHandler>;
 
@@ -61,14 +63,24 @@ public:
   void test_constructor() {
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
-    auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
+    auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+
+    InstrumentActor &actor = instance.getInstrumentActor();
+    actor.initialize(true, true);
+    instance.initWidget(true, true);
+    instance.waitForThread();
   }
 
   void test_constructor_gl_disabled() {
     setGl(false);
     auto qtMock = makeQtDisplay();
     auto glMock = makeGL();
-    auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
+    auto instance = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+
+    InstrumentActor &actor = instance.getInstrumentActor();
+    actor.initialize(true, true);
+    instance.initWidget(true, true);
+    instance.waitForThread();
   }
 
   void test_save_image_gl_enabled() {
@@ -79,7 +91,12 @@ public:
     auto glMock = makeGL();
     EXPECT_CALL(*glMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+    InstrumentActor &actor = widget.getInstrumentActor();
+    actor.initialize(true, true);
+    widget.initWidget(true, true);
+    widget.waitForThread();
+
     widget.saveImage(inputName);
   }
 
@@ -92,7 +109,12 @@ public:
     auto glMock = makeGL();
     EXPECT_CALL(*qtMock, saveToFile(expectedName)).Times(1);
 
-    auto widget = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect());
+    auto widget = construct(makeDisplay(), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+    InstrumentActor &actor = widget.getInstrumentActor();
+    actor.initialize(true, true);
+    widget.initWidget(true, true);
+    widget.waitForThread();
+
     widget.saveImage(inputName);
   }
 
@@ -103,7 +125,12 @@ public:
     EXPECT_CALL(*glMock, updateDetectors()).Times(1);
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
-    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+    InstrumentActor &actor = widget.getInstrumentActor();
+    actor.initialize(true, true);
+    widget.initWidget(true, true);
+    widget.waitForThread();
+
     widget.updateInstrumentDetectors();
   }
 
@@ -113,7 +140,13 @@ public:
     auto displayMock = makeDisplay();
     EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
-    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+
+    InstrumentActor &actor = widget.getInstrumentActor();
+    actor.initialize(true, true);
+    widget.initWidget(true, true);
+    widget.waitForThread();
+
     widget.updateInstrumentDetectors();
   }
 
@@ -127,7 +160,13 @@ public:
     EXPECT_CALL(*glMock, updateDetectors()).Times(1);
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
-    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+
+    InstrumentActor &actor = widget.getInstrumentActor();
+    actor.initialize(true, true);
+    widget.initWidget(true, true);
+    widget.waitForThread();
+
     widget.updateInstrumentDetectors();
   }
 
@@ -139,7 +178,13 @@ public:
     EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
     EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
 
-    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+    auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+
+    InstrumentActor &actor = widget.getInstrumentActor();
+    actor.initialize(true, true);
+    widget.initWidget(true, true);
+    widget.waitForThread();
+
     widget.updateInstrumentDetectors();
   }
 
@@ -149,7 +194,13 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
       EXPECT_CALL(*displayMock, updateView(expected)).Times(1);
-      auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect());
+      auto widget = construct(std::move(displayMock), qtMock.get(), glMock.get(), makeConnect(), makeMetaObject());
+
+      InstrumentActor &actor = widget.getInstrumentActor();
+      actor.initialize(true, true);
+      widget.initWidget(true, true);
+      widget.waitForThread();
+
       widget.updateInstrumentView(expected);
     }
   }
@@ -194,14 +245,26 @@ private:
     mockConnect(*mock, SIGNAL(executeAlgorithm(Mantid::API::IAlgorithm_sptr)),
                 SLOT(executeAlgorithm(Mantid::API::IAlgorithm_sptr)));
 
+    mockConnect(*mock, SIGNAL(initWidget(bool, bool)), SLOT(initWidget(bool, bool)));
+    EXPECT_CALL(*mock, connect(_, StrEq(SIGNAL(destroyed())), _, StrEq(SLOT(threadFinished())))).Times(2);
+
     EXPECT_CALL(*mock,
                 connect(_, StrEq(SIGNAL(updateInfoText())), _, StrEq(SLOT(updateInfoText())), Qt::QueuedConnection))
         .Times(1);
     return mock;
   }
 
+  std::unique_ptr<MetaObjectMock> makeMetaObject() const {
+    auto mock = std::make_unique<MetaObjectMock>();
+    EXPECT_CALL(*mock, invokeMethod(_, StrEq("initialize"), Qt::QueuedConnection, _, _, _, _, _, _, _, _, _, _))
+        .Times(1);
+    EXPECT_CALL(*mock, invokeMethod(_, StrEq("cancel"), Qt::DirectConnection, _, _, _, _, _, _, _, _, _, _)).Times(1);
+    return mock;
+  }
+
   InstrumentWidget construct(std::unique_ptr<DisplayMock> displayMock, QtMock *qtMock, GLMock *glMock,
-                             std::unique_ptr<ConnectMock> connectMock) const {
+                             std::unique_ptr<ConnectMock> connectMock,
+                             std::unique_ptr<MetaObjectMock> metaObjectMock) const {
     ON_CALL(*displayMock, getGLDisplay()).WillByDefault(Return(glMock));
     ON_CALL(*displayMock, getQtDisplay()).WillByDefault(Return(qtMock));
 
@@ -216,8 +279,8 @@ private:
     EXPECT_CALL(*displayMock, setSurfaceProxy(_)).Times(1);
     EXPECT_CALL(*displayMock, installEventFilter(NotNull())).Times(1);
 
-    InstrumentWidget::Dependencies deps{std::move(displayMock), nullptr, nullptr, std::move(connectMock),
-                                        makeMessage()};
+    InstrumentWidget::Dependencies deps{std::move(displayMock),    nullptr,      nullptr, std::move(connectMock),
+                                        std::move(metaObjectMock), makeMessage()};
 
     return InstrumentWidget("test_ws", nullptr, true, true, 0.0, 0.0, true, std::move(deps));
   }

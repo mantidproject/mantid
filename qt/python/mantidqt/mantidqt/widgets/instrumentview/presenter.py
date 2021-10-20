@@ -76,6 +76,12 @@ class InstrumentViewPresenter(ObservingPresenter):
         """
         self.container.set_range(min_x, max_x)
 
+    def is_thread_running(self):
+        return self.container.is_thread_running()
+
+    def wait(self):
+        self.container.wait()
+
     def close(self, workspace_name):
         """
         extend close()
@@ -88,7 +94,7 @@ class InstrumentViewPresenter(ObservingPresenter):
 
         if workspace_name == self.ws_name:
             super(InstrumentViewPresenter, self).close(self.ws_name)
-            InstrumentViewManager.remove(self.ws_name)
+            InstrumentViewManager.remove(self, self.ws_name)
 
 
 class InstrumentViewManager:
@@ -107,7 +113,10 @@ class InstrumentViewManager:
         """Register an InstrumentViewPresenter instance
         """
         InstrumentViewManager.last_view = instrument_view_obj
-        InstrumentViewManager.view_dict[ws_name] = instrument_view_obj
+        if ws_name in InstrumentViewManager.view_dict:
+            InstrumentViewManager.view_dict[ws_name].append(instrument_view_obj)
+        else:
+            InstrumentViewManager.view_dict[ws_name] = [instrument_view_obj]
 
     @staticmethod
     def get_instrument_view(ws_name: str):
@@ -119,14 +128,20 @@ class InstrumentViewManager:
         return InstrumentViewManager.view_dict[ws_name]
 
     @staticmethod
-    def remove(ws_name: str):
+    def remove(view_obj, ws_name: str):
         """Remove a registered InstrumentView
         """
         try:
             # delete the record
-            del InstrumentViewManager.view_dict[ws_name]
+            if ws_name in InstrumentViewManager.view_dict:
+                # find the corresponding object if they have the same workspace name
+                loc = InstrumentViewManager.view_dict[ws_name].index(view_obj)
+                del InstrumentViewManager.view_dict[ws_name][loc]
+                # clear the dictonary entry if it was the last item
+                if len(InstrumentViewManager.view_dict[ws_name]) == 0:
+                    del InstrumentViewManager.view_dict[ws_name]
         except KeyError as ke:
             # if it does not exist
             raise RuntimeError(f'workspace {ws_name} does not exist in dictionary. '
-                               f'The available includes {InstrumentViewManager.view_dict.keys()},'
+                               f'The available includes {InstrumentViewManager.view_dict.items()},'
                                f'FYI: {ke}')
