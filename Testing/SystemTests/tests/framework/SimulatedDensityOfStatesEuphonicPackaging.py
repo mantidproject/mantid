@@ -122,6 +122,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
             print(process.stdout.decode('utf-8'))
 
         # Update path again, in case a new lib/lib64 diretory was created
+        # THIS IS FAILING ON WINDOWS FOR SOME REASON
         cls._add_libs_from_prefix(pathlib.Path(tmp_prefix))
 
     def runTest(self):
