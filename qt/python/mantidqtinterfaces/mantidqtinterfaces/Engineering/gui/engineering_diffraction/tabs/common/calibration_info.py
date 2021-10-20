@@ -169,6 +169,18 @@ class CalibrationInfo:
             suffix = GROUP_SUFFIX[group]
         return "_".join([self.instrument, self.get_ceria_runno(), suffix]) + ext
 
+    def get_subplot_title(self, ispec):
+        """
+        :param ispec: spectrum index for which the calibration results (TOF vs d) are being plotted
+        :return: string to use as subplot title in plot generated in calibration tab
+        """
+        if self.group in [GROUP.NORTH, GROUP.SOUTH, GROUP.CUSTOM, GROUP.CROPPED]:
+            return self.get_group_description()
+        elif self.group == GROUP.BOTH:
+            return GROUP_DESCRIPTIONS[GROUP.NORTH] if ispec == 0 else GROUP_DESCRIPTIONS[GROUP.SOUTH]
+        else:
+            return f"{self.get_group_description()} spec: {ispec}"  # texture
+
     def get_group_ws(self):
         """
         Returns grouping workspace for ROI (creates if not present)

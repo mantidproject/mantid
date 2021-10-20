@@ -174,12 +174,12 @@ def get_diffractometer_constants_from_workspace(ws):
     return diff_consts
 
 
-def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, title_prefix="spec: "):
+def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     """
     Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from PDCalibration
     :param diag_ws: workspace object of group of diagnostic workspaces
     :param ws_foc: workspace object of focused data (post ApplyDiffCal with calibrated diff_consts)
-    :param title_prefix: title prefix string for the subplots
+    :param calibration: CalibrationInfo object used to determine subplot axes titles
     :return:
     """
     from matplotlib.pyplot import subplots
@@ -218,7 +218,7 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, title_prefix="spec
             figs.append(fig)
             icol = 0
         # plot TOF vs d
-        ax[0, icol].set_title(f"{title_prefix}{ispec+1}")
+        ax[0, icol].set_title(calibration.get_subplot_title(ispec))
         ax[0, icol].errorbar(x, y, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
         ax[0, icol].plot(x, yfit, '-r', label='quadratic fit')
         # plot residuals

@@ -66,7 +66,7 @@ Calibration
     button should be checked on the Calibration tab and the path should be populated with the
     `_all_banks`.prm file generated earlier in this test.
 
-13. In the Load Existing Calibration box browse to the `_bank_2`.prm file and click the Load buttonn.
+13. In the Load Existing Calibration box browse to the `_bank_2`.prm file and click the Load button.
 
 Focus
 -----
