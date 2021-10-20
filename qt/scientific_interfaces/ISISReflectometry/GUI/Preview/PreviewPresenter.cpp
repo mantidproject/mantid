@@ -79,7 +79,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
   auto selectionStr = m_model->detIDsToString(indices);
-  g_log.debug(selectionStr);
+  g_log.notice(selectionStr);
 
   m_model->setSelectedBanks(indices);
   m_model->sumBanksAsync(*m_jobManager);

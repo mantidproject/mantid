@@ -17,4 +17,10 @@ ReflAlgorithmFactory::ReflAlgorithmFactory(IBatch const &batch) : m_batch(batch)
 MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makePreprocessingAlgorithm(PreviewRow &row) const {
   return PreprocessRow::createConfiguredAlgorithm(m_batch, row, nullptr);
 }
+
+MantidQt::API::IConfiguredAlgorithm_sptr ReflAlgorithmFactory::makeSumBanksAlgorithm(PreviewRow &row) const {
+  // TODO return correct algorithm
+  return PreprocessRow::createConfiguredAlgorithm(m_batch, row, nullptr);
+}
+
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -48,13 +48,24 @@ public:
     auto previewRow = createPreviewRow();
     auto stubAlg = makeConfiguredAlg();
     EXPECT_CALL(*mockAlgFactory, makePreprocessingAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(stubAlg));
-    EXPECT_CALL(mockJobRunner, clearAlgorithmQueue()).Times(1);
-    EXPECT_CALL(mockJobRunner, setAlgorithmQueue(Eq(std::deque<IConfiguredAlgorithm_sptr>{stubAlg}))).Times(1);
-    EXPECT_CALL(mockJobRunner, executeAlgorithmQueue()).Times(1);
+    expectAlgorithmExecuted(stubAlg, mockJobRunner);
 
     auto batch = MockBatch();
     auto jobManager = createJobManager(&mockJobRunner, std::move(mockAlgFactory));
     jobManager.startPreprocessing(previewRow);
+  }
+
+  void test_start_sum_banks() {
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
+    auto previewRow = createPreviewRow();
+    auto stubAlg = makeConfiguredAlg();
+    EXPECT_CALL(*mockAlgFactory, makeSumBanksAlgorithm(Eq(ByRef(previewRow)))).Times(1).WillOnce(Return(stubAlg));
+    expectAlgorithmExecuted(stubAlg, mockJobRunner);
+
+    auto batch = MockBatch();
+    auto jobManager = createJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    jobManager.startSumBanks(previewRow);
   }
 
   void test_subscribe_to_job_runner() {
@@ -127,5 +138,11 @@ private:
     auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
     auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties), nullptr, &item);
     return configuredAlg;
+  }
+
+  void expectAlgorithmExecuted(IConfiguredAlgorithm_sptr const &alg, MockJobRunner &mockJobRunner) {
+    EXPECT_CALL(mockJobRunner, clearAlgorithmQueue()).Times(1);
+    EXPECT_CALL(mockJobRunner, setAlgorithmQueue(Eq(std::deque<IConfiguredAlgorithm_sptr>{alg}))).Times(1);
+    EXPECT_CALL(mockJobRunner, executeAlgorithmQueue()).Times(1);
   }
 };
