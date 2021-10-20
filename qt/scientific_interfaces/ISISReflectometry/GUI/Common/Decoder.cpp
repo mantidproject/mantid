@@ -81,7 +81,7 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
 }
 
-void Decoder::decodeExperiment(const QtExperimentView *gui, const QMap<QString, QVariant> &map) {
+void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVariant> &map) {
   gui->m_ui.analysisModeComboBox->setCurrentIndex(map[QString("analysisModeComboBox")].toInt());
   gui->m_ui.debugCheckBox->setChecked(map[QString("debugCheckbox")].toBool());
   gui->m_ui.summationTypeComboBox->setCurrentIndex(map[QString("summationTypeComboBox")].toInt());
@@ -100,6 +100,7 @@ void Decoder::decodeExperiment(const QtExperimentView *gui, const QMap<QString, 
   gui->m_ui.floodCorComboBox->setCurrentIndex(map[QString("floodCorComboBox")].toInt());
   gui->m_ui.floodWorkspaceWsSelector->setCurrentIndex(map[QString("floodWorkspaceWsSelector")].toInt());
   gui->m_stitchEdit->setText(map[QString("stitchEdit")].toString());
+  gui->onSettingsChanged();
 }
 
 void Decoder::decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map) {
