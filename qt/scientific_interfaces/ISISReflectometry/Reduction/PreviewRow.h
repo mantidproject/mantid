@@ -8,6 +8,7 @@
 #include "Common/DllConfig.h"
 #include "Item.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 
 #include <string>
 #include <vector>
@@ -38,11 +39,11 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const noexcept;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const noexcept;
-  std::vector<size_t> getSelectedBanks() const noexcept;
+  std::vector<Mantid::detid_t> getSelectedBanks() const noexcept;
 
   void setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
   void setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept;
-  void setSelectedBanks(std::vector<size_t> selectedBanks) noexcept;
+  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept;
 
   friend bool operator==(const PreviewRow &lhs, const PreviewRow &rhs) {
     // Note: This does not consider if the underlying item is equal currently
@@ -52,7 +53,7 @@ public:
 
 private:
   std::vector<std::string> m_runNumbers;
-  std::vector<size_t> m_selectedBanks;
+  std::vector<Mantid::detid_t> m_selectedBanks;
   Mantid::API::MatrixWorkspace_sptr m_loadedWs;
   Mantid::API::MatrixWorkspace_sptr m_summedWs;
 };

@@ -10,6 +10,7 @@
 #include "Common/DllConfig.h"
 #include "IPreviewModel.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "Reduction/PreviewRow.h"
 
 #include <cstddef>
@@ -29,13 +30,13 @@ public:
   void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) override;
   void sumBanksAsync(IJobManager &jobManager) override;
 
-  std::string indicesToString(std::vector<size_t> const &indices) const override;
+  std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const override;
 
   Mantid::API::MatrixWorkspace_sptr getLoadedWs() const override;
-  std::vector<size_t> getSelectedBanks() const override;
+  std::vector<Mantid::detid_t> getSelectedBanks() const override;
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
 
-  void setSelectedBanks(std::vector<size_t> selectedBanks) override;
+  void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
 
 private:
   // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't

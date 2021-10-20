@@ -64,7 +64,7 @@ public:
 
   void test_set_and_get_selected_banks() {
     PreviewModel model;
-    const std::vector<size_t> inputRoi{56, 57, 58, 59};
+    const std::vector<Mantid::detid_t> inputRoi{56, 57, 58, 59};
     model.setSelectedBanks(inputRoi);
     TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
   }
@@ -83,17 +83,17 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
-  void test_convert_indices_to_string() {
+  void test_convert_detIDs_to_string() {
     PreviewModel model;
-    auto const indices = std::vector<size_t>{99, 4, 5};
-    auto result = model.indicesToString(indices);
+    auto const indices = std::vector<Mantid::detid_t>{99, 4, 5};
+    auto result = model.detIDsToString(indices);
     TS_ASSERT_EQUALS(result, "99,4,5");
   }
 
-  void test_convert_empty_indices_to_string() {
+  void test_convert_empty_detIDs_to_string() {
     PreviewModel model;
-    auto const indices = std::vector<size_t>{};
-    auto result = model.indicesToString(indices);
+    auto const indices = std::vector<Mantid::detid_t>{};
+    auto result = model.detIDsToString(indices);
     TS_ASSERT_EQUALS("", result);
   }
 

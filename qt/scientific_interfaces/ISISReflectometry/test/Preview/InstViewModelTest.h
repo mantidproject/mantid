@@ -64,8 +64,8 @@ public:
     model.updateWorkspace(ws);
 
     auto const detIndices = std::vector<size_t>{1, 2, 3};
-    auto const expected = std::vector<size_t>{1, 2, 3};
-    auto const workspaceIndices = model.detIndicesToWsIndices(detIndices);
+    auto const expected = std::vector<Mantid::detid_t>{2, 3, 4};
+    auto const workspaceIndices = model.detIndicesToDetIDs(detIndices);
     TS_ASSERT_EQUALS(workspaceIndices, expected);
   }
 

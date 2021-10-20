@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "InstViewModel.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -47,7 +48,7 @@ Mantid::Kernel::V3D InstViewModel::getAxis() const {
 
 MantidWidgets::InstrumentActor *InstViewModel::getInstrumentViewActor() const { return m_actor.get(); }
 
-std::vector<size_t> InstViewModel::detIndicesToWsIndices(std::vector<size_t> const &detIndices) const {
-  return m_actor->getWorkspaceIndices(detIndices);
+std::vector<Mantid::detid_t> InstViewModel::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
+  return m_actor->getDetIDs(detIndices);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -9,6 +9,7 @@
 #include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
@@ -69,9 +70,9 @@ void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumB
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
 MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
 
-std::vector<size_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
+std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
 
-void PreviewModel::setSelectedBanks(std::vector<size_t> selectedBanks) {
+void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
   m_runDetails->setSelectedBanks(std::move(selectedBanks));
 }
 
@@ -79,7 +80,7 @@ void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
 }
 
-std::string PreviewModel::indicesToString(std::vector<size_t> const &indices) const {
+std::string PreviewModel::detIDsToString(std::vector<Mantid::detid_t> const &indices) const {
   return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

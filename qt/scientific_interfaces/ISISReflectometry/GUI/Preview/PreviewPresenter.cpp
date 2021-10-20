@@ -77,8 +77,8 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Change to shape editing after a selection has been done to match instrument viewer default behaviour
   notifyInstViewEditRequested();
   // Get the masked workspace indices
-  auto indices = m_instViewModel->detIndicesToWsIndices(m_view->getSelectedDetectors());
-  auto selectionStr = m_model->indicesToString(indices);
+  auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
+  auto selectionStr = m_model->detIDsToString(indices);
   g_log.debug(selectionStr);
 
   m_model->setSelectedBanks(indices);
