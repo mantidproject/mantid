@@ -511,8 +511,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.c
 wrongPrintfScanfArgNum:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSPE.cpp:54
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveSampleEnvironmentAndShape.cpp:170
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SetSample.cpp:294
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SetSample.cpp:1004
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/UpdateInstrumentFromFile.cpp:264
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
