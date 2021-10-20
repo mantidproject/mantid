@@ -40,7 +40,7 @@ class AddModelAnalysisTest(unittest.TestCase):
         self.GUI.plot_widget.create_model_fit_pane.assert_not_called()
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.model_analysis.ModelFittingTabWidget')
-    def test_get_features_tab_nad_plot(self, mock_model):
+    def test_get_features_tab_and_plot(self, mock_model):
         AddModelAnalysis(self.GUI, TABANDPLOT)
         mock_model.assert_called_once_with(self.GUI.context, self.GUI)
         self.GUI.plot_widget.create_model_fit_pane.assert_called_once_with()
