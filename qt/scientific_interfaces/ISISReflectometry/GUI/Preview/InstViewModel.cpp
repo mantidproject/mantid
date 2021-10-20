@@ -9,8 +9,6 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 
 #include <memory>
 
@@ -33,15 +31,23 @@ InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &work
                                                           scaleMax);
 }
 
-void InstViewModel::notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) {
+void InstViewModel::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
   // TODO refactor the component info stuff into the surface constructor so we don't need to get it here
   m_actor = createInstrumentViewActor(workspace);
-  const auto &componentInfo = m_actor->componentInfo();
-  auto sample_pos = componentInfo.samplePosition();
-  auto axis = Mantid::Kernel::V3D(0, 1, 0); // CYLINDRICAL_Y
-
-  m_surface = std::make_shared<MantidWidgets::UnwrappedCylinder>(m_actor.get(), sample_pos, axis);
 }
 
-std::shared_ptr<MantidWidgets::RotationSurface> InstViewModel::getInstrumentViewSurface() const { return m_surface; }
+Mantid::Kernel::V3D InstViewModel::getSamplePos() const {
+  const auto &componentInfo = m_actor->componentInfo();
+  return componentInfo.samplePosition();
+}
+
+Mantid::Kernel::V3D InstViewModel::getAxis() const {
+  return Mantid::Kernel::V3D(0, 1, 0); // CYLINDRICAL_Y
+}
+
+MantidWidgets::InstrumentActor *InstViewModel::getInstrumentViewActor() const { return m_actor.get(); }
+
+std::vector<size_t> InstViewModel::detIndicesToWsIndices(std::vector<size_t> const &detIndices) const {
+  return m_actor->getWorkspaceIndices(detIndices);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

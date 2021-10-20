@@ -18,6 +18,8 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
       m_jobManager(std::move(dependencies.jobManager)), m_instViewModel(std::move(dependencies.instViewModel)) {
   m_view->subscribe(this);
   m_jobManager->subscribe(this);
+
+  m_view->setInstViewToolbarEnabled(false);
 }
 
 /** Notification received when the user has requested to load a workspace. If it already exists in the ADS
@@ -42,8 +44,43 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   assert(ws);
 
   // Notify the instrument view model that the workspace has changed before we get the surface
-  m_instViewModel->notifyWorkspaceUpdated(ws);
-  auto surface = m_instViewModel->getInstrumentViewSurface();
-  m_view->plotInstView(surface);
+  m_instViewModel->updateWorkspace(ws);
+  m_view->plotInstView(m_instViewModel->getInstrumentViewActor(), m_instViewModel->getSamplePos(),
+                       m_instViewModel->getAxis());
+  // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
+  m_view->setInstViewToolbarEnabled(true);
+  notifyInstViewZoomRequested();
+}
+
+void PreviewPresenter::notifyInstViewSelectRectRequested() {
+  m_view->setInstViewZoomState(false);
+  m_view->setInstViewEditState(false);
+  m_view->setInstViewSelectRectState(true);
+  m_view->setInstViewSelectRectMode();
+}
+
+void PreviewPresenter::notifyInstViewEditRequested() {
+  m_view->setInstViewZoomState(false);
+  m_view->setInstViewEditState(true);
+  m_view->setInstViewSelectRectState(false);
+  m_view->setInstViewEditMode();
+}
+
+void PreviewPresenter::notifyInstViewZoomRequested() {
+  m_view->setInstViewZoomState(true);
+  m_view->setInstViewEditState(false);
+  m_view->setInstViewSelectRectState(false);
+  m_view->setInstViewZoomMode();
+}
+
+void PreviewPresenter::notifyInstViewShapeChanged() {
+  // Change to shape editing after a selection has been done to match instrument viewer default behaviour
+  notifyInstViewEditRequested();
+  // Get the masked workspace indices
+  auto indices = m_instViewModel->detIndicesToWsIndices(m_view->getSelectedDetectors());
+  auto selectionStr = m_model->indicesToString(indices);
+  // TODO Start the algorithm that will sum banks horizontally. For now just print out the masked indices.
+  g_log.information(selectionStr);
+  // m_model->sumBanksAsync(*m_jobManager, m_model->indicesToString(selectedIndices));
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

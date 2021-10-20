@@ -25,6 +25,7 @@
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
 using namespace MantidQt::API;
+using namespace Mantid::Kernel;
 
 using ::testing::_;
 using ::testing::ByRef;
@@ -86,10 +87,45 @@ public:
     presenter.notifyLoadWorkspaceCompleted();
   }
 
+  void test_notify_inst_view_select_rect_requested() {
+    auto mockView = makeView();
+    expectInstViewSetToSelectRectMode(*mockView);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewSelectRectRequested();
+  }
+
+  void test_notify_inst_view_pan_requested() {
+    auto mockView = makeView();
+    expectInstViewSetToEditMode(*mockView);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewEditRequested();
+  }
+
+  void test_notify_inst_view_zoom_requested() {
+    auto mockView = makeView();
+    expectInstViewSetToZoomMode(*mockView);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+    presenter.notifyInstViewZoomRequested();
+  }
+
+  void test_notify_inst_view_shape_changed() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+    auto mockInstViewModel = makeInstViewModel();
+    expectInstViewSetToEditMode(*mockView);
+    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel);
+    // TODO check that the model is called to sum banks
+    auto presenter =
+        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::make_unique<NiceMock<MockJobManager>>(),
+                                  std::move(mockInstViewModel)));
+    presenter.notifyInstViewShapeChanged();
+  }
+
 private:
   MockViewT makeView() {
     auto mockView = std::make_unique<MockPreviewView>();
     EXPECT_CALL(*mockView, subscribe(NotNull())).Times(1);
+    EXPECT_CALL(*mockView, setInstViewToolbarEnabled(Eq(false))).Times(1);
     return mockView;
   }
 
@@ -112,10 +148,62 @@ private:
 
   void expectLoadWorkspaceCompleted(MockPreviewView &mockView, MockPreviewModel &mockModel,
                                     MockInstViewModel &mockInstViewModel) {
+    expectInstViewModelUpdatedWithLoadedWorkspace(mockModel, mockInstViewModel);
+    expectPlotInstView(mockView, mockInstViewModel);
+    expectInstViewToolbarEnabled(mockView);
+    expectInstViewSetToZoomMode(mockView);
+  }
+
+  void expectInstViewModelUpdatedWithLoadedWorkspace(MockPreviewModel &mockModel,
+                                                     MockInstViewModel &mockInstViewModel) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
     EXPECT_CALL(mockModel, getLoadedWs).Times(1).WillOnce(Return(ws));
-    EXPECT_CALL(mockInstViewModel, notifyWorkspaceUpdated(Eq(ws))).Times(1);
-    EXPECT_CALL(mockInstViewModel, getInstrumentViewSurface()).Times(1).WillOnce(Return(nullptr));
-    EXPECT_CALL(mockView, plotInstView(Eq(nullptr)));
+    EXPECT_CALL(mockInstViewModel, updateWorkspace(Eq(ws))).Times(1);
+  }
+
+  void expectSumBanksCalledOnSelectedDetectors(MockPreviewView &mockView, MockPreviewModel &mockModel,
+                                               MockInstViewModel &mockInstViewModel) {
+    auto detIndices = std::vector<size_t>{44, 45, 46};
+    auto wsIndices = std::vector<size_t>{2, 3, 4};
+    auto wsIndicesStr = std::string{"2, 3, 4"};
+    EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
+    EXPECT_CALL(mockInstViewModel, detIndicesToWsIndices(Eq(detIndices))).Times(1).WillOnce(Return(wsIndices));
+    EXPECT_CALL(mockModel, indicesToString(wsIndices)).Times(1).WillOnce(Return(wsIndicesStr));
+    // TODO uncomment test when sum banks is implemented
+    // EXPECT_CALL(mockModel, sumBanksAsync(wsIndicesStr)).Times(1);
+  }
+
+  void expectPlotInstView(MockPreviewView &mockView, MockInstViewModel &mockInstViewModel) {
+    auto samplePos = V3D(1, 2, 3);
+    auto axes = V3D(4, 5, 6);
+    EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
+    EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
+    EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axes));
+    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes)));
+  }
+
+  void expectInstViewToolbarEnabled(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewToolbarEnabled(Eq(true))).Times(1);
+  }
+
+  void expectInstViewSetToZoomMode(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewZoomState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewZoomMode()).Times(1);
+  }
+
+  void expectInstViewSetToEditMode(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewEditMode()).Times(1);
+  }
+
+  void expectInstViewSetToSelectRectMode(MockPreviewView &mockView) {
+    EXPECT_CALL(mockView, setInstViewEditState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewZoomState(Eq(false))).Times(1);
+    EXPECT_CALL(mockView, setInstViewSelectRectState(Eq(true))).Times(1);
+    EXPECT_CALL(mockView, setInstViewSelectRectMode()).Times(1);
   }
 };

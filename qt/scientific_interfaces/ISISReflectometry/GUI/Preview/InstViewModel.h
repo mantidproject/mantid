@@ -10,7 +10,6 @@
 #include "IInstViewModel.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtWidgets/InstrumentView/RotationSurface.h"
 
 #include <memory>
 
@@ -19,12 +18,14 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL InstViewModel : public IInstViewModel {
 public:
   InstViewModel(std::unique_ptr<MantidWidgets::IMessageHandler> messageHandler = nullptr);
-  void notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) override;
-  std::shared_ptr<MantidWidgets::RotationSurface> getInstrumentViewSurface() const override;
+  void updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) override;
+  MantidWidgets::InstrumentActor *getInstrumentViewActor() const override;
+  Mantid::Kernel::V3D getSamplePos() const override;
+  Mantid::Kernel::V3D getAxis() const override;
+  std::vector<size_t> detIndicesToWsIndices(std::vector<size_t> const &detIndices) const override;
 
 private:
   std::unique_ptr<MantidWidgets::InstrumentActor> m_actor;
-  std::shared_ptr<MantidWidgets::RotationSurface> m_surface;
   std::unique_ptr<MantidWidgets::IMessageHandler> m_messageHandler;
 
   std::unique_ptr<MantidWidgets::InstrumentActor>

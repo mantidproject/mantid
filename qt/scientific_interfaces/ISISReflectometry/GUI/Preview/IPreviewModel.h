@@ -8,6 +8,7 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <string>
+#include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class IJobManager;
@@ -19,5 +20,6 @@ public:
   virtual bool loadWorkspaceFromAds(std::string const &workspaceName) = 0;
   virtual void loadAndPreprocessWorkspaceAsync(std::string const &workspaceName, IJobManager &jobManager) = 0;
   virtual Mantid::API::MatrixWorkspace_sptr getLoadedWs() const = 0;
+  virtual std::string indicesToString(std::vector<size_t> const &indices) const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

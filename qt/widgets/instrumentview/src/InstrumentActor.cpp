@@ -352,11 +352,9 @@ Mantid::detid_t InstrumentActor::getDetID(size_t pickID) const {
   return -1;
 }
 
-QList<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
-  QList<Mantid::detid_t> detIDs;
-  detIDs.reserve(static_cast<int>(dets.size()));
-  for (auto det : dets)
-    detIDs.append(getDetID(det));
+std::vector<Mantid::detid_t> InstrumentActor::getDetIDs(const std::vector<size_t> &dets) const {
+  std::vector<Mantid::detid_t> detIDs;
+  std::transform(dets.cbegin(), dets.cend(), std::back_inserter(detIDs), [this](auto det) { return getDetID(det); });
   return detIDs;
 }
 
@@ -378,6 +376,11 @@ Mantid::Geometry::ComponentID InstrumentActor::getComponentID(size_t pickID) con
  * workspace
  */
 size_t InstrumentActor::getWorkspaceIndex(size_t index) const { return m_detIndex2WsIndex[index]; }
+
+std::vector<size_t> InstrumentActor::getWorkspaceIndices(const std::vector<size_t> &dets) const {
+  auto detIDs = getDetIDs(dets);
+  return m_workspace->getIndicesFromDetectorIDs(detIDs);
+}
 
 /**
  * Set an interval in the data workspace x-vector's units in which the data are

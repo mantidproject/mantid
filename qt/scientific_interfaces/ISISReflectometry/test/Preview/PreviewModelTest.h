@@ -56,6 +56,20 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
+  void test_convert_indices_to_string() {
+    PreviewModel model;
+    auto const indices = std::vector<size_t>{99, 4, 5};
+    auto result = model.indicesToString(indices);
+    TS_ASSERT_EQUALS(result, "99,4,5");
+  }
+
+  void test_convert_empty_indices_to_string() {
+    PreviewModel model;
+    auto const indices = std::vector<size_t>{};
+    auto result = model.indicesToString(indices);
+    TS_ASSERT_EQUALS("", result);
+  }
+
 private:
   MatrixWorkspace_sptr createWorkspace() { return WorkspaceCreationHelper::create2DWorkspace(1, 1); }
 };

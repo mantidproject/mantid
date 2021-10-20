@@ -35,6 +35,11 @@ public:
   // PreviewViewSubscriber overrides
   void notifyLoadWorkspaceRequested() override;
 
+  void notifyInstViewZoomRequested() override;
+  void notifyInstViewEditRequested() override;
+  void notifyInstViewSelectRectRequested() override;
+  void notifyInstViewShapeChanged() override;
+
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
 

@@ -9,7 +9,9 @@
 #include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 
 #include <boost/utility/in_place_factory.hpp>
 
@@ -56,5 +58,9 @@ MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->ge
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
+}
+
+std::string PreviewModel::indicesToString(std::vector<size_t> const &indices) const {
+  return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

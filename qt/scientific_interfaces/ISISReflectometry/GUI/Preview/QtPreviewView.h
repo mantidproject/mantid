@@ -31,7 +31,18 @@ public:
   void subscribe(PreviewViewSubscriber *notifyee) noexcept override;
 
   std::string getWorkspaceName() const override;
-  void plotInstView(std::shared_ptr<MantidWidgets::RotationSurface> &surface) override;
+  void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
+                    Mantid::Kernel::V3D const &axis) override;
+
+  void setInstViewZoomState(bool isChecked) override;
+  void setInstViewEditState(bool isChecked) override;
+  void setInstViewSelectRectState(bool isChecked) override;
+  void setInstViewZoomMode() override;
+  void setInstViewEditMode() override;
+  void setInstViewSelectRectMode() override;
+  void setInstViewToolbarEnabled(bool enable) override;
+
+  std::vector<size_t> getSelectedDetectors() const override;
 
 private:
   Ui::PreviewWidget m_ui;
@@ -39,8 +50,13 @@ private:
   std::unique_ptr<MantidQt::MantidWidgets::InstrumentDisplay> m_instDisplay{nullptr};
 
   void connectSignals() const;
+  void loadToolbarIcons();
 
 private slots:
   void onLoadWorkspaceRequested() const;
+  void onInstViewSelectRectClicked() const;
+  void onInstViewZoomClicked() const;
+  void onInstViewEditClicked() const;
+  void onInstViewShapeChanged() const;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
