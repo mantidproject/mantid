@@ -44,6 +44,8 @@ class InstrumentView(QWidget, ObservingView):
         # used by the observers view to delete the ADS observer
         self.presenter = presenter
 
+        self.name = name
+
         self.setWindowTitle(name)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlags(window_flags)
@@ -88,6 +90,23 @@ class InstrumentView(QWidget, ObservingView):
         if new_window_name is None:
             new_window_name = new_ws_name
         self.widget.replaceWorkspace(new_ws_name, new_window_name)
+
+    def is_thread_running(self):
+        return self.widget.isThreadRunning()
+
+    def wait(self):
+        return self.widget.waitForThread()
+
+    def closeEvent(self, event):
+        # ordering of close events is different depending on
+        # whether workspace is deleted or window is closed
+        if self.presenter is not None:
+            # pass close event through to the underlying C++ widget
+            children = self.findChildren(InstrumentWidget)
+            for child in children:
+                child.close()
+            self.presenter.close(self.name)
+        super(QWidget, self).closeEvent(event)
 
     @Slot()
     def _run_close(self):

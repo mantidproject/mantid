@@ -50,6 +50,7 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
       m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
       m_redrawPicking(true) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
+  connect(rootActor, SIGNAL(refreshView()), this, SLOT(refreshView()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
   connect(&m_maskShapes, SIGNAL(shapeSelected()), this, SIGNAL(shapeSelected()));
   connect(&m_maskShapes, SIGNAL(shapesDeselected()), this, SIGNAL(shapesDeselected()));
@@ -363,6 +364,11 @@ bool ProjectionSurface::hasSelection() const { return !m_selectRect.isNull() && 
 
 void ProjectionSurface::colorMapChanged() {
   this->changeColorMap();
+  updateView(false);
+  requestRedraw();
+}
+
+void ProjectionSurface::refreshView() {
   updateView(false);
   requestRedraw();
 }

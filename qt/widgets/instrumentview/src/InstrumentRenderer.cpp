@@ -78,6 +78,10 @@ void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps,
   if (std::none_of(visibleComps.cbegin(), visibleComps.cend(), [](bool visible) { return visible; }))
     return;
 
+  if (!m_actor.isInitialized()) {
+    return;
+  }
+
   OpenGLError::check("InstrumentActor::draw()");
   size_t i = picking ? 1 : 0;
   if (m_useDisplayList[i]) {
