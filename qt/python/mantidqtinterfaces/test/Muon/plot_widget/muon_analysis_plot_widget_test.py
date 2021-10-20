@@ -102,6 +102,27 @@ class MuonAnalysisPlotWidgetTest(unittest.TestCase):
         self.context.deleted_plots_notifier.add_subscriber.assert_any_call("fit b")
         self.assertEqual(self.context.deleted_plots_notifier.add_subscriber.call_count,2)
 
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.MainPlotWidgetView')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlottingCanvasWidget')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.BasePaneView')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.RawPaneView')
+    def add_all_panes(self, mock_raw_view, mock_base_view, mock_plot_canvas, mock_main_view):
+        self.mock_main_view = mock_main_view
+        self.mock_base_view = mock_base_view
+        self.mock_raw_view = mock_raw_view
+        self.mock_plot_canvas = mock_plot_canvas
+
+        self.mock_main_view.return_value = mock.MagicMock(autospec=MainPlotWidgetView)
+        self.mock_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
+        self.mock_raw_view.return_value = mock.MagicMock(autospec=RawPaneView)
+        self.mock_plot_canvas.side_effect = self.canvas_mocks
+
+        # can exclude the defaults (data and fit)
+        self.widget.create_model_fit_pane()
+        self.widget.create_raw_pane()
+        # mock the update methods in new panes
+        self.widget.modes[RAW].handle_data_updated = mock.Mock()
+
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.MainPlotWidgetPresenter')
     def test_plot_mode_changed_by_user_leave_data(self, mock_presenter):
         mock_presenter.return_value = mock.MagicMock(autospec=MainPlotWidgetPresenter)
@@ -212,27 +233,6 @@ class MuonAnalysisPlotWidgetTest(unittest.TestCase):
         self.widget.handle_plot_mode_changed_by_user()
         mock_presenter.return_value.show.assert_called_once_with("Model Data")
         self.widget.modes[RAW].handle_data_updated.assert_not_called()
-
-    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.MainPlotWidgetView')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlottingCanvasWidget')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.BasePaneView')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.RawPaneView')
-    def add_all_panes(self, mock_raw_view, mock_base_view, mock_plot_canvas, mock_main_view):
-        self.mock_main_view = mock_main_view
-        self.mock_base_view = mock_base_view
-        self.mock_raw_view = mock_raw_view
-        self.mock_plot_canvas = mock_plot_canvas
-
-        self.mock_main_view.return_value = mock.MagicMock(autospec=MainPlotWidgetView)
-        self.mock_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
-        self.mock_raw_view.return_value = mock.MagicMock(autospec=RawPaneView)
-        self.mock_plot_canvas.side_effect = self.canvas_mocks
-
-        # can exclude the defaults (data and fit)
-        self.widget.create_model_fit_pane()
-        self.widget.create_raw_pane()
-        # mock the update methods in new panes
-        self.widget.modes[RAW].handle_data_updated = mock.Mock()
 
 
 if __name__ == '__main__':

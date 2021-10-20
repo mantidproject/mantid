@@ -17,7 +17,7 @@ from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 
 TABANDPLOT = {"model_analysis":2}
 TAB = {"model_analysis":1}
-FAIL = {"model_analysis":0}
+DONOTHING = {"model_analysis":0}
 
 
 class AddModelAnalysisTest(unittest.TestCase):
@@ -47,7 +47,7 @@ class AddModelAnalysisTest(unittest.TestCase):
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.model_analysis.ModelFittingTabWidget')
     def test_get_features_do_nothing(self, mock_model):
-        AddModelAnalysis(self.GUI, FAIL)
+        AddModelAnalysis(self.GUI, DONOTHING)
         mock_model.assert_not_called()
         self.GUI.plot_widget.create_model_fit_pane.assert_not_called()
 
@@ -66,9 +66,9 @@ class AddModelAnalysisTest(unittest.TestCase):
         self.GUI.tabs.addTabWithOrder.assert_called_once_with(self.GUI.model_fitting_tab.model_fitting_tab_view, "Model Fitting")
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.model_analysis.ModelFittingTabWidget')
-    def test_add_to_tab_fail(self, mock_model):
+    def test_add_to_tab_DONOTHING(self, mock_model):
         mock_model.return_value = mock.MagicMock(autospec = ModelFittingTabWidget)
-        add = AddModelAnalysis(self.GUI, FAIL)
+        add = AddModelAnalysis(self.GUI, DONOTHING)
         add.add_to_tab(self.GUI)
         self.GUI.tabs.addTabWithOrder.assert_not_called()
 
@@ -99,7 +99,7 @@ class AddModelAnalysisTest(unittest.TestCase):
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.model_analysis.ModelFittingTabWidget')
     def test_add_observers_to_feature_nothing(self, mock_model):
         mock_model.return_value = mock.MagicMock(autospec = ModelFittingTabWidget)
-        add = AddModelAnalysis(self.GUI, FAIL)
+        add = AddModelAnalysis(self.GUI, DONOTHING)
         add.add_observers_to_feature(self.GUI)
         # the mock_model.return_value replaces the GUI.model_fitting
         self.GUI.results_tab.results_tab_presenter.results_table_created_notifier.add_subscriber.assert_not_called()
@@ -146,9 +146,9 @@ class AddModelAnalysisTest(unittest.TestCase):
         mock_model.return_value.model_fitting_tab_presenter.update_override_tick_labels_notifier.add_subscriber.assert_not_called()
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.features.model_analysis.ModelFittingTabWidget')
-    def test_add_feature_observables_fail(self, mock_model):
+    def test_add_feature_observables_DONOTHING(self, mock_model):
         mock_model.return_value = mock.MagicMock(autospec = ModelFittingTabWidget)
-        add = AddModelAnalysis(self.GUI, FAIL)
+        add = AddModelAnalysis(self.GUI, DONOTHING)
         add.set_feature_observables(self.GUI)
         # the mock_model.return_value replaces the GUI.model_fitting
         mock_model.return_value.model_fitting_tab_presenter.enable_editing_notifier.add_subscriber.assert_not_called()
