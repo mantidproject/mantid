@@ -99,6 +99,18 @@ size_t SampleEnvironmentFactory::cacheSize() const { return retrieveSpecCache().
  */
 void SampleEnvironmentFactory::clearCache() { retrieveSpecCache().clear(); }
 
+/**
+ * Calls SampleEnvironmentSpecFileFinder::parseSpec
+ * @param name The name of the specification
+ * @param filename Assumed to be an absolute path to an existing specification
+ * @return A parse specification
+ */
+SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string &name,
+                                                               const std::string &filename) const {
+  assert(m_finder);
+  return m_finder->parseSpec(name, filename + name + ".xml");
+}
+
 //------------------------------------------------------------------------------
 // SampleEnvironmentSpecFileFinder
 //------------------------------------------------------------------------------
