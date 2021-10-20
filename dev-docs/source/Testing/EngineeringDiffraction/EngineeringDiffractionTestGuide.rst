@@ -50,7 +50,7 @@ Calibration
 
 7. Close the settings window
 
-8. For the Calibration Sample number enter `305738` (if you don't have access to the archive you can use `193749` which is included in the systems test data).
+8. For the Calibration Sample number enter `305738`.
 
 9. Tick the Plot Calibrated Workspace option.
 
@@ -73,7 +73,7 @@ Focus
 
 1. Change to the Focus tab.
 
-2. For the Sample Run number use `305761` and for the Vanadium run number enter `307521` (or if you don't have access to the archive use runs `193749` and `236516` for the sample and vanadium runs respectively).
+2. For the Sample Run number use `305761` and for the Vanadium run number enter `307521`.
 
 3. Tick the Plot Focused Workspace option and click Focus. It should produce a plot of a single spectrum for bank 2.
 
