@@ -14,7 +14,6 @@ from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussin
 import Engineering.EnggUtils as EnggUtils
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import CALIB_FOLDER
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common import path_handling
 
@@ -221,10 +220,9 @@ class CalibrationModel(object):
         if calibration.group == EnggUtils.GROUP.BOTH:
             # output a separate prm for North and South when both banks included
             for ibank, bank in enumerate(calibration.group.banks):
-                # create temp group to get prm template for the bank
-                bank_group = CalibrationInfo(EnggUtils.GROUP(str(ibank + 1)),
-                                             calibration.get_instrument(), calibration.get_ceria_path())
-                prm_filepath_bank = path.join(calibration_dir, bank_group.generate_output_file_name())
+                # get prm filename for individual banks by passing group enum as argument to generate_output_file_name
+                prm_filepath_bank = path.join(calibration_dir,
+                                              calibration.generate_output_file_name(EnggUtils.GROUP(str(ibank + 1))))
                 self.write_prm_file(ws_foc, prm_filepath_bank, spec_nums=[ibank])
                 # copy pdcal output nxs for both banks
                 filepath, ext = path.splitext(prm_filepath_bank)

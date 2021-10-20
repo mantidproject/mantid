@@ -156,13 +156,18 @@ class CalibrationInfo:
             logger.warning("Only save grouping workspace for custom or cropped groupings.")
         return
 
-    def generate_output_file_name(self, ext='.prm'):
+    def generate_output_file_name(self, group=None, ext='.prm'):
         """
         Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
         :param ext: Extension to be used on the saved file
+        :param group: group to use instead of that stored in self.group (e.g. North and South bank only)
         :return: filename
         """
-        return "_".join([self.instrument, self.get_ceria_runno(), self.get_group_suffix()]) + ext
+        if not group:
+            suffix = self.get_group_suffix()
+        else:
+            suffix = GROUP_SUFFIX[group]
+        return "_".join([self.instrument, self.get_ceria_runno(), suffix]) + ext
 
     def get_group_ws(self):
         """
