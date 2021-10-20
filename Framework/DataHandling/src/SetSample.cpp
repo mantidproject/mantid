@@ -73,6 +73,8 @@ namespace SEArgs {
 const std::string NAME("Name");
 /// Static Container string
 const std::string CONTAINER("Container");
+/// Static Path string
+const std::string PATH("Path");
 } // namespace SEArgs
 /// Provate namespace storing geometry args
 namespace GeometryArgs {
@@ -586,7 +588,13 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   }
   auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
-  auto sampleEnviron = factory.create(facilityName, instrumentName, envName, canName);
+  Geometry::SampleEnvironment_uptr sampleEnviron;
+  if (args->existsProperty(SEArgs::PATH)) {
+    auto sampleEnvironSpec = factory.parseSpec(envName, args->getPropertyValue(SEArgs::PATH));
+    sampleEnviron = sampleEnvironSpec->buildEnvironment(canName);
+  } else {
+    auto sampleEnviron = factory.create(facilityName, instrumentName, envName, canName);
+  }
   exptInfo.mutableSample().setEnvironment(std::move(sampleEnviron));
   return &(exptInfo.sample().getEnvironment());
 }
