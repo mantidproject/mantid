@@ -212,8 +212,13 @@ class SuperplotPresenter:
         kwargs = dict()
         kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
         kwargs['drawstyle'] = ConfigService.getString("plots.line.DrawStyle")
-        kwargs['linewidth'] = ConfigService.getString("plots.line.Width")
+        kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
         kwargs['marker'] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
+        if self._error_bars:
+            kwargs['capsize'] = float(ConfigService.getString("plots.errorbar.Capsize"))
+            kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
+            kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
+            kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
         return kwargs
 
     def on_visibility_changed(self, visible):
