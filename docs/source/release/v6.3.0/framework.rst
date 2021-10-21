@@ -34,6 +34,13 @@ Bugfixes
 
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
 
+
+Fit Functions
+-------------
+New Features
+############
+- Fixed a bug in :ref:`UserFunction<func-UserFunction>` where the view would not be updated with the parameters in the formula entered.
+
 Data Objects
 ------------
 
