@@ -22,7 +22,7 @@ DIFF_CONSTS_TABLE_NAME = "diffractometer_consts_table"
 
 class CalibrationModel(object):
 
-    def create_new_calibration(self, calibration, rb_num, plot_output):
+    def create_new_calibration(self, calibration, rb_num, plot_output, save_dir=output_settings.get_output_path()):
         """
         Create a new calibration from a ceria run
         :param ceria_path: Path to ceria (CeO2) data file
@@ -48,9 +48,9 @@ class CalibrationModel(object):
 
         # save output
         if rb_num:
-            calib_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Calibration", "")
+            calib_dir = path.join(save_dir, "User", rb_num, "Calibration", "")
         else:
-            calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
+            calib_dir = path.join(save_dir, "Calibration", "")
         self.create_output_files(calib_dir, calibration, focused_ceria)
 
         DeleteWorkspace(ceria_workspace)
