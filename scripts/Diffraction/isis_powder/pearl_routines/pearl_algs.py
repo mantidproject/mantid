@@ -55,12 +55,14 @@ def apply_vanadium_absorb_corrections(van_ws, run_details, absorb_ws=None):
     van_det_id_list = generate_det_id_list(van_ws)
 
     common_det_ids = [det_id for det_id in abs_det_id_list if det_id in van_det_id_list]
+    if not common_det_ids:
+        raise RuntimeError("No common detectors in Vanadium and sample workspaces")
 
     MSG_STEM = "Vanadium workspace and absorption workspaces have different spectra. "
-    if common_det_ids != van_det_id_list:
+    if sorted(common_det_ids) != sorted(van_det_id_list):
         logger.warning(MSG_STEM + "Removing unmatched spectra from the Vanadium workspace")
         van_ws = mantid.ExtractSpectra(InputWorkspace=van_ws, DetectorList=common_det_ids)
-    if common_det_ids != abs_det_id_list:
+    if sorted(common_det_ids) != sorted(abs_det_id_list):
         logger.warning(MSG_STEM + "Removing unmatched spectra from the absorption workspace")
         absorb_ws = mantid.ExtractSpectra(InputWorkspace=absorb_ws, DetectorList=common_det_ids)
 
