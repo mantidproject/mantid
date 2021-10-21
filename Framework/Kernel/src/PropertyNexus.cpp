@@ -34,6 +34,7 @@ using namespace ::NeXus;
 
 namespace Mantid::Kernel::PropertyNexus {
 
+namespace {
 //----------------------------------------------------------------------------------------------
 /** Helper method to create a property
  *
@@ -104,36 +105,31 @@ std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::str
     return std::unique_ptr<Property>(std::move(prop));
   }
 }
-
-//----------------------------------------------------------------------------------------------
-/** Opens a NXlog group in a nexus file and
- * creates the correct Property object from it.
- *
- * @param file :: NXS file handle
- * @param group :: name of NXlog group to open
- * @return Property pointer
+/**
+ * Common function to populate "time" and "start" entries from NeXus file
  */
-std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group) {
-  file->openGroup(group, "NXlog");
-
-  // Times in second offsets
-  std::vector<double> timeSec;
-  std::string startStr;
-  std::string unitsStr;
-
-  // Get the entries so that you can check if the "time" field is present
-  std::map<std::string, std::string> entries = file->getEntries();
-  if (entries.find("time") != entries.end()) {
-    file->openData("time");
-    file->getData(timeSec);
-    // Optionally get a start
-    try {
-      file->getAttr("start", startStr);
-    } catch (::NeXus::Exception &) {
-    }
-    file->closeData();
+void getTimeAndStart(::NeXus::File *file, std::vector<double> &timeSec, std::string &startStr) {
+  file->openData("time");
+  file->getData(timeSec);
+  // Optionally get a start
+  try {
+    file->getAttr("start", startStr);
+  } catch (::NeXus::Exception &) {
   }
+  file->closeData();
+}
 
+/**
+ * @brief Common function used by loadProperty overloads populating start and units if required
+ * @param file in
+ * @param group  in
+ * @param timeSec  in
+ * @param startStr  out
+ * @param unitsStr  out
+ * @return std::unique_ptr<Property>
+ */
+std::unique_ptr<Property> loadPropertyCommon(::NeXus::File *file, const std::string &group,
+                                             const std::vector<double> &timeSec, std::string &startStr) {
   // Check the type. Boolean stored as UINT8
   bool typeIsBool(false);
   // Check for boolean attribute
@@ -188,6 +184,7 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &g
     break;
   }
 
+  std::string unitsStr;
   if (file->hasAttr("units")) {
     try {
       file->getAttr("units", unitsStr);
@@ -199,8 +196,50 @@ std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &g
   // add units
   if (retVal)
     retVal->setUnits(unitsStr);
-
   return retVal;
+}
+
+} // namespace
+//----------------------------------------------------------------------------------------------
+
+std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+                                       const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix) {
+  file->openGroup(group, "NXlog");
+
+  // Times in second offsets
+  std::vector<double> timeSec;
+  std::string startStr;
+
+  // Check if the "time" field is present
+  if (fileInfo.isEntry(prefix + "/" + group + "/time")) {
+    getTimeAndStart(file, timeSec, startStr);
+  }
+
+  return loadPropertyCommon(file, group, timeSec, startStr);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Opens a NXlog group in a nexus file and
+ * creates the correct Property object from it.
+ *
+ * @param file :: NXS file handle
+ * @param group :: name of NXlog group to open
+ * @return Property pointer
+ */
+std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group) {
+  file->openGroup(group, "NXlog");
+
+  // Times in second offsets
+  std::vector<double> timeSec;
+  std::string startStr;
+
+  // Get the entries so that you can check if the "time" field is present
+  std::map<std::string, std::string> entries = file->getEntries();
+  if (entries.find("time") != entries.end()) {
+    getTimeAndStart(file, timeSec, startStr);
+  }
+
+  return loadPropertyCommon(file, group, timeSec, startStr);
 }
 
 #ifdef _WIN32

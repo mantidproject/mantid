@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/System.h"
 #include <memory>
 #include <string>
@@ -28,8 +29,23 @@ class Property;
 */
 namespace PropertyNexus {
 
+/**
+ * @brief Opens a NXlog group in a nexus file and creates the correct Property object from it. Overload that uses
+ * NexusHDF5Descriptor for faster metadata lookup.
+ *
+ * @param file currently opened NeXus file
+ * @param group current group (relative name)
+ * @param fileInfo descriptor with in-memory index with all entries
+ * @param prefix indicates current group location in file (absolute name)
+ * @return std::unique_ptr<Property>
+ */
+DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+                                                 const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                                 const std::string &prefix);
+
 DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group);
-}
+
+} // namespace PropertyNexus
 
 } // namespace Kernel
 } // namespace Mantid
