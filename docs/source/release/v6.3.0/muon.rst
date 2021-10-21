@@ -41,6 +41,8 @@ Improvements
 Bugfixes
 ########
 
+- Fixed a bug that prevented the model analysis plot showing when data was binned.
+
 ALC
 ---
 
