@@ -25,28 +25,29 @@ DECLARE_FUNCTION(MuoniumDecouplingCurve)
 void MuoniumDecouplingCurve::init() {
   declareParameter("RepolarisingAsymmetry", 1.0, "coefficient for linear term");
   declareParameter("DecouplingField", 1.0, "??");
-  declareParameter("BaselineAsymmetry", 0.0, "coefficient for constant term");
+  declareParameter("BackgroundAsymmetry", 0.0, "coefficient for constant term");
 }
 
 void MuoniumDecouplingCurve::function1D(double *out, const double *xValues, const size_t nData) const {
-  const double a = getParameter("RepolarisingAsymmetry");
-  const double b = getParameter("DecouplingField");
-  const double c = getParameter("BaselineAsymmetry");
+  const double RepolAS = getParameter("RepolarisingAsymmetry");
+  const double DecoupField = getParameter("DecouplingField");
+  const double BkgdAS = getParameter("BaackgroundAsymmetry");
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = a * (0.5 + pow(xValues[i] / b, 2)) / (1 + pow(xValues[i] / b, 2)) + c;
+    out[i] = RepolAS * (0.5 + pow(xValues[i] / DecoupField, 2)) / (1 + pow(xValues[i] / DecoupField, 2)) + BkgdAS;
   }
 }
 
 void MuoniumDecouplingCurve::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-  const double a = getParameter("RepolarisingAsymmetry");
-  const double b = getParameter("DecouplingField");
+  const double RepolAS = getParameter("RepolarisingAsymmetry");
+  const double DecoupField = getParameter("DecouplingField");
 
   for (size_t i = 0; i < nData; i++) {
-    double diffa = (0.5 * pow(b, 2) + pow(xValues[i], 2)) / (pow(b, 2) + pow(xValues[i], 2));
-    double diffb = a * b * pow(xValues[i], 2) / pow(pow(b, 2) + pow(xValues[i], 2), 2);
-    out->set(i, 0, diffa);
-    out->set(i, 1, diffb);
+    double diffRepolAS = (0.5 * pow(DecoupField, 2) + pow(xValues[i], 2)) / (pow(DecoupField, 2) + pow(xValues[i], 2));
+    double diffDecoupField =
+        -(RepolAS * DecoupField * pow(xValues[i], 2)) / pow((pow(DecoupField, 2) + pow(xValues[i], 2)), 2);
+    out->set(i, 0, diffRepolAS);
+    out->set(i, 1, diffDecoupField);
     out->set(i, 2, 1);
   }
 }
