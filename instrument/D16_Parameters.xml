@@ -33,16 +33,16 @@
 		    StartTime:/entry0/start_time:s,
 		    Gamma:/entry0/instrument/Gamma/value:f,
 		    TotalTime:/entry0/duration:f,
-		    Attenuator:/entry0/instrument/attenuator/attenuation_value:f" />
+		    Attenuator:/entry0/instrument/attenuator/attenuation_value:d" />
       </parameter>
       <parameter name="logbook_optional_parameters" type="string" visible="false">
 	<value val="SetpointTemperature:/entry0/sample/setpoint_temperature:f,
 		    SampleTemperature:/entry0/sample/temperature:f,
 		    RegulationTemperature:/entry0/sample/regulation_temperature:f,
-		    TotalCountsDet:/entry0/instrument/Detector1/detsum:d,
+		    TotalCountsDet:/entry0/instrument/Detector1/detsum:f,
 		    RateCountsDet:/entry0/instrument/Detector1/detrate:f,
-		    TotalCountsMonitor1:/entry0/monitor1/monsum:d,
-		    TotalCountsMonitor2:/entry0/monitor2/monsum:d,
+		    TotalCountsMonitor1:/entry0/monitor1/monsum:f,
+		    TotalCountsMonitor2:/entry0/monitor2/monsum:f,
 		    RateMonitor1:/entry0/monitor1/monrate:f,
 		    RateMonitor2:/entry0/monitor2/monrate:f,
 		    Omega:/entry0/instrument/Omega/value:f,
