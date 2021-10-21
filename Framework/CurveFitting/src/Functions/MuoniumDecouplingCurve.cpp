@@ -31,7 +31,7 @@ void MuoniumDecouplingCurve::init() {
 void MuoniumDecouplingCurve::function1D(double *out, const double *xValues, const size_t nData) const {
   const double RepolAS = getParameter("RepolarisingAsymmetry");
   const double DecoupField = getParameter("DecouplingField");
-  const double BkgdAS = getParameter("BaackgroundAsymmetry");
+  const double BkgdAS = getParameter("BackgroundAsymmetry");
 
   for (size_t i = 0; i < nData; i++) {
     out[i] = RepolAS * (0.5 + pow(xValues[i] / DecoupField, 2)) / (1 + pow(xValues[i] / DecoupField, 2)) + BkgdAS;

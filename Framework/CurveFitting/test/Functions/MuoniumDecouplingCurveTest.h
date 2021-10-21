@@ -39,11 +39,11 @@ public:
 
     const double repolarisingAsym = 1.3;
     const double decouplingField = 2.0;
-    const double baselineAsym = 5.2;
+    const double bkgdAsym = 5.2;
 
     mdc.setParameter("RepolarisingAsymmetry", repolarisingAsym);
     mdc.setParameter("DecouplingField", decouplingField);
-    mdc.setParameter("BaselineAsymmetry", baselineAsym);
+    mdc.setParameter("BackgroundAsymmetry", bkgdAsym);
 
     const std::size_t numPoints = 100;
     std::array<double, numPoints> xValues;
@@ -55,7 +55,7 @@ public:
       TS_ASSERT_DELTA(yValues[i],
                       repolarisingAsym * (0.5 + pow(xValues[i] / decouplingField, 2)) /
                               (1 + pow(xValues[i] / decouplingField, 2)) +
-                          baselineAsym,
+                          bkgdAsym,
                       1e-12);
     }
   }
