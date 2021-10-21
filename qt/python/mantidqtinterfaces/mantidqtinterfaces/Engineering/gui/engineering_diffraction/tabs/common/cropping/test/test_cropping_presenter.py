@@ -9,6 +9,7 @@ import unittest
 from unittest import mock
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping import cropping_model, \
     cropping_view, cropping_presenter
+from Engineering.EnggUtils import GROUP
 
 dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping"
 
@@ -26,7 +27,7 @@ class CroppingPresenterTest(unittest.TestCase):
     def test_combo_changed_index_customcal(self):
         self.presenter.on_combo_changed(0)
 
-        self.assertEqual(self.presenter.bank, 0)
+        self.assertEqual(self.presenter.group, GROUP.CUSTOM)
         self.assertTrue(self.presenter.custom_calfile_enabled)
         self.assertFalse(self.presenter.custom_spectra_enabled)
         self.view.set_custom_calfile_widget_visible.assert_called_with()
@@ -35,7 +36,7 @@ class CroppingPresenterTest(unittest.TestCase):
     def test_combo_changed_index_bank_1(self):
         self.presenter.on_combo_changed(1)
 
-        self.assertEqual(self.presenter.bank, 1)
+        self.assertEqual(self.presenter.group, GROUP.NORTH)
         self.assertFalse(self.presenter.custom_calfile_enabled)
         self.assertFalse(self.presenter.custom_spectra_enabled)
         self.view.set_custom_calfile_widget_hidden.assert_called_with()
@@ -44,7 +45,7 @@ class CroppingPresenterTest(unittest.TestCase):
     def test_combo_changed_index_bank_2(self):
         self.presenter.on_combo_changed(2)
 
-        self.assertEqual(self.presenter.bank, 2)
+        self.assertEqual(self.presenter.group, GROUP.SOUTH)
         self.assertFalse(self.presenter.custom_calfile_enabled)
         self.assertFalse(self.presenter.custom_spectra_enabled)
         self.view.set_custom_calfile_widget_hidden.assert_called_with()
@@ -54,7 +55,7 @@ class CroppingPresenterTest(unittest.TestCase):
         self.model.validate_and_clean_spectrum_numbers.return_value = ("", "1400")
         self.presenter.on_combo_changed(3)
 
-        self.assertEqual(self.presenter.bank, 0)
+        self.assertEqual(self.presenter.group, GROUP.CROPPED)
         self.assertFalse(self.presenter.custom_calfile_enabled)
         self.assertTrue(self.presenter.custom_spectra_enabled)
         self.view.set_custom_calfile_widget_hidden.assert_called_with()

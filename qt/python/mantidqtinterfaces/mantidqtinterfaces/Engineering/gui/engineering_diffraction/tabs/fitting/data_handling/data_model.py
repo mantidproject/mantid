@@ -103,7 +103,7 @@ class FittingDataModel(object):
         run_info = CreateEmptyTableWorkspace()
         run_info.addColumn(type="str", name="Instrument")
         run_info.addColumn(type="int", name="Run")
-        run_info.addColumn(type="int", name="Bank")
+        run_info.addColumn(type="str", name="Bank")
         run_info.addColumn(type="float", name="uAmps")
         run_info.addColumn(type="str", name="Title")
         return run_info

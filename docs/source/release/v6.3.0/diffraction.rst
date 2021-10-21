@@ -27,14 +27,22 @@ Bugfixes
 Engineering Diffraction
 -----------------------
 
+New features
+############
+- Now support texture grouping (10 groups per bank) for ENGIN-X in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`. Note this involved changes to the bankID log values saved with focused data, so this means the UI will not load in previously focused .nxs files.
+
 Improvements
 ############
+- Performance speed-up due to parallelisation when calibrating and focusing data into multiple groups in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`.
 - Improved axes scaling in the plot of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` :ref:`Fitting tab <ui engineering fitting>`.
 - Automatically disable zoom and pan when opening the fit browser in the :ref:`Fitting tab <ui engineering fitting>` of the Engineering Diffraction interface (as they interfered with the interactive peak adding tool).
 
 Bugfixes
 ########
+- Save .prm file from :ref:`Calibration tab <ui engineering calibration>` with correct L2 and two-theta for each group in arbitrary groupings (previously only correct for the two ENGIN-X banks).
+- The last calibration file (.prm) populated in the :ref:`Calibration tab <ui engineering calibration>` is now correct when both banks are focused (previously was populated with just the South bank .prm)
 - Fix crash on :ref:`Fitting tab <ui engineering fitting>` when trying to output fit results. The problem was caused by a unit conversion from TOF to dSpacing not being possible eg when peak centre at a negative TOF value
+
 
 Single Crystal Diffraction
 --------------------------

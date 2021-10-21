@@ -23,7 +23,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_inst = mock.MagicMock()
         self.mock_inst.getFullName.return_value = 'instrument'
         mock_prop = mock.MagicMock()
-        mock_prop.value = 1  # bank-id
+        mock_prop.value = 'bank 1'  # bank-id
         mock_log_data = [mock.MagicMock(), mock.MagicMock()]
         mock_log_data[0].name = "LogName"
         mock_log_data[1].name = "proton_charge"
@@ -319,7 +319,7 @@ class TestFittingDataModel(unittest.TestCase):
         self.model._log_names = ["LogName"]
 
         self.model.add_log_to_table("name1", self.mock_ws, 3)
-        mock_writerow.assert_any_call(self.model._log_workspaces[0], ['instrument', 1, 1, 1.0, 'title'], 3)
+        mock_writerow.assert_any_call(self.model._log_workspaces[0], ['instrument', 1, 'bank 1', 1.0, 'title'], 3)
         mock_writerow.assert_any_call(self.model._log_workspaces[1], [2, 1], 3)
         mock_avglogs.assert_not_called()
         mock_update_logname.assert_called_once()
