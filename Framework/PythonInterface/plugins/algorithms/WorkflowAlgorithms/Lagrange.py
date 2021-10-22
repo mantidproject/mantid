@@ -118,8 +118,7 @@ class ILLLagrange(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self.output_ws_name)
         GroupWorkspaces(OutputWorkspace='__' + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
 
-    @staticmethod
-    def load_and_concatenate(files):
+    def load_and_concatenate(self, files):
         """
         Taking Lagrange data files as input, load the interesting data from it and concatenate them into one numpy array
         @param files the ascii data files to load and concatenate together
@@ -128,8 +127,51 @@ class ILLLagrange(DataProcessorAlgorithm):
         """
         loaded_data = None
         for file in files:
-            # load columns 1, 2 and 5 of the file - angle, monitor count, detector count
-            data = np.loadtxt(file, dtype=float, skiprows=38, usecols=(1, 2, 5))
+            header_index = -1
+            energy_col = -1
+            detector_counts_col = -1
+            monitor_counts_col = -1
+
+            # we first open the file to find the size of the header and the position of the columns holding the data
+            with open(file, "r") as f:
+                for index, line in enumerate(f):
+                    if line == "DATA_:\n":
+                        header_index = index
+                        next_line = f.__next__().split()
+
+                        if "EI" in next_line:
+                            energy_col = next_line.index("EI")
+                        else:
+                            energy_col = 1
+                            self.log().warning("Could not find energy column in file {}. "
+                                               "Defaulting to column 1".format(file))
+                        if "CNTS" in next_line:
+                            detector_counts_col = next_line.index("CNTS")
+                        else:
+                            detector_counts_col = 5
+                            self.log().warning("Could not find detector counts column in file {}. "
+                                               "Defaulting to column 5".format(file))
+                        if "M1" in next_line:
+                            monitor_counts_col = next_line.index("M1")
+                        else:
+                            monitor_counts_col = 2
+                            self.log().warning("Could not find monitor counts column in file {}. "
+                                               "Defaulting to column 2".format(file))
+                        break
+                f.close()
+
+            if header_index < 0:
+                self.log().warning("Could not determine header length in file {}. Defaulting to 36".format(file))
+                header_index = 36
+                energy_col = 1
+                detector_counts_col = 5
+                monitor_counts_col = 2
+
+            # load the relevant data, which position we just determined - angle, monitor count, detector count
+            data = np.loadtxt(file,
+                              dtype=float,
+                              skiprows=header_index + 2,
+                              usecols=(energy_col, monitor_counts_col, detector_counts_col))
 
             loaded_data = np.vstack((loaded_data, data)) if loaded_data is not None else data
 
