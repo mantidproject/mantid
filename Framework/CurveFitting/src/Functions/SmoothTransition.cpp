@@ -1,0 +1,64 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin
+// SPDX - License - Identifier: GPL - 3.0 +
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidCurveFitting/Functions/SmoothTransition.h"
+#include "MantidAPI/FunctionFactory.h"
+
+#include <cmath>
+
+namespace Mantid::CurveFitting::Functions {
+
+using namespace CurveFitting;
+
+using namespace Kernel;
+
+using namespace API;
+
+DECLARE_FUNCTION(SmoothTransition)
+
+void SmoothTransition::init() {
+  declareParameter("A1", 1.0, "maximum curve");
+  declareParameter("A2", 0.0, "Flat Background");
+  declareParameter("Midpoint", 0.0, "Sigmoid Midpoint");
+  declareParameter("GrowthRate", 1.0, "Growth rate");
+}
+
+void SmoothTransition::function1D(double *out, const double *xValues, const size_t nData) const {
+  const double a1 = getParameter("A1");
+  const double a2 = getParameter("A2");
+  const double midpoint = getParameter("Midpoint");
+  const double gr = getParameter("GrowthRate");
+
+  for (size_t i = 0; i < nData; i++) {
+    out[i] = a2 + (a1 - a2) / (exp(-(xValues[i] - midpoint) / gr) + 1);
+  }
+}
+
+void SmoothTransition::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
+  const double a1 = getParameter("A1");
+  const double a2 = getParameter("A2");
+  const double midpoint = getParameter("Midpoint");
+  const double gr = getParameter("GrowthRate");
+
+  for (size_t i = 0; i < nData; i++) {
+    double expFunc = exp((midpoint - xValues[i]) / gr);
+    double expFuncsq = pow((expFunc + 1), 2);
+
+    double diffa2 = 2 * (((a1 - a2) / (expFunc + 1)) + 2);
+    double diffmidpoint = -((a1 - a2) * expFunc) / (gr * expFuncsq);
+    double diffgr = ((a1 - a2) * (midpoint - xValues[i]) * expFunc) / (pow(gr, 2) * expFuncsq);
+
+    out->set(i, 0, 1);
+    out->set(i, 1, diffa2);
+    out->set(i, 2, diffmidpoint);
+    out->set(i, 3, diffgr);
+  }
+}
+
+} // namespace Mantid::CurveFitting::Functions
