@@ -74,12 +74,15 @@ class VesuvioAnalysis(PythonAlgorithm):
             "AnalysisMode",
             "LoadReduceAnalyse",
             doc="In the first case, all the algorithm is run. In the second case, the data are not re-loaded, and only"
-            " the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run.",
+            " the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run. In the"
+            " fourth case, the data is re-loaded and the TOF bits are run. In the fifth case, only the TOF bits are run.",
             validator=StringListValidator(
                 [
                     "LoadReduceAnalyse",
                     "ReduceAnalyse",
-                    "Analyse"]))
+                    "Analyse",
+                    "LoadReduce",
+                    "Reduce"]))
         self.declareProperty(
             FileProperty(
                 "IPFile",
@@ -92,7 +95,10 @@ class VesuvioAnalysis(PythonAlgorithm):
                              validator=IntListValidator([0,1,2,3,4]))
         self.declareProperty("OutputName", "polyethylene",doc="The base name for the outputs." )
         self.declareProperty("Runs", "38898-38906", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
-        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last).")
+        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last). Please note that "
+                                                                         "spectra with a number lower than 135 are treated as back "
+                                                                         "scattering spectra, with a number of 135 or above as forward "
+                                                                         "scattering spectra.")
         self.declareProperty(FloatArrayProperty("TOFRangeVector", [110.,1.5,460.]),
                              doc="In micro seconds (lower bound, binning, upper bound).")
         self.declareProperty(
@@ -121,7 +127,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
                              " about the first element specified in the elements string. Then such spectra are converted to the Y space"
                              " of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and"
-                             " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth"
+                             " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermite function up to the sixth"
                              "order.")
 
     def validateInputs(self):
@@ -292,24 +298,25 @@ class VesuvioAnalysis(PythonAlgorithm):
                         Minus(LHSWorkspace=ws_name+"_cor_residuals",RHSWorkspace=ws_name+"_fitted_resonances",
                               OutputWorkspace=ws_name+"_cor_residuals" )
                 else:
-                    if fit_hydrogen_in_Y_space:
+                    if fit_hydrogen_in_Y_space and "Analyse" in analysisMode:
                         hydrogen_ws = subtract_other_masses(ws_name+"_cor", widths, intensities, centres, spectra, masses,IPFile,g_log)
                         RenameWorkspace(hydrogen_ws, ws_name+'_H')
                         SumSpectra(InputWorkspace=ws_name+'_H', OutputWorkspace=ws_name+'_H_sum')
                         calculate_mantid_resolutions(ws_name, masses[0])
 
             # Fit of the summed and symmetrised hydrogen neutron Compton profile in its Y space using MANTID.
-            if fit_hydrogen_in_Y_space:
-                #calculate_mantid_resolutions(ws_name, masses[0])
-                #max_Y
-                _ = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
-                # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!!
-                constraints = "   sigma1=3.0,c4=0.0, c6=0.0,A=0.08, B0=0.00, ties = {}".format(y_fit_ties)
-                correct_for_offsets = True
-                y_range = (-20., 20.)
-                final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses, g_log)
-            elif "Analyse" in analysisMode:
-                g_log.notice("Did not compute analysis. The YSpaceFitFunctionTies must be stated.")
+            if "Analyse" in analysisMode:
+                if fit_hydrogen_in_Y_space:
+                    #calculate_mantid_resolutions(ws_name, masses[0])
+                    #max_Y
+                    _ = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
+                    # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!!
+                    constraints = "   sigma1=3.0,c4=0.0, c6=0.0,A=0.08, B0=0.00, ties = {}".format(y_fit_ties)
+                    correct_for_offsets = True
+                    y_range = (-20., 20.)
+                    final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses, g_log)
+                else:
+                    g_log.notice("Did not compute analysis. The YSpaceFitFunctionTies must be stated.")
 
 
 AlgorithmFactory.subscribe(VesuvioAnalysis)
