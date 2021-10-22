@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm, Progress
-from mantid.simpleapi import CloneWorkspace
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 import numpy as np
 from scipy.signal import savgol_filter
@@ -73,7 +72,11 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
         doSGfilter = self.getProperty('ApplyFilterSG').value
 
         # make output workspace
-        outws = CloneWorkspace(inws, OutputWorkspace=self.getProperty("OutputWorkspace").value)
+        clone_alg = self.createChildAlgorithm("CloneWorkspace", enableLogging=False)
+        clone_alg.setProperty("InputWorkspace", inws)
+        clone_alg.setProperty("OutputWorkspace", self.getProperty("OutputWorkspace").valueAsStr)
+        clone_alg.execute()
+        outws = clone_alg.getProperty("OutputWorkspace").value
 
         # loop over all spectra
         nbins = inws.blocksize()
