@@ -7,7 +7,7 @@
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
-from qtpy.QtWidgets import QDockWidget, QMainWindow, QMenu
+from qtpy.QtWidgets import QDockWidget, QMainWindow, QMenu, QSizePolicy
 from mantidqt.utils.qt import load_ui
 from matplotlib.figure import Figure
 from mantidqt.MPLwidgets import FigureCanvas
@@ -29,6 +29,9 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.fit_browser = None
         self.plot_dock = None
         self.dock_window = None
+        self.initial_chart_width = None
+        self.initial_chart_height = None
+        self.has_first_undock_occurred = 0
 
         self.setup_figure()
         self.setup_toolbar()
@@ -50,6 +53,10 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.plot_dock.setFeatures(QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable)
         self.plot_dock.setAllowedAreas(Qt.BottomDockWidgetArea)
         self.plot_dock.setWindowTitle("Fit Plot")
+        self.plot_dock.topLevelChanged.connect(self.make_undocked_plot_larger)
+        self.initial_chart_width, self.initial_chart_height = self.plot_dock.width(), self.plot_dock.height()
+        self.plot_dock.setSizePolicy(QSizePolicy(QSizePolicy.MinimumExpanding,
+                                                 QSizePolicy.MinimumExpanding))
         self.dock_window.addDockWidget(Qt.BottomDockWidgetArea, self.plot_dock)
         self.vLayout_plot.addWidget(self.dock_window)
 
@@ -75,6 +82,21 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             menu.exec_(QCursor.pos())
 
     def resizeEvent(self, QResizeEvent):
+        self.update_axes_position()
+
+    def make_undocked_plot_larger(self):
+        # only make undocked plot larger the first time it is undocked as the undocked size gets remembered
+        if self.plot_dock.isFloating() and self.has_first_undock_occurred == 0:
+            factor = 1.0
+            aspect_ratio = self.initial_chart_width / self.initial_chart_height
+            new_height = self.initial_chart_height * factor
+            docked_height = self.dock_window.height()
+            if docked_height > new_height:
+                new_height = docked_height
+            new_width = new_height * aspect_ratio
+            self.plot_dock.resize(new_width, new_height)
+            self.has_first_undock_occurred = 1
+
         self.update_axes_position()
 
     def ensure_fit_dock_closed(self):
