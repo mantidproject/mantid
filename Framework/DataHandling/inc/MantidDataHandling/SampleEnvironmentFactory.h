@@ -43,7 +43,7 @@ public:
 
   size_t cacheSize() const;
   void clearCache();
-  SampleEnvironmentSpec_uptr parseSpec(const std::string &name, const std::string &filename) const;
+  SampleEnvironmentSpec_uptr parseSpec(const std::string &filename, const std::string &filepath) const;
 
 private:
   ISampleEnvironmentSpecFinder_uptr m_finder;
