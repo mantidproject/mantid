@@ -101,14 +101,15 @@ void SampleEnvironmentFactory::clearCache() { retrieveSpecCache().clear(); }
 
 /**
  * Calls SampleEnvironmentSpecFileFinder::parseSpec
- * @param name The name of the specification
- * @param filename Assumed to be an absolute path to an existing specification
+ * @param filename The name of the specification
+ * @param filepath Assumed to be an absolute path to an existing specification
  * @return A parse specification
  */
-SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string &name,
-                                                               const std::string &filename) const {
+SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string &filename,
+                                                               const std::string &filepath) const {
   assert(m_finder);
-  return m_finder->parseSpec(name, filename + name + ".xml");
+  Poco::File fullpath(Poco::Path(filepath, filename + ".xml"));
+  return m_finder->parseSpec(filename, fullpath.path());
 }
 
 //------------------------------------------------------------------------------
