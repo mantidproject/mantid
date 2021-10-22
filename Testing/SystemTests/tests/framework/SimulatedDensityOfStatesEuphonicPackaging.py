@@ -58,7 +58,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
 
     @classmethod
     def _install_euphonic_to_tmp_prefix(cls, tmp_prefix,
-                                        verbose=False):
+                                        verbose=True):
         """Install Euphonic library to temporary prefix
 
         Up-to-date versions of Pip and Packaging are used to support this
