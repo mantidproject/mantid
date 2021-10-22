@@ -19,6 +19,11 @@ class ILLLagrange(DataProcessorAlgorithm):
     water_correction = None
     intermediate_workspaces = None
 
+    INCIDENT_ENERGY = 4.5
+
+    # max difference between two identical points, two points closer than that will be merged in the merge algorithm
+    EPSILON = 1e-2
+
     @staticmethod
     def category():
         return 'ILL\\Indirect'
@@ -177,46 +182,39 @@ class ILLLagrange(DataProcessorAlgorithm):
 
         return loaded_data
 
-    @staticmethod
-    def format_values(data):
+    def format_values(self, data):
         """
         Normalize detector counts by monitor counts and set errors
         @param data the data to format
         @return 3 arrays, with the values being incident energy, normalized counts, errors
         """
 
-        # we offset by the incident energy
-        incident_energy = 4.5
-
         energy = [0]*len(data)
         detector_counts = [0]*len(data)
         errors = [0]*len(data)
 
         for index, line in enumerate(data):
-            energy[index] = line[0] - incident_energy
+            # we offset by the incident energy
+            energy[index] = line[0] - self.INCIDENT_ENERGY
+
             detector_counts[index] = line[2] / line[1]
             errors[index] = np.sqrt(line[2]) / line[1]
 
         return energy, detector_counts, errors
 
-    @staticmethod
-    def merge_adjacent_points(data):
+    def merge_adjacent_points(self, data):
         """
         Merge points that are close to one another together, summing their values
         @param data a (nb of points, 3)-shaped numpy array, with values (incident energy, monitor counts, detector counts)
         @return a (nb of points, 3)-shaped numpy array, with data sorted and merged by their incident energy.
         """
-        # max difference between two identical points
-        # two points closer than that will be merged
-        epsilon = 1e-2
-
         # sort by incident energy
         data = data[data[:, 0].argsort()]
 
         # sum adjacent data points
         current_writing_index = 0
         for point in data:
-            if point[0] - data[current_writing_index][0] < epsilon:
+            if point[0] - data[current_writing_index][0] < self.EPSILON:
                 data[current_writing_index][1] = point[1]
                 data[current_writing_index][2] = point[2]
                 # TODO decide on a merging behaviour for multiple points
