@@ -10,6 +10,7 @@ import systemtesting
 
 from mantid import config
 from mantid.api import AnalysisDataService as ADS
+from mantid.kernel import UnitParams
 from Engineering.EnginX import EnginX
 from Engineering.EnggUtils import GROUP
 
@@ -24,29 +25,47 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
                         full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.BOTH)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
-        self._diff_consts = ADS.retrieve("diffractometer_consts_table").toDict()
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_bank")
 
     def validate(self):
-        print("########## DIFF_CONSTS", self._diff_consts )
-        # assert diff const
-        self.assertAlmostEqual(self._diff_consts['DIFC'][0], 18425.452, delta=1e-2)
-        self.assertAlmostEqual(self._diff_consts['DIFC'][1], 18421.872, delta=1e-2)
-        self.assertAlmostEqual(self._diff_consts['DIFA'][0], -7.650, delta=1e-2)
-        self.assertAlmostEqual(self._diff_consts['DIFA'][1], -6.137, delta=1e-2)
-        self.assertAlmostEqual(self._diff_consts['TZERO'][0], -17.501, delta=1e-2)
-        self.assertAlmostEqual(self._diff_consts['TZERO'][1], -15.595, delta=1e-2)
+        # bank 1
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18425.452, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -7.650, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -17.501, delta=1e-2)
+        # bank 2
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18421.872, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.137, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -15.595, delta=1e-2)
         # assert foc data in TOF (conversion to d already tested by assertions on diff consts)
-        return ("ENGINX_299080_236516_bank_1_TOF.nxs", "ref_1.nxs",
-                "ENGINX_299080_236516_bank_2_TOF.nxs", "ref_1.nxs")
 
     def cleanup(self):
         ADS.clear()
-        _try_delete(CWDIR)
+        _try_delete_cal_and_focus_dirs(CWDIR)
 
-# class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
-#
-# class FocusCustomCalSameDiffConstsAsBank(systemtesting.MantidSystemTest):
-#
+
+class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749",
+                        group=GROUP.CROPPED, spectrum_num="1-1200")  # North
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped")
+
+    def validate(self):
+        # bank 1
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18425.452, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -7.650, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -17.501, delta=1e-2)
+
+    def cleanup(self):
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
+
 # class FocusTexture(systemtesting.MantidSystemTest):
 #     def validate(self):
 #         self.tolerance = 1e-3
@@ -56,12 +75,13 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
 #         return validation_list
 
 
-def _try_delete(path):
-    try:
-        # Use this instead of os.remove as we could be passed a non-empty dir
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
-    except OSError:
-        print("Could not delete output file at: ", path)
+def _try_delete_cal_and_focus_dirs(parent_dir):
+    for folder in ['Calibration', 'Focus']:
+        rm_dir = os.path.join(parent_dir, folder)
+        try:
+            if os.path.isdir(rm_dir):
+                shutil.rmtree(rm_dir) # don't use os.remove as we could be passed a non-empty dir
+            else:
+                os.remove(rm_dir)
+        except OSError:
+            print("Could not delete output file at: ", rm_dir)
