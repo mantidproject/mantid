@@ -77,11 +77,15 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
         process = subprocess.run([sys.executable, "-m", "pip", "install",
                                   "--prefix", tmp_prefix]
                                  + compatibility_args
-                                 + ["pip", "packaging"],
+                                 + ["pip>21", "packaging",
+                                    "setuptools", "wheel"],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.STDOUT)
 
         prefix_path = pathlib.Path(tmp_prefix)
+
+        if verbose:
+            print(process.stdout.decode('utf-8'))
 
         # Add to path if anything was installed so that subsequent calls to
         # Pip can see those dependencies
