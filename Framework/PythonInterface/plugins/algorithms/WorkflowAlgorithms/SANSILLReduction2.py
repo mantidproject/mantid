@@ -527,6 +527,7 @@ class SANSILLReduction(PythonAlgorithm):
             offsets.append(mtd[ws].getRun()['Detector 2.dan2_actual'].value)
         if mtd[ws].getInstrument().hasParameter('detector_panels'):
             components = mtd[ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
+        if self.instrument in ['D11B', 'D22', 'D22lr', 'D22B', 'D33']:
             ParallaxCorrection(InputWorkspace=ws, OutputWorkspace=ws, ComponentNames=components, AngleOffsets=offsets)
 
     #===============================HELPER METHODS===============================#
