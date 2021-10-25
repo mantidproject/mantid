@@ -61,3 +61,8 @@ It is also useful to have your terminals in CLion also run with this environment
 * Start CLion using the above steps
 * Navigate to ``File > Settings > Tools > Terminal``.
 * To the end of the ``Shell path`` option, add: ``--rcfile ~/.clionrc``.
+
+CMake conda variables
+-----------------------
+There are two conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a conda env, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
+The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid.

@@ -149,9 +149,6 @@ Build system customisation using CMake variables
 The Mantid CMake build can be configured using several ENABLE_XXX variables, for instance ENABLE_DOCS, ENABLE_WORKBENCH and ENABLE_OPENGL
 A full list of these variables, with a description, can be viewed in the CMake GUI after the project has been configured.
 
-Along side these general build options, there are the conda specific options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a conda env, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
-The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid.
-
 Component builds of mantid can be performed using the `MANTID_FRAMEWORK_LIB`, `MANTID_QT_LIB` and `ENABLE_WORKBENCH` cmake variables.
 For instance, we can build just the framework element using,
 
