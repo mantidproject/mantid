@@ -80,7 +80,7 @@ class PairingTablePresenter(object):
             if not self.validate_alpha(changed_item_text):
                 update_model = False
             else:
-                rounded_item = round_value(changed_item_text, self._model._context.group_pair_contex.alpha_precision)
+                rounded_item = round_value(changed_item_text, self._model._context.group_pair_context.alpha_precision)
                 table[row][col] = rounded_item
         if pair_columns[col] == 'to_analyse':
             update_model = False
