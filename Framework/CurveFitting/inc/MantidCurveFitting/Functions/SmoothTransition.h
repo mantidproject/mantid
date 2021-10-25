@@ -15,14 +15,14 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Provide Power Law function interface to IFunction.
-I.e. the function: y = ax^b +c.
-PowerLaw parameters:
+Provide Smooth Transition function interface to IFunction.
+I.e. the function: y = A2 + (A1-A2)/(exp(-(x-MidPoint)/GrowthRate)+1)?
+Smooth Transition parameters:
 <UL>
 <LI> A1 - maximum curve (default 1.0)</LI>
 <LI> A2 - Flat Background (default 0.0)</LI>
 <LI> Midpoint - sigmoid midpoint (default 0.0)</LI>
-<LI> Growth Rate - growth rate (default 1.0)</LI>
+<LI> GrowthRate - growth rate (default 1.0)</LI>
 </UL>
 */
 
