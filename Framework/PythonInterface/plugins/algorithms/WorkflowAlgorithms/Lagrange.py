@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -23,6 +23,14 @@ class ILLLagrange(DataProcessorAlgorithm):
 
     # max difference between two identical points, two points closer than that will be merged in the merge algorithm
     EPSILON = 1e-2
+
+    # default header size in data files in case it couldn't be determined
+    HEADER_SIZE_DEFAULT = 36
+
+    # default column indices in data files in case they couldn't be determined
+    ENERGY_COL_DEFAULT = 1
+    MONITOR_COUNT_COL_DEFAULT = 2
+    DETECTOR_COUNT_COL_DEFAULT = 5
 
     @staticmethod
     def category():
@@ -69,7 +77,7 @@ class ILLLagrange(DataProcessorAlgorithm):
             # load and format empty cell
             empty_cell_data = self.load_and_concatenate(empty_cell_files)
             empty_cell_data = self.merge_adjacent_points(empty_cell_data)
-            energy, detector_counts, errors = self.format_values(empty_cell_data)
+            energy, detector_counts, errors = self.get_counts_and_errors(empty_cell_data)
 
             self.empty_cell_ws = "__" + self.output_ws_name + "_rawEC"
 
@@ -92,7 +100,7 @@ class ILLLagrange(DataProcessorAlgorithm):
         sample_files = self.getPropertyValue('SampleRuns').split(',')
         sample_data = self.load_and_concatenate(sample_files)
         sample_data = self.merge_adjacent_points(sample_data)
-        energy, detector_counts, errors = self.format_values(sample_data)
+        energy, detector_counts, errors = self.get_counts_and_errors(sample_data)
 
         raw_sample_ws = "__" + self.output_ws_name + "_rawSample"
         CreateWorkspace(outputWorkspace=raw_sample_ws,
@@ -147,30 +155,31 @@ class ILLLagrange(DataProcessorAlgorithm):
                         if "EI" in next_line:
                             energy_col = next_line.index("EI")
                         else:
-                            energy_col = 1
+                            energy_col = self.ENERGY_COL_DEFAULT
                             self.log().warning("Could not find energy column in file {}. "
-                                               "Defaulting to column 1".format(file))
+                                               "Defaulting to column {}".format(file, self.ENERGY_COL_DEFAULT))
                         if "CNTS" in next_line:
                             detector_counts_col = next_line.index("CNTS")
                         else:
-                            detector_counts_col = 5
+                            detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
                             self.log().warning("Could not find detector counts column in file {}. "
-                                               "Defaulting to column 5".format(file))
+                                               "Defaulting to column {}".format(file, self.DETECTOR_COUNT_COL_DEFAULT))
                         if "M1" in next_line:
                             monitor_counts_col = next_line.index("M1")
                         else:
-                            monitor_counts_col = 2
+                            monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
                             self.log().warning("Could not find monitor counts column in file {}. "
-                                               "Defaulting to column 2".format(file))
+                                               "Defaulting to column {}".format(file, self.MONITOR_COUNT_COL_DEFAULT))
                         break
                 f.close()
 
             if header_index < 0:
-                self.log().warning("Could not determine header length in file {}. Defaulting to 36".format(file))
-                header_index = 36
-                energy_col = 1
-                detector_counts_col = 5
-                monitor_counts_col = 2
+                self.log().warning("Could not determine header length in file {}. "
+                                   "Defaulting to {}".format(file, self.HEADER_SIZE_DEFAULT))
+                header_index = self.HEADER_SIZE_DEFAULT
+                energy_col = self.ENERGY_COL_DEFAULT
+                detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
+                monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
 
             # load the relevant data, which position we just determined - angle, monitor count, detector count
             data = np.loadtxt(file,
@@ -182,11 +191,11 @@ class ILLLagrange(DataProcessorAlgorithm):
 
         return loaded_data
 
-    def format_values(self, data):
+    def get_counts_and_errors(self, data):
         """
-        Normalize detector counts by monitor counts and set errors
+        Compute and return correct energy, normalized detector counts and errors
         @param data the data to format
-        @return 3 arrays, with the values being incident energy, normalized counts, errors
+        @return 3 arrays, with the values being incident energy, normalized detector counts, errors
         """
 
         energy = [0]*len(data)
