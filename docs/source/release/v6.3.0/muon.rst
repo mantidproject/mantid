@@ -22,6 +22,8 @@ Improvements
 Bugfixes
 ########
 
+- Fixed a bug that prevented the frequency spectra from being plotted when data was binned.
+
 Muon Analysis
 -------------
 
