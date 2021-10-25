@@ -385,14 +385,38 @@ public:
 
   void testCloseEventChecksIfPrevented() {
     auto presenter = makePresenter();
-    auto event = new QCloseEvent();
     EXPECT_CALL(*m_batchPresenters[0], isProcessing).Times(1);
     EXPECT_CALL(*m_batchPresenters[1], isProcessing).Times(1);
     EXPECT_CALL(*m_batchPresenters[0], isAutoreducing).Times(1);
     EXPECT_CALL(*m_batchPresenters[1], isAutoreducing).Times(1);
-    presenter.notifyCloseEvent(event);
+    EXPECT_CALL(m_view, acceptCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
     verifyAndClear();
-    delete event;
+  }
+
+  void testCloseEventIgnoredIfAutoreducing() {
+    auto presenter = makePresenter();
+    expectBatchIsAutoreducing(0);
+    EXPECT_CALL(m_view, ignoreCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
+  }
+
+  void testCloseEventIgnoredIfProcessing() {
+    auto presenter = makePresenter();
+    expectBatchIsProcessing(0);
+    EXPECT_CALL(m_view, ignoreCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
+  }
+
+  void testCloseEventAcceptedIfNotWorking() {
+    auto presenter = makePresenter();
+    expectBatchIsNotAutoreducing(0);
+    expectBatchIsNotProcessing(0);
+    EXPECT_CALL(m_view, acceptCloseEvent).Times(1);
+    presenter.notifyCloseEvent();
+    verifyAndClear();
   }
 
   void testSaveBatch() {
