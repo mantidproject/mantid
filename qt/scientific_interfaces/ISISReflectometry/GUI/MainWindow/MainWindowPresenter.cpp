@@ -130,11 +130,11 @@ void MainWindowPresenter::notifyChangeInstrumentRequested(std::string const &new
     onInstrumentChanged();
 }
 
-void MainWindowPresenter::notifyCloseEvent(QCloseEvent *&event) {
+void MainWindowPresenter::notifyCloseEvent() {
   if (isCloseEventPrevented()) {
-    event->ignore();
+    m_view->ignoreCloseEvent();
   } else {
-    event->accept();
+    m_view->acceptCloseEvent();
   }
 }
 
