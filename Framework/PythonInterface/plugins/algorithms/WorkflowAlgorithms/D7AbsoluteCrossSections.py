@@ -53,13 +53,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return values, errors
 
     @staticmethod
-    def _set_as_distribution(ws):
-        """Wrapper to set distribution flag to all entries in a workspace group."""
-        for entry in mtd[ws]:
-            entry.setDistribution(True)
-        return ws
-
-    @staticmethod
     def _extract_numor(name):
         """Returns a numor contained in the workspace name, assuming the first number in the name is the run number.
         Otherwise it returns the full name to ensure a unique workspace name."""
@@ -695,7 +688,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         """
         Rebins the single crystal omega scan measurement output onto 2D Qx-Qy grid.
         :param ws: Output of the cross-section separation and/or normalisation.
-        :return: WorkspaceGroup containing 2D distributions on a Qx-Qy grid.
+        :return: WorkspaceGroup containing 2D histograms on a Qx-Qy grid.
         """
         DEG_2_RAD = np.pi / 180.0
         fld = self._sampleAndEnvironmentProperties['fld'].value if 'fld' in self._sampleAndEnvironmentProperties else 1
@@ -986,7 +979,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         else:
             progress.report('Separating cross-sections')
             component_ws = self._cross_section_separation(input_ws, nMeasurements)
-            self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
                 if normalisation_method == 'Vanadium':
                     det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
@@ -1001,7 +993,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         progress.report('Setting units')
         output_ws = self._set_units(output_ws, nMeasurements)
-        self._set_as_distribution(output_ws)
         self._set_output_names(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
         if self.getProperty('ClearCache').value and len(to_clean) != 0:

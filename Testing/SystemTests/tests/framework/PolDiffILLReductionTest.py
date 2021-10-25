@@ -42,32 +42,28 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_individual',
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_individual'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_individual'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_individual'], 'Vanadium')
 
     def d7_reduction_test_vanadium_sum(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_sum',
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Sum')
-        self._check_output(mtd['vanadium_sum'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_sum'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_sum'], 'Vanadium')
 
     def d7_reduction_test_vanadium_average(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_average',
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='AveragePol')
-        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
 
     def d7_reduction_test_vanadium_average_2theta(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_average',
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='AverageTwoTheta')
-        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_average'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_average'], 'Vanadium')
 
     def d7_reduction_test_vanadium_scatter(self):
@@ -75,7 +71,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='IndividualXY')
         self._check_output(mtd['vanadium_full'], 264, 1, 1, 'Momentum transfer', 'Momentum transfer', 'Spectrum',
-                           'Label', post_processed=True)
+                           'Label')
         self._check_process_flag(mtd['vanadium_scatter'], 'Vanadium')
 
     def d7_reduction_test_vanadium_full_reduction(self):
@@ -99,8 +95,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Sum',
                             MaskDetectors=[30, 50, 127])
-        self._check_output(mtd['vanadium_full'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_full'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_full'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_transmission_attenuation(self):
@@ -108,7 +103,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='Transmission', SampleGeometry="None", Transmission='0.95',
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Individual')
         self._check_output(mtd['vanadium_ind_transmission_att'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum',
-                           'Label', post_processed=True)
+                           'Label')
         self._check_process_flag(mtd['vanadium_ind_transmission_att'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_flat_plate_numerical(self):
@@ -116,7 +111,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='Numerical', SampleGeometry="FlatPlate",
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Individual')
         self._check_output(mtd['vanadium_ind_num_flat_plate'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum',
-                           'Label', post_processed=True)
+                           'Label')
         self._check_process_flag(mtd['vanadium_ind_num_flat_plate'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_flat_plate_monte_carlo(self):
@@ -124,7 +119,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='MonteCarlo', SampleGeometry="FlatPlate",
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Individual')
         self._check_output(mtd['vanadium_ind_mc_flat_plate'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum',
-                           'Label', post_processed=True)
+                           'Label')
         self._check_process_flag(mtd['vanadium_ind_mc_flat_plate'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_cylinder_numerical(self):
@@ -132,8 +127,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='Numerical', SampleGeometry="Cylinder",
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_ind_num_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_ind_num_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_ind_num_cylinder'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_cylinder_monte_carlo(self):
@@ -141,8 +135,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='MonteCarlo', SampleGeometry="Cylinder",
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_ind_mc_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_ind_mc_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_ind_mc_cylinder'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_annulus_numerical(self):
@@ -150,8 +143,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='Numerical', SampleGeometry="Annulus",
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_ind_num_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_ind_num_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_ind_num_annulus'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_annulus_monte_carlo(self):
@@ -159,8 +151,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='MonteCarlo', SampleGeometry="Annulus",
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_ind_mc_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_ind_mc_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_ind_mc_annulus'], 'Vanadium')
 
     def d7_reduction_test_vanadium_individual_user(self):
@@ -170,8 +161,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SampleSelfAttenuationFactors='numerical_attenuation_ws_clone',
                             SampleAndEnvironmentProperties=self._sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_ind_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_ind_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_ind_cylinder'], 'Vanadium')
 
     def d7_reduction_test_vanadium_sum_flat_plate(self):
@@ -179,23 +169,21 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='Numerical', SampleGeometry="FlatPlate",
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Sum')
         self._check_output(mtd['vanadium_sum_num_flat_plate'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum',
-                           'Label', post_processed=True)
+                           'Label')
         self._check_process_flag(mtd['vanadium_sum_num_flat_plate'], 'Vanadium')
 
     def d7_reduction_test_vanadium_sum_cylinder(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_sum_num_cylinder',
                             SelfAttenuationMethod='Numerical', SampleGeometry="Cylinder",
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Sum')
-        self._check_output(mtd['vanadium_sum_num_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_sum_num_cylinder'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_sum_num_cylinder'], 'Vanadium')
 
     def d7_reduction_test_vanadium_sum_annulus(self):
         PolDiffILLReduction(Run='396993,396994', ProcessAs='Vanadium', OutputWorkspace='vanadium_sum_mc_annulus',
                             SelfAttenuationMethod='MonteCarlo', SampleGeometry="Annulus",
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Sum')
-        self._check_output(mtd['vanadium_sum_mc_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_sum_mc_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_sum_mc_annulus'], 'Vanadium')
 
     def d7_reduction_test_vanadium_sum_user(self):
@@ -204,8 +192,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                             SelfAttenuationMethod='User', SampleGeometry="Custom",
                             SampleSelfAttenuationFactors='numerical_attenuation_ws_clone',
                             SampleAndEnvironmentProperties=self._sampleProperties, OutputTreatment='Sum')
-        self._check_output(mtd['vanadium_sum_user'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['vanadium_sum_user'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_sum_user'], 'Vanadium')
 
     def d7_reduction_test_sample_individual(self):
@@ -221,7 +208,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_not_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height',
-                           'Label', post_processed=True)
+                           'Label')
 
     def d7_reduction_test_sample_individual_incoherent(self):
         PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_individual',
@@ -236,7 +223,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                 OutputUnits='TwoTheta',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_incoherent'], 263, 1, 6, 'Scattering Angle', 'Label', 'Height',
-                           'Label', post_processed=True)
+                           'Label')
 
     def d7_reduction_test_sample_individual_paramagnetic(self):
         PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_individual',
@@ -251,7 +238,7 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties)
         self._check_output(mtd['sample_individual_paramagnetic'], 132, 1, 6, 'q', 'MomentumTransfer', 'Wavelength',
-                           'Wavelength', post_processed=True, normalised_individually=True)
+                           'Wavelength', normalised_individually=True)
 
     def d7_reduction_test_sample_sum(self):
         PolDiffILLReduction(Run='397004,397005', ProcessAs='Sample', OutputWorkspace='sample_sum',
@@ -302,23 +289,19 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
                                 OutputUnits='Q',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
                                 AbsoluteUnitsNormalisation=True)
-        self._check_output(mtd['sample_full_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height', 'Label',
-                           post_processed=True)
+        self._check_output(mtd['sample_full_normalised'], 263, 1, 6, 'q', 'MomentumTransfer', 'Height', 'Label')
 
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id, post_processed=False,
+    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id,
                       normalised_individually=False):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
         self.assertTrue(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
-            if post_processed:
-                self.assertTrue(entry.isDistribution())
-            else:
-                self.assertTrue(not entry.isDistribution())
+            self.assertTrue(not entry.isDistribution())
             if normalised_individually:
                 self.assertTrue(not entry.isHistogramData())
             else:

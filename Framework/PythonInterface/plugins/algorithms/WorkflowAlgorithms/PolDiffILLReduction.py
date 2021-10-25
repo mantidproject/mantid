@@ -474,13 +474,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     @staticmethod
-    def _set_as_distribution(ws):
-        """Wrapper to set distribution flag to all entries in a workspace group."""
-        for entry in mtd[ws]:
-            entry.setDistribution(True)
-        return ws
-
-    @staticmethod
     def _correct_bin_widths(ws, max_energy):
         """Corrects zero bin widths in masked spectra caused by integrating elastic peak."""
         for spec_no in range(mtd[ws].getNumberHistograms()):
@@ -1152,7 +1145,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         polarisation_directions = 0.5 * self._data_structure_helper()
         absolute_normalisation = self.getProperty('AbsoluteNormalisation').value
         output_treatment = self.getPropertyValue('OutputTreatment')
-        self._set_as_distribution(ws)
         if absolute_normalisation:
             # expected total cross-section of unpolarised neutrons in V is 1/N sum of N polarisation directions (flipper
             # ON and OFF), for uniaxial: N = 1, for 6-p: N = 3,  and normalised to 0.404 barns times the number

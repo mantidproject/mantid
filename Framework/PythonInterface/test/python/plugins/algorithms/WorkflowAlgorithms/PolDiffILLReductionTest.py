@@ -94,7 +94,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label', vanadium=True)
+        self._check_output(mtd['vanadium'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
     def test_vanadium_tof(self):
@@ -108,8 +108,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             MeasurementTechnique='TOF')
         self.assertTrue('vanadium_tof' in mtd)
         self.assertTrue('vanadium_tof_elastic' in mtd)
-        self._check_output(mtd['vanadium_tof'], 1, 132, 2, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label',
-                           vanadium=True)
+        self._check_output(mtd['vanadium_tof'], 1, 132, 2, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_tof'], 'Vanadium')
 
     def test_vanadium_annulus(self):
@@ -125,8 +124,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             SelfAttenuationMethod='MonteCarlo',
                             SampleGeometry='Annulus',
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label',
-                           vanadium=True)
+        self._check_output(mtd['vanadium_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
@@ -160,17 +158,14 @@ class PolDiffILLReductionTest(unittest.TestCase):
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id, vanadium=False):
+    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
         self.assertTrue(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
             self.assertTrue(entry.isHistogramData())
-            if vanadium:
-                self.assertTrue(entry.isDistribution())
-            else:
-                self.assertTrue(not entry.isDistribution())
+            self.assertTrue(not entry.isDistribution())
             self.assertEqual(entry.getAxis(0).getUnit().caption(), x_unit)
             self.assertEqual(entry.getAxis(0).getUnit().unitID(), x_unit_id)
             self.assertEqual(entry.getAxis(1).getUnit().caption(), y_unit)
