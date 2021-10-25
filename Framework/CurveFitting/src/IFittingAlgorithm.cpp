@@ -293,6 +293,7 @@ std::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFuncti
 
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
+  m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
   m_domainCreator->createDomain(domain, values);
 
   // Set peak radius to the values which will be passed to
@@ -319,7 +320,6 @@ std::shared_ptr<CostFunctions::CostFuncFitting> IFittingAlgorithm::getCostFuncti
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
 void IFittingAlgorithm::exec() {
-
   if (!m_domainCreator) {
     setFunction();
     addWorkspaces();
