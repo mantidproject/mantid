@@ -99,6 +99,19 @@ size_t SampleEnvironmentFactory::cacheSize() const { return retrieveSpecCache().
  */
 void SampleEnvironmentFactory::clearCache() { retrieveSpecCache().clear(); }
 
+/**
+ * Calls SampleEnvironmentSpecFileFinder::parseSpec
+ * @param filename The name of the specification
+ * @param filepath Assumed to be an absolute path to an existing specification
+ * @return A parse specification
+ */
+SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string &filename,
+                                                               const std::string &filepath) const {
+  assert(m_finder);
+  Poco::File fullpath(Poco::Path(filepath, filename + ".xml"));
+  return m_finder->parseSpec(filename, fullpath.path());
+}
+
 //------------------------------------------------------------------------------
 // SampleEnvironmentSpecFileFinder
 //------------------------------------------------------------------------------
