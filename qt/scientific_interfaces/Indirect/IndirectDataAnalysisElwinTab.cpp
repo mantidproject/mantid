@@ -772,9 +772,10 @@ void IndirectDataAnalysisElwinTab::closeDialog() {
 
 void IndirectDataAnalysisElwinTab::addData() { checkData(m_addWorkspaceDialog.get()); }
 
-// This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
-// A File requiresd additional checks to ensure a file of the correct type is being loaded. The Workspace list is
-// already filtered.
+/** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
+ * A File requiresd additional checks to ensure a file of the correct type is being loaded. The Workspace list is
+ * already filtered.
+ */
 void IndirectDataAnalysisElwinTab::checkData(IAddWorkspaceDialog const *dialog) {
   try {
     const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
