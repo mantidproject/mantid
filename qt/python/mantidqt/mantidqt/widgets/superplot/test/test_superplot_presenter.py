@@ -114,12 +114,30 @@ class SuperplotPresenterTest(unittest.TestCase):
     @mock.patch("mantidqt.widgets.superplot.presenter.MARKER_MAP")
     def test_get_kwargs_from_settings(self, m_marker_map, m_config_service):
         m_marker_map.__getitem__.return_value = "test"
-        m_config_service.getString.return_value = "test"
+        setting_values = {"plots.line.Style": "test",
+                          "plots.line.DrawStyle": "test",
+                          "plots.line.Width": 10.0,
+                          "plots.marker.Style": "test",
+                          "plots.errorbar.Capsize": 10.0,
+                          "plots.errorbar.CapThickness": 10.0,
+                          "plots.errorbar.errorEvery": 10.0,
+                          "plots.errorbar.Width": 10.0}
+        m_config_service.getString = setting_values.__getitem__
         kwargs = self.presenter.get_kwargs_from_settings()
         self.assertDictEqual(kwargs, {"linestyle": "test",
-                                        "drawstyle": "test",
-                                        "linewidth": "test",
-                                        "marker": "test"})
+                                      "drawstyle": "test",
+                                      "linewidth": 10.0,
+                                      "marker": "test"})
+        self.presenter._error_bars = True
+        kwargs = self.presenter.get_kwargs_from_settings()
+        self.assertDictEqual(kwargs, {"linestyle": "test",
+                                      "drawstyle": "test",
+                                      "linewidth": 10.0,
+                                      "marker": "test",
+                                      "capsize": 10.0,
+                                      "capthick": 10.0,
+                                      "errorevery": 10.0,
+                                      "elinewidth": 10.0})
 
     def test_on_visibility_changed(self):
         self.m_canvas.reset_mock()
