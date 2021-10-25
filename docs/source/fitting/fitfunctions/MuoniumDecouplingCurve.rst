@@ -11,13 +11,13 @@ Description
 
 A Muonium-style decoupling curve is defined as:
 
-.. math:: y = RAS\frac{0.5+(\frac{x}{b0})^2}{1+(\frac{x}{b0})^2}+BAS
+.. math:: y = A_R\frac{0.5+(\frac{x}{B_0})^2}{1+(\frac{x}{B_0})^2}+A_\mathrm{BG}
 
 where
 
--  RAS - the repolarising asymmetry
--  b0 - the decoupling field
--  BAS - the background asymmetry
+-  :math:`A_R` - the repolarising asymmetry
+-  :math:`B_0` - the decoupling field
+-  :math:`A_\mathrm{BG}` - the background asymmetry
 
 The function models the repolarisation of isotropic muonium. The x axis should be the magnetic field, typically scanned from 0 to a few kGauss. The y axis is the asymmetry.
 

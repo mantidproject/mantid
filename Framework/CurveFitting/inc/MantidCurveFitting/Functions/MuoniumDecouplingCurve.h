@@ -16,17 +16,17 @@ namespace CurveFitting {
 namespace Functions {
 /**
 Provide Muonium-style decoupling curve  function interface to IFunction.
-I.e. the function:y = RAS(0.5+(x/b0)^2)/(1+(x/b0)^2)+BAS.
-Where RAS = repolarising asymmetry
-b0 = decoupling field
-BAS = background asymmetry
+I.e. the function:y = A_R(0.5+(x/B0)^2)/(1+(x/B0)^2)+A_BG.
+Where A_R = repolarising asymmetry
+B0 = decoupling field
+A_BG = background asymmetry
 
 MuoniumDecouplingCurve parameters:
 <UL>
 <LI> RepolarisingAsymmetry - the asymmetry of the muonium fraction (default 1.0)</LI>
 <LI> DecouplingField - the decoupling field. This is related to the hyperfine constant A of the muonium state by A =
-b0*(gamma_e+gamma_mu)/2pi (with x and b0 in Gauss, A = 2.81605 * b in MHz) (default 1.0)</LI> <LI> BackgroundAsymmetry -
-the background asymmetry (default 0.0)</LI>
+B0*(gamma_e+gamma_mu)/2pi (with x and B0 in Gauss, A = 2.81605 * B0 in MHz) (default 1.0)</LI>
+<LI> BackgroundAsymmetry - the background asymmetry (default 0.0)</LI>
 </UL>
 */
 
