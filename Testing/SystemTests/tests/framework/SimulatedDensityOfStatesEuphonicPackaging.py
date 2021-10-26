@@ -84,7 +84,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
 
         prefix_path = pathlib.Path(tmp_prefix)
 
-        raise Exception(process.stdout.decode('utf-8'))
+        #raise Exception(process.stdout.decode('utf-8'))
 
         if verbose:
             print(process.stdout.decode('utf-8'))
