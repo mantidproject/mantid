@@ -821,12 +821,19 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         """Sets units for the output workspace."""
         measurement_technique = self.getPropertyValue('MeasurementTechnique')
         output_unit = self.getPropertyValue('OutputUnits')
-        unit_symbol = 'barn / sr / mol'
-        unit = r'd$\sigma$/d$\Omega$'
-        if measurement_technique == 'TOF':
-            unit_symbol_sofqw = '{} / meV'.format(unit_symbol)
-            unit_sofqw = r'{}/dE'.format(unit)
-        self._set_as_distribution(ws)
+        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
+            unit = 'Normalized intensity'
+            unit_symbol = ''
+        elif self.getPropertyValue('NormalisationMethod') == 'Vanadium':
+            unit_symbol = 'barn / sr / mol'
+            unit = r'd$\sigma$/d$\Omega$'
+            if measurement_technique == 'TOF':
+                unit_symbol_sofqw = '{} / meV'.format(unit_symbol)
+                unit_sofqw = r'{}/dE'.format(unit)
+        else:  # OutputUnits == Input
+            unit = 'Corrected intensity'
+            unit_symbol = ''
+
         perform_merge = mtd[ws].getNumberOfEntries() / nMeasurements > 1 \
             and self.getPropertyValue('OutputTreatment') == 'Merge'
         if perform_merge:
@@ -857,9 +864,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 UnGroupWorkspace(InputWorkspace='q')
                 GroupWorkspaces(InputWorkspaces=group_list, OutputWorkspace=ws)
 
-        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
-            unit = 'Normalized intensity'
-            unit_symbol = ''
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
                 if 'SofQW' in entry.name():
@@ -930,7 +934,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         possible_polarisations = ['XPO', 'YPO', 'ZPO']
         old_names = []
         new_names = []
-        for entry in mtd[output_ws]:  # renames individual ws to contain the output name
+        for entry_no, entry in enumerate(mtd[output_ws]):  # renames individual ws to contain the output name
             entry_name = entry.name()
             old_names.append(entry_name)
             if entry_name[:2] == "__":
@@ -950,7 +954,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             output_name = self.getPropertyValue("OutputWorkspace")
             if output_name not in entry_name:
                 new_name = "{}_{}".format(output_name, entry_name)
-                new_names.append(new_name)
+            else:
+                new_name = "{}_{}".format(entry_name, str(entry_no))
+            new_names.append(new_name)
 
         for old_name, new_name in zip(old_names, new_names):
             if old_name != new_name:
