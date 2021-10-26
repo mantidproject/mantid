@@ -536,6 +536,7 @@ public:
     void loadFunction(QString funStr);
     void saveFunction(const QString &fnName);
     void executeCustomSetupRemove(const QString &name);
+    bool ignoreInvalidData();
     double startX() const;
     void setStartX(double start);
     double endX() const;
