@@ -36,7 +36,7 @@ void SmoothTransition::function1D(double *out, const double *xValues, const size
   const double gr = getParameter("GrowthRate");
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = a2 + (a1 - a2) / (exp(-(xValues[i] - midpoint) / gr) + 1);
+    out[i] = a2 + (a1 - a2) / (exp((xValues[i] - midpoint) / gr) + 1);
   }
 }
 
@@ -47,12 +47,12 @@ void SmoothTransition::functionDeriv1D(Jacobian *out, const double *xValues, con
   const double gr = getParameter("GrowthRate");
 
   for (size_t i = 0; i < nData; i++) {
-    double expFunc = exp((midpoint - xValues[i]) / gr);
+    double expFunc = exp((xValues[i] - midpoint) / gr);
     double expFuncsq = pow((expFunc + 1), 2);
 
-    double diffa2 = 2 * (((a1 - a2) / (expFunc + 1)) + 2);
-    double diffmidpoint = -((a1 - a2) * expFunc) / (gr * expFuncsq);
-    double diffgr = ((a1 - a2) * (midpoint - xValues[i]) * expFunc) / (pow(gr, 2) * expFuncsq);
+    double diffa2 = 1 - (1 / (expFunc + 1));
+    double diffmidpoint = ((a1 - a2) * expFunc) / (gr * expFuncsq);
+    double diffgr = ((a1 - a2) * (xValues[i] - midpoint) * expFunc) / (pow(gr, 2) * expFuncsq);
 
     out->set(i, 0, 1);
     out->set(i, 1, diffa2);
