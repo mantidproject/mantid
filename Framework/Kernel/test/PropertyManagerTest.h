@@ -307,14 +307,9 @@ public:
   }
 
   void testExistsProperty() {
-    Property *p = new PropertyWithValue<int>("sjfudh", 0);
+    auto p = std::make_unique<PropertyWithValue<int>>("sjfudh", 0);
     TS_ASSERT(!manager->existsProperty(p->name()));
-    Property *pp = new PropertyWithValue<double>("APROP", 9.99);
-    // Note that although the name of the property is the same, the type is
-    // different - yet it passes
-    TS_ASSERT(manager->existsProperty(pp->name()));
-    delete p;
-    delete pp;
+    TS_ASSERT(manager->existsProperty("APROP"));
   }
 
   void testValidateProperties() {
