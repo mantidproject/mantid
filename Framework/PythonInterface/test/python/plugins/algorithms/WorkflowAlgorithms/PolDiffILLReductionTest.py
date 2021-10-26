@@ -35,19 +35,19 @@ class PolDiffILLReductionTest(unittest.TestCase):
     def test_absorber_transmission(self):
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws')
         self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
+        self._check_process_flag(mtd['cadmium_ws'], 'BeamWithCadmium')
         self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 0.06, delta=1e-3)
 
     def test_absorber_transmission_norm_by_time(self):
         PolDiffILLReduction(Run='396991', ProcessAs='BeamWithCadmium', OutputWorkspace='cadmium_ws', NormaliseBy='Time')
         self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['cadmium_ws'], 'Cadmium')
+        self._check_process_flag(mtd['cadmium_ws'], 'BeamWithCadmium')
         self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 0.00773, delta=1e-3)
 
     def test_beam(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         self._check_output(mtd['beam_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['beam_ws'], 'Beam')
+        self._check_process_flag(mtd['beam_ws'], 'EmptyBeam')
         self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 5.566, delta=1e-3)
 
     def test_transmission(self):
@@ -153,10 +153,10 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             ElasticChannelsWorkspace='table_ws',
                             MeasurementTechnique='TOF')
         self._check_output(mtd['sample_tof'], 339, 132, 2, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['sample_tof'], 'Vanadium')
+        self._check_process_flag(mtd['sample_tof'], 'Sample')
 
     def _check_process_flag(self, ws, value):
-        self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
+        self.assertEquals(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
     def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
