@@ -619,37 +619,43 @@ class PolDiffILLReduction(PythonAlgorithm):
         workspace (empty container or vanadium) measured in the TOF mode."""
         # number of channels around the peak, if X-axis data unit is time channels
         peak_width = self._sampleAndEnvironmentProperties['EPWidth'].value \
-            if 'EPWidth' in self._sampleAndEnvironmentProperties else 15
+            if 'EPWidth' in self._sampleAndEnvironmentProperties else None
         peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
             if 'EPCentre' in self._sampleAndEnvironmentProperties else None
         epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
+        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmas'].value \
+            if 'EPNSigmas' in self._sampleAndEnvironmentProperties else 1.0
         bckg_list = []
         to_clean = []
         transmission = mtd[transmission_ws].readY(0)[0]
+        elastic_peaks = epp_table.column("PeakCentre") \
+            if peak_centre is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_centre)
+        peak_widths = epp_table.column("Sigma") \
+            if peak_width is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_width)
+        peak_widths[peak_widths == 0] = np.mean(peak_widths[peak_widths != 0])
         for empty in mtd[empty_ws]:
             # calculate the background in the region around the elastic peaks separately to the rest of TOF channels
             background = "{}_bckg".format(empty.name())
             bckg_list.append(background)
             CloneWorkspace(InputWorkspace=empty, OutputWorkspace=background)
-            elastic_peaks = epp_table.column("PeakCentre") \
-                if peak_centre is None else np.full(mtd[background].getNumberHistograms(), peak_centre)
             for pixel_no in range(mtd[background].getNumberHistograms()):
                 time_channels = mtd[background].readX(pixel_no)
                 counts = mtd[background].dataY(pixel_no)
                 errors = mtd[background].dataE(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
-                lower_peak_edge = int(ep_index - peak_width)
-                upper_peak_edge = int(ep_index + peak_width)
-                n_time_channels = lower_peak_edge + (np.size(counts) - upper_peak_edge + 1)
+                bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
+                lower_peak_edge = int(ep_index - n_sigmas * peak_widths[pixel_no] / bin_width)
+                upper_peak_edge = int(ep_index + n_sigmas * peak_widths[pixel_no] / bin_width)
+                n_time_channels = upper_peak_edge - lower_peak_edge + 1
                 # first, the time independent contribution (outside elastic peak) to background is calculated
                 time_indep_component = np.mean(np.concatenate((counts[:lower_peak_edge], counts[upper_peak_edge+1:])))
                 # and its error, from error propagation:
-                time_inded_err = np.sum(np.concatenate((np.power(errors[:lower_peak_edge], 2),
+                time_indep_err = np.sum(np.concatenate((np.power(errors[:lower_peak_edge], 2),
                                                         np.power(errors[upper_peak_edge+1:], 2)))) / n_time_channels
                 counts[:lower_peak_edge] = time_indep_component
                 counts[upper_peak_edge+1:] = time_indep_component
-                errors[:lower_peak_edge] = time_inded_err
-                errors[upper_peak_edge+1:] = time_inded_err
+                errors[:lower_peak_edge] = time_indep_err
+                errors[upper_peak_edge+1:] = time_indep_err
                 # then, background in the elastic peak region can be calculated:
                 counts[lower_peak_edge+1:upper_peak_edge] -= time_indep_component
                 counts[lower_peak_edge+1:upper_peak_edge] *= transmission
@@ -1103,9 +1109,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _calculate_epp_energy_width(self, ws):
         """Calculates elastic peak width in energy exchange units based on known widths in time-of-flight."""
         epp_table = mtd[self._elastic_channels_ws]
-        ep_centres_tof = np.array(epp_table.column('PeakCentre'))  # in delta E (meV)
         if 'EPWidth' in self._sampleAndEnvironmentProperties:
-            ep_sigmas_tof = np.full(np.size(ep_centres_tof), self._sampleAndEnvironmentProperties['EPWidth'].value)
+            ep_sigmas_tof = np.full(mtd[ws][0].getNumberHistograms(),
+                                    self._sampleAndEnvironmentProperties['EPWidth'].value)
         else:
             ep_sigmas_tof = np.array(epp_table.column('Sigma'))
             ep_sigmas_tof[ep_sigmas_tof == 0] = np.mean(ep_sigmas_tof[ep_sigmas_tof != 0])
@@ -1115,12 +1121,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         light_speed = physical_constants['speed of light in vacuum'][0]  # in m/s
         L2_odd = instrument.getNumberParameter('sample_distance_odd')[0]  # in m
         L2_even = instrument.getNumberParameter('sample_distance_even')[0]  # in m
-        L2 = min(L2_odd, L2_even)  # in this case we care only about the range and want to maximise it
+        L2 = max(L2_odd, L2_even)  # in this case we care only about the range and want to maximise it
         neutron_speed = self._sampleAndEnvironmentProperties['NeutronSpeed'].value  # in m / s
         Ei = self._sampleAndEnvironmentProperties['InitialEnergy'].value  # in meV
         c1 = 0.5 * np.power(L2, 2) * m_n / light_speed ** 2  # in meV * m^2
-        n_sigmas = self._sampleAndEnvironmentProperties['EPPNSigmas'].value \
-            if 'EPPNSigmas' in self._sampleAndEnvironmentProperties else 5.0  # number of peak widths to take
+        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmas'].value \
+            if 'EPNSigmas' in self._sampleAndEnvironmentProperties else 5.0  # number of peak widths to take
         us_2_s = 1e-6  # microseconds to seconds conversion
 
         return Ei - c1 / np.power((L2 / neutron_speed) + n_sigmas * ep_sigmas_tof * us_2_s, 2)
@@ -1220,7 +1226,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])  # renames group as a whole
         ws = ws[2:]
         output_ws = self.getPropertyValue("OutputWorkspace")
-
         if mtd[ws].getNumberOfEntries() > 1:
             self._set_final_naming_scheme(ws, output_ws)
         self.setProperty('OutputWorkspace', mtd[ws])
@@ -1271,7 +1276,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if transmission_ws:
                 self._subtract_background(ws, transmission_ws)
                 if measurement_technique == 'TOF' and process == 'Vanadium':
-                    self._find_elastic_peak_channels(ws)  # re-runs finding epp, after background is corrected
+                    self._find_elastic_peak_channels(ws)  # (re-)runs finding epp, after background is corrected
 
             if process == 'Quartz':
                 progress.report('Calculating polarising efficiencies')
