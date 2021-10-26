@@ -8,7 +8,7 @@
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-from mantid.plots import convert_color_to_hex
+from mantid.plots import convert_color_to_hex, axesfunctions
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetView
@@ -96,7 +96,10 @@ class AxesTabWidgetPresenter:
             ax.set_xscale(self.current_view_props['xscale'])
 
             if self.current_view_props['xautoscale']:
-                ax.autoscale(True, axis="x")
+                if ax.images:
+                    axesfunctions.update_colorplot_datalimits(ax, ax.images, axis='x')
+                else:
+                    ax.autoscale(True, axis="x")
             else:
                 if isinstance(ax, Axes3D):
                     ax.set_xlim3d(self.current_view_props['xlim'])
@@ -108,7 +111,10 @@ class AxesTabWidgetPresenter:
             ax.set_yscale(self.current_view_props['yscale'])
 
             if self.current_view_props['yautoscale']:
-                ax.autoscale(True, axis="y")
+                if ax.images:
+                    axesfunctions.update_colorplot_datalimits(ax, ax.images, axis='y')
+                else:
+                    ax.autoscale(True, axis="y")
             else:
                 if isinstance(ax, Axes3D):
                     ax.set_ylim3d(self.current_view_props['ylim'])
