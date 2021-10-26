@@ -54,7 +54,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
                 raise FileNotFoundError(
                     ("Could not find site-packages for temporary dir. "
                      "Here are the directory contents: ")
-                    + "; ".join(directory_contents))
+                    + "; ".join(map(str, directory_contents)))
 
     @classmethod
     def _install_euphonic_to_tmp_prefix(cls, tmp_prefix,
