@@ -312,6 +312,11 @@ public:
     TS_ASSERT(manager->existsProperty("APROP"));
   }
 
+  void testGetPropertyNames() {
+    std::vector<std::string> expected{"aProp", "anotherProp", "yetAnotherProp"};
+    TS_ASSERT_EQUALS(std::move(expected), manager->getDeclaredPropertyNames());
+  }
+
   void testValidateProperties() {
     TS_ASSERT(manager->validateProperties());
     PropertyManagerHelper mgr;
