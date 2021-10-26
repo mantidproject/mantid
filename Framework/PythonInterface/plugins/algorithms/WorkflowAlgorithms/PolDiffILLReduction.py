@@ -299,6 +299,13 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty(name="MaskDetectors", validator=arrvalidator),
                              doc='Which detectors should be masked.')
 
+        self.declareProperty(name='MaxTOFChannel',
+                             defaultValue=512,
+                             doc='What is the maximal number of TOF bins to be used.'
+                                 'Bins above this value will be removed.')
+
+        self.setPropertySettings('MaxTOFChannel', tofMeasurement)
+
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
@@ -505,6 +512,15 @@ class PolDiffILLReduction(PythonAlgorithm):
             input_ws = self._merge_omega_scan(ws, self._data_structure_helper(), ws+'_conjoined')
             DeleteWorkspace(Workspace=ws)
             RenameWorkspace(InputWorkspace=input_ws, OutputWorkspace=ws)
+        elif measurement_technique == 'TOF':
+            if not self.getProperty('MaxTOFChannel').isDefault:
+                max_TOF_channel = self.getProperty('MaxTOFChannel').value
+                dataX = mtd[ws][0].readX(0)
+                if len(dataX) > max_TOF_channel:
+                    lowerLimit = dataX[max_TOF_channel]
+                    upperLimit = dataX[-1]
+                    RemoveBins(InputWorkspace=ws, OutputWorkspace=ws, XMin=lowerLimit, XMax=upperLimit)
+
         if process in ['Vanadium', 'Sample']:
             self._read_experiment_properties(ws)
         return ws, progress
