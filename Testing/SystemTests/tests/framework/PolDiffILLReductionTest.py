@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 from mantid.api import MatrixWorkspace, WorkspaceGroup, Run
-from mantid.simpleapi import CloneWorkspace, config, D7AbsoluteCrossSections, Load, mtd, PolDiffILLReduction
+from mantid.simpleapi import CloneWorkspace, config, CreateEmptyTableWorkspace, D7AbsoluteCrossSections, Load, mtd,\
+    PolDiffILLReduction
 from mantid.geometry import Instrument
 
 
@@ -248,6 +249,29 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['sample_sum'], 132, 1, 6, 'Scattering Angle', 'Label', 'Height', 'Label')
         self._check_process_flag(mtd['sample_sum'], 'Sample')
 
+    def d7_reduction_test_sample_crop_tof_axis(self):
+        # creates table workspace with mock elastic peak positions and widths:
+        table_ws = CreateEmptyTableWorkspace()
+        table_ws.addColumn("float", "PeakCentre")
+        table_ws.addColumn("float", "Sigma")
+        for row in range(132):
+            table_ws.addRow([1645.2, 15.0])
+
+        sampleProperties = {'SampleMass': 2.93, 'FormulaUnitMass': 50.94}
+        yig_calibration_file = "D7_YIG_calibration_TOF.xml"
+        PolDiffILLReduction(Run='395639', ProcessAs='Sample', OutputWorkspace='sample_tof',
+                            SampleAndEnvironmentProperties=sampleProperties,
+                            SampleGeometry='None',
+                            OutputTreatment='Individual',
+                            InstrumentCalibration=yig_calibration_file,
+                            ElasticChannelsWorkspace=table_ws,
+                            MeasurementTechnique='TOF',
+                            ConvertToEnergy=False,
+                            MaxTOFChannel=500
+                            )
+        self._check_output(mtd['sample_tof'], 500, 132, 2, 'Time-of-flight', 'TOF', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['sample_tof'], 'Sample')
+
     def d7_reduction_test_sample_full_reduction(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
@@ -337,4 +361,5 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self.d7_reduction_test_sample_individual_incoherent()
         self.d7_reduction_test_sample_individual_paramagnetic()
         self.d7_reduction_test_sample_sum()
+        self.d7_reduction_test_sample_crop_tof_axis()
         self.d7_reduction_test_sample_full_reduction()

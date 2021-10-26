@@ -306,6 +306,12 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('MaxTOFChannel', tofMeasurement)
 
+        self.declareProperty(name='ConvertToEnergy',
+                             defaultValue=True,
+                             doc='Whether to convert TOF axis into energy exchange or keep it in units of time.')
+
+        self.setPropertySettings('ConvertToEnergy', tofMeasurement)
+
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
@@ -829,10 +835,14 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _detector_analyser_energy_efficiency(self, ws):
         """Corrects for the detector and analyser energy efficiency."""
-        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
-                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
-        DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
-                                  IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+        if self.getProperty('ConvertToEnergy').value:
+            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
+                         EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+            DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
+                                      IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+        else:
+            self.log().information('Detector-analyser energy efficiency will not be corrected as unit conversion'
+                                   'is not permitted.')
         return ws
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
@@ -1232,7 +1242,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if self.getPropertyValue('OutputTreatment') in ['AveragePol', 'Sum']:
                 self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment')
                                                                  == 'AveragePol'))
-            if self.getPropertyValue('MeasurementTechnique') == 'TOF':
+            if self.getPropertyValue('MeasurementTechnique') == 'TOF' and process in ['Vanadium', 'Sample'] \
+                    and self.getProperty('ConvertToEnergy').value:
                 self._rebin_in_energy(ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
