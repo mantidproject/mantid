@@ -167,13 +167,6 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_selected_parameter_combination_workspace.assert_called_once_with()
 
-    def test_that_update_selected_parameter_combination_workspace_changes_fit_range(self):
-        new_start_x = -5.2
-        new_end_x = 42.
-        self.model._get_new_start_xs_and_end_xs_using_existing_datasets = mock.Mock(return_value=([new_start_x],[new_end_x]))
-        self.view.start_x.assert_called_once_with(new_start_x)
-        self.view.end_x.assert_called_once_with(new_end_x)
-
     def test_that_handle_parameter_combinations_created_successfully_will_update_the_view(self):
         self.presenter.handle_selected_x_and_y_changed = mock.Mock()
 
@@ -219,11 +212,24 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.view.update_result_table_names.assert_called_once_with(self.result_table_names)
 
     def test_that_update_selected_parameter_combination_workspace_calls_the_expected_methods(self):
+        # set up mocks
+        new_start_x = -5.2
+        new_end_x = 42.
+        self.model._get_new_start_xs_and_end_xs_using_existing_datasets = mock.Mock(return_value=([new_start_x],[new_end_x]))
+        # check current start and end x
+        self.assertEqual(self.view.start_x, 0.0)
+        self.assertEqual(self.mock_view_start_x.mock_calls, [mock.call()])
+        self.assertEqual(self.view.end_x, 15.0)
+        self.assertEqual(self.mock_view_end_x.mock_calls, [mock.call()])
+        # call function
         self.presenter.update_selected_parameter_combination_workspace()
-
+        # check results
         self.mock_model_dataset_names.assert_called_once_with()
         self.mock_model_current_dataset_index.assert_called_once_with(0)
         self.mock_view_current_dataset_name.assert_called_once_with(self.param_combination_name)
+        self.model._get_new_start_xs_and_end_xs_using_existing_datasets.assert_called_once()
+        self.assertEqual(self.mock_view_start_x.mock_calls, [mock.call(), mock.call(new_start_x)])
+        self.assertEqual(self.mock_view_end_x.mock_calls, [mock.call(), mock.call(new_end_x)])
 
     def test_that_clear_current_fit_function_for_undo_will_only_clear_the_current_function(self):
         self.presenter.clear_current_fit_function_for_undo()
