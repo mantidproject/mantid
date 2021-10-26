@@ -82,7 +82,7 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                         presenter.current_view_props.canvas_color)
 
     def test_apply_properties_calls_setters_with_correct_properties_autoscale(self):
-        ax_mock = mock.MagicMock()
+        ax_mock = mock.MagicMock(images=None)
         ax_mock.get_autoscalex_on = mock.Mock(return_value=True)
         ax_mock.get_autoscaley_on = mock.Mock(return_value=True)
         presenter = self._generate_presenter()
@@ -145,8 +145,8 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                             presenter.current_view_props.canvas_color)
 
     def test_apply_all_properties_calls_setters_with_correct_properties_autoscale(self):
-        ax_mock_1 = mock.MagicMock()
-        ax_mock_2 = mock.MagicMock()
+        ax_mock_1 = mock.MagicMock(images=None)
+        ax_mock_2 = mock.MagicMock(images=None)
         ax_mock_1.get_autoscalex_on = mock.Mock(return_value=True)
         ax_mock_1.get_autoscaley_on = mock.Mock(return_value=True)
         presenter = self._generate_presenter()
