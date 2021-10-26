@@ -200,7 +200,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="OutputUnits",
                              defaultValue="Default",
-                             validator=StringListValidator(["Default", "TwoTheta", "Q", "Qxy", "Qw"]),
+                             validator=StringListValidator(["Default", "TwoTheta", "Q", "Qxy", "Qw", "Input"]),
                              direction=Direction.Input,
                              doc="The choice to display the output as a function of detector twoTheta,"
                                  " the momentum exchange, the 2D momentum exchange, or as a function of momentum"
