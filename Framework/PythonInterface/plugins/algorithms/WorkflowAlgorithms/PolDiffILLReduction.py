@@ -659,7 +659,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         background_ws = 'background_ws'
         GroupWorkspaces(InputWorkspaces=bckg_list, OutputWorkspace=background_ws)
-        if len(to_clean) > 1 and self.getProperty('ClearCache'):
+        if len(to_clean) > 1 and self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=to_clean)
         return background_ws
 
@@ -1071,7 +1071,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         tmp_ws = "{}_tmp".format(ws)
         MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp_ws)
         FindEPP(InputWorkspace=tmp_ws, OutputWorkspace=self._elastic_channels_ws)
-        DeleteWorkspace(Workspace=tmp_ws)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspace(Workspace=tmp_ws)
 
     def _calibrate_elastic_peak_position(self, ws):
         """Calibrates the elastic peak position in TOF units to fall at deltaE = 0."""
