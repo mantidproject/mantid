@@ -167,6 +167,13 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
         self.presenter.update_selected_parameter_combination_workspace.assert_called_once_with()
 
+    def test_that_update_selected_parameter_combination_workspace_changes_fit_range(self):
+        new_start_x = -5.2
+        new_end_x = 42.
+        self.model._get_new_start_xs_and_end_xs_using_existing_datasets = mock.Mock(return_value=([new_start_x],[new_end_x]))
+        self.view.start_x.assert_called_once_with(new_start_x)
+        self.view.end_x.assert_called_once_with(new_end_x)
+
     def test_that_handle_parameter_combinations_created_successfully_will_update_the_view(self):
         self.presenter.handle_selected_x_and_y_changed = mock.Mock()
 
