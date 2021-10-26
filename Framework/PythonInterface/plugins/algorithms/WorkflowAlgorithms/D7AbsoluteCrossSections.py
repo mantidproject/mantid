@@ -494,7 +494,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             total_cs = numor + '_Total'
             nuclear_cs = numor + '_Coherent'
             incoherent_cs = numor + '_Incoherent'
-            if nMeasurements == 2:
+            if user_method == 'Z':
                 data_total, data_nuclear, data_incoherent = self._calculate_uniaxial_separation(cross_sections)
                 RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
                 separated_cs.append(total_cs)
