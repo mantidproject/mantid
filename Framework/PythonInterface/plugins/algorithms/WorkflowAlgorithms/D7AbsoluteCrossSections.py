@@ -759,6 +759,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return 2.0 * np.pi / wavelength * deltaTheta
 
     def _get_q_binning(self, ws):
+        """Returns either a user-provided or automatic binning in momentum exchange."""
         if self.getProperty('QBinning').isDefault:
             qMin, qMax = self._find_min_max_q(mtd[ws][0])
             dq = self._delta_q(mtd[ws][0])
@@ -774,6 +775,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     @staticmethod
     def _convert_to_2theta(ws_in, ws_out, merged_data):
+        """Converts the relevant axis unit to 2theta."""
         if merged_data:
             ConvertAxisByFormula(InputWorkspace=ws_in, OutputWorkspace=ws_out, Axis='X', Formula='-x')
         else:
@@ -783,6 +785,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return ws_out
 
     def _convert_to_q(self, ws_in, ws_out, merged_data):
+        """Converts the relevant axis unit to momentum exchange."""
         if merged_data:
             wavelength = mtd[ws_in][0].getRun().getLogData('monochromator.wavelength').value  # in Angstrom
             # flips axis sign and converts detector 2theta to momentum exchange
@@ -798,24 +801,27 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             Transpose(InputWorkspace=ws_out, OutputWorkspace=ws_out)
         return ws_out
 
-    def _convert_to_sofqw(self, ws):
-        q_binning = self._get_q_binning(ws)
+    def _convert_to_sofqw(self, ws_in, ws_out):
+        """Converts the input workspace and appends a '_qw' suffix to all workspace names."""
+        q_binning = self._get_q_binning(ws_in)
+        tmp_name = '{}_{}'.format(ws_in, 'tmp')
         SofQWNormalisedPolygon(
-            InputWorkspace=ws, OutputWorkspace=ws,
+            InputWorkspace=ws_in, OutputWorkspace=tmp_name,
             EMode='Direct',
             EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
             QAxisBinning=q_binning
         )
-        Transpose(InputWorkspace=ws, OutputWorkspace=ws)  # users prefer omega to be the vertical axis
-        # add _SofQW suffix to all workspaces in the group:
-        name_list = mtd[ws].getNames()
+        Transpose(InputWorkspace=tmp_name, OutputWorkspace=tmp_name)  # users prefer omega to be the vertical axis
+        original_names = mtd[ws_in].getNames()
+        current_names = mtd[tmp_name].getNames()
         new_names = []
-        for entry_name in name_list:
-            new_name = "{}_{}".format(entry_name, 'SofQW')
+        for original_name, current_name in zip(original_names, current_names):
+            new_name = "{}_{}".format(original_name, 'qw')
             new_names.append(new_name)
-            RenameWorkspace(InputWorkspace=entry_name, OutputWorkspace=new_name)
-        GroupWorkspaces(InputWorkspaces=new_names, OutputWorkspace=ws)
-        return ws
+            RenameWorkspace(InputWorkspace=current_name, OutputWorkspace=new_name)
+        UnGroupWorkspace(InputWorkspace=tmp_name)
+        GroupWorkspaces(InputWorkspaces=new_names, OutputWorkspace=ws_out)
+        return ws_out
 
     def _set_units(self, ws, nMeasurements):
         """Sets units for the output workspace."""
@@ -848,20 +854,19 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         elif output_unit == 'Qw' or (output_unit == 'Default' and measurement_technique == 'TOF'):
             group_list = []
             if output_unit == 'Default':  # provide SofQW, and distributions as a function of Q and 2theta
-                twoTheta_distribution = self._convert_to_2theta(ws_in=ws, ws_out='2theta', merged_data=perform_merge)
-                q_distribution = self._convert_to_q(ws_in=ws, ws_out='q', merged_data=perform_merge)
-                ws = self._convert_to_sofqw(ws)
+                twoTheta_distribution = self._convert_to_2theta(ws_in=ws, ws_out='tthw', merged_data=perform_merge)
+                ws_sofqw = self._convert_to_sofqw(ws_in=ws, ws_out=ws+'_qw')
                 # interleave output names so that SofQW, 2theta, and q distributions for the same input are together:
                 group_list = [ws_name for name_tuple in zip(mtd[ws].getNames(),
                                                             mtd[twoTheta_distribution].getNames(),
-                                                            mtd[q_distribution].getNames())
+                                                            mtd[ws_sofqw].getNames())
                               for ws_name in name_tuple]
             else:
-                ws = self._convert_to_sofqw(ws)
+                ws = self._convert_to_sofqw(ws_in=ws, ws_out=ws)
 
             if len(group_list) > 0:
-                UnGroupWorkspace(InputWorkspace='2theta')
-                UnGroupWorkspace(InputWorkspace='q')
+                UnGroupWorkspace(InputWorkspace='tthw')
+                UnGroupWorkspace(InputWorkspace=ws+'_qw')
                 GroupWorkspaces(InputWorkspaces=group_list, OutputWorkspace=ws)
 
         if isinstance(mtd[ws], WorkspaceGroup):
