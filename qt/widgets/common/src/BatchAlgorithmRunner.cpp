@@ -4,12 +4,18 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <utility>
 
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+
+#include <memory>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -18,15 +24,6 @@ Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
 }
 
 namespace MantidQt::API {
-
-ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm, AlgorithmRuntimeProps properties)
-    : m_algorithm(std::move(algorithm)), m_properties(std::move(properties)) {}
-
-ConfiguredAlgorithm::~ConfiguredAlgorithm() {}
-
-IAlgorithm_sptr ConfiguredAlgorithm::algorithm() const { return m_algorithm; }
-
-ConfiguredAlgorithm::AlgorithmRuntimeProps ConfiguredAlgorithm::properties() const { return m_properties; }
 
 BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
     : QObject(parent), m_stopOnFailure(true), m_cancelRequested(false), m_notificationCenter(),
@@ -65,14 +62,23 @@ void BatchAlgorithmRunner::removeAllObservers() {
 void BatchAlgorithmRunner::stopOnFailure(bool stopOnFailure) { m_stopOnFailure = stopOnFailure; }
 
 /**
+ * Adds an algorithm to the end of the queue with blank properties
+ *
+ * @param algo Algorithm to add to queue
+ */
+void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo) {
+  this->addAlgorithm(algo, std::make_unique<AlgorithmRuntimeProps>());
+}
+
+/**
  * Adds an algorithm to the end of the queue.
  *
  * @param algo Algorithm to add to queue
  * @param props Optional map of property name to property values to be set just
  *before execution (mainly intended for input and inout workspace names)
  */
-void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo, const AlgorithmRuntimeProps &props) {
-  m_algorithms.emplace_back(std::make_unique<ConfiguredAlgorithm>(algo, props));
+void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo, std::unique_ptr<IAlgorithmRuntimeProps> props) {
+  m_algorithms.emplace_back(std::make_unique<ConfiguredAlgorithm>(algo, std::move(props)));
 
   g_log.debug() << "Added algorithm \"" << m_algorithms.back()->algorithm()->name() << "\" to batch queue\n";
 }
@@ -201,10 +207,20 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
   try {
     m_currentAlgorithm = algorithm->algorithm();
 
-    // Assign the properties to be set at runtime
-    for (auto const &kvp : algorithm->properties()) {
-      m_currentAlgorithm->setProperty(kvp.first, kvp.second);
+    auto const &props = algorithm->properties();
+
+    auto const allowedPropNames = m_currentAlgorithm->getDeclaredPropertyNames();
+    auto const propNamesToUpdate = props.getDeclaredPropertyNames();
+
+    std::vector<std::string> invalidProps;
+    std::set_difference(propNamesToUpdate.cbegin(), propNamesToUpdate.cend(), allowedPropNames.cbegin(),
+                        allowedPropNames.cend(), std::back_inserter(invalidProps));
+    if (invalidProps.size() > 0) {
+      throw Mantid::Kernel::Exception::NotFoundError("Invalid Properties given", "NameOfProp"); // TODO
     }
+
+    // Assign the properties to be set at runtime
+    m_currentAlgorithm->updatePropertyValues(props);
 
     g_log.information() << "Starting next algorithm in queue: " << m_currentAlgorithm->name() << "\n";
 

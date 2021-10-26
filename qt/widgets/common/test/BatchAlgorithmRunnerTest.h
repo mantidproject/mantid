@@ -13,6 +13,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockConfiguredAlgorithm.h"
 
@@ -23,8 +24,7 @@ using namespace MantidQt::API;
 using MantidQt::API::BatchAlgorithmRunner;
 using testing::NiceMock;
 using testing::Return;
-
-using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
+using testing::ReturnRef;
 
 class BatchAlgorithmRunnerTest : public CxxTest::TestSuite {
 public:
@@ -51,21 +51,21 @@ public:
     createWsAlg->setProperty("Function", "Exp Decay");
     createWsAlg->setProperty("XMax", 20.0);
     createWsAlg->setProperty("BinWidth", 1.0);
-    inputFromCreateProps["InputWorkspace"] = "BatchAlgorithmRunnerTest_Create";
+    inputFromCreateProps.setPropertyValue("InputWorkspace", "BatchAlgorithmRunnerTest_Create");
 
     cropWsAlg = AlgorithmManager::Instance().create("CropWorkspace", -1);
     cropWsAlg->initialize();
     cropWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Crop");
     cropWsAlg->setProperty("StartWorkspaceIndex", 4);
     cropWsAlg->setProperty("EndWorkspaceIndex", 5);
-    inputFromCropProps["InputWorkspace"] = "BatchAlgorithmRunnerTest_Crop";
+    inputFromCropProps.setPropertyValue("InputWorkspace", "BatchAlgorithmRunnerTest_Crop");
 
     scaleWsAlg = AlgorithmManager::Instance().create("Scale", -1);
     scaleWsAlg->initialize();
     scaleWsAlg->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Scale");
     scaleWsAlg->setProperty("Factor", 5.0);
     scaleWsAlg->setProperty("Operation", "Add");
-    inputFromScaleProps["InputWorkspace"] = "BatchAlgorithmRunnerTest_Scale";
+    inputFromScaleProps.setPropertyValue("InputWorkspace", "BatchAlgorithmRunnerTest_Scale");
   }
 
   /**
@@ -77,8 +77,8 @@ public:
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
-    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCreateProps));
+    runner.addAlgorithm(scaleWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCropProps));
 
     // Run queue
     TS_ASSERT_EQUALS(runner.queueLength(), 3);
@@ -105,7 +105,7 @@ public:
 
     // Run 1
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCreateProps));
     TS_ASSERT(runner.executeBatch());
 
     auto historyRun1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
@@ -113,8 +113,8 @@ public:
     TS_ASSERT_EQUALS("CropWorkspace", historyRun1.getAlgorithmHistory(1)->name())
 
     // Run 2
-    runner.addAlgorithm(scaleWsAlg, inputFromCreateProps);
-    runner.addAlgorithm(cropWsAlg, inputFromScaleProps);
+    runner.addAlgorithm(scaleWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCreateProps));
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromScaleProps));
     TS_ASSERT(runner.executeBatch());
 
     auto historyRun2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
@@ -130,12 +130,12 @@ public:
     BatchAlgorithmRunner runner(nullptr);
 
     auto props = inputFromCreateProps;
-    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    props.setPropertyValue("InputWorkspace", "BatchAlgorithmRunner_NoWorkspace");
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, props);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(std::move(props)));
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
@@ -149,12 +149,12 @@ public:
     BatchAlgorithmRunner runner(nullptr);
 
     auto props = inputFromCreateProps;
-    props["NotAValidProperty"] = "sample_data.nxs";
+    props.setPropertyValue("NotAValidProperty", "sample_data.nxs");
 
     // Add them to the queue
     // Define the input (and inout, if used) WS properties here
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, props);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(std::move(props)));
 
     // Run queue
     TS_ASSERT(!runner.executeBatch());
@@ -311,8 +311,8 @@ public:
     QSignalSpy algErrorSpy(&runner, &BatchAlgorithmRunner::algorithmError);
 
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
-    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCreateProps));
+    runner.addAlgorithm(scaleWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCropProps));
 
     runner.cancelBatch();
     runner.executeBatch();
@@ -337,8 +337,8 @@ public:
     runner.cancelBatch();
 
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
-    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCreateProps));
+    runner.addAlgorithm(scaleWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCropProps));
     runner.executeBatch();
 
     // The empty queue was cancelled immediately so any subsequent queue is executed as normal
@@ -354,50 +354,47 @@ private:
   IAlgorithm_sptr cropWsAlg;
   IAlgorithm_sptr scaleWsAlg;
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCreateProps;
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCropProps;
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromScaleProps;
+  AlgorithmRuntimeProps inputFromCreateProps;
+  AlgorithmRuntimeProps inputFromCropProps;
+  AlgorithmRuntimeProps inputFromScaleProps;
 
   void executeThreeAlgs(BatchAlgorithmRunner &runner) {
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, inputFromCreateProps);
-    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCreateProps));
+    runner.addAlgorithm(scaleWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCropProps));
     runner.executeBatch();
   }
 
   void executeThreeAlgsWithSecondFailing(BatchAlgorithmRunner &runner) {
     auto props = inputFromCreateProps;
-    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    props.setPropertyValue("InputWorkspace", "BatchAlgorithmRunner_NoWorkspace");
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, props);
-    runner.addAlgorithm(scaleWsAlg, inputFromCropProps);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(std::move(props)));
+    runner.addAlgorithm(scaleWsAlg, std::make_unique<AlgorithmRuntimeProps>(inputFromCropProps));
     runner.executeBatch();
   }
 
   void executeAlgWithMissingWorkspace(BatchAlgorithmRunner &runner) {
     auto props = inputFromCreateProps;
-    props["InputWorkspace"] = "BatchAlgorithmRunner_NoWorkspace";
+    props.setPropertyValue("InputWorkspace", "BatchAlgorithmRunner_NoWorkspace");
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, props);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(std::move(props)));
     runner.executeBatch();
   }
 
   void executeAlgWithInvalidProperty(BatchAlgorithmRunner &runner) {
     auto props = inputFromCreateProps;
-    props["NotAValidProperty"] = "sample_data.nxs";
+    props.setPropertyValue("NotAValidProperty", "sample_data.nxs");
     runner.addAlgorithm(createWsAlg);
-    runner.addAlgorithm(cropWsAlg, props);
+    runner.addAlgorithm(cropWsAlg, std::make_unique<AlgorithmRuntimeProps>(std::move(props)));
     runner.executeBatch();
   }
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps emptyProperties() {
-    return BatchAlgorithmRunner::AlgorithmRuntimeProps();
-  }
+  std::unique_ptr<AlgorithmRuntimeProps> emptyProperties() { return std::make_unique<AlgorithmRuntimeProps>(); }
 
   std::deque<IConfiguredAlgorithm_sptr> makeQueueWithThreeMockAlgs() {
-    auto mockAlg = std::make_shared<NiceMock<MockConfiguredAlgorithm>>();
+    auto mockAlg = std::make_shared<MockConfiguredAlgorithm>(emptyProperties());
     ON_CALL(*mockAlg, algorithm).WillByDefault(Return(createWsAlg));
-    ON_CALL(*mockAlg, properties).WillByDefault(Return(emptyProperties()));
     return std::deque<IConfiguredAlgorithm_sptr>{mockAlg, mockAlg, mockAlg};
   }
 };

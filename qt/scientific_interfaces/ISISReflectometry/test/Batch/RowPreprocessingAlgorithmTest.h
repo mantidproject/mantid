@@ -11,6 +11,7 @@
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MockBatch.h"
 
@@ -54,8 +55,10 @@ public:
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    auto expectedProps = IConfiguredAlgorithm::AlgorithmRuntimeProps{{"InputRunList", inputRuns[0]}};
-    TS_ASSERT_EQUALS(configuredAlg->properties(), expectedProps);
+    MantidQt::API::AlgorithmRuntimeProps expectedProps;
+    expectedProps.setPropertyValue("InputRunList", inputRuns[0]);
+    TS_ASSERT_EQUALS(dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(configuredAlg->properties()),
+                     expectedProps);
   }
 
   void test_row_is_updated_on_algorithm_complete() {

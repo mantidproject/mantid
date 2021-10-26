@@ -7,16 +7,23 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+
 #include <gmock/gmock.h>
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
+#include <memory>
 
 class MockConfiguredAlgorithm : public MantidQt::API::IConfiguredAlgorithm {
 public:
-  MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
-  MOCK_CONST_METHOD0(properties, AlgorithmRuntimeProps());
-};
+  MockConfiguredAlgorithm(std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> runtimeProps)
+      : m_runtimeProps(std::move(runtimeProps)) {
+    ON_CALL(*this, properties).WillByDefault(::testing::ReturnRef(*m_runtimeProps));
+  }
 
-GNU_DIAG_ON_SUGGEST_OVERRIDE
+  MOCK_METHOD(Mantid::API::IAlgorithm_sptr, algorithm, (), (const, override));
+  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), properties, (), (const, noexcept, override));
+
+private:
+  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> m_runtimeProps;
+};

@@ -58,7 +58,7 @@ public:
   void filterByProperty(const TimeSeriesProperty<bool> &filter,
                         const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
 
-  ~PropertyManager() override;
+  virtual ~PropertyManager() override;
 
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;

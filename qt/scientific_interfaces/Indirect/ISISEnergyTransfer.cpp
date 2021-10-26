@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -422,7 +423,6 @@ QString ISISEnergyTransfer::validateDetectorGrouping() const {
 void ISISEnergyTransfer::run() {
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransferWrapper");
   reductionAlg->initialize();
-  BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
   QString instName = getInstrumentName();
 
@@ -494,7 +494,7 @@ void ISISEnergyTransfer::run() {
                       getAnalyserName().toStdString() + getReflectionName().toStdString() + "_Reduced";
   reductionAlg->setProperty("OutputWorkspace", m_outputGroupName);
 
-  m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
+  m_batchAlgoRunner->addAlgorithm(reductionAlg, std::make_unique<MantidQt::API::AlgorithmRuntimeProps>());
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
@@ -788,17 +788,17 @@ void ISISEnergyTransfer::plotRaw() {
   }
 
   // Rebin the workspace to its self to ensure constant binning
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputToRebin;
-  inputToRebin["WorkspaceToMatch"] = name;
-  inputToRebin["WorkspaceToRebin"] = name;
-  inputToRebin["OutputWorkspace"] = name;
+  auto inputToRebin = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  inputToRebin->setPropertyValue("WorkspaceToMatch", name);
+  inputToRebin->setPropertyValue("WorkspaceToRebin", name);
+  inputToRebin->setPropertyValue("OutputWorkspace", name);
 
   IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
   rebinAlg->initialize();
-  m_batchAlgoRunner->addAlgorithm(rebinAlg, inputToRebin);
+  m_batchAlgoRunner->addAlgorithm(rebinAlg, std::move(inputToRebin));
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromRebin;
-  inputFromRebin["InputWorkspace"] = name;
+  auto inputFromRebin = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  inputFromRebin->setPropertyValue("InputWorkspace", name);
 
   std::vector<specnum_t> detectorList;
   for (specnum_t i = detectorMin; i <= detectorMax; i++)
@@ -815,28 +815,29 @@ void ISISEnergyTransfer::plotRaw() {
     calcBackAlg->setProperty("Mode", "Mean");
     calcBackAlg->setProperty("StartX", range[0]);
     calcBackAlg->setProperty("EndX", range[1]);
-    m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromRebin);
+    m_batchAlgoRunner->addAlgorithm(calcBackAlg,
+                                    std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(*inputFromRebin));
 
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalcBG;
-    inputFromCalcBG["InputWorkspace"] = name + "_bg";
+    auto inputFromCalcBG = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    inputFromCalcBG->setPropertyValue("InputWorkspace", name + "_bg");
 
     IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
     groupAlg->initialize();
     groupAlg->setProperty("OutputWorkspace", name + "_grp");
     groupAlg->setProperty("DetectorList", detectorList);
-    m_batchAlgoRunner->addAlgorithm(groupAlg, inputFromCalcBG);
+    m_batchAlgoRunner->addAlgorithm(groupAlg, std::move(inputFromCalcBG));
 
     IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
     rawGroupAlg->initialize();
     rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
     rawGroupAlg->setProperty("DetectorList", detectorList);
-    m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromRebin);
+    m_batchAlgoRunner->addAlgorithm(rawGroupAlg, std::move(inputFromRebin));
   } else {
     IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
     rawGroupAlg->initialize();
     rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
     rawGroupAlg->setProperty("DetectorList", detectorList);
-    m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromRebin);
+    m_batchAlgoRunner->addAlgorithm(rawGroupAlg, std::move(inputFromRebin));
   }
 
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));

@@ -85,7 +85,7 @@ public:
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
-  API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const override;
+  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;
