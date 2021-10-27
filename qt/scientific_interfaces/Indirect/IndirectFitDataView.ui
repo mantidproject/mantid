@@ -40,7 +40,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QVBoxLayout" name="loDataControl" stretch="0,0,0">
+    <layout class="QVBoxLayout" name="loDataControl" stretch="0,0,0,0">
      <property name="rightMargin">
       <number>0</number>
      </property>
@@ -55,6 +55,13 @@
       <widget class="QPushButton" name="pbRemove">
        <property name="text">
         <string>Remove</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pbUnify">
+       <property name="text">
+        <string>Unify Range</string>
        </property>
       </widget>
      </item>

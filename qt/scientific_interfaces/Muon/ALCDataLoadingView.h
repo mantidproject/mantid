@@ -82,7 +82,7 @@ public:
   void setAlphaValue(const std::string &alpha) override;
   std::string getAlphaValue() const override;
   void showAlphaMessage(const bool alpha) override;
-
+  void setFileExtensions(const std::vector<std::string> &extensions) override;
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
 

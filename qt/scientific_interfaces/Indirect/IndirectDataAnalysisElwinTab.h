@@ -48,10 +48,6 @@ protected slots:
   virtual void closeDialog();
 
 signals:
-  /// Signal emitted when file input is visible
-  void fileViewVisible();
-  /// Signal emitted when workspace selector is visible
-  void workspaceViewVisible();
   void dataAdded();
   void dataRemoved();
   void dataChanged();
@@ -112,9 +108,6 @@ private slots:
   void saveClicked();
   void addData();
   void checkLoadedFiles();
-
-  /// Slot called when the current view is changed
-  void handleViewChanged(int index);
 };
 
 } // namespace IDA

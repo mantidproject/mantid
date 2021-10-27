@@ -35,6 +35,8 @@ struct EXPORT_OPT_MANTIDQT_COMMON FindFilesSearchParameters {
   std::string algorithmName;
   /// The name of the property on the algorithm to use for searching
   std::string algorithmProperty;
+  /// any additional extensions that we want to consider
+  std::vector<std::string> extensions;
 };
 
 /**

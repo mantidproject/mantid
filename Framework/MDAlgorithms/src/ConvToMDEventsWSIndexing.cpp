@@ -13,10 +13,9 @@ size_t ConvToMDEventsWSIndexing::initialize(const MDWSDescription &WSD, std::sha
   size_t numSpec = ConvToMDEventsWS::initialize(WSD, inWSWrapper, ignoreZeros);
 
   // check if split parameters are valid
-  auto &split_into = m_OutWSWrapper->pWorkspace()->getBoxController()->getSplitIntoAll();
+  const auto &split_into = m_OutWSWrapper->pWorkspace()->getBoxController()->getSplitIntoAll();
 
-  bool validSplitInfo = isSplitValid(split_into);
-  if (!validSplitInfo) {
+  if (!isSplitValid(split_into)) {
     std::string arg;
     for (auto &i : split_into)
       arg += std::to_string(i) + " ";

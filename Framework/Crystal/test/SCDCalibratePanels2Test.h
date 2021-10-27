@@ -304,7 +304,81 @@ public:
     //  It is recommended to have L1 and T0 calibrated at the same time.
   }
 
-  void test_samplePos() {
+  /**
+   * @brief Test on calibrating detector size
+   */
+  void test_calibrateDetectorSize() {
+
+    // Generate unique temp files
+    auto filenamebase = boost::filesystem::temp_directory_path();
+    filenamebase /= boost::filesystem::unique_path("testBank_%%%%%%%%");
+    std::string filenameBase = filenamebase.string();
+    // Make a clone of the standard peak workspace
+    PeaksWorkspace_sptr pws = m_pws->clone();
+    // Resize
+    const std::string compname("bank27");
+    const double scalex(1.1), scaley(1.1);
+    auto resizeAlg = AlgorithmFactory::Instance().create("ResizeRectangularDetector", 1);
+    resizeAlg->initialize();
+    resizeAlg->setProperty("Workspace", pws);
+    resizeAlg->setProperty("ComponentName", compname);
+    resizeAlg->setProperty("ScaleX", scalex);
+    resizeAlg->setProperty("ScaleY", scaley);
+    resizeAlg->execute();
+    // Retrieve
+    Mantid::API::IPeaksWorkspace_sptr ipws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(pws);
+    // Check
+    TS_ASSERT(ipws);
+    auto input = std::dynamic_pointer_cast<ExperimentInfo>(pws);
+    Mantid::Geometry::ParameterMap &pmap = input->instrumentParameters();
+    auto checkscalex = pmap.getDouble(compname, std::string("scalex"));
+    auto checkscaley = pmap.getDouble(compname, std::string("scaley"));
+
+    TS_ASSERT_DELTA(scalex, checkscalex[0], 0.00000001);
+    TS_ASSERT_DELTA(scaley, checkscaley[0], 0.00000001);
+
+    // Init, config and run Calibration
+    const std::string isawFilename = filenameBase + ".DetCal";
+    const std::string xmlFilename = filenameBase + ".xml";
+    const std::string csvFilename = filenameBase + ".csv";
+
+    // execute the calibration
+    SCDCalibratePanels2 alg;
+    alg.initialize();
+    alg.setProperty("PeakWorkspace", pws);
+    alg.setProperty("a", silicon_a);
+    alg.setProperty("b", silicon_b);
+    alg.setProperty("c", silicon_c);
+    alg.setProperty("alpha", silicon_alpha);
+    alg.setProperty("beta", silicon_beta);
+    alg.setProperty("gamma", silicon_gamma);
+    alg.setProperty("RecalculateUB", false);
+    alg.setProperty("CalibrateL1", false);
+    alg.setProperty("CalibrateT0", false);
+    // special about det size calibration
+    alg.setProperty("CalibrateBanks", true);
+    alg.setProperty("SearchRadiusTransBank", 0.0);
+    alg.setProperty("SearchradiusRotXBank", 0.0);
+    alg.setProperty("SearchradiusRotYBank", 0.0);
+    alg.setProperty("SearchradiusRotZBank", 0.0);
+
+    alg.setProperty("CalibrateSize", true);
+    alg.setProperty("SearchRadiusSize", 0.2);
+    alg.setProperty("FixAspectRatio", true);
+
+    alg.setProperty("TuneSamplePosition", false);
+    alg.setProperty("OutputWorkspace", "caliTableDetSizeTest");
+    alg.setProperty("DetCalFilename", isawFilename);
+    alg.setProperty("XmlFilename", xmlFilename);
+    alg.setProperty("CSVFilename", csvFilename);
+
+    alg.setProperty("MaxFitIterations", 5);
+    alg.setProperty("BankName", "bank27");
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+  }
+
+  void SaveTime_test_samplePos() {
     g_log.notice() << "test_samplePos() starts.\n";
     // Generate unique temp files
     auto filenamebase = boost::filesystem::temp_directory_path();

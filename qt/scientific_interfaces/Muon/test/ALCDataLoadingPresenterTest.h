@@ -56,6 +56,7 @@ public:
   MOCK_CONST_METHOD0(getAlphaValue, std::string());
   MOCK_CONST_METHOD0(isAlphaEnabled, bool());
 
+  MOCK_METHOD1(setFileExtensions, void(const std::vector<std::string> &extensions));
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
   MOCK_METHOD1(displayError, void(const std::string &));
@@ -150,6 +151,8 @@ public:
     MockALCDataLoadingView view;
     ALCDataLoadingPresenter presenter(&view);
     EXPECT_CALL(view, initialize());
+    std::vector<std::string> expected{".nxs_v2", ".bin"};
+    EXPECT_CALL(view, setFileExtensions(expected));
     presenter.initialize();
   }
 

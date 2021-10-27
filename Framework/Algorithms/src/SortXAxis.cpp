@@ -165,12 +165,12 @@ void SortXAxis::copyYandEToOutputWorkspace(std::vector<std::size_t> &workspaceIn
     workspaceIndicies.erase(lastIndexIt);
   }
 
-  auto &inSpaceY = inputWorkspace.y(specNum);
+  const auto &inSpaceY = inputWorkspace.y(specNum);
   for (auto workspaceIndex = 0u; workspaceIndex < inputWorkspace.y(specNum).size(); workspaceIndex++) {
     outputWorkspace.mutableY(specNum)[workspaceIndex] = inSpaceY[workspaceIndicies[workspaceIndex]];
   }
 
-  auto &inSpaceE = inputWorkspace.e(specNum);
+  const auto &inSpaceE = inputWorkspace.e(specNum);
   for (auto workspaceIndex = 0u; workspaceIndex < inputWorkspace.e(specNum).size(); workspaceIndex++) {
     outputWorkspace.mutableE(specNum)[workspaceIndex] = inSpaceE[workspaceIndicies[workspaceIndex]];
   }

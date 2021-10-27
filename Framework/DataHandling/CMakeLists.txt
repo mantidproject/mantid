@@ -209,7 +209,8 @@ set(SRC_FILES
     src/SortTableWorkspace.cpp
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
-    src/XmlHandler.cpp)
+    src/XmlHandler.cpp
+)
 
 set(INC_FILES
     inc/MantidDataHandling/ApplyDiffCal.h
@@ -425,7 +426,8 @@ set(INC_FILES
     src/LoadRaw/isisraw.h
     src/LoadRaw/isisraw2.h
     src/LoadRaw/item_struct.h
-    src/LoadRaw/vms_convert.h)
+    src/LoadRaw/vms_convert.h
+)
 
 set(TEST_FILES
     ApplyDiffCalTest.h
@@ -613,13 +615,12 @@ set(TEST_FILES
     SortTableWorkspaceTest.h
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h
-    XMLInstrumentParameterTest.h)
+    XMLInstrumentParameterTest.h
+)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -634,15 +635,9 @@ endif()
 
 if(ENABLE_LIB3MF)
   add_definitions(-DENABLE_LIB3MF)
-  list(APPEND
-    INC_FILES
-    inc/MantidDataHandling/Mantid3MFFileIO.h)
-  list(APPEND
-    SRC_FILES
-    src/Mantid3MFFileIO.cpp)
-  list(APPEND
-    TEST_FILES
-    Mantid3MFFileIOTest.h)
+  list(APPEND INC_FILES inc/MantidDataHandling/Mantid3MFFileIO.h)
+  list(APPEND SRC_FILES src/Mantid3MFFileIO.cpp)
+  list(APPEND TEST_FILES Mantid3MFFileIOTest.h)
   find_package(Lib3mf REQUIRED)
 endif()
 
@@ -652,54 +647,41 @@ enable_precompiled_headers(inc/MantidDataHandling/PrecompiledHeader.h SRC_FILES)
 add_library(DataHandling ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::DataHandling ALIAS DataHandling)
 
-target_include_directories(DataHandling PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  DataHandling PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(DataHandling
-                      PROPERTIES OUTPUT_NAME
-                                 MantidDataHandling
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_DATAHANDLING")
+set_target_properties(
+  DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling COMPILE_DEFINITIONS "IN_MANTID_DATAHANDLING"
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(DataHandling
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(
-    DataHandling
-    PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}"
-    )
+  set_target_properties(DataHandling PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR};\$ORIGIN/../${PLUGINS_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET DataHandling PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(DataHandling
-                        PUBLIC
-                        Mantid::Nexus
-                        Mantid::API
-                        Mantid::HistogramData
-                        Mantid::Catalog
-                        Mantid::DataObjects
-                        Mantid::Geometry
-                        Mantid::Kernel
-                        Mantid::Indexing
-                        Mantid::Parallel
-                        PRIVATE
-                        Mantid::Json
-                        Boost::filesystem
-                        Mantid::NexusGeometry)
+target_link_libraries(
+  DataHandling
+  PUBLIC Mantid::Nexus
+         Mantid::API
+         Mantid::HistogramData
+         Mantid::Catalog
+         Mantid::DataObjects
+         Mantid::Geometry
+         Mantid::Kernel
+         Mantid::Indexing
+         Mantid::Parallel
+  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
+)
 
-
-# Lib3mf is technically a public dependency as it is in our public headers.
-# We are assuming here that it won't be used.
+# Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.
 if(ENABLE_LIB3MF)
-  target_link_libraries(DataHandling PRIVATE
-                        ${LIB3MF_LIBRARIES})
-  if (CONDA_BUILD)
+  target_link_libraries(DataHandling PRIVATE ${LIB3MF_LIBRARIES})
+  if(CONDA_BUILD)
     target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR})
   else()
     target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
@@ -710,12 +692,8 @@ endif()
 add_subdirectory(test)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)
+if(CONDA_BUILD)
+  mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    DataHandling
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS DataHandling INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()
