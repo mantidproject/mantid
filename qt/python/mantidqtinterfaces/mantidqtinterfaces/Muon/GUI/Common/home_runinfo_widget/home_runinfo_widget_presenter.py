@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
-from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
+from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_to_min_whole_number_or_sf
 
 
-SAMPLE_PRECISION =3
+SAMPLE_PRECISION =4
 
 
 class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
@@ -44,7 +44,7 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
     def create_text_line(self, name, log_name, round=0):
         log = self._model.get_log_value(log_name)
         try:
-            log = round_value(log, round)
+            log = round_to_min_whole_number_or_sf(log, round)
         except ValueError:
             log = log
         text = str(name) + " : " + str(log)

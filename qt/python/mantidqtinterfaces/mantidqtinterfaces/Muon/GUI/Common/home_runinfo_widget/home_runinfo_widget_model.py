@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
+from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_to_min_whole_number_or_sf
 
 
 millions_counts_conversion = 1. / 1e6
@@ -37,13 +37,13 @@ class HomeRunInfoWidgetModel(object):
         return total
 
     def get_counts_in_MeV(self, counts):
-        return counts * millions_counts_conversion
+        return round_to_min_whole_number_or_sf(counts * millions_counts_conversion)
 
     def get_counts_per_good_frame(self, counts):
         good_frames = self.get_log_value("goodfrm")
 
         if good_frames != 'Log not found':
-            return round_value(counts / float(good_frames), 3)
+            return round_to_min_whole_number_or_sf(counts / float(good_frames), 4)
         else:
             return 'Good frames not defined'
 
@@ -51,7 +51,7 @@ class HomeRunInfoWidgetModel(object):
         good_frames = self.get_log_value("goodfrm")
 
         if good_frames != 'Log not found':
-            return round_value(counts / float(good_frames) / float(self._data.num_detectors), 3)
+            return round_to_min_whole_number_or_sf(counts / float(good_frames) / float(self._data.num_detectors), 4)
         else:
             return 'Good frames not defined'
 
@@ -65,7 +65,7 @@ class HomeRunInfoWidgetModel(object):
         except Exception:
             return "Log not found"
         if temps:
-            return round_value(temps.timeAverageValue(), 3)
+            return round_to_min_whole_number_or_sf(temps.timeAverageValue(), 4)
         else:
             return "Log not found"
 

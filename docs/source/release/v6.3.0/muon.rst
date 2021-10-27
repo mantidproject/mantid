@@ -39,7 +39,7 @@ Improvements
 ############
 
 - The `alpha` values on grouping tab are now to six decimal places.
-- The numerical values in the `run info` box on the home tab are now to three decimal places.
+- The numerical values in the `run info` box on the home tab are now rounded.
 
 Bugfixes
 ########
