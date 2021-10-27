@@ -745,8 +745,8 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
     return;
 
   updateProgressBar();
-  auto const path = m_model.reductionJobs().getPath(item.get());
-  setRowStylingForItem(path, item.get());
+  auto const location = m_model.reductionJobs().getLocation(item.get());
+  setRowStylingForItem(location, item.get());
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {
@@ -770,8 +770,8 @@ void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> i
     return;
 
   auto const &row = dynamic_cast<Row const &>(item.get());
-  auto const path = m_model.reductionJobs().getPath(row);
-  m_jobViewUpdater.rowModified(groupOf(path), rowOf(path), row);
+  auto const location = m_model.reductionJobs().getLocation(row);
+  m_jobViewUpdater.rowModified(groupOf(location), rowOf(location), row);
 }
 
 bool RunsTablePresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }

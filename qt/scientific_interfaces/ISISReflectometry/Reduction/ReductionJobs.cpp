@@ -185,13 +185,13 @@ int percentComplete(ReductionJobs const &jobs) {
 
 Group const &ReductionJobs::operator[](int index) const { return m_groups[index]; }
 
-MantidWidgets::Batch::RowLocation ReductionJobs::getPath(Item const &item) const {
+MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Item const &item) const {
   if (item.isGroup())
-    return getPath(dynamic_cast<Group const &>(item));
-  return getPath(dynamic_cast<Row const &>(item));
+    return getLocation(dynamic_cast<Group const &>(item));
+  return getLocation(dynamic_cast<Row const &>(item));
 }
 
-MantidWidgets::Batch::RowLocation ReductionJobs::getPath(Group const &group) const {
+MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Group const &group) const {
   // Find this group in the groups list
   auto groupIter = std::find_if(m_groups.cbegin(), m_groups.cend(),
                                 [&group](Group const &currentGroup) -> bool { return &currentGroup == &group; });
@@ -204,7 +204,7 @@ MantidWidgets::Batch::RowLocation ReductionJobs::getPath(Group const &group) con
   return MantidWidgets::Batch::RowLocation({groupIndex});
 }
 
-MantidWidgets::Batch::RowLocation ReductionJobs::getPath(Row const &row) const {
+MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Row const &row) const {
   auto groupIndex = 0;
   for (auto const &group : m_groups) {
     // See if the row is in this group
@@ -227,10 +227,10 @@ MantidWidgets::Batch::RowLocation ReductionJobs::getPath(Row const &row) const {
 }
 
 Group const &ReductionJobs::getParentGroup(Row const &row) const {
-  auto const path = getPath(row);
-  if (path.path().empty())
+  auto const location = getLocation(row);
+  if (location.path().empty())
     throw std::runtime_error("Internal error: could not find parent group for row");
-  auto const groupIndex = path.path()[0];
+  auto const groupIndex = location.path()[0];
   return m_groups[groupIndex];
 }
 
