@@ -47,7 +47,6 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
 
     def wait_for_thread(self, thread_model):
         if thread_model:
-            thread_model._thread.wait()
             QApplication.sendPostedEvents()
 
     def create_fake_workspace(self):

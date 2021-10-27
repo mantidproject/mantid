@@ -76,27 +76,19 @@ class ThreadModel(QtWidgets.QWidget):
         self.check_model_has_correct_attributes()
 
     def check_model_has_correct_attributes(self):
-        if hasattr(self.model, "execute") and hasattr(self.model, "output"):
+        if hasattr(self.model, "execute"):
             return
         raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
-                             " execute() and output() methods")
+                             " execute() method")
 
     def setup_thread_and_start(self):
-        worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self.warning, success_cb=self.end_slot,
+        # Construct the Async thread
+        worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self._exception_callback, success_cb=self.end_slot,
                                     finished_cb=self.threadWrapperTearDown)
         worker.start()
+
+        # trigger the slot for the start of the process
         self.start_slot()
-        # create the ThreadModelWorker and connect its signals up
-
-        #self._worker.signals.start.connect(self._worker.run)
-        #self._worker.signals.started.connect(self.start_slot)
-
-        # Create the thread and pass it the worker
-        #self._thread.start()
-        #self._worker.moveToThread(self._thread)
-
-        # start the worker code inside the thread
-        #self._worker.signals.start.emit()
 
     def start(self):
         # keep this method to maintain consistency with older usages of the ThreadModel
