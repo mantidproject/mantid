@@ -489,6 +489,9 @@ class WANDPowderReductionTest(unittest.TestCase):
         out = WANDPowderReduction('tmp_ws', Target='Theta', XMin=29, XMax=31, NumberBins=10, NormaliseBy='None')
         np.testing.assert_allclose(out.readY(0), [0, 0, 0, 0, 269.068237, 486.311606, 618.125152, 720.37274, 811.141863, 821.032586], rtol=5e-4)
 
+        tmp_ws.delete()
+        out.delete()
+
 
 if __name__ == "__main__":
     unittest.main()
