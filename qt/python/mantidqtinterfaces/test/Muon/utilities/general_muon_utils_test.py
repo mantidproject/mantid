@@ -20,11 +20,11 @@ class GeneralMuonUtilsTest(unittest.TestCase):
 
     def test_round_significant_figures_up(self):
         self.assertEqual("0.013", utils.round_significant_figures("0.0126",2))
-        self.assertEqual("1.3e3", utils.round_significant_figures("1263",2))
+        self.assertEqual("1.3e+03", utils.round_significant_figures("1263",2))
 
     def test_round_significant_figures_down(self):
         self.assertEqual("0.012", utils.round_significant_figures("0.012134",2))
-        self.assertEqual("1.2e3", utils.round_significant_figures("1223",2))
+        self.assertEqual("1.2e+03", utils.round_significant_figures("1223",2))
 
     def test_round_to_min_whole_number_or_sf_to_whole_number(self):
         self.assertEqual("1223", utils.round_to_min_whole_number_or_sf("1223.258",2))
