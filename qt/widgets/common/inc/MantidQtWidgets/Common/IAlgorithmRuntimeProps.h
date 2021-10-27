@@ -15,6 +15,12 @@ public:
   IAlgorithmRuntimeProps() = default;
   virtual ~IAlgorithmRuntimeProps() = default;
 
+  using Mantid::Kernel::IPropertyManager::getDeclaredPropertyNames;
+
+  // Trying to compare properties downcasts to string types, which results in a bad_cast for sptr types
+  // so you will need to manually call getProperty(name) and cast to type T before comparing
+  virtual bool operator==(const Mantid::Kernel::IPropertyManager &) = delete;
+
   template <typename T> void setProperty(const std::string &name, const T &value) {
     if (!existsProperty(name)) {
       declareProperty(name, value);

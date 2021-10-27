@@ -6,14 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include <string>
 
 namespace MantidQt::API {
-bool AlgorithmRuntimeProps::operator==(const AlgorithmRuntimeProps &other) {
-  return Mantid::Kernel::PropertyManager::operator==(other);
-}
-
 Mantid::Kernel::IPropertyManager::TypedValue
 AlgorithmRuntimeProps::getProperty(const std::string &name) const noexcept {
   return Mantid::Kernel::PropertyManager::getProperty(name);

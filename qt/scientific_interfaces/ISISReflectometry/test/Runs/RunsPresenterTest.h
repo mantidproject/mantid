@@ -701,10 +701,11 @@ public:
 
   void testStartMonitorSetsUserSpecifiedPostProcessingProperties() {
     auto presenter = makePresenter();
-    auto options = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto options = defaultLiveMonitorReductionOptions();
     options->setPropertyValue("Prop1", "val1");
     options->setPropertyValue("Prop2", "val2");
-    expectGetLiveDataOptions(std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(*options));
+    expectGetLiveDataOptions(std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(
+        dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(*options)));
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
     assertPostProcessingPropertiesContainOptions(*options, algRunner);
@@ -1123,15 +1124,21 @@ private:
   void assertAlgorithmPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
                                                std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    TS_ASSERT_EQUALS(dynamic_cast<const Mantid::Kernel::PropertyManager &>(expected),
-                     dynamic_cast<const Mantid::Kernel::PropertyManager &>(*alg))
+    const auto &expectedAlgProps = expected.getProperties();
+    const auto &resultAlgProps = alg->getProperties();
+    for (const auto &expectedProp : expectedAlgProps) {
+      const auto foundItem =
+          std::find_if(resultAlgProps.cbegin(), resultAlgProps.cend(), [&expectedProp](const auto &prop) {
+            return expectedProp->value() == prop->value() && expectedProp->name() == prop->name();
+          });
+      TS_ASSERT_DIFFERS(foundItem, resultAlgProps.cend());
+    }
   }
 
-  void assertPostProcessingPropertiesContainOptions(IAlgorithmRuntimeProps &expected,
+  void assertPostProcessingPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
                                                     std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    TS_ASSERT_EQUALS(expected.getPropertyValue("PostProcessingProperties"),
-                     alg->getPropertyValue("PostProcessingProperties"))
+    TS_ASSERT_EQUALS(convertAlgPropsToString(expected), alg->getPropertyValue("PostProcessingProperties"))
   }
 
   double m_thetaTolerance;
