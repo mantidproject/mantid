@@ -17,7 +17,7 @@ class EXPORT_OPT_MANTIDQT_COMMON IConfiguredAlgorithm {
 public:
   virtual ~IConfiguredAlgorithm() = default;
   virtual Mantid::API::IAlgorithm_sptr algorithm() const = 0;
-  virtual const MantidQt::API::IAlgorithmRuntimeProps &properties() const noexcept = 0;
+  virtual const MantidQt::API::IAlgorithmRuntimeProps &getAlgorithmRuntimeProps() const noexcept = 0;
 };
 
 using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;

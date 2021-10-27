@@ -207,7 +207,7 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
   try {
     m_currentAlgorithm = algorithm->algorithm();
 
-    auto const &props = algorithm->properties();
+    auto const &props = algorithm->getAlgorithmRuntimeProps();
 
     auto const allowedPropNames = m_currentAlgorithm->getDeclaredPropertyNames();
     auto const propNamesToUpdate = props.getDeclaredPropertyNames();
@@ -218,7 +218,7 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
     if (invalidProps.size() > 0) {
       const auto invalidPropsStr = std::accumulate(invalidProps.cbegin(), invalidProps.cend(), invalidProps[0],
                                                    [](const auto &a, const auto &b) { return a + "," + b; });
-      throw Mantid::Kernel::Exception::NotFoundError("Invalid Properties given:", invalidPropsStr);
+      throw Mantid::Kernel::Exception::NotFoundError("Invalid Properties given: ", invalidPropsStr);
     }
 
     // Assign the properties to be set at runtime

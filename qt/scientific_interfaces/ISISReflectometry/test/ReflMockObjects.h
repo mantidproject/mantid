@@ -353,7 +353,8 @@ class MockBatchJobAlgorithm : public IBatchJobAlgorithm, public MantidQt::API::I
 public:
   MockBatchJobAlgorithm() {}
   MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
-  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), properties, (), (const, override, noexcept));
+  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (),
+              (const, override, noexcept));
   MOCK_METHOD0(item, Item *());
   MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());

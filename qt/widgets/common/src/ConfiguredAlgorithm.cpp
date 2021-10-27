@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -16,6 +16,8 @@ ConfiguredAlgorithm::ConfiguredAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
 
 Mantid::API::IAlgorithm_sptr ConfiguredAlgorithm::algorithm() const { return m_algorithm; }
 
-const MantidQt::API::IAlgorithmRuntimeProps &ConfiguredAlgorithm::properties() const noexcept { return *m_properties; }
+const MantidQt::API::IAlgorithmRuntimeProps &ConfiguredAlgorithm::getAlgorithmRuntimeProps() const noexcept {
+  return *m_properties;
+}
 
 } // namespace MantidQt::API

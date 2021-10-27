@@ -18,7 +18,7 @@ public:
   virtual ~ConfiguredAlgorithm() = default;
 
   Mantid::API::IAlgorithm_sptr algorithm() const override;
-  const MantidQt::API::IAlgorithmRuntimeProps &properties() const noexcept override;
+  const MantidQt::API::IAlgorithmRuntimeProps &getAlgorithmRuntimeProps() const noexcept override;
 
 protected:
   Mantid::API::IAlgorithm_sptr m_algorithm;

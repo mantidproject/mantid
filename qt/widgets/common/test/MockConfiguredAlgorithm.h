@@ -18,11 +18,13 @@ class MockConfiguredAlgorithm : public MantidQt::API::IConfiguredAlgorithm {
 public:
   MockConfiguredAlgorithm(std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> runtimeProps)
       : m_runtimeProps(std::move(runtimeProps)) {
-    ON_CALL(*this, properties).WillByDefault(::testing::ReturnRef(*m_runtimeProps));
+    // Explicitly hold a reference to the props we return by reference, so the tests don't get this wrong
+    ON_CALL(*this, getAlgorithmRuntimeProps).WillByDefault(::testing::ReturnRef(*m_runtimeProps));
   }
 
   MOCK_METHOD(Mantid::API::IAlgorithm_sptr, algorithm, (), (const, override));
-  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), properties, (), (const, noexcept, override));
+  MOCK_METHOD((const MantidQt::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (),
+              (const, noexcept, override));
 
 private:
   std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> m_runtimeProps;

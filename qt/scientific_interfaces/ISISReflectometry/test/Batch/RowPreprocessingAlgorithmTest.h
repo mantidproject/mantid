@@ -57,8 +57,9 @@ public:
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
     MantidQt::API::AlgorithmRuntimeProps expectedProps;
     expectedProps.setPropertyValue("InputRunList", inputRuns[0]);
-    TS_ASSERT_EQUALS(dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(configuredAlg->properties()),
-                     expectedProps);
+    TS_ASSERT_EQUALS(
+        dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(configuredAlg->getAlgorithmRuntimeProps()),
+        expectedProps);
   }
 
   void test_row_is_updated_on_algorithm_complete() {
