@@ -23,9 +23,9 @@ A_BG = background asymmetry
 
 MuoniumDecouplingCurve parameters:
 <UL>
-<LI> RepolarisingAsymmetry - the asymmetry of the muonium fraction (default 1.0)</LI>
+<LI> RepolarisingAsymmetry - the asymmetry of the muonium fraction (default 0.2)</LI>
 <LI> DecouplingField - the decoupling field. This is related to the hyperfine constant A of the muonium state by A =
-B0*(gamma_e+gamma_mu)/2pi (with x and B0 in Gauss, A = 2.81605 * B0 in MHz) (default 1.0)</LI>
+B0*(gamma_e+gamma_mu)/2pi (with x and B0 in Gauss, A = 2.81605 * B0 in MHz) (default 500.0)</LI>
 <LI> BackgroundAsymmetry - the background asymmetry (default 0.0)</LI>
 </UL>
 */

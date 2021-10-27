@@ -23,8 +23,8 @@ using namespace API;
 DECLARE_FUNCTION(MuoniumDecouplingCurve)
 
 void MuoniumDecouplingCurve::init() {
-  declareParameter("RepolarisingAsymmetry", 1.0, "coefficient for the repolarising asymmetry");
-  declareParameter("DecouplingField", 1.0, "coefficient for magnetic field rescaling");
+  declareParameter("RepolarisingAsymmetry", 0.2, "coefficient for the repolarising asymmetry");
+  declareParameter("DecouplingField", 500.0, "coefficient for magnetic field rescaling");
   declareParameter("BackgroundAsymmetry", 0.0, "coefficient for the background asymmetry");
 }
 
