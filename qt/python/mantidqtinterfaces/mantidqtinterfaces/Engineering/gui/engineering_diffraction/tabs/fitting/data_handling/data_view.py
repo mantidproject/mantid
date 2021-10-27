@@ -200,8 +200,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             self.proxy_model.text_filter += "bank_1"
         elif bank == "2 (South)":
             self.proxy_model.text_filter += "bank_2"
+        elif bank == "Cropped" or bank == "Custom":
+            self.proxy_model.text_filter += bank
+        elif bank == "Texture":
+            self.proxy_model.text_filter += "Texture*"
         if xunit != "All":
             self.proxy_model.text_filter += "_" + xunit
+        self.proxy_model.text_filter += "*"  # Allows search for 'All' units
 
     # =================
     # Component Getters
