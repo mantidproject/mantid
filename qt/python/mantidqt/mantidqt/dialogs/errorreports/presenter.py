@@ -78,12 +78,11 @@ class ErrorReporterPresenter(object):
 
         # Remember name and email in QSettings
         if self._view.rememberContactInfoCheckbox.checkState():
-            if new_name != self._view.saved_name or new_email != self._view.saved_email:
-                settings = QSettings()
-                settings.beginGroup(self._view.CONTACT_INFO)
-                settings.setValue(self._view.NAME, new_name)
-                settings.setValue(self._view.EMAIL, new_email)
-                settings.endGroup()
+            settings = QSettings()
+            settings.beginGroup(self._view.CONTACT_INFO)
+            settings.setValue(self._view.NAME, new_name)
+            settings.setValue(self._view.EMAIL, new_email)
+            settings.endGroup()
         else:
             self.forget_contact_info()
         return status
