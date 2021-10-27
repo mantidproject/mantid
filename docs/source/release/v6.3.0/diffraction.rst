@@ -18,6 +18,10 @@ Powder Diffraction
 - `absorptioncorrutils` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
 - Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
 
+Improvements
+############
+- :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
+
 Bugfixes
 ########
 - For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
