@@ -227,7 +227,7 @@ public:
 
     TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
     TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
-    TS_ASSERT_EQUALS(algStartSpy.count(), 1);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 2);
     TS_ASSERT_EQUALS(algCompleteSpy.count(), 1);
     TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
     // Check the batch error flag is true
@@ -269,8 +269,7 @@ public:
 
     TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
     TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
-    // Only the first algorithm completes because it quits after the failure
-    TS_ASSERT_EQUALS(algStartSpy.count(), 1);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 2);
     TS_ASSERT_EQUALS(algCompleteSpy.count(), 1);
     TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
     // Check the batch error flag is true
@@ -292,8 +291,7 @@ public:
 
     TS_ASSERT_EQUALS(batchCompleteSpy.count(), 1);
     TS_ASSERT_EQUALS(batchCancelledSpy.count(), 0);
-    // We continue after the failure so the first and third algorithms both complete
-    TS_ASSERT_EQUALS(algStartSpy.count(), 2);
+    TS_ASSERT_EQUALS(algStartSpy.count(), 3);
     TS_ASSERT_EQUALS(algCompleteSpy.count(), 2);
     TS_ASSERT_EQUALS(algErrorSpy.count(), 1);
     // The error flag is false if not stopping on failure
