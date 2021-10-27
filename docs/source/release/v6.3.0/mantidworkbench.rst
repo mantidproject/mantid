@@ -26,5 +26,7 @@ Bugfixes
 - Fixed issue in DrILL when ASCII output was requested but the logs to save were not defined for that instrument.
 - Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 - Fixed plot bins not working on data with numeric X-axis.
+- Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
+
 
 :ref:`Release 6.3.0 <v6.3.0>`

@@ -35,7 +35,6 @@ Bugfixes
 
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
 
-
 Fit Functions
 -------------
 New Features
