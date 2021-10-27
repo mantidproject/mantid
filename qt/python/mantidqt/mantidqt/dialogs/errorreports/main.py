@@ -11,7 +11,6 @@ import sys
 import mantid
 from qtpy import QT_VERSION
 from qtpy.QtCore import QCoreApplication, QSettings
-from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa
 
 from mantidqt.dialogs.errorreports.presenter import ErrorReporterPresenter
 from mantidqt.dialogs.errorreports.report import CrashReportPage
@@ -38,9 +37,10 @@ def main() -> int:
 
     from qtpy.QtWidgets import QApplication
     app = QApplication(sys.argv)
-    app.setOrganizationName(ORGANIZATION)
-    app.setOrganizationDomain(ORG_DOMAIN)
-    app.setApplicationName(APPNAME)
+    # The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated from workbench.config
+    app.setOrganizationName('mantidproject')
+    app.setOrganizationDomain('mantidproject.org')
+    app.setApplicationName('mantidworkbench')
     QSettings.setDefaultFormat(QSettings.IniFormat)
     form = CrashReportPage(show_continue_terminate=False)
     presenter = ErrorReporterPresenter(form, exit_code_str, command_line_args.application)
