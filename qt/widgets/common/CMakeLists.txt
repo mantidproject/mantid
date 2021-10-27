@@ -823,6 +823,7 @@ set(QT5_TEST_FILES
     test/MuonPeriodInfoTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
+    test/ParseKeyValueStringTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h

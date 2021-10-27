@@ -173,8 +173,7 @@ private:
   void stopMonitor();
   void startMonitorComplete();
   std::string liveDataReductionAlgorithm();
-  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> liveDataReductionOptions(const std::string &inputWorkspace,
-                                                                                  const std::string &instrument);
+  std::string liveDataReductionOptions(const std::string &inputWorkspace, const std::string &instrument);
 
   Mantid::API::IAlgorithm_sptr setupLiveDataMonitorAlgorithm();
 
