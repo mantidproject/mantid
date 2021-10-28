@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtCore, QtGui
 from os import path
 
 from mantidqt.utils.qt import load_ui
@@ -54,7 +54,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.allowMultipleFiles(True)
         self.finder_data.setFileExtensions([".nxs"])
         # xunit combo box
-        self.setup_xunit_combobox()
+        self.setup_combo_boxes()
         self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
@@ -204,9 +204,21 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
             self.proxy_model.text_filter += bank
         elif bank == "Texture":
             self.proxy_model.text_filter += "Texture*"
-        if xunit != "All":
+        elif bank == "Both Banks":
+            self.proxy_model.text_filter += "bank*"
+        if xunit != "No Unit Filter":
             self.proxy_model.text_filter += "_" + xunit
-        self.proxy_model.text_filter += "*"  # Allows search for 'All' units
+        self.proxy_model.text_filter += "*"  # Allows browse for '(No Unit Filter)' with a specified bank
+
+        # Keep "No Bank/Unit Filter" text grey and other text black
+        for (combo_box, current_text) in ((self.combo_bank, bank), (self.combo_xunit, xunit)):
+            if current_text[0:2] == "No":  # No Unit or Bank Filter
+                combo_box.setStyleSheet("color: grey")
+                for index in range(1, combo_box.count()):
+                    combo_box.setItemData(index, QtGui.QColor("black"), QtCore.Qt.ForegroundRole)
+            else:
+                combo_box.setStyleSheet("color: black")
+                combo_box.setItemData(0, QtGui.QColor("grey"), QtCore.Qt.ForegroundRole)
 
     # =================
     # Component Getters
@@ -248,8 +260,15 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # Internal Setup
     # =================
 
-    def setup_xunit_combobox(self):
-        self.combo_xunit.setEditable(False)
-        # make TOF default
+    def setup_combo_boxes(self):
+        # set "No Bank/Unit Filter" text grey and other text black
+        for combo_box, type_name in ((self.combo_bank, "Bank"), (self.combo_xunit, "Unit")):
+            combo_box.setEditable(True)
+            combo_box.lineEdit().setReadOnly(True)
+            combo_box.lineEdit().setEnabled(False)
+            no_filter_index = combo_box.findText("No " + type_name + " Filter")
+            combo_box.setItemData(no_filter_index, QtGui.QColor("grey"), QtCore.Qt.ForegroundRole)
+
+        # make TOF default for combo_xunit
         index = self.combo_xunit.findText("TOF")
         self.combo_xunit.setCurrentIndex(index)

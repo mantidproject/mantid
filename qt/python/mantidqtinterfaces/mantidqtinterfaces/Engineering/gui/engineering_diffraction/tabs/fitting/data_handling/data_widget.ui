@@ -80,11 +80,11 @@ QGroupBox:title {
         <item row="1" column="2">
          <widget class="QComboBox" name="combo_xunit">
           <property name="toolTip">
-           <string>Units filter </string>
+           <string>Unit Filter </string>
           </property>
           <item>
            <property name="text">
-            <string>All</string>
+            <string>No Unit Filter</string>
            </property>
           </item>
           <item>
@@ -102,11 +102,11 @@ QGroupBox:title {
         <item row="1" column="3">
          <widget class="QComboBox" name="combo_bank">
           <property name="toolTip">
-           <string>Bank filter </string>
+           <string>Bank Filter </string>
           </property>
           <item>
            <property name="text">
-            <string>All</string>
+            <string>No Bank Filter</string>
            </property>
           </item>
           <item>
@@ -117,6 +117,11 @@ QGroupBox:title {
           <item>
            <property name="text">
             <string>2 (South)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Both Banks</string>
            </property>
           </item>
           <item>
