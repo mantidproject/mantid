@@ -13,5 +13,9 @@ class PlotFreqFitPanePresenter(PlotFitPanePresenter):
         self._data_type = ["Frequency"]
         self._sort_by = [""]
         self.update_view()
-        self._view.disable_plot_raw_option()
+        self._view.hide_plot_raw()
         self._view.hide_tiled_by()
+
+    def handle_rebin_options_changed(self):
+        # there is no way to rebin the data -> do nothing
+        return

@@ -29,4 +29,9 @@ Improvements
   options were introduced to allow reduction and analysis of spectra in the TOF domain
   without automatically carrying out a Y space analysis afterwards.
 
+Bugfixes
+--------
+
+- Fixed a bug which prevented workspaces being loaded into Elwin.
+
 :ref:`Release 6.3.0 <v6.3.0>`

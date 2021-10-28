@@ -79,10 +79,12 @@ Environment Definition File
 In this case the environment kit must be defined in the XML format. See :ref:`SampleEnvironment` concept page for further details on how the creating
 a definition file.
 
-Two keywords must be specified in the ``Environment`` dictionary:
+Three keywords must be specified in the ``Environment`` dictionary:
 
 - ``Name``: The name of the predefined kit (required)
 - ``Container``: The id of the container within the predefined kit. (required if there is more than one container defined for the kit).
+- ``Path``: The directory containing the predefined kit, allowing XML files to be loaded from any directory.
+  If this is not set, then the Sample Environment XML file must be in one of the instrument directories.
 
 The name of a kit must be unique for a given instrument. The following
 procedure is used when trying to find a named definition, e.g ``CRYO-01``:

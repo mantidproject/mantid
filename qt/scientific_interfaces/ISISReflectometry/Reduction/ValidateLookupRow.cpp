@@ -11,6 +11,8 @@
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
 
+using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 template <typename T> class AppendErrorIfNotType : public boost::static_visitor<boost::optional<T>> {
@@ -39,62 +41,63 @@ private:
 using CellText = LookupRow::ValueArray;
 
 boost::optional<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(CellText const &cellText) {
-  if (isEntirelyWhitespace(cellText[0])) {
+  if (isEntirelyWhitespace(cellText[LookupRow::Column::THETA])) {
     return boost::optional<double>();
   } else {
-    auto theta = ::MantidQt::CustomInterfaces::ISISReflectometry::parseTheta(cellText[0]);
+    auto theta = ISISReflectometry::parseTheta(cellText[LookupRow::Column::THETA]);
     if (theta.is_initialized()) {
       return theta;
     }
   }
-  m_invalidColumns.emplace_back(0);
+  m_invalidColumns.emplace_back(LookupRow::Column::THETA);
   return boost::none;
 }
 
 boost::optional<TransmissionRunPair> LookupRowValidator::parseTransmissionRuns(CellText const &cellText) {
-  auto transmissionRunsOrError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseTransmissionRuns(cellText[1], cellText[2]);
-  return boost::apply_visitor(AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, 1), transmissionRunsOrError);
+  auto transmissionRunsOrError = ISISReflectometry::parseTransmissionRuns(cellText[LookupRow::Column::FIRST_TRANS],
+                                                                          cellText[LookupRow::Column::SECOND_TRANS]);
+  return boost::apply_visitor(
+      AppendErrorIfNotType<TransmissionRunPair>(m_invalidColumns, LookupRow::Column::FIRST_TRANS),
+      transmissionRunsOrError);
 }
 
 boost::optional<boost::optional<std::string>>
 LookupRowValidator::parseTransmissionProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseProcessingInstructions(cellText[3]);
+      ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::TRANS_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(3);
+    m_invalidColumns.emplace_back(LookupRow::Column::TRANS_SPECTRA);
   return optionalInstructionsOrNoneIfError;
 }
 
 boost::optional<RangeInQ> LookupRowValidator::parseQRange(CellText const &cellText) {
-  auto qRangeOrError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseQRange(cellText[4], cellText[5], cellText[6]);
-  return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, 4), qRangeOrError);
+  auto qRangeOrError = ISISReflectometry::parseQRange(
+      cellText[LookupRow::Column::QMIN], cellText[LookupRow::Column::QMAX], cellText[LookupRow::Column::QSTEP]);
+  return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, LookupRow::Column::QMIN), qRangeOrError);
 }
 
 boost::optional<boost::optional<double>> LookupRowValidator::parseScaleFactor(CellText const &cellText) {
-  auto optionalScaleFactorOrNoneIfError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseScaleFactor(cellText[7]);
+  auto optionalScaleFactorOrNoneIfError = ISISReflectometry::parseScaleFactor(cellText[LookupRow::Column::SCALE]);
   if (!optionalScaleFactorOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(7);
+    m_invalidColumns.emplace_back(LookupRow::Column::SCALE);
   return optionalScaleFactorOrNoneIfError;
 }
 
 boost::optional<boost::optional<std::string>>
 LookupRowValidator::parseProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseProcessingInstructions(cellText[8]);
+      ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::RUN_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(8);
+    m_invalidColumns.emplace_back(LookupRow::Column::RUN_SPECTRA);
   return optionalInstructionsOrNoneIfError;
 }
 
 boost::optional<boost::optional<std::string>>
 LookupRowValidator::parseBackgroundProcessingInstructions(CellText const &cellText) {
   auto optionalInstructionsOrNoneIfError =
-      ::MantidQt::CustomInterfaces::ISISReflectometry::parseProcessingInstructions(cellText[9]);
+      ISISReflectometry::parseProcessingInstructions(cellText[LookupRow::Column::BACKGROUND_SPECTRA]);
   if (!optionalInstructionsOrNoneIfError.is_initialized())
-    m_invalidColumns.emplace_back(9);
+    m_invalidColumns.emplace_back(LookupRow::Column::BACKGROUND_SPECTRA);
   return optionalInstructionsOrNoneIfError;
 }
 

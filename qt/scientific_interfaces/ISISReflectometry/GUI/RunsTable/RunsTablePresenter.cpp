@@ -7,7 +7,6 @@
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
-#include "MantidQtWidgets/Common/Batch/RowPredicate.h"
 #include "Reduction/Group.h"
 #include "Reduction/RowLocation.h"
 #include "Reduction/ValidateRow.h"
@@ -17,14 +16,6 @@
 #include <boost/regex.hpp>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-namespace Colour {
-constexpr const char *DEFAULT = "#ffffff"; // white
-constexpr const char *INVALID = "#dddddd"; // very pale grey
-constexpr const char *RUNNING = "#f0e442"; // pale yellow
-constexpr const char *SUCCESS = "#d0f4d0"; // pale green
-constexpr const char *WARNING = "#e69f00"; // pale orange
-constexpr const char *FAILURE = "#accbff"; // pale blue
-} // namespace Colour
 
 namespace { // unnamed
 void clearStateStyling(MantidWidgets::Batch::Cell &cell) {
@@ -66,8 +57,7 @@ bool groupNameExists(std::string const &groupName, ReductionJobs const &jobs,
     return false;
 
   // If it exists but in one of the roots to ignore, return false
-  auto existingGroupLocation =
-      MantidWidgets::Batch::RowLocation(MantidWidgets::Batch::RowPath{maybeExistingGroupIndex.get()});
+  auto existingGroupLocation = MantidWidgets::Batch::RowLocation({maybeExistingGroupIndex.get()});
   if (std::find(rootsToIgnore.cbegin(), rootsToIgnore.cend(), existingGroupLocation) != rootsToIgnore.cend())
     return false;
 
@@ -94,16 +84,16 @@ void makePastedGroupNamesUnique(Clipboard &clipboard, int rootIndex,
   if (!clipboard.isGroupLocation(rootIndex))
     return;
 
-  auto groupName = clipboard.groupName(rootIndex);
-  if (groupName.empty())
+  auto clipGroupName = clipboard.groupName(rootIndex);
+  if (clipGroupName.empty())
     return;
 
   // Replace the group name until it is unique in the model and clipboard
-  while (groupNameExists(groupName, jobs, replacementRoots) || groupNameExists(groupName, clipboard, rootIndex))
-    groupName.append(" (copy)");
+  while (groupNameExists(clipGroupName, jobs, replacementRoots) || groupNameExists(clipGroupName, clipboard, rootIndex))
+    clipGroupName.append(" (copy)");
 
   // Set the new name
-  clipboard.setGroupName(rootIndex, groupName);
+  clipboard.setGroupName(rootIndex, clipGroupName);
 }
 
 void makePastedGroupNamesUnique(Clipboard &clipboard,
@@ -358,7 +348,7 @@ void RunsTablePresenter::ensureAtLeastOneGroupExists() {
   if (group.rows().size() > 0)
     return;
 
-  auto location = MantidWidgets::Batch::RowLocation(MantidWidgets::Batch::RowPath{0});
+  auto location = MantidWidgets::Batch::RowLocation({0});
   auto cells = m_view->jobs().cellsAt(location);
 
   // Groups should only have one cell
@@ -701,23 +691,23 @@ void RunsTablePresenter::forAllCellsAt(MantidWidgets::Batch::RowLocation const &
   m_view->jobs().setCellsAt(location, cells);
 }
 
-void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowPath const &rowPath, Item const &item) {
+void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowLocation const &rowLocation, Item const &item) {
   switch (item.state()) {
   case State::ITEM_NOT_STARTED: // fall through
   case State::ITEM_STARTING:
-    forAllCellsAt(rowPath, clearStateStyling);
+    forAllCellsAt(rowLocation, clearStateStyling);
     break;
   case State::ITEM_RUNNING:
-    forAllCellsAt(rowPath, applyRunningStateStyling);
+    forAllCellsAt(rowLocation, applyRunningStateStyling);
     break;
   case State::ITEM_COMPLETE:
-    forAllCellsAt(rowPath, applyCompletedStateStyling);
+    forAllCellsAt(rowLocation, applyCompletedStateStyling);
     break;
   case State::ITEM_ERROR:
-    forAllCellsAt(rowPath, applyErrorStateStyling, item.message());
+    forAllCellsAt(rowLocation, applyErrorStateStyling, item.message());
     break;
   case State::ITEM_WARNING:
-    forAllCellsAt(rowPath, applyWarningStateStyling, item.message());
+    forAllCellsAt(rowLocation, applyWarningStateStyling, item.message());
     break;
   };
 }
@@ -731,17 +721,17 @@ void RunsTablePresenter::notifyRowStateChanged() {
 
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
-    auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
-    setRowStylingForItem(groupPath, group);
+    auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
+    setRowStylingForItem(groupLocation, group);
 
     int rowIndex = 0;
     for (auto &row : group.rows()) {
-      auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
+      auto rowLocation = MantidWidgets::Batch::RowLocation({groupIndex, rowIndex});
 
       if (!row)
-        forAllCellsAt(rowPath, applyInvalidStateStyling);
+        forAllCellsAt(rowLocation, applyInvalidStateStyling);
       else {
-        setRowStylingForItem(rowPath, *row);
+        setRowStylingForItem(rowLocation, *row);
       }
 
       ++rowIndex;
@@ -755,19 +745,19 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
     return;
 
   updateProgressBar();
-  auto const path = m_model.reductionJobs().getPath(item.get());
-  setRowStylingForItem(path, item.get());
+  auto const location = m_model.reductionJobs().getLocation(item.get());
+  setRowStylingForItem(location, item.get());
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {
   int groupIndex = 0;
   for (auto &group : m_model.reductionJobs().groups()) {
-    auto groupPath = MantidWidgets::Batch::RowPath{groupIndex};
+    auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     int rowIndex = 0;
     for (auto &row : group.rows()) {
       if (row) {
-        auto rowPath = MantidWidgets::Batch::RowPath{groupIndex, rowIndex};
-        m_jobViewUpdater.rowModified(groupOf(rowPath), rowOf(rowPath), *row);
+        auto rowLocation = MantidWidgets::Batch::RowLocation({groupIndex, rowIndex});
+        m_jobViewUpdater.rowModified(groupOf(rowLocation), rowOf(rowLocation), *row);
       }
       ++rowIndex;
     }
@@ -780,8 +770,8 @@ void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> i
     return;
 
   auto const &row = dynamic_cast<Row const &>(item.get());
-  auto const path = m_model.reductionJobs().getPath(row);
-  m_jobViewUpdater.rowModified(groupOf(path), rowOf(path), row);
+  auto const location = m_model.reductionJobs().getLocation(row);
+  m_jobViewUpdater.rowModified(groupOf(location), rowOf(location), row);
 }
 
 bool RunsTablePresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
