@@ -33,7 +33,7 @@ class GeneralProperties(Enum):
     USE_NOTIFICATIONS = 'Notifications.Enabled'
     USER_LAYOUT = "MainWindow/user_layouts"
     WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
-    COMPLETION_ENABLED = "Editors/CompletionEnabled"
+    COMPLETION_ENABLED = "Editors/completion_enabled"
 
 
 class GeneralSettings(object):
@@ -99,6 +99,7 @@ class GeneralSettings(object):
 
         self.view.window_behaviour.currentTextChanged.connect(self.action_window_behaviour_changed)
         self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
+        self.view.completion_enabled.stateChanged.connect(self.action_completion_enabled_modified)
 
     def action_main_font_button_clicked(self):
         font = None
@@ -120,6 +121,9 @@ class GeneralSettings(object):
 
     def action_window_behaviour_changed(self, text):
         CONF.set(GeneralProperties.WINDOW_BEHAVIOUR.value, text)
+
+    def action_completion_enabled_modified(self, state):
+        CONF.set(GeneralProperties.COMPLETION_ENABLED.value, bool(state))
 
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
