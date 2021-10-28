@@ -699,5 +699,6 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertGreater(cf.chi2, 0.0)
         self.assertLess(cf.chi2, chi2)
 
+
 if __name__ == '__main__':
     unittest.main()
