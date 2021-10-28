@@ -11,6 +11,7 @@ from mantid.simpleapi import RenameWorkspace
 
 
 def _add_workspace_to_group(group_name, workspace_name):
+    return
     if AnalysisDataService.doesExist(group_name):
         workspaces_to_group = AnalysisDataService.retrieve(group_name).getNames()
     else:
@@ -124,7 +125,7 @@ class MuonWorkspaceWrapper(object):
             if self.is_hidden:
                 AnalysisDataService.addOrReplace(self._workspace_name, self.workspace)
 
-            self._add_to_appropriate_groups()
+            #self._add_to_appropriate_groups()
 
             self._workspace = None
             self._is_in_ads = True

@@ -38,6 +38,9 @@ from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelA
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
+from mantid.api import AnalysisDataService
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
+#from mantid.simpleapi import GroupWorkspaces
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Fitting", "Sequential Fitting", "Results",
@@ -264,6 +267,33 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
+        self.group_observer = GenericObserver(self.do_grouping)
+        self.enable_notifier.add_subscriber(self.group_observer)
+
+    def ADS_check(self, name, instrument):
+        def fit_check(name):
+            return False #"fit" in name.name()
+        print("moo", name.name())
+        return  instrument in name.name() and "MA" in name.name() and name.id() != "WorkspaceGroup" and not fit_check(name)
+
+    def do_grouping(self):
+        instrument = self.context.data_context.instrument
+        # only group things for the current instrument
+        str_names = AnalysisDataService.getObjectNames()
+        names = [name for name in AnalysisDataService.retrieveWorkspaces(str_names) if self.ADS_check(name, instrument)]
+        print("boo", [name.name() for name in names])
+        group_names = {}
+        for name in names:
+            run = get_run_number_from_workspace_name(name.name(), instrument)
+            tmp = instrument+run
+            # in the if and else check the names are not already group workspaces
+            if tmp in list(group_names.keys()):
+                group_names[tmp] += [name]
+            else:
+                group_names[tmp] = [name]
+        #for group in group_names.keys():
+            #print("hi", group)
+            #GroupWorkspaces(InputWorkspaces=group_names[group], OutputWorkspace=group)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -405,6 +435,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
+        self.seq_fitting_tab.seq_fitting_tab_presenter.enable_editing_notifier.add_subscriber(
+            self.enable_observer)
+
     def setup_group_calculation_disabler_notifier(self):
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
@@ -414,6 +447,9 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.disable_observer)
 
         self.fitting_tab.fitting_tab_presenter.disable_editing_notifier.add_subscriber(
+            self.disable_observer)
+
+        self.seq_fitting_tab.seq_fitting_tab_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
         self.phase_tab.phase_table_presenter.disable_editing_notifier.add_subscriber(
