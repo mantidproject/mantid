@@ -26,6 +26,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
+#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -214,12 +215,15 @@ void PDCalibration::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
                   "Comma delimited d-space positions of reference peaks.");
 
-  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-  declareProperty("PeakWindow", 0.1, mustBePositive,
-                  "The maximum window (in d -pace) to the left and right of the "
-                  "nominal peak center to look for the peak");
-  std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
+  auto windowValidator = std::make_shared<CompositeValidator>();
+  windowValidator->add(mustBePosArr);
+  auto lengthValidator = std::make_shared<Kernel::ArrayLengthValidator<double>>();
+  lengthValidator->setLengthMin(1);
+  windowValidator->add(lengthValidator);
+  windowValidator->add(std::make_shared<MandatoryValidator<std::vector<double>>>());
+  declareProperty(std::make_unique<ArrayProperty<double>>("PeakWindow", "0.1", windowValidator),
+                  "Window over which to fit a peak in d-spacing (if a single value is supplied it will used as half "
+                  "the window width for all peaks, otherwise a comma delimited list of boundaries).");
 
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
@@ -238,6 +242,7 @@ void PDCalibration::init() {
                   "(highest Y value position) and "
                   "the peak width will either be estimated by observation or calculated.");
 
+  std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC", std::make_shared<StringListValidator>(modes),
                   "Select calibration parameters to fit.");
 
@@ -309,6 +314,13 @@ std::map<std::string, std::string> PDCalibration::validateInputs() {
     } else if (difaRange[0] >= difaRange[1]) {
       messages["DIFArange"] = "min must be less than max";
     }
+  }
+
+  vector<double> peakWindow = getProperty("PeakWindow");
+  vector<double> peakCentres = getProperty("PeakPositions");
+  if (peakWindow.size() > 1 && peakWindow.size() != 2 * peakCentres.size()) {
+    messages["PeakWindow"] = "PeakWindow must be a vector with either 1 element (interpreted as half the width of "
+                             "the window) or twice the number of peak centres provided.";
   }
 
   return messages;
@@ -388,7 +400,7 @@ void PDCalibration::exec() {
   // Sort peak positions, required for correct peak window calculations
   std::sort(m_peaksInDspacing.begin(), m_peaksInDspacing.end());
 
-  const double peakWindowMaxInDSpacing = getProperty("PeakWindow");
+  const std::vector<double> peakWindow = getProperty("PeakWindow");
   const double minPeakHeight = getProperty("MinimumPeakHeight");
   const double maxChiSquared = getProperty("MaxChiSq");
 
@@ -440,11 +452,9 @@ void PDCalibration::exec() {
   // A pair of workspaces, one containing the nominal peak centers in TOF units,
   // the other containing the left and right fitting ranges around each nominal
   // peak center, also in TOF units. This for each pixel of the instrument
-  auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(m_uncalibratedWS, peakWindowMaxInDSpacing);
+  auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(m_uncalibratedWS, peakWindow);
   API::MatrixWorkspace_sptr tof_peak_center_ws = matrix_pair.first;
   API::MatrixWorkspace_sptr tof_peak_window_ws = matrix_pair.second;
-  //  API::MatrixWorkspace_sptr peak_window_ws =
-  //      createTOFPeakFitWindowWorkspace(m_uncalibratedWS, windowsInDSpacing);
 
   double peak_width_percent = getProperty("PeakWidthPercent");
 
@@ -525,7 +535,7 @@ void PDCalibration::exec() {
 
   // calculate fitting ranges to the left and right of each nominal peak
   // center, in d-spacing units
-  const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
+  const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindow);
 
   // get spectrum info to check workspace index correpsonds to a valid spectrum
   const auto &spectrumInfo = m_uncalibratedWS->spectrumInfo();
@@ -944,49 +954,45 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
 }
 
 /**
- * Fitting ranges to the left and right of peak center
- *
- * Example: if centres = [1, 3, 11] and widthMax=3, then this function returns
- * [(3-1)/2, (3-1)/2, (3-1)/2, 3, 3, 3]
- *
+ * Fitting ranges to the left and right of peak center (the window cannot exceed half the distance to the adjacent peaks
+ * in either direction)
  * @param centres :: peak centers, in d-spacing
- * @param widthMax :: maximum allowable fit range
+ * @param windows_in :: A vector of boundaries in d-sapcing (if only one element this is half the width of the window
+ * for all peaks)
  * @return array containing left and right ranges for first peak, left and right
  * for second peak, and so on.
  */
-vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres, const double widthMax) {
-  if (widthMax <= 0. || isEmpty(widthMax)) {
-    return vector<double>(); // option is turned off
-  }
+vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres,
+                                              const std::vector<double> &windows_in) {
 
   const std::size_t numPeaks = centres.size();
 
   // assumes distance between peaks can be used for window sizes
   assert(numPeaks >= 2);
 
-  vector<double> windows(2 * numPeaks);
-  double widthLeft;
-  double widthRight;
-  for (std::size_t i = 0; i < centres.size(); ++i) {
-    // calculate left
-    if (i == 0)
-      widthLeft = .5 * (centres[1] - centres[0]);
-    else
-      widthLeft = .5 * (centres[i] - centres[i - 1]);
-    widthLeft = std::min(widthLeft, widthMax);
-
-    // calculate right
-    if (i + 1 == numPeaks)
-      widthRight = .5 * (centres[numPeaks - 1] - centres[numPeaks - 2]);
-    else
-      widthRight = .5 * (centres[i + 1] - centres[i]);
-    widthRight = std::min(widthRight, widthMax);
-
+  vector<double> windows_out(2 * numPeaks);
+  double left;
+  double right;
+  for (std::size_t i = 0; i < numPeaks; ++i) {
+    if (windows_in.size() == 1) {
+      left = centres[i] - windows_in[0];
+      right = centres[i] + windows_in[0];
+    } else {
+      left = windows_in[2 * i];
+      right = windows_in[2 * i + 1];
+    }
+    // check boundaries don't exceed half dist to adjacent peaks
+    if (i > 0) {
+      left = std::max(left, centres[i] - 0.5 * (centres[i] - centres[i - 1]));
+    }
+    if (i < numPeaks - 1) {
+      right = std::min(right, centres[i] + 0.5 * (centres[i + 1] - centres[i]));
+    }
     // set the windows
-    windows[2 * i] = centres[i] - widthLeft;
-    windows[2 * i + 1] = centres[i] + widthRight;
+    windows_out[2 * i] = left;
+    windows_out[2 * i + 1] = right;
   }
-  return windows;
+  return windows_out;
 }
 
 /**
@@ -1324,16 +1330,16 @@ API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace
  *  calculated for each pixel.
  *
  *  @param dataws :: input signal workspace
- *  @param peakWindowMaxInDSpacing:: The maximum window (in d -pace) to the
- *  left and right of the nominal peak center to look for the peak
+ *  @param peakWindow:: A vector of boundaries in d-sapcing (if only one element this is half the width of the window
+ * for all peaks) left and right of the nominal peak center to look for the peak
  */
 std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
 PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws,
-                                                      const double peakWindowMaxInDSpacing) {
+                                                      const std::vector<double> &peakWindow) {
 
   // calculate fitting ranges to the left and right of each nominal peak
   // center, in d-spacing units
-  const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
+  const auto windowsInDSpacing = dSpacingWindows(m_peaksInDspacing, peakWindow);
 
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
     g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << " < " << m_peaksInDspacing[i] << " < "
