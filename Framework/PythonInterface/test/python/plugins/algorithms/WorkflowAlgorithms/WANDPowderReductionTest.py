@@ -12,6 +12,9 @@ from mantid.simpleapi import (
     CloneWorkspace,
     AddSampleLog,
     GroupWorkspaces,
+    LoadInstrument,
+    CreateWorkspace,
+    mtd
 )
 from mantid.api import (
     MatrixWorkspace,
@@ -454,6 +457,40 @@ class WANDPowderReductionTest(unittest.TestCase):
 
         assert isinstance(pd_out, WorkspaceGroup)
         assert len(pd_out) == 2
+
+    def test_edge_case(self):
+        # This is to capture the case where there are identical theta
+        # values for multiple spectra which cause problems when
+        # ResampleX is run with particular Xmin and Xmax causing the
+        # output to be all zeros.
+
+        # Create more real test workspace, using same properties as
+        # HB2C_558131
+        data = np.ones((256, 1920))
+        CreateWorkspace(
+            DataX=[0, 1],
+            DataY=data,
+            DataE=np.sqrt(data),
+            UnitX='Empty',
+            YUnitLabel='Counts',
+            NSpec=1966080 // 4,
+            OutputWorkspace='tmp_ws')
+        AddSampleLog('tmp_ws', LogName='HB2C:Mot:s2.RBV', LogText='29.9774', LogType='Number Series', NumberType='Double')
+        AddSampleLog('tmp_ws', LogName='HB2C:Mot:detz.RBV', LogText='0', LogType='Number Series', NumberType='Double')
+        tmp_ws = mtd['tmp_ws']
+
+        for n in range(tmp_ws.getNumberHistograms()):
+            s = tmp_ws.getSpectrum(n)
+            for i in range(2):
+                for j in range(2):
+                    s.addDetectorID(int(n * 2 % 512 + n // (512 / 2) * 512 * 2 + j + i * 512))
+        LoadInstrument('tmp_ws', InstrumentName='WAND', RewriteSpectraMap=False)
+
+        out = WANDPowderReduction('tmp_ws', Target='Theta', XMin=29, XMax=31, NumberBins=10, NormaliseBy='None')
+        np.testing.assert_allclose(out.readY(0), [0, 0, 0, 0, 269.068237, 486.311606, 618.125152, 720.37274, 811.141863, 821.032586], rtol=5e-4)
+
+        tmp_ws.delete()
+        out.delete()
 
 
 if __name__ == "__main__":
