@@ -33,6 +33,7 @@ class GeneralProperties(Enum):
     USE_NOTIFICATIONS = 'Notifications.Enabled'
     USER_LAYOUT = "MainWindow/user_layouts"
     WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
+    COMPLETION_ENABLED = "Editors/CompletionEnabled"
 
 
 class GeneralSettings(object):
@@ -175,6 +176,7 @@ class GeneralSettings(object):
         crystallography_convention = ("Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value))
         use_open_gl = ("on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower())
         invisible_workspaces = ("true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower())
+        completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value)
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -183,6 +185,7 @@ class GeneralSettings(object):
         self.view.crystallography_convention.setChecked(crystallography_convention)
         self.view.use_open_gl.setChecked(use_open_gl)
         self.view.show_invisible_workspaces.setChecked(invisible_workspaces)
+        self.view.completion_enabled.setChecked(completion_enabled)
 
     def action_project_recovery_enabled(self, state):
         ConfigService.setString(GeneralProperties.PR_RECOVERY_ENABLED.value, str(bool(state)))
