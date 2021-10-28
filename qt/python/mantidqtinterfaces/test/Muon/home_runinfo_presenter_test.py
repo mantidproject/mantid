@@ -48,7 +48,7 @@ class HomeTabRunInfoPresenterTest(unittest.TestCase):
         self.view.add_text_line.assert_any_call("Comment                   : FC first sample")
         self.view.add_text_line.assert_any_call("Start                     : 2009-03-24T04:18:58")
         self.view.add_text_line.assert_any_call("End                       : 2009-03-24T04:56:26")
-        self.view.add_text_line.assert_any_call("Counts (MEv)              : 20.1")
+        self.view.add_text_line.assert_any_call("Counts (MEv)              : 20.08")
         self.view.add_text_line.assert_any_call("Good Frames               : 88540")
         self.view.add_text_line.assert_any_call("Counts per Good Frame     : 226.8")
         self.view.add_text_line.assert_any_call("Counts per Good Frame per det : 3.543")
