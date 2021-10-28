@@ -41,8 +41,7 @@ Improvements
 - Automatically disable zoom and pan when opening the fit browser in the :ref:`Fitting tab <ui engineering fitting>` of the Engineering Diffraction interface (as they interfered with the interactive peak adding tool).
 - The plot on the fitting tab is now made larger when undocked, unless the size of the overall interface has been expanded significantly.
 - Updated the default values for :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` and in the fitting tab table to Niter = 50 and XWindow = { 600 for TOF, 0.02 for dSpacing }.
-- The file filter in the Focus tab for calibration type includes All, North, South and now also Cropped, Custom, Texture.
-- Updated the default values for :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` and in the fitting tab table to Niter = 50 and XWindow = { 600 for TOF, 0.02 for dSpacing }.
+- The file filter in the Focus tab for calibration Region includes "No Region Filter", North, South and now also Cropped, Custom, Texture and Both Banks. The text for "No Unit/Region Filter" are colored grey.
 
 Bugfixes
 ########

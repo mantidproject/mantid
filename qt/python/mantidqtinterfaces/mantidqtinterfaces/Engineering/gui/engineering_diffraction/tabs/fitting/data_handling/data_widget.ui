@@ -100,13 +100,13 @@ QGroupBox:title {
          </widget>
         </item>
         <item row="1" column="3">
-         <widget class="QComboBox" name="combo_bank">
+         <widget class="QComboBox" name="combo_region">
           <property name="toolTip">
-           <string>Bank Filter </string>
+           <string>Region Filter </string>
           </property>
           <item>
            <property name="text">
-            <string>No Bank Filter</string>
+            <string>No Region Filter</string>
            </property>
           </item>
           <item>

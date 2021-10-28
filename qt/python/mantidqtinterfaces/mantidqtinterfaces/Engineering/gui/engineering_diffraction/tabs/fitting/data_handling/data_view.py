@@ -55,7 +55,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.finder_data.setFileExtensions([".nxs"])
         # xunit combo box
         self.setup_combo_boxes()
-        self.update_file_filter(self.combo_bank.currentText(), self.combo_xunit.currentText())
+        self.update_file_filter(self.combo_region.currentText(), self.combo_xunit.currentText())
 
     def saveSettings(self):
         self.finder_data.saveSettings(output_settings.INTERFACES_SETTINGS_GROUP + '/' + output_settings.ENGINEERING_PREFIX)
@@ -67,11 +67,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     def set_on_load_clicked(self, slot):
         self.button_load.clicked.connect(slot)
 
-    def set_on_bank_changed(self, slot):
-        self.combo_bank.currentIndexChanged.connect(lambda: slot(self.combo_bank.currentText(), self.combo_xunit.currentText()))
+    def set_on_region_changed(self, slot):
+        self.combo_region.currentIndexChanged.connect(lambda: slot(self.combo_region.currentText(), self.combo_xunit.currentText()))
 
     def set_on_xunit_changed(self, slot):
-        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_bank.currentText(), self.combo_xunit.currentText()))
+        self.combo_xunit.currentIndexChanged.connect(lambda: slot(self.combo_region.currentText(), self.combo_xunit.currentText()))
 
     def set_enable_load_button_connection(self, slot):
         self.sig_enable_load_button.connect(slot)
@@ -194,25 +194,25 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         else:
             self.get_table_item(row, col).setCheckState(QtCore.Qt.Unchecked)
 
-    def update_file_filter(self, bank, xunit):
+    def update_file_filter(self, region, xunit):
         self.proxy_model.text_filter = "*"
-        if bank == "1 (North)":
+        if region == "1 (North)":
             self.proxy_model.text_filter += "bank_1"
-        elif bank == "2 (South)":
+        elif region == "2 (South)":
             self.proxy_model.text_filter += "bank_2"
-        elif bank == "Cropped" or bank == "Custom":
-            self.proxy_model.text_filter += bank
-        elif bank == "Texture":
+        elif region == "Cropped" or region == "Custom":
+            self.proxy_model.text_filter += region
+        elif region == "Texture":
             self.proxy_model.text_filter += "Texture*"
-        elif bank == "Both Banks":
+        elif region == "Both Banks":
             self.proxy_model.text_filter += "bank*"
         if xunit != "No Unit Filter":
             self.proxy_model.text_filter += "_" + xunit
-        self.proxy_model.text_filter += "*"  # Allows browse for '(No Unit Filter)' with a specified bank
+        self.proxy_model.text_filter += "*"  # Allows browse for '(No Unit Filter)' with a specified region
 
-        # Keep "No Bank/Unit Filter" text grey and other text black
-        for (combo_box, current_text) in ((self.combo_bank, bank), (self.combo_xunit, xunit)):
-            if current_text[0:2] == "No":  # No Unit or Bank Filter
+        # Keep "No Region/Unit Filter" text grey and other text black
+        for (combo_box, current_text) in ((self.combo_region, region), (self.combo_xunit, xunit)):
+            if current_text[0:2] == "No":  # No Unit or Region Filter
                 combo_box.setStyleSheet("color: grey")
                 for index in range(1, combo_box.count()):
                     combo_box.setItemData(index, QtGui.QColor("black"), QtCore.Qt.ForegroundRole)
@@ -261,8 +261,8 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # =================
 
     def setup_combo_boxes(self):
-        # set "No Bank/Unit Filter" text grey and other text black
-        for combo_box, type_name in ((self.combo_bank, "Bank"), (self.combo_xunit, "Unit")):
+        # set "No Region/Unit Filter" text grey and other text black
+        for combo_box, type_name in ((self.combo_region, "Region"), (self.combo_xunit, "Unit")):
             combo_box.setEditable(True)
             combo_box.lineEdit().setReadOnly(True)
             combo_box.lineEdit().setEnabled(False)
