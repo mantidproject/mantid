@@ -116,6 +116,7 @@ set(TEST_PY_FILES
     plot_data_pane/plot_data_pane_presenter_test.py
     plot_data_pane/plot_group_pair_model_test.py
     plot_fit_panes/plot_fit_pane_model_test.py
+    plot_fit_panes/plot_freq_pane_presenter_test.py
     plot_fit_panes/plot_time_fit_pane_model_test.py
     plot_fit_panes/plot_fit_pane_presenter_test.py
     plot_fit_panes/plot_freq_fit_pane_model_test.py

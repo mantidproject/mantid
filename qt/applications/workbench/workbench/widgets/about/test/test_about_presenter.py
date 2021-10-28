@@ -40,6 +40,12 @@ class MockConfigService(object):
         self.setString = StrictMock()
 
 
+class FakeVersionInfo(object):
+    def __init__(self):
+        self.major = "the same"
+        self.minor = "every time"
+
+
 class FakeQSettings(object):
     def __init__(self, string_value):
         self.string_value = string_value
@@ -51,7 +57,7 @@ class FakeQSettings(object):
     def value_depending_on_str(self, p_str, defaultValue=None, type=None):
         if p_str == AboutPresenter.DO_NOT_SHOW:
             return "2"
-        elif p_str == AboutPresenter.LAST_VERSION:
+        elif p_str == AboutPresenter.PREVIOUS_VERSION:
             return self.string_value
         else:
             return "unknown p_str"
@@ -62,6 +68,7 @@ class AboutPresenterTest(TestCase):
     CONFIG_SERVICE_CLASSPATH = "workbench.widgets.about.presenter.ConfigService"
     QSETTINGS_CLASSPATH = "workbench.widgets.about.presenter.QSettings"
     RELEASE_NOTES_URL_CLASSPATH = "workbench.widgets.about.presenter.release_notes_url"
+    VERSION_INFO_CLASSPATH = "workbench.widgets.about.presenter.version"
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_no_facility(self, MockConfigService):
@@ -92,9 +99,9 @@ class AboutPresenterTest(TestCase):
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_should_show_on_startup_do_not_show_same_version(self, MockConfigService):
-        version_str = "the same every time"
+        version_str = "the same.every time"
         with patch(self.QSETTINGS_CLASSPATH, return_value=FakeQSettings(version_str)):
-            with patch(self.RELEASE_NOTES_URL_CLASSPATH, return_value=version_str):
+            with patch(self.VERSION_INFO_CLASSPATH, return_value=FakeVersionInfo()):
                 self.assertFalse(AboutPresenter.should_show_on_startup(),
                                  "If do not show is in Qsettings then should_show_on_startup should always be False"
                                  + "for the same version")
