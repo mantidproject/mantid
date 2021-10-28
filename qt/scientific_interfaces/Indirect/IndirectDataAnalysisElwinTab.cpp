@@ -779,11 +779,15 @@ void IndirectDataAnalysisElwinTab::addData() { checkData(m_addWorkspaceDialog.ge
 void IndirectDataAnalysisElwinTab::checkData(IAddWorkspaceDialog const *dialog) {
   try {
     const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
-    // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
-    if (indirectDialog->getFileName().empty()) {
-      addData(dialog);
+    if (indirectDialog) {
+      // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
+      if (indirectDialog->getFileName().empty()) {
+        addData(dialog);
+      } else
+        addDataFromFile(dialog);
     } else
-      addDataFromFile(dialog);
+      (throw std::invalid_argument("Unable to access IndirectAddWorkspaceDialog"));
+
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
