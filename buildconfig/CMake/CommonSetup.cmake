@@ -346,6 +346,11 @@ if(NOT BUNDLES)
 endif()
 
 # ######################################################################################################################
+# Set an auto generate warning for .in files.
+# ######################################################################################################################
+set(AUTO_GENERATE_WARNING "/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/")
+
+# ######################################################################################################################
 # Setup pre-commit here as otherwise it will be overwritten by earlier pre-commit hooks being added
 # ######################################################################################################################
 option(ENABLE_PRECOMMIT "Enable pre-commit framework" ON)
