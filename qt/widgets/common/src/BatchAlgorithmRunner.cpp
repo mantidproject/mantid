@@ -216,8 +216,9 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
     std::set_difference(propNamesToUpdate.cbegin(), propNamesToUpdate.cend(), allowedPropNames.cbegin(),
                         allowedPropNames.cend(), std::back_inserter(invalidProps));
     if (invalidProps.size() > 0) {
-      const auto invalidPropsStr = std::accumulate(invalidProps.cbegin(), invalidProps.cend(), invalidProps[0],
-                                                   [](const auto &a, const auto &b) { return a + "," + b; });
+      const auto invalidPropsStr =
+          std::accumulate(std::next(invalidProps.cbegin()), invalidProps.cend(), invalidProps[0],
+                          [](const auto &a, const auto &b) { return a + "," + b; });
       throw Mantid::Kernel::Exception::NotFoundError("Invalid Properties given: ", invalidPropsStr);
     }
 
