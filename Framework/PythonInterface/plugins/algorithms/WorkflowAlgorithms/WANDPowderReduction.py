@@ -35,6 +35,7 @@ from mantid.simpleapi import (
     Integration,
     GroupWorkspaces,
     RenameWorkspace,
+    GroupDetectors
 )
 from mantid.kernel import (
     StringListValidator,
@@ -46,6 +47,7 @@ from mantid.kernel import (
     StringArrayProperty,
     UnitConversion,
 )
+import numpy as np
 
 
 class WANDPowderReduction(DataProcessorAlgorithm):
@@ -334,6 +336,27 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             EFixed=e_fixed,
             EnableLogging=False,
         )
+
+        # this checks for any duplicated values in target axis, if
+        # so then group them together
+        axis_values = mtd[workspace_out].getAxis(1).extractValues()
+        equal_values = axis_values == np.roll(axis_values, -1)
+        if np.any(equal_values):
+            operator = np.full_like(equal_values, ",", dtype='<U1')
+            operator[equal_values] = '+'
+            grouping_pattern = "".join(str(n)+op for n, op in enumerate(operator))
+            GroupDetectors(
+                InputWorkspace=workspace_out,
+                OutputWorkspace=workspace_out,
+                GroupingPattern=grouping_pattern,
+                EnableLogging=False)
+            ConvertSpectrumAxis(
+                InputWorkspace=workspace_out,
+                OutputWorkspace=workspace_out,
+                Target=target,
+                EFixed=e_fixed,
+                EnableLogging=False,
+            )
 
         Transpose(
             InputWorkspace=workspace_out,
