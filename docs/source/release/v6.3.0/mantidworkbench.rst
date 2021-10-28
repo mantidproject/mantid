@@ -35,12 +35,14 @@ Bugfixes
 - The "About Mantid" page now appears on a new full release, even if a recent nightly was previously launched.
 - Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 - Fixed plot bins not working on data with numeric X-axis.
-- Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
-- Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
 - Fixed a bug with autoscaling of colorfill plots from within the figure options.
 - Fixed an issue to plot negative values with logarithm scaling in slice view.
+- Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
+- Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 - Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
+- Stopped workbench from ignoring GUIs that want to cancel closing.
+- Fixed a bug where folding the pick tab in the instrument viewer crashing Mantid.
 
 :ref:`Release 6.3.0 <v6.3.0>`
