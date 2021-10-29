@@ -422,6 +422,35 @@ public:
     TS_ASSERT_EQUALS(instrRect->containsRectDetectors(), Instrument::ContainsState::Partial);
   }
 
+  void testContainsRectDetectorsIgnoresSlits() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    instr->add(new ObjComponent("slit1"));
+    instr->add(new ObjComponent("slitA"));
+    TS_ASSERT_EQUALS(instr->containsRectDetectors(), Instrument::ContainsState::Full);
+  }
+
+  void testContainsRectDetectorsWithMisnamedSlit() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    // Slits are identified by the first 4 letters being "slit"; check it works ok with fewer letters than this.
+    instr->add(new ObjComponent("sli"));
+    // If it's not identified as a slit, it will count as a non-rectangular
+    TS_ASSERT_EQUALS(instr->containsRectDetectors(), Instrument::ContainsState::Partial);
+  }
+
+  void testContainsRectDetectorsIgnoresSupermirrors() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    instr->add(new ObjComponent("supermirror"));
+    TS_ASSERT_EQUALS(instr->containsRectDetectors(), Instrument::ContainsState::Full);
+  }
+
+  void testContainsRectDetectorsWithMisnamedSupermirror() {
+    Instrument_sptr instr = ComponentCreationHelper::createTestInstrumentRectangular(5, 3);
+    // We currently look for an exact match on the text "supermirror"
+    instr->add(new ObjComponent("supermirror1"));
+    // If it's not identified as a supermirror it will count as non-rectangular
+    TS_ASSERT_EQUALS(instr->containsRectDetectors(), Instrument::ContainsState::Partial);
+  }
+
   void test_detectorIndex() {
     auto i = ComponentCreationHelper::createTestInstrumentRectangular(1, 2);
     TS_ASSERT_EQUALS(i->detectorIndex(4), 0);
