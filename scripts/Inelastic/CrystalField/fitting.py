@@ -1576,13 +1576,16 @@ class CrystalFieldFit(object):
         if Options is not None:
             opt = Options
         for (x, pos) in zip(x0, self._free_cef_parameters):
-            res = sp.minimize(self._evaluate_cf, [x], args=(fun, pos, self._free_cef_parameters, cef_fixed), method=Solver, options=opt)
+            res = sp.minimize(self._evaluate_cf, [x], args=(fun, pos), method=Solver, options=opt)
             if res.success:
                 if self._function is not None:
-                    self._function.setParameter(pos, res.x[0])
+                    if isinstance(res.x, list):
+                        self._function.setParameter(pos, float(res.x[0]))
+                    else:
+                        self._function.setParameter(pos, float(res.x))
         self.model.update(self._function)
 
-    def _evaluate_cf(self, x0: float, fun: IFunction, cef_pos: int, cef_pos_free: list, cef_pos_fixed: list) -> float:
+    def _evaluate_cf(self, x0: float, fun: IFunction, cef_pos: int) -> float:
         from mantid.simpleapi import CalculateChiSquared
         fun.setParameter(cef_pos, x0[0])
         if isinstance(self._input_workspace, list):
@@ -1592,21 +1595,11 @@ class CrystalFieldFit(object):
             for workspace in self._input_workspace[1:]:
                 ws_kwargs['InputWorkspace_{}'.format(i)] = workspace
                 i += 1
-            # remake function to avoid problems during evaluation
-            from mantid.simpleapi import FunctionFactory
-            eval_fun = FunctionFactory.createFunction('CrystalFieldMultiSpectrum')
-            eval_fun.setAttributeValue('Ion', self.model.Ion)
-            eval_fun.setAttributeValue('Symmetry', self.model.Symmetry)
-            eval_fun.setAttributeValue('Temperatures', [float(val) for val in self.model.Temperature])
-            eval_fun.setAttributeValue('FixAllPeaks', True)
-            for par_id in cef_pos_free:
-                eval_fun.setParameter(par_id, fun.getParameterValue(par_id))
-            for par_id in cef_pos_fixed:
-                eval_fun.fixParameter(par_id)
-            fun_str = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(eval_fun))
+            fun_str = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(fun))
             fun_str = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun_str)
             fun_str = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun_str)
-            return CalculateChiSquared(fun_str, IgnoreInvalidData=True, **ws_kwargs)[1]
+            fun_str = re.sub(r'f[0-9]+\.f(['+str(fun.getAttributeValue("MaxPeakCount"))+'-9]|[1-9][0-9])\.\w+=.*?,','', fun_str)# noqa: W605
+            return CalculateChiSquared(fun_str, **ws_kwargs)[1]
         else:
             return CalculateChiSquared(str(fun), self._input_workspace)[1]
 
