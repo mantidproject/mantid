@@ -170,8 +170,9 @@ class AxisEditor(PropertiesEditorBase):
 
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
-        # Grid has no direct accessor from the axes
-        self.axis = axes.xaxis if axis_id == 'x' else axes.yaxis
+        # Store the axis for attributes that can't be directly accessed
+        # from axes object (e.g. grid and tick parameters).
+        self.axis = getattr(axes, '{}axis'.format(axis_id))
 
     def create_model(self):
         memento = AxisEditorModel()
