@@ -40,8 +40,7 @@ from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_featu
 
 from mantid.api import AnalysisDataService
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
-#from mantid.simpleapi import GroupWorkspaces
-
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import *
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Fitting", "Sequential Fitting", "Results",
              "Model Fitting"]
@@ -267,33 +266,77 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
-        self.group_observer = GenericObserver(self.do_grouping)
-        self.enable_notifier.add_subscriber(self.group_observer)
 
-    def ADS_check(self, name, instrument):
-        def fit_check(name):
-            return False #"fit" in name.name()
-        print("moo", name.name())
-        return  instrument in name.name() and "MA" in name.name() and name.id() != "WorkspaceGroup" and not fit_check(name)
+        self.group_observer = GenericObserver(self.do_grouping)
+        # only do grouping when group/pair changes
+        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
+            add_subscriber(self.group_observer)
+        # phaseqaud finished -> do grouping
+        self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(self.group_observer)
+        # need to add stuff for phasetable finished
+        # fits not getting all of the workspaces in the group correct for simultaneous
+        # results table has no grouping
+
+    def check_not_in_group(self, groups, name):
+        if name in groups and "fit" not in name.name():
+            return False
+        for group in groups:
+            if name.name() in group.getNames():
+                return False
+        return True
+
+    def ADS_check(self, name, instrument, groups):
+
+        return  instrument in name.name() and "MA" in name.name() and self.check_not_in_group(groups,name)
+
+    def make_group(self, ws_list, group_name):
+        alg = mantid.AlgorithmManager.create("GroupWorkspaces")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(True)
+        alg.setProperty("InputWorkspaces", ws_list)
+        alg.setProperty("OutputWorkspace", group_name)
+        alg.execute()
 
     def do_grouping(self):
+        str_names = AnalysisDataService.getObjectNames()
+
         instrument = self.context.data_context.instrument
         # only group things for the current instrument
-        str_names = AnalysisDataService.getObjectNames()
-        names = [name for name in AnalysisDataService.retrieveWorkspaces(str_names) if self.ADS_check(name, instrument)]
-        print("boo", [name.name() for name in names])
-        group_names = {}
+        ws_list =  AnalysisDataService.retrieveWorkspaces(str_names)
+
+        #just the groups
+        groups = [name for name in ws_list if name.isGroup()]
+
+        # just the workspaces
+        def string_name(name):
+            if isinstance(name, str):
+                return retrieve_ws(name)
+            return name
+        names = [string_name(name) for name in ws_list if self.ADS_check(name, instrument, groups)]
+        # make sure we include the groups that we already have in the ADS
+        group_names = {key.name():[] for key in groups}
+        # put ws into groups
         for name in names:
             run = get_run_number_from_workspace_name(name.name(), instrument)
             tmp = instrument+run
-            # in the if and else check the names are not already group workspaces
+            # check the names are not already group workspaces
             if tmp in list(group_names.keys()):
                 group_names[tmp] += [name]
             else:
                 group_names[tmp] = [name]
-        #for group in group_names.keys():
-            #print("hi", group)
-            #GroupWorkspaces(InputWorkspaces=group_names[group], OutputWorkspace=group)
+
+        #print("before", AnalysisDataService.getObjectNames())
+
+        # add to the groups that already exist
+        for group in groups:
+            if group.name() in group_names.keys():
+                print("do group ", group.name())
+                for ws in group_names[group.name()]:
+                    group.add(ws.name())
+
+        for group in group_names.keys():
+            if group not in [name.name() for name in groups] :
+                self.make_group(group_names[group], group)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
