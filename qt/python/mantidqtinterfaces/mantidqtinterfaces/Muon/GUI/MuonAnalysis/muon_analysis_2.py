@@ -38,9 +38,9 @@ from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelA
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
-from mantid.api import AnalysisDataService
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import *
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
+
+
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Fitting", "Sequential Fitting", "Results",
              "Model Fitting"]
@@ -277,66 +277,8 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         # fits not getting all of the workspaces in the group correct for simultaneous
         # results table has no grouping
 
-    def check_not_in_group(self, groups, name):
-        if name in groups and "fit" not in name.name():
-            return False
-        for group in groups:
-            if name.name() in group.getNames():
-                return False
-        return True
-
-    def ADS_check(self, name, instrument, groups):
-
-        return  instrument in name.name() and "MA" in name.name() and self.check_not_in_group(groups,name)
-
-    def make_group(self, ws_list, group_name):
-        alg = mantid.AlgorithmManager.create("GroupWorkspaces")
-        alg.initialize()
-        alg.setAlwaysStoreInADS(True)
-        alg.setProperty("InputWorkspaces", ws_list)
-        alg.setProperty("OutputWorkspace", group_name)
-        alg.execute()
-
     def do_grouping(self):
-        str_names = AnalysisDataService.getObjectNames()
-
-        instrument = self.context.data_context.instrument
-        # only group things for the current instrument
-        ws_list =  AnalysisDataService.retrieveWorkspaces(str_names)
-
-        #just the groups
-        groups = [name for name in ws_list if name.isGroup()]
-
-        # just the workspaces
-        def string_name(name):
-            if isinstance(name, str):
-                return retrieve_ws(name)
-            return name
-        names = [string_name(name) for name in ws_list if self.ADS_check(name, instrument, groups)]
-        # make sure we include the groups that we already have in the ADS
-        group_names = {key.name():[] for key in groups}
-        # put ws into groups
-        for name in names:
-            run = get_run_number_from_workspace_name(name.name(), instrument)
-            tmp = instrument+run
-            # check the names are not already group workspaces
-            if tmp in list(group_names.keys()):
-                group_names[tmp] += [name]
-            else:
-                group_names[tmp] = [name]
-
-        #print("before", AnalysisDataService.getObjectNames())
-
-        # add to the groups that already exist
-        for group in groups:
-            if group.name() in group_names.keys():
-                print("do group ", group.name())
-                for ws in group_names[group.name()]:
-                    group.add(ws.name())
-
-        for group in group_names.keys():
-            if group not in [name.name() for name in groups] :
-                self.make_group(group_names[group], group)
+        add_to_group(self.context.data_context.instrument, "MA")
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(

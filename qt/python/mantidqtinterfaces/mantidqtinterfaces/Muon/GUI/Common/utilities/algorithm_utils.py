@@ -15,6 +15,15 @@ from mantid.kernel import PhysicalConstants as const
 muon_logger = Logger('Muon-Algs')
 
 
+def make_group(ws_list, group_name):
+    alg = mantid.AlgorithmManager.create("GroupWorkspaces")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspaces", ws_list)
+    alg.setProperty("OutputWorkspace", group_name)
+    alg.execute()
+
+
 def create_empty_table(name):
     alg = mantid.AlgorithmManager.create("CreateEmptyTableWorkspace")
     alg.initialize()

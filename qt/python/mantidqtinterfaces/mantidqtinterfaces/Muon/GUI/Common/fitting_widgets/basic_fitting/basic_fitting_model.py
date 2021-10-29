@@ -7,6 +7,7 @@
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_covariance_matrix_name,
@@ -19,7 +20,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, make_group
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
@@ -686,6 +687,12 @@ class BasicFittingModel:
         second_pulse_weighting = 1 / (1 + decay)
         return first_pulse_weighting, second_pulse_weighting
 
+    def _add_workspaces_to_group(self, ws_names, group_name):
+        if check_if_workspace_exist(group_name):
+            add_list_to_group(ws_names, retrieve_ws(group_name))
+        else:
+            make_group(ws_names, group_name)
+
     def _add_single_fit_results_to_ADS_and_context(self, input_workspace_name: str, parameters_table, output_workspace,
                                                    covariance_matrix) -> None:
         """Adds the results of a single fit to the ADS and context."""
@@ -703,6 +710,7 @@ class BasicFittingModel:
         parameter_workspace_wrap = StaticWorkspaceWrapper(parameter_table_name, retrieve_ws(parameter_table_name))
         covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
 
+        self._add_workspaces_to_group([output_workspace_name, parameter_table_name, covariance_matrix_name], directory[:-1])
         self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap,
                                  covariance_workspace_wrap)
 
