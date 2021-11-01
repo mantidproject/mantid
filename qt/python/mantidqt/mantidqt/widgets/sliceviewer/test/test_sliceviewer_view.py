@@ -22,7 +22,7 @@ from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantidqt.widgets.sliceviewer.view import SCALENORM  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, FakeMDEventData, ConvertToDistribution, Scale, SetUB,
-    RenameWorkspace)
+    RenameWorkspace, ClearUB)
 from mantid.api import AnalysisDataService  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
@@ -294,6 +294,22 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
 
+    def test_view_closes_on_replace_when_changed_support_for_nonortho_transform(self):
+        ws_non_ortho = CreateMDWorkspace(Dimensions='3', Extents='-6,6,-4,4,-0.5,0.5',
+                                         Names='H,K,L', Units='r.l.u.,r.l.u.,r.l.u.',
+                                         Frames='HKL,HKL,HKL',
+                                         SplitInto='2', SplitThreshold='50')
+        expt_info_nonortho = CreateSampleWorkspace()
+        ws_non_ortho.addExperimentInfo(expt_info_nonortho)
+        SetUB(ws_non_ortho, 1, 1, 2, 90, 90, 120)
+        pres = SliceViewer(ws_non_ortho)
+        ClearUB(ws_non_ortho)
+
+        QApplication.sendPostedEvents()
+
+        self.assert_no_toplevel_widgets()
+        self.assertEqual(pres.ads_observer, None)
+
     def test_plot_matrix_xlimits_ignores_monitors(self):
         xmin = 5000
         xmax = 10000
@@ -329,7 +345,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assert_no_toplevel_widgets()
 
-    def test_axes_limits_respect_nonorthog_transfrom(self):
+    def test_axes_limits_respect_nonorthog_transform(self):
         limits = (-10.0, 10.0, -9.0, 9.0)
         ws_nonrotho = CreateMDWorkspace(Dimensions=3,
                                         Extents=','.join([str(lim) for lim in limits]) + ',-8,8',
