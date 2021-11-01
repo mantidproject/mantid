@@ -44,3 +44,14 @@ class NonOrthogonalTransform:
         """
         angle = self._angle
         return x - y / np.tan(angle), y / np.sin(angle)
+
+
+class OrthogonalTransform():
+    def __init__(self):
+        self._angle = np.pi/2  # 90 degrees
+
+    def tr(self, x, y):
+        return x, y
+
+    def inv_tr(self, x, y):
+        return x, y

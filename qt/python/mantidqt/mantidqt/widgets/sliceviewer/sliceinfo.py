@@ -11,7 +11,7 @@ from typing import Tuple, Sequence, Optional
 # 3rd party
 import numpy as np
 
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
+from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform, OrthogonalTransform
 
 # Types
 SlicePointType = Optional[float]
@@ -152,14 +152,3 @@ class SliceInfo:
         else:
             self._transform = OrthogonalTransform()
             self._nonorthogonal_axes_supported = False
-
-
-class OrthogonalTransform(NonOrthogonalTransform):
-    def __init__(self):
-        self._angle = np.pi/2  # 90 degrees
-
-    def tr(self, x, y):
-        return x, y
-
-    def inv_tr(self, x, y):
-        return x, y
