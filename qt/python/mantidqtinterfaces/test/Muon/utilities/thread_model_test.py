@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -75,6 +76,13 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         model.output = mock.Mock()
         return model
 
+    def wait_for_thread(self, thread_model):
+        if thread_model and thread_model.worker:
+            while thread_model.worker.is_alive():
+                QApplication.sendPostedEvents()
+                time.sleep(0.1)
+            QApplication.sendPostedEvents()
+
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
@@ -91,6 +99,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock()
 
         self.Runner(self.thread)
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(self.model.execute.call_count, 1)
@@ -102,6 +111,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
         self.Runner(self.thread)
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
@@ -127,6 +137,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
         self.Runner(self.thread)
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
@@ -139,6 +150,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock(side_effect=raise_error)
 
         self.Runner(self.thread)
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(self.warning_box_patcher.call_count, 1)

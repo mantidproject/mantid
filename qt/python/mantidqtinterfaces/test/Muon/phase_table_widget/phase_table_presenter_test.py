@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -25,8 +26,10 @@ def phase_table_name_side_effect():
 @start_qapplication
 class PhaseTablePresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
-        if thread_model:
-            thread_model._thread.wait()
+        if thread_model and thread_model.worker:
+            while thread_model.worker.is_alive():
+                QApplication.sendPostedEvents()
+                time.sleep(0.1)
             QApplication.sendPostedEvents()
 
     def setUp(self):
@@ -120,7 +123,8 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=['MUSR22222_raw_data_period_1'])
         self.context.phase_context.options_dict['input_workspace'] = 'MUSR22222_raw_data_period_1'
         self.presenter.update_view_from_model()
-        run_algorithm_mock.side_effect = RuntimeError('CalMuonDetectorPhases has failed')
+        runtime_error = RuntimeError('CalMuonDetectorPhases has failed')
+        run_algorithm_mock.side_effect = runtime_error
         self.presenter.add_phase_table_to_ADS = mock.MagicMock()
         self.presenter.calculate_base_name_and_group = mock.MagicMock(
             return_value=('MUSR22222_raw_data_period_1', 'MUSR22222 PhaseTable'))
@@ -130,7 +134,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.wait_for_thread(self.presenter.calculation_thread)
 
         self.assertTrue(self.view.isEnabled())
-        self.view.warning_popup.assert_called_once_with('CalMuonDetectorPhases has failed')
+        self.view.warning_popup.assert_called_once_with(runtime_error)
 
     def test_update_current_phase_table_list_retrieves_all_correct_tables(self):
         self.view.set_phase_table_combo_box = mock.MagicMock()

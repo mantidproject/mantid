@@ -67,7 +67,7 @@ class ThreadModel(QtWidgets.QWidget):
     def __init__(self, model):
         super(ThreadModel, self).__init__()
         self.model = model
-
+        self.worker = None
         # callbacks for the .started() and .finished() signals of the worker
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
@@ -83,9 +83,9 @@ class ThreadModel(QtWidgets.QWidget):
 
     def setup_thread_and_start(self):
         # Construct the Async thread
-        worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self._exception_callback, success_cb=self.end_slot,
-                                    finished_cb=self.threadWrapperTearDown)
-        worker.start()
+        self.worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self.warning,
+                                         finished_cb=self.threadWrapperTearDown)
+        self.worker.start()
 
         # trigger the slot for the start of the process
         self.start_slot()
@@ -132,6 +132,7 @@ class ThreadModel(QtWidgets.QWidget):
             self._exception_callback = self._default_exception_callback
 
     def threadWrapperTearDown(self):
+        self.end_slot()
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
 
