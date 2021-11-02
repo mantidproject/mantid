@@ -44,8 +44,7 @@ protected:
   void init() override;
 
 private:
-  double getExp() const;
-  double getLifetimeMulti() const;
+  double getMeVConv() const;
 };
 
 } // namespace Functions

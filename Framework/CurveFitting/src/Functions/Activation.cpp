@@ -34,10 +34,10 @@ void Activation::function1D(double *out, const double *xValues, const size_t nDa
 
   const double height = getParameter("Height");
   const double lifetime = getParameter("Lifetime");
-  const double expFunc = getExp();
+  const double meVConv = getMeVConv();
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = height * exp(-expFunc * (1 / xValues[i]));
+    out[i] = height * exp(-(meVConv * lifetime) / xValues[i]);
   }
 }
 
@@ -46,14 +46,11 @@ void Activation::functionDeriv1D(Jacobian *out, const double *xValues, const siz
 
   const double height = getParameter("Height");
   const double lifetime = getParameter("Lifetime");
-  const double expFunc = getExp();
-  // auto unit = getAttribute("Unit").asString();
-  // const double k_B = PhysicalConstants::BoltzmannConstant;
+  const double meVConv = getMeVConv();
 
   for (size_t i = 0; i < nData; i++) {
-    double diffHeight = exp(-expFunc * (1 / xValues[i]));
-    double diffLifetimeMulti = getLifetimeMulti();
-    double diffLifetime = diffLifetimeMulti * ((height * exp(-expFunc * (1 / xValues[i])) / xValues[i]));
+    double diffHeight = exp(-(meVConv * lifetime) / xValues[i]);
+    double diffLifetime = (height * meVConv * (exp(-(meVConv * lifetime) / xValues[i]))) / xValues[i];
     out->set(i, 0, diffHeight);
     out->set(i, 1, diffLifetime);
   }
@@ -67,36 +64,16 @@ void Activation::beforeFunctionSet() const {
   }
 }
 
-double Activation::getExp() const {
+double Activation::getMeVConv() const {
   auto unit = getAttribute("Unit").asString();
-  const double lifetime = getParameter("Lifetime");
-
-  if (unit.compare("K") == 0) {
-    return lifetime;
-  }
-
-  if (unit.compare("meV") == 0) {
-    const double k_B = PhysicalConstants::BoltzmannConstant;
-    const double e = 1.0; // elementary charge
-
-    const double unitFunc = (e * lifetime) / (1000 * k_B);
-    return unitFunc;
-  }
-}
-
-double Activation::getLifetimeMulti() const {
-  auto unit = getAttribute("Unit").asString();
-  const double lifetime = getParameter("Lifetime");
+  const double meVConv = PhysicalConstants::meVtoKelvin;
 
   if (unit.compare("K") == 0) {
     return 1.0;
   }
 
   if (unit.compare("meV") == 0) {
-    const double k_B = PhysicalConstants::BoltzmannConstant;
-
-    const double unitFunc = 1 / (1000 * k_B);
-    return unitFunc;
+    return meVConv;
   }
 }
 
