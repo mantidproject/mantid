@@ -68,6 +68,7 @@ set(QT5_SRC_FILES
     src/MantidWSIndexDialog.cpp
     src/Message.cpp
     src/MessageDisplay.cpp
+    src/MessageHandler.cpp
     src/MultifitSetupDialog.cpp
     src/MuonPeriodInfo.cpp
     src/NotificationService.cpp

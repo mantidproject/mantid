@@ -8,8 +8,8 @@
 
 #include "InstViewModel.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "test/ReflMockObjects.h"
 
 #include <cxxtest/TestSuite.h>

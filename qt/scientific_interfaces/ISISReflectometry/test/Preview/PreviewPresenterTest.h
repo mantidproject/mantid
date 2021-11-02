@@ -10,7 +10,6 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockInstViewModel.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
