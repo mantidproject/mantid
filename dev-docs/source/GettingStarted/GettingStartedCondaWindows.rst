@@ -62,7 +62,7 @@ Compile and Build using Visual Studio
 * It's not possible to compile in Debug on Windows with conda libraries, however Release, and RelWithDebInfo for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
 
-CMake conda variables
+CMake Conda variables
 -----------------------
-There are two conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a conda env, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
-The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid.
+There are two Conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a Conda environment, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
+The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. These options can be passed to CMake on the command line using -DCONDA_ENV=True for example.
