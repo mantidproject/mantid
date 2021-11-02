@@ -55,6 +55,15 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
         self.setProperty(self._OUTPUT_WS, summed_workspace)
 
+    def validateInputs(self):
+        issues = dict()
+        workspace = self.getProperty(self._WORKSPACE).value
+        try:
+            self._get_rectangular_detector_component(workspace)
+        except Exception as err:
+            issues['InputWorkspace'] = str(err)
+        return issues
+
     def mask_detectors(self, workspace: MatrixWorkspace, roi_detector_ids: str) -> MatrixWorkspace:
         # We need to apply the mask to the original workspace so we can extract a MaskWorkspace to use in
         # BinaryOperateMasks which inverts it. First, we take a clone to not destructively alter the original WS
@@ -71,15 +80,26 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
         return cloned_ws
 
     def sum_banks(self, workspace: MatrixWorkspace):
+        component = self._get_rectangular_detector_component(workspace)
+        num_banks = component.xpixels()
+        return self._run_child_with_out_props('SmoothNeighbours', InputWorkspace=workspace,
+                                              SumPixelsX=num_banks, SumPixelsY=1)
+
+    def _get_rectangular_detector_component(self, workspace: MatrixWorkspace):
+        result = None
         inst = workspace.getInstrument()
+        if not inst:
+            raise RuntimeError('The input workspace must have an instrument')
+
         for idx in range(inst.nelements()):
             component = inst[idx]
             if type(component) == RectangularDetector:
-                num_banks = component.xpixels()
-                break
-
-        return self._run_child_with_out_props('SmoothNeighbours', InputWorkspace=workspace,
-                                              SumPixelsX=num_banks, SumPixelsY=1)
+                if result:
+                    raise RuntimeError('The input workspace must only contain one rectangular detector: multiple were found')
+                result = component
+        if not result:
+            raise RuntimeError('The input workspace must contain a rectangular detector')
+        return result
 
     def _run_child_with_out_props(self, *args, **kwargs) -> MatrixWorkspace:
         alg = self.createChildAlgorithm(*args, **kwargs)

@@ -9,11 +9,55 @@ import unittest
 import numpy
 
 from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import CreateSampleWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISSumBanks import ReflectometryISISSumBanks
+from testhelpers import WorkspaceCreationHelper
 
 
 class ReflectometryISISSumBanksTest(unittest.TestCase):
+
+    def test_validate_inputs(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(1, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty('InputWorkspace', test_ws)
+
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 0)
+
+    def test_validate_inputs_fails_if_no_instrument(self):
+        test_ws = CreateWorkspace(StoreInADS=False, DataX=[1, 2, 3], DataY=[10,20,30])
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty('InputWorkspace', test_ws)
+
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues['InputWorkspace'], 'The input workspace must have an instrument')
+
+    def test_validate_inputs_fails_if_multiple_rectangular_detectors(self):
+        test_ws = WorkspaceCreationHelper.create2DWorkspaceWithRectangularInstrument(2, 5, 5)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty('InputWorkspace', test_ws)
+
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues['InputWorkspace'], 'The input workspace must only contain one rectangular detector: multiple were found')
+
+    def test_validate_inputs_fails_if_not_a_rectangular_detector(self):
+        test_ws = WorkspaceCreationHelper.createEventWorkspaceWithNonUniformInstrument(1, True)
+
+        alg = ReflectometryISISSumBanks()
+        alg.initialize()
+        alg.setProperty('InputWorkspace', test_ws)
+
+        issues = alg.validateInputs()
+        self.assertEqual(len(issues), 1)
+        self.assertEqual(issues['InputWorkspace'], 'The input workspace must contain a rectangular detector')
 
     def test_mask_workspace(self):
         roi_detector_id = 200

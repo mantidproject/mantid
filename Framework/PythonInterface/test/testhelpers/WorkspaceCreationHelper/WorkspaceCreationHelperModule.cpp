@@ -77,6 +77,9 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
   def("createEventWorkspace", (EventWorkspace_sptr(*)())createEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
   def("createEventWorkspace2", &createEventWorkspace2, return_value_policy<AsType<Workspace_sptr>>());
+  def("createEventWorkspaceWithNonUniformInstrument",
+      (EventWorkspace_sptr(*)(const int, const bool))createEventWorkspaceWithNonUniformInstrument,
+      return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== Peak Workspaces
   //===================================
