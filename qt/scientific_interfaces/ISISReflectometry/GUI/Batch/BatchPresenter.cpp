@@ -258,6 +258,8 @@ void BatchPresenter::notifyAnyBatchAutoreductionResumed() { m_runsPresenter->not
 
 void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->notifyAnyBatchAutoreductionPaused(); }
 
+void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }

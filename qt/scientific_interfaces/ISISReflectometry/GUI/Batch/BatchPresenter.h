@@ -71,6 +71,7 @@ public:
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyReductionPaused() override;
+  void notifyBatchLoaded() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
