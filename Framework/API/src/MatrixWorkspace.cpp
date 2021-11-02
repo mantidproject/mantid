@@ -479,7 +479,8 @@ bool MatrixWorkspace::hasGroupedDetectors() const {
  *  @param throwIfMultipleDets :: set to true to make the algorithm throw an
  * error if there is more than one detector for a specific workspace index.
  *  @param ignoreIfNoValidDets :: set to true to exclude spectra that do not
- * include any valid detector IDs
+ * include any valid detector IDs. Note that if any valid detector IDs exist
+ * then all of the detector IDs (including the invalid ones) will be returned.
  *  @throw runtime_error if there is more than one detector per spectrum (if
  * throwIfMultipleDets is true)
  *  @return Index to Index Map object. THE CALLER TAKES OWNERSHIP OF THE MAP AND

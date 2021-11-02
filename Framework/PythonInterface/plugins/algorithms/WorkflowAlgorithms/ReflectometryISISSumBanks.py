@@ -15,10 +15,6 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
     _ROI = 'ROIDetectorIDs'
     _OUTPUT_WS = 'OutputWorkspace'
 
-    def __init__(self):
-        """Initialize an instance of the algorithm."""
-        DataProcessorAlgorithm.__init__(self)
-
     def category(self):
         """Return the categories of the algorithm."""
         return 'Reflectometry\\ISIS;Workflow\\Reflectometry'

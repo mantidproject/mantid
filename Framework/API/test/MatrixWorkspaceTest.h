@@ -961,8 +961,10 @@ public:
     const auto ignoreIfNoValidDets = true;
     detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
 
-    // Note that the ignore-flag only excludes spectra if they have no valid detectors at all, so we
-    // should still have all original detector IDs along with the additional invalid one
+    // Note that currently the ignore-flag only excludes spectra if they have no valid detectors at all, so we
+    // still get all of the original detector IDs along with the additional invalid one. This is not necessarily
+    // desired behaviour (I think it's an unlikely scenario in practice so it's hard to know what to do) but I'm adding
+    // this test to document the behaviour.
     const auto numDets = 6;
     TS_ASSERT_EQUALS(idmap.size(), numDets);
     TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 1);

@@ -31,11 +31,9 @@ class ReflectometryISISSumBanksTest(systemtesting.MantidSystemTest):
             return starting_pixel_id + (bank_width * bank_pos)
 
         # Banks 1 + 2
-        start_roi, end_roi = get_first_detid_in_bank(1),  get_first_detid_in_bank(3) - 1
-        roi_str = str(start_roi) + '-' + str(end_roi)
-
+        roi_str = f"{get_first_detid_in_bank(1)}-{get_first_detid_in_bank(3) - 1}"
         ReflectometryISISSumBanks(InputWorkspace=raw_ws, ROIDetectorIDs=roi_str,
                                   OutputWorkspace=self.OUT_WS_NAME)
 
     def validate(self):
-        return self.OUT_WS_NAME, "INTER45455_SummedX.nxs"
+        return self.OUT_WS_NAME, self.REF_FILENAME
