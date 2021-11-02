@@ -577,8 +577,11 @@ class MainWindow(QMainWindow):
                     event.ignore()
                     return
 
+        # Close windows
         app = QApplication.instance()
         if app is not None:
+            #  closeAllWindows() does no checking.
+            #  This loop lets GUIs and such refuse the close if they need to save or something.
             for window in app.topLevelWindows():
                 if not window.close():
                     event.ignore()
