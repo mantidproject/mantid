@@ -45,6 +45,9 @@ set(TEST_PY_FILES
     elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
     elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
     external_plotting_model_test.py
+    feature_flags/add_model_analysis_test.py
+    feature_flags/add_raw_plots_test.py
+    feature_flags/load_features_test.py
     FFTModel_test.py
     fft_presenter_context_interaction_test.py
     fit_information_test.py
@@ -113,6 +116,7 @@ set(TEST_PY_FILES
     plot_data_pane/plot_data_pane_presenter_test.py
     plot_data_pane/plot_group_pair_model_test.py
     plot_fit_panes/plot_fit_pane_model_test.py
+    plot_fit_panes/plot_freq_pane_presenter_test.py
     plot_fit_panes/plot_time_fit_pane_model_test.py
     plot_fit_panes/plot_fit_pane_presenter_test.py
     plot_fit_panes/plot_freq_fit_pane_model_test.py
@@ -124,6 +128,8 @@ set(TEST_PY_FILES
     plotting_canvas/plotting_canvas_presenter_test.py
     plotting_canvas/plotting_canvas_utils_test.py
     plotting_canvas/plotting_canvas_view_test.py
+    plot_widget/frequency_analysis_plot_widget_test.py
+    plot_widget/muon_analysis_plot_widget_test.py
     quick_edit/dual_quick_edit_test.py
     quick_edit/quick_edit_presenter_test.py
     raw_pane/raw_pane_model_test.py

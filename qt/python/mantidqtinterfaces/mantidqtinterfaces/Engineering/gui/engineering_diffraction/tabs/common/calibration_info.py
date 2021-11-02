@@ -100,7 +100,7 @@ class CalibrationInfo:
         """
         basepath, fname = path.split(file_path)
         # fname has form INSTRUMENT_ceriaRunNo_BANKS
-        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
+        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture"
         fname_words = fname.split('_')
         suffix = fname_words[-1].split('.')[0]  # take last element and remove extension
         if any(grp.value == suffix for grp in GROUP):

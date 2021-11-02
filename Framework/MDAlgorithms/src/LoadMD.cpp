@@ -168,8 +168,8 @@ void LoadMD::execLoader() {
     if (vecDims.empty())
       throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
     m_numDims = vecDims[0];
-    if (m_numDims <= 0)
-      throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+    if (m_numDims == 0)
+      throw std::runtime_error("LoadMD:: number of dimensions == 0.");
 
     // Now load all the dimension xml
     this->loadDimensions();

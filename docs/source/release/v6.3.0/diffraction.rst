@@ -29,6 +29,7 @@ Bugfixes
 - For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
 - Restored behavior in :ref:`ConvertUnits <algm-ConvertUnits>` where negative time-of-flight converts to negative d-spacing when ``DIFA==0``
 - Identification in :ref:`AlignComponents <algm-AlignComponents>` of the first and last detector-ID for an instrument component with unsorted detector-ID's.
+- Fix issue in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` where in some cases you end up with zeros as output.
 
 Engineering Diffraction
 -----------------------
@@ -43,6 +44,8 @@ Improvements
 - Improved axes scaling in the plot of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` :ref:`Fitting tab <ui engineering fitting>`.
 - Automatically disable zoom and pan when opening the fit browser in the :ref:`Fitting tab <ui engineering fitting>` of the Engineering Diffraction interface (as they interfered with the interactive peak adding tool).
 - The plot on the fitting tab is now made larger when undocked, unless the size of the overall interface has been expanded significantly.
+- Updated the default values for :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` and in the fitting tab table to Niter = 50 and XWindow = { 600 for TOF, 0.02 for dSpacing }.
+- The file filter in the Focus tab for calibration Region includes "No Region Filter", North, South and now also Cropped, Custom, Texture and Both Banks. The text for "No Unit/Region Filter" are colored grey.
 
 Bugfixes
 ########
