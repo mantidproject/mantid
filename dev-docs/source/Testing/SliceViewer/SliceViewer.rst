@@ -97,17 +97,17 @@ For the data types above:
 4. Non-orthogonal view
 ######################
 
-- For the ``SXD_MD_nonortho`` workspace, the non-orthogonal view button (see below) should be enabled - clicking this should also turn on grid lines. When viewing the H and K axes you should see the gridlines are no longer perpendicular to each other.
+A. For the ``SXD_MD_nonortho`` workspace, the non-orthogonal view button (see below) should be enabled - clicking this should also turn on grid lines. When viewing the H and K axes you should see the gridlines are no longer perpendicular to each other.
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-nonorthobutton.png
    :class: screenshot
    :align: center
 
-- Check that sliceviewer gets the projection correct for an ``MDHisto`` object from a non-axis aligned cut.
+B. This tests that the sliceviewer gets the correct basis vectors for an ``MDHisto`` object from a non-axis aligned cut.
 
 .. code-block:: python
 
-	ws = CreateMDWorkspace(Dimensions='3', Extents='-3,3,-3,3,-3,3',
+    ws = CreateMDWorkspace(Dimensions='3', Extents='-3,3,-3,3,-3,3',
                        Names='H,K,L', Units='r.l.u.,r.l.u.,r.l.u.',
                        Frames='HKL,HKL,HKL',
                        SplitInto='2', SplitThreshold='10')
@@ -121,15 +121,16 @@ For the data types above:
         OutputExtents='-4,4,-4,4,-0.25,0.25',
         OutputBins='101,101,1', OutputWorkspace='ws_slice', NormalizeBasisVectors=False)
 
-Open ``ws_slice`` in the sliceviewer and check that non-orthogonal view is enabled - however when clicked the gridlines are orthogonal  (in this case 110 is orthogonal to 001).
+- Run the above code and open ``ws_slice`` in the sliceviewer.
+- Check that non-orthogonal view is enabled on opening - however when clicked the gridlines are orthogonal  (in this case 110 is orthogonal to 001).
 
-- Check that changing the properties of the workspace that governs the support for the non-orthogonal transform closes the sliceviewer window.
+C. Check that changing the properties of the workspace that governs the support for the non-orthogonal transform closes the sliceviewer window.
 
-  - Open ``ws`` from the above test script in the sliceviewer
+- Open ``ws`` from the above test script in the sliceviewer
 
-  - Run ``ClearUB(ws)`` (it should close sliceviewer with warning ``property supports_nonorthogonal_axes is different...``
+- Run ``ClearUB(ws)`` (it should close sliceviewer with warning ``property supports_nonorthogonal_axes is different...``)
 
-  - Instead of clearing the UB you can also replace the workspace with a workspace of a different frame that doesn't support the non-orthogonal view (e.g. QLab)
+- Instead of clearing the UB you can also replace the workspace with a workspace of a different frame that doesn't support the non-orthogonal view (e.g. QLab)
 
 .. code-block:: python
 
@@ -138,17 +139,17 @@ Open ``ws_slice`` in the sliceviewer and check that non-orthogonal view is enabl
                 Frames='QLab,QLab,QLab',
                 SplitInto='2', SplitThreshold='50')
 
-- Check that the non-orthogonal view is disabled for non-Q axes such as energy
+D. Check that the non-orthogonal view is disabled for non-Q axes such as energy
 
 .. code-block:: python
 
-	ws_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1, 1, -1, 1, -1, 1, -1, 1], Names="E,H,K,L",
+    ws_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1, 1, -1, 1, -1, 1, -1, 1], Names="E,H,K,L",
                                   Frames='General Frame,HKL,HKL,HKL', Units='meV,r.l.u.,r.l.u.,r.l.u.')
-        expt_info_4D = CreateSampleWorkspace()
-        ws_4D.addExperimentInfo(expt_info_4D)
-        SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
+    expt_info_4D = CreateSampleWorkspace()
+    ws_4D.addExperimentInfo(expt_info_4D)
+    SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
 
-Check that when the Energy axis is viewed the non-orthogonal view is disabled. The button should be re-enabled when you view two Q-axes e.g. H and K.
+- When the Energy axis is viewed (as X or Y) the non-orthogonal view is disabled. The button should be re-enabled when you view two Q-axes e.g. H and K.
 
 
 5. Cursor Tracking
