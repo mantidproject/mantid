@@ -28,9 +28,13 @@ def _absoluteUnits(ws, vanaWS, wsNames, wsCleanup, report, algorithmLogging):
     vanaMaterial = vanaWS.sample().getMaterial()
     vanaNumberDensity = vanaMaterial.numberDensity
     vanaCrossSection = vanaMaterial.totalScatterXSection()
+    if vanaNumberDensity == 0 or math.isnan(vanaNumberDensity) or math.isinf(vanaNumberDensity):
+        raise RuntimeError('Invalid vanadium number density, consider setting the material before: {}'.format(vanaNumberDensity))
+    if sampleNumberDensity == 0 or math.isnan(sampleNumberDensity) or math.isinf(sampleNumberDensity):
+        raise RuntimeError('Invalid sample number density, consider setting the sample material before: {}'.format(sampleNumberDensity))
+    if vanaCrossSection <= 0 or math.isnan(vanaCrossSection) or math.isinf(vanaCrossSection):
+        raise RuntimeError('Invalid vanadium cross-section, consider setting the material before: {}'.format(vanaCrossSection))
     factor = vanaNumberDensity / sampleNumberDensity * vanaCrossSection
-    if factor <= 0 or math.isnan(factor) or math.isinf(factor):
-        raise RuntimeError('Invalid absolute units normalisation factor: {}'.format(factor))
     report.notice('Absolute units scaling factor: {}'.format(factor))
     scaledWSName = wsNames.withSuffix('absolute_units')
     scaledWS = Scale(InputWorkspace=ws,
