@@ -140,6 +140,7 @@ set(TEST_PY_FILES
     seq_fitting_tab_widget/sequential_table_test.py
     tf_asymmetry_fitting_context_test.py
     transform_widget_test.py
+    utilities/general_muon_utils_test.py
     utilities/load_utils_test.py
     utilities/muon_base_pair_test.py
     utilities/muon_file_utils_test.py
