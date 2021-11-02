@@ -37,5 +37,6 @@ Bugfixes
 - Fixed a bug with autoscaling of colorfill plots from within the figure options.
 - Fixed an issue to plot negative values with logarithm scaling in slice view.
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
+- Stopped workbench from ignoring GUIs that want to cancel closing
 
 :ref:`Release 6.3.0 <v6.3.0>`

@@ -577,6 +577,14 @@ class MainWindow(QMainWindow):
                     event.ignore()
                     return
 
+        app = QApplication.instance()
+        if app is not None:
+            for window in app.topLevelWindows():
+                if not window.close():
+                    event.ignore()
+                    return
+            app.closeAllWindows()
+
         # Close editors
         if self.editor is None or self.editor.app_closing():
             # write out any changes to the mantid config file
@@ -590,10 +598,6 @@ class MainWindow(QMainWindow):
 
             # Cancel all running (managed) algorithms
             AlgorithmManager.Instance().cancelAll()
-
-            app = QApplication.instance()
-            if app is not None:
-                app.closeAllWindows()
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly
