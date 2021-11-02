@@ -36,6 +36,16 @@ bool AlgCompleteCallback::m_callbackWasCalled = false;
 } // namespace
 
 class PreviewJobManagerTest : public CxxTest::TestSuite {
+  class StubAlgPreprocess : public WorkspaceCreationHelper::StubAlgorithm {
+  public:
+    const std::string name() const override { return "ReflectometryISISPreprocess"; }
+  };
+
+  class StubAlgSumBanks : public WorkspaceCreationHelper::StubAlgorithm {
+  public:
+    const std::string name() const override { return "ReflectometryISISSumBanks"; }
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -83,7 +93,7 @@ public:
     auto mockSubscriber = MockJobManagerSubscriber();
 
     auto row = PreviewRow({"12345"});
-    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
+    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<StubAlgPreprocess>();
     auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
     auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties),
                                                              AlgCompleteCallback::updateRowOnAlgorithmComplete, &row);
@@ -95,6 +105,48 @@ public:
     auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
     jobManager.notifyAlgorithmComplete(configuredAlgRef);
     TS_ASSERT(AlgCompleteCallback::m_callbackWasCalled);
+  }
+
+  void test_notify_sum_banks_algorithm_complete_notifies_subscriber() {
+    AlgCompleteCallback::m_callbackWasCalled = false;
+
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    auto row = PreviewRow({"12345"});
+    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<StubAlgSumBanks>();
+    auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties),
+                                                             AlgCompleteCallback::updateRowOnAlgorithmComplete, &row);
+
+    EXPECT_CALL(mockSubscriber, notifySumBanksCompleted).Times(1);
+    auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    jobManager.subscribe(&mockSubscriber);
+
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+    jobManager.notifyAlgorithmComplete(configuredAlgRef);
+    TS_ASSERT(AlgCompleteCallback::m_callbackWasCalled);
+  }
+
+  void test_notify_algorithm_complete_throws_with_unknown_algorithm() {
+    AlgCompleteCallback::m_callbackWasCalled = false;
+
+    auto mockAlgFactory = std::make_unique<MockReflAlgorithmFactory>();
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+
+    auto row = PreviewRow({"12345"});
+    Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
+    auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties),
+                                                             AlgCompleteCallback::updateRowOnAlgorithmComplete, &row);
+
+    auto jobManager = PreviewJobManager(&mockJobRunner, std::move(mockAlgFactory));
+    jobManager.subscribe(&mockSubscriber);
+
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+    TS_ASSERT_THROWS(jobManager.notifyAlgorithmComplete(configuredAlgRef), std::logic_error const &);
   }
 
   void test_notify_preprocessing_algorithm_complete_skips_non_preview_items() {

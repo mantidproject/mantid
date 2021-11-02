@@ -10,7 +10,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
 
@@ -23,10 +25,9 @@ using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputProperties(IConfiguredAlgorithm::AlgorithmRuntimeProps &properties,
-                           MatrixWorkspace_sptr const &workspace, std::vector<Mantid::detid_t> const &detIDs) {
-  // TODO we need to pass the workspace pointer here rather than the name because we can't be sure it's in the ADS
-  AlgorithmProperties::update("InputWorkspace", workspace->getName(), properties);
+void updateInputProperties(MantidQt::API::IAlgorithmRuntimeProps &properties, MatrixWorkspace_sptr const &workspace,
+                           std::vector<Mantid::detid_t> const &detIDs) {
+  properties.setProperty("InputWorkspace", workspace);
 
   auto detIDsStr = Mantid::Kernel::Strings::simpleJoin(detIDs.cbegin(), detIDs.cend(), ",");
   AlgorithmProperties::update("ROIDetectorIDs", detIDsStr, properties);
@@ -53,11 +54,12 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
-  auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
-  updateInputProperties(properties, row.getLoadedWs(), row.getSelectedBanks());
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  updateInputProperties(*properties, row.getLoadedWs(), row.getSelectedBanks());
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateRowOnAlgorithmComplete, &row);
+  auto jobAlgorithm =
+      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowOnAlgorithmComplete, &row);
   return jobAlgorithm;
 }
 
@@ -65,6 +67,5 @@ void updateRowOnAlgorithmComplete(const IAlgorithm_sptr &algorithm, Item &item) 
   auto &row = dynamic_cast<PreviewRow &>(item);
   MatrixWorkspace_sptr outputWs = algorithm->getProperty("OutputWorkspace");
   row.setSummedWs(outputWs);
-  // TODO reset the rest of the workspaces associated with the workflow
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry::SumBanks

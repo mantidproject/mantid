@@ -50,7 +50,10 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // Ensure the toolbar is enabled, and reset the instrument view to zoom mode
   m_view->setInstViewToolbarEnabled(true);
   notifyInstViewZoomRequested();
+  // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
 }
+
+void PreviewPresenter::notifySumBanksCompleted() { g_log.debug("Sum banks completed"); }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);

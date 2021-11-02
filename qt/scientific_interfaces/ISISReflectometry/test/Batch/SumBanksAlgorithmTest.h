@@ -11,6 +11,7 @@
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockBatch.h"
@@ -23,6 +24,7 @@ using namespace ::testing;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::SumBanks;
 using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper;
+using MantidQt::API::AlgorithmRuntimeProps;
 using MantidQt::API::IConfiguredAlgorithm;
 
 class SumBanksAlgorithmTest : public CxxTest::TestSuite {
@@ -57,15 +59,21 @@ public:
     row.setSelectedBanks(detIDs);
     auto mockAlg = std::make_shared<StubbedPreProcess>();
 
+    const std::string inputPropName = "InputWorkspace";
+    const std::string roiPropName = "ROIDetectorIDs";
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
+    auto expectedProps = std::make_unique<AlgorithmRuntimeProps>();
+    expectedProps->setProperty(inputPropName, mockWs);
+    expectedProps->setPropertyValue(roiPropName, "2,3");
+    const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
+
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    // TODO use workspace pointer instead of string when we update AlgorithmRunimeProps to support this
-    auto expectedProps =
-        IConfiguredAlgorithm::AlgorithmRuntimeProps{{"InputWorkspace", "mockWs"}, {"ROIDetectorIDs", "2, 3"}};
-    TS_ASSERT_EQUALS(configuredAlg->properties(), expectedProps);
+    TS_ASSERT_EQUALS(static_cast<decltype(mockWs)>(expectedProps->getProperty(inputPropName)),
+                     static_cast<decltype(mockWs)>(setProps.getProperty(inputPropName)))
+    TS_ASSERT_EQUALS(expectedProps->getPropertyValue(roiPropName), setProps.getPropertyValue(roiPropName))
   }
 
-  void xtest_row_is_updated_on_algorithm_complete() {
+  void test_row_is_updated_on_algorithm_complete() {
     auto mockAlg = std::make_shared<StubbedPreProcess>();
     const bool isHistogram = true;
     Mantid::API::MatrixWorkspace_sptr mockWs = WorkspaceCreationHelper::create1DWorkspaceRand(1, isHistogram);
@@ -76,6 +84,6 @@ public:
 
     updateRowOnAlgorithmComplete(mockAlg, row);
 
-    TS_ASSERT_EQUALS(row.getLoadedWs(), mockWs);
+    TS_ASSERT_EQUALS(row.getSummedWs(), mockWs);
   }
 };

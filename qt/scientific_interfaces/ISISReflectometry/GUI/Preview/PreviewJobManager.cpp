@@ -17,7 +17,9 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Job Manager");
-}
+constexpr auto PREPROCESS_ALG_NAME = "ReflectometryISISPreprocess";
+constexpr auto SUM_BANKS_ALG_NAME = "ReflectometryISISSumBanks";
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -44,9 +46,14 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
 
   jobAlgorithm->updateItem();
 
-  // TODO When the full implementation is added we will need to switch between different algorithm cases.
-  // For now we just deal with loading.
-  m_notifyee->notifyLoadWorkspaceCompleted();
+  const auto &name = algorithm->algorithm()->name();
+  if (name == PREPROCESS_ALG_NAME) {
+    m_notifyee->notifyLoadWorkspaceCompleted();
+  } else if (name == SUM_BANKS_ALG_NAME) {
+    m_notifyee->notifySumBanksCompleted();
+  } else {
+    throw std::logic_error("Invalid algorithm. Not implemented.");
+  }
 }
 
 void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &message) {
