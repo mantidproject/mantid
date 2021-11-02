@@ -67,9 +67,11 @@ SliceViewer
 Improvements
 ############
 
-
 Bugfixes
 ########
+- Fix out-of-range error when trying to access the projection matrix in sliceviewer for a workspace with a non-Q axis before other Q axes.
+- For MDHisto workspaces get the projection matrix from the basis vectors on the workspace rather than search for the W_MATRIX log.
+
 
 - Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
 
