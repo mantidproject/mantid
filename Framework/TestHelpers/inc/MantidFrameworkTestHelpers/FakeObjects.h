@@ -126,7 +126,7 @@ public:
   size_t getNumberHistograms() const override { return m_spec; }
   const std::string id() const override { return "AxeslessWorkspaceTester"; }
   size_t size() const override {
-    return std::accumulate(m_vec.cbegin(), m_vec.cend(), 0U,
+    return std::accumulate(m_vec.cbegin(), m_vec.cend(), static_cast<size_t>(0),
                            [](size_t total, const SpectrumTester &i) { return total + i.dataY().size(); });
   }
   size_t blocksize() const override {
