@@ -112,6 +112,20 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         pres.view.close()
 
+    def test_non_orthog_view_disabled_when_Eaxis_viewed(self):
+        ws_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1, 1, -1, 1, -1, 1, -1, 1], Names="E,H,K,L",
+                                  Frames='General Frame,HKL,HKL,HKL', Units='meV,r.l.u.,r.l.u.,r.l.u.')
+        expt_info_4D = CreateSampleWorkspace()
+        ws_4D.addExperimentInfo(expt_info_4D)
+        SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
+        pres = SliceViewer(ws_4D)
+        QApplication.sendPostedEvents()
+
+        non_ortho_action = toolbar_actions(pres, [ToolItemText.NONORTHOGONAL_AXES])[0]
+        self.assertFalse(non_ortho_action.isEnabled())
+
+        pres.view.close()
+
     def test_disable_lineplots_disables_region_selector(self):
         pres = SliceViewer(self.hkl_ws)
         line_plots_action, region_sel_action = toolbar_actions(pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
