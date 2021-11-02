@@ -33,5 +33,6 @@ Bugfixes
 - The "About Mantid" page now appears on a new full release, even if a recent nightly was previously launched.
 - Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 - Fixed plot bins not working on data with numeric X-axis.
+- Fixed a bug with autoscaling of colorfill plots from within the figure options.
 
 :ref:`Release 6.3.0 <v6.3.0>`
