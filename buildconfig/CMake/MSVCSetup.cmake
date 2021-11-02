@@ -28,16 +28,17 @@ add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 if(NOT CONDA_BUILD)
   string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/")
   string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/")
-  # /MP            - Compile .cpp files in parallel /W3            - Warning Level 3 (This is also the default)
-  # /external:I    - Ignore third party library warnings (similar to "isystem" in GCC)
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}\\ "
   )
 endif()
 
+# /MP - Compile .cpp files in parallel /W3 - Warning Level 3 (This is also the default) /external:I - Ignore third party
+# library  warnings (similar to "isystem" in GCC) /bigobj Compile large test targets by losing compatibility with MSVC
+# 2005
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
-  /MP /W3 \
+  /MP /W3 /bigobj \
   /experimental:external /external:W0 "
 )
 
