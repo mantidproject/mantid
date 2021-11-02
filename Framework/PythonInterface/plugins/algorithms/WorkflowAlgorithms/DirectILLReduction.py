@@ -497,7 +497,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
                                   EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(mainWS)
         if self.getProperty(common.PROP_ABSOLUTE_UNITS).value == common.ABSOLUTE_UNITS_ON:
-            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS)
+            vanaNormalizedWS = _absoluteUnits(vanaNormalizedWS, vanaWS, self._names, self._cleanup, self._report, self._subalgLogging)
         return vanaNormalizedWS
 
     def _outputWSConvertedToTheta(self, mainWS):
@@ -537,7 +537,7 @@ class DirectILLReduction(DataProcessorAlgorithm):
         # out of range from the original ragged workspace in delta E.
         # The mask is later respected by the detector grouping
         # to get the normalisation right also in the non-overlapping regions.
-        if mainWS.getInstrument().getName() in ['IN5', 'PANTHER']:
+        if mainWS.getInstrument().getName() in ['IN5', 'PANTHER', 'SHARP']:
             rebinnedWS = MaskNonOverlappingBins(InputWorkspace=rebinnedWS, ComparisonWorkspace=mainWS, RaggedInputs='Ragged',
                                                 OutputWorkspace=rebinnedWS.name(), MaskPartiallyOverlapping=True)
         self._cleanup.cleanup(mainWS)
