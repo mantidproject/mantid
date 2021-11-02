@@ -67,10 +67,12 @@ Improvements
 Bugfixes
 ########
 
+
 Fitting Functions
 -----------------
 New Features
 ############
+- Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
 - Added a :ref:`Power Law <func-PowerLaw>` function to MuonModelling Fit Functions.
 
 Improvements
@@ -78,7 +80,6 @@ Improvements
 - :ref:`Gaussian <func-Gaussian>`, :ref:`Lorentzian <func-Lorentzian>` and :ref:`Polynomial fitting <func-Polynomial>` functions can now also be found under MuonModelling in the Fitting Functions Tree.
 
 :ref:`Release 6.3.0 <v6.3.0>`
-
 
 ..
   Model Fitting

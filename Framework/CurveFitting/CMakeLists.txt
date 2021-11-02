@@ -114,6 +114,7 @@ set(SRC_FILES
     src/Functions/Lorentzian.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
+    src/Functions/MuoniumDecouplingCurve.cpp
     src/Functions/NeutronBk2BkExpConvPVoigt.cpp
     src/Functions/PawleyFunction.cpp
     src/Functions/PeakParameterFunction.cpp
@@ -283,6 +284,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/Lorentzian.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
+    inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
     inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
     inc/MantidCurveFitting/Functions/PawleyFunction.h
     inc/MantidCurveFitting/Functions/PeakParameterFunction.h
@@ -441,6 +443,7 @@ set(TEST_FILES
     Functions/LorentzianTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
+    Functions/MuoniumDecouplingCurveTest.h
     Functions/NeutronBk2BkExpConvPVoigtTest.h
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
