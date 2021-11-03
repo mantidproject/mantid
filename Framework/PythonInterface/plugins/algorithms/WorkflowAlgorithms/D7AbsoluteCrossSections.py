@@ -871,7 +871,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
-                if 'SofQW' in entry.name():
+                if measurement_technique == 'TOF' and '_qw' in entry.name():
                     entry.setYUnitLabel("{} ({})".format(unit_sofqw, unit_symbol_sofqw))
                 else:
                     entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
