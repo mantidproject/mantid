@@ -2,7 +2,6 @@ name: mantid-developer
 
 channels:
   - conda-forge
-  - DLR-SC # Required for OpenCascade
 
 dependencies:
   # Common packages
@@ -23,7 +22,7 @@ dependencies:
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy>=1.20.2
-  - opencascade>=7.4.0
+  - occt>=7.4.0
   - pip>=21.0.1
   - poco=1.10.*
   - psutil>=5.8.0
