@@ -33,10 +33,11 @@ InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &work
 }
 
 void InstViewModel::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
-  // TODO refactor the component info stuff into the surface constructor so we don't need to get it here
   m_actor = createInstrumentViewActor(workspace);
+  m_actor->initialize(true, true);
 }
 
+// TODO refactor getting the sample pos and axis into the surface constructor so we don't need to get it here
 Mantid::Kernel::V3D InstViewModel::getSamplePos() const {
   const auto &componentInfo = m_actor->componentInfo();
   return componentInfo.samplePosition();

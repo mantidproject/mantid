@@ -41,6 +41,15 @@ public:
     TS_ASSERT_EQUALS(result->getWorkspace(), ws)
   }
 
+  void test_update_workspace_initializes_actor() {
+    auto model = makeInstViewModel();
+    auto ws = createWorkspace();
+    model.updateWorkspace(ws);
+
+    const auto result = model.getInstrumentViewActor();
+    TS_ASSERT(result->isInitialized());
+  }
+
   void test_get_sample_pos() {
     auto model = makeInstViewModel();
     auto ws = createWorkspace();
