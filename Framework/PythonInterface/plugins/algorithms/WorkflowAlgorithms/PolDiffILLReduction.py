@@ -645,14 +645,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
             if 'EPCentre' in self._sampleAndEnvironmentProperties else None
         epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
-        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmas'].value \
-            if 'EPNSigmas' in self._sampleAndEnvironmentProperties else 1.0
+        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmasBckg'].value \
+            if 'EPNSigmasBckg' in self._sampleAndEnvironmentProperties else 1.0
         bckg_list = []
         to_clean = []
         transmission = mtd[transmission_ws].readY(0)[0]
         elastic_peaks = epp_table.column("PeakCentre") \
             if peak_centre is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_centre)
-        peak_widths = epp_table.column("Sigma") \
+        peak_widths = np.array(epp_table.column("Sigma")) \
             if peak_width is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_width)
         peak_widths[peak_widths == 0] = np.mean(peak_widths[peak_widths != 0])
         for empty in mtd[empty_ws]:
@@ -675,14 +675,14 @@ class PolDiffILLReduction(PythonAlgorithm):
                 time_indep_err = np.sum(np.concatenate((np.power(errors[:lower_peak_edge], 2),
                                                         np.power(errors[upper_peak_edge+1:], 2)))) / n_time_channels
                 counts[:lower_peak_edge] = time_indep_component
-                counts[upper_peak_edge+1:] = time_indep_component
+                counts[upper_peak_edge:] = time_indep_component
                 errors[:lower_peak_edge] = time_indep_err
-                errors[upper_peak_edge+1:] = time_indep_err
+                errors[upper_peak_edge:] = time_indep_err
                 # then, background in the elastic peak region can be calculated:
-                counts[lower_peak_edge+1:upper_peak_edge] -= time_indep_component
-                counts[lower_peak_edge+1:upper_peak_edge] *= transmission
-                errors[lower_peak_edge+1:upper_peak_edge] = \
-                    transmission * np.sqrt(np.power(errors[lower_peak_edge+1:upper_peak_edge], 2)
+                counts[lower_peak_edge:upper_peak_edge] -= time_indep_component
+                counts[lower_peak_edge:upper_peak_edge] *= transmission
+                errors[lower_peak_edge:upper_peak_edge] = \
+                    transmission * np.sqrt(np.power(errors[lower_peak_edge:upper_peak_edge], 2)
                                            + np.power(time_indep_component, 2))
 
         background_ws = 'background_ws'
@@ -1151,8 +1151,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         neutron_speed = self._sampleAndEnvironmentProperties['NeutronSpeed'].value  # in m / s
         Ei = self._sampleAndEnvironmentProperties['InitialEnergy'].value  # in meV
         c1 = 0.5 * np.power(L2, 2) * m_n / light_speed ** 2  # in meV * m^2
-        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmas'].value \
-            if 'EPNSigmas' in self._sampleAndEnvironmentProperties else 5.0  # number of peak widths to take
+        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmasVana'].value \
+            if 'EPNSigmasVana' in self._sampleAndEnvironmentProperties else 5.0  # number of peak widths to take
         us_2_s = 1e-6  # microseconds to seconds conversion
 
         return Ei - c1 / np.power((L2 / neutron_speed) + n_sigmas * ep_sigmas_tof * us_2_s, 2)
