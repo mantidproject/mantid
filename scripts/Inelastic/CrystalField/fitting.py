@@ -1553,7 +1553,7 @@ class CrystalFieldFit(object):
         self.model.update(function)
         self.model.chi2 = alg.getProperty('OutputChi2overDoF').value
 
-    def fit_sp(self, Solver: str = 'L-BFGS-B', Options: dict = None) -> None:
+    def fit_sp(self, Solver: str, Options: dict = None) -> None:
         """
         Run scipy.optimize.minimize algorithm for CEF parameters only. Update function parameters.
         """
@@ -1580,10 +1580,10 @@ class CrystalFieldFit(object):
             if res.success:
                 if self._function is not None:
                     if isinstance(res.x, list):
-                        self._function.setParameter(pos, float(res.x[0]))
+                        fun.setParameter(pos, float(res.x[0]))
                     else:
-                        self._function.setParameter(pos, float(res.x))
-        self.model.update(self._function)
+                        fun.setParameter(pos, float(res.x))
+        self.model.update(fun)
 
     def _evaluate_cf(self, x0: float, fun: IFunction, cef_pos: int) -> float:
         from mantid.simpleapi import CalculateChiSquared
