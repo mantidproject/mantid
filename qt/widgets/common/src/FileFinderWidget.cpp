@@ -779,8 +779,13 @@ QStringList FileFinderWidget::getFileExtensionsFromAlgorithm(const QString &algN
 QString FileFinderWidget::openFileDialog() {
   QStringList filenames;
   QString dir;
-  if (QFileInfo(getText()).isAbsolute()) {
-    dir = QFileInfo(getText()).absoluteDir().path();
+
+  auto prevFileNames = getText().split(",", QString::SkipEmptyParts);
+  for (auto &prevFileName : prevFileNames)
+    prevFileName = prevFileName.trimmed();
+
+  if (!prevFileNames.empty() && QFileInfo(prevFileNames[0]).isAbsolute()) {
+    dir = QFileInfo(prevFileNames[0]).absoluteDir().path();
   } else {
     dir = m_lastDir;
   }
