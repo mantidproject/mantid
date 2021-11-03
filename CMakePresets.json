@@ -19,7 +19,7 @@
                 "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
                 "HDF5_ROOT": "$env{CONDA_PREFIX}",
                 "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
@@ -31,7 +31,7 @@
             "generator": "Visual Studio 16 2019",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true
+                "CONDA_ENV": true
             }
         },
         {
@@ -42,7 +42,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Debug"
@@ -56,7 +56,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Release",
@@ -75,7 +75,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -95,7 +95,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -115,7 +115,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
@@ -135,7 +135,7 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Debug",

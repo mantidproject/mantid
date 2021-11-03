@@ -170,7 +170,7 @@ target_link_libraries(SINQ PUBLIC Mantid::Kernel Mantid::Geometry Mantid::API Ma
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS SINQ PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS SINQ INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
