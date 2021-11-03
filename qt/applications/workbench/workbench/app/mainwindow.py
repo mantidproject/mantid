@@ -580,13 +580,11 @@ class MainWindow(QMainWindow):
         # Close windows
         app = QApplication.instance()
         if app is not None:
-            #  closeAllWindows() does no checking.
-            #  This loop lets GUIs and such refuse the close if they need to save or something.
             for window in app.topLevelWindows():
                 if not window.close():
+                    # Allow GUIs to cancel the closure if they want to save
                     event.ignore()
                     return
-            app.closeAllWindows()
 
         # Close editors
         if self.editor is None or self.editor.app_closing():
@@ -598,6 +596,9 @@ class MainWindow(QMainWindow):
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
+
+            # Close any remaining windows
+            app.closeAllWindows()
 
             # Cancel all running (managed) algorithms
             AlgorithmManager.Instance().cancelAll()
