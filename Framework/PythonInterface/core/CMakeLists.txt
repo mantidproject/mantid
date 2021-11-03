@@ -107,7 +107,7 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(${_target_name} PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidPythonInterfaceCoreTargets")
   mtd_install_framework_lib(TARGETS PythonInterfaceCore EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
