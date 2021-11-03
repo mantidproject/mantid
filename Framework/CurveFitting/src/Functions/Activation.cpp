@@ -26,34 +26,34 @@ DECLARE_FUNCTION(Activation)
 
 void Activation::init() {
   declareAttribute("Unit", Attribute("K")); // or meV
-  declareParameter("Height", 1.0, "coefficient for height");
-  declareParameter("Lifetime", 1.0, "coefficient for Lifetime");
+  declareParameter("AttemptRate", 1000.0, "coefficient for attempt rate");
+  declareParameter("Barrier", 1000.0, "coefficient for barrier energy");
 }
 
 void Activation::function1D(double *out, const double *xValues, const size_t nData) const {
   beforeFunctionSet();
 
-  const double height = getParameter("Height");
-  const double lifetime = getParameter("Lifetime");
+  const double attemptRate = getParameter("AttemptRate");
+  const double barrier = getParameter("Barrier");
   const double meVConv = getMeVConv();
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = height * exp(-(meVConv * lifetime) / xValues[i]);
+    out[i] = attemptRate * exp(-(meVConv * barrier) / xValues[i]);
   }
 }
 
 void Activation::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   beforeFunctionSet();
 
-  const double height = getParameter("Height");
-  const double lifetime = getParameter("Lifetime");
+  const double attemptRate = getParameter("AttemptRate");
+  const double barrier = getParameter("Barrier");
   const double meVConv = getMeVConv();
 
   for (size_t i = 0; i < nData; i++) {
-    double diffHeight = exp(-(meVConv * lifetime) / xValues[i]);
-    double diffLifetime = (height * meVConv * (exp(-(meVConv * lifetime) / xValues[i]))) / xValues[i];
-    out->set(i, 0, diffHeight);
-    out->set(i, 1, diffLifetime);
+    double diffAR = exp(-(meVConv * barrier) / xValues[i]);
+    double diffBarrier = -(attemptRate * meVConv * (exp(-(meVConv * barrier) / xValues[i]))) / xValues[i];
+    out->set(i, 0, diffAR);
+    out->set(i, 1, diffBarrier);
   }
 }
 

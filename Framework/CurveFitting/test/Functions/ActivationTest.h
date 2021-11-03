@@ -63,8 +63,8 @@ public:
     auto activ = createTestActivation();
     activ->setAttributeValue("Unit", "K");
 
-    const double height = activ->getParameter("Height");
-    const double lifetime = activ->getParameter("Lifetime");
+    const double attemptRate = activ->getParameter("AttemptRate");
+    const double barrier = activ->getParameter("Barrier");
 
     const std::size_t numPoints = 100;
     std::array<double, numPoints> xValues;
@@ -73,7 +73,7 @@ public:
     activ->function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_DELTA(yValues[i], height * exp(-(1 * lifetime) / i), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], attemptRate * exp(-(1 * barrier) / i), 1e-12);
     }
   }
 
@@ -81,8 +81,8 @@ public:
     auto activ = createTestActivation();
     activ->setAttributeValue("Unit", "meV");
 
-    const double height = activ->getParameter("Height");
-    const double lifetime = activ->getParameter("Lifetime");
+    const double attemptRate = activ->getParameter("AttemptRate");
+    const double barrier = activ->getParameter("Barrier");
     const double meVConv = Mantid::PhysicalConstants::meVtoKelvin;
 
     const std::size_t numPoints = 100;
@@ -92,7 +92,7 @@ public:
     activ->function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_DELTA(yValues[i], height * exp(-(meVConv * lifetime) / i), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], attemptRate * exp(-(meVConv * barrier) / i), 1e-12);
     }
   }
 
@@ -106,11 +106,11 @@ public:
     Mantid::CurveFitting::Jacobian jacobian(nData, 2);
     activ->functionDeriv1D(&jacobian, xValues.data(), nData);
 
-    double dfdheight = jacobian.get(0, 0);
-    double dfdlifetime = jacobian.get(0, 1);
+    double dfdar = jacobian.get(0, 0);
+    double dfdbarrier = jacobian.get(0, 1);
 
-    TS_ASSERT_DELTA(dfdheight, 0.3189065573, 1e-8);
-    TS_ASSERT_DELTA(dfdlifetime, 0.2095671662, 1e-8);
+    TS_ASSERT_DELTA(dfdar, 0.318906557, 1e-7);
+    TS_ASSERT_DELTA(dfdbarrier, -0.209567166, 1e-7);
   }
 
   void test_jacobian_gives_expected_values_meV() {
@@ -123,11 +123,11 @@ public:
     Mantid::CurveFitting::Jacobian jacobian(nData, 2);
     activ->functionDeriv1D(&jacobian, xValues.data(), nData);
 
-    double dfdheight = jacobian.get(0, 0);
-    double dfdlifetime = jacobian.get(0, 1);
+    double dfdar = jacobian.get(0, 0);
+    double dfdbarrier = jacobian.get(0, 1);
 
-    TS_ASSERT_DELTA(dfdheight, 0.00000173881, 1e-8);
-    TS_ASSERT_DELTA(dfdlifetime, 0.0000132598, 1e-8);
+    TS_ASSERT_DELTA(dfdar, 0.0000017388, 1e-7);
+    TS_ASSERT_DELTA(dfdbarrier, -0.000013260, 1e-7);
   }
 
 private:
@@ -144,8 +144,8 @@ private:
   std::shared_ptr<TestableActivation> createTestActivation() {
     auto func = std::make_shared<TestableActivation>();
     func->initialize();
-    func->setParameter("Height", 2.3);
-    func->setParameter("Lifetime", 4.0);
+    func->setParameter("AttemptRate", 2.3);
+    func->setParameter("Barrier", 4.0);
     return func;
   }
 };

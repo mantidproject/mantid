@@ -78,9 +78,11 @@ Fitting Functions
 -----------------
 New Features
 ############
+- Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
 - Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
-- Added a :ref:`Power Law <func-PowerLaw>` function to MuonModelling Fit Functions.
+- Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.
 - Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
+
 
 Improvements
 ############

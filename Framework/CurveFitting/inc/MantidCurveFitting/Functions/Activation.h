@@ -16,8 +16,8 @@ namespace CurveFitting {
 namespace Functions {
 /**
 Provide Activation fit function interface to IFunction.
-I.e. if the unit is K, the function: y = = height*exp(-lifetime/x)
-or if the unit is meV, the function: y = height*exp(-e*lifetime/(1000 k_B x))
+I.e. if the unit is K, the function: y = = AttemptRate*exp(-Barrier/x)
+or if the unit is meV, the function: y = AttemptRate*exp(-e*Barrier/(1000 k_B x))
 Activation attributes:
 <UL>
 <LI> Unit - either K or meV (default K)</LI>
@@ -25,8 +25,8 @@ Activation attributes:
 
 Activation parameters:
 <UL>
-<LI> Height - coefficient for height (default 1.0)</LI>
-<LI> Lifetime - coefficient for lifetime (default 1.0)</LI>
+<LI> AttemptRate - coefficient for attempt rate (default 1000.0)</LI>
+<LI> Barrier - coefficient for barrier energy (default 1000.0)</LI>
 </UL>
 */
 
