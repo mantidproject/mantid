@@ -48,7 +48,7 @@ Data Objects
 Python
 ------
 
-- `isGroup` can not be used to determine if a workspace/table workspace is a grouped workspace object.
+- `isGroup` can now be used to determine if a workspace/table workspace is a grouped workspace object.
 - `createChildAlgorithm` now accepts property keyword arguments to set the child algorithm's properties during creation:
 
   -  Existing arguments, such as version, start and end progress...etc. are unaffected by this change.
