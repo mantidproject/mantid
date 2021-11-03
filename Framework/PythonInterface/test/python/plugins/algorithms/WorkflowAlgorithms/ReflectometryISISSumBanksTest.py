@@ -81,6 +81,19 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         self.assertNotEqual(test_ws, summed_ws)
         self.assertTrue(numpy.allclose(num_banks * test_ws.readY(0), summed_ws.readY(0)))
 
+    def test_mask_and_sum_banks(self):
+        num_banks = 3
+        test_ws = CreateSampleWorkspace(StoreInADS=False, NumBanks=1, BankPixelWidth=num_banks)
+
+        # We have 3x3 pixels, so 9 detectors. Include the first 6, i.e. first 2 banks.
+        num_banks_included = 2
+        roi_detector_ids = '9-14'
+        masked_ws = ReflectometryISISSumBanks().mask_detectors(test_ws, roi_detector_ids)
+        summed_ws = ReflectometryISISSumBanks().sum_banks(masked_ws)
+
+        self.assertIsInstance(summed_ws, MatrixWorkspace)
+        self.assertNotEqual(test_ws, summed_ws)
+        self.assertTrue(numpy.allclose(num_banks_included * test_ws.readY(0), summed_ws.readY(0)))
 
 if __name__ == '__main__':
     unittest.main()
