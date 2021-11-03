@@ -18,6 +18,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Pha
     run_minus, run_crop_workspace, run_create_workspace, run_convert_to_points, run_convert_to_histogram, run_divide
 import mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
@@ -87,6 +88,9 @@ class MuonContext(object):
     @property
     def current_runs(self):
         return self._data_context.current_runs
+
+    def do_grouping(self):
+        add_to_group(self._data_context.instrument, self.workspace_suffix)
 
     def calculate_counts(self, run, group, rebin=False):
         """Calculates the counts workspace for the given run and group."""

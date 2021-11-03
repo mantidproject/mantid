@@ -36,9 +36,8 @@ from mantidqtinterfaces.Muon.GUI.Common.plotting_dock_widget.plotting_dock_widge
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelAnalysis
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
+from mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces import AddGroupingWorkspaces
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
-
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
 
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
@@ -132,6 +131,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
 
         self.add_model_analysis = AddModelAnalysis(self, feature_dict)
         self.add_raw_plots = AddRawPlots(self, feature_dict)
+        setup_group_ws = AddGroupingWorkspaces(self, feature_dict)
 
         self.setup_tabs()
         self.plot_widget.insert_plot_panes()
@@ -192,6 +192,7 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.add_model_analysis.set_feature_observables(self)
 
         self.add_raw_plots.add_observers_to_feature(self)
+        setup_group_ws.add_observers_to_feature(self)
 
     def setup_tabs(self):
         """
@@ -266,19 +267,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.enable_notifier.add_subscriber(self.seq_fitting_tab.seq_fitting_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
-
-        self.group_observer = GenericObserver(self.do_grouping)
-        # only do grouping when group/pair changes
-        self.corrections_tab.corrections_tab_presenter.asymmetry_pair_and_diff_calculations_finished_notifier.\
-            add_subscriber(self.group_observer)
-        # phaseqaud finished -> do grouping
-        self.phase_tab.phase_table_presenter.calculation_finished_notifier.add_subscriber(self.group_observer)
-        # need to add stuff for phasetable finished
-        # fits not getting all of the workspaces in the group correct for simultaneous
-        # results table has no grouping
-
-    def do_grouping(self):
-        add_to_group(self.context.data_context.instrument, "MA")
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
