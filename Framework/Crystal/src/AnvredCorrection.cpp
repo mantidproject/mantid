@@ -94,7 +94,9 @@ void AnvredCorrection::init() {
   declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
                   "Linear absorption coefficient at 1.8 Angstroms in 1/cm if "
                   "not set with SetSampleMaterial");
-  declareProperty("Radius", EMPTY_DBL(), mustBePositive, "Radius of the sample in centimeters");
+  declareProperty("Radius", EMPTY_DBL(), mustBePositive,
+                  "Radius of the sample in centimeters if "
+                  "not set with SetSample.");
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events (default).\n"
