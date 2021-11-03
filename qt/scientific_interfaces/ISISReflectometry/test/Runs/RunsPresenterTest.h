@@ -751,6 +751,13 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyBatchLoaded() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsTablePresenter, notifyBatchLoaded()).Times(1);
+    presenter.notifyBatchLoaded();
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;
