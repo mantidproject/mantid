@@ -6,20 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import make_group
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import make_group
 
 
-def check_not_in_group(groups, name):
+def check_not_in_group(groups, ws):
     for group in groups:
-        if name in group.getNames():
+        if ws in group.getNames():
             return False
     return True
 
 
-def safe_to_add_to_group(name, instrument, groups, extension):
-    if name.isGroup():
+def safe_to_add_to_group(ws, instrument, groups, extension):
+    if ws.isGroup():
         return False
-    return instrument in name.name() and extension in name.name() and check_not_in_group(groups, name.name())
+    return instrument in ws.name() and extension in ws.name() and check_not_in_group(groups, ws.name())
 
 
 def add_list_to_group(ws_names, group):
@@ -33,15 +33,15 @@ def add_to_group(instrument, extension):
     ws_list =  AnalysisDataService.retrieveWorkspaces(str_names)
 
     #just the groups
-    groups = [name for name in ws_list if name.isGroup()]
+    groups = [ws for ws in ws_list if ws.isGroup()]
 
     # just the workspaces
-    def string_name(name):
-        if isinstance(name, str):
-            return name
-        return name.name()
+    def string_name(ws):
+        if isinstance(ws, str):
+            return ws
+        return ws.name()
 
-    names = [string_name(name) for name in ws_list if safe_to_add_to_group(name, instrument, groups, extension)]
+    names = [string_name(ws) for ws in ws_list if safe_to_add_to_group(ws, instrument, groups, extension)]
     # make sure we include the groups that we already have in the ADS
     group_names = {key.name():[] for key in groups}
     # put ws into groups

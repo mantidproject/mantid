@@ -408,9 +408,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.phase_tab.phase_table_presenter.enable_editing_notifier.add_subscriber(
             self.enable_observer)
 
-        self.seq_fitting_tab.seq_fitting_tab_presenter.enable_editing_notifier.add_subscriber(
-            self.enable_observer)
-
     def setup_group_calculation_disabler_notifier(self):
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
@@ -420,9 +417,6 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
             self.disable_observer)
 
         self.fitting_tab.fitting_tab_presenter.disable_editing_notifier.add_subscriber(
-            self.disable_observer)
-
-        self.seq_fitting_tab.seq_fitting_tab_presenter.disable_editing_notifier.add_subscriber(
             self.disable_observer)
 
         self.phase_tab.phase_table_presenter.disable_editing_notifier.add_subscriber(

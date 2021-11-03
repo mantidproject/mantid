@@ -9,7 +9,7 @@ from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_covariance_matrix_name,
                                                                             create_fitted_workspace_name, create_parameter_table_name,
                                                                             get_diff_asymmetry_name, get_group_asymmetry_name,
@@ -20,7 +20,7 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, make_group
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
