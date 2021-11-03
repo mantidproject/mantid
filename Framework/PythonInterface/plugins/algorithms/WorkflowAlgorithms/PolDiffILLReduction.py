@@ -1326,6 +1326,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                     if self.getProperty('DetectorEnergyEfficiencyCorrection').value:
                         progress.report('Correcting detector-analyser efficiency')
                         self._detector_analyser_energy_efficiency(ws)
+                    elif self.getProperty('ConvertToEnergy').value:
+                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
+                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
