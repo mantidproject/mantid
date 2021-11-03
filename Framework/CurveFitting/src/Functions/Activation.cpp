@@ -10,6 +10,7 @@
 #include "MantidCurveFitting/Functions/Activation.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <boost/algorithm/string.hpp>
 
 #include <cmath>
 
@@ -58,21 +59,23 @@ void Activation::functionDeriv1D(Jacobian *out, const double *xValues, const siz
 
 void Activation::beforeFunctionSet() const {
   auto unit = getAttribute("Unit").asString();
+  boost::to_lower(unit);
 
-  if (unit.compare("K") != 0 || unit.compare("meV") != 0) {
+  if (unit.compare("k") != 0 && unit.compare("mev") != 0) {
     throw std::invalid_argument("Activation function can only be used with K or meV as the unit");
   }
 }
 
 double Activation::getMeVConv() const {
   auto unit = getAttribute("Unit").asString();
+  boost::to_lower(unit);
   const double meVConv = PhysicalConstants::meVtoKelvin;
 
-  if (unit.compare("K") == 0) {
+  if (unit.compare("k") == 0) {
     return 1.0;
   }
 
-  if (unit.compare("meV") == 0) {
+  if (unit.compare("mev") == 0) {
     return meVConv;
   }
 }
