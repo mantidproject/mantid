@@ -9,6 +9,7 @@
 from mantid.api import PythonAlgorithm
 from mantid.kernel import ConfigService, logger
 from mantid.utils.deprecator import deprecated_algorithm
+from mantid.utils.logging import capture_logs
 
 # standard imports
 from contextlib import contextmanager
@@ -34,26 +35,7 @@ class deprecatorTest(unittest.TestCase):
             def PyExec(self):
                 logger.notice(f'The meaning of the Universe is {self.getPropertyValue("Meaning")}')
 
-        @contextmanager
-        def backup_environment():
-            r"""redirect logging messages to a file"""
-            try:
-                # backup the logging channel and sys.stdout
-                config = ConfigService.Instance()
-                backup = dict(channel=config['logging.channels.consoleChannel.class'],
-                              stdout=sys.stdout)
-                # redirect log messages to log_file
-                config['logging.channels.consoleChannel.class'] =  'PythonStdoutChannel'
-                _, log_file = tempfile.mkstemp(suffix='.log')
-                sys.stdout = open(log_file, 'w', buffering=1)
-                yield log_file
-            finally:
-                # restore the loggin channel and sys.stdout
-                config['logging.channels.consoleChannel.class'] = backup['channel']
-                sys.stdout = backup['stdout']
-                os.remove(log_file)  # delete the temporay log file
-
-        with backup_environment() as log_file:
+        with capture_logs(level="notice") as logs:
             alg = MyOldAlg()
             alg.initialize()
             alg.setProperty("Meaning", 42)
@@ -61,11 +43,11 @@ class deprecatorTest(unittest.TestCase):
             config = ConfigService.Instance()
             config['algorithms.deprecated'] = 'Raise'
             alg.execute()
-            self.assertTrue('Error in execution of algorithm MyOldAlg' in open(log_file, 'r').read())
+            self.assertTrue('Error in execution of algorithm MyOldAlg' in logs.getvalue())
 
             config['algorithms.deprecated'] = 'Log'
             alg.execute()  # use alias, log error message
-            self.assertTrue(' Algorithm "MyOldAlg" is deprecated' in open(log_file, 'r').read())
+            self.assertTrue(' Algorithm "MyOldAlg" is deprecated' in logs.getvalue())
 
 
 if __name__ == "__main__":
