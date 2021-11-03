@@ -1292,7 +1292,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
             if measurement_technique == 'TOF':
-                if process == 'Vanadium' and 'EPCentre' not in self._sampleAndEnvironmentProperties:
+                if process == 'Vanadium' and ('EPCentre' not in self._sampleAndEnvironmentProperties
+                                              or self.getProperty('ElasticChannelsWorkspace').isDefault):
                     progress.report('Calibrating the elastic peak energy')
                     self._find_elastic_peak_channels(ws)
                 else:
