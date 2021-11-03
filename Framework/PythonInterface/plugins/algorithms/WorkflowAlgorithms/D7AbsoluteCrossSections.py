@@ -936,6 +936,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         """Renames output workspaces with unique names based on the provided output workspace name
         and the input name."""
         input_ws = self.getPropertyValue("InputWorkspace")
+        output_treatment = self.getPropertyValue('OutputTreatment')
+        separation_method = self.getPropertyValue('CrossSectionSeparationMethod')
         possible_polarisations = ['XPO', 'YPO', 'ZPO']
         old_names = []
         new_names = []
@@ -947,7 +949,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             if input_ws in entry_name:
                 entry_name = entry_name[len(input_ws)+1:]  # assuming the verbose input name is at the beginning
             pol_present = [polarisation in entry_name for polarisation in possible_polarisations]
-            if any(pol_present):
+            if any(pol_present) and (output_treatment == 'Merge' or separation_method != 'None'):
                 pol_length = len(max(possible_polarisations, key=len))
                 if 'ON' in entry_name:
                     pol_length += 4  # length of '_ON_'
