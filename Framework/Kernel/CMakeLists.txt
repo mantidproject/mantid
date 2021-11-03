@@ -650,7 +650,7 @@ mtd_install_files(
 )
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidKernelTargets")
   mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
