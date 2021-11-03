@@ -15,7 +15,11 @@ function(mtd_install_targets)
   endif()
   _sanitize_install_dirs(_install_dirs ${PARSED_INSTALL_DIRS})
   foreach(_dir ${_install_dirs})
-    install(TARGETS ${PARSED_TARGETS} ${SYSTEM_PACKAGE_TARGET} DESTINATION ${_dir})
+    install(
+      TARGETS ${PARSED_TARGETS} ${SYSTEM_PACKAGE_TARGET}
+      DESTINATION ${_dir}
+      COMPONENT Runtime
+    )
   endforeach()
 endfunction()
 
@@ -29,8 +33,8 @@ function(mtd_install_framework_lib)
   if(PARSED_PLUGIN_LIB)
     install(
       TARGETS ${PARSED_TARGETS}
-      RUNTIME DESTINATION plugins
-      LIBRARY DESTINATION plugins
+      RUNTIME DESTINATION ${WORKBENCH_PLUGINS_DIR} COMPONENT Runtime
+      LIBRARY DESTINATION ${WORKBENCH_PLUGINS_DIR} COMPONENT Runtime
     )
   else()
     install(
@@ -49,9 +53,9 @@ function(mtd_install_framework_lib)
     install(
       TARGETS ${PARSED_TARGETS}
       EXPORT ${PARSED_EXPORT_NAME}
-      LIBRARY DESTINATION lib
-      ARCHIVE DESTINATION lib
-      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION ${WORKBENCH_LIB_DIR} COMPONENT Runtime
+      ARCHIVE DESTINATION ${WORKBENCH_LIB_DIR} COMPONENT Devel
+      RUNTIME DESTINATION ${WORKBENCH_BIN_DIR} COMPONENT Runtime
     )
 
     install(
@@ -89,6 +93,7 @@ function(mtd_install_files)
       FILES ${PARSED_FILES}
       DESTINATION ${_dir}
       RENAME ${PARSED_RENAME}
+      COMPONENT Runtime
     )
   endforeach()
 endfunction()

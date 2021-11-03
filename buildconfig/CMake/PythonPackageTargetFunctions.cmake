@@ -96,6 +96,7 @@ function(add_python_package pkg_name)
         install(
           DIRECTORY ${_setup_py_build_root}/install/lib/
           DESTINATION ${_dest}
+          COMPONENT Runtime
           PATTERN "test" EXCLUDE
           REGEX "${_parsed_arg_EXCLUDE_FROM_INSTALL}" EXCLUDE
         )
@@ -105,13 +106,18 @@ function(add_python_package pkg_name)
         install(
           DIRECTORY ${_setup_py_build_root}/install/lib/
           DESTINATION ${_dest}
+          COMPONENT Runtime
           PATTERN "test" EXCLUDE
         )
       endforeach()
     endif()
     # install the generated executable
     if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
-      install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name} DESTINATION ${_parsed_arg_INSTALL_BIN_DIR})
+      install(
+        PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
+        DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
+        COMPONENT Runtime
+      )
     endif()
   endif()
 endfunction()
