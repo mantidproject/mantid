@@ -384,6 +384,7 @@ set(TEST_FILES
     MagneticIonTest.h
     MakeCowTest.h
     MandatoryValidatorTest.h
+    MantidVersionTest.h
     MaskedPropertyTest.h
     MaterialBuilderTest.h
     MaterialTest.h
@@ -498,9 +499,9 @@ endif()
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 target_compile_features(Kernel PUBLIC cxx_std_17)
 
-# if we are not on conda build ${HDF5_LIBRARIES} are full paths to the libs and not cmake targets, therefore we need to
+# if we are not in a conda env ${HDF5_LIBRARIES} are full paths to the libs and not cmake targets, therefore we need to
 # include the headers
-if(NOT CONDA_BUILD)
+if(NOT CONDA_ENV)
   target_include_directories(Kernel SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
 endif()
 
@@ -539,6 +540,9 @@ add_subdirectory(test)
 
 if(NOT NOT_GIT_REPO OR NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h.in ${CMAKE_CURRENT_SOURCE_DIR}/test/MantidVersionTest.h
+  )
 endif()
 
 # This section deals with creating the PocoVersion implementation

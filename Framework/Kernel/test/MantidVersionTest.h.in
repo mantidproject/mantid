@@ -1,0 +1,39 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+
+@AUTO_GENERATE_WARNING@
+/********** Source = MantidVersionTest.h.in *****************************************************/
+
+#pragma once
+
+#include "MantidKernel/MantidVersion.h"
+#include <cxxtest/TestSuite.h>
+
+using namespace Mantid::Kernel;
+
+class MantidVersionTest : public CxxTest::TestSuite {
+public:
+  void test_full_version_string() {
+    std::string vers = "@VERSION_MAJOR@.@VERSION_MINOR@.@VERSION_PATCH@@VERSION_TWEAK@";
+    TS_ASSERT_EQUALS(MantidVersion::version(), vers);
+  }
+
+  void test_major_version_from_info() {
+    std::string major = "@VERSION_MAJOR@";
+    TS_ASSERT_EQUALS(MantidVersion::versionInfo().major, major);
+  }
+
+  void test_minor_version_from_info() {
+    std::string minor = "@VERSION_MINOR@";
+    TS_ASSERT_EQUALS(MantidVersion::versionInfo().minor, minor);
+  }
+
+  void test_patch_version_from_info() {
+    std::string patch = "@VERSION_PATCH@@VERSION_TWEAK@";
+    TS_ASSERT_EQUALS(MantidVersion::versionInfo().patch, patch);
+  }
+};

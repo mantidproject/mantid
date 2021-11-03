@@ -101,8 +101,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter._on_worker_success("info")
 
         self.assertEqual(1, self.view.remove_all.call_count)
-        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100, 1000, True)
-        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100, 0.05, True)
+        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 50, 600, True)
+        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 50, 0.02, True)
 
     @patch(dir_path + ".data_presenter.logger")
     def test_worker_success_invalid_filename(self, mock_logger):
@@ -116,7 +116,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.view.remove_all.call_count)
         self.assertEqual(2, self.view.add_table_row.call_count)
-        self.view.add_table_row.assert_any_call("invalid", "N/A", False, False, 100, 1000, True)
+        self.view.add_table_row.assert_any_call("invalid", "N/A", False, False, 50, 600, True)
         self.assertEqual(2, mock_logger.warning.call_count)
 
     @patch(dir_path + ".data_presenter.logger")
@@ -131,8 +131,8 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.view.remove_all.call_count)
         self.assertEqual(2, self.view.add_table_row.call_count)
-        self.view.add_table_row.assert_any_call("10", "2", False, False, 100, 1000, True)
-        self.view.add_table_row.assert_any_call("20", "1", False, False, 100, 1000, True)
+        self.view.add_table_row.assert_any_call("10", "2", False, False, 50, 600, True)
+        self.view.add_table_row.assert_any_call("20", "1", False, False, 50, 600, True)
         self.assertEqual(2, mock_logger.notice.call_count)
 
     def test_remove_workspace_tracked(self):

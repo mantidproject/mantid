@@ -70,21 +70,21 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="filterLabel">
-            <property name="text">
-             <string>Browse Filters:</string>
-            </property>
-           </widget>
-          </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="filterLabel">
+          <property name="text">
+           <string>Browse Filters:</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="2">
          <widget class="QComboBox" name="combo_xunit">
           <property name="toolTip">
-           <string>Units filter </string>
+           <string>Unit Filter </string>
           </property>
           <item>
            <property name="text">
-            <string>All</string>
+            <string>No Unit Filter</string>
            </property>
           </item>
           <item>
@@ -100,13 +100,13 @@ QGroupBox:title {
          </widget>
         </item>
         <item row="1" column="3">
-         <widget class="QComboBox" name="combo_bank">
+         <widget class="QComboBox" name="combo_region">
           <property name="toolTip">
-           <string>Bank filter </string>
+           <string>Region Filter </string>
           </property>
           <item>
            <property name="text">
-            <string>All</string>
+            <string>No Region Filter</string>
            </property>
           </item>
           <item>
@@ -117,6 +117,26 @@ QGroupBox:title {
           <item>
            <property name="text">
             <string>2 (South)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Both Banks</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Custom</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Cropped</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Texture</string>
            </property>
           </item>
          </widget>
@@ -259,23 +279,23 @@ QGroupBox:title {
           </property>
          </widget>
         </item>
-		<item row="0" column="3">
+        <item row="0" column="3">
          <widget class="QPushButton" name="button_SeqFit">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="text">
-		   <string>Sequential Fit</string>
+           <string>Sequential Fit</string>
           </property>
          </widget>
         </item>
-		<item row="0" column="4">
+        <item row="0" column="4">
          <widget class="QPushButton" name="button_SerialFit">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="text">
-		   <string>Serial Fit</string>
+           <string>Serial Fit</string>
           </property>
          </widget>
         </item>

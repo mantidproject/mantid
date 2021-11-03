@@ -28,6 +28,7 @@ Improvements
 - :ref:`GenerateLogbook <algm-GenerateLogbook>` now allows to perform binary operations even when certain entries do not exist, e.g. to create a string with all polarisation orientations contained in a collection of data files.
 - Event nexuses produced at ILL can now be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - :ref:`Rebin <algm-Rebin>` now has an option for binning with reverse logarithmic and inverse power bins.
+- :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
 
 Bugfixes
 ########
@@ -66,9 +67,11 @@ SliceViewer
 Improvements
 ############
 
-
 Bugfixes
 ########
+- Fix out-of-range error when trying to access the projection matrix in sliceviewer for a workspace with a non-Q axis before other Q axes.
+- For MDHisto workspaces get the projection matrix from the basis vectors on the workspace rather than search for the W_MATRIX log.
+
 
 - Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
 

@@ -40,6 +40,7 @@ public:
   MOCK_METHOD0(notifyAnyBatchReductionResumed, void());
   MOCK_METHOD0(notifyAnyBatchReductionPaused, void());
   MOCK_METHOD1(notifyChangeInstrumentRequested, void(std::string const &));
+  MOCK_METHOD0(notifyCloseEvent, void());
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());

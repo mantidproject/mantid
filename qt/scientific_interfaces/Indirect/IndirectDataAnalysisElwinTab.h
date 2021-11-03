@@ -37,6 +37,8 @@ public slots:
 
 protected:
   void addData(IAddWorkspaceDialog const *dialog);
+  void checkData(IAddWorkspaceDialog const *dialog);
+  void addDataFromFile(IAddWorkspaceDialog const *dialog);
   void newInputFilesFromDialog(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   virtual void addTableEntry(FitDomainIndex row);

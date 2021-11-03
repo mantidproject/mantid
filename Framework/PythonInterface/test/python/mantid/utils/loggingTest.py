@@ -7,7 +7,7 @@
 
 # package imports
 from mantid.kernel import ConfigService, logger
-from mantid.utils.logging import to_file
+from mantid.utils.logging import capture_logs
 
 # standard imports
 from pathlib import Path
@@ -16,27 +16,23 @@ import unittest
 
 
 class loggingTest(unittest.TestCase):
+    def test_capture_logs(self):
 
-    def test_to_file(self):
-
-        with to_file() as log_file:
+        with capture_logs() as logs:
             logger.error('Error message')
-            self.assertTrue('Error message' in open(log_file, 'r').read())
-        self.assertFalse(Path(log_file).exists())
-
-        with to_file(filename='my_one_and_only_one_log_file.log') as log_file:
-            logger.error('Error message')
-            self.assertTrue('Error message' in open(log_file, 'r').read())
-        self.assertTrue(Path(log_file).exists())
-        os.remove(log_file)
+            self.assertTrue('Error message' in logs.getvalue())
 
         config = ConfigService.Instance()
         config['logging.loggers.root.level'] = 'information'
-        with to_file(level='error') as log_file:
+        with capture_logs(level='error') as logs:
             self.assertTrue(config['logging.loggers.root.level'] == 'error')
             logger.error('Error-message')
             logger.debug('Debug-message')
-            self.assertTrue('Error-message' in open(log_file, 'r').read())
-            self.assertFalse('Debug-message' in open(log_file, 'r').read())
-        self.assertFalse(Path(log_file).exists())
+            self.assertTrue('Error-message' in logs.getvalue())
+            self.assertFalse('Debug-message' in logs.getvalue())
+
         self.assertTrue(config['logging.loggers.root.level'] == 'information')
+
+
+if __name__ == '__main__':
+    unittest.main()
