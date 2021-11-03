@@ -114,6 +114,22 @@ void AnvredCorrection::init() {
   defineProperties();
 }
 
+std::map<std::string, std::string> AnvredCorrection::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  const double radius = getProperty("Radius");
+  if (radius == EMPTY_DBL()) {
+    // check that if radius isn't supplied that the radius can be accessed from the sample
+    m_inputWS = getProperty("InputWorkspace");
+    const auto &sampleShape = m_inputWS->sample().getShape();
+    if (!sampleShape.hasValidShape() ||
+        sampleShape.shapeInfo().shape() != Geometry::detail::ShapeInfo::GeometryShape::SPHERE) {
+      result["Radius"] = "Please supply a radius or provide a workspace with a spherical sample set.";
+    }
+  }
+  return result;
+}
+
 void AnvredCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -344,6 +360,9 @@ void AnvredCorrection::retrieveBaseProperties() {
       m_smu = scatterXSection * rho;
     if (m_amu == EMPTY_DBL())
       m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    if (m_radius == EMPTY_DBL())
+      m_radius =
+          m_inputWS->sample().getShape().shapeInfo().sphereGeometry().radius * 100; // convert radius from m to cm
   } else // Save input in Sample with wrong atomic number and name
   {
     NeutronAtom neutron(0, 0, 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
