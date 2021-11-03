@@ -601,9 +601,8 @@ QVector<QString> IndirectTab::convertStdStringVector(const std::vector<std::stri
   QVector<QString> resultVec;
   resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
 
-  for (auto &str : stringVec) {
-    resultVec.push_back(QString::fromStdString(str));
-  }
+  std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
+                 [](const auto &str) { return QString::fromStdString(str); });
   return resultVec;
 }
 

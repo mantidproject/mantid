@@ -98,7 +98,7 @@ void CalculatePaalmanPings::run() {
   auto algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
   algorithmName = algorithmName.replace("Annulus", "Cylinder"); // Use the cylinder algorithm for annulus
 
-  std::unique_ptr<MantidQt::API::AlgorithmRuntimeProps> absCorProps;
+  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   auto absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
   absCorAlgo->initialize();
 

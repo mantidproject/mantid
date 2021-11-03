@@ -180,7 +180,7 @@ void ApplyAbsorptionCorrections::run() {
   setRunIsRunning(true);
 
   // Create / Initialize algorithm
-  std::unique_ptr<MantidQt::API::AlgorithmRuntimeProps> absCorProps;
+  auto absCorProps = std::unique_ptr<MantidQt::API::AlgorithmRuntimeProps>();
   IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
