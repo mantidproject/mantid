@@ -119,6 +119,7 @@ function(mtd_install_dirs)
     install(
       DIRECTORY ${PARSED_DIRECTORY}
       DESTINATION ${_dir}
+      COMPONENT Runtime
       PATTERN ${PARSED_EXCLUDE} EXCLUDE
     )
   endforeach()
