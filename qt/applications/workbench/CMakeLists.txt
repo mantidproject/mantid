@@ -191,31 +191,9 @@ if(APPLE AND NOT CONDA_BUILD)
       endif()
   "
     )
+  else()
+    include(BundleOSXConda)
   endif()
-
-  install(CODE "set(WORKBENCH_APP \"${WORKBENCH_APP}\")" COMPONENT Runtime)
-  # Manually sort out the dependencies using cmake
-  install(
-    CODE [[ file(GET_RUNTIME_DEPENDENCIES EXECUTABLES $<TARGET_FILE:MantidWorkbenchInstalled>
-  LIBRARIES $<TARGET_FILE:Qt5::QCocoaIntegrationPlugin> $<TARGET_FILE:Kernel> $<TARGET_FILE:API> $<TARGET_FILE:Json> $<TARGET_FILE:mantidqt_commonqt5>  $<TARGET_FILE:LiveData>
-  RESOLVED_DEPENDENCIES_VAR _r_deps UNRESOLVED_DEPENDENCIES_VAR _u_deps
-  DIRECTORIES ${MY_DEPENDENCY_PATHS} )
-  foreach(_file ${_r_deps})
-  if(NOT ${_file} MATCHES "Mantid")
-  file(INSTALL DESTINATION
-  "${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP}/Contents/Frameworks" TYPE
-  SHARED_LIBRARY FOLLOW_SYMLINK_CHAIN FILES "${_file}" )
-  endif()
-  endforeach()
-  list(LENGTH _u_deps _u_length)
-  if("${_u_length}" GREATER 0)
-  message(WARNING
-  "Unresolved dependencies detected!")
-   endif()
-  ]]
-    COMPONENT Runtime
-  )
-  # * and extra qt stuff, we should fix this manually
 
 endif()
 
