@@ -44,10 +44,13 @@ class ReflectometryISISSumBanks(DataProcessorAlgorithm):
 
     def PyExec(self):
         input_workspace = self.getProperty(self._WORKSPACE).value
-        roi_detector_ids = self.getProperty(self._ROI).value
 
-        masked_workspace = self.mask_detectors(input_workspace, roi_detector_ids)
-        summed_workspace = self.sum_banks(masked_workspace)
+        if not self.getProperty(self._ROI).isDefault:
+            roi_detector_ids = self.getProperty(self._ROI).value
+            masked_workspace = self.mask_detectors(input_workspace, roi_detector_ids)
+            summed_workspace = self.sum_banks(masked_workspace)
+        else:
+            summed_workspace = self.sum_banks(input_workspace)
 
         self.setProperty(self._OUTPUT_WS, summed_workspace)
 
