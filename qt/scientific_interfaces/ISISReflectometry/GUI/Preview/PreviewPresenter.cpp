@@ -53,7 +53,11 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
 }
 
-void PreviewPresenter::notifySumBanksCompleted() { g_log.debug("Sum banks completed"); }
+void PreviewPresenter::notifySumBanksCompleted() {
+  g_log.debug("Sum banks completed");
+  // TODO Implement plotting of the summed workspace
+  // m_view->plotSliceView(m_model->getSummedWs())
+}
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);
@@ -82,7 +86,7 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   // Get the masked workspace indices
   auto indices = m_instViewModel->detIndicesToDetIDs(m_view->getSelectedDetectors());
   auto selectionStr = m_model->detIDsToString(indices);
-  g_log.notice(selectionStr);
+  g_log.debug(selectionStr);
 
   m_model->setSelectedBanks(indices);
   m_model->sumBanksAsync(*m_jobManager);
