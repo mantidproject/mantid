@@ -302,7 +302,7 @@ class ColorbarWidget(QWidget):
                 masked_data = data[~data.mask]
                 # use the smallest positive value as vmin when using log scale,
                 # matplotlib will take care of the data skipping part.
-                masked_data = masked_data[data > 0] if norm == "Log" else masked_data
+                masked_data = masked_data[masked_data > 0] if norm == "Log" else masked_data
                 self.cmin_value = masked_data.min()
                 self.cmax_value = masked_data.max()
             except (AttributeError, IndexError):
