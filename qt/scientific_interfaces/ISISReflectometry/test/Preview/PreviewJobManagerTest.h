@@ -139,6 +139,18 @@ public:
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmComplete(configuredAlgRef), std::logic_error const &);
   }
 
+  void test_notify_algorithm_error_throws_with_unknown_algorithm() {
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto previewRow = makePreviewRow();
+    auto configuredAlg = makeConfiguredAlg(previewRow);
+
+    auto jobManager = makeJobManager(&mockJobRunner, mockSubscriber);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+
+    TS_ASSERT_THROWS(jobManager.notifyAlgorithmError(configuredAlgRef, ""), std::logic_error const &);
+  }
+
 private:
   class StubAlgPreprocess : public StubAlgorithm {
   public:

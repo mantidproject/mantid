@@ -17,8 +17,22 @@
 
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry Preview Job Manager");
+
 constexpr auto PREPROCESS_ALG_NAME = "ReflectometryISISPreprocess";
 constexpr auto SUM_BANKS_ALG_NAME = "ReflectometryISISSumBanks";
+
+enum class AlgorithmType { PREPROCESS, SUM_BANKS };
+
+AlgorithmType algorithmType(MantidQt::API::IConfiguredAlgorithm_sptr &configuredAlg) {
+  auto const &name = configuredAlg->algorithm()->name();
+  if (name == PREPROCESS_ALG_NAME) {
+    return AlgorithmType::PREPROCESS;
+  } else if (name == SUM_BANKS_ALG_NAME) {
+    return AlgorithmType::SUM_BANKS;
+  } else {
+    throw std::logic_error(std::string("Preview tab error: callback from invalid algorithm ") + name);
+  }
+}
 } // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -46,21 +60,32 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
 
   jobAlgorithm->updateItem();
 
-  const auto &name = algorithm->algorithm()->name();
-  if (name == PREPROCESS_ALG_NAME) {
+  switch (algorithmType(algorithm)) {
+  case AlgorithmType::PREPROCESS:
     m_notifyee->notifyLoadWorkspaceCompleted();
-  } else if (name == SUM_BANKS_ALG_NAME) {
+    break;
+  case AlgorithmType::SUM_BANKS:
     m_notifyee->notifySumBanksCompleted();
-  } else {
-    throw std::logic_error("Invalid algorithm. Not implemented.");
-  }
+    break;
+  };
 }
 
-void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr, std::string const &message) {
-  // TODO when full implementation is added we'll need to update this to give the relevant error for the algorithm case.
-  // TODO It would probably be good to report this as a popup instead of in the log. We can do this by
-  //  injecting IReflMessageHandler as other tabs do. This is not urgent for the initial implementation though.
-  g_log.error(std::string("Error loading workspace: ") + message);
+void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
+  auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
+  auto item = jobAlgorithm->item();
+  if (!item || !item->isPreview())
+    return;
+
+  // TODO It would probably be good to report these as popups instead of in the log. We can do this by
+  // injecting IReflMessageHandler as other tabs do. This is not urgent for the initial implementation though.
+  switch (algorithmType(algorithm)) {
+  case AlgorithmType::PREPROCESS:
+    g_log.error(std::string("Error loading workspace: ") + message);
+    break;
+  case AlgorithmType::SUM_BANKS:
+    g_log.error(std::string("Error summing banks: ") + message);
+    break;
+  };
 }
 
 void PreviewJobManager::startPreprocessing(PreviewRow &row) {
