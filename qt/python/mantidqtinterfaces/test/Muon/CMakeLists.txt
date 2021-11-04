@@ -2,6 +2,7 @@
 
 set(TEST_PY_FILES
     ADSHandler/workspace_naming_test.py
+    ADSHandler/workspace_group_definition_test.py
     base_pane/base_pane_model_test.py
     base_pane/base_pane_presenter_test.py
     basic_fitting_context_test.py
@@ -45,6 +46,7 @@ set(TEST_PY_FILES
     elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
     elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
     external_plotting_model_test.py
+    feature_flags/add_grouping_workspaces_test.py
     feature_flags/add_model_analysis_test.py
     feature_flags/add_raw_plots_test.py
     feature_flags/load_features_test.py
@@ -146,7 +148,6 @@ set(TEST_PY_FILES
     utilities/muon_load_data_test.py
     utilities/muon_pair_test.py
     utilities/muon_phasequad_test.py
-    utilities/muon_workspace_wrapper_directory_test.py
     utilities/muon_workspace_wrapper_test.py
     utilities/run_string_utils_conversion_test.py
     utilities/run_string_utils_operator_test.py
