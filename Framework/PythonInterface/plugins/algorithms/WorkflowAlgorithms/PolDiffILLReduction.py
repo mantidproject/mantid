@@ -1162,13 +1162,15 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Integrates bins around the elastic peak for vanadium in energy exchange units."""
         sigmaE = self._calculate_epp_energy_width(ws)
         max_energy = np.max(sigmaE)
-        bin_width = max_energy * 2.0
+        bin_width = 2.0 * max_energy
         for entry in mtd[ws]:
             Integration(InputWorkspace=entry, OutputWorkspace=entry,
-                        RangeLowerList=-sigmaE, RangeUpperList=sigmaE)
+                        RangeLowerList=-sigmaE, RangeUpperList=sigmaE,
+                        IncludePartialBins=True)
             self._correct_bin_widths(entry.name(), max_energy)
+            # rebins vanadium to a common bin:
             Rebin(InputWorkspace=entry, OutputWorkspace=entry,
-                  Params='{},{},{}'.format(-max_energy, bin_width, max_energy))  # rebins vanadium to a common bin
+                  Params='{},{},{}'.format(-max_energy, bin_width, max_energy))
         return ws
 
     def _normalise_vanadium(self, ws):
