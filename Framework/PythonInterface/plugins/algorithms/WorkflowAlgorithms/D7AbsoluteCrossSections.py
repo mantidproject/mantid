@@ -826,17 +826,19 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_units(self, ws, nMeasurements):
         """Sets units for the output workspace."""
         measurement_technique = self.getPropertyValue('MeasurementTechnique')
+        separation_method = self.getPropertyValue('CrossSectionSeparationMethod')
         output_unit = self.getPropertyValue('OutputUnits')
-        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
+        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic'] \
+                or self.getPropertyValue('NormalisationMethod') == 'Vanadium' and separation_method == 'None':
             unit = 'Normalized intensity'
             unit_symbol = ''
         elif self.getPropertyValue('NormalisationMethod') == 'Vanadium':
-            unit_symbol = 'barn / sr / mol'
+            unit_symbol = 'barn / sr / formula unit'
             unit = r'd$\sigma$/d$\Omega$'
             if measurement_technique == 'TOF':
                 unit_symbol_sofqw = '{} / meV'.format(unit_symbol)
                 unit_sofqw = r'{}/dE'.format(unit)
-        else:  # OutputUnits == Input
+        else:  # NormalisationMethod == None and OutputUnits == Input
             unit = 'Corrected intensity'
             unit_symbol = ''
 
@@ -873,7 +875,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
-                if measurement_technique == 'TOF' and '_qw' in entry.name():
+                if measurement_technique == 'TOF' \
+                        and (self.getPropertyValue('NormalisationMethod') != 'None' and '_qw' in entry.name()):
                     entry.setYUnitLabel("{} ({})".format(unit_sofqw, unit_symbol_sofqw))
                 else:
                     entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
