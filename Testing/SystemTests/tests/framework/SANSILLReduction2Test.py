@@ -322,3 +322,107 @@ class ILL_SANS_D22_MULTISENS(systemtesting.MantidSystemTest):
 
         GroupWorkspaces(InputWorkspaces=['out', 'sens', 'ref1', 'ref2'],
                         OutputWorkspace='outputs')
+
+
+class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a standard monochromatic reduction with the v2 of the algorithm and data from the new D11B
+    It is a water measurement performed at 3 distances with 1 wavelength.
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D11B_MONO_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config.appendDataSearchSubDir('ILL/D11B/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['out', 'ILL_SANS_D11B_MONO.nxs']
+
+    def runTest(self):
+
+        cadmiums = ['8551', '8566', '8581']
+        empty_beams = ['8552', '8567', '8582']
+        tr_beam = '8538'
+        can_tr = '8535'
+        cans = ['8550', '8565', '8580']
+        str = '8524'
+        water = ['8539', '8554', '8569']
+        edge_mask = 'edge_mask_2p5m'
+        masks = ['bs_mask_1p7m', 'bs_mask_2p0m', 'bs_mask_2p5m']
+
+        Load(Filename=edge_mask, OutputWorkspace=edge_mask)
+        for i, mask in enumerate(masks):
+            Load(Filename=mask, OutputWorkspace=mask)
+
+        for i, cad in enumerate(cadmiums):
+            SANSILLReduction(Runs=cad,
+                             ProcessAs='DarkCurrent',
+                             OutputWorkspace=f'cad_{i}')
+
+        SANSILLReduction(Runs=tr_beam,
+                         ProcessAs='EmptyBeam',
+                         OutputWorkspace='trb',
+                         OutputFluxWorkspace='trfl')
+
+        SANSILLReduction(Runs=can_tr,
+                         ProcessAs='Transmission',
+                         FluxWorkspace='trfl',
+                         OutputWorkspace='ctr')
+
+        SANSILLReduction(Runs=str,
+                         ProcessAs='Transmission',
+                         EmptyBeamWorkspace='trb',
+                         FluxWorkspace='trfl',
+                         OutputWorkspace='str')
+
+        for i, mt in enumerate(empty_beams):
+            SANSILLReduction(Runs=mt,
+                             ProcessAs='EmptyBeam',
+                             DarkCurrentWorkspace=f'cad_{i}',
+                             OutputWorkspace=f'mt_{i}',
+                             OutputFluxWorkspace=f'fl_{i}')
+
+        for i, can in enumerate(cans):
+            SANSILLReduction(Runs=can,
+                             ProcessAs='EmptyContainer',
+                             TransmissionWorkspace='ctr',
+                             DarkCurrentWorkspace=f'cad_{i}',
+                             EmptyBeamWorkspace=f'mt_{i}',
+                             OutputWorkspace=f'can_{i}')
+
+        for i, wat in enumerate(water):
+            SANSILLReduction(Runs=wat,
+                             ProcessAs='Water',
+                             DefaultMaskWorkspace=edge_mask,
+                             MaskWorkspace=masks[i],
+                             DarkCurrentWorkspace=f'cad_{i}',
+                             EmptyBeamWorkspace=f'mt_{i}',
+                             FluxWorkspace=f'fl_{i}',
+                             TransmissionWorkspace='str',
+                             EmptyContainerWorkspace=f'can_{i}',
+                             OutputWorkspace=f'h2o_{i}')
+
+        for i in range(3):
+            mtd[f'h2o_{i}'].getAxis(0).setUnit('Empty')
+            CalculateDynamicRange(f'h2o_{i}')
+
+        Q1DWeighted('h2o_0', OutputBinning='0.04,-0.02,0.54', NumberOfWedges=0, OutputWorkspace='iq0')
+        Q1DWeighted('h2o_1', OutputBinning='0.03,-0.02,0.47', NumberOfWedges=0, OutputWorkspace='iq1')
+        Q1DWeighted('h2o_2', OutputBinning='0.03,-0.02,0.38', NumberOfWedges=0, OutputWorkspace='iq2')
+        GroupWorkspaces(InputWorkspaces=['iq0', 'iq1', 'iq2'], OutputWorkspace='out')
