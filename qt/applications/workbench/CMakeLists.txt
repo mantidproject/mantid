@@ -70,6 +70,9 @@ if(APPLE OR WIN32)
     DESTINATION ${WORKBENCH_BIN_DIR}
     COMPONENT Runtime
   )
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set_target_properties(MantidWorkbenchInstalled PROPERTIES INSTALL_RPATH "@loader_path/../Frameworks")
+  endif()
 endif()
 
 # process resources files
