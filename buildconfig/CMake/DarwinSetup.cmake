@@ -96,7 +96,13 @@ if(NOT TARGET mantidpython)
     COMMENT "Generating mantidpython"
   )
   # Configure install script at the same time. Doing it later causes a warning from ninja.
-  set(PYTHONHOME "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
+  if(NOT CONDA_ENV)
+    set(PYTHONHOME
+        "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
+    )
+  else()
+    set(PYTHONHOME "\${INSTALLDIR}/Resources/mantid_python")
+  endif()
   configure_file(${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY)
   unset(PYTHONHOME)
 endif()
@@ -141,13 +147,12 @@ if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
   set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-  if(NOT CONDA_ENV)
-    install(
-      PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-      DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
-      RENAME mantidpython
-    )
-  endif()
+  install(
+    PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
+    DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
+    RENAME mantidpython
+    COMPONENT Runtime
+  )
   install(
     FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
     DESTINATION ${WORKBENCH_BUNDLE}Resources/

@@ -341,6 +341,10 @@ option(ENABLE_CPACK "Switch to enable CPack package generation")
 if(ENABLE_CPACK)
   include(CPackCommon)
 
+  if(APPLE)
+    add_subdirectory(${CMAKE_SOURCE_DIR}/installers/constructor)
+  endif()
+
   # Mac package settings
   set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/installers/WinInstaller/License.txt)
 

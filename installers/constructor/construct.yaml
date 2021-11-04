@@ -1,0 +1,38 @@
+name: MantidPython
+version: 0.1.0
+company: "Mantid Project"
+
+welcome_image_text: "MantidProject"
+header_image_text: "MantidProject"
+
+# see https://github.com/conda-forge/miniforge/blob/master/Miniforge3/construct.yaml
+channels:
+  # specifying the channel with the full URL adds two channels
+  # when the end user adds the channel without the full URL
+  # - https://conda.anaconda.org/conda-forge
+  - conda-forge
+
+write_condarc: True
+keep_pkgs: True
+
+specs:
+  - euphonic=0.6.*
+  - h5py>=2.10.0,<3
+  - ipykernel<6
+  - numpy>=1.20.2
+  - pip>=21.0.1
+  - psutil>=5.8.0
+  - pycifrw>=4.4.1
+  - pyqt>=5.12.3,<6
+  - python-dateutil>=2.8.1
+  - python=3.8.*
+  - pyyaml>=5.4.1
+  - qtconsole>=5.0.3,<6
+  - qtpy>=1.9.0
+  - requests>=2.25.1
+  - scipy>=1.6.2
+  - setuptools=48.0.0
+  - toml>=0.10.2
+  - matplotlib==3.1.3
+
+register_python_default: false
