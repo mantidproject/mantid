@@ -19,6 +19,7 @@ New and Improved
 Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
+- Fixed an issue to plot negative values with logarithm scaling in slice view.
 
 
 :ref:`Release 6.3.0 <v6.3.0>`
