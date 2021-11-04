@@ -69,15 +69,16 @@ void Activation::beforeFunctionSet() const {
 double Activation::getMeVConv() const {
   auto unit = getAttribute("Unit").asString();
   boost::to_lower(unit);
-  const double meVConv = PhysicalConstants::meVtoKelvin;
+  double meVConv;
 
   if (unit.compare("k") == 0) {
-    return 1.0;
+    meVConv = 1.0;
   }
 
   if (unit.compare("mev") == 0) {
-    return meVConv;
+    meVConv = PhysicalConstants::meVtoKelvin;
   }
+  return meVConv;
 }
 
 } // namespace Mantid::CurveFitting::Functions

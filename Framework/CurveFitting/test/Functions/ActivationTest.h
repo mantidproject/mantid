@@ -73,7 +73,7 @@ public:
     activ->function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_DELTA(yValues[i], attemptRate * exp(-(1 * barrier) / i), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], attemptRate * exp(-barrier / xValues[i]), 1e-12);
     }
   }
 
@@ -92,7 +92,7 @@ public:
     activ->function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      TS_ASSERT_DELTA(yValues[i], attemptRate * exp(-(meVConv * barrier) / i), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], attemptRate * exp(-(meVConv * barrier) / xValues[i]), 1e-12);
     }
   }
 
