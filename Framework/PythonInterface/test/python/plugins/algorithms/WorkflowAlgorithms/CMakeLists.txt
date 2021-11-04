@@ -67,6 +67,7 @@ set(TEST_PY_FILES
     SANSILLMultiProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
+    SANSILLReduction2Test.py
     SANSILLParameterScanTest.py
     SANSMaskTest.py
     SANSStitchTest.py
