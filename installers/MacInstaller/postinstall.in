@@ -1,0 +1,11 @@
+#!/bin/bash
+set -x #echo on
+
+Bundle=@PACKAGE_EXECUTABLE@
+env_version=@ENV_VERSION@
+
+
+sh /Applications/${Bundle}.app/Contents/Resources/env_installer/MantidPython-${env_version}-MacOSX-x86_64.sh -b -u -p /Applications/${Bundle}.app/Contents/Resources/mantid_python
+
+
+exit 0

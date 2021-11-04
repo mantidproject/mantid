@@ -29,7 +29,7 @@ foreach(_file ${_r_deps})
 if(NOT ${_file} MATCHES "Mantid")
 file(INSTALL DESTINATION
 "${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP}/Contents/Frameworks" TYPE
-SHARED_LIBRARY FOLLOW_SYMLINK_CHAIN FILES "${_file}" )
+SHARED_LIBRARY FOLLOW_SYMLINK_CHAIN FILES "${_file}")
 endif()
 endforeach()
 list(LENGTH _u_deps _u_length)
@@ -41,5 +41,5 @@ message(WARNING
   COMPONENT Runtime
 )
 
-install_qt5_plugin_osx("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS ${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP}/Contents/)
-install_qt5_plugin_osx("Qt5::QMacStylePlugin" QT_PLUGINS ${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP}/Contents/)
+install_qt5_plugin_osx("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS ${WORKBENCH_APP}/Contents/)
+install_qt5_plugin_osx("Qt5::QMacStylePlugin" QT_PLUGINS ${WORKBENCH_APP}/Contents/)

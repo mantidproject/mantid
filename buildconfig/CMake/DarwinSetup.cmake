@@ -128,7 +128,17 @@ if(NOT HDF5_ROOT)
 endif()
 
 if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
-  set(CPACK_GENERATOR DragNDrop)
+  if(NOT CONDA_ENV)
+    set(CPACK_GENERATOR DragNDrop)
+  else()
+    set(CPACK_GENERATOR "productbuild")
+    set(CPACK_SET_DESTDIR true)
+    set(CPACK_INSTALL_PREFIX "/Applications")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/Applications")
+    set(CPACK_COMPONENT_DEVEL_DISABLED True)
+    set(CPACK_POSTFLIGHT_RUNTIME_SCRIPT ${CMAKE_BINARY_DIR}/postinstall)
+  endif()
+
   set(CMAKE_INSTALL_PREFIX
       ""
       CACHE PATH ""

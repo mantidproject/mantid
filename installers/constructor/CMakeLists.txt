@@ -19,7 +19,7 @@ if(APPLE)
   install(CODE "set(WORKBENCH_APP \"${WORKBENCH_APP}\")" COMPONENT Runtime)
   install(
     FILES ${OUTPUT_ENV}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP}/Contents/Resources/env_installer
+    DESTINATION ${WORKBENCH_APP}/Contents/Resources/env_installer
     COMPONENT Runtime
   )
 else()

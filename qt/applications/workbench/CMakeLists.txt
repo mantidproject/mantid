@@ -174,6 +174,12 @@ if(APPLE AND NOT CONDA_BUILD)
     ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/Info.plist.in ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
     @ONLY
   )
+  if(CONDA_ENV)
+    set(ENV_VERSION "0.1.0")
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/postinstall.in ${CMAKE_BINARY_DIR}/postinstall @ONLY
+    )
+  endif()
   # Determine Qt install prefix
   set(_qt_install_prefix ${Qt5Core_DIR})
   foreach(_i RANGE 2)

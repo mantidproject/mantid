@@ -69,7 +69,9 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   set(BUILD_MANTIDFRAMEWORK ON)
 endif()
 
-set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+if(NOT CONDA_ENV)
+  set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+endif()
 
 # Conda build variables
 set(CONDA_ENV
@@ -341,7 +343,7 @@ option(ENABLE_CPACK "Switch to enable CPack package generation")
 if(ENABLE_CPACK)
   include(CPackCommon)
 
-  if(APPLE)
+  if(APPLE AND CONDA_ENV)
     add_subdirectory(${CMAKE_SOURCE_DIR}/installers/constructor)
   endif()
 
@@ -447,4 +449,15 @@ if(ENABLE_CPACK)
   include(CPack)
   # let people know what is coming out the other end - must be after cpack generates value for rpm
   message(STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}")
+
+  if(APPLE AND CONDA_ENV)
+    set(CPACK_COMPONENT_DEVEL_HIDDEN True)
+    cpack_add_component(
+      Runtime
+      DISPLAY_NAME Runtime
+      DESCRIPTION "Runtime of window application"
+      PLIST ${PROJECT_SOURCE_DIR}/installers/MacInstaller/MantidWorkbench.plist
+    )
+
+  endif()
 endif()
