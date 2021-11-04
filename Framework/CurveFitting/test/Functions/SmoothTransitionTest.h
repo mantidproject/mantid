@@ -14,8 +14,6 @@
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-// using namespace Mantid;
-// using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Functions;
@@ -69,7 +67,7 @@ public:
     double dfdmp = jacobian.get(0, 2);
     double dfdgr = jacobian.get(0, 3);
 
-    TS_ASSERT_DELTA(dfda1, 1.0, 1e-8);
+    TS_ASSERT_DELTA(dfda1, 0.9758729786, 1e-8);
     TS_ASSERT_DELTA(dfda2, 0.0241270214, 1e-8);
     TS_ASSERT_DELTA(dfdmp, -0.0400263440, 1e-8);
     TS_ASSERT_DELTA(dfdgr, 0.1480974729, 1e-8);
