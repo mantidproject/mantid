@@ -46,6 +46,7 @@ Improvements
 Bugfixes
 ########
 
+- On the model analysis tab, the fit range will now update when the x axis is changed.
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
 
 ALC
