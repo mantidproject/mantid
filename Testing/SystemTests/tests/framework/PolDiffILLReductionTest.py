@@ -272,6 +272,42 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self._check_output(mtd['sample_tof'], 500, 132, 2, 'Time-of-flight', 'TOF', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample_tof'], 'Sample')
 
+    def d7_reduction_test_sample_tof_data_bckg_subtraction(self):
+        yig_calibration_file = "D7_YIG_calibration_TOF.xml"
+        # uses TOF vanadium sample as the source of background
+        PolDiffILLReduction(Run='396016', ProcessAs='Empty', OutputWorkspace='container_ws')
+        PolDiffILLReduction(Run='395639', ProcessAs='Sample', OutputWorkspace='sample_tof_data_bckg',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            SampleGeometry='None',
+                            OutputTreatment='Individual',
+                            Transmission='0.95',
+                            EmptyContainerWorkspace='container_ws',
+                            InstrumentCalibration=yig_calibration_file,
+                            MeasurementTechnique='TOF',
+                            ConvertToEnergy=False,
+                            SubtractTOFBackgroundMethod='Data'
+                            )
+        self._check_output(mtd['sample_tof_data_bckg'], 512, 132, 2, 'Time-of-flight', 'TOF', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['sample_tof_data_bckg'], 'Sample')
+
+    def d7_reduction_test_sample_tof_gauss_bckg_subtraction(self):
+        yig_calibration_file = "D7_YIG_calibration_TOF.xml"
+        # uses TOF vanadium sample as the source of background
+        PolDiffILLReduction(Run='396016', ProcessAs='Empty', OutputWorkspace='container_ws')
+        PolDiffILLReduction(Run='395639', ProcessAs='Sample', OutputWorkspace='sample_tof_data_bckg',
+                            SampleAndEnvironmentProperties=self._sampleProperties,
+                            SampleGeometry='None',
+                            OutputTreatment='Individual',
+                            Transmission='0.95',
+                            EmptyContainerWorkspace='container_ws',
+                            InstrumentCalibration=yig_calibration_file,
+                            MeasurementTechnique='TOF',
+                            ConvertToEnergy=False,
+                            SubtractTOFBackgroundMethod='Gaussian'
+                            )
+        self._check_output(mtd['sample_tof_data_bckg'], 512, 132, 2, 'Time-of-flight', 'TOF', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['sample_tof_data_bckg'], 'Sample')
+
     def d7_reduction_test_sample_full_reduction(self):
         PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
@@ -362,4 +398,6 @@ class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
         self.d7_reduction_test_sample_individual_paramagnetic()
         self.d7_reduction_test_sample_sum()
         self.d7_reduction_test_sample_crop_tof_axis()
+        self.d7_reduction_test_sample_tof_data_bckg_subtraction()
+        self.d7_reduction_test_sample_tof_gauss_bckg_subtraction()
         self.d7_reduction_test_sample_full_reduction()

@@ -313,6 +313,16 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('ConvertToEnergy', tofMeasurement)
 
+        self.declareProperty(name='SubtractTOFBackgroundMethod',
+                             defaultValue='Gaussian',
+                             validator=StringListValidator(['Gaussian', 'Rectangular', 'Data']),
+                             doc='Which approach to use when subtracting time-(in)dependent background. Gaussian is '
+                                 'equivalent to LAMP implementation, subtracts a Gaussian distribution preserving '
+                                 'counts of the background source. Rectangular averages the container counts over '
+                                 'the EP region. Data uses container counts directly as measured.')
+
+        self.setPropertySettings('SubtractTOFBackgroundMethod', tofMeasurement)
+
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
@@ -651,12 +661,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             CreateSingleValuedWorkspace(DataValue=float(transmission), OutputWorkspace=transmission_ws)
         return transmission_ws
 
-    def _extract_time_dependent_background(self, empty_ws, transmission_ws):
+    def _extract_time_dependent_background(self, empty_ws, transmission_ws, tof_background_subtraction_method):
         """Extracts time-independent and time-dependent contributions to the background from the provided
         workspace (empty container or vanadium) measured in the TOF mode."""
         # number of channels around the peak, if X-axis data unit is time channels
         peak_width = self._sampleAndEnvironmentProperties['EPWidth'].value \
-            if 'EPWidth' in self._sampleAndEnvironmentProperties else None
+            if 'EPWidth' in self._sampleAndEnvironmentProperties else 25.0
         peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
             if 'EPCentre' in self._sampleAndEnvironmentProperties else None
         epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
@@ -694,6 +704,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 errors[:lower_peak_edge] = time_indep_err
                 errors[upper_peak_edge:] = time_indep_err
                 # then, background in the elastic peak region can be calculated:
+                if tof_background_subtraction_method == 'Rectangular':  # averages container counts in the EP region
+                    counts[lower_peak_edge:upper_peak_edge] = np.mean(counts[lower_peak_edge:upper_peak_edge])
                 counts[lower_peak_edge:upper_peak_edge] -= time_indep_component
                 counts[lower_peak_edge:upper_peak_edge] *= transmission
                 errors[lower_peak_edge:upper_peak_edge] = \
@@ -770,7 +782,13 @@ class PolDiffILLReduction(PythonAlgorithm):
         if empty_ws != "":
             max_empty_entry = mtd[empty_ws].getNumberOfEntries()
             if measurement_technique == "TOF":
-                tof_backgrounds = self._extract_time_dependent_background(empty_ws, transmission_ws)
+                tof_background_subtraction_method = self.getPropertyValue('SubtractTOFBackgroundMethod')
+                if tof_background_subtraction_method == 'Gaussian':
+                    self._subtract_gaussian_time_dep_background(ws, empty_ws, transmission_ws)
+                    return
+                else:  # either Rectangular or Data
+                    tof_backgrounds = self._extract_time_dependent_background(empty_ws, transmission_ws,
+                                                                              tof_background_subtraction_method)
         elif measurement_technique == "TOF":
             return
 
@@ -792,6 +810,58 @@ class PolDiffILLReduction(PythonAlgorithm):
             tmp_names.extend(tmp_ws)
         if self.getProperty('ClearCache').value and len(tmp_names) > 0:
             DeleteWorkspaces(WorkspaceList=tmp_names)
+        return ws
+
+    @staticmethod
+    def _gaussian_elastic_peak_background(epp_centre, sigma, x_axis, total_counts):
+        """Provides a gaussian distribution using given elastic peak position (epp_centre), width of the distribution,
+        span of the distribution (x_axis), while preserving counts in the original container data (total_counts."""
+        return total_counts / (sigma * np.sqrt(2 * np.pi)) * np.exp(-0.5 * ((x_axis - epp_centre) / sigma) ** 2)
+
+    def _subtract_gaussian_time_dep_background(self, ws, empty_ws, transmission_ws):
+        """Subtracts from the data time-dependent and independent background using a gaussian approximation
+        of the shape of container counts in the elastic peak region."""
+        # number of channels around the peak, if X-axis data unit is time channels
+        peak_width = self._sampleAndEnvironmentProperties['EPWidth'].value \
+            if 'EPWidth' in self._sampleAndEnvironmentProperties else 25.0
+        peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
+            if 'EPCentre' in self._sampleAndEnvironmentProperties else None
+        epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
+        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmasBckg'].value \
+            if 'EPNSigmasBckg' in self._sampleAndEnvironmentProperties else 1.0
+        transmission = mtd[transmission_ws].readY(0)[0]
+        elastic_peaks = epp_table.column("PeakCentre") \
+            if peak_centre is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_centre)
+        peak_widths = np.array(epp_table.column("Sigma")) \
+            if peak_width is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_width)
+        peak_widths[peak_widths == 0] = np.mean(peak_widths[peak_widths != 0])
+        max_empty = mtd[empty_ws].getNumberOfEntries()
+        for entry_no, entry in enumerate(mtd[ws]):
+            empty_no = entry_no if entry_no < max_empty else entry_no % max_empty
+            background = mtd[empty_ws][empty_no].name()
+            for pixel_no in range(entry.getNumberHistograms()):
+                counts = entry.dataY(pixel_no)
+                time_channels = mtd[background].readX(pixel_no)
+                empty_counts = mtd[background].readY(pixel_no)
+                ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
+                bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
+                lower_peak_edge = int(ep_index - n_sigmas * peak_widths[pixel_no] / bin_width)
+                upper_peak_edge = int(ep_index + n_sigmas * peak_widths[pixel_no] / bin_width)
+                # first, the time independent contribution (outside elastic peak) to background is calculated
+                time_indep_component = np.mean(np.concatenate((empty_counts[:lower_peak_edge],
+                                                               empty_counts[upper_peak_edge+1:])))
+                # and its error, from error propagation:
+                time_dep_component = self._gaussian_elastic_peak_background(
+                    epp_centre=elastic_peaks[pixel_no],
+                    sigma=peak_widths[pixel_no],
+                    x_axis=time_channels[lower_peak_edge:upper_peak_edge],
+                    total_counts=np.sum(empty_counts[lower_peak_edge:upper_peak_edge]))
+                counts[:lower_peak_edge] -= time_indep_component
+                counts[upper_peak_edge:] -= time_indep_component
+                # then, background in the elastic peak region can be calculated:
+                counts[lower_peak_edge:upper_peak_edge] -= time_indep_component
+                counts /= transmission
+                counts[lower_peak_edge:upper_peak_edge] -= time_dep_component
         return ws
 
     def _calculate_polarising_efficiencies(self, ws):
