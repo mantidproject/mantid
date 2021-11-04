@@ -16,7 +16,7 @@ class EXPORT_OPT_MANTIDQT_COMMON AlgorithmRuntimeProps final : private Mantid::K
 public:
   AlgorithmRuntimeProps() = default;
   AlgorithmRuntimeProps(const AlgorithmRuntimeProps &) = default;
-  AlgorithmRuntimeProps(AlgorithmRuntimeProps &&) noexcept = default;
+  AlgorithmRuntimeProps(AlgorithmRuntimeProps &&) = default;
   ~AlgorithmRuntimeProps() = default;
 
   bool operator==(const Mantid::Kernel::IPropertyManager &other) override = delete;
