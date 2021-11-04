@@ -856,6 +856,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             if output_unit == 'Default':  # provide SofQW, and distributions as a function of Q and 2theta
                 twoTheta_distribution = self._convert_to_2theta(ws_in=ws, ws_out='tthw', merged_data=perform_merge)
                 ws_sofqw = self._convert_to_sofqw(ws_in=ws, ws_out=ws+'_qw')
+                # transpose the results as a function of spectrum number to remain consistent with other workspaces
+                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
                 # interleave output names so that SofQW, 2theta, and q distributions for the same input are together:
                 group_list = [ws_name for name_tuple in zip(mtd[ws].getNames(),
                                                             mtd[twoTheta_distribution].getNames(),
