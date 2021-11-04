@@ -258,9 +258,9 @@ void DiscusMultipleScatteringCorrection::exec() {
   const std::string reportMsg = "Computing corrections";
 
   bool enableParallelFor = true;
-  for (auto &ws : simulationWSs) {
-    enableParallelFor = enableParallelFor && Kernel::threadSafe(*ws);
-  }
+  enableParallelFor = std::all_of(simulationWSs.begin(), simulationWSs.end(),
+                                  [](MatrixWorkspace_sptr ws) { return Kernel::threadSafe(*ws); });
+
   enableParallelFor = enableParallelFor && Kernel::threadSafe(*noAbsOutputWS);
 
   const auto &spectrumInfo = instrumentWS.spectrumInfo();
@@ -757,7 +757,7 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
 Geometry::Track
 DiscusMultipleScatteringCorrection::start_point(const Geometry::IObject &shape,
                                                 const std::shared_ptr<const Geometry::ReferenceFrame> &frame,
-                                                const V3D& sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
+                                                const V3D &sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
   for (int i = 0; i < m_maxScatterPtAttempts; i++) {
     auto t = generateInitialTrack(shape, frame, sourcePos, rng);
     const int nlinks = shape.interceptSurface(t);
