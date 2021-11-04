@@ -426,3 +426,100 @@ class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
         Q1DWeighted('h2o_1', OutputBinning='0.03,-0.02,0.47', NumberOfWedges=0, OutputWorkspace='iq1')
         Q1DWeighted('h2o_2', OutputBinning='0.03,-0.02,0.38', NumberOfWedges=0, OutputWorkspace='iq2')
         GroupWorkspaces(InputWorkspaces=['iq0', 'iq1', 'iq2'], OutputWorkspace='out')
+
+
+class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a standard monochromatic reduction with the v2 of the algorithm and data from the new D22B
+    It is a water measurement normalised to a flux measured with chopper as attenuator at a different distance (but same collimation).
+    This also tests the panel separation.
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D22B_MONO_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config.appendDataSearchSubDir('ILL/D22B/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['out', 'ILL_SANS_D22B_MONO.nxs']
+
+    def runTest(self):
+        Load(Filename='bs_mask.nxs', OutputWorkspace='bs_mask')
+        Load(Filename='edge_mask.nxs', OutputWorkspace='edge_mask')
+
+        SANSILLReduction(Runs='51690+51704',
+                         ProcessAs='DarkCurrent',
+                         OutputWorkspace='cad')
+
+        SANSILLReduction(Runs='51701',
+                         ProcessAs='EmptyBeam',
+                         DarkCurrentWorkspace='cad',
+                         OutputFluxWorkspace='fl',
+                         OutputWorkspace='mt')
+
+        SANSILLReduction(Runs='51703',
+                         ProcessAs='Transmission',
+                         DarkCurrentWorkspace='cad',
+                         FluxWorkspace='fl',
+                         OutputWorkspace='ctr')
+
+        SANSILLReduction(Runs='51727+51724+51693',
+                         ProcessAs='EmptyContainer',
+                         DarkCurrentWorkspace='cad',
+                         EmptyBeamWorkspace='mt',
+                         TransmissionWorkspace='ctr',
+                         OutputWorkspace='can')
+
+        SANSILLReduction(Runs='51702',
+                         ProcessAs='Transmission',
+                         DarkCurrentWorkspace='cad',
+                         FluxWorkspace='fl',
+                         OutputWorkspace='wtr')
+
+        #Empty beam for flux calculation
+        SANSILLReduction(Runs='51644',
+                         ProcessAs='EmptyBeam',
+                         DarkCurrentWorkspace='cad',
+                         OutputFluxWorkspace='chfl',
+                         OutputWorkspace='mtfl')
+
+        # note that in the original script there was also 51787 summed,
+        # but it is NOT WATER, it is an empty beam!
+        # adding that obviously brings the scale down to a wrong level
+        SANSILLReduction(Runs='51726+51692+51723',
+                         ProcessAs='Water',
+                         MaskWorkspace='bs_mask',
+                         DefaultMaskWorkspace='edge_mask',
+                         DarkCurrentWorkspace='cad',
+                         EmptyBeamWorkspace='mt',
+                         TransmissionWorkspace='wtr',
+                         EmptyContainerWorkspace='can',
+                         FluxWorkspace='chfl',
+                         OutputSensitivityWorkspace='sens',
+                         OutputWorkspace='water')
+
+        front = CropToComponent('water', ['detector_front'])
+        back = CropToComponent('water', ['detector_back'])
+        front.getAxis(0).setUnit('Empty')
+        back.getAxis(0).setUnit('Empty')
+        mtd['water'].getAxis(0).setUnit('Empty')
+        Q1DWeighted('water', '0.005,-0.01,0.655', NumberOfWedges=0, OutputWorkspace='iq')
+        Q1DWeighted('front', '0.06,-0.01,0.655', NumberOfWedges=0, OutputWorkspace='iqf')
+        Q1DWeighted('back', '0.005,-0.01,0.066', NumberOfWedges=0, OutputWorkspace='iqb')
+        GroupWorkspaces(InputWorkspaces=['iq', 'iqf', 'iqb'], OutputWorkspace='out')
