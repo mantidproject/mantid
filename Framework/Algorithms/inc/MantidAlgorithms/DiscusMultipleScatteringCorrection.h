@@ -57,10 +57,11 @@ protected:
                                                                  const size_t columns);
   virtual std::unique_ptr<InterpolationOption> createInterpolateOption();
   double interpolateFlat(const HistogramData::Histogram &histToInterpolate, double x);
-  double sampleQW(const MatrixWorkspace_sptr &CumulativeProb, double x);
+  std::tuple<double, int> sampleQW(const MatrixWorkspace_sptr &CumulativeProb, double x);
   double interpolateSquareRoot(const HistogramData::Histogram &histToInterpolate, double x);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
-  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmax, std::vector<double> &resultX,
+  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
+                           std::vector<double> &resultX,
                            std::vector<double> &resultY);
 
 private:
@@ -87,9 +88,11 @@ private:
   void correctForWorkspaceNameClash(std::string &wsName);
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   MatrixWorkspace_sptr createInvPOfQ(size_t expectedSize);
-  void prepareCumulativeProbForQ(const HistogramData::Histogram &QSQ, double kinc, MatrixWorkspace_sptr PInvOfQ);
+  void prepareCumulativeProbForQ(const MatrixWorkspace_uptr &QSQ, double kinc, const MatrixWorkspace_sptr &PInvOfQ);
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
-  std::unique_ptr<Mantid::HistogramData::Histogram> prepareQSQ(double kinc);
+  MatrixWorkspace_uptr prepareQSQ(double kinc);
+  double getKf(const MatrixWorkspace_sptr &SOfQ, const int iW, const double kinc);
+  std::tuple<double, double> getKinematicRange(double kf, double ki);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts;

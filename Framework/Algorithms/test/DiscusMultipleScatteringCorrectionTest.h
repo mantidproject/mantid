@@ -34,9 +34,9 @@ public:
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
     DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
-  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmax, std::vector<double> &resultX,
-                           std::vector<double> &resultY) {
-    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmax, resultX, resultY);
+  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin, double xmax,
+                           std::vector<double> &resultX, std::vector<double> &resultY) {
+    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmin, xmax, resultX, resultY);
   }
 };
 
@@ -354,13 +354,19 @@ public:
     Mantid::HistogramData::Histogram test(Mantid::HistogramData::Points({0., 1., 2., 3.}),
                                           Mantid::HistogramData::Frequencies({1., 1., 1., 1.}));
     std::vector<double> testResultX, testResultY;
-    alg.integrateCumulative(test, 2.2, testResultX, testResultY);
+    alg.integrateCumulative(test, 0., 2.2, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[3], 2.2);
-    TS_ASSERT_THROWS(alg.integrateCumulative(test, 3.2, testResultX, testResultY), std::runtime_error &);
-    alg.integrateCumulative(test, 2.0, testResultX, testResultY);
+    TS_ASSERT_THROWS(alg.integrateCumulative(test, 0., 3.2, testResultX, testResultY), std::runtime_error &);
+    alg.integrateCumulative(test, 0., 2.0, testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[2], 2.0);
-    alg.integrateCumulative(test, 0., testResultX, testResultY);
+    alg.integrateCumulative(test, 0., 0., testResultX, testResultY);
     TS_ASSERT_EQUALS(testResultY[0], 0.);
+    alg.integrateCumulative(test, 1., 0., testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[0], 0.);
+    alg.integrateCumulative(test, 0.5, 1.5, testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[2], 1.0);
+    alg.integrateCumulative(test, 0.5, 0.9, testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[1], 0.4);
   }
 
   //---------------------------------------------------------------------------

@@ -238,7 +238,11 @@ void DiscusMultipleScatteringCorrection::exec() {
 
   double lambdamin, lambdamax;
   getXMinMax(*inputWS, lambdamin, lambdamax);
-  auto QSQHist = prepareQSQ(2 * M_PI / lambdamin);
+  auto QSQ = prepareQSQ(2 * M_PI / lambdamin);
+  int totalPoints = 0;
+  for (int i = 0; i < QSQ->getNumberHistograms(); i++) {
+    totalPoints += QSQ->histogram(i).size();
+  }
 
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
@@ -323,9 +327,10 @@ void DiscusMultipleScatteringCorrection::exec() {
       const auto detPos = spectrumInfo.position(i);
 
       MatrixWorkspace_sptr invPOfQ;
-      if (m_importanceSampling)
+      if (m_importanceSampling) {
         // prep invPOfQ outside the bin loop to avoid costly construction\destruction
-        invPOfQ = createInvPOfQ(QSQHist->size());
+        invPOfQ = createInvPOfQ(totalPoints);
+      }
 
       for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
         if (lambdas[bin] <= 0) {
@@ -336,7 +341,7 @@ void DiscusMultipleScatteringCorrection::exec() {
         const double kinc = 2 * M_PI / lambdas[bin];
 
         if (m_importanceSampling)
-          prepareCumulativeProbForQ(*QSQHist, kinc, invPOfQ);
+          prepareCumulativeProbForQ(QSQ, kinc, invPOfQ);
 
         double total = simulatePaths(nSingleScatterEvents, 1, rng, invPOfQ, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
@@ -441,13 +446,12 @@ void DiscusMultipleScatteringCorrection::exec() {
  * q value in the input S(Q) profile
  * @return A pointer to a histogram containing the Q*S(Q) profile
  */
-std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
+MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
 
-  std::vector<double> flattenedQ, flattenedQSQ;
-  double maxQ = m_SQWS->histogram(0).readY().back();
+  MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(*m_SQWS);
+  double qMaxPreviousRow = 0.;
   // loop through the S(Q) spectra for the different energy transfer values
   for (int iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
-
     std::vector<double> qValues = m_SQWS->histogram(iW).readX();
     std::vector<double> SQValues = m_SQWS->histogram(iW).readY();
     // add terminating points at 0 and 2k before multiplying by Q so no extrapolation problems
@@ -472,15 +476,11 @@ std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrec
     std::transform(SQValues.begin(), SQValues.end(), qValues.begin(), std::back_inserter(QSQValues),
                    std::multiplies<double>());
 
-    std::transform(qValues.begin(), qValues.end(), qValues.begin(),
-                   [maxQ, iW](double d) -> double { return d + iW * maxQ; });
-
-    flattenedQSQ.insert(flattenedQSQ.begin(), QSQValues.begin(), QSQValues.end());
-    flattenedQ.insert(flattenedQ.begin(), qValues.begin(), qValues.end());
+    outputWS->mutableX(iW).assign(qValues.cbegin(), qValues.cend());
+    outputWS->mutableY(iW).assign(QSQValues.cbegin(), QSQValues.cend());
   }
 
-  return std::make_unique<Mantid::HistogramData::Histogram>(Mantid::HistogramData::Points{flattenedQ},
-                                                            Mantid::HistogramData::Counts{flattenedQSQ});
+  return outputWS;
 }
 
 /**
@@ -490,54 +490,89 @@ std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrec
  * @param kinc The incident wavenumber
  * @param PInvOfQ The inverted cumulative probability distribution
  */
-void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(const HistogramData::Histogram &QSQ, double kinc,
-                                                                   MatrixWorkspace_sptr PInvOfQ) {
-  auto &PInvOfQX = PInvOfQ->dataX(0);
-  auto &PInvOfQY = PInvOfQ->dataY(0);
-  PInvOfQX.clear();
-  PInvOfQY.clear();
-  integrateCumulative(QSQ, 2 * kinc, PInvOfQY, PInvOfQX);
-  auto POfQYAt2K = PInvOfQX.back();
-  if (POfQYAt2K == 0.)
+void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(const MatrixWorkspace_uptr &QSQ, double kinc,
+                                                                   const MatrixWorkspace_sptr &PInvOfQ) {
+  std::vector<double> IOfQXFull, IOfQYFull, qValuesInKinRange, wValuesInKinRange;
+  // loop through the S(Q) spectra for the different energy transfer values
+  for (int iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
+    auto kf = getKf(m_SQWS, iW, kinc);
+    auto [qmin, qrange] = getKinematicRange(kf, kinc);
+    std::vector<double> IOfQX, IOfQY;
+    integrateCumulative(QSQ->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
+    qValuesInKinRange.insert(qValuesInKinRange.end(), IOfQX.begin(), IOfQX.end());
+    wValuesInKinRange.insert(wValuesInKinRange.end(), IOfQX.size(), iW);
+    IOfQXFull.insert(IOfQXFull.end(), IOfQX.begin(), IOfQX.end());
+    IOfQYFull.insert(IOfQYFull.end(), IOfQY.begin(), IOfQY.end());
+  }
+  auto IOfQYAt2K = IOfQYFull.back();
+  if (IOfQYAt2K == 0.)
     throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
   // normalise probability range to 0-1
-  std::transform(PInvOfQX.begin(), PInvOfQX.end(), PInvOfQX.begin(),
-                 [POfQYAt2K](double d) -> double { return d / POfQYAt2K; });
+  std::transform(IOfQYFull.begin(), IOfQYFull.end(), IOfQYFull.begin(),
+                 [IOfQYAt2K](double d) -> double { return d / IOfQYAt2K; });
   // Store the normalized integral (= cumulative probability) on the x axis
   // The y values in the three spectra store coordinate of flattened S(Q,W) workspace, Q, W
-  PInvOfQ->mutableY(1).assign(PInvOfQY.cbegin(), PInvOfQY.cend());
-  PInvOfQ->mutableY(2).assign(PInvOfQY.cbegin(), PInvOfQY.cend());
+  PInvOfQ->mutableX(0).assign(IOfQYFull.cbegin(), IOfQYFull.cend());
+  PInvOfQ->mutableY(0).assign(IOfQXFull.cbegin(), IOfQXFull.cend());
+  PInvOfQ->mutableY(1).assign(qValuesInKinRange.cbegin(), qValuesInKinRange.cend());
+  PInvOfQ->mutableY(2).assign(wValuesInKinRange.cbegin(), wValuesInKinRange.cend());
 }
 
 /**
- * Integrate a distribution between x=0 and the supplied xmax value using trapezoid rule
+ * Integrate a distribution between the supplied xmin and xmax values using trapezoid rule
  * without any extrapolation on either end of the distribution
  * Return two vectors rather than a histogram for performance reasons and to make transposing it easier
  * @param h Histogram object containing the distribution to integrate
+ * @param xmin The lower integration limit
  * @param xmax The upper integration limit
  * @param resultX The x values at which the integral has been calculated
  * @param resultY the values of the integral at various x values up to xmax
  */
-void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmax,
-                                                             std::vector<double> &resultX,
+void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmin,
+                                                             double xmax, std::vector<double> &resultX,
                                                              std::vector<double> &resultY) {
   const std::vector<double> &xValues = h.readX();
   const std::vector<double> &yValues = h.readY();
 
   // set the integral to zero at x=0
-  resultX.emplace_back(0.);
+  resultX.emplace_back(xmin);
   resultY.emplace_back(0.);
   double sum = 0;
 
-  // ensure there's a point at x=0 so xmax is never to the left of all the points
-  if (xValues.front() > 0.)
-    throw std::runtime_error("Distribution doesn't contain a point at x=0");
+  // ensure there's a point at x=0
+  if (xValues.front() > xmin)
+    throw std::runtime_error("Distribution doesn't extend as far as lower integration limit, x=" +
+                             std::to_string(xmin));
   // ...and a terminating point. Q.S(Q) generally not flat so assuming flat extrapolation not v useful
   if (xValues.back() < xmax)
     throw std::runtime_error("Distribution doesn't extend as far as upper integration limit, x=" +
                              std::to_string(xmax));
 
-  size_t iRight;
+  auto iter = std::upper_bound(h.x().cbegin(), h.x().cend(), xmin);
+  auto iRight = static_cast<size_t>(std::distance(h.x().cbegin(), iter));
+
+  // deal with partial initial segments
+  if ((xmin > xValues[iRight - 1]) && (xmax >= xValues[iRight])) {
+    double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmin) + yValues[iRight] * (xmin - xValues[iRight - 1])) /
+                     (xValues[iRight] - xValues[iRight - 1]);
+    sum += 0.5 * (interpY + yValues[iRight]) * (xValues[iRight] - xmin);
+    resultX.push_back(xValues[iRight]);
+    resultY.push_back(sum);
+    iRight++;
+  }
+  if ((xmin > xValues[iRight - 1]) && (xmax < xValues[iRight])) {
+    double interpY1 =
+        (yValues[iRight - 1] * (xValues[iRight] - xmin) + yValues[iRight] * (xmin - xValues[iRight - 1])) /
+        (xValues[iRight] - xValues[iRight - 1]);
+    double interpY2 =
+        (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
+        (xValues[iRight] - xValues[iRight - 1]);
+    sum += 0.5 * (interpY1 + interpY2) * (xmax - xmin);
+    resultX.push_back(xmax);
+    resultY.push_back(sum);
+    iRight++;
+  }
+
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (iRight = 1; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     sum += 0.5 * (yValues[iRight] + yValues[iRight - 1]) * (xValues[iRight] - xValues[iRight - 1]);
@@ -546,7 +581,7 @@ void DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::Histo
   }
 
   // integrate a partial final interval if xmax is between points
-  if (xmax > xValues[iRight - 1]) {
+  if ((xmax > xValues[iRight - 1]) && (xmin <= xValues[iRight - 1])) {
     // use linear interpolation to calculate the y value at xmax
     double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
                      (xValues[iRight] - xValues[iRight - 1]);
@@ -585,8 +620,9 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
   return {sig_total, scatteringXSection};
 }
 
-double DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb, double x) {
-  return interpolateSquareRoot(CumulativeProb->histogram(0), x);
+std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb,
+                                                                     double x) {
+  return {interpolateSquareRoot(CumulativeProb->histogram(0), x), 0 /*elastic only so far*/};
 }
 
 /**
@@ -743,6 +779,42 @@ DiscusMultipleScatteringCorrection::scatter(const int nScatters, Kernel::PseudoR
   return {true, weight, QSS};
 }
 
+double DiscusMultipleScatteringCorrection::getKf(const MatrixWorkspace_sptr &SOfQ, const int iW, const double kinc) {
+  double deltaE, kf;
+  const std::string emodeStr = getProperty("EMode");
+  auto emode = Kernel::DeltaEMode::fromString(emodeStr);
+  if (emode == Kernel::DeltaEMode::Elastic) {
+    deltaE = 0.;
+  } else {
+    assert(!SOfQ->getAxis(1)->isSpectra());
+    deltaE = SOfQ->getAxis(1)->getValue(iW);
+  }
+  if (deltaE == 0.) {
+    kf = kinc; // avoid costly sqrt
+  } else {
+    kf = sqrt(kinc * kinc + deltaE / PhysicalConstants::E_mev_toNeutronWavenumberSq);
+  }
+  return kf;
+}
+
+/**
+ * Get the range of q values accessible for a particular kinc and kf. Since the kinc value is know
+ * during the simulation this is similar to direct geometry kinematics
+ * @param kf The wavevector after the scatter event
+ * @param ki The wavevector before the scatter event
+ * @return a tuple containing qmin and the qrange
+ */
+std::tuple<double, double> DiscusMultipleScatteringCorrection::getKinematicRange(double kf, double ki) {
+  double qrange;
+  const double qmin = abs(kf - ki);
+  if (ki <= kf) {
+    qrange = 2 * ki;
+  } else {
+    qrange = 2 * kf;
+  }
+  return {qmin, qrange};
+}
+
 // update track direction, QSS and weight
 void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const MatrixWorkspace_sptr &invPOfQ,
                                                const double kinc, const double scatteringXSection,
@@ -750,36 +822,16 @@ void DiscusMultipleScatteringCorrection::q_dir(Geometry::Track &track, const Mat
   double kf;
   double QQ, SQ;
   if (m_importanceSampling) {
-    kf = kinc; // elastic only so far
-    QQ = sampleQW(invPOfQ, rng.nextValue());
-    int iW = 0;
+    int iW;
+    std::tie(QQ, iW) = sampleQW(invPOfQ, rng.nextValue());
+    kf = getKf(m_SQWS, iW, kinc);
     // S(Q) not strictly needed here but useful to see if the higher values are indeed being returned
     SQ = interpolateFlat(m_SQWS->histogram(iW), QQ);
     weight = weight * scatteringXSection;
   } else {
-
-    const std::string emodeStr = getProperty("EMode");
-    auto emode = Kernel::DeltaEMode::fromString(emodeStr);
-    double deltaE, qrange;
     auto iW = rng.nextInt(0, static_cast<int>(m_SQWS->getNumberHistograms() - 1));
-    if (emode == Kernel::DeltaEMode::Elastic) {
-      deltaE = 0.;
-    } else {
-      assert(!m_SQWS->getAxis(1)->isSpectra());
-      deltaE = m_SQWS->getAxis(1)->getValue(iW);
-    }
-    if (deltaE == 0.) {
-      kf = kinc; // avoid costly sqrt
-    } else {
-      kf = sqrt(kinc * kinc + deltaE / PhysicalConstants::E_mev_toNeutronWavenumberSq);
-    }
-    const double qmin = abs(kf - kinc);
-    if (deltaE <= 0) {
-      qrange = 2 * kinc;
-    } else {
-      qrange = 2 * kf;
-    }
-
+    kf = getKf(m_SQWS, iW, kinc);
+    auto [qmin, qrange] = getKinematicRange(kf, kinc);
     QQ = qmin + qrange * rng.nextValue();
     SQ = interpolateFlat(m_SQWS->histogram(iW), QQ);
     weight = weight * scatteringXSection * SQ * QQ;
