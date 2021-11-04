@@ -75,7 +75,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             EmptyBeamWorkspace='beam_ws')
         PolDiffILLReduction(Run='396939', ProcessAs='Quartz', Transmission='quartz_transmission',
                             OutputTreatment='AveragePol', OutputWorkspace='quartz')
-        self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['quartz'], 1, 132, 3, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
 
     def test_quartz_transmission_as_value(self):
@@ -86,7 +86,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             EmptyContainerWorkspace='container_ws')
         self.assertTrue('quartz_transmission' in mtd)
         self.assertTrue(mtd['quartz_transmission'].readY(0)[0] == float(quartz_transmission))
-        self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['quartz'], 1, 132, 3, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
 
     def test_vanadium(self):
@@ -108,7 +108,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             MeasurementTechnique='TOF')
         self.assertTrue('vanadium_tof' in mtd)
         self.assertTrue('vanadium_tof_elastic' in mtd)
-        self._check_output(mtd['vanadium_tof'], 1, 132, 2, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label')
+        self._check_output(mtd['vanadium_tof'], 1, 132, 1, 'Energy transfer', 'DeltaE', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_tof'], 'Vanadium')
 
     def test_vanadium_annulus(self):
@@ -161,7 +161,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
     def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
-        self.assertTrue(ws.getNumberOfEntries(), nEntries)
+        self.assertEqual(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
             self.assertTrue(entry.isHistogramData())

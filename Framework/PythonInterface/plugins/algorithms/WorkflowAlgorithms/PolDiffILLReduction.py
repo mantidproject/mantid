@@ -584,6 +584,20 @@ class PolDiffILLReduction(PythonAlgorithm):
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    + "The provided input does not fit in any of these measurement types.")
 
+    def _merge_group_entries(self, ws):
+        """Merges all entries in the provided group into a single workspace."""
+        tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
+        RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
+        to_remove = []
+        for entry_no in range(1, mtd[ws].getNumberOfEntries()):
+            ws_name = mtd[ws][entry_no].name()
+            Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
+            to_remove.append(ws_name)
+        GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
+        if len(to_remove) > 1:
+            DeleteWorkspaces(WorkspaceList=to_remove)
+        return ws
+
     def _merge_polarisations(self, ws, average_detectors=False):
         """Merges workspaces with the same polarisation inside the provided WorkspaceGroup either
         by using SumOverlappingTubes or averaging entries for each detector depending on the status
@@ -1193,13 +1207,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         to_remove = [norm_name]
         if output_treatment == 'Sum':
             self._merge_polarisations(ws, average_detectors=True)
-            tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
-            RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
-            for entry_no in range(1, mtd[ws].getNumberOfEntries()):
-                ws_name = mtd[ws][entry_no].name()
-                Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
-                to_remove.append(ws_name)
-            GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
+            self._merge_group_entries(ws)
             if measurement_technique == 'TOF':
                 self._integrate_elastic_peak(ws)
         else:
@@ -1242,12 +1250,15 @@ class PolDiffILLReduction(PythonAlgorithm):
         if not (process == 'Vanadium' and output_treatment == 'Sum'):
             if output_treatment == 'AverageTwoTheta':
                 ws = self._merge_twoTheta_positions(ws)
-            if self.getPropertyValue('OutputTreatment') in ['AveragePol', 'Sum']:
-                self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment')
-                                                                 == 'AveragePol'))
+            if output_treatment in ['AveragePol', 'Sum']:
+                self._merge_polarisations(ws, average_detectors=(output_treatment == 'AveragePol'))
+                if output_treatment == 'Sum':
+                    self._merge_group_entries(ws)
             if self.getPropertyValue('MeasurementTechnique') == 'TOF' and process in ['Vanadium', 'Sample'] \
                     and self.getProperty('ConvertToEnergy').value:
                 self._rebin_in_energy(ws)
+        elif output_treatment == 'Sum' and process != 'Vanadium':
+            self._merge_group_entries(ws)
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
