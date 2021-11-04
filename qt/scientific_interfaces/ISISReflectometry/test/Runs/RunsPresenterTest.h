@@ -690,12 +690,11 @@ public:
 
   void testStartMonitorSetsDefaultPostProcessingProperties() {
     auto presenter = makePresenter();
-    auto options = defaultLiveMonitorReductionOptions();
-    expectGetLiveDataOptions(
-        std::make_unique<AlgorithmRuntimeProps>(dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(*options)));
+    expectGetLiveDataOptions(defaultLiveMonitorReductionOptions());
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    assertPostProcessingPropertiesContainOptions(*options, algRunner);
+    auto expected = defaultLiveMonitorReductionOptions();
+    assertPostProcessingPropertiesContainOptions(*expected, algRunner);
     verifyAndClear();
   }
 
