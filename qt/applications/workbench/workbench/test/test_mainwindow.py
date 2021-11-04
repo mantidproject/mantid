@@ -254,9 +254,6 @@ class MainWindowTest(unittest.TestCase):
         mock_q_app.instance = Mock(return_value=mock_app)
         mock_app.topLevelWindows = Mock(return_value=[mock_window])
 
-        if __name__ == '__main__':
-            self.main_window.app
-
         self.main_window.closeEvent(mock_event)
 
         mock_window.close.assert_called()

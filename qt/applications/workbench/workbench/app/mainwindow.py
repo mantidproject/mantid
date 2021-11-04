@@ -587,7 +587,7 @@ class MainWindow(QMainWindow):
                     return
 
         # Close editors
-        if self.editor is None or self.editor.app_closing():
+        if self.editor is None or (self.editor.editors.current_editor() and self.editor.app_closing()):
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
