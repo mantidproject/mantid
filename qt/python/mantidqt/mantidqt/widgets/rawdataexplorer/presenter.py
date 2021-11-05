@@ -14,8 +14,8 @@ from qtpy.QtWidgets import QAbstractItemView
 from qtpy.QtCore import *
 import os.path
 
-from mantid.simpleapi import config, mtd
-from mantid.api import PreviewManager, PreviewType # IPreview
+from mantid.simpleapi import mtd
+from mantid.api import PreviewManager, PreviewType
 
 
 class PreviewPresenter:
@@ -101,7 +101,7 @@ class RawDataExplorerPresenter(QObject):
         self.set_working_directory(self.working_dir)
         self.preview_manager = PreviewManager.Instance()
 
-        self.populate_acquisitions()
+        self.populate_targets()
 
         self.setup_connections()
 
@@ -115,10 +115,6 @@ class RawDataExplorerPresenter(QObject):
         self.view.repositoryPath.editingFinished.connect(self.on_qlineedit)
 
         self.view.accumulate.stateChanged.connect(self.on_accumulate_checked)
-
-        self.view.instrumentSelector.currentIndexChanged.connect(self.model.on_instrument_changed)
-        self.view.previewType.currentIndexChanged.connect(self.populate_targets)
-        self.view.acquisitionType.currentIndexChanged.connect(self.populate_previews)
 
     def set_working_directory(self, new_working_directory):
         """
@@ -156,36 +152,20 @@ class RawDataExplorerPresenter(QObject):
             self.view.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
             self.view.fileTree.selectionModel().clearSelection()
 
-    def get_current_preview_type(self):
-        """
-        Get the currently selected preview type for the instrument
-        @return the previewType object
-        """
-        preview_name = self.view.get_current_preview()
-
-        facility = config.getInstrument(self.model.instrument).facility().name()
-        technique = config.getInstrument(self.model.instrument).techniques()[0]
-        acquisition = self.get_current_acquisition()
-
-        preview = self.preview_manager.getPreview(facility, technique, acquisition, preview_name)
-        # TODO get the geometry attribute from the facility file; this means adding another getter and
-        #  propagating the change through the preview manager (?)
-        return preview.type()
-
     def on_selection_changed(self):
         """
         Triggered when the selection changed in the file system widget.
         """
         selection = self.view.get_selection()
         # target_type = self.view.get_current_target()
-        instrument = self.view.get_current_instrument()
-        acquision_mode = self.view.get_current_acquisition()
-        preview_name = self.view.get_current_preview()
+
+        # TODO get preview per instrument
+        preview_name = PreviewType.IVIEW
         self.view.fileTree.setCursor(Qt.BusyCursor)
         if self.view.get_current_target() == "New":
-            self.model.new_preview(selection, instrument, acquision_mode, preview_name)
+            self.model.new_preview(selection, preview_name)
         else:
-            self.model.modify_preview(selection, instrument, acquision_mode, preview_name)
+            self.model.modify_preview(selection, preview_name)
         self.view.fileTree.unsetCursor()
 
     def on_new_preview(self, previewModel):
@@ -202,7 +182,7 @@ class RawDataExplorerPresenter(QObject):
         @param ws_to_show: the name of the workspace to show
         """
         target_type = self.view.get_current_target()
-        preview_type = self.get_current_preview_type()
+        preview_type = PreviewType.IVIEW
 
         if target_type == "New" or not self.displays.get_last_plot(preview_type):
             if preview_type == PreviewType.IVIEW:
@@ -256,28 +236,12 @@ class RawDataExplorerPresenter(QObject):
                 workspaces_to_show = self.displays.get_last_workspaces(preview_type)
                 self.view.plot_2D(workspaces_to_show, last_window)
 
-    def populate_previews(self):
-        """
-        Set the available preview options in the combo box.
-        """
-
-        acquisition = self.get_current_acquisition()
-        if not acquisition:
-            return
-
-        facility = config.getInstrument(self.model.instrument).facility().name()
-        technique = config.getInstrument(self.model.instrument).techniques()[0]
-
-        previews = self.preview_manager.getPreviews(facility, technique, acquisition)
-        self.view.populate_previews(previews)
-        self.populate_targets()
-
     def populate_targets(self):
         """
         Set the available target options in the combo box.
         """
 
-        current_preview = self.get_current_preview_type()
+        current_preview = PreviewType.IVIEW
         current_target = self.view.get_current_target()
 
         targets = ["Same", "New"]
@@ -288,33 +252,11 @@ class RawDataExplorerPresenter(QObject):
         self.view.populate_targets(targets)
         self.view.set_target(current_target)
 
-    def populate_acquisitions(self):
-        """
-        Set the available acquisition options in the combo box.
-        """
-        acquisitions = config.getInstrument(self.model.instrument).acquisitions()
-        if not acquisitions:
-            acquisitions = []
-        self.view.populate_acquisitions(acquisitions)
-        self.populate_previews()
-
     def is_accumulate_checked(self):
         """
         @return whether or not the accumulate checkbox is checked
         """
         return self.view.accumulate.isChecked()
-
-    def get_current_preview(self):
-        """
-        @return the currently selected preview.
-        """
-        return self.view.get_current_preview()
-
-    def get_current_acquisition(self):
-        """
-        @return the currently selected acquisition, as a string
-        """
-        return self.view.get_current_acquisition()
 
 
 class DisplayManager:
