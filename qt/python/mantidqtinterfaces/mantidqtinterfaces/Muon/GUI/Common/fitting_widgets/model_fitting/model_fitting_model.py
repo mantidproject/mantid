@@ -244,28 +244,28 @@ class ModelFittingModel(BasicFittingModel):
     def _set_x_label(self, workspace_name: str, axis_label: str) -> None:
         """Sets the label and unit for the X axis of a workspace."""
         workspace = retrieve_ws(workspace_name)
-        unit = self._get_parameter_unit(axis_label)
+        unit = self._get_parameter_unit(axis_label, 0)
         workspace.getAxis(0).setUnit("Label").setLabel(axis_label, unit)
 
     def _set_y_label(self, workspace_name: str, axis_label: str) -> None:
         """Sets the label and unit for the Y axis of a workspace."""
         workspace = retrieve_ws(workspace_name)
-        unit = self._get_parameter_unit(axis_label)
-        workspace.setYUnitLabel(f"{axis_label} ({unit})" if unit != "" else f"{axis_label}")
+        unit = self._get_parameter_unit(axis_label, 1)
+        workspace.setYUnit(f"{axis_label} ({unit})" if unit != "" else f"{axis_label}")
 
-    def _get_parameter_unit(self, parameter_name: str) -> str:
+    def _get_parameter_unit(self, parameter_name: str, axis: int) -> str:
         """Returns the units of a parameter by searching the Dictionary, UnitFactory and Sample logs."""
-        unit = self._get_unit_from_unit_dictionary(parameter_name)
+        unit = self._get_unit_from_unit_dictionary(parameter_name, axis)
         if unit == "":
             unit = self._get_unit_from_sample_logs(parameter_name)
         if unit == "":
             unit = self._get_unit_from_unit_factory(parameter_name)
         return unit
 
-    def _get_unit_from_unit_dictionary(self, parameter_name: str) -> str:
+    def _get_unit_from_unit_dictionary(self, parameter_name: str, axis: int) -> str:
         """Returns the units of a parameter if it exists in the model fitting unit dictionary."""
         if parameter_name in self.fitting_context.parameter_units:
-            return self.fitting_context.parameter_units[parameter_name]
+            return self.fitting_context.parameter_units[parameter_name][axis]
         return ""
 
     def _get_unit_from_unit_factory(self, parameter_name: str) -> str:

@@ -217,7 +217,7 @@ class ModelFittingModelTest(unittest.TestCase):
 
         unit_test_ws = retrieve_ws("Result1; test2 vs test1")
         self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == 'test_unit_1')
-        self.assertTrue(str(unit_test_ws.getAxis(1).getUnit().symbol()) == 'test_unit_2')
+        self.assertTrue(str(unit_test_ws.YUnit()) == 'test2 (test_unit_2)')
 
 
 if __name__ == '__main__':

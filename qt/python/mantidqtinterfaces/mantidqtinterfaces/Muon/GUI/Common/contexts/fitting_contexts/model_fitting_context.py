@@ -7,14 +7,14 @@
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 
 PARAMETERUNITS = {
-    'Frequency': 'MHz',
-    'Lambda': r'$\mu$ $s^{-1}$',
-    'Phi': 'Radians',
-    'sample_magn_field': 'G',
-    'sample_temp': 'K',
-    'Sigma': r'\mu s^{-1}',
-    'test1': 'test_unit_1',
-    'test2': 'test_unit_2',
+    'Frequency': ['MHz', 'MHz'],
+    'Lambda': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$'],
+    'Phi': ['Radians', 'Radians'],
+    'sample_magn_field': ['G', 'G'],
+    'sample_temp': ['K', 'K'],
+    'Sigma': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$'],
+    'test1': ['test_unit_1', 'test_unit_1'],
+    'test2': ['test_unit_2', 'test_unit_2'],
 }
 
 
