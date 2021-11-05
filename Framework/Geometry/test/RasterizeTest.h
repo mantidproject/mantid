@@ -135,6 +135,24 @@ public:
     // all the vector lengths should match
     constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
     simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
+
+    // check to ensure that all points are within the shell of the hollow cylinder
+    // NOTE:
+    // For a centered hollow cylinder, the element_i should have
+    // * x^2 + z^2 < CYLINDER_RADIUS^2
+    // * x^2 + z^2 > CYLINDER_INNER_RADIUS^2
+    // * |y| < 0.5 * CYLINDER_HEIGHT
+    // where (x, y, z) is the element position vector
+    const double Rsquared = CYLINDER_RADIUS * CYLINDER_RADIUS;
+    const double Risquared = CYLINDER_INNER_RADIUS * CYLINDER_INNER_RADIUS;
+    double r, h;
+    for (const auto &pos : raster.position) {
+      r = pos[0] * pos[0] + pos[2] * pos[2];
+      h = std::abs(pos[1]);
+      TS_ASSERT_LESS_THAN_EQUALS(r, Rsquared);
+      TS_ASSERT_LESS_THAN_EQUALS(Risquared, r);
+      TS_ASSERT_LESS_THAN_EQUALS(h, 0.5 * CYLINDER_HEIGHT);
+    }
   }
 
   void test_calculateOffsetCylinder() {
