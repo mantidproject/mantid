@@ -492,16 +492,20 @@ MatrixWorkspace_uptr DiscusMultipleScatteringCorrection::prepareQSQ(double kmax)
  */
 void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(const MatrixWorkspace_uptr &QSQ, double kinc,
                                                                    const MatrixWorkspace_sptr &PInvOfQ) {
-  std::vector<double> IOfQXFull, IOfQYFull, qValuesInKinRange, wValuesInKinRange;
+  std::vector<double> IOfQYFull, qValuesFull, wIndices;
+  double qMaxPreviousRow = 0.;
   // loop through the S(Q) spectra for the different energy transfer values
   for (int iW = 0; iW < m_SQWS->getNumberHistograms(); iW++) {
     auto kf = getKf(m_SQWS, iW, kinc);
     auto [qmin, qrange] = getKinematicRange(kf, kinc);
     std::vector<double> IOfQX, IOfQY;
     integrateCumulative(QSQ->histogram(iW), qmin, qmin + qrange, IOfQX, IOfQY);
-    qValuesInKinRange.insert(qValuesInKinRange.end(), IOfQX.begin(), IOfQX.end());
-    wValuesInKinRange.insert(wValuesInKinRange.end(), IOfQX.size(), iW);
-    IOfQXFull.insert(IOfQXFull.end(), IOfQX.begin(), IOfQX.end());
+    qValuesFull.insert(qValuesFull.end(), IOfQX.begin(), IOfQX.end());
+    wIndices.insert(wIndices.end(), IOfQX.size(), iW);
+    // create a pseudo x coordinate which is the qvalues from each w row reset to zero and appended to previous row
+    std::transform(IOfQX.begin(), IOfQX.end(), IOfQX.begin(),
+                   [qMaxPreviousRow, qmin = IOfQX.front()](double d) -> double { return d - qmin + qMaxPreviousRow; });
+    qMaxPreviousRow = qMaxPreviousRow + qrange;
     IOfQYFull.insert(IOfQYFull.end(), IOfQY.begin(), IOfQY.end());
   }
   auto IOfQYAt2K = IOfQYFull.back();
@@ -511,11 +515,10 @@ void DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(const MatrixW
   std::transform(IOfQYFull.begin(), IOfQYFull.end(), IOfQYFull.begin(),
                  [IOfQYAt2K](double d) -> double { return d / IOfQYAt2K; });
   // Store the normalized integral (= cumulative probability) on the x axis
-  // The y values in the three spectra store coordinate of flattened S(Q,W) workspace, Q, W
+  // The y values in the two spectra store Q, w (or w index to be precise)
   PInvOfQ->mutableX(0).assign(IOfQYFull.cbegin(), IOfQYFull.cend());
-  PInvOfQ->mutableY(0).assign(IOfQXFull.cbegin(), IOfQXFull.cend());
-  PInvOfQ->mutableY(1).assign(qValuesInKinRange.cbegin(), qValuesInKinRange.cend());
-  PInvOfQ->mutableY(2).assign(wValuesInKinRange.cbegin(), wValuesInKinRange.cend());
+  PInvOfQ->mutableY(0).assign(qValuesFull.cbegin(), qValuesFull.cend());
+  PInvOfQ->mutableY(1).assign(wIndices.cbegin(), wIndices.cend());
 }
 
 /**
@@ -622,7 +625,7 @@ std::tuple<double, double> DiscusMultipleScatteringCorrection::new_vector(const 
 
 std::tuple<double, int> DiscusMultipleScatteringCorrection::sampleQW(const MatrixWorkspace_sptr &CumulativeProb,
                                                                      double x) {
-  return {interpolateSquareRoot(CumulativeProb->histogram(0), x), 0 /*elastic only so far*/};
+  return {interpolateSquareRoot(CumulativeProb->histogram(0), x), interpolateFlat(CumulativeProb->histogram(1), x)};
 }
 
 /**
