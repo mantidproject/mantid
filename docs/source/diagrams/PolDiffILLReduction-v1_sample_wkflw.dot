@@ -3,11 +3,12 @@ digraph Sample {
 
   subgraph decisions {
     $decision_style
-    AverageCounts
+    AverageCounts [label="Average counts or sum"]
     SelfAttenuationMethod
     SingleCrystal
     TimeOfFlight1 [label="Time-of-flight"]
     TimeOfFlight2 [label="Time-of-flight"]
+    ConvertToEnergy
   }
 
   subgraph params {
@@ -44,6 +45,7 @@ digraph Sample {
     ApplyPaalmanPingsCorrection
     Divide2 [label="Divide by transmission"]
     SumOverlappingTubes
+    FindEPP
   }
 
   Run -> LoadAndMerge
@@ -51,8 +53,8 @@ digraph Sample {
   LoadAndMerge -> SingleCrystal
   SingleCrystal -> Divide
   SingleCrystal -> MergeOmegaScan
+  MergeOmegaScan -> Divide
   Divide -> Minus
-  MergeOmegaScan -> Minus
   CadmiumWorkspace -> Minus
   EmptyContainerWorkspace -> Minus
   Transmission -> Minus
@@ -75,10 +77,13 @@ digraph Sample {
   ApplyPaalmanPingsCorrection -> TimeOfFlight2
   Divide2 -> TimeOfFlight2
   TimeOfFlight2 -> AverageCounts
-  TimeOfFlight2 -> EnergyEfficiencyCorrection
-  EnergyEfficiencyCorrection -> ElasticPeakCalibration
+  TimeOfFlight2 -> FindEPP
   ElasticChannelsWorkspace -> ElasticPeakCalibration
-  ElasticPeakCalibration -> AverageCounts
+  FindEPP -> ConvertToEnergy
+  ConvertToEnergy -> ElasticPeakCalibration
+  ElasticPeakCalibration -> EnergyEfficiencyCorrection
+  EnergyEfficiencyCorrection -> AverageCounts
+  ConvertToEnergy -> AverageCounts
   AverageCounts -> SumOverlappingTubes
   AverageCounts -> Plus
   AverageCounts -> OutputWorkspace
