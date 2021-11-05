@@ -1563,20 +1563,23 @@ class CrystalFieldFit(object):
             fun = self.model.function
         else:
             fun = self._function
-        x0 = []
-        fun.setAttributeValue('FixAllPeaks', True)
-        for par_id in self._free_cef_parameters:
-            x0.append(fun.getParameterValue(par_id))
         cef_fixed = []
         for par_id in [id for id in range(fun.nParams()) if fun.isFixed(id)]:
             parName = fun.getParamName(par_id)
             if parName in CrystalField.field_parameter_names or "IntensityScaling" in parName:
                 cef_fixed.append(par_id)
+        x0 = []
+        fun.setAttributeValue('FixAllPeaks', True)
+        for par_id in self._free_cef_parameters:
+            x0.append(fun.getParameterValue(par_id))
+            fun.fixParameter(par_id)
         opt = {'disp': False}
         if Options is not None:
             opt = Options
         for (x, pos) in zip(x0, self._free_cef_parameters):
+            fun.removeTie(pos)
             res = sp.minimize(self._evaluate_cf, [x], args=(fun, pos), method=Solver, options=opt)
+            fun.fixParameter(pos)
             if res.success:
                 if self._function is not None:
                     if isinstance(res.x, list):
