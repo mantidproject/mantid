@@ -489,7 +489,7 @@ bool MatrixWorkspace::hasGroupedDetectors() const {
 detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets,
                                                                   bool ignoreIfNoValidDets) const {
   detid2index_map map;
-  auto specInfo = spectrumInfo();
+  const auto &specInfo = spectrumInfo();
 
   // Loop through the workspace index
   for (size_t workspaceIndex = 0; workspaceIndex < this->getNumberHistograms(); ++workspaceIndex) {
