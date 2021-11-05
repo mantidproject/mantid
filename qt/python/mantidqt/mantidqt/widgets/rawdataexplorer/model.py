@@ -9,8 +9,7 @@
 from os import path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import Load, config, mtd, Plus, Minus
-from mantid.api import PreviewManager
+from mantid.simpleapi import Load, config, mtd
 
 
 class PreviewModel(QObject):
@@ -18,7 +17,7 @@ class PreviewModel(QObject):
     """
     Type of the preview.
     """
-    _type  = None
+    _type = None
 
     """
     Name of the current workspace.
@@ -98,55 +97,57 @@ class RawDataExplorerModel(QObject):
         self.presenter.populate_acquisitions()
         # TODO emit a signal to modify both preview manager and target
 
-    def new_preview(self, filenames, instrument, acquisition_mode, preview_name):
+    def new_preview(self, filenames, preview_name):
         """
         Add a preview to the model.
         """
-        technique = config.getInstrument(instrument).techniques()[0]
-        preview = PreviewManager.Instance().getPreview("ILL", technique,
-                                                       acquisition_mode,
-                                                       preview_name)
-        if not preview:
+
+        # preview = PreviewManager.Instance().getPreview("ILL", preview_name)
+
+        preview = preview_name
+
+        # TODO find a way to check again
+        if preview is None:
             return
 
         # TODO Plus/Minus if several workspaces
         if len(filenames) != 1:
             return
 
+        ws_name = ""
         for filename in filenames:
             ws_name = path.basename(filename)[:-4]
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
-        preview_model = PreviewModel(preview.type(), ws_name)
+        preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
-    def modify_preview(self, filenames, instrument, acquisition_mode, preview_name):
+    def modify_preview(self, filenames, preview_name):
         """
         Modify the last preview of the same type. If none is found, a new
         preview is opened.
         """
-        technique = config.getInstrument(instrument).techniques()[0]
-        preview = PreviewManager.Instance().getPreview("ILL", technique,
-                                                       acquisition_mode,
-                                                       preview_name)
+        preview = preview_name
 
-        if not preview:
+        if preview is None:
             return
 
         # TODO Plus/Minus if several workspaces
         if len(filenames) != 1:
             return
 
+        ws_name = ""
         for filename in filenames:
             ws_name = path.basename(filename)[:-4]
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
+
         for i in range(len(self._previews) - 1, -1, -1):
-            if self._previews[i].get_preview_type() == preview.type():
+            if self._previews[i].get_preview_type() == preview:
                 self._previews[i].set_workspace_name(ws_name)
                 return
-        preview_model = PreviewModel(preview.type(), ws_name)
+        preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
@@ -156,41 +157,6 @@ class RawDataExplorerModel(QObject):
         @param preview_model(PreviewModel): reference to the model.
         """
         self._previews.remove(previewModel)
-
-    def on_file_clicked(self, file_index):
-        """
-        Slot triggered by clicking on a file. If it is not loaded already, tries to do so.
-        @param file_index: a QModelIndex object, referencing the position of the file in the model
-        """
-        file_path = self.file_model.filePath(file_index)
-        if not path.isfile(file_path):
-            return
-        ws_name = path.basename(file_path)[:-4]
-
-        # TODO define caching policy
-        # for now, we keep everything because it makes for faster testing
-        if not mtd.doesExist(ws_name):
-            self.presenter.view.fileTree.setCursor(Qt.BusyCursor)
-            Load(Filename=file_path, OutputWorkspace=ws_name)
-            self.presenter.view.fileTree.unsetCursor()
-
-        if self.presenter.is_accumulate_checked():
-
-            preview_type = self.presenter.get_current_preview_type()
-            ws_on_last_display = self.presenter.displays.get_last_workspaces(preview_type)
-
-            if ws_on_last_display:
-                last_ws = ws_on_last_display[-1]
-                # TODO manage the case where all the workspaces have been deleted
-                acc_ws_name = accumulate_name(last_ws, ws_name)
-                if self.presenter.view.fileTree.selectionModel().isSelected(file_index):
-                    Plus(LHSWorkspace=last_ws, RHSWorkspace=ws_name, OutputWorkspace=acc_ws_name)
-                else:
-                    Minus(LHSWorkspace=last_ws, RHSWorkspace=ws_name, OutputWorkspace=acc_ws_name)
-
-                ws_name = acc_ws_name
-        self.presenter.show_ws(ws_name)
-        self.presenter.populate_targets()
 
 
 def accumulate_name(last_ws, ws_to_add):
