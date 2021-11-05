@@ -124,6 +124,34 @@ public:
   }
 
   /**
+   * Tests passing properties via AlgorithmRuntimeProps.
+   */
+  void test_AlgorithmRuntimeProps() {
+    BatchAlgorithmRunner runner(nullptr);
+
+    // Create an algorithm with a separate AlgorithmRuntimeProps for the properties
+    auto alg = AlgorithmManager::Instance().create("CreateSampleWorkspace", -1);
+    auto props = std::make_unique<AlgorithmRuntimeProps>();
+    props->setProperty("OutputWorkspace", "BatchAlgorithmRunnerTest_Create");
+    props->setProperty("Function", "Exp Decay");
+    props->setProperty("XMax", 20.0);
+    props->setProperty("BinWidth", 1.0);
+    runner.addAlgorithm(alg, std::move(props));
+
+    // Run queue
+    TS_ASSERT(runner.executeBatch());
+    TS_ASSERT_EQUALS(runner.queueLength(), 0);
+
+    // Get workspace history
+    std::string wsName = "BatchAlgorithmRunnerTest_Create";
+    auto history = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->getHistory();
+
+    // Check the algorithm history of the workspace matches what should have
+    // been done to it
+    TS_ASSERT_EQUALS("CreateSampleWorkspace", history.getAlgorithmHistory(0)->name())
+  }
+
+  /**
    * Tests failure caused by setting a property such that it fails validation.
    */
   void test_basicBatchWorkspaceFailure() {

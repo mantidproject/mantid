@@ -21,7 +21,27 @@ using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("BatchAlgorithmRunner");
+
+// Throw if any of the given properties do not exist in the algorithm's declared property names
+void throwIfAnyPropertiesInvalid(IAlgorithm_sptr alg, MantidQt::API::IAlgorithmRuntimeProps const &props) {
+  auto allowedPropNames = alg->getDeclaredPropertyNames();
+  auto propNamesToUpdate = props.getDeclaredPropertyNames();
+
+  // Note that for std::set_difference the lists need to be sorted
+  std::sort(allowedPropNames.begin(), allowedPropNames.end());
+  std::sort(propNamesToUpdate.begin(), propNamesToUpdate.end());
+
+  std::vector<std::string> invalidProps;
+  std::set_difference(propNamesToUpdate.cbegin(), propNamesToUpdate.cend(), allowedPropNames.cbegin(),
+                      allowedPropNames.cend(), std::back_inserter(invalidProps));
+
+  if (invalidProps.size() > 0) {
+    const auto invalidPropsStr = std::accumulate(std::next(invalidProps.cbegin()), invalidProps.cend(), invalidProps[0],
+                                                 [](const auto &a, const auto &b) { return a + "," + b; });
+    throw Mantid::Kernel::Exception::NotFoundError("Invalid Properties given: ", invalidPropsStr);
+  }
 }
+} // namespace
 
 namespace MantidQt::API {
 
@@ -206,21 +226,8 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) 
 bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorithm) {
   try {
     m_currentAlgorithm = algorithm->algorithm();
-
     auto const &props = algorithm->getAlgorithmRuntimeProps();
-
-    auto const allowedPropNames = m_currentAlgorithm->getDeclaredPropertyNames();
-    auto const propNamesToUpdate = props.getDeclaredPropertyNames();
-
-    std::vector<std::string> invalidProps;
-    std::set_difference(propNamesToUpdate.cbegin(), propNamesToUpdate.cend(), allowedPropNames.cbegin(),
-                        allowedPropNames.cend(), std::back_inserter(invalidProps));
-    if (invalidProps.size() > 0) {
-      const auto invalidPropsStr =
-          std::accumulate(std::next(invalidProps.cbegin()), invalidProps.cend(), invalidProps[0],
-                          [](const auto &a, const auto &b) { return a + "," + b; });
-      throw Mantid::Kernel::Exception::NotFoundError("Invalid Properties given: ", invalidPropsStr);
-    }
+    throwIfAnyPropertiesInvalid(m_currentAlgorithm, props);
 
     // Assign the properties to be set at runtime
     m_currentAlgorithm->updatePropertyValues(props);
