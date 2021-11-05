@@ -195,8 +195,8 @@ public:
   }
 
   void test_calculateHollowCylinderManyElements() {
-    // tests a hollow cylinder with many slices and annuli
-    constexpr double ELEMENT_SIZE{5.0e-4}; // 0.5 mm element size
+    // tests a hollow cylinder with more slices and annuli
+    constexpr double ELEMENT_SIZE{0.005};
     constexpr double HEIGHT{0.1};
     constexpr V3D BASE{0.0, -0.5 * HEIGHT, 0.0};
     constexpr V3D AXIS{0.0, 1.0, 0.0}; // sym along +Y
