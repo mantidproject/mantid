@@ -123,6 +123,8 @@ class RawDataExplorerPresenter(QObject):
         """
         self.working_dir = new_working_directory
         self.view.repositoryPath.setText(self.working_dir)
+        self.view.fileTree.model().setRootPath(self.working_dir)
+        self.view.fileTree.setRootIndex(self.view.fileTree.model().index(self.working_dir))
 
     def on_file_dialog_choice(self, new_directory):
         """
