@@ -258,7 +258,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   const std::string reportMsg = "Computing corrections";
 
   bool enableParallelFor = true;
-  enableParallelFor = std::all_of(simulationWSs.begin(), simulationWSs.end(),
+  enableParallelFor = std::all_of(simulationWSs.cbegin(), simulationWSs.cend(),
                                   [](MatrixWorkspace_sptr ws) { return Kernel::threadSafe(*ws); });
 
   enableParallelFor = enableParallelFor && Kernel::threadSafe(*noAbsOutputWS);
