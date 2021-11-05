@@ -28,6 +28,10 @@ Improvements
 Data Objects
 ------------
 
+Geometry
+----------
+- add additional unit test for Rasterize class.
+
 Python
 ------
 
