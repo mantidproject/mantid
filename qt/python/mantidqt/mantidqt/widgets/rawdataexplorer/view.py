@@ -53,7 +53,7 @@ class PreviewView:
     _presenter = None
 
     """
-    Reference to the visualisation widet.
+    Reference to the visualisation widget.
     """
     _widget = None
 
@@ -169,9 +169,9 @@ class RawDataExplorerView(QWidget):
         self.fileTree.setModel(file_model)
         self.fileTree.header().hideSection(2)
         self.fileTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.fileTree.header().setSectionResizeMode(1, QHeaderView.Fixed)
-        self.fileTree.header().setSectionResizeMode(2, QHeaderView.Fixed)
-        self.fileTree.header().setSectionResizeMode(3, QHeaderView.Fixed)
+        self.fileTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.fileTree.header().setStretchLastSection(False)
         self.fileTree.clicked.connect(self.on_file_clicked)
 
     def closeEvent(self, event):
