@@ -516,10 +516,9 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/UpdateInstrumentF
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateEfficiency.cpp:308
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:482
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:257
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculatePlaczekSelfScattering.cpp:29
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculatePlaczek.cpp:45
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:253
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:133
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertAxisByFormula.cpp:238
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertAxisByFormula.cpp:255

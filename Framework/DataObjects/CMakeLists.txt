@@ -234,11 +234,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(DataObjects PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
-# Intensive use of templated libaries can cause large objects to be generated. These require an additional flag in MSVC.
-if(MSVC)
-  set_target_properties(DataObjects PROPERTIES COMPILE_FLAGS "/bigobj")
-endif()
-
 # Add to the 'Framework' group in VS
 set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
@@ -252,7 +247,7 @@ target_link_libraries(
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
   mtd_install_framework_lib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()

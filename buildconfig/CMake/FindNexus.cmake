@@ -9,7 +9,7 @@
 find_path(NEXUS_INCLUDE_DIR napi.h PATH_SUFFIXES nexus)
 
 # Find the C libraries
-if(WIN32 AND CONDA_BUILD)
+if(WIN32 AND CONDA_ENV)
   find_library(NEXUS_C_LIBRARIES NAMES NeXus NeXus)
   # Find the C++ libraries
   find_library(NEXUS_CPP_LIBRARIES NAMES NeXusCPP NeXusCPP)

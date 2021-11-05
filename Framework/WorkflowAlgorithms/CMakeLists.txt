@@ -139,7 +139,7 @@ target_link_libraries(
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS WorkflowAlgorithms PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS WorkflowAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

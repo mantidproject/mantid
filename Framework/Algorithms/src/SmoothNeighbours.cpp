@@ -167,7 +167,7 @@ void SmoothNeighbours::findNeighboursRectangular() {
   Instrument_const_sptr inst = inWS->getInstrument();
 
   // To get the workspace index from the detector ID
-  const detid2index_map pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
+  const detid2index_map pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true, true);
 
   // std::cout << " inst->nelements() " << inst->nelements() << "\n";
   Progress prog(this, 0.0, 1.0, inst->nelements());

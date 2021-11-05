@@ -502,7 +502,7 @@ target_include_directories(
 )
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidGeometryTargets")
   mtd_install_framework_lib(TARGETS Geometry EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
