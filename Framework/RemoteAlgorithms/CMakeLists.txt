@@ -79,7 +79,7 @@ target_link_libraries(
 add_subdirectory(test) # Note: No tests yet for many remote algorithms...
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS RemoteAlgorithms PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS RemoteAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

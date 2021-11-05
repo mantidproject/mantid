@@ -45,7 +45,7 @@ target_link_libraries(RemoteJobManagers PUBLIC Mantid::Kernel Mantid::API)
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS RemoteJobManagers PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS RemoteJobManagers INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

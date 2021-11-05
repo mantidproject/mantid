@@ -499,9 +499,9 @@ endif()
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 target_compile_features(Kernel PUBLIC cxx_std_17)
 
-# if we are not on conda build ${HDF5_LIBRARIES} are full paths to the libs and not cmake targets, therefore we need to
+# if we are not in a conda env ${HDF5_LIBRARIES} are full paths to the libs and not cmake targets, therefore we need to
 # include the headers
-if(NOT CONDA_BUILD)
+if(NOT CONDA_ENV)
   target_include_directories(Kernel SYSTEM PUBLIC ${HDF5_INCLUDE_DIRS})
 endif()
 
@@ -662,7 +662,7 @@ mtd_install_files(
 )
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidKernelTargets")
   mtd_install_framework_lib(TARGETS Kernel EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()

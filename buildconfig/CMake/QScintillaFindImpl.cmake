@@ -47,7 +47,7 @@ function(find_qscintilla qt_version)
   )
 
   set(_library_var QSCINTILLA_QT${qt_version}_LIBRARY)
-  if(${CONDA_BUILD})
+  if(${CONDA_ENV})
     set(_opt_outs NO_CMAKE_SYSTEM_PATH)
   endif()
   find_library(

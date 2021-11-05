@@ -17,11 +17,12 @@ New and Improved
 - The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
 - The algorithm browser has been tidied to reduce the number of single algorithm categories.
 - Table workspaces can now have read-only columns added to them (`ws.addReadOnlyColumn(<TYPE>, <NAME>)`). Existing columns can also be set to be read-only (`ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)`).
+- Cells containing vector data in a table workspace can now be viewed in the table workspace display.
+
 - **The Error Reporter can now remember and prefill the user's name and email.**
 
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
-
 
 Bugfixes
 --------
@@ -33,5 +34,7 @@ Bugfixes
 - Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 - Fixed plot bins not working on data with numeric X-axis.
 - Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
+- Fixed a bug with autoscaling of colorfill plots from within the figure options.
+- Fixed an issue to plot negative values with logarithm scaling in slice view.
 
 :ref:`Release 6.3.0 <v6.3.0>`

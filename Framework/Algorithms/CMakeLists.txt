@@ -1072,7 +1072,7 @@ target_include_directories(
 generate_mantid_export_header(Algorithms FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS Algorithms PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS Algorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

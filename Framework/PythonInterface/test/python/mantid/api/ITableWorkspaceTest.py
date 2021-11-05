@@ -28,6 +28,7 @@ class ITableWorkspaceTest(unittest.TestCase):
     def test_meta_information_is_correct(self):
         self.assertEqual(self._test_ws.columnCount(), 19)
         self.assertEqual(self._test_ws.rowCount(), 1)
+        self.assertEqual(self._test_ws.isGroup(), False)
 
         column_names = self._test_ws.getColumnNames()
         self.assertEqual(len(column_names), 19)

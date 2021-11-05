@@ -34,7 +34,7 @@ The quantity :math:`J_n` is calculated by performing the following integration:
 
 .. math::
 
-   J_n &= (\frac{\mu}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) S(Q_i)] e^{-\mu_T l_{out}} S(Q_n) \\
+   J_n &= (\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{\pi} \sin\theta_i d\theta_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) S(Q_i)] e^{-\mu_T l_{out}} S(Q_n) \\
        &=(\frac{\mu_s}{4 \pi})^n \frac{1}{A} \int dS \int_{0}^{l_1^{max}} dl_1 e^{-\mu_T l_1} \prod\limits_{i=1}^{n-1} [\int_{0}^{l_{i+1}^{max}} dl_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{2 \pi} d\phi_i (e^{-\mu_T l_{i+1}}) \frac{Q_i}{k^2} S(Q_i)] e^{-\mu_T l_{out}} S(Q_n)
 
 
@@ -44,35 +44,64 @@ The following substitutions are then performed in order to make it more convenie
 
 :math:`t_i = \frac{1-e^{-\mu_T l_i}}{1-e^{-\mu_T l_i^{max}}}`
 
-:math:`p_i = \frac{\phi_i}{2 \pi}`
+:math:`u_i = \frac{\phi_i}{2 \pi}`
 
-:math:`\int_0^{2k} Q_i S(Q_i) dQ = 2 k^2`
+:math:`2 k^2 = \frac{\sigma_S \int_0^{2k} Q_i S(Q_i) dQ}{\sigma_s(k)}`
 
 Using the new variables the integral is:
 
 .. math::
 
-   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{1} dp_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{\int_0^{2k} Q_i S(Q_i) dQ_i} S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{2k} dQ_i \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{\int_0^{2k} Q_i S(Q_i) dQ_i} S(Q_i) \sigma_s(k)] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
-This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`p_i` between 0 and 1 and values for :math:`Q_i` between 0 and 2k.
+This is evaluated as a Monte Carlo integration by selecting random values for the variables :math:`t_i` and :math:`u_i` between 0 and 1 and values for :math:`Q_i` between 0 and 2k.
 A simulated path is traced through the sample to enable the :math:`l_i^{\ max}` values to be calculated. The path is traced by calculating the :math:`l_i`, :math:`\theta` and :math:`\phi` values as follows from the random variables. The code keeps a note of the start coordinates of the current path segment and updates it when moving to the next segment using these randomly selected lengths and directions:
 
 :math:`l_i = -\frac{1}{\mu_T}ln(1-(1-e^{-\mu_T l_i^{\ max}})t_i)`
 
-:math:`\cos(\theta_i) = 1 - Q_i^2/k^2`
+:math:`\cos\theta_i = 1 - Q_i^2/k^2`
 
-:math:`\phi_i = 2 \pi p_i`
+:math:`\phi_i = 2 \pi u_i`
 
-The final Monte Carlo integration that is actually performed by the code is as follows:
+The final Monte Carlo integration that is actually performed by the code is as follows where N is the number of scenarios:
 
 .. math::
 
-   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{<Q S(Q)>} S(Q_i) \sigma_S] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T} \frac{Q_i}{<Q S(Q)>} S(Q_i) \sigma_s(k)] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
 
 The purpose of replacing :math:`2 k^2` with :math:`\int Q S(Q) dQ` can now be seen because it avoids the need to multiply by an integration range across :math:`dQ` when converting the integral to a Monte Carlo integration.
 This is useful in the inelastic version of this algorithm where the integration of the structure factor is over two dimensions :math:`Q` and :math:`\omega` and the area of :math:`Q\omega` space that has been integrated over is less obvious.
 
 This is similar to the formulation described in the Mancinelli paper except there is no random variable to decide whether a particular scattering event is coherent or incoherent.
+
+Importance Sampling
+^^^^^^^^^^^^^^^^^^^
+
+The algorithm includes an option to use importance sampling to improve the results for S(Q) profiles containing spikes.
+Without this option enabled, the contribution from rare, high values in the structure factor is only visible at a very high number of scenarios.
+
+The importance sampling is achieved using a further change of variables as follows:
+
+:math:`v_i = P(Q_i) = \frac{I(Q_i)}{I(2k)}` where :math:`I(x) = \int_{0}^{x} Q S(Q) dQ`
+
+With this approach the Q value for each segment is chosen as follows based on a :math:`v_i` value randomly selected between 0 and 1:
+
+:math:`Q_i = P^{-1}(v_i)`
+
+:math:`\cos\theta_i` is determined from :math:`Q_i` as before. The change of variables gives the following integral for :math:`J_n`:
+
+.. math::
+
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i 2 \frac{I(2k)}{2k^2} \sigma_s \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+
+   J_n = \frac{1}{A} \int dS \int_{0}^{1} dt_1 \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[\int_{0}^{1} dt_{i+1} \int_{0}^{1} dv_i 2 \sigma_s(k) \int_{0}^{1} du_i \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+
+Finally, the equivalent Monte Carlo integration that the algorithm performs with importance sampling enabled is:
+
+.. math::
+
+   J_n = \frac{1}{N}\sum \frac{1-e^{-\mu_T l_1^{\ max}}}{\sigma_T} \prod\limits_{i=1}^{n-1}[2 \sigma_s(k) \frac{(1-e^{-\mu_T l_{i+1}^{max}})}{\sigma_T}] e^{-\mu_T l_{out}} S(Q_n) \frac{\sigma_s}{4 \pi}
+
 
 Outputs
 #######

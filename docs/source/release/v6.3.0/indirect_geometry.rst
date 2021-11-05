@@ -13,6 +13,8 @@ New Features
 ------------
 
 - In Indirect Data Analysis fitting tabs a button has been added that will unify the fit range for all spectra selected.
+- The Bayes Fortran libraries can now be installed on OSX and Linux using the bayesfitting python package https://pypi.org/project/bayesfitting/0.1.0/. This can be installed with `python -m pip install bayesfitting`
+  using the Mantid Python executable.
 
 Improvements
 ------------
