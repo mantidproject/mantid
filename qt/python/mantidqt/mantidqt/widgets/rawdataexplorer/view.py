@@ -298,31 +298,12 @@ class RawDataExplorerView(QWidget):
             return presenter.view
 
     # Combobox getters
-    def get_current_instrument(self):
-        """
-        @return the name of the currently selected instrument.
-        """
-        return self.instrumentSelector.currentText()
-
-    def get_current_preview(self):
-        """
-        @return the name of the currently selected preview type, as a string.
-        """
-        return str(self.previewType.currentText())
-
     def get_current_target(self):
         """
         Get the current target's name.
         @return the currently selected target, as a string
         """
         return str(self.targetType.currentText())
-
-    def get_current_acquisition(self):
-        """
-        Get the current acquisition's name.
-        @return the currently selected acquisition, as a string
-        """
-        return str(self.acquisitionType.currentText())
 
     # Combobox option setters
     def populate_targets(self, targets):
@@ -342,26 +323,3 @@ class RawDataExplorerView(QWidget):
         index = self.targetType.findText(target)
         if index != -1:
             self.targetType.setCurrentIndex(index)
-
-    def populate_previews(self, previews):
-        """
-        Write the new possible previews in the preview combobox.
-        @param previews: the list of the possible previews, as strings.
-        """
-        self.previewType.blockSignals(True)
-        self.previewType.clear()
-        for preview in previews:
-            self.previewType.addItem(preview)
-
-        self.previewType.blockSignals(False)
-
-    def populate_acquisitions(self, acquisitions):
-        """
-        Write the new possible acquisitions in the acquisition combobox.
-        @param acquisitions: the list of the possible acquisitions, as strings.
-        """
-        self.acquisitionType.blockSignals(True)
-        self.acquisitionType.clear()
-        for acq in acquisitions:
-            self.acquisitionType.addItem(acq)
-        self.acquisitionType.blockSignals(False)
