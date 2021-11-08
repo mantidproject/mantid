@@ -2055,12 +2055,7 @@ const std::vector<Property *> &Algorithm::getProperties() const { return m_prope
  * @return A vector holding strings of property names
  */
 std::vector<std::string> Algorithm::getDeclaredPropertyNames() const noexcept {
-  std::vector<std::string> names;
-  const auto &props = getProperties();
-  names.reserve(props.size());
-  std::transform(props.cbegin(), props.cend(), std::back_inserter(names),
-                 [](auto &propPtr) { return propPtr->name(); });
-  return names;
+  return m_properties.getDeclaredPropertyNames();
 }
 
 /** Get the value of a property. Allows you to assign directly to a variable of
