@@ -463,6 +463,7 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
                            CharacterizationRunsFile=charfile,
                            Binning=-0.001,
                            SaveAs="nexus",
+                           NumWavelengthBins=1,
                            OutputDirectory=savedir)
 
         assert not mtd['PG3_46577'].sample().getMaterial().name().strip()
@@ -475,6 +476,7 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
                            SaveAs="nexus",
                            TypeOfCorrection="FullPaalmanPings",
                            SampleFormula="Si",
+                           NumWavelengthBins=1,
                            MeasuredMassDensity=1.165,
                            ContainerShape="",
                            OutputFilePrefix='PP_absorption_',
@@ -495,6 +497,7 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
                            Binning=-0.001,
                            SaveAs="nexus",
                            TypeOfCorrection="FullPaalmanPings",
+                           NumWavelengthBins=1,
                            SampleFormula="Si",
                            SampleGeometry={'Height': 2.0},
                            MeasuredMassDensity=1.165,
