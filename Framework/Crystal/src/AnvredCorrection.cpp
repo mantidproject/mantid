@@ -419,7 +419,7 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
  *       function to calculate a spherical absorption correction
  *       and tbar. based on values in:
  *
- *       c. w. dwiggins, jr., acta cryst. a31, 395 (1975).
+ *       Weber, K., Acta Cryst. B, 25.6 (1969)
  *
  *       in this paper, a is the transmission and a* = 1/a is
  *       the absorption correction.
@@ -436,56 +436,44 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
  *       @returns absorption
  */
 double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
-  int i;
-  double mu, mur; // mu is the linear absorption coefficient,
-  // r is the radius of the spherical sample.
-  double theta, astar1, astar2, frac, astar;
-  //  double trans;
-  //  double tbar;
+  //  For each of the 19 theta values in (theta = 0:5:90 deg)
+  //  fitted ln(1/A*) = sum_{i=1}^{N} pc[i][ith]*(muR)^i
+  //  using A* values in Weber (1969) for 0 < muR < 10 cm^-1.
+  //  These values are given in the static array pc[][]
 
-  //  For each of the 19 theta values in dwiggins (theta = 0.0 to 90.0
-  //  in steps of 5.0 deg.), the astar values vs.mur were fit to a third
-  //  order polynomial in excel. these values are given in the static array
-  //  pc[][]
-
-  mu = m_smu + (m_amu / 1.8f) * wl;
-
-  mur = mu * m_radius;
+  double mur = (m_smu + (m_amu / 1.8f) * wl) * m_radius;
   if (mur < 0.) {
     throw std::runtime_error("muR cannot be negative");
-  } else if (mur > 2.5) {
-    g_log.warning() << "muR (" << mur
-                    << ") is not in range of Dwiggins' table ( 0 < muR < 2.5) so using extrapolation of cubic fit."
-                    << std::endl;
+  } else if (mur > 10.0) {
+    g_log.warning() << "muR (" << mur << ") is not in range  ( 0 < muR < 2.5) so extrapolating." << std::endl;
   }
 
-  theta = twoth * radtodeg_half;
+  auto theta = twoth * radtodeg_half;
   if (theta < 0. || theta > 90.) {
     std::ostringstream s;
     s << theta;
-    throw std::runtime_error("theta is not in range of Dwiggins' table :" + s.str());
+    throw std::runtime_error("theta is not in allowed range :" + s.str());
   }
-
+  //  interpolation better done on A = 1/A* = transmission (
   //  using the polymial coefficients, calulate astar (= 1/transmission) at
   //  theta values below and above the actual theta value.
-
-  i = static_cast<int>(theta / 5.);
-  astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  i = i + 1;
-  astar2 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
+  auto ith = static_cast<size_t>(theta / 5.); // floor
+  double lnA_1 = 0.0;
+  double lnA_2 = 0.0;
+  size_t ndeg = sizeof pc / sizeof pc[0]; // order of poly
+  for (size_t icoef = 0; icoef < ndeg; icoef++) {
+    lnA_1 = lnA_1 * mur + pc[icoef][ith];     // previous theta
+    lnA_2 = lnA_2 * mur + pc[icoef][ith + 1]; // next theta
+  }
 
   //  do a linear interpolation between theta values.
-
-  frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
+  auto frac = theta - static_cast<double>(ith) * 5.; // theta%5.
   frac = frac / 5.;
 
-  astar = astar1 * (1 - frac) + astar2 * frac; // astar is the correction
-  //  trans = 1.f/astar;                           // trans is the transmission
+  // correction to apply (A* = 1/A = 1/transmission)
+  auto astar = 1 / (std::exp(lnA_1) * (1 - frac) + std::exp(lnA_2) * frac);
   // trans = exp(-mu*tbar)
-
-  //  calculate tbar as defined by coppens.
-  //  tbar = -(double)Math.log(trans)/mu;
+  // tbar = -(double)Math.log(trans)/mu;  // as defined by coppens
 
   return astar;
 }
