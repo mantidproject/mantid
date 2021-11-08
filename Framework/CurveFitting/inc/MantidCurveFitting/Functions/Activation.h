@@ -44,7 +44,7 @@ protected:
   void init() override;
 
 private:
-  double getMeVConv() const;
+  double getmeVConv() const;
 };
 
 } // namespace Functions

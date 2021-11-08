@@ -25,7 +25,7 @@ using namespace API;
 DECLARE_FUNCTION(Activation)
 
 void Activation::init() {
-  declareAttribute("Unit", Attribute("K")); // or meV
+  declareAttribute("Unit", Attribute("K")); // this should either be K or MeV
   declareParameter("AttemptRate", 1000.0, "coefficient for attempt rate");
   declareParameter("Barrier", 1000.0, "coefficient for barrier energy");
 }
@@ -35,7 +35,7 @@ void Activation::function1D(double *out, const double *xValues, const size_t nDa
 
   const double attemptRate = getParameter("AttemptRate");
   const double barrier = getParameter("Barrier");
-  const double meVConv = getMeVConv();
+  const double meVConv = getmeVConv();
 
   for (size_t i = 0; i < nData; i++) {
     out[i] = attemptRate * exp(-(meVConv * barrier) / xValues[i]);
@@ -47,7 +47,7 @@ void Activation::functionDeriv1D(Jacobian *out, const double *xValues, const siz
 
   const double attemptRate = getParameter("AttemptRate");
   const double barrier = getParameter("Barrier");
-  const double meVConv = getMeVConv();
+  const double meVConv = getmeVConv();
 
   for (size_t i = 0; i < nData; i++) {
     double diffAR = exp(-(meVConv * barrier) / xValues[i]);
@@ -66,7 +66,7 @@ void Activation::beforeFunctionSet() const {
   }
 }
 
-double Activation::getMeVConv() const {
+double Activation::getmeVConv() const {
   auto unit = getAttribute("Unit").asString();
   boost::to_lower(unit);
   double meVConv;

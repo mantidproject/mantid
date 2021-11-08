@@ -9,29 +9,30 @@ Activation
 Description
 -----------
 
-An activation fitting function, when using Kelvin, may be used to describe:
+The activation fitting function can be written as:
 
 .. math:: y = A_R\times e^{-\frac{b}{x}}
 
 where:
 - A_R - Attempt Rate
 - b - Barrier energy
+- x - is in Kelvin
 
 
 When fitting to meV instead it can be described as:
 
-.. math:: y = A_R\times e^{-\frac{E\times b}{1000 k_B x}}
+.. math:: y = A_R e^{-\frac{E\times b}{1000 k_B x}}
 
 where:
-E = energy spin
-k_B = Boltzmann Constant
+- E - activation energy
+- k_B - Boltzmann Constant
 
 
 
 Examples
 --------
 
-An example of when this might be used is for examining the muonium state of CdS at low temperatures[1].
+An example of when this might be used is for examining the ion dynamics in flouride-containing polyatomic anion cathodes using muon spectroscopy [1].
 
 
 
@@ -41,7 +42,7 @@ An example of when this might be used is for examining the muonium state of CdS 
 
 References
 ----------
-[1] Gil, J.M et al (1999). Novel Muonium State in CdS. Phys. Rev. Lett., Vol 83 Issue 25, 5294-5297 `doi: 10.1103/PhysRevLett.83.5294 <https://doi.org/10.1103/PhysRevLett.83.5294>`.
+[1] Johnston, B. I., Baker, P. J. & Cussen, S. A. (2021). Ion dynamics in flouride-containing polyatomic anion cathodes by muon spectroscopy. Journal of Physics:Materials, Vol. 4 No. 4, `https://iopscience.iop.org/article/10.1088/2515-7639/ac22ba <https://iopscience.iop.org/article/10.1088/2515-7639/ac22ba>`.
 
 .. categories::
 
