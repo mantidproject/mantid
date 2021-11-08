@@ -451,12 +451,11 @@ if(ENABLE_CPACK)
   message(STATUS "CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}")
 
   if(APPLE AND CONDA_ENV)
-    set(CPACK_COMPONENT_DEVEL_HIDDEN True)
     cpack_add_component(
       Runtime
       DISPLAY_NAME Runtime
-      DESCRIPTION "Runtime of window application"
-      PLIST ${PROJECT_SOURCE_DIR}/installers/MacInstaller/MantidWorkbench.plist
+      DESCRIPTION "Mantid workbench application"
+      PLIST ${CMAKE_BINARY_DIR}/MantidWorkbench.plist
     )
 
   endif()

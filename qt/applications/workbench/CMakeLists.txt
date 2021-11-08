@@ -179,6 +179,10 @@ if(APPLE AND NOT CONDA_BUILD)
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/postinstall.in ${CMAKE_BINARY_DIR}/postinstall @ONLY
     )
+    configure_file(
+      ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/MantidWorkbench.plist.in
+      ${CMAKE_BINARY_DIR}/MantidWorkbench.plist @ONLY
+    )
   endif()
   # Determine Qt install prefix
   set(_qt_install_prefix ${Qt5Core_DIR})
