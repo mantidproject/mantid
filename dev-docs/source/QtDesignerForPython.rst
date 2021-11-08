@@ -47,7 +47,7 @@ which inherits from the imported one.
     from qtpy import QtCore, QtGui, QtWidgets
     import matplotlib.pyplot as plt
     from mantidqt.utils.qt import load_ui
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
     Ui_MyWidget, _ = load_ui(__file__, "my_widget.ui")
 

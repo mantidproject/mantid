@@ -33,13 +33,10 @@ try:
     from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
     from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 except ImportError:
-    from qtpy import PYQT4, PYQT5, PYSIDE, PYSIDE2  # noqa
+    from qtpy import PYQT5, PYSIDE2  # noqa
     if PYQT5 or PYSIDE2:
         from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
         from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-    elif PYQT4 or PYSIDE:
-        from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-        from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
     else:
         raise RuntimeError('Do not know which matplotlib backend to set')
     from matplotlib.legend import Legend
