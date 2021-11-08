@@ -96,6 +96,7 @@ private:
                                                                               double kinc);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
+  int m_maxScatterPtAttempts;
 };
 } // namespace Algorithms
 } // namespace Mantid
