@@ -324,6 +324,9 @@ class FitInformation(object):
             elif len(values) > 1:
                 return str(values[0]) + " to " + str(values[-1]), ""
 
+    def log_value(self, log_name):
+        return self.log_value_and_error(log_name)[0]
+
 
 class FittingContext(object):
     """Context specific to fitting.
