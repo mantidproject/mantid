@@ -23,7 +23,7 @@ using namespace API;
 DECLARE_FUNCTION(SmoothTransition)
 
 void SmoothTransition::init() {
-  declareParameter("A1", 0.00, "maximum curve");
+  declareParameter("A1", 0.0, "maximum curve");
   declareParameter("A2", 0.1, "Flat Background");
   declareParameter("Midpoint", 100.0, "Sigmoid Midpoint");
   declareParameter("GrowthRate", 1.0, "Growth rate");
@@ -48,12 +48,12 @@ void SmoothTransition::functionDeriv1D(Jacobian *out, const double *xValues, con
 
   for (size_t i = 0; i < nData; i++) {
     double expFunc = exp((xValues[i] - midpoint) / gr);
-    double expFuncsq = pow((expFunc + 1), 2);
+    double denominatorSq = pow((expFunc + 1), 2);
 
     double diffa1 = 1 / (expFunc + 1);
     double diffa2 = 1 - diffa1;
-    double diffmidpoint = ((a1 - a2) * expFunc) / (gr * expFuncsq);
-    double diffgr = ((a1 - a2) * (xValues[i] - midpoint) * expFunc) / (pow(gr, 2) * expFuncsq);
+    double diffmidpoint = ((a1 - a2) * expFunc) / (gr * denominatorSq);
+    double diffgr = ((a1 - a2) * (xValues[i] - midpoint) * expFunc) / (pow(gr, 2) * denominatorSq);
 
     out->set(i, 0, diffa1);
     out->set(i, 1, diffa2);

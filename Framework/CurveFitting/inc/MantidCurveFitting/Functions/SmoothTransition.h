@@ -16,12 +16,12 @@ namespace CurveFitting {
 namespace Functions {
 /**
 Provide Smooth Transition function interface to IFunction.
-I.e. the function: y = A2 + (A1-A2)/(exp((x-MidPoint)/GrowthRate)+1)?
+I.e. the function: y = A2 + (A1-A2)/(exp((x-MidPoint)/GrowthRate)+1)
 Smooth Transition parameters:
 <UL>
-<LI> A1 - maximum curve (default 1.0)</LI>
-<LI> A2 - Flat Background (default 0.0)</LI>
-<LI> Midpoint - sigmoid midpoint (default 0.0)</LI>
+<LI> A1 - the limit of the function as x tends to zero (default 0.0)</LI>
+<LI> A2 - the limit of the function as x tends to infinity (default 0.1)</LI>
+<LI> Midpoint - sigmoid midpoint (default 100.0)</LI>
 <LI> GrowthRate - growth rate (default 1.0)</LI>
 </UL>
 */
