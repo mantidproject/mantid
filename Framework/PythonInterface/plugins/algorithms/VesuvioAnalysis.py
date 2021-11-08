@@ -157,11 +157,12 @@ class VesuvioAnalysis(PythonAlgorithm):
         constraints = self.getProperty("ConstraintsProfileNumbers").value
         if len(constraints) != 0 and len(constraints) != 2:
             issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should either be empty or only contain 2 numbers."
-        #check aritmatic is safe
-        cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
-        for ch in cross_section:
-            if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
+        #check arithmetic is safe
+        if len(constraints) != 0:
+            cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
+            for ch in cross_section:
+                if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
+                    issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
