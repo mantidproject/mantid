@@ -26,14 +26,14 @@ This document tries to give an overview on how the algorithms work together via 
 Reduction workflow and recommendations
 ######################################
 
-A description of the usage of the algorithms for the D7 data reduction is presented along with several possible workflows, depending on the number of desired corrections, the type of normalisation, as well as the type of measurement that the data comes from (powder sample, TOF, single crystal).
+A description of the usage of the algorithms for the D7 data reduction is presented along with several possible workflows, depending on the number of desired corrections, the type of normalisation, as well as the type of measurement that the data comes from (powder sample,  single crystal, TOF).
 
 Reduction basics
 ================
 
 .. include:: ../usagedata-note.txt
 
-A very basic powder data reduction would include a vanadium reference and a sample, without any corrections or position and wavelength calibration, and follow the steps:
+A very basic powder data reduction would include a vanadium reference and a sample, without any corrections or position and wavelength calibration, and follow the following steps:
 
 #. Reduce vanadium data.
 
@@ -374,8 +374,73 @@ Reduction workflow
 ------------------
 
 The first two steps of the reduction of vanadium data are the same as for quartz, with normalisation to the monitor or time, and background
-subtraction (provided the necessary inputs). The polarisation efficiency of the instrument can be corrected using the previously reduced
-quartz data. The correction is applied according to the following formula:
+subtraction (provided the necessary inputs). This is followed by polarisation correction, frame-overlap correction (optional in the TOF mode),
+self-attenuation correction, detector energy-efficiency correction (optional in the TOF mode), and finally normalisation to either relative
+or absolute scale. In the case of relative scale, the counts are normalised to the number of polarisation directions (e.g. one in the `Z`
+method, three for the `XYZ`, etc. ). For the absolute scale normalisation, the number of moles and the total expected cross-section is also
+taken into account.
+
+Background subtraction
+----------------------
+
+Background subtraction is straight-forward in case of a diffraction experiment, where it is perfomed
+in the way described in the Quartz reduction. However, in the case of Time-of-flight experiment, this approach is not sufficient. There, background
+is split into time-independent (:math:`B_{\mathrm{indep}}`) and time-dependent (:math:`B_{\mathrm{dep}}`) contributions. Time-independent contribution
+is calculated as an average of counts of the background source (either empty container or vanadium measurement itself) in time channels outside
+of the elastic peak region. There are three possible ways to take into account the time-dependent contribution available
+in the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`, depending on the selection of `SubtractTOFBackgroundMethod`, which follows formulas
+given below.
+
+1. `Data` and `Rectangular` options
+
+   Both of these method will use the following equation to establish time-dependent background:
+
+   .. math::
+
+      B_{dep} = T \left( E (\#, \mathrm{chn} = \mathrm{chn(el)}) - B_{\mathrm{indep}} \right),
+
+   where `T` is sample transmission, `E` is distribution of counts as measured for the empty container (or vanadium) if the `SubtractTOFBackgroundMethod`
+   is set to `Data`, or `E` is an average of the measured background distribution in the elastic peak region, if the property is set to `Rectangular`,
+   chn(el) signifies the region around the elastic peak, and :math:`B_{\mathrm{indep}}` is the time-independent background.
+
+   Then, regardless of the `SubtractTOFBackgroundMethod` choice, the time-dependent and time-independent background contributions are subtracted from
+   the sample counts as follows:
+
+   .. math::
+
+      I_{B} (\#, chn) = I (\#, chn) - B_{dep} - B_{indep},
+
+   where :math:`I_{B} (\#, chn)` is the intensity after background is subtracted, and :math:`I (\#, chn)` is the current sample distribution before background
+   subtraction.
+
+2. `Gaussian` option
+
+   The approach when `Gaussian` option is set for the `SubtractTOFBackgroundMethod` property is similar to previously described solution, with a significant
+   change, where the `E` distribution is substituted by sample data itself. The background subtraction in that case is as follows:
+
+   .. math::
+
+      I_{B} (\#, \mathrm{chn} \ne \mathrm{chn(el)}) &= I (\#, \mathrm{chn}) - B_{\mathrm{indep}},
+
+      I_{B} (\#, \mathrm{chn} = \mathrm{chn(el)}) &= T \left( I (\#, \mathrm{chn} = \mathrm{chn(el)}) - B_{\mathrm{indep}} \right) - G (\#, \mathrm{chn} = \mathrm{chn(el)}),
+
+   where :math:`G (\#, \mathrm{chn} = \mathrm{chn(el)})` is a gaussian distribution matched to the background source, so that the centre of the distribution falls
+   at the position of the elastic peak, the width matches with the elastic peak region width, and the counts of the background source are preserved. `G` is generated
+   for each time channel or time-of-flight value in the elastic peak region as follows:
+
+   .. math::
+
+      G (\#) = \frac{A}{\sigma \sqrt{2\pi}} \mathrm{exp} \left( -\frac{1}{2} \left(\frac{chn - chn_{el}}{\sigma}\right)^{2} \right),
+
+   where `A` is the total counts of the background source in the elastic peak region, :math:`\sigma` is the half-width of the elastic peak region, `chn` is the time-of-flight
+   or time channel value of a bin in the elastic peak region, :math:`chn_{el}` is the position of the elastic peak.
+
+
+Polarisation correction
+-----------------------
+
+The polarisation efficiency of the instrument can be corrected using the previously reduced quartz data. The correction is applied according
+to the following formula:
 
 .. math::   \begin{bmatrix}
                 \dot{I_{B}}(+) \\
@@ -500,13 +565,15 @@ property of :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`, and by defaul
 
 
 The data needs to have elastic peak positions calibrated before the detector efficiency can be performed. Positions of elastic peaks
-for each detector and their fitted widths are obtained using :ref:`FindEPP <algm-FindEPP>`. Missing values of widths, in cases
-where the gaussian fit was not successful, are padded with the average width calculated from available peak widths. The fitting is done when the X-axis
+for each detector and their widths are obtained using :ref:`FindEPP <algm-FindEPP>` algorithm or from the user input via `EPCentre` and `EPWidth`
+valuees provided through `SampleAndEnvironmentProperties`. Missing values of widths, in cases where the gaussian fit was not successful,
+are padded with the average width calculated from available peak widths. The fitting is done when the X-axis
 is still in TOF units.
 
 Detector efficiency correction algorithm, :ref:`DetectorEfficiencyCorUser <algm-DetectorEfficiencyCorUser>`, requires the X-axis unit
-to be `DeltaE` (energy exchange). Unit conversion from `TOF` units to `DeltaE` is handled by :ref:`ConvertUnits <algm-ConvertUnits>`.
-The following formula is used to correct detector energy efficiency:
+to be `DeltaE` (energy exchange), therefore if `ConvertToEnergy` property is set to `False`, this correction cannot be performed and is skipped.
+Unit conversion from `TOF` units to `DeltaE` is handled by :ref:`ConvertUnits <algm-ConvertUnits>`.
+The following formula is used to correct for detector energy efficiency:
 
 .. math:: y = \frac{y}{eff},
 
@@ -519,7 +586,7 @@ where in turn, the :math:`f(E_{i})` for D7 is:
 .. math:: f(E_{i}) = 1.0 - \mathrm{exp} \left( \frac{-13.153}{\sqrt{E_{i}}} \right),
 
 where the constant value of -13.153 is derived from multiplying the pressure of detector tubes (10 Pa), their diameter (2.54 cm),
-and a factor of −0.51784.
+and a factor of −0.51784, obtained by D7 responsible scientists using Monte Carlo simulations.
 
 
 Output
@@ -529,7 +596,8 @@ The corrected counts in each each detector are normalised to the expected total 
 of :math:`0.404 \frac{\text{barn}}{\text{steradian} \cdot \text{atom}}`. The output of vanadium reduction
 is a :ref:`WorkspaceGroup <WorkspaceGroup>` with one entry if the `OutputTreatment` is set to `Sum`, or
 the same number of entries as input data if `Individual` was selected. In the case of `TOF` reduction mode,
-vanadium counts are integrated around elastic peak positions before normalisation to the expected cross-section.
+vanadium counts are integrated around the elastic peak position for each detector before normalisation
+to the expected cross-section.
 
 In case it is desireable to separate cross-sections, for example for diagnostic purposes, it can be done
 using the reduced data described as above using :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
@@ -1075,17 +1143,13 @@ Output:
 
    vanadium_mass = 6.11 * 4.0 * np.pi * (0.6**2 - 0.4**2)
    formula_weight_H2O = 1.008 * 2 + 15.999 # NIST
-   formula_weight_D2O = 2.014 * 2 + 15.999 # NIST
    sample_mass_H2O = 0.874
-   sample_mass_D2O = 1.9204
    sample_formula_H2O = 'H2O'
-   sample_formula_D2O = 'D2O'
    sample_thickness_H2O = 1.95
-   sample_thickness_D2O = 1.9
    max_tof_channel = 511
    vanadium_dictionary = {'SampleMass':vanadium_mass, 'FormulaUnitMass':50.942}
    sample_dictionary_H2O = {'SampleMass':sample_mass_H2O, 'FormulaUnitMass':formula_weight_H2O, 'SampleChemicalFormula':sample_formula_H2O}
-   sample_dictionary_D2O = {'SampleMass':sample_mass_D2O, 'FormulaUnitMass':formula_weight_D2O, 'SampleChemicalFormula':sample_formula_D2O}
+   masked_detectors = []
    yig_calibration_file = "D7_YIG_calibration_TOF.xml"
 
    # Beam measurement for transmission
@@ -1105,7 +1169,10 @@ Output:
 		Run='396036:396155',
 		OutputTreatment='AveragePol',
 		OutputWorkspace='container_ws',
-		ProcessAs='Empty'
+		ProcessAs='Empty',
+		MeasurementTechnique='TOF',
+		MaxTOFChannel=500,
+		MaskDetectors=masked_detectors,
    )
 
    # Quartz has not been measured
@@ -1124,6 +1191,7 @@ Output:
 		OutputWorkspace='vanadium_ws',
 		EmptyContainerWorkspace='container_ws',
 		Transmission='vanadium_tr',
+		SubtractTOFBackgroundMethod='Data',
 		OutputTreatment='Sum',
 		SelfAttenuationMethod='None',
 		SampleGeometry='None',
@@ -1132,6 +1200,11 @@ Output:
 		MeasurementTechnique='TOF',
 		ProcessAs='Vanadium',
 		InstrumentCalibration=yig_calibration_file,
+		MaskDetectors=masked_detectors,
+		MaxTOFChannel=500,
+		FrameOverlapCorrection=True,
+		DetectorEnergyEfficiencyCorrection=True,
+		ConvertToEnergy=True,
 		ClearCache=True
    )
 
@@ -1151,12 +1224,18 @@ Output:
 		OutputWorkspace='h2O_ws',
 		EmptyContainerWorkspace='container_ws',
 		Transmission='h2O_1cm_tr',
+		SubtractTOFBackgroundMethod='Gaussian',
 		OutputTreatment='AveragePol',
 		SampleGeometry='None',
 		SampleAndEnvironmentProperties=sample_dictionary_H2O,
 		MeasurementTechnique='TOF',
 		InstrumentCalibration=yig_calibration_file,
 		ElasticChannelsWorkspace='vanadium_ws_elastic',
+		MaskDetectors=masked_detectors,
+		MaxTOFChannel=500,
+		FrameOverlapCorrection=True,
+		DetectorEnergyEfficiencyCorrection=True,
+		ConvertToEnergy=True,
 		ProcessAs='Sample'
    )
 

@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm performs polarised diffraction reduction for the D7 instrument at the ILL.
+This algorithm performs polarised diffraction and spectroscopy reduction for the D7 instrument at the ILL.
 With each call, this algorithm processes one type of data which is a part of the whole experiment.
 The logic is resolved by the property **ProcessAs**, which governs the reduction steps based on the requested type.
 It can be one of the 8: cadmium, empty beam, beam-with-cadmium, transmission, empty, quartz, vanadium, and sample.
@@ -53,15 +53,26 @@ Different input properties can be specified depending on the value of **ProcessA
 |                  | * EmptyContainerWorkspace       | * SampleGeometry                           |
 |                  | * Transmission                  | * **SampleAndEnvironmentProperties**       |
 |                  | * QuartzWorkspace               | * OutputTreatment                          |
+|                  | * ElasticChannelWorkspace       | * ConvertToEnergy                          |
+|                  |                                 | * EnergyBinning                            |
+|                  |                                 | * DetectorEfficiencyCorrection             |
+|                  |                                 | * FrameOverlapCorrection                   |
+|                  |                                 | * MaskDetectors                            |
+|                  |                                 | * MaxTOFChannel                            |
+|                  |                                 | * SubtractTOFBackgroundMethod              |
 +------------------+---------------------------------+--------------------------------------------+
 | Sample           | * CadmiumWorkspace              | * NormaliseBy                              |
 |                  | * EmptyContainerWorkspace       | * SampleGeometry                           |
 |                  | * Transmission                  | * **SampleAndEnvironmentProperties**       |
 |                  | * QuartzWorkspace               | * OutputTreatment                          |
 |                  | * ElasticChannelsWorkspace      | * MeasurementTechnique                     |
-|                  |                                 | * FrameOverlapCorrection                   |
-|                  |                                 | * DetectorEnergyEfficiencyCorrection       |
+|                  |                                 | * ConvertToEnergy                          |
 |                  |                                 | * EnergyBinning                            |
+|                  |                                 | * DetectorEfficiencyCorrection             |
+|                  |                                 | * FrameOverlapCorrection                   |
+|                  |                                 | * MaskDetectors                            |
+|                  |                                 | * MaxTOFChannel                            |
+|                  |                                 | * SubtractTOFBackgroundMethod              |
 +------------------+---------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -79,16 +90,30 @@ MeasurementTechnique
 --------------------
 
 This property allows to distinguish between reducing powder data from single crystal measurement. The options are: `Powder`, `SingleCrystal`, and `TOF`. In the case of single crystal
-data, only one bank position can processed at a time, and all input files for that bank are concatenated into a single workspace with vertical axis being 2theta positions of detectors,
+data, only one bank position can be processed at a time, and all input files for that bank are concatenated into a single workspace with vertical axis being 2theta positions of detectors,
 and the horizontal axis containing omega scan steps.
 
 In the `TOF` case, the X-axis is binned according to uncalibrated time, with binning information (start of the range, time bin width, number of bins) coming from NeXus files. Setting
 the `MeasurementTechnique` property to `TOF` enables also elastic peak calibration of data, with peak information coming from :ref:`FindEPP <algm-FindEPP>` which is run on vanadium data
-during reducing data as `Vanadium`. The output of `Vanadium` reduction elastic peak calibration, or a mock TableWorkspace containing at least two columns: `PeakCentre` and `Sigmas`,
-is required to be provided through `ElasticChannelsWorkspace` property, when the `processAs` property is `Sample` and `MeasurementTechnique` is set to `TOF`. The output workspace
-processed in this mode will have its X-axis units set to calibrated energy exchange (`DeltaE`), where the energy exchange equal to 0 is set to fall at the position of the elastic peak
-for each detector.
+during reducing data as `Vanadium`. The output of `Vanadium` reduction containing information with fitted elastic peak positions provided through `ElasticChannelsWorkspace` property,
+or a mock TableWorkspace containing at least two columns: `PeakCentre` and `Sigmas`, or an `EPCentre` (optionally also `EPWidth`) key defined via `SampleAndEnvironmentProperties` property,
+is required when the `processAs` is set to `Sample` and `MeasurementTechnique` is set to `TOF`. The output workspace processed in this mode will have its X-axis units set to calibrated energy
+exchange (`DeltaE`), where the energy exchange equal to 0 is set to fall at the position of the elastic peak for each detector.
 
+SubtractTOFBackgroundMethod
+---------------------------
+
+This property is relevant only when `MeasurementTechnique` is `TOF`. The property introduces three options for subtracting the background from the sample in the time-of-flight mode.
+In all cases, the background is coming from either a measurement of the empty container or vanadium sample, if container measurement is not possible. The background is split in two
+contributions, time-independent and time-dependent, respectively. The time-independent contribution is calculated as an average of counts outside of the elastic peak region. The time-dependent
+contribution is the background present in the elastic peak region. Different options of the `SubtractTOFBackgroundMethod` allow the user to choose how the time-dependent background
+estimate is going to be subtracted from the current sample (vanadium, sample) data. The full mathematical description is placed in the technique document for the Polarised Diffraction
+at D7.
+
+When `SubtractTOFBackgroundMethod` is equal to `Data`, the counts coming from empty container or vanadium measurement are used without modification and directly subtracted from current
+sample counts. When this property is set to `Rectangular`, an average of the measured background source counts is used instead of direct counts. This allows to smooth our fluctuations in
+the background source data, which in principle may be quite noisy. The last option is `Gaussian`, which estimates the background source counts as a gaussian distribution, with a centre
+at the elastic peak, the width of the elastic peak, and the integrated counts equal to that of the background source.
 
 OutputTreatment
 ---------------
@@ -175,11 +200,19 @@ Then, depending on the chosen sample geometry, additional parameters need to be 
 
 Time-of-flight specific keys:
 
+- *EPCentre*
 - *EPWidth*
+- *EPNSigmasBckg*
+- *EPNSigmasVana*
 
-The *EPWidth* key is the user-defined width (in the number of time channels) of elastic peaks to be used for integrating elastic peaks.
+The *EPCentre* and *EPWidth* keys are the user-defined centre and width, respectively, of elastic peaks to be used
+for integrating elastic peaks, in units of time-of-flight. If any of those keys is provided along with the ElasticChannelWorkspace,
+it will be used instead of information provided in that table.
 
-Optional keys:
+*EPNSigmasBckg* and *EPNSigmasVana* control the integration range around the position of elastic peak for each detector by expanding
+the width of the peak by the provided factor, used for calculations of the time-dependent background and the vanadium normalisation, respectively.
+
+Optional general-use keys:
 
 - *InitialEnergy* - if not provided, the value will be calculated from the wavelength in the SampleLogs
 - *NMoles* - if not provided, the value will be calculated based on the *SampleMass* and *FormulaUnitMass*
@@ -475,7 +508,7 @@ Output:
        RenameWorkspace(InputWorkspace=entry, OutputWorkspace="{}_{}".format(appended_ws, polarisation))
 
 
-**Example - full treatment of a single crystal sample**
+**Example - full treatment of a water sample measured in Time-of-flight mode**
 
 .. code-block:: python
 
@@ -483,28 +516,18 @@ Output:
 
    vanadium_mass = 6.11 * 4.0 * np.pi * (0.6**2 - 0.4**2)
    formula_weight_H2O = 1.008 * 2 + 15.999 # NIST
-   formula_weight_D2O = 2.014 * 2 + 15.999 # NIST
    sample_mass_H2O = 0.874
-   sample_mass_D2O = 1.9204
    sample_formula_H2O = 'H2O'
-   sample_formula_D2O = 'D2O'
    sample_thickness_H2O = 1.95
-   sample_thickness_D2O = 1.9
    max_tof_channel = 511
-   vanadium_dictionary = {'SampleMass':vanadium_mass, 'FormulaUnitMass':50.942}
+   vanadium_dictionary = {'SampleMass':vanadium_mass, 'FormulaUnitMass':50.942, 'EPCentre':1645.0, 'EPWidth':54.0, 'EPNSigmasBckg':3.0, 'EPNSigmasVana': 3.0}
    sample_dictionary_H2O = {'SampleMass':sample_mass_H2O, 'FormulaUnitMass':formula_weight_H2O, 'SampleChemicalFormula':sample_formula_H2O}
-   sample_dictionary_D2O = {'SampleMass':sample_mass_D2O, 'FormulaUnitMass':formula_weight_D2O, 'SampleChemicalFormula':sample_formula_D2O}
    yig_calibration_file = "D7_YIG_calibration_TOF.xml"
 
    # Beam measurement for transmission
    PolDiffILLReduction(
 		Run='395557',
 		OutputWorkspace='beam_ws',
-		ProcessAs='EmptyBeam'
-   )
-   PolDiffILLReduction(
-		Run='395566',
-		OutputWorkspace='beam_ws_2',
 		ProcessAs='EmptyBeam'
    )
 
@@ -538,24 +561,19 @@ Output:
 		MeasurementTechnique='TOF',
 		ProcessAs='Vanadium',
 		InstrumentCalibration=yig_calibration_file,
+		FrameOverlapCorrection=True,
+		DetectorEnergyEfficiencyCorrection=True,
+		ConvertToEnergy=True,
 		ClearCache=True
    )
 
-   # D2O transmission
-   PolDiffILLReduction(
-		Run='395558,395559', # 0 and 90 degrees
-		OutputWorkspace='d2O_1cm_tr',
-		EmptyBeamWorkspace='beam_ws',
-		ProcessAs='Transmission'
-   )
-   # H2O transmissions
+   # H2O transmission
    PolDiffILLReduction(
 		Run='395560,395561', # 0 and 90 degrees
 		OutputWorkspace='h2O_1cm_tr',
 		EmptyBeamWorkspace='beam_ws',
 		ProcessAs='Transmission'
    )
-
    # Sample reduction
 
    # water reduction
@@ -570,19 +588,10 @@ Output:
 		MeasurementTechnique='TOF',
 		InstrumentCalibration=yig_calibration_file,
 		ElasticChannelsWorkspace='vanadium_ws_elastic',
-		ProcessAs='Sample'
-   )
-
-   D7AbsoluteCrossSections(
-		InputWorkspace='h2O_ws',
-		OutputWorkspace='h2O_red',
-		CrossSectionSeparationMethod='Uniaxial',
-		NormalisationMethod='Vanadium',
-		VanadiumInputWorkspace='vanadium_ws',
-		OutputUnits='Qw',
-		SampleAndEnvironmentProperties=sample_dictionary_H2O,
-		AbsoluteUnitsNormalisation=False,
-		MeasurementTechnique='TOF',
+		ProcessAs='Sample',
+		FrameOverlapCorrection=True,
+		DetectorEnergyEfficiencyCorrection=True,
+		ConvertToEnergy=True
 		ClearCache=True
    )
 
