@@ -156,7 +156,8 @@ void AnvredCorrection::exec() {
   // Get the input parameters
   retrieveBaseProperties();
 
-  BuildLamdaWeights();
+  if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
+    BuildLamdaWeights();
 
   eventW = std::dynamic_pointer_cast<EventWorkspace>(m_inputWS);
   if (eventW)
@@ -508,8 +509,6 @@ void AnvredCorrection::BuildLamdaWeights() {
   // peaks in ARCS data with no
   // incident spectrum
 
-  double power = m_power_th;
-
   // GetSpectrumWeights( spectrum_file_name, m_lamda_weight);
 
   if (m_lamda_weight.empty()) // loading spectrum failed so use
@@ -518,13 +517,10 @@ void AnvredCorrection::BuildLamdaWeights() {
     // don't override user specified
     // value.
     m_lamda_weight.reserve(NUM_WAVELENGTHS);
-    for (int i = 0; i < NUM_WAVELENGTHS; i++)
-      m_lamda_weight.emplace_back(1.);
-  }
-
-  for (size_t i = 0; i < m_lamda_weight.size(); ++i) {
-    double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
-    m_lamda_weight[i] *= (1 / std::pow(lamda, power));
+    for (int i = 0; i < NUM_WAVELENGTHS; i++) {
+      double lamda = static_cast<double>(i) / STEPS_PER_ANGSTROM;
+      m_lamda_weight.emplace_back(1 / std::pow(lamda, m_power_th));
+    }
   }
 }
 
