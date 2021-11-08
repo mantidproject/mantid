@@ -10,6 +10,7 @@ from os import path
 from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd
+from mantid.api import PreviewType
 
 
 class PreviewModel(QObject):
@@ -119,6 +120,11 @@ class RawDataExplorerModel(QObject):
             ws_name = path.basename(filename)[:-4]
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
+
+        preview = self.choose_preview(ws_name)
+
+        if preview is None:
+            return
         preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
@@ -147,6 +153,12 @@ class RawDataExplorerModel(QObject):
             if self._previews[i].get_preview_type() == preview:
                 self._previews[i].set_workspace_name(ws_name)
                 return
+
+        preview = self.choose_preview(ws_name)
+
+        if preview is None:
+            return
+
         preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
@@ -157,6 +169,27 @@ class RawDataExplorerModel(QObject):
         @param preview_model(PreviewModel): reference to the model.
         """
         self._previews.remove(previewModel)
+
+    def choose_preview(self, ws_name):
+        """
+        TODO
+        """
+        ws = mtd[ws_name]
+
+        # TODO find a way to know if ws is a group workspace -- stupid idea : try to get child wspaces
+        # if ws.isGroupWorkspace():
+        #     # that's probably D7 or some processed data
+        #     print("INVALID ENTRY : GROUP WORKSPACE")
+        #     return
+
+        if ws.getNumberHistograms() > 1:
+            if ws.getNumberBins() > 1:
+                # plot2D
+                return PreviewType.PLOT2D
+            else:
+                return PreviewType.PLOT1D
+        else:
+            return PreviewType.PLOTBINS
 
 
 def accumulate_name(last_ws, ws_to_add):
