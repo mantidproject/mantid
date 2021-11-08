@@ -120,8 +120,10 @@ class VesuvioAnalysis(PythonAlgorithm):
             "ConstraintsProfileScatteringCrossSection",
             "2.*82.03/5.551",
             doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering"
-            "cross section. Simple arithmetic can be included but the result may be rounded.")
-        self.declareProperty("ConstraintsProfileState", "eq", validator=StringListValidator(["eq","ineq"]))
+            "cross section. Simple arithmetic can be included but the result may be rounded. This setting is ignored when no "
+            "ConstraintsProfileNumbers are set.")
+        self.declareProperty("ConstraintsProfileState", "eq", doc="This setting is ignored when no ConstraintsProfileNumbers are set.",
+                             validator=StringListValidator(["eq","ineq"]))
         self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
