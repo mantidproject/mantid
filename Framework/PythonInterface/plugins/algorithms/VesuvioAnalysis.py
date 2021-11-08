@@ -115,7 +115,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                                      "",
                                                      direction=Direction.Input),doc="Table for Compton profiles")
-        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", [0,1]))
+        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", []))
         self.declareProperty(
             "ConstraintsProfileScatteringCrossSection",
             "2.*82.03/5.551",
@@ -155,8 +155,8 @@ class VesuvioAnalysis(PythonAlgorithm):
         if len(TOF) != 3:
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
         constraints = self.getProperty("ConstraintsProfileNumbers").value
-        if len(constraints)!=2:
-            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should only contain 2 numbers."
+        if len(constraints) != 0 and len(constraints) != 2:
+            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should either be empty or only contain 2 numbers."
         #check aritmatic is safe
         cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
         for ch in cross_section:
@@ -202,10 +202,12 @@ class VesuvioAnalysis(PythonAlgorithm):
         # if flag=True inequality; if flag = False equality
         constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value
         # check this is valid in the validate inputs
-        cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
-        state = self.getProperty("ConstraintsProfileState").value
-        C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
-        constraints = [C1]
+        constraints = []
+        if len(constraints_profile_num) > 0:
+            cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
+            state = self.getProperty("ConstraintsProfileState").value
+            C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
+            constraints = [C1]
 
         # spectra to be masked
         spectra_to_be_masked = self.getProperty("SpectraToBeMasked").value
