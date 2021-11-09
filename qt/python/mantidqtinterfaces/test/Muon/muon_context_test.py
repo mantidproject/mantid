@@ -210,7 +210,7 @@ class MuonContextTest(unittest.TestCase):
 
         self._assert_list_in_ADS(['__EMU19489; Group; bwd; Asymmetry; MA_unnorm',
                                   '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
-                                  'EMU19489 MA', 'EMU19489; Group; bwd; Asymmetry; MA',
+                                  'EMU19489; Group; bwd; Asymmetry; MA',
                                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; fwd; Asymmetry; MA',
                                   'EMU19489; Group; fwd; Counts; MA'])
 
@@ -227,7 +227,6 @@ class MuonContextTest(unittest.TestCase):
                                   '__EMU19489; Group; bwd; Asymmetry; Rebin; MA_unnorm',
                                   '__EMU19489; Group; fwd; Asymmetry; MA_unnorm',
                                   '__EMU19489; Group; fwd; Asymmetry; Rebin; MA_unnorm',
-                                  'EMU19489 MA',
                                   'EMU19489; Group; bwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; Rebin; MA',
                                   'EMU19489; Group; bwd; Counts; MA', 'EMU19489; Group; bwd; Counts; Rebin; MA',
                                   'EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; fwd; Asymmetry; Rebin; MA',
@@ -236,7 +235,7 @@ class MuonContextTest(unittest.TestCase):
     def test_show_all_pairs_calculates_and_shows_all_pairs(self):
         self._calculate_data_for(self.run_list, self.groups, self.rebins, self.pairs)
 
-        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA'])
+        self._assert_list_in_ADS(['EMU19489; Pair Asym; long; MA'])
 
     def test_that_show_all_calculates_and_shows_all_pairs_with_rebin(self):
         self.gui_context['RebinType'] = 'Fixed'
@@ -244,7 +243,7 @@ class MuonContextTest(unittest.TestCase):
 
         self._calculate_data_for(self.run_list, self.groups, self.rebins, self.pairs)
 
-        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Pair Asym; long; MA',
+        self._assert_list_in_ADS(['EMU19489; Pair Asym; long; MA',
                                   'EMU19489; Pair Asym; long; Rebin; MA'])
 
     def test_that_show_all_calculates_and_shows_all_diffs(self):
@@ -255,7 +254,7 @@ class MuonContextTest(unittest.TestCase):
         diffs = [group_diff, pair_diff]
         self._calculate_data_for(self.run_list, self.groups, self.rebins, pairs, diffs)
 
-        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Diff; group_diff; Asymmetry; MA',
+        self._assert_list_in_ADS(['EMU19489; Diff; group_diff; Asymmetry; MA',
                                   'EMU19489; Diff; pair_diff; Asymmetry; MA'])
 
     def test_that_show_all_calculates_and_shows_all_diffs_with_rebin(self):
@@ -272,7 +271,7 @@ class MuonContextTest(unittest.TestCase):
         diffs = [group_diff, pair_diff]
         self._calculate_data_for(self.run_list, groups, rebins, pairs, diffs)
 
-        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489; Diff; group_diff; Asymmetry; MA',
+        self._assert_list_in_ADS(['EMU19489; Diff; group_diff; Asymmetry; MA',
                                   'EMU19489; Diff; group_diff; Asymmetry; Rebin; MA',
                                   'EMU19489; Diff; pair_diff; Asymmetry; MA',
                                   'EMU19489; Diff; pair_diff; Asymmetry; Rebin; MA'])
@@ -291,7 +290,7 @@ class MuonContextTest(unittest.TestCase):
     def test_show_raw_data_puts_raw_data_into_the_ADS(self):
         self.context.show_raw_data()
 
-        self._assert_list_in_ADS(['EMU19489 MA', 'EMU19489_raw_data MA'])
+        self._assert_list_in_ADS(['EMU19489_raw_data MA'])
 
     def test_that_first_good_data_returns_correctly_when_from_file_chosen_option(self):
         self.gui_context.update({'FirstGoodDataFromFile': True})
@@ -656,6 +655,11 @@ class MuonContextTest(unittest.TestCase):
     def test_multi_period_phasequad(self):
         self.context._data_context.num_periods = mock.Mock(return_value=4)
         self.assertRaises(ValueError, self.context._calculate_phasequads, mock.Mock(), True)
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context.add_to_group')
+    def test_do_grouping(self, group_mock):
+        self.context.do_grouping()
+        group_mock.assert_called_once_with(self.data_context.instrument, self.context.workspace_suffix)
 
 
 if __name__ == '__main__':

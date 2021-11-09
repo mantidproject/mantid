@@ -5,21 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=F0401
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import WorkspaceGroupDefinition
 from mantid.api import Workspace, AnalysisDataService
 from mantid.simpleapi import RenameWorkspace
-
-
-def _add_workspace_to_group(group_name, workspace_name):
-    if AnalysisDataService.doesExist(group_name):
-        workspaces_to_group = AnalysisDataService.retrieve(group_name).getNames()
-    else:
-        workspaces_to_group = []
-
-    if workspace_name not in workspaces_to_group:
-        workspaces_to_group.append(workspace_name)
-        WorkspaceGroupDefinition().add_workspaces_to_group(group_name, workspaces_to_group)
-        WorkspaceGroupDefinition().execute_grouping()
 
 
 class MuonWorkspaceWrapper(object):
@@ -124,21 +111,11 @@ class MuonWorkspaceWrapper(object):
             if self.is_hidden:
                 AnalysisDataService.addOrReplace(self._workspace_name, self.workspace)
 
-            self._add_to_appropriate_groups()
-
             self._workspace = None
             self._is_in_ads = True
         else:
             raise ValueError("Cannot store workspace in ADS with name : ",
                              str(name))
-
-    def _add_to_appropriate_groups(self):
-        if not self._directory_structure:
-            return
-        workspace_list = reversed(self.name.split('/')[1:])
-        group_workspace_list = reversed(self.name.split('/')[:-1])
-        for workspace, workspace_group in zip(workspace_list, group_workspace_list):
-            _add_workspace_to_group(workspace_group, workspace)
 
     def hide(self):
         """
