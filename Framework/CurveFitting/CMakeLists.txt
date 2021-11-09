@@ -113,6 +113,7 @@ set(SRC_FILES
     src/Functions/LinearBackground.cpp
     src/Functions/LogNormal.cpp
     src/Functions/Lorentzian.cpp
+    src/Functions/MagneticOrderParameter.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
     src/Functions/MuoniumDecouplingCurve.cpp
@@ -285,6 +286,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/LinearBackground.h
     inc/MantidCurveFitting/Functions/LogNormal.h
     inc/MantidCurveFitting/Functions/Lorentzian.h
+    inc/MantidCurveFitting/Functions/MagneticOrderParameter.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
     inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
