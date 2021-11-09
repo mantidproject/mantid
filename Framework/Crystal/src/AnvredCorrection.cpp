@@ -448,7 +448,7 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
     g_log.warning() << "muR (" << mur << ") is not in range  ( 0 < muR < 2.5) so extrapolating." << std::endl;
   }
 
-  auto theta = twoth * radtodeg_half;
+  auto theta = 0.5 * twoth * radtodeg;
   if (theta < 0. || theta > 90.) {
     std::ostringstream s;
     s << theta;
@@ -465,13 +465,17 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
     lnA_1 = lnA_1 * mur + pc[icoef][ith];     // previous theta
     lnA_2 = lnA_2 * mur + pc[icoef][ith + 1]; // next theta
   }
-
-  //  do a linear interpolation between theta values.
-  auto frac = theta - static_cast<double>(ith) * 5.; // theta%5.
-  frac = frac / 5.;
+  double A1 = std::exp(lnA_1);
+  double sin_th1_sq = std::pow(sin((static_cast<double>(ith) * 5.0) / radtodeg), 2);
+  double A2 = std::exp(lnA_2);
+  double sin_th2_sq = std::pow(sin((static_cast<double>(ith + 1) * 5.0) / radtodeg), 2);
+  // interpolate using the Eq. for A at fixed th
+  // A(th) = L0 + L1*(sin(th)^2)
+  double L1 = (A1 - A2) / (sin_th1_sq - sin_th2_sq);
+  double L0 = A1 - L1 * sin_th1_sq;
 
   // correction to apply (A* = 1/A = 1/transmission)
-  auto astar = 1 / (std::exp(lnA_1) * (1 - frac) + std::exp(lnA_2) * frac);
+  auto astar = 1 / (L0 + L1 * std::pow(sin(theta / radtodeg), 2));
   // trans = exp(-mu*tbar)
   // tbar = -(double)Math.log(trans)/mu;  // as defined by coppens
 

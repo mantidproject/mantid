@@ -46,7 +46,7 @@ const double STEPS_PER_ANGSTROM = 100; // resolution of lamda table
 
 const int NUM_WAVELENGTHS = static_cast<int>(std::ceil(MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
 
-const double radtodeg_half = 180.0 / M_PI / 2.;
+const double radtodeg = 180.0 / M_PI;
 /** Calculates anvred correction factors for attenuation due to absorption and
    scattering in a spherical sample.
 
