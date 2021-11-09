@@ -75,6 +75,7 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
             compatibility_args = []
 
         process = subprocess.run([sys.executable, "-m", "pip", "install",
+                                  "--ignore-installed",
                                   "--prefix", tmp_prefix]
                                  + compatibility_args
                                  + ["pip>21", "packaging",
