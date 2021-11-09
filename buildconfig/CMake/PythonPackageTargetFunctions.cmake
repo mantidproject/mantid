@@ -79,6 +79,7 @@ function(add_python_package pkg_name)
   if(CONDA_BUILD)
     install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
     ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
+            COMPONENT Runtime
     )
   else()
     install(
@@ -86,6 +87,7 @@ function(add_python_package pkg_name)
     ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed \
     --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib \
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
+      COMPONENT Runtime
     )
   endif()
 
