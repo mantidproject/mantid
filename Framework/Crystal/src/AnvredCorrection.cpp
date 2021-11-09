@@ -444,8 +444,8 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
   double mur = (m_smu + (m_amu / 1.8f) * wl) * m_radius;
   if (mur < 0.) {
     throw std::runtime_error("muR cannot be negative");
-  } else if (mur > 10.0) {
-    g_log.warning() << "muR (" << mur << ") is not in range  ( 0 < muR < 2.5) so extrapolating." << std::endl;
+  } else if (mur > 8.0) {
+    g_log.warning("Absorption correction not accurate for muR > 9 cm^-1 \n");
   }
 
   auto theta = 0.5 * twoth * radtodeg;
@@ -454,9 +454,7 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
     s << theta;
     throw std::runtime_error("theta is not in allowed range :" + s.str());
   }
-  //  interpolation better done on A = 1/A* = transmission (
-  //  using the polymial coefficients, calulate astar (= 1/transmission) at
-  //  theta values below and above the actual theta value.
+  //  interpolation better done on A = 1/A* = transmission
   auto ith = static_cast<size_t>(theta / 5.); // floor
   double lnA_1 = 0.0;
   double lnA_2 = 0.0;
