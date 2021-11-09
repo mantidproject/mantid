@@ -23,8 +23,8 @@ using namespace API;
 DECLARE_FUNCTION(SmoothTransition)
 
 void SmoothTransition::init() {
-  declareParameter("A1", 0.0, "maximum curve");
-  declareParameter("A2", 0.1, "Flat Background");
+  declareParameter("A1", 0.0, "the limit of the function as x tends to zero");
+  declareParameter("A2", 0.1, "the limit of the function as x tends to infinity");
   declareParameter("Midpoint", 100.0, "Sigmoid Midpoint");
   declareParameter("GrowthRate", 1.0, "Growth rate");
 }
