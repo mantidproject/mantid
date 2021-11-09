@@ -38,6 +38,7 @@ class PlotFitPanePresenter(BasePanePresenter):
         """
         workspace_list = []
         indices = []
+        shade_list = []
         raw = self._view.is_raw_plot()
         with_diff = self._view.is_plot_diff()
         if fit_information_list:
@@ -47,7 +48,9 @@ class PlotFitPanePresenter(BasePanePresenter):
                 fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
                 workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
+                # dont shade the data but do shade the fit lines
+                shade_list += [False] * len(fit_information.input_workspaces) + [True]*len(fit_indices)
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale, shades=shade_list)
         # the data change probably means its the wrong scale
         self._figure_presenter.force_autoscale()
 

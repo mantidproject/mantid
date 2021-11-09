@@ -133,7 +133,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         except (RuntimeError, KeyError):
             return -1
         self._plot_information_list.append(workspace_plot_info)
-        errors = workspace_plot_info.errors
+        errors = workspace_plot_info.errors if not workspace_plot_info.shade else False
         ws_index = workspace_plot_info.index
         axis_number = workspace_plot_info.axis
         ax = self.fig.axes[axis_number]
@@ -269,7 +269,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                             color = artist.get_color()
                         plot_kwargs = self._get_plot_kwargs(plot_info)
                         plot_kwargs["color"] = color
-                        axis.replot_artist(artist, with_errors, **plot_kwargs)
+                        if plot_info.shade:
+                            print("do nothing")
+                        else:
+                            axis.replot_artist(artist, with_errors, **plot_kwargs)
         self.redraw_figure()
 
     def set_axis_xlimits(self, axis_number, xlims):

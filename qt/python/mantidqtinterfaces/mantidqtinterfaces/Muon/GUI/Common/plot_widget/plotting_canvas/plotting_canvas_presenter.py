@@ -113,12 +113,15 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     # Interface implementation
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
-                        autoscale: bool):
+                        autoscale: bool, shades:List[bool]=[]):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list
+        shade_list = shades
+        if shade_list ==[]:
+            shade_list=[False]*len(workspace_indices)
         workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
-                                                                            self._options_presenter.get_errors())
+                                                                            self._options_presenter.get_errors(), shade_list)
         if not hold_on:
             # Remove data which is currently plotted and not in the new workspace_plot_info
             workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
