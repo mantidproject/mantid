@@ -223,14 +223,15 @@ void AnvredCorrection::exec() {
     auto &Y = correctionFactors->mutableY(i);
     auto &E = correctionFactors->mutableE(i);
     // Loop through the bins in the current spectrum
+    bool muRTooLarge = false;
     for (int64_t j = 0; j < specSize; j++) {
 
       double lambda = (unitStr == "TOF") ? wl.convertSingleFromTOF(points[j], L1, 0, pmap) : points[j];
 
       if (m_returnTransmissionOnly) {
-        Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
+        Y[j] = 1.0 / this->getEventWeight(lambda, scattering, muRTooLarge);
       } else {
-        double value = this->getEventWeight(lambda, scattering);
+        double value = this->getEventWeight(lambda, scattering, muRTooLarge);
 
         if (m_useScaleFactors)
           scale_exec(bankName, lambda, depth, inst, pathlength, value);
@@ -238,6 +239,11 @@ void AnvredCorrection::exec() {
         Y[j] = Yin[j] * value;
         E[j] = Ein[j] * value;
       }
+    }
+
+    if (muRTooLarge) {
+      g_log.warning("Absorption correction not accurate for muR > 9 cm^-1 which was exceeded in spectrum index " +
+                    std::to_string(i));
     }
 
     prog.report();
@@ -307,6 +313,7 @@ void AnvredCorrection::execEvent() {
       scale_init(det, inst, L2, depth, pathlength, bankName);
 
     // multiplying an event list by a scalar value
+    bool muRTooLarge = false;
 
     for (auto &ev : events) {
       // get the event's TOF
@@ -315,13 +322,18 @@ void AnvredCorrection::execEvent() {
       if ("TOF" == unitStr)
         lambda = wl.convertSingleFromTOF(lambda, L1, 0, pmap);
 
-      double value = this->getEventWeight(lambda, scattering);
+      double value = this->getEventWeight(lambda, scattering, muRTooLarge);
 
       if (m_useScaleFactors)
         scale_exec(bankName, lambda, depth, inst, pathlength, value);
 
       ev.m_errorSquared = static_cast<float>(ev.m_errorSquared * value * value);
       ev.m_weight *= static_cast<float>(value);
+    }
+
+    if (muRTooLarge) {
+      g_log.warning("Absorption correction not accurate for muR > 9 cm^-1 which was exceeded in spectrum index " +
+                    std::to_string(i));
     }
 
     correctionFactors->getSpectrum(i) += events;
@@ -391,10 +403,10 @@ void AnvredCorrection::retrieveBaseProperties() {
  *
  *  @return The weight factor for the specified position and wavelength.
  */
-double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
+double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge) {
   double transinv = 1;
   if (m_radius > 0)
-    transinv = absor_sphere(two_theta, lamda);
+    transinv = absor_sphere(two_theta, lamda, muRTooLarge);
   // Only Spherical absorption correction
   if (m_onlySphericalAbsorption || m_returnTransmissionOnly)
     return transinv;
@@ -435,7 +447,7 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
  *       @param wl scattering wavelength
  *       @returns absorption
  */
-double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
+double AnvredCorrection::absor_sphere(const double &twoth, const double &wl, bool &muRTooLarge) {
   //  For each of the 19 theta values in (theta = 0:5:90 deg)
   //  fitted ln(1/A*) = sum_{i=1}^{N} pc[i][ith]*(muR)^i
   //  using A* values in Weber (1969) for 0 < muR < 10 cm^-1.
@@ -445,7 +457,7 @@ double AnvredCorrection::absor_sphere(double &twoth, double &wl) {
   if (mur < 0.) {
     throw std::runtime_error("muR cannot be negative");
   } else if (mur > 8.0) {
-    g_log.warning("Absorption correction not accurate for muR > 9 cm^-1 \n");
+    muRTooLarge = true;
   }
 
   auto theta = 0.5 * twoth * radtodeg;

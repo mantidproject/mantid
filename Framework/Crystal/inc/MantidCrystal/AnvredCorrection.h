@@ -121,9 +121,9 @@ private:
 
   void retrieveBaseProperties();
   // void constructSample(API::Sample& sample);
-  double getEventWeight(double lamda, double two_theta);
+  double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
   void BuildLamdaWeights();
-  double absor_sphere(double &twoth, double &wl);
+  double absor_sphere(const double &twoth, const double &wl, bool &muRTooLarge);
   void scale_init(const Geometry::IDetector &det, const Geometry::Instrument_const_sptr &inst, double &L2,
                   double &depth, double &pathlength, std::string &bankName);
   void scale_exec(std::string &bankName, double &lambda, double &depth, const Geometry::Instrument_const_sptr &inst,
