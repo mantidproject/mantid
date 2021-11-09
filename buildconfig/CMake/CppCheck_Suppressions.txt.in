@@ -540,9 +540,9 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterEvents.cpp:10
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1457
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1466
-nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1642
-nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1954
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1747
+nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1644
+nullPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1956
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeaks.cpp:1749
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePythonFitScript.cpp:175
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePythonFitScript.cpp:187
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateEventsFilter.cpp:834
