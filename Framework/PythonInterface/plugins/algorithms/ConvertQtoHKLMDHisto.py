@@ -123,9 +123,11 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         names = ['[' + ','.join(char_dict.get(j, '{0}{1}')
                                 .format(j, chars[np.argmax(np.abs(w[:, i]))]) for j in w[:, i]) + ']' for i in range(3)]
 
-        q = [self._lattice.qFromHKL(w[i]) for i in range(3)]
+        q = [self._lattice.qFromHKL(w[:,i]) for i in range(3)]
 
         units = ['in {:.3f} A^-1'.format(q[i].norm()) for i in range(3)]
+
+        SetMDFrame(input_ws, MDFrame='HKL', Axes='0,1,2')
 
         mdhist = BinMD(InputWorkspace=input_ws, AxisAligned=False, NormalizeBasisVectors=False,
                        BasisVector0='{},{},{},{},{}'.format(names[0], units[0], q[0].X(), q[0].Y(), q[0].Z()),
@@ -133,8 +135,6 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
                        BasisVector2='{},{},{},{},{}'.format(names[2], units[2], q[2].X(), q[2].Y(), q[2].Z()),
                        OutputExtents=extents,
                        OutputBins=bins)
-
-        SetMDFrame(mdhist, MDFrame='HKL', Axes='0, 1, 2')
 
         self.setProperty("OutputWorkspace", mdhist)
         mdhist.clearOriginalWorkspaces()
