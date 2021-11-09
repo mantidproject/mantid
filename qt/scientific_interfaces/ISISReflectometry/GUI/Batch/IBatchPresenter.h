@@ -47,6 +47,7 @@ public:
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyReductionPaused() = 0;
+  virtual void notifyBatchLoaded() = 0;
 
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;

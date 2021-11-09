@@ -169,6 +169,8 @@ void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) 
   tablePresenter()->notifyRowOutputsChanged(item);
 }
 
+void RunsPresenter::notifyBatchLoaded() { m_tablePresenter->notifyBatchLoaded(); }
+
 void RunsPresenter::notifyReductionResumed() {
   updateWidgetEnabledState();
   tablePresenter()->notifyReductionResumed();
