@@ -29,9 +29,6 @@ class SimulatedDensityOfStatesTest(MantidSystemTest):
 class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
     """"Install Euphonic library to temporary prefix and check results"""
 
-    def skipTests(self):
-        return not sys.platform.startswith("linux")
-
     @staticmethod
     def _add_libs_from_prefix(prefix_path):
         package_dirs = []
