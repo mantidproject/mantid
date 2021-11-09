@@ -57,16 +57,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def convert_plot_to_tiled_plot(self, keys):
         """Converts the current plot into a tiled plot specified by the keys and tiled by type
         In then replots the existing data on the new tiles"""
-        workspaces, indices = self._view.plotted_workspaces_and_indices
+        workspaces, indices, shade_list = self._view.plotted_workspaces_and_indices_and_shade
         self.create_tiled_plot(keys)
-        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
+        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False, shades=shade_list)
 
     def convert_plot_to_single_plot(self):
         """Converts the current plot into a single plot
         In then replots the existing data on the new tiles"""
-        workspaces, indices = self._view.plotted_workspaces_and_indices
+        workspaces, indices, shade_list = self._view.plotted_workspaces_and_indices_and_shade
         self.create_single_plot()
-        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
+        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False, shades=shade_list)
 
     def clear_subplots(self):
         self._context.clear_subplots()
@@ -89,7 +89,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def get_plotted_workspaces_and_indices(self):
         """Returns the workspace names and indices which are plotted in the figure """
-        plotted_workspaces, indices = self._view.plotted_workspaces_and_indices
+        plotted_workspaces, indices,_ = self._view.plotted_workspaces_and_indices_and_shade
         return plotted_workspaces, indices
 
     def plot_guess_workspace(self, guess_ws_name: str):
@@ -411,7 +411,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # update the state of errors
         selected_subplots, _ = self._get_selected_subplots_from_quick_edit_widget()
         state = self._options_presenter.get_errors()
-        plotted_workspaces, plot_indices = self._view.plotted_workspaces_and_indices
+        plotted_workspaces, plot_indices, _ = self._view.plotted_workspaces_and_indices_and_shade
 
         if self.should_update_all(selected_subplots):
             self._context.set_error_all(state)

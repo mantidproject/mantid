@@ -37,7 +37,7 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
 
     @property
     @abc.abstractmethod
-    def plotted_workspaces_and_indices(self):
+    def plotted_workspaces_and_indices_and_shade(self):
         """Returns plotted workspaces and indices"""
         pass
 

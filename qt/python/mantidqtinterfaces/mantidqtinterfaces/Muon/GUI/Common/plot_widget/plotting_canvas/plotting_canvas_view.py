@@ -76,14 +76,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         return self._plot_information_list
 
     @property
-    def plotted_workspaces_and_indices(self):
+    def plotted_workspaces_and_indices_and_shade(self):
         plotted_workspaces = []
         plotted_indices = []
+        plotted_shades = []
         for plot_info in self._plot_information_list:
             plotted_workspaces.append(plot_info.workspace_name)
             plotted_indices.append(plot_info.index)
+            plotted_shades.append(plot_info.shade)
 
-        return plotted_workspaces, plotted_indices
+        return plotted_workspaces, plotted_indices, plotted_shades
 
     @property
     def num_plotted_workspaces(self):
@@ -133,12 +135,17 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         except (RuntimeError, KeyError):
             return -1
         self._plot_information_list.append(workspace_plot_info)
-        errors = workspace_plot_info.errors if not workspace_plot_info.shade else False
+        errors = workspace_plot_info.errors
         ws_index = workspace_plot_info.index
         axis_number = workspace_plot_info.axis
         ax = self.fig.axes[axis_number]
         plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
         plot_kwargs['color'] = self._color_queue[axis_number]()
+
+        if workspace_plot_info.shade and errors:
+            errors = False
+            self.shade_region(ax, plot_kwargs['color'])
+
         _do_single_plot(ax, workspace, ws_index, errors=errors,
                         plot_kwargs=plot_kwargs)
         return axis_number
@@ -255,7 +262,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 axis.replace_workspace_artists(workspace)
         self.redraw_figure()
 
+    # not used for tiled plots
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
+        print("moo", workspace_name)
         for plot_info in self.plotted_workspace_information:
             if plot_info.workspace_name == workspace_name:
                 axis = self.fig.axes[plot_info.axis]
@@ -269,11 +278,21 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                             color = artist.get_color()
                         plot_kwargs = self._get_plot_kwargs(plot_info)
                         plot_kwargs["color"] = color
+                        print("baa", plot_info.shade,with_errors)
                         if plot_info.shade:
-                            print("do nothing")
+                            if with_errors:
+                                self.shade_region(axis, color)
+                            elif len(axis.collections)>0:
+                                axis.collections.pop()
                         else:
                             axis.replot_artist(artist, with_errors, **plot_kwargs)
         self.redraw_figure()
+
+    def shade_region(self, axis, color):
+        x_values = np.linspace(0,15,100)
+        y1 = .15*np.sin(x_values)
+        y2= .15*np.sin(x_values+1.2)
+        axis.fill_between(x_values, y1, y2, facecolor=color, interpolate=True, alpha=0.25)
 
     def set_axis_xlimits(self, axis_number, xlims):
         ax = self.fig.axes[axis_number]
