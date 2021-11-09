@@ -60,9 +60,6 @@ class LModel(object):
         self.last_loaded_runs.append(self.run)
         return self.loaded_runs[self.run]
 
-    def output(self):
-        return
-
     def cancel(self):
         return
 

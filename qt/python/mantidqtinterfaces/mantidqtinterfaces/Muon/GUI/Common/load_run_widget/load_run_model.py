@@ -43,10 +43,6 @@ class LoadRunWidgetModel(object):
                       "\n - The file was not found locally (please check the user directories)."
             raise ValueError(message)
 
-    # This is needed to work with thread model
-    def output(self):
-        pass
-
     def cancel(self):
         pass
 
