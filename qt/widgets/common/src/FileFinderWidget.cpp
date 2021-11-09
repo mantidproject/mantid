@@ -785,7 +785,11 @@ QString FileFinderWidget::openFileDialog() {
     prevFileName = prevFileName.trimmed();
 
   if (!prevFileNames.empty() && QFileInfo(prevFileNames[0]).isAbsolute()) {
-    dir = QFileInfo(prevFileNames[0]).absoluteDir().path();
+    if (QFileInfo(prevFileNames[0]).isFile()) {
+      dir = QFileInfo(prevFileNames[0]).absoluteDir().path();
+    } else {
+      dir = prevFileNames[0];
+    }
   } else {
     dir = m_lastDir;
   }
