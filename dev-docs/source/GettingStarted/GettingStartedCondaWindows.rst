@@ -21,6 +21,11 @@ Install `Git <https://git-scm.com/>`_
 * Install the latest version of Git, and ensure git bash was installed and the git executable location was added to your PATH, if you didn't do this as part of your installation you can do this `manually <https://docs.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)#to-add-a-path-to-the-path-environment-variable>`_.
 * We no longer need Git LFS as conda handles the dependencies that used to be in the third party directory.
 
+Turn off Python association in Windows
+--------------------------------------
+* Because of the way Windows associates Python files with it's Windows Store version of python we need to turn off this association. If you don't turn this off you will have issues when running the pre-commit framework.
+* Navigate to your Settings -> Manage App Execution Aliases, and turn off all Python Aliases.
+
 Clone the mantid source code
 ----------------------------
 
