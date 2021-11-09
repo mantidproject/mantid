@@ -16,6 +16,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
+class Row;
+
 /** @class Group
 
     The Group model holds information about a group of rows in the runs table.

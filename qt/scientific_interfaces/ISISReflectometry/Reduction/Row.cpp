@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "Common/Map.h"
+#include "Group.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
@@ -64,6 +65,8 @@ bool Row::hasOutputWorkspace(std::string const &wsName) const { return m_reduced
 void Row::renameOutputWorkspace(std::string const &oldName, std::string const &newName) {
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
 }
+
+void Row::setParent(Group *parent) { m_parent = parent; }
 
 Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) const {
   // If both lists of run numbers are the same then there's nothing to merge
