@@ -171,17 +171,16 @@ size_t PDFFourierTransform2::determineMinIndex(double min, const std::vector<dou
     min = X.front();
   }
 
-  // get index for the min from the X-range
-  auto iter = std::upper_bound(X.begin(), X.end(), min);
+  // get index for the min from the X-range, tightening the range if a partial x bin value is provided
+  auto iter = std::lower_bound(X.begin(), X.end(), min);
   size_t min_index = std::distance(X.begin(), iter);
-  if (min_index == 0)
-    min_index += 1; // so there doesn't have to be a check in integration loop
 
   // go to first non-nan value
-  iter = std::find_if(std::next(Y.begin(), min_index), Y.end(), static_cast<bool (*)(double)>(std::isnormal));
-  size_t first_normal_index = std::distance(Y.begin(), iter);
+  auto iter_first_normal =
+      std::find_if(std::next(Y.begin(), min_index), Y.end(), static_cast<bool (*)(double)>(std::isnormal));
+  size_t first_normal_index = std::distance(Y.begin(), iter_first_normal);
   if (first_normal_index > min_index) {
-    g_log.information("Specified input min where data is nan/inf. Adjusting to data range.");
+    g_log.information("Specified input min where data is nan/inf or zero. Adjusting to data range.");
     min_index = first_normal_index;
   }
 
@@ -197,15 +196,16 @@ size_t PDFFourierTransform2::determineMaxIndex(double max, const std::vector<dou
     max = X.back();
   }
 
-  // get pointers for the data range
-  auto iter = std::lower_bound(X.begin(), X.end(), max);
+  // get index for the max from the X-range, tightening the range if a partial x bin value is provided
+  auto iter = std::upper_bound(X.begin(), X.end(), max) - 1;
   size_t max_index = std::distance(X.begin(), iter);
 
-  // go to first non-nan value
+  // go to first non-nan value. This works for histogram (bin edge) data and
+  // also point data, where point integration ends at the Y value to the left of the max bound
   auto back_iter = std::find_if(Y.rbegin(), Y.rend(), static_cast<bool (*)(double)>(std::isnormal));
-  size_t first_normal_index = Y.size() - std::distance(Y.rbegin(), back_iter) - 1;
+  size_t first_normal_index = Y.size() - std::distance(Y.rbegin(), back_iter);
   if (first_normal_index < max_index) {
-    g_log.information("Specified input max where data is nan/inf. Adjusting to data range.");
+    g_log.information("Specified input max where data is nan/inf or zero. Adjusting to data range.");
     max_index = first_normal_index;
   }
 

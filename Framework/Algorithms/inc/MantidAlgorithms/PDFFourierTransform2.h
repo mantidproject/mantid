@@ -33,14 +33,16 @@ public:
   /// @copydoc Algorithm::validateInputs()
   std::map<std::string, std::string> validateInputs() override;
 
+protected:
+  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y);
+  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y);
+
 private:
   /// Initialize the properties
   void init() override;
   /// Run the algorithm
   void exec() override;
 
-  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y);
-  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y);
   double determineRho0();
   void convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q, std::vector<double> &DFOfQ,
                          std::vector<double> &DQ);
