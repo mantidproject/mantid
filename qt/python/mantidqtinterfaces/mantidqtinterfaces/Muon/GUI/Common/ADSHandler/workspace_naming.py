@@ -18,6 +18,7 @@ FFT_STR = 'FFT'
 MAXENT_STR = 'MaxEnt'
 PERIOD_STR = "_period_"
 RECONSTRUCTED_SPECTRA='_reconstructed_spectra'
+BOUNDINGLINES = "bounding_error_lines"
 
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
@@ -317,3 +318,7 @@ def add_rebin_to_name(name):
         return name
     index =  [ch.start() for ch in re.finditer(r";",name)]
     return name[:index[-1]]+"; "+REBIN_STR+name[index[-1]:]
+
+
+def bounding_errors_name(instrument, run, group, workspace_suffix):
+    return _base_run_name(instrument, run) + group+BOUNDINGLINES+ workspace_suffix

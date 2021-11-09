@@ -135,6 +135,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self._plot_information_list.append(workspace_plot_info)
         errors = workspace_plot_info.errors
         ws_index = workspace_plot_info.index
+        print("moo", ws_index, errors, workspace_name)
+        if ws_index ==1:
+            # if the index is 1 it must be a fit result
+            errors = False
         axis_number = workspace_plot_info.axis
         ax = self.fig.axes[axis_number]
         plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
@@ -257,6 +261,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
         for plot_info in self.plotted_workspace_information:
+            # dont plot fits with error bars
+            if plot_info.shade:
+                print("hi", workspace_name, plot_info.shade)
+                continue
             if plot_info.workspace_name == workspace_name:
                 axis = self.fig.axes[plot_info.axis]
                 workspace_name = plot_info.workspace_name
@@ -271,6 +279,12 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                         plot_kwargs["color"] = color
                         axis.replot_artist(artist, with_errors, **plot_kwargs)
         self.redraw_figure()
+
+    def shade_region(self, x_values, y1, y2, colour, opacity=.5):
+        # need to get the axis number....
+        ax = self.fig.axes[0]
+
+        ax.fill_between(x_values, y1, y2, facecolor='r', interpolate=True, alpha=opacity)
 
     def set_axis_xlimits(self, axis_number, xlims):
         ax = self.fig.axes[axis_number]

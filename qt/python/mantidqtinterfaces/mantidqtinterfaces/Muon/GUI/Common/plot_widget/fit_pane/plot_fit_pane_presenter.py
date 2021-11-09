@@ -38,6 +38,10 @@ class PlotFitPanePresenter(BasePanePresenter):
         """
         workspace_list = []
         indices = []
+
+        bounding_list = []
+        #bounding_indices = []
+        shade_list= []
         raw = self._view.is_raw_plot()
         with_diff = self._view.is_plot_diff()
         if fit_information_list:
@@ -47,7 +51,16 @@ class PlotFitPanePresenter(BasePanePresenter):
                 fit_workspaces, fit_indices = self._model.get_fit_workspace_and_indices(fit,with_diff)
                 workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
-        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
+                shade_list += [False] * len(fit_information.input_workspaces) + [True]*len(fit_indices)
+
+                fit_workspaces, names, bound_indces = self._model.get_bounding_workspaces(fit)
+                bounding_list.extend(fit_workspaces)
+                workspace_list += names
+                indices+=bound_indces
+
+        self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale, shade=shade_list)
+        self._figure_presenter.shade_region(bounding_list,"b")
+
         # the data change probably means its the wrong scale
         self._figure_presenter.force_autoscale()
 

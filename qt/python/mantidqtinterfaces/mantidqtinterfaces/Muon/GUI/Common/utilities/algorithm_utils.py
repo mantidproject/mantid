@@ -374,11 +374,12 @@ def run_divide(LHS, RHS, name):
     return alg.getProperty("OutputWorkspace").valueAsStr
 
 
-def run_create_workspace(x_data, y_data, name):
+def run_create_workspace(x_data, y_data, name, N_spec=1):
     alg = mantid.AlgorithmManager.create("CreateWorkspace")
     alg.initialize()
     alg.setProperty("DataX", x_data)
     alg.setProperty("DataY", y_data)
     alg.setProperty("OutputWorkspace", name)
+    alg.setProperty("NSpec", N_spec)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
