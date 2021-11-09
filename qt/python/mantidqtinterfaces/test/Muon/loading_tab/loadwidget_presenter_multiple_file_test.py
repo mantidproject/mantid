@@ -29,10 +29,11 @@ from mantidqtinterfaces.Muon.GUI.MuonAnalysis.load_widget.load_widget_view impor
 @start_qapplication
 class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
-        while(thread_model._thread.isRunning()):
+        if thread_model and thread_model.worker:
+            while thread_model.worker.is_alive():
+                QApplication.sendPostedEvents()
+                time.sleep(0.1)
             QApplication.sendPostedEvents()
-            time.sleep(0.1)
-        QApplication.sendPostedEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

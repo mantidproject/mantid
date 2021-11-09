@@ -32,10 +32,6 @@ class BrowseFileWidgetModel(object):
         return self._loaded_data_store.get_parameter("run")
 
     # Used with load thread
-    def output(self):
-        pass
-
-    # Used with load thread
     def cancel(self):
         pass
 
