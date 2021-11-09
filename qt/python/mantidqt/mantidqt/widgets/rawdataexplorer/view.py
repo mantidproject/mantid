@@ -173,6 +173,7 @@ class RawDataExplorerView(QWidget):
         self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.fileTree.header().setStretchLastSection(False)
         self.fileTree.clicked.connect(self.on_file_clicked)
+        self.fileTree.activated.connect(self.on_file_clicked)
 
     def closeEvent(self, event):
         self.deleteLater()
