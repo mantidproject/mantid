@@ -90,6 +90,7 @@ public:
   const std::string category() const override {
     return "Crystal\\Corrections;CorrectionFunctions\\AbsorptionCorrections";
   }
+  static double calc_Astar(const double theta, const double mur);
 
 protected:
   /** A virtual function in which additional properties of an algorithm should

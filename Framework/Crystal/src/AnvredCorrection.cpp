@@ -472,6 +472,19 @@ double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool 
     s << theta;
     throw std::runtime_error("theta is not in allowed range :" + s.str());
   }
+
+  // tbar = -(double)Math.log(trans)/mu;  // as defined by coppens
+  // trans = exp(-mu*tbar)
+  return calc_Astar(theta, mur);
+}
+
+/*
+ * Helper function to calc Astar to be called from SaveHKL
+ *       @param theta: half scattering angle (i.e. twotheta/2)
+ *       @param mur: muR is the product of linenar attenuation and sphere radius
+ *       @returns astar: 1/transmission
+ */
+double AnvredCorrection::calc_Astar(const double theta, const double mur) {
   //  interpolation better done on A = 1/A* = transmission
   auto ith = static_cast<size_t>(theta / 5.); // floor
   double lnA_1 = 0.0;
@@ -491,11 +504,7 @@ double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool 
   double L0 = A1 - L1 * sin_th1_sq;
 
   // correction to apply (A* = 1/A = 1/transmission)
-  auto astar = 1 / (L0 + L1 * std::pow(sin(theta / radtodeg), 2));
-  // trans = exp(-mu*tbar)
-  // tbar = -(double)Math.log(trans)/mu;  // as defined by coppens
-
-  return astar;
+  return 1 / (L0 + L1 * std::pow(sin(theta / radtodeg), 2));
 }
 /**
  *  Build the list of weights corresponding to different wavelengths.
