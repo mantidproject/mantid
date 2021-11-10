@@ -38,6 +38,7 @@ public:
   std::vector<Group> const &groups() const;
   Group const &operator[](int index) const;
   std::string nextEmptyGroupName();
+  void setAllRowParents();
 
   MantidWidgets::Batch::RowLocation getLocation(Item const &item) const;
   MantidWidgets::Batch::RowLocation getLocation(Group const &group) const;

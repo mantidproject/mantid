@@ -214,6 +214,13 @@ int Group::completedItems() const {
   });
 }
 
+void Group::setAllRowParents() {
+  std::for_each(m_rows.cbegin(), m_rows.cend(), [this](boost::optional<Row> const &row) {
+    if (row)
+      row->setParent(this);
+  });
+}
+
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Group const &lhs, Group const &rhs) {

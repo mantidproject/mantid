@@ -91,6 +91,10 @@ std::string ReductionJobs::nextEmptyGroupName() {
   return name;
 }
 
+void ReductionJobs::setAllRowParents() {
+  std::for_each(m_groups.begin(), m_groups.end(), [](auto &group){ group.setAllRowParents(); });
+}
+
 /* Return true if the reduction table has content. This excludes the
  * case where we have a single empty group that is usually a convenience
  * group that we've added to avoid an empty table so does not count as

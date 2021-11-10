@@ -60,6 +60,8 @@ public:
 
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
+  void setAllRowParents();
+
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
