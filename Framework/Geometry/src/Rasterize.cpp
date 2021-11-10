@@ -94,8 +94,11 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection, const IObject &shape
   // Create track for distance in cylinder before scattering point
   Track incoming(position, -beamDirection);
 
-  shape.interceptSurface(incoming);
-  return incoming.totalDistInsideObject();
+  if (shape.interceptSurface(incoming) > 0) {
+    return incoming.totalDistInsideObject();
+  } else {
+    return 0;
+  }
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape, const double cubeSizeInMetre) {
