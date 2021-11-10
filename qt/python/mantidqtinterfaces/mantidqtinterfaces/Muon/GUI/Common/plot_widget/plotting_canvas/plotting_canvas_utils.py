@@ -20,7 +20,6 @@ def get_y_min_max_between_x_range(line, x_min, x_max, y_min, y_max):
     crop = y[start:end]
     if start==end:
         return y_min, y_max
-    print("moo", crop, start, end, y, x_min, x_max,x)
     current_min = np.min(crop)
     current_max = np.max(crop)
     y_min = current_min if current_min < y_min else y_min
