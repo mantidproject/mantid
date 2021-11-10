@@ -58,9 +58,14 @@ inline const V3D getDirection(const V3D &posInitial, const V3D &posFinal) { retu
 
 // make code slightly clearer
 inline double getDistanceInsideObject(const IObject &shape, Track &track) {
-  shape.interceptSurface(track);
-  return track.totalDistInsideObject();
+  if (shape.interceptSurface(track) > 0) {
+    return track.totalDistInsideObject();
+  } else {
+    return 0.0;
+  }
 }
+
+inline double checkzero(const double x) { return std::abs(x) < std::numeric_limits<float>::min() ? 0.0 : x; }
 } // namespace
 
 /**
