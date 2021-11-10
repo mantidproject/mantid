@@ -29,6 +29,8 @@
 # This is beacuse it renames every @rpath reference to @executable_path assuming that you can always move one directory
 # back from the executable and land in the Contents folder.
 
+# cmake-format: off
+
 # Do not include this module at configure time!
 if(DEFINED CMAKE_GENERATOR)
   cmake_policy(GET CMP0080 _BundleUtilities_CMP0080)
@@ -592,3 +594,5 @@ function(verify_app app)
 endfunction()
 
 cmake_policy(POP)
+
+# cmake-format: on
