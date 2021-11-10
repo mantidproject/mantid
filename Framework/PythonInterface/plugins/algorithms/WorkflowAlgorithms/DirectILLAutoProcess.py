@@ -398,12 +398,15 @@ class DirectILLAutoProcess(PythonAlgorithm):
     def _save_output(self, ws_to_save):
         """Saves the output workspaces to an external file."""
         for ws_name in ws_to_save:
+            offset = 0
             if self.reduction_type == 'SingleCrystal':
-                Psi = mtd[ws_name].run().getProperty('a3.value').value
+                psi = mtd[ws_name].run().getProperty('a3.value').value
+                psi_offset = self.getProperty('SampleAngleOffset').value
+                offset = psi - psi_offset
             SaveNXSPE(
                 InputWorkspace=ws_name,
                 Filename='{}.nxspe'.format(ws_name),
-                Psi=Psi
+                Psi=offset
             )
 
     def _prepare_masks(self):
