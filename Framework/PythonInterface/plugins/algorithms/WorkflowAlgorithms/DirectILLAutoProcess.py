@@ -145,7 +145,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
             self.masking = False
         else:
             self.masking = True
-        self.flat_bkg_scaling = self.getProperty('FlatBkgScaling')
+        self.flat_bkg_scaling = self.getProperty('FlatBkgScaling').value
         self.ebinning_params = self.getProperty('EnergyBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
