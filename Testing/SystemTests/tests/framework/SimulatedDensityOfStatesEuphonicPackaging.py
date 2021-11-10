@@ -32,13 +32,17 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
     @staticmethod
     def _add_libs_from_prefix(prefix_path):
         package_dirs = []
-        for lib_dir in ('lib', 'lib64'):
+        for lib_dir in ('lib', 'lib64', 'Lib', 'Lib64'):
             if (prefix_path / lib_dir).is_dir():
                 site_packages = next(
                     (prefix_path / lib_dir).iterdir()) / 'site-packages'
                 if site_packages.is_dir():
                     site.addsitedir(site_packages)
                     package_dirs.append(site_packages)
+                else:
+                    raise FileNotFoundError(f'Found lib dir {str(prefix_path / lib_dir)} but no site-packages.'
+                                            f'Here are the directory contents: '
+                                            + "; ".join(map(str, (prefix_path / lib_dir).iterdir())))
 
         if package_dirs:
             return package_dirs
