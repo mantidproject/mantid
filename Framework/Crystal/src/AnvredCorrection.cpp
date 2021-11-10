@@ -409,7 +409,7 @@ void AnvredCorrection::retrieveBaseProperties() {
  *
  *  @return The weight factor for the specified position and wavelength.
  */
-double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool muRTooLarge) {
+double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge) {
   double transinv = 1;
   if (m_radius > 0)
     transinv = absor_sphere(two_theta, lamda, muRTooLarge);
@@ -453,7 +453,7 @@ double AnvredCorrection::getEventWeight(const double lamda, const double two_the
  *       @param wl scattering wavelength
  *       @returns absorption
  */
-double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool muRTooLarge) {
+double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool &muRTooLarge) {
   //  For each of the 19 theta values in (theta = 0:5:90 deg)
   //  fitted ln(1/A*) = sum_{i=1}^{N} pc[i][ith]*(muR)^i
   //  using A* values in Weber (1969) for 0 < muR < 10 cm^-1.
