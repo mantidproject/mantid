@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_can
     PlottingCanvasPresenterInterface
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view_interface import PlottingCanvasViewInterface
-from mantid import AnalysisDataService
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from mantidqt.utils.observer_pattern import GenericObserver
 import numpy as np
 
@@ -29,13 +29,14 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._setup_autoscale_observer()
         self._options_presenter.add_subplot("one")
         self._context.update_axis("one", 0)
+        self._shaded_region_info = {}
 
     # general plotting
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
         for workspace_name in workspace_names:
             try:
-                workspace = AnalysisDataService.Instance().retrieve(workspace_name)
+                workspace = retrieve_ws(workspace_name)
             except RuntimeError:
                 continue
             self._view.remove_workspace_from_plot(workspace)
@@ -57,16 +58,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def convert_plot_to_tiled_plot(self, keys):
         """Converts the current plot into a tiled plot specified by the keys and tiled by type
         In then replots the existing data on the new tiles"""
-        workspaces, indices, shade_list = self._view.plotted_workspaces_and_indices_and_shade
+        workspaces, indices = self._view.plotted_workspaces_and_indices
         self.create_tiled_plot(keys)
-        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False, shades=shade_list)
+        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
 
     def convert_plot_to_single_plot(self):
         """Converts the current plot into a single plot
         In then replots the existing data on the new tiles"""
-        workspaces, indices, shade_list = self._view.plotted_workspaces_and_indices_and_shade
+        workspaces, indices = self._view.plotted_workspaces_and_indices
         self.create_single_plot()
-        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False, shades=shade_list)
+        self.plot_workspaces(workspaces, indices, hold_on=False, autoscale=False)
 
     def clear_subplots(self):
         self._context.clear_subplots()
@@ -89,7 +90,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def get_plotted_workspaces_and_indices(self):
         """Returns the workspace names and indices which are plotted in the figure """
-        plotted_workspaces, indices,_ = self._view.plotted_workspaces_and_indices_and_shade
+        plotted_workspaces, indices = self._view.plotted_workspaces_and_indices
         return plotted_workspaces, indices
 
     def plot_guess_workspace(self, guess_ws_name: str):
@@ -113,15 +114,13 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     # Interface implementation
     def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
-                        autoscale: bool, shades:List[bool]=[]):
+                        autoscale: bool):
         """Plots the input workspace names and indices in the figure window
         If hold_on is True the existing workspaces plotted in the figure are kept"""
         # Create workspace information named tuple from input list
-        shade_list = shades
-        if shade_list ==[]:
-            shade_list=[False]*len(workspace_indices)
+
         workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
-                                                                            self._options_presenter.get_errors(), shade_list)
+                                                                            self._options_presenter.get_errors())
         if not hold_on:
             # Remove data which is currently plotted and not in the new workspace_plot_info
             workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
@@ -136,6 +135,15 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         if self._options_presenter.autoscale:
             autoscale = True
         self._set_axes_limits_and_titles(autoscale)
+
+    def add_shaded_region(self, workspaces, indices):
+        for name, index in zip(workspaces, indices):
+            x_data, y1_data, y2_data = self._model.get_shade_lines(name, index)
+            self._view.add_shaded_region(workspace_name = name,
+                                         axis = index,
+                                         x_values = x_data,
+                                         y1_values = y1_data,
+                                         y2_values = y2_data)
 
     def should_update_all(self, selected_subplots):
         all = len(selected_subplots)==1 and self._options_presenter.get_selection_index()==0
@@ -411,7 +419,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         # update the state of errors
         selected_subplots, _ = self._get_selected_subplots_from_quick_edit_widget()
         state = self._options_presenter.get_errors()
-        plotted_workspaces, plot_indices, _ = self._view.plotted_workspaces_and_indices_and_shade
+        plotted_workspaces, plot_indices = self._view.plotted_workspaces_and_indices
 
         if self.should_update_all(selected_subplots):
             self._context.set_error_all(state)

@@ -48,3 +48,11 @@ class PlotFitPaneModel(BasePaneModel):
 
     def _is_guess_workspace(self, workspace_name):
         return self.context.guess_workspace_prefix in workspace_name
+
+    @staticmethod
+    def get_shade_lines(ws, index):
+        x_data = ws.readX(index)
+        y_data = ws.readY(index)
+        e_data = ws.readE(index)
+
+        return x_data, y_data + e_data, y_data - e_data

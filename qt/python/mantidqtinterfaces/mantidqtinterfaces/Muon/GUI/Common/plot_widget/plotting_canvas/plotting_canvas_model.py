@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import NamedTuple, List
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_convert_to_points, run_convert_to_histogram
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 
 
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
@@ -17,7 +19,6 @@ class WorkspacePlotInformation(NamedTuple):
     normalised: bool
     errors: bool
     label: str
-    shade: bool
 
     # equal only checks for workspace, axis, and spec num, as the user could have changed the other states
     def __eq__(self, other):
@@ -49,7 +50,7 @@ class PlottingCanvasModel(object):
         self._is_tiled = state
 
     def create_workspace_plot_information(self, input_workspace_names: List[str], input_indices: List[int],
-                                          errors: bool, shade_list:List[bool]) -> List[WorkspacePlotInformation]:
+                                          errors: bool) -> List[WorkspacePlotInformation]:
         """
         Creates a list of workspace plot information (workspace name, index, axis..) from a input list
         of indices and workspace names
@@ -59,10 +60,10 @@ class PlottingCanvasModel(object):
         :return: A list of WorkspacePlotInformation
         """
         workspace_plot_information = []
-        for workspace_name, index, shade in zip(input_workspace_names, input_indices, shade_list):
+        for workspace_name, index in zip(input_workspace_names, input_indices):
             axis = self._plot_model._get_workspace_plot_axis(workspace_name, self._axes_workspace_map, index)
             if not self._plot_model._is_guess_workspace(workspace_name):
-                workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors, shade)]
+                workspace_plot_information += [self.create_plot_information(workspace_name, index, axis, errors)]
             else:
                 workspace_plot_information += [self.create_plot_information_for_guess_ws(workspace_name)]
 
@@ -81,7 +82,7 @@ class PlottingCanvasModel(object):
             self._axes_workspace_map[key] = axis_number
 
     def create_plot_information(self, workspace_name: str, index: int, axis: int,
-                                errors: bool, shade: bool) -> WorkspacePlotInformation:
+                                errors: bool) -> WorkspacePlotInformation:
         """
         Creates a workspace plot information instance (workspace name, index, axis..) from an input
         workspace name, index, axis and errors flag.
@@ -94,7 +95,7 @@ class PlottingCanvasModel(object):
         label = self._plot_model._create_workspace_label(workspace_name, index)
         return WorkspacePlotInformation(workspace_name=workspace_name, index=index, axis=axis,
                                         normalised=self._normalised,
-                                        errors=errors, label=label, shade=shade)
+                                        errors=errors, label=label)
 
     def create_plot_information_for_guess_ws(self, guess_ws_name: str) -> WorkspacePlotInformation:
         """
@@ -116,3 +117,12 @@ class PlottingCanvasModel(object):
             return ''
         else:
             return list(self._axes_workspace_map.keys())
+
+    def get_shade_lines(self, name, index):
+        ws = retrieve_ws(name)
+        if ws.isHistogramData():
+            ws = retrieve_ws(run_convert_to_points(name))
+            x_data, y1_data, y2_data = self._plot_model.get_shade_lines(ws, index)
+            run_convert_to_histogram(name)
+            return x_data, y1_data, y2_data
+        return self._plot_model.get_shade_lines(ws, index)
