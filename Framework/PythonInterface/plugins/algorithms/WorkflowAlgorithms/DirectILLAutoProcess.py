@@ -339,12 +339,11 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setUp()
         sample_runs = self.getPropertyValue('Runs').split(',')
         output_samples = []
-        if self.masking:
-            self.mask_ws = self._prepare_masks()
-
         for sample_no, sample in enumerate(sample_runs):
             current_it_output = []  # output of the current iteration of reduction
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
+            if self.masking and sample_no == 0:  # prepares masks once, and when the instrument is known
+                self.mask_ws = self._prepare_masks()
             if self.process == 'Vanadium':
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
                 current_it_output = [ws_sofq, ws_softw, ws_diag, ws_integral]
@@ -418,7 +417,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if mask != str():
             mask = self.getPropertyValue('MaskWorkspace')
             if mask not in mtd:
-                LoadNexusProcessed(Filename=mask, OutputWorkspace=mask)
+                LoadMask(Instrument=self.instrument, InputFile=mask, OutputWorkspace=mask)
             existing_masks.append(mask)
         mask_tubes = self.getPropertyValue('MaskedTubes')
         if mask_tubes != str():
@@ -427,13 +426,12 @@ class DirectILLAutoProcess(PythonAlgorithm):
             RenameWorkspace(InputWorkspace='{}MaskBTP'.format(self.instrument), OutputWorkspace=tube_mask_ws)
             existing_masks.append(tube_mask_ws)
 
-        mask_angles = self.getProperty('MaskedAngles')
+        mask_angles = self.getProperty('MaskedAngles').value
         if mask_angles != list():
             masked_angles_ws = '{}_masked_angles'.format(self.instrument)
             LoadEmptyInstrument(Filename=self.instrument, OutputWorkspace=masked_angles_ws)
             MaskAngles(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])
             existing_masks.append(masked_angles_ws)
-
         mask_with_vanadium = self.getProperty('MaskWithVanadium').value
         if mask_with_vanadium:
             existing_masks.append(self.vanadium_diagnostics)
@@ -448,7 +446,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
     def _apply_mask(self, ws):
         """Applies selected masks."""
-        MaskWorkspace(InputWorkspace=ws, OutputWorkspace=ws)
+        MaskDetectors(Workspace=ws, MaskedWorkspace=self.mask_ws)
         # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
         if not self.getProperty('MaskThreshold').isDefault:
             MaskBinsIf(InputWorkspace=ws, OutputWorkspace=ws,
