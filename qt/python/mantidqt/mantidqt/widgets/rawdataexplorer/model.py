@@ -9,7 +9,7 @@
 from os import path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import Load, config, mtd
+from mantid.simpleapi import Load, config, mtd, SumRowColumn
 from mantid.api import PreviewType
 
 
@@ -98,18 +98,11 @@ class RawDataExplorerModel(QObject):
         self.presenter.populate_acquisitions()
         # TODO emit a signal to modify both preview manager and target
 
-    def new_preview(self, filenames, preview_name):
+    def new_preview(self, filenames):
         """
         Add a preview to the model.
+        @param filenames: a list of the names of the files to show
         """
-
-        # preview = PreviewManager.Instance().getPreview("ILL", preview_name)
-
-        preview = preview_name
-
-        # TODO find a way to check again
-        if preview is None:
-            return
 
         # TODO Plus/Minus if several workspaces
         if len(filenames) != 1:
@@ -121,23 +114,20 @@ class RawDataExplorerModel(QObject):
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
 
-        preview = self.choose_preview(ws_name)
+        ws_to_show = self.prepare_data(ws_name)
+        preview = self.choose_preview(ws_to_show)
 
         if preview is None:
             return
-        preview_model = PreviewModel(preview, ws_name)
+        preview_model = PreviewModel(preview, ws_to_show)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
-    def modify_preview(self, filenames, preview_name):
+    def modify_preview(self, filenames):
         """
-        Modify the last preview of the same type. If none is found, a new
-        preview is opened.
+        Modify the last preview of the same type. If none is found, a new preview is opened.
+        @param filenames: a list of the names of the files to show
         """
-        preview = preview_name
-
-        if preview is None:
-            return
 
         # TODO Plus/Minus if several workspaces
         if len(filenames) != 1:
@@ -149,47 +139,76 @@ class RawDataExplorerModel(QObject):
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
 
-        for i in range(len(self._previews) - 1, -1, -1):
-            if self._previews[i].get_preview_type() == preview:
-                self._previews[i].set_workspace_name(ws_name)
-                return
+        # modify the data so it shows what's relevant
+        ws_to_show = self.prepare_data(ws_name)
 
-        preview = self.choose_preview(ws_name)
+        # determine the preview given the prepared data
+        preview = self.choose_preview(ws_to_show)
 
         if preview is None:
             return
 
-        preview_model = PreviewModel(preview, ws_name)
+        for i in range(len(self._previews) - 1, -1, -1):
+            if self._previews[i].get_preview_type() == preview:
+                self._previews[i].set_workspace_name(ws_to_show)
+                return
+
+        preview_model = PreviewModel(preview, ws_to_show)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
     def del_preview(self, previewModel):
         """
         Delete a preview model.
-        @param preview_model(PreviewModel): reference to the model.
+        @param previewModel(PreviewModel): reference to the model.
         """
         self._previews.remove(previewModel)
 
-    def choose_preview(self, ws_name):
+    @staticmethod
+    def choose_preview(ws_name):
         """
-        TODO
+        Reading the dimensions of the data, this determines the plot to use to show it.
+        @param ws_name: the name of the workspace which data are to be shown
         """
         ws = mtd[ws_name]
 
         # TODO find a way to know if ws is a group workspace -- stupid idea : try to get child wspaces
+        # better idea : isInstance
+
         # if ws.isGroupWorkspace():
         #     # that's probably D7 or some processed data
         #     print("INVALID ENTRY : GROUP WORKSPACE")
         #     return
 
         if ws.getNumberHistograms() > 1:
-            if ws.getNumberBins() > 1:
-                # plot2D
+            if ws.blocksize() > 1:
                 return PreviewType.PLOT2D
             else:
                 return PreviewType.PLOT1D
         else:
-            return PreviewType.PLOTBINS
+            return PreviewType.PLOTSPECTRUM
+
+    @staticmethod
+    def prepare_data(ws_name):
+        """
+        Format the data to a more useful representation.
+        @param ws_name: the name of the workspace to format
+        @return the name of the workspace containing the final data
+        """
+        new_ws = "__" + ws_name
+        ws = mtd[ws_name]
+
+        if ws.getNumberHistograms() > 1:
+            if ws.blocksize() > 1:
+                pass
+            else:
+                if str(ws.getAxis(1).getUnit().symbol()) == "":
+                    # hopefully this data is not treated
+                    SumRowColumn(InputWorkspace=ws_name, OutputWorkspace=new_ws, Orientation="D_V")
+                    return new_ws
+        else:
+            pass
+        return ws_name
 
 
 def accumulate_name(last_ws, ws_to_add):
