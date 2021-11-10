@@ -57,11 +57,7 @@ void PreviewPresenter::notifyLoadWorkspaceCompleted() {
   // TODO reset the other plots (or perhaps re-run the reduction with the new data?)
 }
 
-void PreviewPresenter::notifySumBanksCompleted() {
-  g_log.debug("Sum banks completed");
-  // TODO Implement plotting of the summed workspace
-  // m_view->plotSliceView(m_model->getSummedWs())
-}
+void PreviewPresenter::notifySumBanksCompleted() { m_view->plotContour(m_model->getSummedWs()); }
 
 void PreviewPresenter::notifyInstViewSelectRectRequested() {
   m_view->setInstViewZoomState(false);

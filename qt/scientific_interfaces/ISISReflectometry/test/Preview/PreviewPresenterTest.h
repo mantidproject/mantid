@@ -151,6 +151,14 @@ public:
     presenter.notifyInstViewShapeChanged();
   }
 
+  void test_notify_sum_banks_completed() {
+    auto mockView = makeView();
+    EXPECT_CALL(*mockView, plotContour).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get()));
+
+    presenter.notifySumBanksCompleted();
+  }
+
   void test_notify_contour_export_to_ads_requested() {
     auto mockView = makeView();
     auto mockModel = makeModel();

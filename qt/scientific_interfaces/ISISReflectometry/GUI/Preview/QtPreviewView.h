@@ -33,6 +33,7 @@ public:
   std::string getWorkspaceName() const override;
   void plotInstView(MantidWidgets::InstrumentActor *instActor, Mantid::Kernel::V3D const &samplePos,
                     Mantid::Kernel::V3D const &axis) override;
+  void plotContour(Mantid::API::MatrixWorkspace_sptr const &ws) const override;
 
   void setInstViewZoomState(bool isChecked) override;
   void setInstViewEditState(bool isChecked) override;

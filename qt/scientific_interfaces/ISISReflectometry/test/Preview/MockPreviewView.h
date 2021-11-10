@@ -22,6 +22,7 @@ public:
   MOCK_METHOD(std::string, getWorkspaceName, (), (const, override));
   MOCK_METHOD(void, plotInstView,
               (MantidWidgets::InstrumentActor *, Mantid::Kernel::V3D const &, Mantid::Kernel::V3D const &), (override));
+  MOCK_METHOD(void, plotContour, (Mantid::API::MatrixWorkspace_sptr const &), (const, override));
   MOCK_METHOD(void, setInstViewZoomState, (bool), (override));
   MOCK_METHOD(void, setInstViewEditState, (bool), (override));
   MOCK_METHOD(void, setInstViewSelectRectState, (bool), (override));
