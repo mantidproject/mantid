@@ -406,7 +406,7 @@ void AnvredCorrection::retrieveBaseProperties() {
  *
  *  @param  lamda      The wavelength of an event.
  *  @param  two_theta  The scattering angle of the event.
- *
+ *  @param muRTooLarge bool to warn in muR limit exceeded in absorption correction
  *  @return The weight factor for the specified position and wavelength.
  */
 double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge) {
@@ -451,6 +451,7 @@ double AnvredCorrection::getEventWeight(const double lamda, const double two_the
  *
  *       @param twoth scattering angle
  *       @param wl scattering wavelength
+ *       @param muRTooLarge bool to warn in muR limit exceeded
  *       @returns absorption
  */
 double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool &muRTooLarge) {
