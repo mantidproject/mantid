@@ -207,10 +207,11 @@ void AnvredCorrection::exec() {
     double pathlength = 0.0;
 
     std::string bankName;
-
-    const auto &det = spectrumInfo.detector(i);
-    if (m_useScaleFactors)
-      scale_init(det, inst, L2, depth, pathlength, bankName);
+    if (m_useScaleFactors) {
+      const auto &det = spectrumInfo.detector(i);
+      bankName = det.getParent()->getParent()->getName();
+      scale_init(inst, L2, depth, pathlength, bankName);
+    }
 
     auto points = m_inputWS->points(i);
 
@@ -311,9 +312,11 @@ void AnvredCorrection::execEvent() {
     double depth = 0.2;
     double pathlength = 0.0;
     std::string bankName;
-    const auto &det = spectrumInfo.detector(i);
-    if (m_useScaleFactors)
-      scale_init(det, inst, L2, depth, pathlength, bankName);
+    if (m_useScaleFactors) {
+      const auto &det = spectrumInfo.detector(i);
+      bankName = det.getParent()->getParent()->getName();
+      scale_init(inst, L2, depth, pathlength, bankName);
+    }
 
     // multiplying an event list by a scalar value
     bool muRTooLarge = false;
@@ -406,7 +409,7 @@ void AnvredCorrection::retrieveBaseProperties() {
  *
  *  @return The weight factor for the specified position and wavelength.
  */
-double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge) {
+double AnvredCorrection::getEventWeight(const double lamda, const double two_theta, bool muRTooLarge) {
   double transinv = 1;
   if (m_radius > 0)
     transinv = absor_sphere(two_theta, lamda, muRTooLarge);
@@ -450,7 +453,7 @@ double AnvredCorrection::getEventWeight(const double lamda, const double two_the
  *       @param wl scattering wavelength
  *       @returns absorption
  */
-double AnvredCorrection::absor_sphere(const double &twoth, const double &wl, bool &muRTooLarge) {
+double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool muRTooLarge) {
   //  For each of the 19 theta values in (theta = 0:5:90 deg)
   //  fitted ln(1/A*) = sum_{i=1}^{N} pc[i][ith]*(muR)^i
   //  using A* values in Weber (1969) for 0 < muR < 10 cm^-1.
@@ -529,9 +532,8 @@ void AnvredCorrection::BuildLamdaWeights() {
   }
 }
 
-void AnvredCorrection::scale_init(const IDetector &det, const Instrument_const_sptr &inst, double &L2, double &depth,
-                                  double &pathlength, std::string &bankName) {
-  bankName = det.getParent()->getParent()->getName();
+void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const double L2, const double depth,
+                                  double pathlength, const std::string &bankName) {
   // Distance to center of detector
   std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank
@@ -546,8 +548,8 @@ void AnvredCorrection::scale_init(const IDetector &det, const Instrument_const_s
   pathlength = depth / cosA;
 }
 
-void AnvredCorrection::scale_exec(std::string &bankName, double &lambda, double &depth,
-                                  const Instrument_const_sptr &inst, double &pathlength, double &value) {
+void AnvredCorrection::scale_exec(std::string &bankName, const double lambda, const double depth,
+                                  const Instrument_const_sptr &inst, const double pathlength, double value) {
   // correct for the slant path throught the scintillator glass
   double mu = (9.614 * lambda) + 0.266;            // mu for GS20 glass
   double eff_center = 1.0 - std::exp(-mu * depth); // efficiency at center of detector

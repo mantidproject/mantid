@@ -121,13 +121,13 @@ private:
 
   void retrieveBaseProperties();
   // void constructSample(API::Sample& sample);
-  double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
+  double getEventWeight(const double lamda, const double two_theta, bool muRTooLarge);
   void BuildLamdaWeights();
-  double absor_sphere(const double &twoth, const double &wl, bool &muRTooLarge);
-  void scale_init(const Geometry::IDetector &det, const Geometry::Instrument_const_sptr &inst, double &L2,
-                  double &depth, double &pathlength, std::string &bankName);
-  void scale_exec(std::string &bankName, double &lambda, double &depth, const Geometry::Instrument_const_sptr &inst,
-                  double &pathlength, double &value);
+  double absor_sphere(const double twoth, const double wl, bool muRTooLarge);
+  void scale_init(const Geometry::Instrument_const_sptr &inst, const double L2, const double depth, double pathlength,
+                  const std::string &bankName);
+  void scale_exec(std::string &bankName, const double lambda, const double depth,
+                  const Geometry::Instrument_const_sptr &inst, const double pathlength, double value);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm
   double m_amu;                       ///< linear absoprtion coefficient in 1/cm
