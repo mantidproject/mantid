@@ -23,7 +23,7 @@ namespace API {
  */
 class MANTID_API_DLL IPreview {
 public:
-  enum class PreviewType { IVIEW = 0, PLOT1D = 1, PLOT2D = 2, SVIEW = 3, PLOTBINS = 4 };
+  enum class PreviewType { IVIEW = 0, PLOT1D = 1, PLOT2D = 2, SVIEW = 3, PLOTSPECTRUM = 4 };
   virtual ~IPreview() = default;
   virtual PreviewType type() const = 0;
   virtual std::string technique() const = 0;
