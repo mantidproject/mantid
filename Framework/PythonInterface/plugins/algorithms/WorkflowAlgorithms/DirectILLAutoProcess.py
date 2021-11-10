@@ -213,7 +213,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.declareProperty("ElasticChannelCalibration", False,
                              doc='Enable or disable calibration of the elastic channel.')
 
-        additional_inputs_group = 'Correction workspaces'
+        additional_inputs_group = 'Corrections'
         self.setPropertyGroup('VanadiumWorkspace', additional_inputs_group)
         self.setPropertyGroup('EmptyContainerWorkspace', additional_inputs_group)
         self.setPropertyGroup('EmptyContainerScaling', additional_inputs_group)
@@ -229,9 +229,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              validator=positiveFloat,
                              doc='Value for the calibrated incident energy (meV).')
 
-        self.declareProperty(FloatArrayProperty(name='IncidentEnergyRange', values=[], validator=orderedPairsValidator),
-                             doc='Minimum and maximum energy for neutrons in a time frame (meV).')
-
         self.declareProperty(name='ElasticChannelEnergy',
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
@@ -242,7 +239,6 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
         parameters_group = 'Parameters'
         self.setPropertyGroup('IncidentEnergy', parameters_group)
-        self.setPropertyGroup('IncidentEnergyRange', parameters_group)
         self.setPropertyGroup('ElasticChannelEnergy', parameters_group)
         self.setPropertyGroup('SampleAngleOffset', parameters_group)
 
