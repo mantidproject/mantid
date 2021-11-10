@@ -41,12 +41,13 @@ install_qt5_target_plugins("${Qt5Svg_PLUGINS}" ${prefix})
 install_qt5_target_plugins("${Qt5Sql_PLUGINS}" ${prefix})
 install_qt5_target_plugins("${Qt5PrintSupport_PLUGINS}" ${prefix})
 
-# Install dependencies for Mantid libraries and qt plugins
+# Install dependencies for Mantid libraries and qt plugins The first line in libraries are the Qt plugins THe next line
+# are select libraries that ensure all our dependencies exist - If something is missing add it to this line
 install(CODE "set(WORKBENCH_APP \"${WORKBENCH_APP}\")" COMPONENT Runtime)
 install(
   CODE [[ file(GET_RUNTIME_DEPENDENCIES EXECUTABLES $<TARGET_FILE:MantidWorkbenchInstalled>
 LIBRARIES ${QT_PLUGINS} $<TARGET_FILE:Qt5::QCocoaIntegrationPlugin> $<TARGET_FILE:Qt5::QMacStylePlugin> $<TARGET_FILE:Qt5::QSvgPlugin> $<TARGET_FILE:Qt5::QSQLiteDriverPlugin> $<TARGET_FILE:Qt5::QCocoaPrinterSupportPlugin>
-$<TARGET_FILE:Kernel> $<TARGET_FILE:API> $<TARGET_FILE:Json> $<TARGET_FILE:mantidqt_commonqt5> $<TARGET_FILE:LiveData>
+$<TARGET_FILE:Kernel> $<TARGET_FILE:API> $<TARGET_FILE:Json> $<TARGET_FILE:mantidqt_commonqt5> $<TARGET_FILE:mantidqt_iconsqt5> $<TARGET_FILE:mantidqt_instrumentviewqt5> $<TARGET_FILE:LiveData>
 RESOLVED_DEPENDENCIES_VAR _r_deps UNRESOLVED_DEPENDENCIES_VAR _u_deps
 DIRECTORIES ${MY_DEPENDENCY_PATHS} )
 foreach(_file ${_r_deps})
@@ -62,5 +63,15 @@ message(WARNING
 "Unresolved dependencies detected!")
  endif()
 ]]
+  COMPONENT Runtime
+)
+
+# Check the app has everything we need.
+set(APPS "\$ENV{DESTDIR}/\${CMAKE_INSTALL_PREFIX}/\${WORKBENCH_APP}")
+install(
+  CODE "
+include(${PROJECT_SOURCE_DIR}/buildconfig/CMake/VerifyBundleOSXConda.cmake)
+verify_app(\"${APPS}\")
+"
   COMPONENT Runtime
 )

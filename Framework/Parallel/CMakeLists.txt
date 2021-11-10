@@ -99,7 +99,9 @@ set_target_properties(
 )
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(
+    EventParallelLoader PROPERTIES INSTALL_RPATH "@executable_path/../MacOS;@executable_path/../Frameworks"
+  )
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
