@@ -6,15 +6,15 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
 
+# The PARAMETERUNITS dict contains two copies of each units because the X and Y unit setting options on workspaces take
+# different formatting for special symbols
 PARAMETERUNITS = {
     'Frequency': ['MHz', 'MHz'],
     'Lambda': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$'],
     'Phi': ['Radians', 'Radians'],
     'sample_magn_field': ['G', 'G'],
     'sample_temp': ['K', 'K'],
-    'Sigma': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$'],
-    'test1': ['test_unit_1', 'test_unit_1'],
-    'test2': ['test_unit_2', 'test_unit_2'],
+    'Sigma': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$']
 }
 
 
