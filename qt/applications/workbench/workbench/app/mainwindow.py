@@ -598,7 +598,8 @@ class MainWindow(QMainWindow):
             plt.close('all')
 
             # Close any remaining windows
-            app.closeAllWindows()
+            if app is not None:
+                app.closeAllWindows()
 
             # Cancel all running (managed) algorithms
             AlgorithmManager.Instance().cancelAll()
