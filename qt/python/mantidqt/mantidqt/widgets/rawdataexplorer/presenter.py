@@ -56,6 +56,8 @@ class PreviewPresenter:
             self._view.set_type(PreviewView.PLOT2D)
         if preview_type == PreviewType.PLOT1D:
             self._view.set_type(PreviewView.PLOT1D)
+        if preview_type == PreviewType.PLOTSPECTRUM:
+            self._view.set_type(PreviewView.PLOTSPECTRUM)
 
         workspace_name = self._model.get_workspace_name()
         self._view.show_workspace(workspace_name)
