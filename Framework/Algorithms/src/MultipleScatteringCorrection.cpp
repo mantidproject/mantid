@@ -667,7 +667,7 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       // getDistanceInsideObject returns the line segment inside the shape from the given ray (defined by track)
       // therefore, the distance between the two point (element) can be found by the difference of the two line
       // segments.
-      L12s[idx] = (rayLengthOne1 - rayLengthOne2);
+      L12s[idx] = checkzero(rayLengthOne1 - rayLengthOne2);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -716,21 +716,25 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       const V3D unitVector = getDirection(posFrom, posTo);
 
       // combined
-      track.reset(posFrom, unitVector);
       track.clearIntersectionResults();
+      track.reset(posFrom, unitVector);
+      // track.clearIntersectionResults();
       const auto rayLen1_container = getDistanceInsideObject(shapeContainer, track);
+      track.clearIntersectionResults();
       track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
+      // track.clearIntersectionResults();
       const auto rayLen1_sample = getDistanceInsideObject(shapeSample, track);
-      track.reset(posTo, unitVector);
       track.clearIntersectionResults();
+      track.reset(posTo, unitVector);
+      // track.clearIntersectionResults();
       const auto rayLen2_container = getDistanceInsideObject(shapeContainer, track);
-      track.reset(posTo, unitVector);
       track.clearIntersectionResults();
+      track.reset(posTo, unitVector);
+      // track.clearIntersectionResults();
       const auto rayLen2_sample = getDistanceInsideObject(shapeSample, track);
       //
-      L12sContainer[idx] = rayLen1_container - rayLen2_container;
-      L12sSample[idx] = rayLen1_sample - rayLen2_sample;
+      L12sContainer[idx] = checkzero(rayLen1_container - rayLen2_container);
+      L12sSample[idx] = checkzero(rayLen1_sample - rayLen2_sample);
     }
     PARALLEL_END_INTERUPT_REGION
   }
