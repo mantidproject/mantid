@@ -656,8 +656,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegio
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/SeqDomainSpectrumCreator.cpp:38
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/FilterPeaks.h:85
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindUBUsingIndexedPeaks.cpp:208
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindUBUsingIndexedPeaks.cpp:208
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h:104
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:210
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:218

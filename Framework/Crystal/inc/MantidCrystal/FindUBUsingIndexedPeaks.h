@@ -45,7 +45,7 @@ private:
 
   /// Run the algorithm
   void exec() override;
-  void logLattice(Geometry::OrientedLattice &o_lattice, int &ModDim);
+  void logLattice(const Geometry::OrientedLattice &o_lattice, const int &ModDim);
   int getModulationDimension(Kernel::V3D &mnp);
   bool isPeakIndexed(const Geometry::IPeak &peak);
 };
