@@ -89,14 +89,17 @@ void AnvredCorrection::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("LinearScatteringCoef", EMPTY_DBL(), mustBePositive,
-                  "Linear scattering coefficient in 1/cm if not set with "
-                  "SetSampleMaterial");
+                  "Linear scattering coefficient in 1/cm. "
+                  "If not provided this will be calculated from the "
+                  "material cross-section if present (set with SetSampleMaterial)");
   declareProperty("LinearAbsorptionCoef", EMPTY_DBL(), mustBePositive,
-                  "Linear absorption coefficient at 1.8 Angstroms in 1/cm if "
-                  "not set with SetSampleMaterial");
+                  "Linear absorption coefficient at 1.8 Angstroms in 1/cm. "
+                  "If not provided this will be calculated from the "
+                  "material cross-section if present (set with SetSampleMaterial)");
   declareProperty("Radius", EMPTY_DBL(), mustBePositive,
-                  "Radius of the sample in centimeters if "
-                  "not set with SetSample.");
+                  "Radius of the sample in centimeters. f not provided the "
+                  "radius will be taken from the sample shape if it is a sphere "
+                  "(set with SetSample).");
   declareProperty("PreserveEvents", true,
                   "Keep the output workspace as an EventWorkspace, if the "
                   "input has events (default).\n"
