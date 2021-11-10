@@ -231,6 +231,7 @@ void BatchJobManager::algorithmComplete(IConfiguredAlgorithm_sptr algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   jobAlgorithm->updateItem();
   item->setSuccess();
+  item->updateParent();
 }
 
 void BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {

@@ -7,6 +7,7 @@
 #pragma once
 #include "Common/DllConfig.h"
 #include "ItemState.h"
+#include "MantidKernel/Exception.h"
 #include <string>
 #include <vector>
 
@@ -43,6 +44,10 @@ public:
 
   virtual int totalItems() const = 0;
   virtual int completedItems() const = 0;
+
+  virtual void updateParent() {
+    throw Mantid::Kernel::Exception::NotImplementedError("This method should be overridden if it is used.");
+  }
 
   bool complete() const;
   bool success() const;

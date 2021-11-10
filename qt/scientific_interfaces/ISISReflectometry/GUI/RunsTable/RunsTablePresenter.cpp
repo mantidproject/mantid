@@ -725,7 +725,8 @@ void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
 
   int groupIndex = 0;
-  for (auto &group : m_model.reductionJobs().groups()) {
+  for (auto &group : m_model.mutableReductionJobs().mutableGroups()) {
+    group.updateParent();
     auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     setRowStylingForItem(groupLocation, group);
 
@@ -752,6 +753,14 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
   updateProgressBar();
   auto const location = m_model.reductionJobs().getLocation(item.get());
   setRowStylingForItem(location, item.get());
+  if (!item->isGroup()) {
+    auto const row = dynamic_cast<const Row &>(item.get());
+    auto *parent = row.getParent();
+    if (parent) {
+      auto const parentLocation = m_model.reductionJobs().getLocation(*parent);
+      setRowStylingForItem(parentLocation, *parent);
+    }
+  }
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {

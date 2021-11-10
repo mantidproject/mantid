@@ -61,6 +61,7 @@ public:
   boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
   void setAllRowParents();
+  void updateParent() override;
 
 private:
   std::string m_name;

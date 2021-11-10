@@ -68,6 +68,14 @@ void Row::renameOutputWorkspace(std::string const &oldName, std::string const &n
 
 void Row::setParent(Group *parent) const { m_parent = parent; }
 
+Group* Row::getParent() const { return m_parent; }
+
+void Row::updateParent() {
+  if (m_parent) {
+    m_parent->updateParent();
+  }
+}
+
 Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) const {
   // If both lists of run numbers are the same then there's nothing to merge
   if (extraRunNumbers == m_runNumbers)

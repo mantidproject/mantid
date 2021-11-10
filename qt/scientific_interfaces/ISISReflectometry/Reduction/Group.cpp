@@ -221,6 +221,14 @@ void Group::setAllRowParents() {
   });
 }
 
+void Group::updateParent() {
+  if (!m_rows.empty() && std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); })) {
+    setSuccess();
+  } else {
+    resetState(false);
+  }
+}
+
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Group const &lhs, Group const &rhs) {

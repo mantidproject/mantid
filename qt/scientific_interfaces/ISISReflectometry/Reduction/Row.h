@@ -51,6 +51,8 @@ public:
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
 
   void setParent(Group *parent) const;
+  Group *getParent() const;
+  void updateParent() override;
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
