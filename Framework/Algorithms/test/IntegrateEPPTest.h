@@ -11,7 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/IntegrateEPP.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::IntegrateEPP;
 

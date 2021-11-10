@@ -36,7 +36,7 @@
 
 #include <string>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

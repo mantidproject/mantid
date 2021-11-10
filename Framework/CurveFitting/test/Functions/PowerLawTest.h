@@ -11,7 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/PowerLaw.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 // using namespace Mantid;
 // using namespace Mantid::Kernel;

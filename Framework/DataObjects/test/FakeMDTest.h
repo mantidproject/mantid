@@ -11,8 +11,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/FakeMD.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

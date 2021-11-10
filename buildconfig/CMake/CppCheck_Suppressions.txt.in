@@ -229,7 +229,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:6
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/FileLoaderRegistry.cpp:33
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:136
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:171
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:840
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:334
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/GridDomain1D.cpp:18
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/GridDomain1D.cpp:18

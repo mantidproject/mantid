@@ -17,8 +17,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 #include <utility>
@@ -32,13 +32,9 @@ class PlotFitAnalysisPanePresenterTest : public CxxTest::TestSuite {
 public:
   PlotFitAnalysisPanePresenterTest() { FrameworkManager::Instance(); }
 
-  static PlotFitAnalysisPanePresenterTest *createSuite() {
-    return new PlotFitAnalysisPanePresenterTest();
-  }
+  static PlotFitAnalysisPanePresenterTest *createSuite() { return new PlotFitAnalysisPanePresenterTest(); }
 
-  static void destroySuite(PlotFitAnalysisPanePresenterTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(PlotFitAnalysisPanePresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_view = new NiceMock<MockPlotFitAnalysisPaneView>();
@@ -61,9 +57,7 @@ public:
     m_presenter->addSpectrum(m_workspaceName);
     // set up rest of test
 
-    IFunction_sptr function =
-        Mantid::API::FunctionFactory::Instance().createInitialized(
-            "name = FlatBackground");
+    IFunction_sptr function = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
 
     EXPECT_CALL(*m_view, getFunction()).Times(1).WillOnce(Return(function));
     EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
@@ -75,8 +69,7 @@ public:
   }
 
   void test_addFunction() {
-    auto function = Mantid::API::FunctionFactory::Instance().createInitialized(
-        "name = FlatBackground");
+    auto function = Mantid::API::FunctionFactory::Instance().createInitialized("name = FlatBackground");
     EXPECT_CALL(*m_view, addFunction(function)).Times(1);
     m_presenter->addFunction(function);
   }
@@ -86,12 +79,8 @@ public:
     m_presenter->addSpectrum(m_workspaceName);
   }
 
-  void
-  test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
-    EXPECT_CALL(*m_view,
-                displayWarning(
-                    "Could not update estimate: data has not been extracted."))
-        .Times(1);
+  void test_that_calculateEstimate_is_not_called_when_the_current_workspace_name_is_blank() {
+    EXPECT_CALL(*m_view, displayWarning("Could not update estimate: data has not been extracted.")).Times(1);
 
     m_presenter->updateEstimate();
     TS_ASSERT_EQUALS(m_model->getEstimateCount(), 0);
@@ -109,8 +98,7 @@ public:
     TS_ASSERT(m_model->hasEstimate());
   }
 
-  void
-  test_that_updateEstimateAfterExtraction_calls_calculateEstimate_if_an_estimate_does_not_exist() {
+  void test_that_updateEstimateAfterExtraction_calls_calculateEstimate_if_an_estimate_does_not_exist() {
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
     m_presenter->addSpectrum(m_workspaceName);
 
@@ -121,8 +109,7 @@ public:
     TS_ASSERT(m_model->hasEstimate());
   }
 
-  void
-  test_that_updateEstimateAfterExtraction_does_not_call_calculateEstimate_if_an_estimate_already_exists() {
+  void test_that_updateEstimateAfterExtraction_does_not_call_calculateEstimate_if_an_estimate_already_exists() {
     EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
     m_presenter->addSpectrum(m_workspaceName);
 

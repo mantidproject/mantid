@@ -17,10 +17,10 @@
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
 using Mantid::Algorithms::SumOverlappingTubes;

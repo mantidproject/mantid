@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/DisplayNormalizationSetter.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "boost/pointer_cast.hpp"
 #include <cxxtest/TestSuite.h>
 using namespace Mantid::MDAlgorithms;

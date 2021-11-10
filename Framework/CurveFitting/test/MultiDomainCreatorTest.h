@@ -20,7 +20,7 @@
 #include "MantidCurveFitting/MultiDomainCreator.h"
 #include "MantidKernel/PropertyManager.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 #include <algorithm>
 #include <cxxtest/TestSuite.h>

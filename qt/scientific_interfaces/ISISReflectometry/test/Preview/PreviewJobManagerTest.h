@@ -8,8 +8,8 @@
 
 #include "../Reduction/MockBatch.h"
 #include "GUI/Batch/BatchJobAlgorithm.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PreviewJobManager.h"
 
 #include "test/Batch/BatchJobManagerTest.h"

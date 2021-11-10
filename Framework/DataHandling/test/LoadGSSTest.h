@@ -12,9 +12,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadGSS.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include "cxxtest/TestSuite.h"
 
 using namespace Mantid;

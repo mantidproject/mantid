@@ -21,8 +21,8 @@
 #include "MantidCurveFitting/Algorithms/QENSFitSimultaneous.h"
 
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::QENSFitSimultaneous;
 using namespace Mantid::API;

@@ -8,9 +8,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/RandomPoint.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 #include <boost/math/special_functions/pow.hpp>
 

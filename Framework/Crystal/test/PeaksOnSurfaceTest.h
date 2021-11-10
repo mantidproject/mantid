@@ -9,8 +9,8 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/PeaksOnSurface.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Crystal;

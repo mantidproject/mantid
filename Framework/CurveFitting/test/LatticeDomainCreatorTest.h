@@ -14,7 +14,7 @@
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 #include "MantidCurveFitting/LatticeFunction.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::LatticeDomainCreator;
 using Mantid::CurveFitting::LatticeFunction;

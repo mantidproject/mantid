@@ -11,7 +11,7 @@
 
 namespace Mantid {
 
-namespace TestHelpers {
+namespace FrameworkTestHelpers {
 
 class FunctionChangesNParams : public Mantid::API::IFunction1D, public Mantid::API::ParamFunction {
 public:
@@ -27,5 +27,5 @@ protected:
   bool m_canChange = false;
 };
 
-} // namespace TestHelpers
+} // namespace FrameworkTestHelpers
 } // namespace Mantid

@@ -14,8 +14,8 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAlgorithms/CrossCorrelate.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "CrossCorrelateTestData.h"
 

@@ -12,9 +12,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/GetDetectorOffsets.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

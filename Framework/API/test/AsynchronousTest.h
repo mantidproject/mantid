@@ -11,7 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/NObserver.h>
 #include <Poco/Thread.h>

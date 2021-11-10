@@ -17,9 +17,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/ReflectometryHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -27,7 +27,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel;
-using namespace Mantid::TestHelpers;
+using namespace Mantid::FrameworkTestHelpers;
 using namespace Mantid::Reflectometry;
 using namespace WorkspaceCreationHelper;
 

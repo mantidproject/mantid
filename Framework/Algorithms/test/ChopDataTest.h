@@ -11,7 +11,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/ChopData.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

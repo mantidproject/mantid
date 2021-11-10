@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "SpecularReflectionAlgorithmTest.h"
 
 #include "MantidReflectometry/SpecularReflectionCalculateTheta2.h"
