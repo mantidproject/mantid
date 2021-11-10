@@ -17,8 +17,8 @@ repos:
       - id: check-yaml
         args: [--allow-multiple-documents]
 
-  - repo: https://github.com/DavidFair/pre-commit-hooks.git
-    rev: 286a37a33b4c583808d2224735d7c461d4079773
+  - repo: https://github.com/mantidproject/pre-commit-hooks.git
+    rev: f99fd08a5f4ece5a196adeda23d20b4491cfd97b
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
