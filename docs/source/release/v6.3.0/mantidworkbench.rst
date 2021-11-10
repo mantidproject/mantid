@@ -24,6 +24,8 @@ New and Improved
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
 
+- The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path)
+
 Bugfixes
 --------
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
