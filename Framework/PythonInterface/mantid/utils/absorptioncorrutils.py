@@ -269,6 +269,7 @@ def calculate_absorption_correction(
     props,
     sample_formula,
     mass_density,
+    sample_geometry={},
     number_density=Property.EMPTY_DBL,
     container_shape="PAC06",
     num_wl_bins=1000,
@@ -307,6 +308,7 @@ def calculate_absorption_correction(
     :param props: PropertyManager of run characterizations, obtained from PDDetermineCharacterizations
     :param sample_formula: Sample formula to specify the Material for absorption correction
     :param mass_density: Mass density of the sample to specify the Material for absorption correction
+    :param sample_geometry: Dictionary to specify the sample geometry for absorption correction
     :param number_density: Optional number density of sample to be added to the Material for absorption correction
     :param container_shape: Shape definition of container, such as PAC06.
     :param num_wl_bins: Number of bins for calculating wavelength
@@ -336,6 +338,7 @@ def calculate_absorption_correction(
                                       props,
                                       num_wl_bins,
                                       material=material,
+                                      geometry=sample_geometry,
                                       environment=environment,
                                       metaws=metaws)
 
