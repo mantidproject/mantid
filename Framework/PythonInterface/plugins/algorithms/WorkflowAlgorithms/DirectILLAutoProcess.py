@@ -503,7 +503,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         :return: Either normalised sample or the input, if vanadium is not provided
         """
         normalised_ws = '{}_norm'.format(numor)
-        if self.vanadium_integral:
+        if self.vanadium_integral != list():
             nintegrals = len(self.vanadium_integral)
             vanadium_no = sample_no
             if nintegrals == 1:
@@ -593,7 +593,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
             # rebin in energy or momentum transfer
             processed_sample = '{}_reb'.format(numor)
-            if self.ebinning_params:
+            if self.ebinning_params != list():
                 Rebin(InputWorkspace=corrected_ws, Params=self.ebinning_params, OutputWorkspace=processed_sample)
             else:
                 RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
