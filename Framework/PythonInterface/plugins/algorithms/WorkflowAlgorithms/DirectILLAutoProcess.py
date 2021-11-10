@@ -70,6 +70,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     flat_background = None
     to_clean = None
     absorption_corr = None
+    save_output = None
 
     def category(self):
         return "{};{}".format(common.CATEGORIES, "ILL\\Auto")
@@ -150,6 +151,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
         if self.vanadium:
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
+        self.save_output = self.getProperty('SaveOutput').value
 
     def PyInit(self):
 
@@ -327,6 +329,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup('GroupPixelsBy', grouping_options_group)
         self.setPropertyGroup(common.PROP_GROUPING_ANGLE_STEP, grouping_options_group)
 
+        self.declareProperty(name="SaveOutput",
+                             defaultValue=True,
+                             doc="Whether to save the output directly after processing.")
+
         self.declareProperty(name='ClearCache',
                              defaultValue=False,
                              doc='Whether to clear intermediate workspaces.')
@@ -339,15 +345,21 @@ class DirectILLAutoProcess(PythonAlgorithm):
             self.mask_ws = self._prepare_masks()
 
         for sample_no, sample in enumerate(sample_runs):
+            current_it_output = []  # output of the current iteration of reduction
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
             if self.process == 'Vanadium':
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
-                output_samples.extend([ws_sofq, ws_softw, ws_diag, ws_integral])
+                current_it_output = [ws_sofq, ws_softw, ws_diag, ws_integral]
+                output_samples.extend(current_it_output)
             elif self.process == 'Sample':
                 sample_sofq, sample_softw = self._process_sample(ws, sample_no)
-                output_samples.extend([sample_sofq, sample_softw])
-        output_samples = np.array(output_samples)
-        GroupWorkspaces(InputWorkspaces=output_samples[output_samples is not None],
+                current_it_output = np.array([sample_sofq, sample_softw])
+                current_it_output = current_it_output[[isinstance(elem, str) for elem in current_it_output]]
+                output_samples.extend(current_it_output)
+            if self.save_output:
+                self._save_output(current_it_output)
+
+        GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
         if self.getProperty('ClearCache').value:
             self._final_cleanup()
@@ -386,6 +398,17 @@ class DirectILLAutoProcess(PythonAlgorithm):
         """Performs the clean up of intermediate workspaces that are created and used throughout the code."""
         if self.to_clean:
             DeleteWorkspaces(WorkspaceList=self.to_clean)
+
+    def _save_output(self, ws_to_save):
+        """Saves the output workspaces to an external file."""
+        for ws_name in ws_to_save:
+            if self.reduction_type == 'SingleCrystal':
+                Psi = mtd[ws_name].run().getProperty('a3.value').value
+            SaveNXSPE(
+                InputWorkspace=ws_name,
+                Filename='{}.nxspe'.format(ws_name),
+                Psi=Psi
+            )
 
     def _prepare_masks(self):
         """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
