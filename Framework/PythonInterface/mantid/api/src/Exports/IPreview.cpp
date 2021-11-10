@@ -32,6 +32,7 @@ void export_IPreview() {
       .value("PLOT1D", IPreview::PreviewType::PLOT1D)
       .value("PLOT2D", IPreview::PreviewType::PLOT2D)
       .value("SVIEW", IPreview::PreviewType::SVIEW)
+      .value("PLOTSPECTRUM", IPreview::PreviewType::PLOTSPECTRUM)
       .export_values();
 
   class_<IPreview, boost::noncopyable>("IPreview", no_init)
