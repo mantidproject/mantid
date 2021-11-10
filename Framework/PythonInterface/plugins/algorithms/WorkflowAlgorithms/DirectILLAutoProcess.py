@@ -71,6 +71,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     to_clean = None
     absorption_corr = None
     save_output = None
+    clear_cache = None
 
     def category(self):
         return "{};{}".format(common.CATEGORIES, "ILL\\Auto")
@@ -152,6 +153,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if self.vanadium:
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
         self.save_output = self.getProperty('SaveOutput').value
+        self.clear_cache = self.getProperty('ClearCache').value
 
     def PyInit(self):
 
@@ -357,8 +359,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
-        if self.getProperty('ClearCache').value:
-            self._final_cleanup()
+        if self.clear_cache:  # final clean up
+            self._clean_up(self.to_clean)
         self.setProperty('OutputWorkspace', mtd[self.output])
 
     def _collect_data(self, sample, vanadium=False):
@@ -390,10 +392,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 self.instrument = instrument
         return ws
 
-    def _final_cleanup(self):
+    def _clean_up(self, to_clean):
         """Performs the clean up of intermediate workspaces that are created and used throughout the code."""
-        if self.to_clean:
-            DeleteWorkspaces(WorkspaceList=self.to_clean)
+        if len(to_clean) > 0:
+            DeleteWorkspaces(WorkspaceList=to_clean)
 
     def _save_output(self, ws_to_save):
         """Saves the output workspaces to an external file."""
@@ -441,6 +443,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
             MergeRuns(InputWorkspaces=existing_masks, OutputWorkspace=mask_ws)
         else:
             RenameWorkspace(InputWorkspace=existing_masks[0], OutputWorkspace=mask_ws)
+        self.to_clean.append(mask_ws)
         return mask_ws
 
     def _apply_mask(self, ws):
@@ -491,8 +494,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
                            DiagnosticsWorkspace=vanadium_diagnostics
                            )
 
-        if self.getProperty('ClearCache').value:
-            DeleteWorkspaces(WorkspaceList=to_remove)
+        if len(to_remove) > 0 and self.clear_cache:
+            self._clean_up(to_remove)
         return sofq_output, softw_output, vanadium_diagnostics, vanadium_integral
 
     def _normalise_sample(self, sample_ws, sample_no, numor):
@@ -612,8 +615,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 IntegratedVanadiumWorkspace=vanadium_integral,
                 DiagnosticsWorkspace=vanadium_diagnostics
             )
-        if len(to_remove) > 0 and self.getProperty('ClearCache').value:
-            DeleteWorkspaces(WorkspaceList=to_remove)
+        if len(to_remove) > 0 and self.clear_cache:
+            self._clean_up(to_remove)
 
         return processed_sample, processed_sample_tw
 
