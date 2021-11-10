@@ -172,13 +172,10 @@ class RawDataExplorerModel(QObject):
         """
         ws = mtd[ws_name]
 
-        # TODO find a way to know if ws is a group workspace -- stupid idea : try to get child wspaces
-        # better idea : isInstance
-
-        # if ws.isGroupWorkspace():
-        #     # that's probably D7 or some processed data
-        #     print("INVALID ENTRY : GROUP WORKSPACE")
-        #     return
+        if ws.isGroup():
+            # that's probably D7 or some processed data
+            print("INVALID ENTRY : GROUP WORKSPACE")
+            return
 
         if ws.getNumberHistograms() > 1:
             if ws.blocksize() > 1:
@@ -198,6 +195,16 @@ class RawDataExplorerModel(QObject):
         new_ws = "__" + ws_name
         ws = mtd[ws_name]
 
+        if ws.isGroup():
+            # that's probably D7 or some processed data
+            print("INVALID ENTRY : GROUP WORKSPACE")
+            if ws.getNumberOfEntries() == 1:
+                ws_name = ws.getNames()[0]
+                ws = mtd[ws_name]
+            else:
+                # TODO if multiple workspaces, use a tiled plot (which we don't manage for now)
+                return
+
         if ws.getNumberHistograms() > 1:
             if ws.blocksize() > 1:
                 pass
@@ -205,7 +212,7 @@ class RawDataExplorerModel(QObject):
                 if str(ws.getAxis(1).getUnit().symbol()) == "":
                     # hopefully this data is not treated
                     SumRowColumn(InputWorkspace=ws_name, OutputWorkspace=new_ws, Orientation="D_V")
-                    return new_ws
+                    ws_name = new_ws
         else:
             pass
         return ws_name

@@ -14,7 +14,7 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.instrumentview.api import *
 from mantid.simpleapi import *
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-from mantidqt.plotting.functions import pcolormesh, plot_contour
+from mantidqt.plotting.functions import pcolormesh
 
 from os import path
 
@@ -97,8 +97,7 @@ class PreviewView:
             self._widget.view.show()
             self._widget.view.close_signal.connect(self.on_close)
         if self._type == self.PLOT2D:
-            # self._widget = pcolormesh([workspace_name])
-            self._widget = plot_contour([workspace_name])
+            self._widget = pcolormesh([workspace_name])
             self._widget.canvas.mpl_connect("close_event", self.on_close)
         if self._type == self.PLOT1D:
             self._widget = plotBin(workspace_name, 0, error_bars=True)
