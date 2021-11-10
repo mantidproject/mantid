@@ -164,12 +164,11 @@ class RawDataExplorerPresenter(QObject):
         # target_type = self.view.get_current_target()
 
         # TODO get preview per instrument
-        preview_name = PreviewType.IVIEW
         self.view.fileTree.setCursor(Qt.BusyCursor)
         if self.view.get_current_target() == "New":
-            self.model.new_preview(selection, preview_name)
+            self.model.new_preview(selection)
         else:
-            self.model.modify_preview(selection, preview_name)
+            self.model.modify_preview(selection)
         self.view.fileTree.unsetCursor()
 
     def on_new_preview(self, previewModel):
