@@ -185,7 +185,7 @@
          </layout>
         </item>
         <item>
-         <widget class="QTreeView" name="treeView_2"/>
+         <widget class="MantidQt::MantidWidgets::ContourPreviewPlot" name="contour_preview_plot" native="true"/>
         </item>
        </layout>
       </widget>
@@ -225,9 +225,17 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::ContourPreviewPlot</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>workspace_line_edit</tabstop>
-  <tabstop>treeView_2</tabstop>
+  <tabstop>plot_2d_tool_placeholders</tabstop>
   <tabstop>plot_1d_toolbar_placeholder</tabstop>
   <tabstop>treeView</tabstop>
   <tabstop>tableWidget_2</tabstop>
