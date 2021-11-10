@@ -24,6 +24,15 @@ else:
         app, within_mantid = get_qapplication()
         if 'drillInterface' not in globals():
             drillInterface = DrillView()
+        else:
+            drillInterface = globals()["drillInterface"]
+            try:
+                visible = drillInterface.isVisible()
+            except:
+                #underlying Qt object has been deleted
+                visible = False
+            if not visible:
+                drillInterface = DrillView()
         drillInterface.show()
         if not within_mantid:
             sys.exit(app.exec_())
