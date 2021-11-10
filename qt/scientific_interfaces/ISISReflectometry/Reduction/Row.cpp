@@ -66,7 +66,7 @@ void Row::renameOutputWorkspace(std::string const &oldName, std::string const &n
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
 }
 
-void Row::setParent(Group *parent) { m_parent = parent; }
+void Row::setParent(Group *parent) const { m_parent = parent; }
 
 Row Row::withExtraRunNumbers(std::vector<std::string> const &extraRunNumbers) const {
   // If both lists of run numbers are the same then there's nothing to merge

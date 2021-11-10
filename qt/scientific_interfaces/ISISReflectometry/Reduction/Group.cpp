@@ -97,6 +97,9 @@ std::vector<boost::optional<Row>> &Group::mutableRows() { return m_rows; }
 
 void Group::appendRow(boost::optional<Row> const &row) {
   Item::resetState();
+  if (row) {
+    row->setParent(this);
+  }
   m_rows.emplace_back(row);
 }
 
@@ -116,6 +119,9 @@ void Group::appendEmptyRow() {
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
   Item::resetState();
+  if (row) {
+    row->setParent(this);
+  }
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
 }
 
@@ -143,6 +149,9 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
   };
   auto insertIter = std::upper_bound(m_rows.cbegin(), m_rows.cend(), row->theta(), valueLessThanRowTheta);
   auto const insertedRowIndex = std::distance(m_rows.cbegin(), insertIter);
+  if (row) {
+    row->setParent(this);
+  }
   m_rows.insert(insertIter, row); // invalidates iterator
   return static_cast<int>(insertedRowIndex);
 }
@@ -157,6 +166,9 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
     return;
 
   Item::resetState();
+  if (row) {
+    row->setParent(this);
+  }
   m_rows[rowIndex] = row;
 }
 

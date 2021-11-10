@@ -50,7 +50,7 @@ public:
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
 
-  void setParent(Group *parent);
+  void setParent(Group *parent) const;
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 
@@ -66,7 +66,7 @@ private:
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
-  Group *m_parent;
+  mutable Group *m_parent;
 
   friend class Encoder;
 };
