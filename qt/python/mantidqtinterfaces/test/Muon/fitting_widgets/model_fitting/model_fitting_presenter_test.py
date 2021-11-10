@@ -44,6 +44,8 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.result_table_names = ["Results1", "Results2"]
         self.x_parameters = ["A0", "A1"]
         self.y_parameters = ["A0", "A1"]
+        self.x_parameter_types = [2, 2]
+        self.y_parameter_types = [2, 2]
 
         self._setup_mock_view()
         self._setup_mock_model()
@@ -175,8 +177,8 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.mock_model_dataset_names.assert_has_calls([mock.call(), mock.call()])
         self.view.set_datasets_in_function_browser.assert_called_once_with(self.dataset_names)
         self.view.update_dataset_name_combo_box.assert_called_once_with(self.dataset_names, emit_signal=False)
-        self.view.update_y_parameters.assert_called_once_with(self.y_parameters)
-        self.view.update_x_parameters.assert_called_once_with(self.x_parameters, emit_signal=True)
+        self.view.update_y_parameters.assert_called_once_with(self.y_parameters, self.y_parameter_types)
+        self.view.update_x_parameters.assert_called_once_with(self.x_parameters, self.x_parameter_types, emit_signal=True)
 
     def test_that_handle_parameter_combinations_error_will_show_a_warning_in_the_view(self):
         error = "Error message"
@@ -271,7 +273,8 @@ class ModelFittingPresenterTest(unittest.TestCase):
                                                              self.fit_status, self.chi_squared,
                                                              self.param_combination_name, self.param_group_name,
                                                              self.result_table_names, self.x_parameters,
-                                                             self.y_parameters)
+                                                             self.y_parameters, self.x_parameter_types,
+                                                             self.y_parameter_types)
 
         # Mock the properties of the model
         self.mock_model_current_dataset_index = mock.PropertyMock(return_value=self.current_dataset_index)

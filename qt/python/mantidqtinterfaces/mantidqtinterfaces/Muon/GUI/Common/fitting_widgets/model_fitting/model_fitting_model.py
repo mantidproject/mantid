@@ -64,6 +64,14 @@ class ModelFittingModel(BasicFittingModel):
         """Returns the Y parameters that are stored by the fitting context."""
         return list(self.fitting_context.y_parameters.keys())
 
+    def x_parameter_types(self) -> list:
+        """Returns the types of X parameters that are stored by the fitting context"""
+        return [parameter[1] for parameter in self.fitting_context.x_parameters.values()]
+
+    def y_parameter_types(self) -> list:
+        """Returns the types of Y parameters that are stored by the fitting context"""
+        return [parameter[1] for parameter in self.fitting_context.y_parameters.values()]
+
     def get_first_x_parameter_not(self, parameter: str) -> str:
         """Returns the first X parameter that is not the same as the parameter provided."""
         return self._get_first_parameter_from_list_not(self.x_parameters(), parameter)
@@ -124,15 +132,16 @@ class ModelFittingModel(BasicFittingModel):
             current_results_table = retrieve_ws(results_table_name)
 
             for i, column_name in enumerate(current_results_table.getColumnNames()):
-                self._save_values_from_table_column(column_name, current_results_table.column(i))
+                self._save_values_from_table_column(column_name, current_results_table.column(i),
+                                                    current_results_table.getPlotType(i))
 
             self._populate_empty_parameter_errors(current_results_table.rowCount())
 
-    def _save_values_from_table_column(self, column_name: str, values: list) -> None:
+    def _save_values_from_table_column(self, column_name: str, values: list, type: int) -> None:
         """Saves the values from a results table column in the correct location based on the column name."""
         if "Error" not in column_name:
-            self.fitting_context.x_parameters[column_name] = values
-            self.fitting_context.y_parameters[column_name] = values
+            self.fitting_context.x_parameters[column_name] = [values, type]
+            self.fitting_context.y_parameters[column_name] = [values, type]
         else:
             self.fitting_context.x_parameter_errors[column_name.replace("Error", "")] = values
             self.fitting_context.y_parameter_errors[column_name.replace("Error", "")] = values
@@ -165,11 +174,9 @@ class ModelFittingModel(BasicFittingModel):
         """Creates the matrix workspace for a specific x and y parameter, and adds it to the workspace group."""
         if x_parameter_name != y_parameter_name and x_parameter_name in self.x_parameters() \
                 and y_parameter_name in self.y_parameters():
-            x_values = self._convert_str_column_values_to_int(x_parameter_name,
-                                                              self.fitting_context.x_parameters)
+            x_values = self._convert_str_column_values_to_int(self.fitting_context.x_parameters[x_parameter_name])
             x_errors = self.fitting_context.x_parameter_errors[x_parameter_name]
-            y_values = self._convert_str_column_values_to_int(y_parameter_name,
-                                                              self.fitting_context.y_parameters)
+            y_values = self._convert_str_column_values_to_int(self.fitting_context.y_parameters[y_parameter_name])
             y_errors = self.fitting_context.y_parameter_errors[y_parameter_name]
 
             # Sort the data based on the x_values being in ascending order
@@ -205,12 +212,12 @@ class ModelFittingModel(BasicFittingModel):
         return all([is_equal_to_n_decimals(i, j, 5) for i, j in zip(list1, list2)])
 
     @staticmethod
-    def _convert_str_column_values_to_int(parameter_name: str, parameter_values: list) -> list:
+    def _convert_str_column_values_to_int(parameter_values: list) -> list:
         """Converts any str column values to an int so that they can be fitted."""
-        if type(parameter_values[parameter_name][0]) == str:
-            return range(len(parameter_values[parameter_name]))
+        if type(parameter_values[0][0]) == str:
+            return range(len(parameter_values[0]))
         else:
-            return parameter_values[parameter_name]
+            return parameter_values[0]
 
     def _get_new_start_xs_and_end_xs_using_existing_datasets(self, new_dataset_names: list) -> tuple:
         """Returns the start and end Xs to use for the new datasets. It uses the limits of the new workspaces."""

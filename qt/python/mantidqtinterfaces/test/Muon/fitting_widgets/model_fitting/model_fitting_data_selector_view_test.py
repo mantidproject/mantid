@@ -60,16 +60,19 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_that_update_x_and_y_parameters_will_update_the_x_and_y_parameters(self):
         x_parameters = ["workspace_name", "A0", "A1"]
+        x_parameter_types = [0, 2, 2]
         y_parameters = ["workspace_name", "A0", "A1", "Chi Squared"]
+        y_parameter_types = [0, 2, 2, 2]
 
-        self.view.update_x_parameters(x_parameters)
-        self.view.update_y_parameters(y_parameters)
+        self.view.update_x_parameters(x_parameters, x_parameter_types)
+        self.view.update_y_parameters(y_parameters, y_parameter_types)
 
         x_data = [self.view.x_selector.itemText(i) for i in range(self.view.x_selector.count())]
         y_data = [self.view.y_selector.itemText(i) for i in range(self.view.y_selector.count())]
-
-        self.assertTrue(x_data, x_parameters)
-        self.assertTrue(y_data, y_parameters)
+        self.assertEqual(x_data, x_parameters)
+        self.assertEqual(y_data, y_parameters)
+        self.assertEqual(self.view.x_parameter, "workspace_name")
+        self.assertEqual(self.view.y_parameter, "A0")
 
 
 if __name__ == '__main__':
