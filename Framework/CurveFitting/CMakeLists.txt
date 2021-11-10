@@ -449,6 +449,7 @@ set(TEST_FILES
     Functions/LinearBackgroundTest.h
     Functions/LogNormalTest.h
     Functions/LorentzianTest.h
+    Functions/MagneticOrderParameterTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
     Functions/MuoniumDecouplingCurveTest.h
