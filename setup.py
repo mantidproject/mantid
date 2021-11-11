@@ -12,7 +12,7 @@ from pathlib import Path
 from pprint import pprint
 
 from distutils import sysconfig
-from setuptools import setup, Extension
+from setuptools import setup, Extension, find_packages
 from setuptools.command.build_ext import build_ext
 
 
@@ -140,12 +140,11 @@ ext_modules = [
   CMakeExtension('mantid._plugins._curvefitting')]
 
 setup(name='mantid',
-      packages=['mantid', 'mantid.kernel', 'mantid.api', 'mantid.utils',
-                'mantid.geometry', 'mantid.plots', 'mantid.dataobjects', 'mantid.py36compat'],
       version="6.2.0",
       description='Generate displacement fields with known volume changes',
       author='Mantid Project Developers',
       package_dir={'': 'Framework/PythonInterface'},
+      packages=find_packages('Framework/PythonInterface', exclude=['*.test']),
       ext_modules=ext_modules,
       cmdclass={'build_ext': CMakeBuild},
       classifiers=[
