@@ -91,4 +91,6 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   m_model->setSelectedBanks(indices);
   m_model->sumBanksAsync(*m_jobManager);
 }
+
+void PreviewPresenter::notifyContourExportAdsRequested() { m_model->exportSummedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
