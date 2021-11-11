@@ -37,6 +37,8 @@ Muon Analysis and Frequency Domain Analysis
 New Features
 ############
 
+- Instead of plotting the confidence interval of a fit as an error bar, it is now represented by a shaded region.
+
 Improvements
 ############
 
