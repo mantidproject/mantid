@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/MagneticOrderParameter.h"
+#include "MantidCurveFitting/Jacobian.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
@@ -56,6 +57,47 @@ public:
     }
   }
 
+  void test_jacobian_gives_expected_values() {
+    auto mop = createTestMagneticOrderParameter();
+
+    const size_t nData(1);
+    std::vector<double> xValues(nData, 3.5);
+
+    Mantid::CurveFitting::Jacobian jacobian(nData, 4);
+    mop->functionDeriv1D(&jacobian, xValues.data(), nData);
+
+    double dfdamp = jacobian.get(0, 0);
+    double dfdalpha = jacobian.get(0, 1);
+    double dfdbeta = jacobian.get(0, 2);
+    double dfdtc = jacobian.get(0, 3);
+
+    TS_ASSERT_DELTA(dfdamp, 0.9999999629, 1e-8);
+    TS_ASSERT_DELTA(dfdalpha, 0.0000003793, 1e-8);
+    TS_ASSERT_DELTA(dfdbeta, -0.0000000426, 1e-8);
+    TS_ASSERT_DELTA(dfdtc, 0.0000000011, 1e-8);
+  }
+
+  // test ensures that certain variables return 0 if calculation hits nan or inf
+  void test_jacobian_gives_expected_values_not_finite_numbers() {
+    auto mop = createTestMagneticOrderParameter_infinite();
+
+    const size_t nData(1);
+    std::vector<double> xValues(nData, 4.5);
+
+    Mantid::CurveFitting::Jacobian jacobian(nData, 4);
+    mop->functionDeriv1D(&jacobian, xValues.data(), nData);
+
+    double dfdamp = jacobian.get(0, 0);
+    double dfdalpha = jacobian.get(0, 1);
+    double dfdbeta = jacobian.get(0, 2);
+    double dfdtc = jacobian.get(0, 3);
+
+    TS_ASSERT_DELTA(dfdamp, 0.0, 1e-8);
+    TS_ASSERT_DELTA(dfdalpha, 0.0, 1e-8);
+    TS_ASSERT_DELTA(dfdbeta, 0.0, 1e-8);
+    TS_ASSERT_DELTA(dfdtc, 0.0, 1e-8);
+  }
+
 private:
   class TestableMagneticOrderParameter : public MagneticOrderParameter {
   public:
@@ -74,6 +116,16 @@ private:
     func->setParameter("Alpha", 4.0);
     func->setParameter("Beta", 2.0);
     func->setParameter("CriticalTemp", 300.0);
+    return func;
+  }
+
+  std::shared_ptr<TestableMagneticOrderParameter> createTestMagneticOrderParameter_infinite() {
+    auto func = std::make_shared<TestableMagneticOrderParameter>();
+    func->initialize();
+    func->setParameter("A0", 3.3);
+    func->setParameter("Alpha", 4.0);
+    func->setParameter("Beta", 0.5);
+    func->setParameter("CriticalTemp", 3.0);
     return func;
   }
 };
