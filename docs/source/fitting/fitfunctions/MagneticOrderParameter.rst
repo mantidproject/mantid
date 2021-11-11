@@ -20,6 +20,11 @@ where
 -  :math:`Beta` - the critical exponent
 -  :math:`Tc` - the critical temperature
 
+The CriticalTemp (:math:`Tc`) needs to be set to the value at which the frequency hits 0. In the figure example below this is around 0.4 and so CritialTemp was set to 0.4 to achieve a fit.
+
+.. figure:: /images/magorder_plot.png
+   :alt: magorder_plot.png
+
 
 Examples
 --------

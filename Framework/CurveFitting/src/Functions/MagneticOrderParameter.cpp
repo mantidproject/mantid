@@ -36,7 +36,12 @@ void MagneticOrderParameter::function1D(double *out, const double *xValues, cons
   const double Tc = getParameter("CriticalTemp");
 
   for (size_t i = 0; i < nData; i++) {
-    out[i] = Amp * pow((1 - pow(xValues[i] / Tc, Alpha)), Beta);
+    double formula = Amp * pow((1 - pow(xValues[i] / Tc, Alpha)), Beta);
+    // check whether the formula has returned an nan and if so return 0 instead
+    if (!std::isfinite(formula)) {
+      formula = 0;
+    }
+    out[i] = formula;
   }
 }
 
@@ -51,9 +56,23 @@ void MagneticOrderParameter::functionDeriv1D(Jacobian *out, const double *xValue
     double xCalcAlpha = pow(xCalc, Alpha);
 
     double diffAmp = pow((1 - xCalcAlpha), Beta);
+    // if diffAmp is NaN or inf we should use 0 instead.
+    if (!std::isfinite(diffAmp)) {
+      diffAmp = 0;
+    }
+
     double diffAmpMin = pow((1 - xCalcAlpha), Beta - 1);
+    // if diffAmpMin is NaN or inf we should use 0 instead.
+    if (!std::isfinite(diffAmpMin)) {
+      diffAmpMin = 0;
+    }
+
     double diffAlpha = -Amp * Beta * xCalcAlpha * log(xCalc) * diffAmpMin;
     double diffBeta = Amp * diffAmp * log(1 - xCalcAlpha);
+    // we can only take a log of a positive number. If thats not possible the diffBeta should be 0.
+    if ((1 - xCalcAlpha) <= 0.0) {
+      diffBeta = 0;
+    }
     double diffTc = (Amp * Alpha * Beta * xCalcAlpha * diffAmpMin) / Tc;
 
     out->set(i, 0, diffAmp);
