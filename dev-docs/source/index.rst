@@ -23,6 +23,7 @@ Guides
    Standards/index
    Testing/index
    DoxygenSetup
+   OSXCondaPackaging
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
