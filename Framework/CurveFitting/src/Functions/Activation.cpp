@@ -59,9 +59,8 @@ void Activation::functionDeriv1D(Jacobian *out, const double *xValues, const siz
 
 void Activation::beforeFunctionSet() const {
   auto unit = getAttribute("Unit").asString();
-  boost::to_lower(unit);
 
-  if (unit.compare("k") != 0 && unit.compare("mev") != 0) {
+  if (unit.compare("K") != 0 && unit.compare("meV") != 0) {
     throw std::invalid_argument("Activation function can only be used with K or meV as the unit");
   }
 }

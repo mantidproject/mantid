@@ -46,14 +46,14 @@ public:
     activ->setAttributeValue("Unit", "K");
     TS_ASSERT_THROWS_NOTHING(activ->beforeFunctionSet());
 
-    activ->setAttributeValue("Unit", "k");
-    TS_ASSERT_THROWS_NOTHING(activ->beforeFunctionSet());
-
     activ->setAttributeValue("Unit", "meV");
     TS_ASSERT_THROWS_NOTHING(activ->beforeFunctionSet());
 
+    activ->setAttributeValue("Unit", "k");
+    TS_ASSERT_THROWS(activ->beforeFunctionSet(), const std::invalid_argument &);
+
     activ->setAttributeValue("Unit", "mev");
-    TS_ASSERT_THROWS_NOTHING(activ->beforeFunctionSet());
+    TS_ASSERT_THROWS(activ->beforeFunctionSet(), const std::invalid_argument &);
 
     activ->setAttributeValue("Unit", "mevk");
     TS_ASSERT_THROWS(activ->beforeFunctionSet(), const std::invalid_argument &);

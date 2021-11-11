@@ -28,6 +28,7 @@ where:
 - k_B - Boltzmann Constant
 
 
+When using this function the Unit must be set to either K or meV otherwise the fitting function will not be applied.
 
 Examples
 --------
