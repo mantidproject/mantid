@@ -368,7 +368,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DataBlockComposite
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEventNexus.h:347
-nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:281
+nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:284
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/EventWorkspaceCollection.cpp:191
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:780
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:1988
@@ -928,9 +928,8 @@ stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlot
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:107
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:113
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataValidationHelper.cpp:33
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectTab.cpp:604
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectSymmetrise.cpp:173
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Stretch.cpp:220
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:281
+ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:284

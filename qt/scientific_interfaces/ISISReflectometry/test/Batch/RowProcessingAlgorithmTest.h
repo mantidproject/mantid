@@ -29,42 +29,42 @@ public:
   void testExperimentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result["AnalysisMode"], "MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(result["ReductionType"], "NonFlatSample");
-    TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
-    TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
-    TS_ASSERT_EQUALS(result["Debug"], "1");
-    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
-    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "Polynomial");
-    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
-    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
-    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
-    TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
-    TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
-    TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
-    TS_ASSERT_EQUALS(result["EndOverlap"], "9.200000");
-    TS_ASSERT_EQUALS(result["Params"], "-0.02");
-    TS_ASSERT_EQUALS(result["ScaleRHSWorkspace"], "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "NonFlatSample");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SummationType"), "SumInQ");
+    TS_ASSERT_EQUALS(result->getPropertyValue("IncludePartialBins"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("Debug"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SubtractBackground"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundCalculationMethod"), "Polynomial");
+    TS_ASSERT_EQUALS(result->getPropertyValue("DegreeOfPolynomial"), "3");
+    TS_ASSERT_EQUALS(result->getPropertyValue("CostFunction"), "Unweighted least squares");
+    TS_ASSERT_EQUALS(result->getPropertyValue("PolarizationAnalysis"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FloodCorrection"), "Workspace");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FloodWorkspace"), "test_workspace");
+    TS_ASSERT_EQUALS(result->getPropertyValue("StartOverlap"), "7.500000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("EndOverlap"), "9.200000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("Params"), "-0.02");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleRHSWorkspace"), "1");
   }
 
   void testExperimentSettingsWithEmptyRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["AnalysisMode"], "MultiDetectorAnalysis");
-    TS_ASSERT_EQUALS(result["ReductionType"], "NonFlatSample");
-    TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
-    TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
-    TS_ASSERT_EQUALS(result["Debug"], "1");
-    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
-    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "Polynomial");
-    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
-    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
-    TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
-    TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
-    TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
-    TS_ASSERT_EQUALS(result["StartOverlap"], "7.500000");
-    TS_ASSERT_EQUALS(result["EndOverlap"], "9.200000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("AnalysisMode"), "MultiDetectorAnalysis");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "NonFlatSample");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SummationType"), "SumInQ");
+    TS_ASSERT_EQUALS(result->getPropertyValue("IncludePartialBins"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("Debug"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SubtractBackground"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundCalculationMethod"), "Polynomial");
+    TS_ASSERT_EQUALS(result->getPropertyValue("DegreeOfPolynomial"), "3");
+    TS_ASSERT_EQUALS(result->getPropertyValue("CostFunction"), "Unweighted least squares");
+    TS_ASSERT_EQUALS(result->getPropertyValue("PolarizationAnalysis"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FloodCorrection"), "Workspace");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FloodWorkspace"), "test_workspace");
+    TS_ASSERT_EQUALS(result->getPropertyValue("StartOverlap"), "7.500000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("EndOverlap"), "9.200000");
   }
 
   void testLookupRowWithAngleLookup() {
@@ -72,15 +72,15 @@ public:
     // angle within tolerance of 2.3
     auto row = makeRow(2.29);
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "22348, 22349");
-    TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "22358, 22359");
-    TS_ASSERT_EQUALS(result["TransmissionProcessingInstructions"], "4");
-    TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.009000");
-    TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.030000");
-    TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.300000");
-    TS_ASSERT_EQUALS(result["ScaleFactor"], "0.900000");
-    TS_ASSERT_EQUALS(result["ProcessingInstructions"], "4-6");
-    TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "2-3,7-8");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "22348, 22349");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "22358, 22359");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "4");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMin"), "0.009000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferStep"), "0.030000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMax"), "1.300000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleFactor"), "0.900000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "4-6");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "2-3,7-8");
   }
 
   void testLookupRowWithWildcardLookup() {
@@ -88,46 +88,47 @@ public:
     // angle outside tolerance of any angle matches wildcard row instead
     auto row = makeRow(2.28);
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "22345");
-    TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "22346");
-    TS_ASSERT_EQUALS(result["TransmissionProcessingInstructions"], "5-6");
-    TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.007000");
-    TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.010000");
-    TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.100000");
-    TS_ASSERT_EQUALS(result["ScaleFactor"], "0.700000");
-    TS_ASSERT_EQUALS(result["ProcessingInstructions"], "1");
-    TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "3,7");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "22345");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "22346");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TransmissionProcessingInstructions"), "5-6");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMin"), "0.007000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferStep"), "0.010000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMax"), "1.100000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleFactor"), "0.700000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundProcessingInstructions"), "3,7");
   }
 
   void testInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result["WavelengthMin"], "2.300000");
-    TS_ASSERT_EQUALS(result["WavelengthMax"], "14.400000");
-    TS_ASSERT_EQUALS(result["I0MonitorIndex"], "2");
-    TS_ASSERT_EQUALS(result["NormalizeByIntegratedMonitors"], "1");
-    TS_ASSERT_EQUALS(result["MonitorBackgroundWavelengthMin"], "1.100000");
-    TS_ASSERT_EQUALS(result["MonitorBackgroundWavelengthMax"], "17.200000");
-    TS_ASSERT_EQUALS(result["MonitorIntegrationWavelengthMin"], "3.400000");
-    TS_ASSERT_EQUALS(result["MonitorIntegrationWavelengthMax"], "10.800000");
-    TS_ASSERT_EQUALS(result["CorrectDetectors"], "1");
-    TS_ASSERT_EQUALS(result["DetectorCorrectionType"], "RotateAroundSample");
+    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMin"), "2.300000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMax"), "14.400000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("I0MonitorIndex"), "2");
+    TS_ASSERT_EQUALS(result->getPropertyValue("NormalizeByIntegratedMonitors"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMin"), "1.100000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMax"), "17.200000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMin"), "3.400000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMax"), "10.800000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("CorrectDetectors"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
   }
 
   void testInstrumentSettingsWithEmptyRow() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["WavelengthMin"], "2.300000");
-    TS_ASSERT_EQUALS(result["WavelengthMax"], "14.400000");
-    TS_ASSERT_EQUALS(result["I0MonitorIndex"], "2");
-    TS_ASSERT_EQUALS(result["NormalizeByIntegratedMonitors"], "1");
-    TS_ASSERT_EQUALS(result["MonitorBackgroundWavelengthMin"], "1.100000");
-    TS_ASSERT_EQUALS(result["MonitorBackgroundWavelengthMax"], "17.200000");
-    TS_ASSERT_EQUALS(result["MonitorIntegrationWavelengthMin"], "3.400000");
-    TS_ASSERT_EQUALS(result["MonitorIntegrationWavelengthMax"], "10.800000");
-    TS_ASSERT_EQUALS(result["CorrectDetectors"], "1");
-    TS_ASSERT_EQUALS(result["DetectorCorrectionType"], "RotateAroundSample");
+
+    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMin"), "2.300000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMax"), "14.400000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("I0MonitorIndex"), "2");
+    TS_ASSERT_EQUALS(result->getPropertyValue("NormalizeByIntegratedMonitors"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMin"), "1.100000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorBackgroundWavelengthMax"), "17.200000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMin"), "3.400000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MonitorIntegrationWavelengthMax"), "10.800000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("CorrectDetectors"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("DetectorCorrectionType"), "RotateAroundSample");
   }
 
   void testSettingsForSlicingWithEmptyRow() {
@@ -135,36 +136,36 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto row = makeEmptyRow();
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["TimeInterval"], "123.400000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TimeInterval"), "123.400000");
   }
 
   void testSettingsForSlicingByTime() {
     auto slicing = Slicing(UniformSlicingByTime(123.4));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result["TimeInterval"], "123.400000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TimeInterval"), "123.400000");
   }
 
   void testSettingsForSlicingByNumberOfSlices() {
     auto slicing = Slicing(UniformSlicingByNumberOfSlices(3));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result["NumberOfSlices"], "3");
+    TS_ASSERT_EQUALS(result->getPropertyValue("NumberOfSlices"), "3");
   }
 
   void testSettingsForSlicingByList() {
     auto slicing = Slicing(CustomSlicingByList({3.1, 10.2, 47.35}));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result["TimeInterval"], "3.1, 10.2, 47.35");
+    TS_ASSERT_EQUALS(result->getPropertyValue("TimeInterval"), "3.1, 10.2, 47.35");
   }
 
   void testSettingsForSlicingByLog() {
     auto slicing = Slicing(SlicingByEventLog({18.2}, "test_log_name"));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, slicing);
     auto result = createAlgorithmRuntimeProps(model);
-    TS_ASSERT_EQUALS(result["LogName"], "test_log_name");
-    TS_ASSERT_EQUALS(result["LogValueInterval"], "18.200000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("LogName"), "test_log_name");
+    TS_ASSERT_EQUALS(result->getPropertyValue("LogValueInterval"), "18.200000");
   }
 
   void testSettingsForRowCellValues() {
@@ -173,14 +174,15 @@ public:
     // overridden by the cell values
     auto row = makeRowWithMainCellsFilled(2.3);
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["InputRunList"], "12345, 12346");
-    TS_ASSERT_EQUALS(result["FirstTransmissionRunList"], "92345");
-    TS_ASSERT_EQUALS(result["SecondTransmissionRunList"], "92346");
-    TS_ASSERT_EQUALS(result["ThetaIn"], "2.300000");
-    TS_ASSERT_EQUALS(result["MomentumTransferMin"], "0.100000");
-    TS_ASSERT_EQUALS(result["MomentumTransferStep"], "0.090000");
-    TS_ASSERT_EQUALS(result["MomentumTransferMax"], "0.910000");
-    TS_ASSERT_EQUALS(result["ScaleFactor"], "2.200000");
+
+    TS_ASSERT_EQUALS(result->getPropertyValue("InputRunList"), "12345, 12346");
+    TS_ASSERT_EQUALS(result->getPropertyValue("FirstTransmissionRunList"), "92345");
+    TS_ASSERT_EQUALS(result->getPropertyValue("SecondTransmissionRunList"), "92346");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ThetaIn"), "2.300000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMin"), "0.100000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferStep"), "0.090000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("MomentumTransferMax"), "0.910000");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ScaleFactor"), "2.200000");
   }
 
   void testAddingPropertyViaOptionsCell() {
@@ -189,7 +191,7 @@ public:
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ThetaLogName", "theta_log_name"}});
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["ThetaLogName"], "theta_log_name");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ThetaLogName"), "theta_log_name");
   }
 
   void testOptionsCellOverridesExperimentSettings() {
@@ -197,8 +199,8 @@ public:
     auto row = makeRowWithOptionsCellFilled(
         2.3, ReductionOptionsMap{{"AnalysisMode", "PointDetectorAnalysis"}, {"ReductionType", "DivergentBeam"}});
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["AnalysisMode"], "PointDetectorAnalysis");
-    TS_ASSERT_EQUALS(result["ReductionType"], "DivergentBeam");
+    TS_ASSERT_EQUALS(result->getPropertyValue("AnalysisMode"), "PointDetectorAnalysis");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ReductionType"), "DivergentBeam");
   }
 
   void testOptionsCellOverridesLookupRow() {
@@ -207,14 +209,14 @@ public:
     // overridden by the cell values
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"ProcessingInstructions", "390-410"}});
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["ProcessingInstructions"], "390-410");
+    TS_ASSERT_EQUALS(result->getPropertyValue("ProcessingInstructions"), "390-410");
   }
 
   void testOptionsCellOverridesInstrumentSettings() {
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"WavelengthMin", "3.3"}});
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["WavelengthMin"], "3.3");
+    TS_ASSERT_EQUALS(result->getPropertyValue("WavelengthMin"), "3.3");
   }
 
   void testOptionsCellOverridesSubtractBackgroundAndStillPicksUpSettings() {
@@ -227,10 +229,11 @@ public:
     auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
     auto row = makeRowWithOptionsCellFilled(2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
     auto result = createAlgorithmRuntimeProps(model, row);
-    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
-    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "AveragePixelFit");
-    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
-    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
+
+    TS_ASSERT_EQUALS(result->getPropertyValue("SubtractBackground"), "1");
+    TS_ASSERT_EQUALS(result->getPropertyValue("BackgroundCalculationMethod"), "AveragePixelFit");
+    TS_ASSERT_EQUALS(result->getPropertyValue("DegreeOfPolynomial"), "3");
+    TS_ASSERT_EQUALS(result->getPropertyValue("CostFunction"), "Unweighted least squares");
   }
 
 private:

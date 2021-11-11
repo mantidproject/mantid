@@ -245,6 +245,9 @@ public:
   /// Get the list of managed properties.
   virtual const std::vector<Property *> &getProperties() const = 0;
 
+  /// Get the list of managed property names.
+  virtual std::vector<std::string> getDeclaredPropertyNames() const noexcept = 0;
+
   /** Templated method to set the value of a PropertyWithValue
    *  @param name :: The name of the property (case insensitive)
    *  @param value :: The value to assign to the property

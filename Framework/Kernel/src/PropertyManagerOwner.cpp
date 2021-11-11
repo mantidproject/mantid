@@ -179,6 +179,19 @@ Property *PropertyManagerOwner::getPointerToPropertyOrdinal(const int &index) co
  */
 const std::vector<Property *> &PropertyManagerOwner::getProperties() const { return m_properties->getProperties(); }
 
+/**
+ * Return the list of declared property names.
+ * @return A vector holding strings of property names
+ */
+std::vector<std::string> PropertyManagerOwner::getDeclaredPropertyNames() const noexcept {
+  std::vector<std::string> names;
+  const auto &props = getProperties();
+  names.reserve(props.size());
+  std::transform(props.cbegin(), props.cend(), std::back_inserter(names),
+                 [](auto &propPtr) { return propPtr->name(); });
+  return names;
+}
+
 /** Get the value of a property. Allows you to assign directly to a variable of
  *the property's type
  *  (if a supported type).

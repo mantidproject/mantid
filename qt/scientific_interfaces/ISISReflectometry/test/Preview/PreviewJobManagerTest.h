@@ -9,6 +9,7 @@
 #include "../Reduction/MockBatch.h"
 #include "GUI/Batch/BatchJobAlgorithm.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "PreviewJobManager.h"
 
@@ -72,8 +73,8 @@ public:
 
     auto row = PreviewRow({"12345"});
     Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
-    auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
-    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(mockAlg, properties,
+    auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties),
                                                              AlgCompleteCallback::updateRowOnAlgorithmComplete, &row);
 
     EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(1);
@@ -117,14 +118,14 @@ private:
 
   IConfiguredAlgorithm_sptr makeConfiguredAlg() {
     IAlgorithm_sptr stubAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
-    auto emptyProps = MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps();
-    return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(stubAlg, emptyProps);
+    auto emptyProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    return std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(stubAlg), std::move(emptyProps));
   }
 
   std::shared_ptr<BatchJobAlgorithm> makeConfiguredAlg(Item &item) {
     Mantid::API::IAlgorithm_sptr mockAlg = std::make_shared<WorkspaceCreationHelper::StubAlgorithm>();
-    auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
-    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(mockAlg, properties, nullptr, &item);
+    auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    auto configuredAlg = std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties), nullptr, &item);
     return configuredAlg;
   }
 };

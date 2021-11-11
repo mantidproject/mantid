@@ -9,6 +9,7 @@
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 #include "Reduction/Item.h"
 #include "Reduction/PreviewRow.h"
@@ -22,7 +23,7 @@ using MantidQt::API::IConfiguredAlgorithm;
 using MantidQt::API::IConfiguredAlgorithm_sptr;
 
 namespace {
-void updateInputWorkspacesProperties(IConfiguredAlgorithm::AlgorithmRuntimeProps &properties,
+void updateInputWorkspacesProperties(MantidQt::API::IAlgorithmRuntimeProps &properties,
                                      std::vector<std::string> const &inputRunNumbers) {
   AlgorithmProperties::update("InputRunList", inputRunNumbers, properties);
 }
@@ -47,11 +48,12 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(IBatch const & /*model*/, Pr
   alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
 
   // Set the algorithm properties from the model
-  auto properties = IConfiguredAlgorithm::AlgorithmRuntimeProps();
-  updateInputWorkspacesProperties(properties, row.runNumbers());
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  updateInputWorkspacesProperties(*properties, row.runNumbers());
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateRowOnAlgorithmComplete, &row);
+  auto jobAlgorithm =
+      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowOnAlgorithmComplete, &row);
   return jobAlgorithm;
 }
 
