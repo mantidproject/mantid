@@ -183,11 +183,12 @@ public:
       TS_ASSERT_DELTA(radius, cylinder.getRadius(), 0.01 * cylinder.getRadius());
       std::cout << "AA found " << point << std::endl;
     }
-    TS_ASSERT_DIFFERS(case1_out[0], case1_out[1]);
-    TS_ASSERT_EQUALS(case1_out.size(), expNumIntersections); // once in, once out
+    TS_ASSERT_EQUALS(case1_out.size(), expNumIntersections);
+    if (case1_out.size() > 1)
+      TS_ASSERT_DIFFERS(case1_out[0], case1_out[1]);
 
     // from point2 to point1 -- duplicated from lines above
-    Line case2(point1, Kernel::normalize(point2 - point1));
+    Line case2(point2, Kernel::normalize(point1 - point2));
     Line::PType case2_out;
     case2.intersect(case2_out, cylinder);
     for (const auto &point : case2_out) {
@@ -196,13 +197,21 @@ public:
       TS_ASSERT_DELTA(radius, cylinder.getRadius(), 0.01 * cylinder.getRadius());
       std::cout << "BB found " << point << std::endl;
     }
-    TS_ASSERT_DIFFERS(case2_out[0], case2_out[1]);
-    TS_ASSERT_EQUALS(case2_out.size(), expNumIntersections); // once in, once out
+    TS_ASSERT_EQUALS(case2_out.size(), expNumIntersections);
+    if (case2_out.size() > 1)
+      TS_ASSERT_DIFFERS(case2_out[0], case2_out[1]);
 
     // should have found the same points
     // note that order is preserved for opposite directions
-    for (size_t i = 0; i < expNumIntersections; ++i)
-      TS_ASSERT_EQUALS(case1_out[i], case2_out[i]);
+    if (expNumIntersections == 1) {
+      // TODO should these be the same point?
+      TS_ASSERT_EQUALS(case1_out.front(), case2_out.front());
+    } else if (expNumIntersections == 2) {
+      TS_ASSERT_EQUALS(case1_out.front(), case2_out.back());
+      TS_ASSERT_EQUALS(case1_out.back(), case2_out.front());
+    } else {
+      TS_ASSERT_LESS_THAN(expNumIntersections, 3); // too many interactions
+    }
 
     // pointing away from the cylinder
     Line case3(point2, Kernel::normalize(point2 - point1));
