@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.qt import load_ui
 from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
+from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
 from qtpy.QtWidgets import QWidget
 
@@ -103,7 +104,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
     def _get_x_parameter_for_update(self, old_x_parameter: str, x_parameters: list, x_parameter_types: list) -> str:
         if self.y_selector.findText(old_x_parameter) != -1:
             return old_x_parameter
-        elif 1 in x_parameter_types:
+        elif TableColumnType.X.value in x_parameter_types:
             return x_parameters[x_parameter_types.index(1)]
         else:
             return ''
@@ -111,7 +112,7 @@ class ModelFittingDataSelectorView(ui_form, base_widget):
     def _get_y_parameter_for_update(self, old_y_parameter: str, y_parameters: list, y_parameter_types: list) -> str:
         if self.x_selector.findText(old_y_parameter) != -1:
             return old_y_parameter
-        elif 2 in y_parameter_types:
+        elif TableColumnType.Y.value in y_parameter_types:
             return y_parameters[y_parameter_types.index(2)]
         else:
             return ''

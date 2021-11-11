@@ -12,6 +12,7 @@ from mantid.api import FrameworkManager, FunctionFactory
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_presenter import ModelFittingPresenter
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
+from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import (add_mock_methods_to_model_fitting_model,
                                                                                 add_mock_methods_to_model_fitting_presenter,
                                                                                 add_mock_methods_to_model_fitting_view)
@@ -44,8 +45,8 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.result_table_names = ["Results1", "Results2"]
         self.x_parameters = ["A0", "A1"]
         self.y_parameters = ["A0", "A1"]
-        self.x_parameter_types = [2, 2]
-        self.y_parameter_types = [2, 2]
+        self.x_parameter_types = [TableColumnType.Y.value, TableColumnType.Y.value]
+        self.y_parameter_types = [TableColumnType.Y.value, TableColumnType.Y.value]
 
         self._setup_mock_view()
         self._setup_mock_model()

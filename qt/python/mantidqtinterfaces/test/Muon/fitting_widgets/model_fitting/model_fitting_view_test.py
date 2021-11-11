@@ -10,6 +10,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_view import ModelFittingView
+from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
 from qtpy.QtWidgets import QApplication
 
@@ -62,9 +63,9 @@ class ModelFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
     def test_that_update_x_and_y_parameters_will_update_the_x_and_y_parameters(self):
         x_parameters = ["workspace_name", "A0", "A1"]
-        x_parameter_types = [0, 2, 2]
+        x_parameter_types = [TableColumnType.NoType.value, TableColumnType.Y.value, TableColumnType.Y.value]
         y_parameters = ["workspace_name", "A0", "A1", "Chi Squared"]
-        y_parameter_types = [0, 2, 2, 2]
+        y_parameter_types = [TableColumnType.NoType.value, TableColumnType.Y.value, TableColumnType.Y.value, TableColumnType.Y.value]
 
         self.view.update_x_parameters(x_parameters, x_parameter_types)
         self.view.update_y_parameters(y_parameters, y_parameter_types)
