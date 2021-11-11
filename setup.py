@@ -62,6 +62,7 @@ class CMakeBuild(build_ext):
         self.with_conda = os.environ.get('MANTID_WITH_CONDA', 'True')
         self.install_mantid_cpp = os.environ.get('MANTID_INSTALL_CPP_LIBS', 'True')
         self.install_prefix = os.environ.get('CONDA_PREFIX', self.build_lib)
+        self.cmake_prefix_path = os.environ.get('CONDA_PREFIX')
 
     def finalize_options(self):
         if self.inplace:
@@ -82,11 +83,12 @@ class CMakeBuild(build_ext):
                 '-DENABLE_DOCS=OFF',
                 '-DUSE_SETUPPY=True',
                 '-DINPLACE_BUILD=True',
+                '-DHDF5_ROOT=' + self.cmake_prefix_path,
                 '-DCMAKE_BUILD_TYPE=' + self.build_type,
                 '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + build_directory,
                 '-DCMAKE_INSTALL_PREFIX=' + self.install_prefix,
-                '-DCONDA_BUILD='+ self.with_conda,
+                '-DCONDA_ENV='+ self.with_conda,
                 '-G' + self.cmake_generator,
             ]
 
