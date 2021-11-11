@@ -34,8 +34,12 @@ class SimulatedDensityOfStatesEuphonicTest(MantidSystemTest):
         package_dirs = []
         for lib_dir in ('lib', 'lib64', 'Lib', 'Lib64'):
             if (prefix_path / lib_dir).is_dir():
-                site_packages = next(
-                    (prefix_path / lib_dir).iterdir()) / 'site-packages'
+                if (prefix_path / lib_dir / 'site-packages').is_dir():
+                    site_packages = prefix_path / lib_dir / 'site-packages'
+                else:
+                    site_packages = next(
+                        (prefix_path / lib_dir).iterdir()) / 'site-packages'
+
                 if site_packages.is_dir():
                     site.addsitedir(site_packages)
                     package_dirs.append(site_packages)
