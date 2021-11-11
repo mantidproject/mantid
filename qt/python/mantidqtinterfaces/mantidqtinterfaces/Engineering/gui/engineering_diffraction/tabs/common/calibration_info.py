@@ -127,7 +127,12 @@ class CalibrationInfo:
         """
         filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
         self.calibration_table = output_prefix + "_calibration_" + self.get_group_suffix()
-        Load(Filename=filepath, OutputWorkspace=self.calibration_table)
+
+        try:
+            Load(Filename=filepath, OutputWorkspace=self.calibration_table)
+        except Exception as e:
+            logger.error("Unable to loading calibration file " + filepath + ". Error: " + str(e))
+
         # load in custom grouping - checks if applicable inside method
         if not self.group.banks:
             self.load_custom_grouping_workspace()

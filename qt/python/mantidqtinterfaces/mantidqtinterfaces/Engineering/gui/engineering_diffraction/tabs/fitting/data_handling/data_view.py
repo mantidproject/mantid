@@ -125,7 +125,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.button_SeqFit.setEnabled(enabled)
         self.button_SerialFit.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
+    def add_table_row(self, run_no, bank, plotted, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
 
@@ -137,13 +137,13 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         bank_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
         self.table_selection.setItem(row_no, 1, bank_item)
 
-        check_box = QtWidgets.QTableWidgetItem()
-        check_box.setFlags(check_box.flags() & ~QtCore.Qt.ItemIsEditable)
-        self.table_selection.setItem(row_no, 2, check_box)
-        if checked:
-            check_box.setCheckState(QtCore.Qt.Checked)
+        plotted_check_box = QtWidgets.QTableWidgetItem()
+        plotted_check_box.setFlags(plotted_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        self.table_selection.setItem(row_no, 2, plotted_check_box)
+        if plotted:
+            plotted_check_box.setCheckState(QtCore.Qt.Checked)
         else:
-            check_box.setCheckState(QtCore.Qt.Unchecked)
+            plotted_check_box.setCheckState(QtCore.Qt.Unchecked)
 
         bgsub_check_box = QtWidgets.QTableWidgetItem()
         bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
