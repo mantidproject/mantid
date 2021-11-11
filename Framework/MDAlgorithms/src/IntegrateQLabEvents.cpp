@@ -223,7 +223,7 @@ void IntegrateQLabEvents::getEigenVectors(DblMatrix const &cov_matrix, std::vect
   gsl_eigen_symmv_free(wkspace);
 }
 
-void IntegrateQLabEvents::addEvent(const SlimEvent event) {
+void IntegrateQLabEvents::addEvent(const SlimEvent &event) {
   V3D q(event.second);
   CellCoords abc(q, m_cellSize);
   if (abc.isOrigin())

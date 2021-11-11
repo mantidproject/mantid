@@ -221,7 +221,7 @@ private:
   /**
    * @brief assign an event to one cell of the partitioned QLab space.
    * @param event : SlimEvent to be assigned */
-  void addEvent(const SlimEvent event);
+  void addEvent(const SlimEvent &event);
 
   /**
    * @brief Integrate a list of events associated to one peak.

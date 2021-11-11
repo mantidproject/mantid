@@ -30,6 +30,7 @@
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
 
 #include <cmath>
+#include <ctime>
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
@@ -53,6 +54,7 @@ const std::size_t DIMS(3);
 
 void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator, Progress &prog, EventWorkspace_sptr &wksp) {
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
+  // TODO - Test run without OpenMP
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -106,8 +108,19 @@ void IntegrateEllipsoids::qListFromEventWS(IntegrateQLabEvents &integrator, Prog
   integrator.populateCellsWithPeaks();
 }
 
+/**
+ * @brief Retrieve ...
+ * @param integrator
+ * @param prog
+ * @param wksp
+ */
 void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator, Progress &prog, Workspace2D_sptr &wksp) {
+
   auto numSpectra = static_cast<int>(wksp->getNumberHistograms());
+  g_log.notice() << "[DEBUG] num spec = " << numSpectra << "\n";
+  uint64_t numevents(0);
+
+  // TODO - Test run without OpenMP
   PARALLEL_FOR_IF(Kernel::threadSafe(*wksp))
   for (int i = 0; i < numSpectra; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -156,12 +169,17 @@ void IntegrateEllipsoids::qListFromHistoWS(IntegrateQLabEvents &integrator, Prog
         qList.emplace_back(std::pair<double, double>(yVal, esqVal), qVec);
       }
     }
-    PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList); }
+    PARALLEL_CRITICAL(addHisto) {
+      integrator.addEvents(qList);
+      numevents += qList.size();
+    }
     prog.report();
     PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
   PARALLEL_CHECK_INTERUPT_REGION
   integrator.populateCellsWithPeaks();
+
+  g_log.notice() << "[DEBUG] Total slim events added = " << numevents << "\n";
 }
 
 void IntegrateEllipsoids::init() {
@@ -371,7 +389,7 @@ void IntegrateEllipsoids::exec() {
   // get the list of peak Q's for the integrator
   std::vector<Peak> &peaks = peak_ws->getPeaks();
   size_t n_peaks = peak_ws->getNumberPeaks();
-  SlimEvents qList;
+  SlimEvents peak_pos_list;
   // Note: we skip un-indexed peaks
   for (size_t i = 0; i < n_peaks; i++) {
     // check if peak is satellite peak
@@ -386,7 +404,7 @@ void IntegrateEllipsoids::exec() {
     V3D hkl(peaks[i].getIntHKL());
     // use tolerance == 1 to just check for (0,0,0,0,0,0)
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-      qList.emplace_back(std::pair<double, double>(1., 1.), peak_q);
+      peak_pos_list.emplace_back(std::pair<double, double>(1., 1.), peak_q);
     }
   }
 
@@ -400,27 +418,45 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> SatelliteBackgroundOuterRadiusVector(n_peaks, satellite_back_outer_radius);
 
   // make the integrator
-  IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
-  IntegrateQLabEvents integrator_satellite(qList, satellite_radius, useOnePercentBackgroundCorrection);
+  IntegrateQLabEvents integrator(peak_pos_list, radius_m, useOnePercentBackgroundCorrection);
+  IntegrateQLabEvents integrator_satellite(peak_pos_list, satellite_radius, useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator
   // set up a descripter of where we are going
   this->initTargetWSDescr(wksp);
 
+  g_log.notice("[DEBUG] Progress bar shall be at 50% already!");
+
   // set up the progress bar
   const size_t numSpectra = wksp->getNumberHistograms();
-  Progress prog(this, 0.5, 1.0, numSpectra);
 
+  std::clock_t c_start = std::clock();
   if (eventWS) {
     // process as EventWorkspace
-    qListFromEventWS(integrator, prog, eventWS);
-    qListFromEventWS(integrator_satellite, prog, eventWS);
+    g_log.notice("[DEBUG] Checkpoint 1 Event");
+    Progress prog1(this, 0.5, 0.75, numSpectra);
+    qListFromEventWS(integrator, prog1, eventWS);
+    Progress prog2(this, 0.75, 0.90, numSpectra);
+    qListFromEventWS(integrator_satellite, prog2, eventWS);
   } else {
     // process as Workspace2D
-    qListFromHistoWS(integrator, prog, histoWS);
-    qListFromHistoWS(integrator_satellite, prog, histoWS);
+    g_log.notice("[DEBUG] Checkpoint 1 Histogram");
+    Progress prog1(this, 0.5, 0.75, numSpectra);
+    qListFromHistoWS(integrator, prog1, histoWS);
+    std::clock_t bragg_qlist_time = std::clock();
+    g_log.notice() << "[DEBUG] QList[Bragg] = " << bragg_qlist_time - c_start << "\n";
+
+    g_log.notice("[DEBUG] Checkpoint 2 Histogram Satellite");
+    Progress prog2(this, 0.75, 0.90, numSpectra);
+    qListFromHistoWS(integrator_satellite, prog2, histoWS);
+    std::clock_t sat_qlist_time = std::clock();
+
+    g_log.notice() << "[DEBUG] QList[Bragg] = " << bragg_qlist_time - c_start << ", "
+                   << "QList[Sat] = " << sat_qlist_time - bragg_qlist_time << "\n";
   }
+  g_log.notice("[DEBUG] Check point over 90%");
+  c_start = std::clock();
 
   double inti;
   double sigi;
@@ -676,6 +712,10 @@ void IntegrateEllipsoids::exec() {
   peak_ws->mutableRun().addProperty("SatellitePeakRadius", SatellitePeakRadiusVector, true);
   peak_ws->mutableRun().addProperty("SatelliteBackgroundInnerRadius", SatelliteBackgroundInnerRadiusVector, true);
   peak_ws->mutableRun().addProperty("SatelliteBackgroundOuterRadius", SatelliteBackgroundOuterRadiusVector, true);
+
+  // Final
+  std::clock_t final_time = std::clock();
+  g_log.notice() << "[DEBUG] Peak integration and etc Time = " << final_time - c_start << "\n";
 
   setProperty("OutputWorkspace", peak_ws);
 }
