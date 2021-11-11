@@ -136,6 +136,8 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
                        OutputExtents=extents,
                        OutputBins=bins)
 
+        SetMDFrame(mdhist, MDFrame='HKL', Axes='0, 1, 2')
+
         self.setProperty("OutputWorkspace", mdhist)
         mdhist.clearOriginalWorkspaces()
         DeleteWorkspace(mdhist)
