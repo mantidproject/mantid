@@ -34,11 +34,10 @@ list(APPEND _pth_list_install "${_scripts_rel_path}/ExternalInterfaces")
 
 # development copy
 set(_scripts_pth_src "${CMAKE_CURRENT_BINARY_DIR}/mantid-scripts.pth.src")
-if (INPLACE_BUILD)
-set(_scripts_pth_dest
-    "${PROJECT_SOURCE_DIR}/Framework/PythonInterface/mantid-scripts.pth")
+if(INPLACE_BUILD)
+  set(_scripts_pth_dest "${PROJECT_SOURCE_DIR}/Framework/PythonInterface/mantid-scripts.pth")
 else()
-set(_scripts_pth_dest "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid-scripts.pth")
+  set(_scripts_pth_dest "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantid-scripts.pth")
 endif()
 string(REPLACE ";" "\n" _pth_list_dev "${_pth_list_dev}")
 file(WRITE ${_scripts_pth_src} "${_pth_list_dev}\n")
