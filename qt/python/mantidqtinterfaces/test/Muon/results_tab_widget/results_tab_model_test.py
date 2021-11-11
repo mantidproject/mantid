@@ -253,7 +253,6 @@ class ResultsTabModelTest(unittest.TestCase):
                                             model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        #workspace = WorkspaceFactory.create("Workspace2D", NVectors=3, YLength=5, XLength=5)
         workspace = CreateWorkspace([0,1,2,3,4,5],[0,1,2,3,4,5])
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:00:00", Value=100)
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:30:00", Value=65)
