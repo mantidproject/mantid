@@ -148,20 +148,20 @@ class ModelFittingModelTest(unittest.TestCase):
         self.assertEqual(list(x_parameters), ["workspace_name", "A0", "A1", "Sigma", "Lambda"])
         self.assertEqual(list(y_parameters), ["workspace_name", "A0", "A1", "Sigma", "Lambda"])
 
-        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0], 0.1, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][1], 0.3, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][2], 0.5, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0], 0.2, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][1], 0.4, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][2], 0.6, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0], 0.3, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][1], 0.5, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][2], 0.7, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0], 0.4, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][1], 0.6, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][2], 0.8, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0][0], 0.1, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0][1], 0.3, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0][2], 0.5, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0][0], 0.2, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0][1], 0.4, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0][2], 0.6, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0][0], 0.3, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0][1], 0.5, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0][2], 0.7, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0][0], 0.4, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0][1], 0.6, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0][2], 0.8, delta=0.000001)
 
-        self.assertEqual(self.model.fitting_context.y_parameters["workspace_name"],
+        self.assertEqual(self.model.fitting_context.y_parameters["workspace_name"][0],
                          ["MUSR62260; Group; bottom; Asymmetry; MA", "MUSR62260; Group; top; Asymmetry; MA",
                           "MUSR62260; Group; fwd; Asymmetry; MA"])
 
