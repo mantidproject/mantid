@@ -178,19 +178,15 @@ class ModelFittingModel(BasicFittingModel):
             output_name = self.parameter_combination_workspace_name(x_parameter_name, y_parameter_name)
             if not self._parameter_combination_workspace_exists(output_name, x_values, y_values, y_errors):
                 self._create_workspace(x_values, x_errors, x_parameter_name, y_values, y_errors,
-                                       self._create_y_label(y_parameter_name), output_name)
+                                       y_parameter_name, output_name)
                 workspace_group.add(output_name)
 
     def _create_workspace(self, x_values: list, x_errors: list, x_parameter: str, y_values: list, y_errors: list,
-                          y_label: str, output_name: str) -> None:
+                          y_parameter: str, output_name: str) -> None:
         """Creates a matrix workspace using the provided data. Uses UnitX if the parameter exists in the UnitFactory."""
-        if self._is_in_unit_factory(x_parameter):
-            CreateWorkspace(DataX=x_values, Dx=x_errors, DataY=y_values, DataE=y_errors, UnitX=x_parameter,
-                            YUnitLabel=y_label, OutputWorkspace=output_name)
-        else:
-            CreateWorkspace(DataX=x_values, Dx=x_errors, DataY=y_values, DataE=y_errors, YUnitLabel=y_label,
-                            OutputWorkspace=output_name)
-            self._set_x_label(output_name, x_parameter)
+        CreateWorkspace(DataX=x_values, Dx=x_errors, DataY=y_values, DataE=y_errors, OutputWorkspace=output_name)
+        self._set_x_label(output_name, x_parameter)
+        self._set_y_label(output_name, y_parameter)
 
     def _parameter_combination_workspace_exists(self, workspace_name: str, x_values: list, y_values: list, y_errors: list) -> bool:
         """Returns true if a parameter combination workspace exists and contains the same data."""
@@ -248,20 +244,35 @@ class ModelFittingModel(BasicFittingModel):
     def _set_x_label(self, workspace_name: str, axis_label: str) -> None:
         """Sets the label and unit for the X axis of a workspace."""
         workspace = retrieve_ws(workspace_name)
-        unit = self._get_unit_from_sample_logs(axis_label)
+        unit = self._get_parameter_unit(axis_label, 0)
         workspace.getAxis(0).setUnit("Label").setLabel(axis_label, unit)
 
-    def _create_y_label(self, parameter_name: str) -> str:
-        """Returns the string to use for the y label of a workspace."""
-        unit = self._get_parameter_unit(parameter_name)
-        return f"{parameter_name} ({unit})" if unit != "" else f"{parameter_name}"
+    def _set_y_label(self, workspace_name: str, axis_label: str) -> None:
+        """Sets the label and unit for the Y axis of a workspace."""
+        workspace = retrieve_ws(workspace_name)
+        unit = self._get_parameter_unit(axis_label, 1)
+        workspace.setYUnit(f"{axis_label} ({unit})" if unit != "" else f"{axis_label}")
 
-    def _get_parameter_unit(self, parameter_name: str) -> str:
-        """Returns the units of a parameter by searching the UnitFactory and Sample logs."""
-        unit = self._get_unit_from_unit_factory(parameter_name)
+    def _get_parameter_unit(self, parameter_name: str, axis: int) -> str:
+        """Returns the units of a parameter by searching the Dictionary, UnitFactory and Sample logs."""
+        unit = self._get_unit_from_unit_dictionary(parameter_name, axis)
         if unit == "":
             unit = self._get_unit_from_sample_logs(parameter_name)
+        if unit == "":
+            unit = self._get_unit_from_unit_factory(parameter_name)
         return unit
+
+    def _get_unit_from_unit_dictionary(self, parameter_name: str, axis: int) -> str:
+        """Returns the units of a parameter if it exists in the model fitting unit dictionary."""
+        if parameter_name in self.fitting_context.parameter_units:
+            return self.fitting_context.parameter_units[parameter_name][axis]
+        return ""
+
+    def _get_unit_from_unit_factory(self, parameter_name: str) -> str:
+        """Returns the units of a parameter if it exists in the UnitFactory."""
+        if self._is_in_unit_factory(parameter_name):
+            return UnitFactory.create(parameter_name).label()
+        return ""
 
     def _get_unit_from_sample_logs(self, parameter_name: str) -> str:
         """Returns the units of a sample log if the parameter exists as a sample log."""
@@ -271,13 +282,7 @@ class ModelFittingModel(BasicFittingModel):
             return run.getLogData(parameter_name).units if run.hasProperty(parameter_name) else ""
         return ""
 
-    def _get_unit_from_unit_factory(self, parameter_name: str) -> str:
-        """Returns the units of a parameter if it exists in the UnitFactory."""
-        if self._is_in_unit_factory(parameter_name):
-            return UnitFactory.create(parameter_name).label()
-        return ""
-
-    @ staticmethod
+    @staticmethod
     def _is_in_unit_factory(parameter_name: str) -> bool:
         """Returns true of the provided parameter exists in the UnitFactory."""
         return parameter_name in UnitFactory.getKeys()
