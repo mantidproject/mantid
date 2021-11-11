@@ -18,14 +18,14 @@
 
 namespace Mantid::Geometry {
 
-LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt, const Kernel::V3D &uVec)
-    : ATrack(Pt, uVec)
+LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &point, const Kernel::V3D &unitVector)
+    : m_line(point, unitVector)
 /**
   Constructor
 */
 {
-  PtOut.reserve(2);
-  DOut.reserve(2);
+  m_intersectionPointsOut.reserve(2);
+  m_distancesOut.reserve(2);
 }
 
 void LineIntersectVisit::Accept(const Surface &Surf)
@@ -44,7 +44,7 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPointsOut, Surf);
   procTrack();
 }
 
@@ -54,7 +54,7 @@ void LineIntersectVisit::Accept(const Plane &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPointsOut, Surf);
   procTrack();
 }
 
@@ -64,7 +64,7 @@ void LineIntersectVisit::Accept(const Cone &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPointsOut, Surf);
   procTrack();
 }
 
@@ -74,7 +74,7 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPointsOut, Surf);
   procTrack();
 }
 
@@ -84,7 +84,7 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPointsOut, Surf);
   procTrack();
 }
 
@@ -94,7 +94,7 @@ void LineIntersectVisit::Accept(const General &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
+  m_line.intersect(m_intersectionPointsOut, Surf);
   procTrack();
 }
 
@@ -105,9 +105,10 @@ void LineIntersectVisit::procTrack()
 */
 {
   // Calculate the distances to the points
-  DOut.resize(PtOut.size());
+  m_distancesOut.resize(m_intersectionPointsOut.size());
   using std::placeholders::_1;
-  std::transform(PtOut.begin(), PtOut.end(), DOut.begin(), std::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
+  std::transform(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(), m_distancesOut.begin(),
+                 std::bind(&Kernel::V3D::distance, m_line.getOrigin(), _1));
 }
 
 } // namespace Mantid::Geometry
