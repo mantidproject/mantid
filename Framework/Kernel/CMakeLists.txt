@@ -603,6 +603,7 @@ configure_file(../Properties/Mantid.properties.template ${CMAKE_CURRENT_BINARY_D
 
 # If we do an inpalce build we need a properties file in our Framework folder
 if(INPLACE_BUILD)
+  set(FRAMEWORK_PLUGINS_DIR "${CMAKE_BINARY_DIR}/bin")
   configure_file(
     ../Properties/Mantid.properties.template ${PROJECT_SOURCE_DIR}/Framework/PythonInterface/Mantid.properties
   )
