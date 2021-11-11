@@ -25,7 +25,7 @@ public:
   void testConstructor() {
     LineIntersectVisit A(V3D(-1.0, -1.0, -1.0), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(A.getNPoints(), 0);
-    TS_ASSERT_EQUALS(A.getDistance(), LineIntersectVisit::DType());
+    TS_ASSERT_EQUALS(A.getDistance(), LineIntersectVisit::DistancesType());
   }
 
   void testAcceptPlane() {
@@ -37,7 +37,7 @@ public:
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     Line::PType Pnts{{0.0, -1.0, -1.0}};
     TS_ASSERT_EQUALS(A.getPoints(), Pnts);
-    LineIntersectVisit::DType Dist{1.0};
+    LineIntersectVisit::DistancesType Dist{1.0};
 
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
@@ -54,7 +54,7 @@ public:
     Line::PType pntOut{{2.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
-    LineIntersectVisit::DType Dist;
+    LineIntersectVisit::DistancesType Dist;
     Dist.emplace_back(2.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
@@ -94,7 +94,7 @@ public:
     Line::PType pntOut{{1.0, 0.0, 0.0}};
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
-    LineIntersectVisit::DType Dist;
+    LineIntersectVisit::DistancesType Dist;
     // Dist.emplace_back(1.0);
     Dist.emplace_back(1.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
