@@ -106,6 +106,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
                                                          WorkspaceToMatch=focused_ws)
 
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
+    focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
