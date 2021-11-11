@@ -25,7 +25,7 @@ using namespace API;
 DECLARE_FUNCTION(Activation)
 
 void Activation::init() {
-  declareAttribute("Unit", Attribute("K")); // this should either be K or MeV
+  declareAttribute("Unit", Attribute("K")); // this should either be K or meV
   declareParameter("AttemptRate", 1000.0, "coefficient for attempt rate");
   declareParameter("Barrier", 1000.0, "coefficient for barrier energy");
 }

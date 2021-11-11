@@ -11,7 +11,7 @@ Description
 
 The activation fitting function can be written as:
 
-.. math:: y = A_R\times e^{-\frac{b}{x}}
+.. math:: y = A_R e^{-\frac{b}{x}}
 
 where:
 - A_R - Attempt Rate
