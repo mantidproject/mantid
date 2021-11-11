@@ -141,7 +141,7 @@ ext_modules = [
 
 setup(name='mantid',
       version="6.2.0",
-      description='Generate displacement fields with known volume changes',
+      description='The Mantid project provides a framework that supports computing and visualisation of materials science data.',
       author='Mantid Project Developers',
       package_dir={'': 'Framework/PythonInterface'},
       packages=find_packages('Framework/PythonInterface', exclude=['*.test']),
