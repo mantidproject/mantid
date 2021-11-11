@@ -60,22 +60,16 @@ target_link_libraries(
 )
 
 # Installation settings
-<<<<<<< HEAD
 set_target_properties(
   PythonDataObjectsModule
   PROPERTIES INSTALL_RPATH
              "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/"
 )
-=======
-set_target_properties(PythonDataObjectsModule
-    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/;${DL_ORIGIN_TAG}/../geometry/;${DL_ORIGIN_TAG}/../api/")
-
 
 # if we are using setup.py we don't need to do this
-if (NOT USE_SETUPPY)
->>>>>>> 89bbeb1d927 (work towards a setup.py file to build the framework)
-mtd_install_targets(
-  TARGETS PythonDataObjectsModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/dataobjects
-  ${WORKBENCH_SITE_PACKAGES}/mantid/dataobjects
-)
+if(NOT USE_SETUPPY)
+  mtd_install_targets(
+    TARGETS PythonDataObjectsModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/dataobjects
+    ${WORKBENCH_SITE_PACKAGES}/mantid/dataobjects
+  )
 endif()

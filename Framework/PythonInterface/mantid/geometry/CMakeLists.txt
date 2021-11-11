@@ -81,18 +81,12 @@ target_link_libraries(
 )
 
 # Installation settings
-<<<<<<< HEAD
 set_target_properties(PythonGeometryModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
-=======
-set_target_properties(PythonGeometryModule
-    PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH};${DL_ORIGIN_TAG}/../kernel/")
-
-
 
 # if we are using setup.py we don't need to do this
-if (NOT USE_SETUPPY)
->>>>>>> 89bbeb1d927 (work towards a setup.py file to build the framework)
-mtd_install_targets(
-  TARGETS PythonGeometryModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/geometry ${WORKBENCH_SITE_PACKAGES}/mantid/geometry
-)
+if(NOT USE_SETUPPY)
+  mtd_install_targets(
+    TARGETS PythonGeometryModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/geometry
+    ${WORKBENCH_SITE_PACKAGES}/mantid/geometry
+  )
 endif()
