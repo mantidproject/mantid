@@ -95,10 +95,7 @@ class VesuvioAnalysis(PythonAlgorithm):
                              validator=IntListValidator([0,1,2,3,4]))
         self.declareProperty("OutputName", "polyethylene",doc="The base name for the outputs." )
         self.declareProperty("Runs", "38898-38906", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
-        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last). Please note that "
-                                                                         "spectra with a number lower than 135 are treated as back "
-                                                                         "scattering spectra, with a number of 135 or above as forward "
-                                                                         "scattering spectra.")
+        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last).")
         self.declareProperty(FloatArrayProperty("TOFRangeVector", [110.,1.5,460.]),
                              doc="In micro seconds (lower bound, binning, upper bound).")
         self.declareProperty(
@@ -115,11 +112,13 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                                      "",
                                                      direction=Direction.Input),doc="Table for Compton profiles")
-        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", []))
+        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", []), doc="List with LHS and RHS element of constraint on "
+                                              "intensities of element peaks. A constraint can only be set when there are at least two "
+                                              "elements in the ComptonProfile.")
         self.declareProperty(
             "ConstraintsProfileScatteringCrossSection",
             "2.*82.03/5.551",
-            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering"
+            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering "
             "cross section. Simple arithmetic can be included but the result may be rounded. This setting is ignored when no "
             "ConstraintsProfileNumbers are set.")
         self.declareProperty("ConstraintsProfileState", "eq", doc="This setting is ignored when no ConstraintsProfileNumbers are set.",
@@ -130,7 +129,7 @@ class VesuvioAnalysis(PythonAlgorithm):
                              " about the first element specified in the elements string. Then such spectra are converted to the Y space"
                              " of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and"
                              " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermite function up to the sixth"
-                             "order.")
+                             " order.")
 
     def validateInputs(self):
         tableCols = [
