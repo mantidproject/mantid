@@ -10,7 +10,6 @@
 #include "MantidCurveFitting/Functions/Activation.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <boost/algorithm/string.hpp>
 
 #include <cmath>
 
@@ -67,14 +66,13 @@ void Activation::beforeFunctionSet() const {
 
 double Activation::getmeVConv() const {
   auto unit = getAttribute("Unit").asString();
-  boost::to_lower(unit);
   double meVConv;
 
-  if (unit.compare("k") == 0) {
+  if (unit.compare("K") == 0) {
     meVConv = 1.0;
   }
 
-  if (unit.compare("mev") == 0) {
+  if (unit.compare("meV") == 0) {
     meVConv = PhysicalConstants::meVtoKelvin;
   }
   return meVConv;
