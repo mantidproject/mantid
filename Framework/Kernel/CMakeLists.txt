@@ -601,6 +601,13 @@ set(ALIASDEPRECATED "Raise")
 set(ALGORITHMDEPRECATED "Raise")
 configure_file(../Properties/Mantid.properties.template ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.config)
 
+# If we do an inpalce build we need a properties file in our Framework folder
+if(INPLACE_BUILD)
+  configure_file(
+    ../Properties/Mantid.properties.template ${PROJECT_SOURCE_DIR}/Framework/PythonInterface/Mantid.properties
+  )
+endif()
+
 # Then, copy into appropriate place
 if(MSVC)
   file(

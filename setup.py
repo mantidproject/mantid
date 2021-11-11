@@ -84,6 +84,8 @@ class CMakeBuild(build_ext):
                 '-DUSE_SETUPPY=True',
                 '-DINPLACE_BUILD=True',
                 '-DHDF5_ROOT=' + self.cmake_prefix_path,
+                '-DOpenSSL_ROOT=' + self.cmake_prefix_path,
+                '-DCMAKE_PREFIX_PATH=' + self.cmake_prefix_path,
                 '-DCMAKE_BUILD_TYPE=' + self.build_type,
                 '-DPYTHON_EXECUTABLE={}'.format(sys.executable),
                 '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + build_directory,
@@ -93,6 +95,9 @@ class CMakeBuild(build_ext):
             ]
 
         cmake_args += cmake_cmd_args
+
+        if self.with_conda and sys.platform == 'darwin':
+            cmake_args += ["-DUSE_PYTHON_DYNAMIC_LIB=OFF"]
 
         pprint(cmake_args)
 
