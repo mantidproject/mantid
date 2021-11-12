@@ -12,8 +12,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/Functions/Activation.h"
 #include "MantidCurveFitting/Jacobian.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
