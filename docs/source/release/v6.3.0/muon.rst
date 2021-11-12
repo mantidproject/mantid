@@ -80,6 +80,7 @@ New Features
 ############
 - Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
 - Added a :ref:`Power Law <func-PowerLaw>` function to MuonModelling Fit Functions.
+- Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
 
 Improvements
 ############
