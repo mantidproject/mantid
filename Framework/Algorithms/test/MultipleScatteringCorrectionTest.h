@@ -119,29 +119,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr rst_ms_sampleAndContainer =
         AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>("rst_ms_sampleAndContainer");
 
-    /*
-    NOTE: regression test results as there is no analytical solution as reference
-    --------------------------------------------------------------------------
-    DetID	SpectrumID	Method	           A1	       A2	      A2/A1	    Delta
-    ==========================================================================
-    0	        0	    SampleOnly	      8.41E-08	1.55E-09	1.84E-02	0.0923619
-    0	        0	    ContainerOnly	    1.51E-07	1.16E-08	7.64E-02	0.223564
-    0	        0	    Sample&Container	9.75E-06	1.36E-05	1.40E+00	0.111176
-    1	        0	    SampleOnly	      8.13E-08	1.48E-09	1.82E-02	0.0911247
-    1	        0	    ContainerOnly	    1.51E-07	1.15E-08	7.64E-02	0.223515
-    1	        0	    Sample&Container	9.53E-06	1.32E-05	1.38E+00	0.109849
-    0	        1	    SampleOnly	      7.82E-08	1.39E-09	1.78E-02	0.0891449
-    0	        1	    ContainerOnly	    1.50E-07	1.15E-08	7.62E-02	0.222937
-    0	        1	    Sample&Container	9.19E-06	1.24E-05	1.35E+00	0.107302
-    1	        1	    SampleOnly	      7.55E-08	1.32E-09	1.75E-02	0.0876116
-    1	        1	    ContainerOnly	    1.50E-07	1.14E-08	7.62E-02	0.222875
-    1	        1	    Sample&Container	8.99E-06	1.19E-05	1.33E+00	0.105738
-    --------------------------------------------------------------------------
-    - Delta refers to the final multiple scattering correction factor where Im = I_total * Delta
-    */
     TS_ASSERT_DELTA(rst_ms_sampleOnly->readY(0)[0], 0.0923619, 1e-3);
     TS_ASSERT_DELTA(rst_ms_containerOnly->readY(0)[0], 0.223564, 1e-3);
-    TS_ASSERT_DELTA(rst_ms_sampleAndContainer->readY(0)[0], 0.111176, 1e-3);
+    TS_ASSERT_DELTA(rst_ms_sampleAndContainer->readY(0)[0], 0.109557, 1e-3);
   }
 
 private:
