@@ -48,7 +48,6 @@ class PlotFitPanePresenter(BasePanePresenter):
                 workspace_list += self.match_raw_selection(fit_information.input_workspaces,raw) + fit_workspaces
                 indices += [0] * len(fit_information.input_workspaces) + fit_indices
                 # dont shade the data but do shade the fit lines
-                print("wsadddfs", fit_workspaces)
                 self._figure_presenter.add_shaded_region(fit_workspaces, fit_indices)
         self._figure_presenter.plot_workspaces(workspace_list, indices, hold_on=False, autoscale=autoscale)
         # the data change probably means its the wrong scale
