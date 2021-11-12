@@ -58,7 +58,12 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
   if (!item || !item->isPreview())
     return;
 
-  jobAlgorithm->updateItem();
+  try {
+    jobAlgorithm->updateItem();
+  } catch (std::runtime_error const &ex) {
+    g_log.error(ex.what());
+    return;
+  }
 
   switch (algorithmType(algorithm)) {
   case AlgorithmType::PREPROCESS:
