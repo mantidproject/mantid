@@ -15,6 +15,7 @@ New and Improved
     :align: center
 - The instrument is now loaded in a background thread when opening the instrument viewer which prevents running scripts from hanging.
 - The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
+- The *replace_workspace* and *save_image* capabilities of the :ref:`InstrumentViewer` are now exposed to its python API.
 - The algorithm browser has been tidied to reduce the number of single algorithm categories.
 - Table workspaces can now have read-only columns added to them (`ws.addReadOnlyColumn(<TYPE>, <NAME>)`). Existing columns can also be set to be read-only (`ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)`).
 - Cells containing vector data in a table workspace can now be viewed in the table workspace display.
