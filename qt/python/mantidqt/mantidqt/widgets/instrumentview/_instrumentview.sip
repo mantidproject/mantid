@@ -217,6 +217,13 @@ public:
   Blocks until the instrument loading thread is finished.
 %End
 
+  void saveImage(QString filename);
+%Docstring
+  void saveImage(QString filename)
+  --------------------------------
+  Saves the current scene as a png image to a file.
+%End
+
 };
 
 class InstrumentWidgetEncoder {
