@@ -137,7 +137,7 @@ class ResultsTabModelTest(unittest.TestCase):
                                        ('Cost function value',
                                         self.cost_function)])
 
-        self.log_names = ['sample_temp', 'sample_magn_field']
+        self.log_names = ['run_start', 'sample_temp', 'sample_magn_field']
         self.logs = [(self.log_names[0], (50., 60.)),
                      (self.log_names[1], (2., 3.))]
 
@@ -254,6 +254,7 @@ class ResultsTabModelTest(unittest.TestCase):
 
     def test_create_results_table_with_logs_selected(self):
         workspace = CreateWorkspace([0,1,2,3,4,5],[0,1,2,3,4,5])
+        workspace.mutableRun().addProperty("run_start", "1970-01-01T00:00:01 to 1970-01-01T00:00:01", True)
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:00:00", Value=100)
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:30:00", Value=65)
         AddTimeSeriesLog(workspace, Name="sample_temp", Time="2010-01-01T00:50:00", Value=100.2)
@@ -266,13 +267,14 @@ class ResultsTabModelTest(unittest.TestCase):
         # workspace_name => no error col as its a string
         # sample_temp => time series and will have non-zero error
         # sample_magn_field => just a number
-        expected_cols = ['workspace_name',  'sample_temp', 'sample_tempError',
+        expected_cols = ['workspace_name', 'run_start', 'run_start_seconds',  'sample_temp', 'sample_tempError',
                          'sample_magn_field', 'sample_magn_fieldError',
                          'f0.Height', 'f0.HeightError', 'f0.PeakCentre',
                          'f0.PeakCentreError', 'f0.Sigma', 'f0.SigmaError', 'f1.Height',
                          'f1.HeightError', 'f1.PeakCentre', 'f1.PeakCentreError',
                          'f1.Sigma', 'f1.SigmaError', 'Cost function value']
         expected_types = (TableColumnType.NoType, TableColumnType.X,
+                          TableColumnType.X, TableColumnType.X,
                           TableColumnType.XErr, TableColumnType.X,
                           TableColumnType.XErr, TableColumnType.Y,
                           TableColumnType.YErr, TableColumnType.Y,
@@ -281,15 +283,12 @@ class ResultsTabModelTest(unittest.TestCase):
                           TableColumnType.YErr, TableColumnType.Y,
                           TableColumnType.YErr, TableColumnType.Y,
                           TableColumnType.YErr, TableColumnType.Y)
-        avg_log_values = 86., 2.0
+        avg_log_values = "1970-01-01T00:00:01 to 1970-01-01T00:00:01", 1, 86., 2.0
         expected_content = [
-            ('ws1_Parameters', avg_log_values[0], 17.146,  avg_log_values[1], 0.,
-             self.f0_height[0], self.f0_height[1], self.f0_centre[0],
-             self.f0_centre[1], self.f0_sigma[0], self.f0_sigma[1],
-             self.f1_height[0], self.f1_height[1], self.f1_centre[0],
-             self.f1_centre[1], self.f1_sigma[0], self.f1_sigma[1],
-             self.cost_function[0])
-        ]
+            ('ws1_Parameters', avg_log_values[0], avg_log_values[1], avg_log_values[2], 17.146, avg_log_values[3], 0.,
+             self.f0_height[0], self.f0_height[1], self.f0_centre[0], self.f0_centre[1], self.f0_sigma[0],
+             self.f0_sigma[1], self.f1_height[0], self.f1_height[1], self.f1_centre[0], self.f1_centre[1],
+             self.f1_sigma[0], self.f1_sigma[1], self.cost_function[0])]
         self._assert_table_matches_expected(zip(expected_cols, expected_types),
                                             expected_content, table,
                                             model.results_table_name())
