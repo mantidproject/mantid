@@ -147,7 +147,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         ax = self.fig.axes[axis_number]
         plot_kwargs = self._get_plot_kwargs(workspace_plot_info)
         plot_kwargs['color'] = self._color_queue[axis_number]()
-
         if workspace_name in self._shaded_regions.keys() and errors:
             errors = False
             self.shade_region(ax, plot_kwargs['color'], workspace_name)
@@ -173,6 +172,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 self.hide_axis(axis_number, nrows, ncols)
 
     def add_shaded_region(self, workspace_name, axis, x_values, y1_values, y2_values):
+        #if workspace_name in self._shaded_regions:
+        #    del self._shaded_regions[workspace_name]
         self._shaded_regions[workspace_name] = ShadedRegionInfo(workspace_name = workspace_name,
                                                                 axis = axis,
                                                                 x_values = x_values,
@@ -226,8 +227,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     axis = self.fig.axes[workspace_plot_info.axis]
                     axis.remove_workspace_artists(workspace)
                     self._plot_information_list.remove(plotted_information)
-        # empty shaded region list
-        self._shaded_regions = {}
+                    # clear shaded regions from plot
+                    if len(axis.collections)>0:
+                        axis.collections.pop()
         # If we have no plotted lines, reset the color cycle
         if self.num_plotted_workspaces == 0:
             self._reset_color_cycle()
@@ -295,6 +297,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                         plot_kwargs["color"] = color
                         if workspace_name in self._shaded_regions.keys():
                             if with_errors:
+                                # replot without errors to get the fit on top
+                                axis.replot_artist(artist, False, **plot_kwargs)
                                 self.shade_region(axis, color, workspace_name)
                             elif len(axis.collections)>0:
                                 axis.collections.pop()

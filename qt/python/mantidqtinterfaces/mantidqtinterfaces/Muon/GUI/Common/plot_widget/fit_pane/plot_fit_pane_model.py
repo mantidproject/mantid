@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_model import BasePaneModel
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_fit_function_name_from_workspace
+from copy import copy
 
 
 class PlotFitPaneModel(BasePaneModel):
@@ -51,8 +52,8 @@ class PlotFitPaneModel(BasePaneModel):
 
     @staticmethod
     def get_shade_lines(ws, index):
-        x_data = ws.readX(index)
+        # need to copy the x data because if switch from points to hist data it causes errors
+        x_data = copy(ws.readX(index))
         y_data = ws.readY(index)
         e_data = ws.readE(index)
-
         return x_data, y_data + e_data, y_data - e_data
