@@ -245,16 +245,16 @@ public:
     multScattCylinderDetails(cylinder2mm, {0.00194856, -0.00475, 0.001125}, {0, -0.00475, 0.00225});
 
     // one out and one in, wacky angle
-    // std::cout << "CASE 2 !!!!!!!!!!!!!!!" << std::endl;
-    // multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {0, -0.00475, 0.00225});
+    std::cout << "CASE 2 !!!!!!!!!!!!!!!" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {0, -0.00475, 0.00225});
 
     // // both in, wacky angle
-    // std::cout << "CASE 3 !!!!!!!!!!!!!!!" << std::endl;
-    // multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {-0.000625, -0.00475, -0.00108253});
+    std::cout << "CASE 3 !!!!!!!!!!!!!!!" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {-0.000625, -0.00475, -0.00108253});
 
     // // both in and parallel to the plane
-    // std::cout << "CASE 4 !!!!!!!!!!!!!!!" << std::endl;
-    // multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {-0.000625, -0.00375, -0.00108253});
+    std::cout << "CASE 4 !!!!!!!!!!!!!!!" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {-0.000625, -0.00375, -0.00108253});
 
     // need some cases where the cylinder is missed altogether
   }
