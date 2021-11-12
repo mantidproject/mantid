@@ -31,8 +31,6 @@ class FittingDataWidget(object):
         self.presenter.remove_workspace(workspace)
 
     def rename_workspace(self, old_name, new_name):
-        import pydevd_pycharm
-        pydevd_pycharm.settrace(stdoutToServer = True, stderrToServer = True)
         self.presenter.rename_workspace(old_name, new_name)
 
     def clear_workspaces(self):

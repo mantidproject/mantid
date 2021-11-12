@@ -72,21 +72,26 @@ class FittingDataPresenter(object):
 
     def remove_workspace(self, ws_name):
         if ws_name in self.get_loaded_workspaces():
-            removed = self.get_loaded_workspaces().pop(ws_name)
+            removed = self.model._data_workspaces.pop(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
             self.model.remove_log_rows([self.row_numbers[ws_name]])
             self.model.update_log_workspace_group()
             self._repopulate_table()
-        elif ws_name in self.get_bgsub_workspaces():
-            removed = self.get_bgsub_workspaces()[ws_name]
-            self.model._workspaces[ws_name].bgsub_ws = None
+        elif ws_name in self.model._data_workspaces.get_bgsub_ws_dict_keyed_by_bg_name():
+            loaded_ws_name = self.model._data_workspaces.get_loaded_workspace_from_bgsub(ws_name)
+            removed = self.model._data_workspaces[loaded_ws_name].bgsub_ws
+            self.model._data_workspaces[loaded_ws_name].bgsub_ws = None
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
+            # set plotted and Subtract BG checkboxes to False
+            self.view.set_item_checkstate(self.row_numbers[loaded_ws_name], 2, False)
+            self.view.set_item_checkstate(self.row_numbers[loaded_ws_name], 3, False)
         elif ws_name in self.model.get_log_workspaces_name():
             self.model.update_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):
+        # Note - ws.name() not updated yet so need to rely on new_name parameter
         if old_name in self.model.get_all_workspace_names():
             self.model.update_workspace_name(old_name, new_name)
             if old_name in self.plotted:
@@ -141,6 +146,7 @@ class FittingDataPresenter(object):
         if self.view.get_add_to_plot():
             self.plotted.update(wsnames)
         self._repopulate_table()
+
         # subtract background - has to be done post repopulation, can't change default in _add_row_to_table
         [self.view.set_item_checkstate(self.row_numbers[wsname], 3, True) for wsname in wsnames]
 
@@ -159,15 +165,14 @@ class FittingDataPresenter(object):
                 bank = self.model.get_sample_log_from_ws(name, "bankid")
                 if bank == 0:
                     bank = "cropped"
-                active_ws = self.model.get_active_ws(name)
-                plotted = active_ws.name() in self.plotted
+                active_ws_name = self.model.get_active_ws_name(name)
+                plotted = active_ws_name in self.plotted
                 if name in self.model.get_bg_params():
                     self._add_row_to_table(name, i, run_no, bank, plotted, *self.model.get_bg_params()[name])
                 else:
                     self._add_row_to_table(name, i, run_no, bank, plotted)
             except RuntimeError:
                 self._add_row_to_table(name, i)
-            self._handle_table_cell_changed(i, 2)
 
     def _remove_selected_tracked_workspaces(self):
         row_numbers = self._remove_selected_table_rows()
@@ -193,6 +198,7 @@ class FittingDataPresenter(object):
             self.model.plot_background_figure(ws_name)
 
     def _handle_table_cell_changed(self, row, col):
+
         if row in self.row_numbers:
             loaded_ws_name = self.row_numbers[row]
             is_plotted = self.view.get_item_checked(row, 2)
@@ -200,7 +206,7 @@ class FittingDataPresenter(object):
             if col == 2:
                 # Plot check box
                 ws = self.model.get_active_ws(loaded_ws_name)
-                ws_name = ws.name()
+                ws_name = self.model.get_active_ws_name(loaded_ws_name)
                 if self.view.get_item_checked(row, col):  # Plot Box is checked
                     self.plot_added_notifier.notify_subscribers(ws)
                     self.plotted.add(ws_name)
@@ -210,9 +216,10 @@ class FittingDataPresenter(object):
             elif col == 3:
                 # subtract bg col
                 self.model.update_bgsub_status(loaded_ws_name, is_sub)
-                if is_sub or is_plotted:  # this ensures the sub ws isn't made on load
+                if is_sub:
                     bg_params = self.view.read_bg_params_from_table(row)
                     self.model.create_or_update_bgsub_ws(loaded_ws_name, bg_params)
+                if is_plotted:
                     self._update_plotted_ws_with_sub_state(loaded_ws_name, is_sub)
             elif col > 3:
                 if is_sub:

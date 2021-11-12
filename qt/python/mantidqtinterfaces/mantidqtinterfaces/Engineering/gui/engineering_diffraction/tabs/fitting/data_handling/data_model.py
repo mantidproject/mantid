@@ -64,6 +64,9 @@ class WorkspaceRecordContainer:
     def get_bgsub_ws_dict(self):
         return dict([(key, value.bgsub_ws) for key, value in self.dict.items()])
 
+    def get_bgsub_ws_dict_keyed_by_bg_name(self):
+        return dict([(value.bgsub_ws_name, value.bgsub_ws) for key, value in self.dict.items()])
+
     def get_ws_names_dict(self):
         return dict([(key, [value.bgsub_ws_name, value.bg_params]) for key, value in self.dict.items()])
 
@@ -73,6 +76,13 @@ class WorkspaceRecordContainer:
     def get_active_ws_list(self):
         return dict([(key, value.bgsub_ws if value.bg_params and value.bg_params[0] else value.loaded_ws)
                      for key, value in self.dict.items()])
+
+    def get_active_ws_name(self, ws_name):
+        ws_rec = self.dict[ws_name]
+        if ws_rec.bgsub_ws and ws_rec.bg_params[0]:
+            return ws_rec.bgsub_ws_name
+        else:
+            ws_name
 
     def rename(self, old_ws_name, new_ws_name):
         ws_loaded = self.dict.get(old_ws_name, None)
@@ -107,20 +117,20 @@ class FittingDataModel(object):
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
-        self._workspaces = WorkspaceRecordContainer()
+        self._data_workspaces = WorkspaceRecordContainer()
 
     def restore_files(self, ws_names):
-        self._workspaces.add_from_names_dict(ws_names)
+        self._data_workspaces.add_from_names_dict(ws_names)
         for ws_name in ws_names:
             try:
                 ws = ADS.retrieve(ws_name)
                 if ws.getNumberHistograms() == 1:
                     bgsubws = None
-                    if self._workspaces[ws_name].bg_params:
-                        bgsubws= ADS.retrieve(self._workspaces[ws_name].bgsub_ws_name)
+                    if self._data_workspaces[ws_name].bg_params:
+                        bgsubws= ADS.retrieve(self._data_workspaces[ws_name].bgsub_ws_name)
                     self._last_added.append(ws_name)
-                    self._workspaces.set_ws(ws_name, ws)
-                    self._workspaces[ws_name].bgsub_ws=bgsubws
+                    self._data_workspaces.set_ws(ws_name, ws)
+                    self._data_workspaces[ws_name].bgsub_ws=bgsubws
                 else:
                     logger.warning(
                         f"Invalid number of spectra in workspace {ws_name}. Skipping restoration of workspace.")
@@ -134,7 +144,7 @@ class FittingDataModel(object):
         filenames = [name.strip() for name in filenames_string.split(",")]
         for filename in filenames:
             ws_name = self._generate_workspace_name(filename)
-            if ws_name not in self._workspaces.get_loaded_workpace_names():
+            if ws_name not in self._data_workspaces.get_loaded_workpace_names():
                 try:
                     if not ADS.doesExist(ws_name):
                         ws = Load(filename, OutputWorkspace=ws_name)
@@ -142,7 +152,7 @@ class FittingDataModel(object):
                         ws = ADS.retrieve(ws_name)
                     if ws.getNumberHistograms() == 1:
                         self._last_added.append(ws_name)
-                        self._workspaces.add(ws_name, loaded_ws=ws)
+                        self._data_workspaces.add(ws_name, loaded_ws=ws)
                     else:
                         logger.warning(
                             f"Invalid number of spectra in workspace {ws_name}. Skipping loading of file.")
@@ -193,7 +203,7 @@ class FittingDataModel(object):
                 self.make_runinfo_table()
                 self._log_workspaces.add("run_info")
         # update log tables
-        for irow, (ws_name, ws) in enumerate(self._workspaces.get_loaded_ws_dict().items()):
+        for irow, (ws_name, ws) in enumerate(self._data_workspaces.get_loaded_ws_dict().items()):
             self.add_log_to_table(ws_name, ws, irow)  # rename write_log_row
 
     def add_log_to_table(self, ws_name, ws, irow):
@@ -248,17 +258,20 @@ class FittingDataModel(object):
             self.clear_logs()
 
     def get_loaded_ws_list(self):
-        return list(self._workspaces.get_loaded_ws_dict().keys())
+        return list(self._data_workspaces.get_loaded_ws_dict().keys())
 
     def get_active_ws_list(self):
-        return self._workspaces.get_active_ws_list()
+        return self._data_workspaces.get_active_ws_list()
 
-    def get_active_ws(self, ws_name):
-        return self._workspaces[ws_name].get_active_ws()
+    def get_active_ws(self, loaded_ws_name):
+        return self._data_workspaces[loaded_ws_name].get_active_ws()
+
+    def get_active_ws_name(self, loaded_ws_name):
+        return self._data_workspaces.get_active_ws_name(loaded_ws_name)
 
     def get_ws_sorted_by_primary_log(self, ws_list):
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
-                       self._workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
+                       self._data_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                   "primary_log")
         sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
@@ -313,7 +326,7 @@ class FittingDataModel(object):
     def create_fit_tables(self):
         wslist = []  # ws to be grouped
         # extract fit parameters and errors
-        nruns = len(self.get_ws_list())  # num of rows of output workspace
+        nruns = len(self.get_loaded_ws_list())  # num of rows of output workspace
         # get unique set of function parameters across all workspaces
         func_params = set(chain(*[list(d['results'].keys()) for d in self._fit_results.values()]))
         for param in func_params:
@@ -324,7 +337,7 @@ class FittingDataModel(object):
             ws = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
-            for iws, wsname in enumerate(self.get_ws_list()):
+            for iws, wsname in enumerate(self.get_loaded_ws_list()):
                 wsname_bgsub = wsname + "_bgsub"
                 if wsname_bgsub in self._fit_results:
                     wsname = wsname_bgsub
@@ -345,7 +358,7 @@ class FittingDataModel(object):
         model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
         model.addColumn(type="str", name="status")
         model.addColumn(type="str", name="Model")
-        for iws, wsname in enumerate(self.get_ws_list()):
+        for iws, wsname in enumerate(self.get_loaded_ws_list()):
             if wsname in self._fit_results:
                 row = [wsname, self._fit_results[wsname]['costFunction'],
                        self._fit_results[wsname]['status'], self._fit_results[wsname]['model']]
@@ -357,62 +370,62 @@ class FittingDataModel(object):
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
 
     def replace_workspace(self, name, workspace):
-        self._workspaces.replace_workspace(name, workspace)
+        self._data_workspaces.replace_workspace(name, workspace)
 
     def update_workspace_name(self, old_name, new_name):
         if new_name not in self.get_all_workspace_names():
-            self._workspaces.rename(old_name, new_name)
+            self._data_workspaces.rename(old_name, new_name)
             if old_name in self._log_values:
                 self._log_values[new_name] = self._log_values.pop(old_name)
         else:
             logger.warning(f"There already exists a workspace with name {new_name}.")
 
     def clear_workspaces(self):
-        self._workspaces.clear()
+        self._data_workspaces.clear()
 
     def clear_workspace(self, loaded_ws_name):
-        removed = self._workspaces.pop(loaded_ws_name)
+        removed = self._data_workspaces.pop(loaded_ws_name)
         removed_ws_list = [removed.loaded_ws]
         if removed.bgsub_ws:
             removed_ws_list.append((removed.bgsub_ws))
         return removed_ws_list
 
     def get_loaded_workspaces(self):
-        return self._workspaces.get_loaded_ws_dict()
+        return self._data_workspaces.get_loaded_ws_dict()
 
     def get_all_workspace_names(self):
-        return self._workspaces.get_loaded_workpace_names() + self._workspaces.get_bgsub_workpace_names()
+        return self._data_workspaces.get_loaded_workpace_names() + self._data_workspaces.get_bgsub_workpace_names()
 
     def get_log_workspaces_name(self):
         return [ws.name() for ws in self._log_workspaces] if self._log_workspaces else ''
 
     def get_bgsub_workspaces(self):
-        return self._workspaces.get_bgsub_ws_dict()
+        return self._data_workspaces.get_bgsub_ws_dict()
 
     def get_bg_params(self):
-        return self._workspaces.get_bg_params_dict()
+        return self._data_workspaces.get_bg_params_dict()
 
     def get_fit_results(self):
         return self._fit_results
 
     def create_or_update_bgsub_ws(self, ws_name, bg_params):
-        ws = self._workspaces[ws_name].loaded_ws
-        ws_bg = self._workspaces[ws_name].bgsub_ws
-        ws_bg_params = self._workspaces[ws_name].bg_params
+        ws = self._data_workspaces[ws_name].loaded_ws
+        ws_bg = self._data_workspaces[ws_name].bgsub_ws
+        ws_bg_params = self._data_workspaces[ws_name].bg_params
         if not ws_bg or ws_bg_params == [] or bg_params[1:] != ws_bg_params[1:]:
             background = self.estimate_background(ws_name, *bg_params[1:])
-            self._workspaces[ws_name].bg_params=bg_params
+            self._data_workspaces[ws_name].bg_params=bg_params
             bgsub_ws_name = ws_name + "_bgsub"
             bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
-            self._workspaces[ws_name].bgsub_ws = bgsub_ws
-            self._workspaces[ws_name].bgsub_ws_name = bgsub_ws_name
+            self._data_workspaces[ws_name].bgsub_ws = bgsub_ws
+            self._data_workspaces[ws_name].bgsub_ws_name = bgsub_ws_name
             DeleteWorkspace(background)
         else:
             logger.notice("Background workspace already calculated")
 
     def update_bgsub_status(self, ws_name, status):
-        if self._workspaces[ws_name].bg_params:
-            self._workspaces[ws_name].bg_params[0] = status
+        if self._data_workspaces[ws_name].bg_params:
+            self._data_workspaces[ws_name].bg_params[0] = status
 
     def estimate_background(self, ws_name, niter, xwindow, doSGfilter):
         try:
@@ -426,8 +439,8 @@ class FittingDataModel(object):
         return ws_bg
 
     def plot_background_figure(self, ws_name):
-        ws = self._workspaces[ws_name].loaded_ws
-        ws_bgsub = self._workspaces[ws_name].bgsub_ws
+        ws = self._data_workspaces[ws_name].loaded_ws
+        ws_bgsub = self._data_workspaces[ws_name].bgsub_ws
         if ws_bgsub:
             fig, ax = subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [2, 1]},
                                subplot_kw={'projection': 'mantid'})
@@ -441,7 +454,7 @@ class FittingDataModel(object):
         return self._last_added
 
     def get_sample_log_from_ws(self, ws_name, log_name):
-        return self._workspaces[ws_name].loaded_ws.getSampleDetails().getLogData(log_name).value
+        return self._data_workspaces[ws_name].loaded_ws.getSampleDetails().getLogData(log_name).value
 
     def set_log_workspaces_none(self):
         # to be used in the event of Ads clear, as trying to reference the deleted grp ws results in an error

@@ -138,21 +138,23 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.table_selection.setItem(row_no, 1, bank_item)
 
         plotted_check_box = QtWidgets.QTableWidgetItem()
+
         plotted_check_box.setFlags(plotted_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
-        self.table_selection.setItem(row_no, 2, plotted_check_box)
         if plotted:
             plotted_check_box.setCheckState(QtCore.Qt.Checked)
         else:
             plotted_check_box.setCheckState(QtCore.Qt.Unchecked)
+        # setItem last so that cellChanged signal only fired once
+        self.table_selection.setItem(row_no, 2, plotted_check_box)
 
         bgsub_check_box = QtWidgets.QTableWidgetItem()
         bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         bgsub_check_box.setToolTip('Estimate the background using iterative low-pass (smoothing) filter algorithm')
-        self.table_selection.setItem(row_no, 3, bgsub_check_box)
         if bgsub:
             bgsub_check_box.setCheckState(QtCore.Qt.Checked)
         else:
             bgsub_check_box.setCheckState(QtCore.Qt.Unchecked)
+        self.table_selection.setItem(row_no, 3, bgsub_check_box)
 
         niter_item = QtWidgets.QTableWidgetItem()
         niter_item.setData(QtCore.Qt.EditRole, int(niter))
