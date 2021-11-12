@@ -165,8 +165,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
             # update the x range for the fit
             start_x_list, end_x_list = self.model._get_new_start_xs_and_end_xs_using_existing_datasets([dataset_name])
             # update values in context
-            self.model.current_start_x = start_x_list[0]
-            self.model.current_end_x = end_x_list[0]
+            self.model.set_current_start_and_end_x(start_x_list[0], end_x_list[0])
             #update values in view
             self.view.start_x = start_x_list[0]
             self.view.end_x = end_x_list[0]
