@@ -1090,15 +1090,18 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
   // sort the points based on its
   // 1. build a vector that contains the relative distance to the starting point
   //    of the track/ray
-  const size_t nPoints(IPoints.size());
-  std::vector<double> dists(nPoints);
-  for (auto pt : IPoints) {
-    dists.push_back(pt.distance(track.startPoint()));
-  }
   // 2. get the index in the sorted order
-  std::vector<size_t> idxs(nPoints);
-  std::iota(idxs.begin(), idxs.end(), 0);
-  std::sort(idxs.begin(), idxs.end(), [&dists](size_t a, size_t b) { return dists[a] < dists[b]; });
+  const size_t nPoints(IPoints.size());
+  std::vector<size_t> idxs(nPoints, 0);
+  if (nPoints > 1) {
+    std::vector<double> dists(nPoints);
+    for (size_t i = 0; i < nPoints; i++) {
+      dists[i] = IPoints[i].distance(track.startPoint());
+    }
+    // sort by distance, only keep index
+    std::iota(idxs.begin(), idxs.end(), 0);
+    std::sort(idxs.begin(), idxs.end(), [&dists](size_t a, size_t b) { return dists[a] < dists[b]; });
+  }
 
   // 3. iterating through IPoints by the order of the smallest
   //    relative distance to the largest
@@ -1117,8 +1120,7 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
     const auto ditr = dPoints[idx];
     if (ditr > 0) {
       // compute the mid point
-      auto midPoint = prePoint + currentPt;
-      midPoint *= 0.5;
+      const auto midPoint((prePoint + currentPt) * 0.5);
       // find the type of currentPt (entering or leaving)
       const TrackDirection flag = calcValidTypeByMidPoint(midPoint);
       // add to list
