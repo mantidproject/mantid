@@ -47,7 +47,8 @@ using namespace Mantid::Kernel;
 namespace {
 
 /// A shift to add/subtract to a point to test if it is an entry/exit point
-constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
+// constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
+constexpr double VALID_INTERCEPT_POINT_SHIFT{8e-6};
 
 /**
  * Find the solid angle of a triangle defined by vectors a,b,c from point
@@ -1086,17 +1087,59 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
   const auto &IPoints(LI.getPoints());
   const auto &dPoints(LI.getDistance());
 
-  auto ditr = dPoints.begin();
-  auto itrEnd = IPoints.end();
-  for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
-    if (*ditr > 0.0) // only interested in forward going points
-    {
-      // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, track.direction());
-      if (flag != TrackDirection::INVALID)
-        track.addPoint(flag, *iitr, *this);
+  // sort the points based on its
+  // 1. build a vector that contains the relative distance to the starting point
+  //    of the track/ray
+  const size_t nPoints(IPoints.size());
+  std::vector<double> dists(nPoints);
+  for (auto pt : IPoints) {
+    dists.push_back(pt.distance(track.startPoint()));
+  }
+  // 2. get the index in the sorted order
+  std::vector<size_t> idxs(nPoints);
+  std::iota(idxs.begin(), idxs.end(), 0);
+  std::sort(idxs.begin(), idxs.end(), [&dists](size_t a, size_t b) { return dists[a] < dists[b]; });
+
+  // 3. iterating through IPoints by the order of the smallest
+  //    relative distance to the largest
+  // * schematics
+  //     (out)  |  (inside)      | (out)
+  // Ps         |                |
+  // o----x-----x-------x--------x----------------------->
+  //      m0    p0      m1       p1
+  //
+  // m0 = 0.5*(Ps + p0): outside ==> p0 is a Entering Type intercept
+  // m1 = 0.5*(Ps + p1): inside ==> p1 is a Leaving Type intercept
+  for (size_t i = 0; i < nPoints; ++i) {
+    const size_t idx(idxs[i]);
+    const auto &currentPt(IPoints[idx]);
+    const auto &prePoint = (i == 0) ? track.startPoint() : IPoints[idxs[i - 1]];
+    const auto ditr = dPoints[idx];
+    if (ditr > 0) {
+      // compute the mid point
+      auto midPoint = prePoint + currentPt;
+      midPoint *= 0.5;
+      // find the type of currentPt (entering or leaving)
+      const TrackDirection flag = calcValidTypeByMidPoint(midPoint);
+      // add to list
+      track.addPoint(flag, currentPt, *this);
     }
   }
+
+  // NOTE: Original method of identifying intercept type: twiddling with fixed
+  //       step size.
+  // auto ditr = dPoints.begin();
+  // auto itrEnd = IPoints.end();
+  // for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
+  //   if (*ditr > 0.0) // only interested in forward going points
+  //   {
+  //     // Is the point and enterance/exit Point
+  //     const TrackDirection flag = calcValidType(*iitr, track.direction());
+  //     if (flag != TrackDirection::INVALID)
+  //       track.addPoint(flag, *iitr, *this);
+  //   }
+  // }
+
   track.buildLink();
   // Return number of track segments added
   return (track.count() - originalCount);
@@ -1133,11 +1176,26 @@ double CSGObject::distance(const Geometry::Track &track) const {
  * @retval -1 :: Exit Point
  */
 TrackDirection CSGObject::calcValidType(const Kernel::V3D &point, const Kernel::V3D &uVec) const {
+  // NOTE: This method is sensitive to the geometry dimension, and will lead to
+  //       incorrect identification due to the value of VALID_INTERCEPT_POINT_SHIFT
+  //       being either too large or too small.
   const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
   const int flagA = isValid(point - shift);
   const int flagB = isValid(point + shift);
   if (!(flagA ^ flagB))
     return Geometry::TrackDirection::INVALID;
+  return (flagA) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
+}
+
+/**
+ * Check if an intercept is guiding the ray into the shape or leaving the shape
+ * @param midPt :: the middle point between the intercept point of interest and its
+ *                 previous point
+ * @retval 1 :: Entry point
+ * @retval -1 :: Exit Point
+ */
+TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &midPt) const {
+  const int flagA = isValid(midPt);
   return (flagA) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
 }
 
