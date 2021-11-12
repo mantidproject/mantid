@@ -215,6 +215,8 @@ added. It does not check the points for validity.
   const double vDA = cylinder_axis.scalar_prod(center);
 
   // this is param[0] * x^2 + param[1] * x + param[0]
+  // NOTE: Check the documentation page (concept::GeometryofShape) to learn the
+  //       detailed derivation of the following formula.
   double quadratic_params[3];
   quadratic_params[0] = 1.0 - (vDn * vDn);
   quadratic_params[1] = 2.0 * (center.scalar_prod(m_direction) - vDA * vDn);
