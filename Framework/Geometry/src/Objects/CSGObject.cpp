@@ -216,7 +216,7 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre, co
 
 /**
  * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle
- * based soild angle
+ * based solid angle
  * calculation. Should work for parallel-piped as well.
  * @param observer :: point from which solid angle required
  * @param vectors :: vector of V3D - the values are the 4 points used to defined
@@ -384,7 +384,7 @@ namespace {
 Kernel::Logger logger("CSGObject");
 }
 /**
- *  Default constuctor
+ *  Default constructor
  */
 CSGObject::CSGObject() : CSGObject("") {}
 
@@ -488,7 +488,7 @@ int CSGObject::setObject(const int objName, const std::string &lineStr) {
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
  * @return Cell String (from m_topRule)
- * @todo Break infinite recusion
+ * @todo Break infinite recursion
  */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
 
@@ -500,7 +500,7 @@ void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
  * @return Cell String (from m_topRule)
- * @todo Break infinite recusion
+ * @todo Break infinite recursion
  */
 std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
   std::string TopStr = this->topRule()->display();
@@ -516,7 +516,7 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
       auto vc = MList.find(cN);
       if (vc == MList.end())
         throw Kernel::Exception::NotFoundError("Not found in the list of indexable hulls (Object::cellStr)", cN);
-      // Not the recusion :: This will cause no end of problems
+      // Not the recursion :: This will cause no end of problems
       // if there is an infinite loop.
       cx << vc->second.cellStr(MList);
       cx << ") ";
@@ -530,7 +530,7 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
 }
 
 /*
- * Calcluate if there are any complementary components in
+ * Calculate if there are any complementary components in
  * the object. That is lines with #(....)
  * @throw ColErr::ExBase :: Error with processing
  * @param lineStr :: Input string must:  ID Mat {Density}  {rules}
@@ -1202,11 +1202,10 @@ TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &midPt) cons
 }
 
 /**
- * Find soild angle of object wrt the observer. This interface routine calls
- * either
- * getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of
- * triangles
- * in the discete surface representation.
+ * Find solid angle of object wrt the observer.
+ * This interface routine calls either getTriangleSolidAngle or
+ * getRayTraceSolidAngle.
+ * Choice made on number of triangles in the discrete surface representation.
  * @param observer :: point to measure solid angle from
  * @return :: estimate of solid angle of object. Accuracy depends on object
  * shape.
@@ -1236,7 +1235,7 @@ double CSGObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &sca
  */
 double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
   // Calculation of solid angle as numerical double integral over all angles.
-  // This could be optimised further e.g. by using a light weight version of
+  // This could be optimized further e.g. by using a light weight version of
   // the interceptSurface method - this does more work than is necessary in this
   // application.
   // Accuracy is of the order of 1% for objects with an accurate bounding box,
@@ -1347,7 +1346,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
 
 /**
  * Find solid angle of object from point "observer" using the
- * OC triangluation of the object, if it exists
+ * OC triangulation of the object, if it exists
  *
  * @param observer :: Point from which solid angle is required
  * @return the solid angle
@@ -1428,7 +1427,7 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
 }
 /**
  * Find solid angle of object from point "observer" using the
- * OC triangluation of the object, if it exists. This method expects a
+ * OC triangulation of the object, if it exists. This method expects a
  * scaling vector scaleFactor that scales the three axes.
  *
  * @param observer :: Point from which solid angle is required.
