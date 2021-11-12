@@ -91,7 +91,6 @@ class ModelFittingPresenter(BasicFittingPresenter):
         # Triggers handle_selected_x_changed
         self.view.update_x_parameters(self.model.x_parameters(), self.model.y_parameter_types(), emit_signal=True)
         #update start and end x
-        print("hi")
         self.update_selected_parameter_combination_workspace()
 
     def handle_parameter_combinations_error(self, error: str) -> None:
