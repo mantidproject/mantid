@@ -97,5 +97,6 @@ Improvements
   ########
   - A bug has been fixed that caused Model fitting to not update it's results table list.
   - Plotting in Model fitting now features a greater number of units for parameters and sample logs.
+  - The dates and times for relevant parameters in model fitting have been formatted so that they can be plotted with relative spacing.
 
 
