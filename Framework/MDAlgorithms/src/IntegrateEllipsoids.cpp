@@ -412,15 +412,16 @@ void IntegrateEllipsoids::exec() {
   const size_t numSpectra = wksp->getNumberHistograms();
   Progress prog(this, 0.5, 1.0, numSpectra);
 
-  if (eventWS) {
-    // process as EventWorkspace
-    qListFromEventWS(integrator, prog, eventWS);
-    qListFromEventWS(integrator_satellite, prog, eventWS);
-  } else {
-    // process as Workspace2D
-    qListFromHistoWS(integrator, prog, histoWS);
-    qListFromHistoWS(integrator_satellite, prog, histoWS);
-  }
+  // TODO FIXME - Skip this block to find out how many tests will be broken
+  //  if (eventWS) {
+  //    // process as EventWorkspace
+  //    qListFromEventWS(integrator, prog, eventWS);
+  //    qListFromEventWS(integrator_satellite, prog, eventWS);
+  //  } else {
+  //    // process as Workspace2D
+  //    qListFromHistoWS(integrator, prog, histoWS);
+  //    qListFromHistoWS(integrator_satellite, prog, histoWS);
+  //  }
 
   double inti;
   double sigi;
