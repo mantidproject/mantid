@@ -30,6 +30,14 @@ public:
   LoadDNSEventTest() {}
 
   std::shared_ptr<LoadDNSEvent> makeAlgorithm(bool doesThrow = true) {
+    // DNS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     std::shared_ptr<LoadDNSEvent> alg(new LoadDNSEvent());
     alg->setRethrows(doesThrow);
     alg->initialize();
@@ -98,7 +106,7 @@ public:
   void test_DataWSStructure() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
     alg->execute();
 
     // Retrieve the workspace from data service.
@@ -142,7 +150,7 @@ public:
   void test_DiscardPreChopperEvents() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("DiscardPreChopperEvents", false));
     alg->execute();
     EventWorkspace_sptr iws;
@@ -153,7 +161,7 @@ public:
   void test_SetBinBoundary() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 2, true, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 0, true, outWSName);
     alg->execute();
     EventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
