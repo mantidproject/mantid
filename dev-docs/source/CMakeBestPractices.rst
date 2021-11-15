@@ -119,7 +119,7 @@ The only way you can change it to ON is to edit it within CMake. If you cache th
 CMake framework exports
 =============================
 
-WIth the move to conda, we have created a CMake export target for the Framework libraries. If you add a new Framework library, or dependency there are a couple of things you need to consider.
+With the move to conda, we have created a CMake export target for the Framework libraries. If you add a new Framework library, or dependency there are a couple of things you need to consider.
 
 1. When you add a new Framework library, alias it using the namespace Mantid:: - This means when we link to Mantid::NewTarget it can either link to our inbuilt library, or one on our system. This ensures we can have a standalone mantidqt build.
 
