@@ -91,7 +91,7 @@ After you've created this file, you can find mylibrary and its target ``MyLibrar
     find_package(MyLibrary REQUIRED)
 
 
-NOTE: The ``UNKNOWN`` specifier in add_library is useful on windows as it means we aren't required to point it to the .lib export libraries. The find_library CMake function will not find these. Usage of Unknown is common place in CMake finders because of this.
+NOTE: The ``UNKNOWN`` specifier in add_library is useful on Windows as it means we aren't required to point it to the .lib export libraries. The find_library CMake function will not find these. Usage of Unknown is common place in CMake finders because of this.
 
 =============================================
 Introducing a new CMake configurable variable
