@@ -197,7 +197,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cp
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:400
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1411
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1342
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1343
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
