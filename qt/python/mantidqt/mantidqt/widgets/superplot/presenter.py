@@ -204,10 +204,10 @@ class SuperplotPresenter:
 
     def get_kwargs_from_settings(self):
         """
-        Get the useful plot keywork arguments from the global settings.
+        Get the useful plot keyword arguments from the global settings.
 
         Returns:
-            dict(str: str): plot keywork arguments
+            dict(str: str): plot keyword arguments
         """
         kwargs = dict()
         kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
