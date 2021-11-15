@@ -225,6 +225,7 @@ public:
 
   void testAlgorithmComplete() {
     auto row = makeRow("12345", 0.5);
+    row.setParent(nullptr);
     auto jobManager = makeJobManager();
     auto iVsQ = createWorkspace();
     auto iVsQBin = createWorkspace();
