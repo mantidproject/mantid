@@ -31,14 +31,6 @@ public:
   LoadDNSEventTest() {}
 
   std::shared_ptr<LoadDNSEvent> makeAlgorithm(bool doesThrow = true) {
-    // DNS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
-    // for this test
-    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
-    std::string foundFile =
-        Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
-    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
-    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
-    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     std::shared_ptr<LoadDNSEvent> alg(new LoadDNSEvent());
     alg->setRethrows(doesThrow);
     alg->initialize();
@@ -61,6 +53,16 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("chopperChannel", chopperChannel));
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SetBinBoundary", SetBinBoundary));
     return alg;
+  }
+
+  void testConfidence() {
+    LoadDNSEvent alg;
+    alg.initialize();
+    alg.setPropertyValue("InputFile", m_fileName);
+    FileDescriptor descriptor(alg.getPropertyValue("InputFile"));
+    TS_ASSERT_EQUALS(80, alg.confidence(descriptor));
+    alg.setPropertyValue("InputFile", m_badFileName);
+    TS_ASSERT_EQUALS(0, alg.confidence(descriptor));
   }
 
   void test_Init() {
@@ -105,6 +107,14 @@ public:
   }
 
   void test_DataWSStructure() {
+    // DNS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
     auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
@@ -146,27 +156,53 @@ public:
     TS_ASSERT_EQUALS(iws->getSpectrum(32217).getNumberEvents(), 808);
     TS_ASSERT_EQUALS(iws->getDimension(0)->getMaximum(), 0.00); // histogram bins not set
     AnalysisDataService::Instance().remove(outWSName);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
   void test_DiscardPreChopperEvents() {
+    // DNS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     std::string outWSName("LoadDNSEventTest_OutputWS");
-
     auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("DiscardPreChopperEvents", false));
     alg->execute();
     EventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT_EQUALS(iws->getNumberEvents(), 10520);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
   void test_SetBinBoundary() {
+    // DNS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     std::string outWSName("LoadDNSEventTest_OutputWS");
-
     auto alg = makeAlgorithm(m_fileName, 0, true, outWSName);
     alg->execute();
     EventWorkspace_sptr iws;
     TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
     TS_ASSERT_DELTA(iws->getDimension(0)->getMaximum(), 99471.296, 0.001);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
 private:

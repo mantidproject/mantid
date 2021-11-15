@@ -67,7 +67,14 @@ int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &extn = descriptor.extension();
   if (extn != ".mdat")
     return 0;
-  return 90;
+  auto &file = descriptor.data();
+
+  std::string fileline;
+  std::getline(file, fileline);
+  if (fileline.find("mesytec psd listmode data") != std::string::npos) {
+    return 80;
+  } else
+    return 0;
 }
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
