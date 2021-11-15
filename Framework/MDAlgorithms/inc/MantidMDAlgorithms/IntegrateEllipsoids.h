@@ -65,6 +65,12 @@ private:
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
+  /// Write the profiles of each  principle axis to the output workspace with fixed name
+  void outputProfile(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
+                     const std::vector<double> &principalaxis3, const double &cutoffIsigI, const int &numSigmas,
+                     std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator,
+                     IntegrateQLabEvents &integrator_satellite);
+
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
 
