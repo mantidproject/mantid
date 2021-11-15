@@ -70,6 +70,7 @@ class AdvancedSetupScript(BaseScriptElement):
     sampleformula = ""
     samplenumberdensity = ""
     measuredmassdensity = ""
+    sampleheight = ""
     containershape = ""
     typeofcorrection = ""
     parnamelist = None
@@ -120,6 +121,7 @@ class AdvancedSetupScript(BaseScriptElement):
             'TypeOfCorrection',
             'SampleFormula',
             'MeasuredMassDensity',
+            'SampleGeometry',
             'SampleNumberDensity',
             'ContainerShape',
             # Caching options
@@ -176,6 +178,10 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["TypeOfCorrection"] = self.typeofcorrection
         pardict["SampleFormula"] = self.sampleformula
         pardict["MeasuredMassDensity"] = self.measuredmassdensity
+        if self.sampleheight is not "":
+            pardict["SampleGeometry"] = {'Height': self.sampleheight}
+        else:
+            pardict["SampleGeometry"] = ""
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
         #Caching options
@@ -278,6 +284,9 @@ class AdvancedSetupScript(BaseScriptElement):
 
             self.measuredmassdensity = getFloatElement(instrument_dom, "measuredmassdensity",
                                                        AdvancedSetupScript.measuredmassdensity)
+
+            self.sampleheight = getFloatElement(instrument_dom, "sampleheight",
+                                                AdvancedSetupScript.sampleheight)
 
             self.containershape = BaseScriptElement.getStringElement(instrument_dom, "containershape",
                                                                      default=AdvancedSetupScript.containershape)

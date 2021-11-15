@@ -170,6 +170,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.sampleformula_edit.setText(str(state.sampleformula))
         self._content.numberdensity_edit.setText(str(state.samplenumberdensity))
         self._content.massdensity_edit.setText(str(state.measuredmassdensity))
+        self._content.sampleheight_edit.setText(str(state.sampleheight))
         self._content.containertype_combo.setCurrentIndex(
             self._content.containertype_combo.findText(state.containershape))
         self._content.correctiontype_combo.setCurrentIndex(
@@ -219,6 +220,7 @@ class AdvancedSetupWidget(BaseWidget):
         s.sampleformula = self._content.sampleformula_edit.text()
         s.samplenumberdensity = self._content.numberdensity_edit.text()
         s.measuredmassdensity = self._content.massdensity_edit.text()
+        s.sampleheight = self._content.sampleheight_edit.text()
         s.containershape = self._content.containertype_combo.currentText()
         s.typeofcorrection = self._content.correctiontype_combo.currentText()
 
