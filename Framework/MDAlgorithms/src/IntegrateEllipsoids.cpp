@@ -591,108 +591,10 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
-  // why statistics are different?
-  if (principalaxis1.size() > 1) {
-    Statistics stats1 = getStatistics(principalaxis1);
-    g_log.notice() << "principalaxis1: "
-                   << " mean " << stats1.mean << " standard_deviation " << stats1.standard_deviation << " minimum "
-                   << stats1.minimum << " maximum " << stats1.maximum << " median " << stats1.median << "\n";
-    Statistics stats2 = getStatistics(principalaxis2);
-    g_log.notice() << "principalaxis2: "
-                   << " mean " << stats2.mean << " standard_deviation " << stats2.standard_deviation << " minimum "
-                   << stats2.minimum << " maximum " << stats2.maximum << " median " << stats2.median << "\n";
-    Statistics stats3 = getStatistics(principalaxis3);
-    g_log.notice() << "principalaxis3: "
-                   << " mean " << stats3.mean << " standard_deviation " << stats3.standard_deviation << " minimum "
-                   << stats3.minimum << " maximum " << stats3.maximum << " median " << stats3.median << "\n";
-  }
-  g_log.notice() << " .............. ..................\n";
   if (principalaxis1.size() > 1) {
     outputProfile(principalaxis1, principalaxis2, principalaxis3, cutoffIsigI, numSigmas, peaks, integrator,
                   integrator_satellite);
   }
-
-  //   if (principalaxis1.size() > 1) {
-  //     Statistics stats1 = getStatistics(principalaxis1);
-  //     g_log.notice() << "principalaxis1: "
-  //                    << " mean " << stats1.mean << " standard_deviation " << stats1.standard_deviation << " minimum "
-  //                    << stats1.minimum << " maximum " << stats1.maximum << " median " << stats1.median << "\n";
-  //     Statistics stats2 = getStatistics(principalaxis2);
-  //     g_log.notice() << "principalaxis2: "
-  //                    << " mean " << stats2.mean << " standard_deviation " << stats2.standard_deviation << " minimum "
-  //                    << stats2.minimum << " maximum " << stats2.maximum << " median " << stats2.median << "\n";
-  //     Statistics stats3 = getStatistics(principalaxis3);
-  //     g_log.notice() << "principalaxis3: "
-  //                    << " mean " << stats3.mean << " standard_deviation " << stats3.standard_deviation << " minimum "
-  //                    << stats3.minimum << " maximum " << stats3.maximum << " median " << stats3.median << "\n";
-  //
-  //     constexpr size_t histogramNumber = 3;
-  //     Workspace_sptr wsProfile = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-  //                                                                    principalaxis1.size(), principalaxis1.size());
-  //     Workspace2D_sptr wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
-  //     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-  //
-  //     // set output workspace
-  //     Points points(principalaxis1.size(), LinearGenerator(0, 1));
-  //     wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
-  //     wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
-  //     wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
-  //
-  //     if (cutoffIsigI != EMPTY_DBL()) {
-  //       principalaxis1.clear();
-  //       principalaxis2.clear();
-  //       principalaxis3.clear();
-  //       specify_size = true;
-  //       double meanMax = std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
-  //       double stdMax =
-  //           std::max(std::max(stats1.standard_deviation, stats2.standard_deviation), stats3.standard_deviation);
-  //       peak_radius = meanMax + numSigmas * stdMax;
-  //       back_inner_radius = peak_radius;
-  //       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
-  //       // will make the background shell volume equal to the peak region volume.
-  //       for (size_t i = 0; i < n_peaks; i++) {
-  //         // check if peak is satellite peak
-  //         const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
-  //         //
-  //         const V3D peak_q = peaks[i].getQLabFrame();
-  //         std::vector<double> axes_radii;
-  //
-  //         if (isSatellitePeak) {
-  //           integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-  //                                                       back_outer_radius, axes_radii, inti, sigi, backi);
-  //         } else {
-  //           integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-  //                                             back_outer_radius, axes_radii, inti, sigi, backi);
-  //         }
-  //
-  //         peaks[i].setIntensity(inti);
-  //         peaks[i].setSigmaIntensity(sigi);
-  //         if (axes_radii.size() == 3) {
-  //           principalaxis1.emplace_back(axes_radii[0]);
-  //           principalaxis2.emplace_back(axes_radii[1]);
-  //           principalaxis3.emplace_back(axes_radii[2]);
-  //           g_log.notice() << "Peak " << i << ": "
-  //                          << axes_radii[0] << ", "
-  //                          << axes_radii[1] << ", "
-  //                          << axes_radii[2] << "\n";
-  //         }
-  //       }
-  //       if (principalaxis1.size() > 1) {
-  //         Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-  //                                                                         principalaxis1.size(),
-  //                                                                         principalaxis1.size());
-  //         Workspace2D_sptr wsProfile2D2 = std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
-  //         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass", wsProfile2D2);
-  //
-  //         Points profilePoints(principalaxis1.size(), LinearGenerator(0, 1));
-  //         wsProfile2D->setHistogram(0, profilePoints, Counts(std::move(principalaxis1)));
-  //         wsProfile2D->setHistogram(1, profilePoints, Counts(std::move(principalaxis2)));
-  //         wsProfile2D->setHistogram(2, profilePoints, Counts(std::move(principalaxis3)));
-  //       }
-  //      g_log.notice() << "Principle axis size = " << principalaxis1.size() << "\n";
-  //      throw std::runtime_error("Has this part ever tested?");
-  //    }
-  //  }
 
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
   // integrated.
@@ -744,6 +646,25 @@ void IntegrateEllipsoids::calculateE1(const Geometry::DetectorInfo &detectorInfo
     E1 = E1 * (1. / E1.norm());       // normalize
     E1Vec.emplace_back(E1);
   }
+}
+
+void IntegrateEllipsoids::outputProfileWS(const std::vector<double> &principalaxis1,
+                                          const std::vector<double> &principalaxis2,
+                                          const std::vector<double> &principalaxis3, const std::string &wsname) {
+
+  constexpr size_t histogramNumber = 3;
+  Workspace_sptr wsProfile =
+      WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, principalaxis1.size(), principalaxis1.size());
+  g_log.notice() << "Create workspace 2D with " << histogramNumber << " spec with size = " << principalaxis1.size()
+                 << "\n";
+  Workspace2D_sptr wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
+  AnalysisDataService::Instance().addOrReplace(wsname, wsProfile2D);
+
+  // set output workspace
+  Points points(principalaxis1.size(), LinearGenerator(0, 1));
+  wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
+  wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
+  wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
 }
 
 void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis1,
@@ -825,22 +746,73 @@ void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis
     if (m_principalaxis1.size() > 1) {
       Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
                                                                       m_principalaxis1.size(), m_principalaxis1.size());
-      if (!wsProfile2)
-        g_log.error("Not a workspace 2");
       Workspace2D_sptr wsProfile2D2 = std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
-      if (!wsProfile2D2)
-        g_log.error("Not a workspace2D 2");
       AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass", wsProfile2D2);
-      g_log.notice("check point xx2");
 
       Points profilePoints(m_principalaxis1.size(), LinearGenerator(0, 1));
       wsProfile2D->setHistogram(0, profilePoints, Counts(std::move(m_principalaxis1)));
       wsProfile2D->setHistogram(1, profilePoints, Counts(std::move(m_principalaxis2)));
       wsProfile2D->setHistogram(2, profilePoints, Counts(std::move(m_principalaxis3)));
     }
+  }
+}
 
-    g_log.error() << "CutoffIsigI = " << cutoffIsigI << "\n";
-    // throw std::runtime_error("CutoffIsigI is not empty");
+/**
+ * @brief Integrate peaks again with cutoff value of I/Sig(I)
+ */
+void IntegrateEllipsoids::integratePeaksCutoffISigI(std::vector<double> &m_principalaxis1,
+                                                    std::vector<double> &m_principalaxis2,
+                                                    std::vector<double> &m_principalaxis3, const int &numSigmas,
+                                                    std::vector<Peak> &peaks, IntegrateQLabEvents &integrator,
+                                                    IntegrateQLabEvents &integrator_satellite) {
+  m_principalaxis1.clear();
+  m_principalaxis2.clear();
+  m_principalaxis3.clear();
+
+  Statistics stats1 = getStatistics(m_principalaxis1);
+  g_log.notice() << "principalaxis1: "
+                 << " mean " << stats1.mean << " standard_deviation " << stats1.standard_deviation << " minimum "
+                 << stats1.minimum << " maximum " << stats1.maximum << " median " << stats1.median << "\n";
+  Statistics stats2 = getStatistics(m_principalaxis2);
+  g_log.notice() << "principalaxis2: "
+                 << " mean " << stats2.mean << " standard_deviation " << stats2.standard_deviation << " minimum "
+                 << stats2.minimum << " maximum " << stats2.maximum << " median " << stats2.median << "\n";
+  Statistics stats3 = getStatistics(m_principalaxis3);
+  g_log.notice() << "principalaxis3: "
+                 << " mean " << stats3.mean << " standard_deviation " << stats3.standard_deviation << " minimum "
+                 << stats3.minimum << " maximum " << stats3.maximum << " median " << stats3.median << "\n";
+
+  bool specify_size = true;
+  double meanMax = std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
+  double stdMax = std::max(std::max(stats1.standard_deviation, stats2.standard_deviation), stats3.standard_deviation);
+  double peak_radius = meanMax + numSigmas * stdMax;
+  double back_inner_radius = peak_radius;
+  double back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
+  // will make the background shell volume equal to the peak region volume.
+  for (size_t i = 0; i < peaks.size(); i++) {
+    // check if peak is satellite peak
+    const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
+    //
+    const V3D peak_q = peaks[i].getQLabFrame();
+    std::vector<double> axes_radii;
+
+    double inti{0.}, sigi{0.};
+    std::pair<double, double> backi;
+    if (isSatellitePeak) {
+      integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
+                                                  back_outer_radius, axes_radii, inti, sigi, backi);
+    } else {
+      integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius, back_outer_radius,
+                                        axes_radii, inti, sigi, backi);
+    }
+
+    peaks[i].setIntensity(inti);
+    peaks[i].setSigmaIntensity(sigi);
+    if (axes_radii.size() == 3) {
+      m_principalaxis1.emplace_back(axes_radii[0]);
+      m_principalaxis2.emplace_back(axes_radii[1]);
+      m_principalaxis3.emplace_back(axes_radii[2]);
+    }
   }
 }
 

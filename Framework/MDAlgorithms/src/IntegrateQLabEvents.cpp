@@ -59,6 +59,8 @@ IntegrateQLabEvents::IntegrateQLabEvents(const SlimEvents &peak_q_list, double r
   }
 }
 
+void IntegrateQLabEvents::setRadius(const double &radius) { m_radius = radius; }
+
 bool IntegrateQLabEvents::isOrigin(const V3D &q, const double &cellSize) {
   int64_t a(static_cast<int64_t>(q[0] / cellSize));
   int64_t b(static_cast<int64_t>(q[1] / cellSize));

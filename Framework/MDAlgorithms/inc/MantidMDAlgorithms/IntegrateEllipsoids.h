@@ -71,6 +71,14 @@ private:
                      std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator,
                      IntegrateQLabEvents &integrator_satellite);
 
+  void outputProfileWS(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
+                       const std::vector<double> &principalaxis3, const std::string &wsname);
+
+  void integratePeaksCutoffISigI(std::vector<double> &m_principalaxis1, std::vector<double> &m_principalaxis2,
+                                 std::vector<double> &m_principalaxis3, const int &numSigmas,
+                                 std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator,
+                                 IntegrateQLabEvents &integrator_satellite);
+
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
 

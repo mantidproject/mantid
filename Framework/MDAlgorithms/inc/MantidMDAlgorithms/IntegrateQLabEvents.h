@@ -100,6 +100,8 @@ public:
   /// Determine if an input Q-vector lies in the cell associated to the origin
   static bool isOrigin(const V3D &q, const double &cellSize);
 
+  void setRadius(const double &radius);
+
   /**
    * @brief distribute the events among the cells of the partitioned QLab
    * space.
