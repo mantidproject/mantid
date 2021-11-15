@@ -65,5 +65,6 @@ Single Crystal Diffraction
 --------------------------
 - Existing :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
 - Enabling :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` to calibrate each detector bank's size if it is a rectagular detector optionally.
+- Fixed calculation of modulation vector uncertainty in :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>`, new option ``CommonUBForAll`` allow selection of calculation handling multiple run the same as :ref:`IndexPeaks <algm-IndexPeaks>`.
 
 :ref:`Release 6.3.0 <v6.3.0>`
