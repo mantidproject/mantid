@@ -10,8 +10,8 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleShapeValidator.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 #include "boost/make_shared.hpp"
 

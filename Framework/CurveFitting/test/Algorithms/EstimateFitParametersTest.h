@@ -11,8 +11,8 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidCurveFitting/Algorithms/CalculateCostFunction.h"
 #include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::CalculateCostFunction;
 using Mantid::CurveFitting::Algorithms::EstimateFitParameters;

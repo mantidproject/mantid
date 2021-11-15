@@ -8,9 +8,9 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/ReflectometryTransform.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 

@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/TransformMD.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

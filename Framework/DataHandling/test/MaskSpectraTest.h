@@ -14,7 +14,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
 using namespace Mantid;
 using namespace API;

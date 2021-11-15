@@ -213,7 +213,7 @@ Mantid::Geometry::Instrument_sptr createInstrumentWithOptionalComponents(bool ha
 Mantid::Geometry::Instrument_sptr createSimpleInstrumentWithRotation(
     const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos, const Mantid::Kernel::V3D &detectorPos,
     const Mantid::Kernel::Quat &relativeBankRotation, const Mantid::Kernel::Quat &relativeDetRotation,
-    const Mantid::Kernel::V3D detOffset = Mantid::Kernel::V3D(0, 0, 0));
+    const Mantid::Kernel::V3D &detOffset = Mantid::Kernel::V3D(0, 0, 0));
 
 Mantid::Geometry::Instrument_sptr
 createInstrumentWithSourceRotation(const Mantid::Kernel::V3D &sourcePos, const Mantid::Kernel::V3D &samplePos,

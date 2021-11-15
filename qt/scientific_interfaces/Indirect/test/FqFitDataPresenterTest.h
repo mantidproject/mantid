@@ -15,8 +15,8 @@
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;

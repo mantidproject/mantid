@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidMDAlgorithms/LessThanMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

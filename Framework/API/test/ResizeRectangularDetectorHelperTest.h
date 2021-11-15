@@ -9,11 +9,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace API;

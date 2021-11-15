@@ -229,7 +229,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:6
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/FileLoaderRegistry.cpp:33
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:136
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:171
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:840
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:334
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/GridDomain1D.cpp:18
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/GridDomain1D.cpp:18
@@ -753,7 +752,7 @@ shadowVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.cpp:595
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.cpp:639
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD2.cpp:641
-unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadMD.cpp:171
+unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadMD.cpp:172
 deallocuse:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:118
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadSQW.cpp:437
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/LoadDNSSCD.cpp:307

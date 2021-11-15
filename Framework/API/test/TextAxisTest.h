@@ -9,12 +9,12 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/TextAxis.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

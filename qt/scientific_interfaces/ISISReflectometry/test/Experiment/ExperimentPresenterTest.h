@@ -11,8 +11,8 @@
 #include "../ReflMockObjects.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/ReflectometryHelper.h"
 #include "MockExperimentOptionDefaults.h"
 #include "MockExperimentView.h"
 

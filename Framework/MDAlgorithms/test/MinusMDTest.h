@@ -9,10 +9,10 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/MinusMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

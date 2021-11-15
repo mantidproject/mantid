@@ -16,8 +16,8 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData::detail;

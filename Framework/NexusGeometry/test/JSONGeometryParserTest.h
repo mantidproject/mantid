@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
-#include "MantidTestHelpers/JSONGeometryParserTestHelper.h"
 #include <Poco/Glob.h>
 #include <cxxtest/TestSuite.h>
 #include <exception>
@@ -43,62 +43,62 @@ public:
   }
 
   void test_parse_fail_with_no_sample_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoSample();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoSample();
     attemptParseInvalidArgument(json, "No sample found in JSON.");
   }
 
   void test_parse_fail_with_no_instrument_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoInstrument();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoInstrument();
     attemptParseInvalidArgument(json, "No instrument found in JSON.");
   }
 
   void test_parse_fail_with_no_detectors_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoDetectors();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoDetectors();
     attemptParseInvalidArgument(json, "No detectors found in JSON.");
   }
 
   void test_parse_fail_if_no_detector_ids_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoDetectorIDs();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoDetectorIDs();
     attemptParseInvalidArgument(json, "No detector ids found in detector_1.");
   }
 
   void test_parse_fail_if_no_x_pixel_offset_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoXPixelOffset();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoXPixelOffset();
     attemptParseInvalidArgument(json, "No x_pixel_offsets found in detector_1.");
   }
 
   void test_parse_fail_if_no_y_pixel_offset_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoYPixelOffset();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoYPixelOffset();
     attemptParseInvalidArgument(json, "No y_pixel_offsets found in detector_1.");
   }
 
   void test_parse_fail_if_no_pixel_shape_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryNoPixelShape();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryNoPixelShape();
     attemptParseInvalidArgument(json, "Insufficient pixel shape information found in detector_1.");
   }
 
   void test_parse_fail_for_empty_off_geometry_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryEmptyOffGeometry();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryEmptyOffGeometry();
     attemptParseInvalidArgument(json, "Insufficient pixel shape information found in detector_1.");
   }
 
   void test_parse_fail_for_invalid_off_geometry_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryInvalidOffGeometry();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryInvalidOffGeometry();
     attemptParseInvalidArgument(json, "Invalid off geometry provided in JSON pixel_shape.");
   }
 
   void test_parse_fail_for_empty_cylindrical_geometry_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryEmptyCylindricalGeometry();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryEmptyCylindricalGeometry();
     attemptParseInvalidArgument(json, "Insufficient pixel shape information found in detector_1.");
   }
 
   void test_parse_fail_for_invalid_cylindrical_geometry_in_JSON() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryInvalidCylindricalGeometry();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryInvalidCylindricalGeometry();
     attemptParseInvalidArgument(json, "Invalid cylindrical geometry provided in JSON pixel_shape.");
   }
 
   void test_parse_fail_for_missing_transformation_dependency() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryMissingTransformations();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryMissingTransformations();
     attemptParseInvalidArgument(json, "Could not find dependency "
                                       "/entry/instrument/detector_1/"
                                       "transformations/location in JSON "
@@ -106,7 +106,7 @@ public:
   }
 
   void test_parse_fail_for_missing_transformation_beam_direction_offset() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryMissingBeamDirectionOffset();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryMissingBeamDirectionOffset();
     attemptParseInvalidArgument(json, "Could not find dependency "
                                       "/entry/instrument/detector_1/"
                                       "transformations/beam_direction_offset "
@@ -114,7 +114,7 @@ public:
   }
 
   void test_parse_fail_for_missing_transformation_orientation() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryMissingOrientation();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryMissingOrientation();
     attemptParseInvalidArgument(json, "Could not find dependency "
                                       "/entry/instrument/detector_1/"
                                       "transformations/orientation in JSON "
@@ -122,17 +122,17 @@ public:
   }
 
   void test_parse_fail_for_empty_chopper() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryMissingChopperInformation();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryMissingChopperInformation();
     attemptParseInvalidArgument(json, "Full chopper definition missing in JSON provided.");
   }
 
   void test_parse_fail_for_empty_monitor() {
-    std::string json = Mantid::TestHelpers::getJSONGeometryMissingMonitorInformation();
+    std::string json = Mantid::FrameworkTestHelpers::getJSONGeometryMissingMonitorInformation();
     attemptParseInvalidArgument(json, "Full monitor definition for monitor_1 missing in JSON provided.");
   }
 
   void test_load_full_instrument_simple_off_pixel_shape() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleOFF();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleOFF();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.sampleName(), "sample");
@@ -168,7 +168,7 @@ public:
   }
 
   void test_load_full_instrument_simple_with_source() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleWithSource();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleWithSource();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.sampleName(), "sample");
@@ -205,7 +205,7 @@ public:
   }
 
   void test_load_full_instrument_simple_cylindrical_pixel_shape() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleCylindrical();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleCylindrical();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
@@ -234,7 +234,7 @@ public:
   }
 
   void test_load_full_instrument_simple_with_single_chopper() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleWithChopper();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleWithChopper();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
@@ -277,7 +277,7 @@ public:
   }
 
   void test_load_full_instrument_with_single_monitor_without_shape() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitorNoShape();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleWithMonitorNoShape();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
@@ -329,7 +329,7 @@ public:
   }
 
   void test_load_full_instrument_with_single_monitor_with_shape() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleWithMonitor();
     JSONGeometryParser parser(json);
     TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
@@ -382,7 +382,7 @@ public:
   }
 
   void test_load_full_instrument_with_z_pixel_offset() {
-    std::string json = Mantid::TestHelpers::getFullJSONInstrumentSimpleWithZPixelOffset();
+    std::string json = Mantid::FrameworkTestHelpers::getFullJSONInstrumentSimpleWithZPixelOffset();
     JSONGeometryParser parser(json);
     const auto &zPixelOffsets = parser.zPixelOffsets(0);
     TS_ASSERT_EQUALS(zPixelOffsets.size(), 4);

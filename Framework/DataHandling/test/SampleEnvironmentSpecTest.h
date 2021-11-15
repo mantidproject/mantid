@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/SampleEnvironmentSpec.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <memory>
 

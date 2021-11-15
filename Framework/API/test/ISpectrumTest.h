@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ISpectrum.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

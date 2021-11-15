@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
 #include <algorithm>
 #include <mutex>
@@ -41,7 +41,8 @@ public:
     ParallelRunner parallel;
     TS_ASSERT(parallel.size() > 1);
     std::vector<int> sizes;
-    parallel.run(get_sizes, std::ref(mutex), std::ref(sizes));
+    parallel.runSerial(get_sizes, std::ref(mutex), std::ref(sizes));
+    parallel.runParallel(get_sizes, std::ref(mutex), std::ref(sizes));
     // Currently ParallelRunner also runs the callable with a single rank.
     TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), 1), 1);
     TS_ASSERT_EQUALS(std::count(sizes.begin(), sizes.end(), parallel.size()), parallel.size());
@@ -51,7 +52,8 @@ public:
     std::mutex mutex;
     std::set<int> ranks;
     ParallelRunner parallel;
-    parallel.run(get_ranks, std::ref(mutex), std::ref(ranks));
+    parallel.runSerial(get_ranks, std::ref(mutex), std::ref(ranks));
+    parallel.runParallel(get_ranks, std::ref(mutex), std::ref(ranks));
     int size{1};
 #ifdef MPI_EXPERIMENTAL
     boost::mpi::communicator world;

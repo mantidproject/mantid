@@ -48,15 +48,8 @@ mtd_add_qt_tests(
   TARGET_NAME MantidScientificInterfacesISISReflectometryTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc
-               ../../../../Framework/TestHelpers/inc ../GUI/Preview Preview Reduction
-  TEST_HELPER_SRCS
-    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/ReflectometryHelper.cpp
-    ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
+  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../GUI/Preview Preview
+               Reduction
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
@@ -68,3 +61,5 @@ mtd_add_qt_tests(
                    MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
+
+add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt5)

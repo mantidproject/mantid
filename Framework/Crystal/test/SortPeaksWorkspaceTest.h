@@ -10,7 +10,7 @@
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 #include <vector>

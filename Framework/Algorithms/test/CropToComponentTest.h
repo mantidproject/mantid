@@ -13,7 +13,7 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/CropToComponent.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <array>
 #include <numeric>

@@ -8,7 +8,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/Scale.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::MantidVec;

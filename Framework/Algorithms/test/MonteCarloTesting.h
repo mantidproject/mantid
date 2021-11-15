@@ -7,13 +7,13 @@
 #pragma once
 
 #include "MantidAPI/Sample.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <gmock/gmock.h>
 #include <memory>
 

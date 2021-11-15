@@ -11,7 +11,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Projection.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -12,8 +12,8 @@
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadNexus.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

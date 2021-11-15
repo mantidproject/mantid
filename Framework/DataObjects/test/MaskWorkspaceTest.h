@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "PropertyManagerHelper.h"
 
 using Mantid::DataObjects::MaskWorkspace_const_sptr;

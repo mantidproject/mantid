@@ -279,13 +279,11 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
-    inc/MantidQtWidgets/Common/IMessageHandler.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
-    inc/MantidQtWidgets/Common/MessageHandler.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -1023,13 +1021,7 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsCommonTest
   QT_VERSION 5
   SRC ${QT5_TEST_FILES}
-  INCLUDE_DIRS ../../../Framework/TestHelpers/inc ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
+  INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
   LINK_LIBS ${TARGET_LIBRARIES}
             ${Boost_LIBRARIES}
             Mantid::PythonInterfaceCore
@@ -1040,3 +1032,5 @@ mtd_add_qt_tests(
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )
+
+add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)

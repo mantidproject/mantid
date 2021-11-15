@@ -42,12 +42,8 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE "${CMAKE_CURRENT_LIST_DIR}/test/PlottingTestIni
 mtd_add_qt_tests(
   TARGET_NAME MantidQtWidgetsPlottingTest
   QT_VERSION 5
-  INCLUDE_DIRS inc ../common/inc ../../../Framework/DataObjects/inc ../../../Framework/TestHelpers/inc
+  INCLUDE_DIRS inc ../common/inc ../../../Framework/DataObjects/inc
   SRC ${TEST_FILES}
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             ${POCO_LIBRARIES}
@@ -58,3 +54,5 @@ mtd_add_qt_tests(
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
+
+add_framework_test_helpers(MantidQtWidgetsPlottingTestQt5)

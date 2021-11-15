@@ -16,7 +16,7 @@ namespace Mantid {
 
 using namespace API;
 
-namespace TestHelpers {
+namespace FrameworkTestHelpers {
 
 // Create a workspace equipped with fake instrument from
 // unit_testing/REFL_Definition.xml IDF.
@@ -54,5 +54,5 @@ MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
                                            const std::vector<double> &yValues);
 
 MatrixWorkspace_sptr createWorkspaceSingle(const double startX = 1, const int nBins = 3, const double deltaX = 1);
-} // namespace TestHelpers
+} // namespace FrameworkTestHelpers
 } // namespace Mantid

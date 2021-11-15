@@ -10,8 +10,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDAlgorithms/CreateMD.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 #include <stdexcept>

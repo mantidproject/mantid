@@ -10,12 +10,12 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/NullCoordTransform.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
