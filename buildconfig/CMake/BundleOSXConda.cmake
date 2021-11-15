@@ -41,8 +41,14 @@ install_qt5_target_plugins("${Qt5Svg_PLUGINS}" ${prefix})
 install_qt5_target_plugins("${Qt5Sql_PLUGINS}" ${prefix})
 install_qt5_target_plugins("${Qt5PrintSupport_PLUGINS}" ${prefix})
 
-# Install dependencies for Mantid libraries and qt plugins The first line in libraries are the Qt plugins THe next line
-# are select libraries that ensure all our dependencies exist - If something is missing add it to this line
+# Install dependencies for Mantid libraries and qt plugins. The first line in libraries are the Qt plugins. The next
+# line are (arbitrarily) selected libraries that ensure all our dependencies are present in the final package - The
+# verify_app call at the end of bundling should ensure that this captures all dependencies. If a required library is
+# missing you should add the target which relies on that dependency to the second line.
+
+# For instance, if the Kafka libraries were missing from the final bundle, we would add the LiveData target to the list
+# of libraries that we scan and install dependencies for.
+
 install(CODE "set(WORKBENCH_APP \"${WORKBENCH_APP}\")" COMPONENT Runtime)
 install(
   CODE [[ file(GET_RUNTIME_DEPENDENCIES EXECUTABLES $<TARGET_FILE:MantidWorkbenchInstalled>
