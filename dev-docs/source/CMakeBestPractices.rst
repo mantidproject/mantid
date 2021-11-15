@@ -56,7 +56,7 @@ This specifies that while building the project, the headers for fitting can be f
 Tips:
 
     - Please use this target based approach. Do not link the CMake target to variables such as ``${Boost_LIBRARIES}``.
-    - Consider whether the dependencies are PUBLIC or PRIVATE. If you wrongly specify things as public it add unnecessary dependencies to users of your library.
+    - Consider whether the dependencies are PUBLIC or PRIVATE. If you wrongly specify things as public it adds unnecessary dependencies to users of your library.
     - Please rethink if you are using ``target_include_directories`` to include headers from an external library, as the ``target_link_libraries`` should have already resolved those requirements.
 
 ================================
