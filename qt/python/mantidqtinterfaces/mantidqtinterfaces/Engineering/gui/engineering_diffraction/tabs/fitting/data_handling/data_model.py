@@ -42,6 +42,15 @@ class WorkspaceRecordContainer:
     def __getitem__(self, key):
         return self.dict[key]
 
+    def __len__(self):
+        return len(self.dict)
+
+    def __bool__(self):
+        return len(self.dict)>0
+
+    def get(self, key, default_value):
+        return self.dict.get(key, default_value)
+
     def add(self, ws_name, **kwargs):
         self.dict[ws_name] = WorkspaceRecord(**kwargs)
 
@@ -64,13 +73,16 @@ class WorkspaceRecordContainer:
     def get_bgsub_ws_dict(self):
         return dict([(key, value.bgsub_ws) for key, value in self.dict.items()])
 
+    def get_bgsub_ws_name_dict(self):
+        return dict([(key, value.bgsub_ws_name) for key, value in self.dict.items()])
+
     def get_bgsub_ws_dict_keyed_by_bg_name(self):
         return dict([(value.bgsub_ws_name, value.bgsub_ws) for key, value in self.dict.items()])
 
     def get_ws_names_dict(self):
         return dict([(key, [value.bgsub_ws_name, value.bg_params]) for key, value in self.dict.items()])
 
-    def get_loaded_workspace_from_bgsub(self, bgsub_ws_name):
+    def get_loaded_workspace_name_from_bgsub(self, bgsub_ws_name):
         return next((key for key, val in self.dict.items() if val.bgsub_ws_name == bgsub_ws_name), None)
 
     def get_active_ws_list(self):
@@ -82,25 +94,25 @@ class WorkspaceRecordContainer:
         if ws_rec.bgsub_ws and ws_rec.bg_params[0]:
             return ws_rec.bgsub_ws_name
         else:
-            ws_name
+            return ws_name
 
     def rename(self, old_ws_name, new_ws_name):
         ws_loaded = self.dict.get(old_ws_name, None)
         if ws_loaded:
             self.dict[new_ws_name]= self.pop(old_ws_name)
         else:
-            ws_loaded = self.get_loaded_workspace_from_bgsub(old_ws_name)
-            if ws_loaded:
-                self.dict[ws_loaded].bgsub_ws_name = new_ws_name
+            ws_loaded_name = self.get_loaded_workspace_name_from_bgsub(old_ws_name)
+            if ws_loaded_name:
+                self.dict[ws_loaded_name].bgsub_ws_name = new_ws_name
 
     def replace_workspace(self, name, workspace):
         ws_loaded = self.dict.get(name, None)
         if ws_loaded:
             self.dict[name].loaded_ws = workspace
         else:
-            ws_loaded = self.get_loaded_workspace_from_bgsub(name)
-            if ws_loaded:
-                self.dict[ws_loaded].bgsub_ws = workspace
+            ws_loaded_name = self.get_loaded_workspace_name_from_bgsub(name)
+            if ws_loaded_name:
+                self.dict[ws_loaded_name].bgsub_ws = workspace
 
     def pop(self, ws_name):
         return self.dict.pop(ws_name)
@@ -112,7 +124,7 @@ class WorkspaceRecordContainer:
 class FittingDataModel(object):
     def __init__(self):
         self._log_names = []
-        self._log_workspaces = None
+        self._log_workspaces = None # GroupWorkspace
         self._log_values = dict()  # {ws_name: {log_name: [avg, er]} }
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
@@ -192,6 +204,11 @@ class FittingDataModel(object):
 
     def update_log_workspace_group(self):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
+
+        if not self._data_workspaces:
+            self.delete_logs()
+            return
+
         if not self._log_workspaces:
             self.create_log_workspace_group()
         else:
@@ -203,8 +220,9 @@ class FittingDataModel(object):
                 self.make_runinfo_table()
                 self._log_workspaces.add("run_info")
         # update log tables
+        self.remove_all_log_rows()
         for irow, (ws_name, ws) in enumerate(self._data_workspaces.get_loaded_ws_dict().items()):
-            self.add_log_to_table(ws_name, ws, irow)  # rename write_log_row
+            self.add_log_to_table(ws_name, ws, irow)
 
     def add_log_to_table(self, ws_name, ws, irow):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
@@ -241,7 +259,11 @@ class FittingDataModel(object):
         DeleteTableRows(TableWorkspace=self._log_workspaces, Rows=list(row_numbers))
         self.update_log_group_name()
 
-    def clear_logs(self):
+    def remove_all_log_rows(self):
+        for ws in self._log_workspaces:
+            ws.setRowCount(0)
+
+    def delete_logs(self):
         if self._log_workspaces:
             ws_name = self._log_workspaces.name()
             self._log_workspaces = None
@@ -255,7 +277,7 @@ class FittingDataModel(object):
             if not name == self._log_workspaces.name():
                 RenameWorkspace(InputWorkspace=self._log_workspaces.name(), OutputWorkspace=name)
         else:
-            self.clear_logs()
+            self.delete_logs()
 
     def get_loaded_ws_list(self):
         return list(self._data_workspaces.get_loaded_ws_dict().keys())
@@ -369,6 +391,26 @@ class FittingDataModel(object):
         group_name = self._log_workspaces.name().split('_log')[0] + '_fits'
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
 
+    def remove_workspace(self, name):
+        ws_loaded = self._data_workspaces.get(name, None)
+        if ws_loaded:
+            bgsub_ws_name=self._data_workspaces[name].bgsub_ws_name
+            removed = self._data_workspaces.pop(name)
+            # deleting bg sub workspace will generate further remove_workspace event so ensure this is done after
+            # removing record from _data_workspaces to avoid circular call
+            if bgsub_ws_name:
+                DeleteWorkspace(bgsub_ws_name)
+            self.update_log_workspace_group()
+            return removed
+        else:
+            ws_loaded_name = self._data_workspaces.get_loaded_workspace_name_from_bgsub(name)
+            if ws_loaded_name:
+                removed = self._data_workspaces[ws_loaded_name].bgsub_ws
+                self._data_workspaces[ws_loaded_name].bgsub_ws = None
+                self._data_workspaces[ws_loaded_name].bgsub_ws_name = None
+                self._data_workspaces[ws_loaded_name].bg_params = []
+                return removed
+
     def replace_workspace(self, name, workspace):
         self._data_workspaces.replace_workspace(name, workspace)
 
@@ -379,15 +421,31 @@ class FittingDataModel(object):
                 self._log_values[new_name] = self._log_values.pop(old_name)
         else:
             logger.warning(f"There already exists a workspace with name {new_name}.")
+        self.update_log_workspace_group()
 
+    # handle ADS clear
     def clear_workspaces(self):
         self._data_workspaces.clear()
+        self.set_log_workspaces_none()
 
-    def clear_workspace(self, loaded_ws_name):
+    def delete_workspaces(self):
+        if self._log_workspaces:
+            ws_name = self._log_workspaces.name()
+            self._log_workspaces = None
+            DeleteWorkspace(ws_name)
+        removed_ws_list = []
+        for ws_name in self._data_workspaces.get_loaded_workpace_names():
+            removed_ws_list.extend(self.delete_workspace(ws_name))
+        return removed_ws_list
+
+    def delete_workspace(self, loaded_ws_name):
         removed = self._data_workspaces.pop(loaded_ws_name)
         removed_ws_list = [removed.loaded_ws]
+        DeleteWorkspace(removed.loaded_ws)
         if removed.bgsub_ws:
-            removed_ws_list.append((removed.bgsub_ws))
+            DeleteWorkspace(removed.bgsub_ws)
+            removed_ws_list.append(removed.bgsub_ws)
+        self.update_log_workspace_group()
         return removed_ws_list
 
     def get_loaded_workspaces(self):
@@ -401,6 +459,9 @@ class FittingDataModel(object):
 
     def get_bgsub_workspaces(self):
         return self._data_workspaces.get_bgsub_ws_dict()
+
+    def get_bgsub_workspace_names(self):
+        return self._data_workspaces.get_bgsub_ws_name_dict()
 
     def get_bg_params(self):
         return self._data_workspaces.get_bg_params_dict()

@@ -71,22 +71,11 @@ class FittingDataPresenter(object):
             self._start_load_worker(filenames)
 
     def remove_workspace(self, ws_name):
-        if ws_name in self.get_loaded_workspaces():
-            removed = self.model._data_workspaces.pop(ws_name)
+        if ws_name in self.model.get_all_workspace_names():
+            removed = self.model.remove_workspace(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
-            self.model.remove_log_rows([self.row_numbers[ws_name]])
-            self.model.update_log_workspace_group()
             self._repopulate_table()
-        elif ws_name in self.model._data_workspaces.get_bgsub_ws_dict_keyed_by_bg_name():
-            loaded_ws_name = self.model._data_workspaces.get_loaded_workspace_from_bgsub(ws_name)
-            removed = self.model._data_workspaces[loaded_ws_name].bgsub_ws
-            self.model._data_workspaces[loaded_ws_name].bgsub_ws = None
-            self.plot_removed_notifier.notify_subscribers(removed)
-            self.plotted.discard(ws_name)
-            # set plotted and Subtract BG checkboxes to False
-            self.view.set_item_checkstate(self.row_numbers[loaded_ws_name], 2, False)
-            self.view.set_item_checkstate(self.row_numbers[loaded_ws_name], 3, False)
         elif ws_name in self.model.get_log_workspaces_name():
             self.model.update_log_workspace_group()
 
@@ -98,11 +87,10 @@ class FittingDataPresenter(object):
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
             self._repopulate_table()
-            self.model.update_log_workspace_group()  # so matches new table
 
+    # handle ADS clear
     def clear_workspaces(self):
         self.model.clear_workspaces()
-        self.model.set_log_workspaces_none()
         self.plotted.clear()
         self.row_numbers.clear()
         self._repopulate_table()
@@ -110,8 +98,6 @@ class FittingDataPresenter(object):
     def replace_workspace(self, name, workspace):
         if name in self.model.get_all_workspace_names():
             self.model.replace_workspace(name, workspace)
-            if name in self.plotted:
-                self.all_plots_removed_notifier.notify_subscribers()
             self._repopulate_table()
 
     def get_loaded_workspaces(self):
@@ -176,18 +162,19 @@ class FittingDataPresenter(object):
 
     def _remove_selected_tracked_workspaces(self):
         row_numbers = self._remove_selected_table_rows()
-        self.model.remove_log_rows(row_numbers)
         for row_no in row_numbers:
             ws_name = self.row_numbers.pop(row_no)
-            removed_ws_list = self.model.clear_workspace(ws_name)
+            removed_ws_list = self.model.delete_workspace(ws_name)
             for ws in removed_ws_list:
-                self.plot_removed_notifier.notify_subscribers(ws)
+                #self.plot_removed_notifier.notify_subscribers(ws) will be done in _repopulate_table
                 self.plotted.discard(ws.name())
         self._repopulate_table()
 
     def _remove_all_tracked_workspaces(self):
-        self.clear_workspaces()
-        self.model.clear_logs()
+        removed_ws_list = self.model.delete_workspaces()
+        for ws in removed_ws_list:
+            self.plot_removed_notifier.notify_subscribers(ws)
+            self.plotted.discard(ws.name())
         self._remove_all_table_rows()
 
     def _plotBG(self):
@@ -230,14 +217,15 @@ class FittingDataPresenter(object):
     def _update_plotted_ws_with_sub_state(self, ws_name, is_sub):
         ws = self.model.get_loaded_workspaces()[ws_name]
         ws_bgsub = self.model.get_bgsub_workspaces()[ws_name]
+        ws_bgsub_name = self.model.get_bgsub_workspace_names()[ws_name]
         if ws_name in self.plotted and is_sub:
             self.plot_removed_notifier.notify_subscribers(ws)
             self.plotted.discard(ws_name)
             self.plot_added_notifier.notify_subscribers(ws_bgsub)
-            self.plotted.add(ws_name + "_bgsub")
-        elif ws_name + "_bgsub" in self.plotted and not is_sub:
+            self.plotted.add(ws_bgsub_name)
+        elif ws_bgsub_name in self.plotted and not is_sub:
             self.plot_removed_notifier.notify_subscribers(ws_bgsub)
-            self.plotted.discard(ws_name + "_bgsub")
+            self.plotted.discard(ws_bgsub_name)
             self.plot_added_notifier.notify_subscribers(ws)
             self.plotted.add(ws_name)
 
