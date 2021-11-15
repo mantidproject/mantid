@@ -23,11 +23,14 @@ class InstrumentViewPresenter(ObservingPresenter):
     It has no model as its an old widget written in C++ with out MVP
     """
 
-    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None):
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
 
-        self.container = InstrumentView(parent, self, self.ws_name, window_flags=window_flags)
+        self.container = view
+        if not self.container:
+            self.container = InstrumentView(parent=parent, presenter=self,
+                                            name=self.ws_name, window_flags=window_flags)
 
         if ads_observer:
             self.ads_observer = ads_observer
