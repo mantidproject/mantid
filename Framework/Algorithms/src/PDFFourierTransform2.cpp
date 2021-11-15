@@ -231,7 +231,7 @@ double PDFFourierTransform2::determineRho0() {
 }
 
 void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
-                                             std::vector<double> &DFOfQ, std::vector<double> &DQ) {
+                                             std::vector<double> &DFOfQ, const std::vector<double> &DQ) {
   // convert to S(Q)-1
   string soqType = getProperty("SofQType");
   string inputSOQType = getProperty("InputSofQType");
@@ -264,8 +264,8 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vec
   return;
 }
 
-void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, std::vector<double> &R,
-                                                   std::vector<double> &DFOfR, std::vector<double> &DR) {
+void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R,
+                                                   std::vector<double> &DFOfR, const std::vector<double> &DR) {
   string PDFType = getProperty("PDFType");
   double rho0 = determineRho0();
   if (PDFType == LITTLE_G_OF_R) {
@@ -293,7 +293,7 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, st
   return;
 }
 
-void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
+void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, const HistogramData::HistogramX &Q,
                                                HistogramData::HistogramE &DFOfQ) {
   // convert to S(Q)-1string
   string soqType = getProperty("SofQType");
@@ -316,7 +316,7 @@ void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, 
   return;
 }
 
-void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
+void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, const HistogramData::HistogramX &R,
                                                      HistogramData::HistogramE &DFOfR) {
   // convert to the correct form of PDF
   double rho0 = determineRho0();
