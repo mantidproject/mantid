@@ -1465,8 +1465,6 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer, const V3D &scaleFa
     this->GetObjectGeom(type, vectors, innerRadius, radius, height);
     switch (type) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
-      for (auto &vector : vectors)
-        vector *= scaleFactor;
       std::transform(vectors.begin(), vectors.end(), vectors.begin(),
                      [scaleFactor](const V3D &v) { return v * scaleFactor; });
       return cuboidSolidAngle(observer, vectors);
