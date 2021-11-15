@@ -8,6 +8,12 @@ import os
 import shutil
 import systemtesting
 
+<<<<<<< HEAD
+=======
+import mantid.simpleapi as simple
+from mantid.api import FrameworkManager
+
+>>>>>>> Run test in single thread to get repeatable results
 from mantid import config
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import UnitParams
