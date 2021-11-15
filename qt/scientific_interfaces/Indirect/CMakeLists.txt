@@ -273,4 +273,6 @@ mtd_add_qt_library(
 )
 
 # Testing target
-add_subdirectory(test)
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_subdirectory(test)
+endif()

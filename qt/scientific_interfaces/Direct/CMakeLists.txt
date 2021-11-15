@@ -26,5 +26,8 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
-# Testing target
-add_subdirectory(test)
+# Testing target We can currently only include the tests if we are building the framework. This is bceause we depend on
+# a non-exported library of frameworks in the tests.
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_subdirectory(test)
+endif()
