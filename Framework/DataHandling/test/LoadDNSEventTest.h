@@ -11,6 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "Poco/Path.h"
 #include <boost/range/irange.hpp>
 #include <cxxtest/TestSuite.h>
 
