@@ -32,6 +32,7 @@ void FindUBUsingIndexedPeaks::init() {
   mustBePositive->setLower(0.0);
   declareProperty("Tolerance", 0.1, mustBePositive, "Indexing Tolerance (0.1)");
   declareProperty("ToleranceForSatellite", 0.1, mustBePositive, "Indexing Tolerance for satellite (0.1)");
+  declareProperty("CommonUBForAll", false, "Used when evaluating the uncertainty of modHKL");
 }
 
 /** Execute the algorithm.
@@ -45,6 +46,7 @@ void FindUBUsingIndexedPeaks::exec() {
   std::vector<V3D> mnp_vectors;
 
   double tolerance = getProperty("Tolerance");
+  bool commonUB = getProperty("CommonUBForAll");
 
   int ModDim = 0;
   int MaxOrder = 0;
@@ -151,16 +153,28 @@ void FindUBUsingIndexedPeaks::exec() {
         if (run_indexed < 3)
           continue;
 
-        std::vector<double> rsigabc(7);
-        IndexingUtils::Optimize_6dUB(UB, modUB, run_hkl_vectors, run_mnp_vectors, ModDim, run_q_vectors, rsigabc, sigq);
         OrientedLattice run_lattice;
-        run_lattice.setUB(UB);
-        run_lattice.setModUB(modUB);
-        run_lattice.setError(rsigabc[0], rsigabc[1], rsigabc[2], rsigabc[3], rsigabc[4], rsigabc[5]);
+
+        if (commonUB) {
+          run_lattice.setUB(UB);
+          run_lattice.setModUB(modUB);
+          run_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
+        } else {
+          Matrix<double> run_UB(3, 3, false);
+          Matrix<double> run_modUB(3, 3, false);
+          std::vector<double> run_sigabc(7);
+          std::vector<double> run_sigq(3);
+          IndexingUtils::Optimize_6dUB(run_UB, run_modUB, run_hkl_vectors, run_mnp_vectors, ModDim, run_q_vectors,
+                                       run_sigabc, run_sigq);
+          run_lattice.setUB(run_UB);
+          run_lattice.setModUB(run_modUB);
+          run_lattice.setError(run_sigabc[0], run_sigabc[1], run_sigabc[2], run_sigabc[3], run_sigabc[4],
+                               run_sigabc[5]);
+        }
         g_log.notice() << run_lattice << "\n";
 
         double average_error = 0.;
-        IndexingUtils::CalculateMillerIndices(UB, run_q_vectors, 1.0, run_fhkl_vectors, average_error);
+        IndexingUtils::CalculateMillerIndices(run_lattice.getUB(), run_q_vectors, 1.0, run_fhkl_vectors, average_error);
         for (size_t i = 0; i < run_indexed; i++) {
           if (IndexingUtils::ValidIndex(run_fhkl_vectors[i], tolerance))
             continue;
@@ -205,7 +219,7 @@ void FindUBUsingIndexedPeaks::exec() {
     ws->mutableSample().setOrientedLattice(std::move(o_lattice));
   }
 }
-void FindUBUsingIndexedPeaks::logLattice(OrientedLattice &o_lattice, int &ModDim) {
+void FindUBUsingIndexedPeaks::logLattice(const OrientedLattice &o_lattice, const int &ModDim) {
   // Show the modified lattice parameters
   g_log.notice() << o_lattice << "\n";
   g_log.notice() << "Modulation Dimension is: " << ModDim << "\n";
