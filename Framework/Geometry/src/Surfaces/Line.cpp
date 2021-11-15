@@ -204,7 +204,7 @@ add the point to the VecOut, return number of points
 added. It does not check the points for validity.
 
 @param PntOut :: Vector of points found by the line/cylinder intersection
-@param Cyl :: Cylinder to intersect line with
+@param cylinder :: Cylinder to intersect line with
 @return Number of points found by intersection
 */
 {
