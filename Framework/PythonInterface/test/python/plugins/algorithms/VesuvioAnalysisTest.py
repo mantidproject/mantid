@@ -40,7 +40,17 @@ class VesuvioAnalysisTest(unittest.TestCase):
         table.addRow(['H', 1.0079,  0.,1.,9.9e9,  3.,  4.5,  6.,  -1.5, 0., 0.5])
         table.addRow(['C', 12.0,    0.,1.,9.9e9,  10., 15.5, 30., -1.5, 0., 0.5])
 
-        return table
+        return table = CreateEmptyTableWorkspace()
+
+    def generate_constraints_table(self):
+        table = CreateEmptyTableWorkspace()
+        table.addColumn(type="int", name="LHS element")
+        table.addColumn(type="int", name="RHS element")
+        table.addColumn(type="str", name="ScatteringCrossSection")
+        table.addColumn(type="str", name="State")
+        table.addRow([0, 1, "2.*82.03/5.551", "eq"])
+
+        return table = CreateEmptyTableWorkspace()
 
     def test_no_elements(self):
         alg = self.set_up_alg()
@@ -72,7 +82,21 @@ class VesuvioAnalysisTest(unittest.TestCase):
         self.assertTrue("ComptonProfile" in errors)
         self.assertEquals(len(errors),1)
 
-    def test_case_instensitive_table(self):
+    def test_bad_column_in_constraints_table(self):
+        table = self.generate_table()
+        constraints = self.generate_constraints_table()
+        constraints.removeColumn("ScatteringCrossSection")
+        constraints.addRow([0, 1, "eq"])
+
+        alg = self.set_up_alg()
+        alg.setProperty('Spectra', [135, 182])
+        alg.setProperty('ComptonProfile', table)
+        alg.setProperty('ConstraintsProfile', constraints)
+        errors = alg.validateInputs()
+        self.assertTrue("ConstraintsProfile" in errors)
+        self.assertEquals(len(errors),1)
+
+    def test_case_insensitive_table(self):
         table = CreateEmptyTableWorkspace()
         table.addColumn(type="str", name="Symbol")
         table.addColumn(type="double", name="mAsS (a.u.)")
@@ -91,6 +115,18 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg = self.set_up_alg()
         alg.setProperty('ComptonProfile', table)
         alg.setProperty('Spectra', [135, 182])
+        errors = alg.validateInputs()
+        self.assertEquals(len(errors),0)
+
+    def test_case_insensitive_constraints_table(self):
+        table = self.generate_table()
+        constraints = self.generate_constraints_table()
+        constraints.removeColumn("LHS element")
+        constraints.addColumn("lhs element")
+        alg = self.set_up_alg()
+        alg.setProperty('ConstraintsProfile', constraints)
+        alg.setProperty('Spectra', [135, 182])
+        alg.setProperty('ComptonProfile', table)
         errors = alg.validateInputs()
         self.assertEquals(len(errors),0)
 
@@ -116,48 +152,28 @@ class VesuvioAnalysisTest(unittest.TestCase):
         self.assertEquals(len(errors),1)
         self.assertTrue("TOFRangeVector" in errors)
 
-    def test_constraints_short(self):
-        table = self.generate_table()
-        alg = self.set_up_alg()
-        alg.setProperty('ConstraintsProfileNumbers', [1])
-        alg.setProperty('ComptonProfile', table)
-        alg.setProperty('Spectra', [135, 182])
-
-        errors = alg.validateInputs()
-        self.assertEquals(len(errors),1)
-        self.assertTrue("ConstraintsProfileNumbers" in errors)
-
-    def test_constraints_long(self):
-        table = self.generate_table()
-        alg = self.set_up_alg()
-        alg.setProperty('ConstraintsProfileNumbers', [1,2,3])
-        alg.setProperty('ComptonProfile', table)
-        alg.setProperty('Spectra', [135, 182])
-
-        errors = alg.validateInputs()
-        self.assertEquals(len(errors),1)
-        self.assertTrue("ConstraintsProfileNumbers" in errors)
-
     def test_maths_is_safe_fails(self):
         table = self.generate_table()
+        constraints = self.generate_constraints_table()
         bad_expressions = [ "2*r", "2,3", "4£", "rm -r *"]
         for expression in bad_expressions:
             alg = self.set_up_alg()
-            alg.setProperty('ConstraintsProfileNumbers', [0,1])
-            alg.setProperty('ConstraintsProfileScatteringCrossSection',expression )
+            constraints.addRow([0, 1, expression, "eq"])
+            alg.setProperty('ConstraintsProfile', constraints)
             alg.setProperty('ComptonProfile', table)
             alg.setProperty('Spectra', [135, 182])
             errors = alg.validateInputs()
             self.assertEquals(len(errors),1)
-            self.assertTrue("ConstraintsProfileScatteringCrossSection" in errors)
+            self.assertTrue("ConstraintsProfile" in errors)
 
     def test_maths_is_safe_pass(self):
         table = self.generate_table()
+        constraints = self.generate_constraints_table()
         good_expressions = [ "2*3", "2+3", "4-1", "5/2", "(3+2)", "2.3+4.5"]
         for expression in good_expressions:
             alg = self.set_up_alg()
-            alg.setProperty('ConstraintsProfileNumbers', [0,1])
-            alg.setProperty('ConstraintsProfileScatteringCrossSection',expression )
+            constraints.addRow([0, 1, expression, "eq"])
+            alg.setProperty('ConstraintsProfile', constraints)
             alg.setProperty('ComptonProfile', table)
             alg.setProperty('Spectra', [135, 182])
             errors = alg.validateInputs()

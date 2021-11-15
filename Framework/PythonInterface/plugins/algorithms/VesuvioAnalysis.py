@@ -112,6 +112,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                                      "",
                                                      direction=Direction.Input),doc="Table for Compton profiles")
+<<<<<<< HEAD
         self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", []), doc="List with LHS and RHS element of constraint on "
                                               "intensities of element peaks. A constraint can only be set when there are at least two "
                                               "elements in the ComptonProfile.")
@@ -123,6 +124,14 @@ class VesuvioAnalysis(PythonAlgorithm):
             "ConstraintsProfileNumbers are set.")
         self.declareProperty("ConstraintsProfileState", "eq", doc="This setting is ignored when no ConstraintsProfileNumbers are set.",
                              validator=StringListValidator(["eq","ineq"]))
+        self.declareProperty(ITableWorkspaceProperty("ConstraintsProfile",
+                                                     "",
+                                                     direction=Direction.Input),doc="Table with LHS and RHS element of constraint on "
+                                              "intensities of element peaks. A constraint can only be set when there are at least two "
+                                              "elements in the ComptonProfile. For each constraint the ratio of the first to second "
+                                              "intensities, each equal to atom stoichiometry times bound scattering "
+                                              "cross section is defined in the column ScatteringCrossSection. Simple arithmetic can be "
+                                              "included but the result may be rounded. The column State allows the values [eq,ineq].")
         self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
@@ -144,8 +153,13 @@ class VesuvioAnalysis(PythonAlgorithm):
             "Centre lower limit",
             "Centre value",
             "Centre upper limit"]
+        constraintCols = [
+            "LHS element",
+            "RHS element",
+            "ScatteringCrossSection",
+            "State"]
         issues = dict()
-        table = self.getProperty("ComptonProfile").value
+        table: TableWorkspace = self.getProperty("ComptonProfile").value
         if(not table):
             issues["ComptonProfile"] = "An elements table should be provided."
         elif(table.columnCount()!= len(tableCols) or sorted(cleanNames(tableCols))!=sorted(cleanNames(table.getColumnNames())) ):
@@ -155,6 +169,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         TOF = self.getProperty("TOFRangeVector").value
         if len(TOF) != 3:
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
+<<<<<<< HEAD
         constraints = self.getProperty("ConstraintsProfileNumbers").value
         if len(constraints) != 0 and len(constraints) != 2:
             issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should either be empty or only contain 2 numbers."
@@ -164,6 +179,30 @@ class VesuvioAnalysis(PythonAlgorithm):
             for ch in cross_section:
                 if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
                     issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
+||||||| parent of 6f8ac4f985f (Replaced constraint properties with table)
+        constraints = self.getProperty("ConstraintsProfileNumbers").value
+        if len(constraints)!=2:
+            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should only contain 2 numbers."
+        #check aritmatic is safe
+        cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
+        for ch in cross_section:
+            if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
+                issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
+=======
+        constraints: TableWorkspace = self.getProperty("ConstraintsProfile").value
+        if constraints.columnCount()!= len(constraintCols) or \
+                sorted(cleanNames(constraintCols))!=sorted(cleanNames(constraints.getColumnNames())):
+            issues["ConstraintsProfile"] = "The constraints table should be of the form: "
+            for name in constraintCols:
+                issues["ConstraintsProfile"] += name + ", "
+        if len(constraints)!=2:#?
+            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should only contain 2 numbers."#?
+        #check aritmatic is safe
+        cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value#?
+        for ch in cross_section:#?
+            if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():#?
+                issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch#?
+>>>>>>> 6f8ac4f985f (Replaced constraint properties with table)
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
