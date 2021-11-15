@@ -18,6 +18,7 @@ class ReflAlgorithmFactory : public IReflAlgorithmFactory {
 public:
   explicit ReflAlgorithmFactory(IBatch const &batch);
   MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const override;
+  MantidQt::API::IConfiguredAlgorithm_sptr makeSumBanksAlgorithm(PreviewRow &row) const override;
 
 private:
   IBatch const &m_batch;

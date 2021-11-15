@@ -42,6 +42,7 @@ public:
 
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
+  void notifySumBanksCompleted() override;
 
 private:
   IPreviewView *m_view{nullptr};
