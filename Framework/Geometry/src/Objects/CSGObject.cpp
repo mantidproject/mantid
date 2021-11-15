@@ -47,7 +47,6 @@ using namespace Mantid::Kernel;
 namespace {
 
 /// A shift to add/subtract to a point to test if it is an entry/exit point
-// constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
 constexpr double VALID_INTERCEPT_POINT_SHIFT{8e-6};
 
 /**
@@ -1468,6 +1467,8 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer, const V3D &scaleFa
     case detail::ShapeInfo::GeometryShape::CUBOID:
       for (auto &vector : vectors)
         vector *= scaleFactor;
+      std::transform(vectors.begin(), vectors.end(), vectors.begin(),
+                     [scaleFactor](const V3D &v) { return v * scaleFactor; });
       return cuboidSolidAngle(observer, vectors);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
