@@ -29,7 +29,7 @@ This new target, ``Fitting``, will likely have a set of dependencies, these shou
                         <PRIVATE|PUBLIC|INTERFACE> <item>...
                         [<PRIVATE|PUBLIC|INTERFACE> <item>...]...)
 
-Whether or not a dependency is PUBLIC or PRIVATE primarily depends on whether the code has been included in a public header. For example, if had used Boost's date_time library in our header files of the Fitting target,
+Whether or not a dependency is PUBLIC or PRIVATE primarily depends on whether the code has been included in a public header. For example, if we had used Boost's date_time library in our header files for the Fitting target,
 we would add Boost::date_time as a PUBLIC dependency of our target.
 
 .. code-block:: cmake
