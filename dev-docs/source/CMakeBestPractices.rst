@@ -97,7 +97,7 @@ NOTE: The ``UNKNOWN`` specifier in add_library is useful on windows as it means 
 Introducing a new CMake configurable variable
 =============================================
 
-If you are introducing a new configuration variable for CMake, e.g to conditionally add a new feature PLEASE cache the variable. If you don't cache it, you won't be able to set it on the command line. Example:
+If you are introducing a new configuration variable for CMake, e.g to conditionally add a new feature, PLEASE cache the variable. If you don't cache it, you won't be able to set it on the command line. Example:
 
 If you add a new feature and control it with a flag
 
