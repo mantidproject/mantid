@@ -11,7 +11,6 @@ import systemtesting
 <<<<<<< HEAD
 =======
 import mantid.simpleapi as simple
-from mantid.api import FrameworkManager
 
 >>>>>>> Run test in single thread to get repeatable results
 from mantid import config
