@@ -32,6 +32,10 @@ Bugfixes
 Engineering Diffraction
 -----------------------
 
+Improvements
+############
+- :ref:`FilterEvents <algm-FilterEvents>` execution speed improved by 35% in some cases.
+
 Single Crystal Diffraction
 --------------------------
 - Existing :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
