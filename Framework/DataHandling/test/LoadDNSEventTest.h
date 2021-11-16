@@ -31,7 +31,7 @@ public:
   std::string origVTPDirectory;
   const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
 
-  virtual void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
+  void setUp() { // DNS file slow to create geometry cache so use a pregenerated vtp file.
     std::string foundFile =
         Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
     hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
@@ -39,7 +39,7 @@ public:
     ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
   }
 
-  virtual void tearDown() override {
+  void tearDown() {
     if (hasVTPDirectory)
       ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
     else
