@@ -103,7 +103,7 @@ public:
 
   void test_Executes_1() {
     // DNS file slow to create geometry cache so use a pregenerated vtp file.
-    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtpDirectory";
     std::string foundFile =
         Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
     bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
