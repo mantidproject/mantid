@@ -321,7 +321,7 @@ void BatchPresenter::notifyResetRoundPrecision() { m_runsPresenter->resetRoundPr
  */
 int BatchPresenter::percentComplete() const { return m_jobManager->percentComplete(); }
 
-API::IConfiguredAlgorithm::AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessingProperties() const {
   return m_jobManager->rowProcessingProperties();
 }
 

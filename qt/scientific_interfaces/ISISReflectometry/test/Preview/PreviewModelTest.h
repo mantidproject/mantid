@@ -25,6 +25,12 @@ class PreviewModelTest : public CxxTest::TestSuite {
 public:
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
+  void test_run_details_created_by_default() {
+    PreviewModel model;
+    // This will throw if the underlying RunDetails is null
+    TS_ASSERT_THROWS_NOTHING(model.getSelectedBanks())
+  }
+
   void test_load_workspace_from_ads() {
     auto mockJobManager = MockJobManager();
     EXPECT_CALL(mockJobManager, startPreprocessing(_)).Times(0);
@@ -56,17 +62,38 @@ public:
     TS_ASSERT_EQUALS(workspace, expectedWs);
   }
 
-  void test_convert_indices_to_string() {
+  void test_set_and_get_selected_banks() {
     PreviewModel model;
-    auto const indices = std::vector<size_t>{99, 4, 5};
-    auto result = model.indicesToString(indices);
+    const std::vector<Mantid::detid_t> inputRoi{56, 57, 58, 59};
+    model.setSelectedBanks(inputRoi);
+    TS_ASSERT_EQUALS(inputRoi, model.getSelectedBanks())
+  }
+
+  void test_sum_banks() {
+    auto mockJobManager = MockJobManager();
+    auto expectedWs = createWorkspace();
+    auto wsSumBanksEffect = [&expectedWs](PreviewRow &row) { row.setSummedWs(expectedWs); };
+    EXPECT_CALL(mockJobManager, startSumBanks(_)).Times(1).WillOnce(Invoke(wsSumBanksEffect));
+
+    PreviewModel model;
+    model.sumBanksAsync(mockJobManager);
+
+    auto workspace = model.getSummedWs();
+    TS_ASSERT(workspace);
+    TS_ASSERT_EQUALS(workspace, expectedWs);
+  }
+
+  void test_convert_detIDs_to_string() {
+    PreviewModel model;
+    auto const indices = std::vector<Mantid::detid_t>{99, 4, 5};
+    auto result = model.detIDsToString(indices);
     TS_ASSERT_EQUALS(result, "99,4,5");
   }
 
-  void test_convert_empty_indices_to_string() {
+  void test_convert_empty_detIDs_to_string() {
     PreviewModel model;
-    auto const indices = std::vector<size_t>{};
-    auto result = model.indicesToString(indices);
+    auto const indices = std::vector<Mantid::detid_t>{};
+    auto result = model.detIDsToString(indices);
     TS_ASSERT_EQUALS("", result);
   }
 

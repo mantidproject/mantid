@@ -8,7 +8,7 @@ import unittest
 
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory, WorkspaceFactory
 
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import add_ws_to_ads, check_if_workspace_exist, retrieve_ws
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -19,9 +19,11 @@ def create_results_table():
     table.addColumn(type='str', name='workspace_name')
     table.addColumn(type='float', name='A0')
     table.addColumn(type='float', name='A1')
-    table.addRow(["MUSR62260; Group; bottom; Asymmetry; MA", 0.1, 0.2])
-    table.addRow(["MUSR62260; Group; top; Asymmetry; MA", 0.3, 0.4])
-    table.addRow(["MUSR62260; Group; fwd; Asymmetry; MA", 0.5, 0.6])
+    table.addColumn(type='float', name='Sigma')
+    table.addColumn(type='float', name='Lambda')
+    table.addRow(["MUSR62260; Group; bottom; Asymmetry; MA", 0.1, 0.2, 0.3, 0.4])
+    table.addRow(["MUSR62260; Group; top; Asymmetry; MA", 0.3, 0.4, 0.5, 0.6])
+    table.addRow(["MUSR62260; Group; fwd; Asymmetry; MA", 0.5, 0.6, 0.7, 0.8])
     return table
 
 
@@ -35,7 +37,7 @@ class ModelFittingModelTest(unittest.TestCase):
         context = setup_context()
         self.model = ModelFittingModel(context, context.model_fitting_context)
         self.result_table_names = ["Result1", "Result2"]
-        self.dataset_names = ["workspace_name_A0", "workspace_name_A1", "A0_A1"]
+        self.dataset_names = ["workspace_name_A0", "workspace_name_A1", "A0_A1", "Sigma_Lambda"]
         self.fit_function1 = FunctionFactory.createFunction("FlatBackground")
         self.fit_function2 = FunctionFactory.createFunction("LinearBackground")
         self.single_fit_functions = [self.fit_function1.clone(), self.fit_function1.clone(), self.fit_function2.clone()]
@@ -143,17 +145,23 @@ class ModelFittingModelTest(unittest.TestCase):
         x_parameters = self.model.x_parameters()
         y_parameters = self.model.y_parameters()
 
-        self.assertEqual(list(x_parameters), ["workspace_name", "A0", "A1"])
-        self.assertEqual(list(y_parameters), ["workspace_name", "A0", "A1"])
+        self.assertEqual(list(x_parameters), ["workspace_name", "A0", "A1", "Sigma", "Lambda"])
+        self.assertEqual(list(y_parameters), ["workspace_name", "A0", "A1", "Sigma", "Lambda"])
 
-        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0], 0.1, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][1], 0.3, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][2], 0.5, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0], 0.2, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][1], 0.4, delta=0.000001)
-        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][2], 0.6, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0][0], 0.1, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0][1], 0.3, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.x_parameters["A0"][0][2], 0.5, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0][0], 0.2, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0][1], 0.4, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["A1"][0][2], 0.6, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0][0], 0.3, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0][1], 0.5, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Sigma"][0][2], 0.7, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0][0], 0.4, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0][1], 0.6, delta=0.000001)
+        self.assertAlmostEqual(self.model.fitting_context.y_parameters["Lambda"][0][2], 0.8, delta=0.000001)
 
-        self.assertEqual(self.model.fitting_context.y_parameters["workspace_name"],
+        self.assertEqual(self.model.fitting_context.y_parameters["workspace_name"][0],
                          ["MUSR62260; Group; bottom; Asymmetry; MA", "MUSR62260; Group; top; Asymmetry; MA",
                           "MUSR62260; Group; fwd; Asymmetry; MA"])
 
@@ -190,12 +198,14 @@ class ModelFittingModelTest(unittest.TestCase):
         self.model.create_x_and_y_parameter_combination_workspace("workspace_name", "A0")
         self.model.create_x_and_y_parameter_combination_workspace("A1", "A0")
         self.model.create_x_and_y_parameter_combination_workspace("workspace_name", "A1")
+        self.model.create_x_and_y_parameter_combination_workspace("Sigma", "Lambda")
 
         self.assertTrue(check_if_workspace_exist("Result1; Parameter Combinations"))
 
         self.assertTrue(check_if_workspace_exist("Result1; A0 vs workspace_name"))
         self.assertTrue(check_if_workspace_exist("Result1; A1 vs workspace_name"))
         self.assertTrue(check_if_workspace_exist("Result1; A0 vs A1"))
+        self.assertTrue(check_if_workspace_exist("Result1; Lambda vs Sigma"))
 
         self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs A0"))
         self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs A1"))
@@ -204,6 +214,10 @@ class ModelFittingModelTest(unittest.TestCase):
         self.assertTrue(not check_if_workspace_exist("Result1; workspace_name vs workspace_name"))
         self.assertTrue(not check_if_workspace_exist("Result1; A0 vs A0"))
         self.assertTrue(not check_if_workspace_exist("Result1; A1 vs A1"))
+
+        unit_test_ws = retrieve_ws("Result1; Lambda vs Sigma")
+        self.assertTrue(str(unit_test_ws.getAxis(0).getUnit().symbol()) == '\\mu s^{-1}')
+        self.assertTrue(str(unit_test_ws.YUnit()) == 'Lambda ($\\mu$ $s^{-1}$)')
 
 
 if __name__ == '__main__':

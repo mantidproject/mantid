@@ -11,13 +11,14 @@
 #include "BatchJobAlgorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
 using Mantid::API::IAlgorithm_sptr;
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
 
 namespace { // unnamed namespace
 // These functions update properties in an AlgorithmRuntimeProps for specific
@@ -226,29 +227,30 @@ IConfiguredAlgorithm_sptr createConfiguredAlgorithm(Batch const &model, Row &row
   auto properties = createAlgorithmRuntimeProps(model, row);
 
   // Return the configured algorithm
-  auto jobAlgorithm = std::make_shared<BatchJobAlgorithm>(alg, properties, updateRowFromOutputProperties, &row);
+  auto jobAlgorithm =
+      std::make_shared<BatchJobAlgorithm>(std::move(alg), std::move(properties), updateRowFromOutputProperties, &row);
   return jobAlgorithm;
 }
 
-AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model, Row const &row) {
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(Batch const &model, Row const &row) {
   // Create properties for the model
   auto properties = createAlgorithmRuntimeProps(model);
   // Update properties specific to this row - the per-angle options based on
   // the known angle, and the values in the table cells in the row
-  updateLookupRowProperties(properties, model.findLookupRow(row.theta()));
-  updateRowProperties(properties, row);
+  updateLookupRowProperties(*properties, model.findLookupRow(row.theta()));
+  updateRowProperties(*properties, row);
   return properties;
 }
 
-AlgorithmRuntimeProps createAlgorithmRuntimeProps(Batch const &model) {
-  auto properties = AlgorithmRuntimeProps();
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps(Batch const &model) {
+  auto properties = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   // Update properties from settings in the event, experiment and instrument
   // tabs
-  updateEventProperties(properties, model.slicing());
-  updateExperimentProperties(properties, model.experiment());
-  updateInstrumentProperties(properties, model.instrument());
+  updateEventProperties(*properties, model.slicing());
+  updateExperimentProperties(*properties, model.experiment());
+  updateInstrumentProperties(*properties, model.instrument());
   // Update properties from the wildcard row in the lookup table
-  updateLookupRowProperties(properties, model.findLookupRow());
+  updateLookupRowProperties(*properties, model.findLookupRow());
   return properties;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

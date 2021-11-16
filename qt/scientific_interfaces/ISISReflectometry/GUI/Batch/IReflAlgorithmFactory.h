@@ -17,5 +17,6 @@ public:
   virtual ~IReflAlgorithmFactory() = default;
 
   virtual MantidQt::API::IConfiguredAlgorithm_sptr makePreprocessingAlgorithm(PreviewRow &row) const = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr makeSumBanksAlgorithm(PreviewRow &row) const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

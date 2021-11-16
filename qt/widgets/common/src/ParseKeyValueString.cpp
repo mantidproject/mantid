@@ -5,9 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
+
 #include <QStringList>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
+
 #include <vector>
 
 namespace MantidQt::MantidWidgets {
@@ -256,5 +259,16 @@ std::string optionsToString(std::map<std::string, std::string> const &options, c
   } else {
     return std::string();
   }
+}
+
+std::string convertAlgPropsToString(MantidQt::API::IAlgorithmRuntimeProps const &options) {
+  auto props = options.getDeclaredPropertyNames();
+  if (props.empty()) {
+    return std::string();
+  }
+  auto result = std::string(props[0] + std::string("=") + options.getPropertyValue(props[0]));
+  return std::accumulate(++props.cbegin(), props.cend(), result, [&options](auto const &result, auto const &prop) {
+    return result + std::string(";") + prop + std::string("=") + options.getPropertyValue(prop);
+  });
 }
 } // namespace MantidQt::MantidWidgets
