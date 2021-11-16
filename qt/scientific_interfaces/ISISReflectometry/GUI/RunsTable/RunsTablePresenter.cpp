@@ -479,6 +479,8 @@ void RunsTablePresenter::notifyCellTextChanged(MantidWidgets::Batch::RowLocation
   notifyRowStateChanged();
 }
 
+void RunsTablePresenter::notifyBatchLoaded() { notifySelectionChanged(); }
+
 void RunsTablePresenter::notifySelectionChanged() {
   m_model.setSelectedRowLocations(m_view->jobs().selectedRowLocations());
 }

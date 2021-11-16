@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -16,7 +17,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <boost/algorithm/string/replace.hpp>

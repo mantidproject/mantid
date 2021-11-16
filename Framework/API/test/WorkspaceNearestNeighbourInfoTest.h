@@ -10,8 +10,8 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceNearestNeighbourInfo.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
 using Mantid::API::WorkspaceNearestNeighbourInfo;
 

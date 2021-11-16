@@ -10,8 +10,8 @@
 
 #include "MantidAPI/SingleCountValidator.h"
 
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::HistogramData;
 using Mantid::API::SingleCountValidator;

@@ -8,13 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoItem.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <iterator>
 
 using namespace ComponentCreationHelper;

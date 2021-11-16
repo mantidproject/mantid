@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DigestStream.h>
 #include <Poco/Path.h>

@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/Objects/CSGObject.h"
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -19,7 +20,6 @@
 #include "MantidGeometry/Surfaces/SurfaceFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
 #include <cxxtest/TestSuite.h>

@@ -56,7 +56,7 @@ public:
 
   int setSurface(const std::string &Pstr) override;
   int side(const Kernel::V3D &R) const override;
-  int onSurface(const Kernel::V3D &R) const override;
+  bool onSurface(const Kernel::V3D &R) const override;
   double distance(const Kernel::V3D &Pt) const override;
 
   /// Return centre point

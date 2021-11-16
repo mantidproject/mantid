@@ -13,9 +13,9 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/CorrectTOFAxis.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CorrectTOFAxis;
 using namespace Mantid::API;

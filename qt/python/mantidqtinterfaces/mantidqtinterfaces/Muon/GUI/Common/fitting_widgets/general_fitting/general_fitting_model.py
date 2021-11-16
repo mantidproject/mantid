@@ -374,6 +374,8 @@ class GeneralFittingModel(BasicFittingModel):
 
         parameter_workspace_wrap = StaticWorkspaceWrapper(parameter_table_name, retrieve_ws(parameter_table_name))
         covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
+        # the directory returns with a slash, so lets remove it
+        self._add_workspaces_to_group([parameter_table_name, covariance_matrix_name], directory[:-1])
 
         self._add_fit_to_context(input_workspace_names, output_workspace_wraps, parameter_workspace_wrap,
                                  covariance_workspace_wrap, global_parameters)

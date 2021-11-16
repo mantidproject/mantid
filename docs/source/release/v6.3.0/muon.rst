@@ -42,12 +42,15 @@ Improvements
 
 - The `alpha` values on grouping tab are now to six decimal places.
 - The numerical values in the `run info` box on the home tab are now rounded to either 4 significant figures or a whole number, whichever is more precise.
+- The results table now produces errors for log values (when they are available).
+- Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ########
 
 - On the model analysis tab, the fit range will now update when the x axis is changed.
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
+- When a new results table is created the Model Analysis tab selects the default parameters to plot based on log values or parameters in the results table.
 
 ALC
 ---
@@ -78,6 +81,7 @@ New Features
 ############
 - Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
 - Added a :ref:`Power Law <func-PowerLaw>` function to MuonModelling Fit Functions.
+- Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
 
 Improvements
 ############
@@ -92,5 +96,6 @@ Improvements
   BugFixes
   ########
   - A bug has been fixed that caused Model fitting to not update it's results table list.
+  - Plotting in Model fitting now features a greater number of units for parameters and sample logs.
 
 

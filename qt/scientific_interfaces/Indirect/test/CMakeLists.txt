@@ -31,14 +31,8 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../../../../Framework/TestHelpers/inc ../
-  TEST_HELPER_SRCS
-    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../IndirectDataValidationHelper.cpp
+  INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
+  TEST_HELPER_SRCS ../IndirectDataValidationHelper.cpp
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
@@ -51,3 +45,5 @@ mtd_add_qt_tests(
                    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
+
+add_framework_test_helpers(MantidQtInterfacesIndirectTestQt5)

@@ -65,7 +65,7 @@ public:
   virtual double lineIntersect(const Kernel::V3D &, const Kernel::V3D &) const;
 
   int side(const Kernel::V3D &) const override;
-  int onSurface(const Kernel::V3D &) const override;
+  bool onSurface(const Kernel::V3D &) const override;
   double distance(const Kernel::V3D &) const override;
 
   int setSurface(const std::string &) override;

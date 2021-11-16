@@ -12,11 +12,11 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitDomain.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorMockObjects.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

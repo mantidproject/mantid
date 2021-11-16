@@ -806,6 +806,32 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(message, "No data or fit function selected for fitting.")
 
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    def test_add_workspaces_to_group(self, retrieve_ws, check_exists, add_to_group, make_group):
+        check_exists.return_value = True
+        retrieve_ws.return_value = "group ws"
+
+        self.model._add_workspaces_to_group(["ws"], "group")
+        retrieve_ws.assert_called_once_with("group")
+        add_to_group.assert_called_once_with(["ws"], "group ws")
+        make_group.assert_not_called()
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    def test_add_workspaces_to_new_group(self, retrieve_ws, check_exists, add_to_group, make_group):
+        check_exists.return_value = False
+        retrieve_ws.return_value = "group ws"
+
+        self.model._add_workspaces_to_group(["ws"], "group")
+        retrieve_ws.assert_not_called()
+        add_to_group.assert_not_called()
+        make_group.assert_called_once_with(["ws"], "group")
+
 
 if __name__ == '__main__':
     unittest.main()

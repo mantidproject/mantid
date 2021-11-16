@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 class AddTimeSeriesLogTest : public CxxTest::TestSuite {

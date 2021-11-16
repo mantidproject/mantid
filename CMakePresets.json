@@ -19,6 +19,7 @@
                 "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
                 "HDF5_ROOT": "$env{CONDA_PREFIX}",
                 "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
                 "CONDA_ENV": true,
                 "CMAKE_BUILD_TYPE": "Debug"
             }
@@ -45,7 +46,8 @@
                 "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
             }
         },
         {
@@ -145,7 +147,8 @@
                 "ENABLE_CONDA": "ON",
                 "COLORED_COMPILER_OUTPUT": "OFF",
                 "COVERAGE": "OFF",
-                "TESTING_TIMEOUT": "1200"
+                "TESTING_TIMEOUT": "1200",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
             }
         }
     ]

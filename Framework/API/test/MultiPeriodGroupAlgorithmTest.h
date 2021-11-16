@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAPI/MultiPeriodGroupAlgorithm.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MultiPeriodGroupTestBase.h"
 #include <cxxtest/TestSuite.h>
 

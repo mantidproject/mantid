@@ -58,7 +58,7 @@ public:
   void filterByProperty(const TimeSeriesProperty<bool> &filter,
                         const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
 
-  ~PropertyManager() override;
+  virtual ~PropertyManager() override;
 
   // Function to declare properties (i.e. store them)
   void declareProperty(std::unique_ptr<Property> p, const std::string &doc = "") override;
@@ -89,6 +89,7 @@ public:
   size_t propertyCount() const override;
   std::string getPropertyValue(const std::string &name) const override;
   const std::vector<Property *> &getProperties() const override;
+  std::vector<std::string> getDeclaredPropertyNames() const noexcept override;
 
   /// removes the property from properties map
   void removeProperty(const std::string &name, const bool delproperty = true) override;

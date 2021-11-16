@@ -19,7 +19,7 @@ mtd_add_sip_module(
   LINK_LIBS ${WORKBENCH_LINK_LIBS}
   INSTALL_DIR ${WORKBENCH_SITE_PACKAGES}/mantidqt/icons
   LINUX_INSTALL_RPATH "\$ORIGIN/../.."
-  OSX_INSTALL_RPATH "@loader_path/../.."
+  OSX_INSTALL_RPATH "@loader_path/../..;@loader_path/../../Frameworks"
   FOLDER Qt5
 )
 

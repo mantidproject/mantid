@@ -9,11 +9,11 @@
 #include "SpecularReflectionAlgorithmTest.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 #include "MantidReflectometry/SpecularReflectionPositionCorrect.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <utility>
 

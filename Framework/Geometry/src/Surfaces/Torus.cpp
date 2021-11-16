@@ -250,17 +250,21 @@ int Torus::side(const Kernel::V3D &R) const
   return -1;
 }
 
-int Torus::onSurface(const Kernel::V3D &R) const {
+bool Torus::onSurface(const Kernel::V3D &R) const {
   /**
      Calculate if the point R is on
      the cone (Note: have to be careful here
      since angle calcuation calcuates an angle.
      We need a distance for tolerance!)
      @param R :: Point to check
-     @return 1 if on surface and -1 if not no surface
   */
   UNUSED_ARG(R);
-  return -1;
+  // was formerly alwasy returning -1 which bool(-1) == true
+  // which appears to be an accidental bug
+
+  // the previous doxygen comment was
+  // return 1 if on surface and -1 if not no surface
+  return false;
 }
 
 void Torus::write(std::ostream &OX) const

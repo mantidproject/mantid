@@ -15,7 +15,7 @@
 #include "MantidAlgorithms/ConvertDiffCal.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::ConvertDiffCal;
 using namespace Mantid::API;

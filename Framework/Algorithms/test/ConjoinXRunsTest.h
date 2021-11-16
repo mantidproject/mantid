@@ -16,6 +16,7 @@
 #include "MantidAlgorithms/AddTimeSeriesLog.h"
 #include "MantidAlgorithms/ConjoinXRuns.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidHistogramData/HistogramE.h"
@@ -23,7 +24,6 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::AddSampleLog;
 using Mantid::Algorithms::AddTimeSeriesLog;

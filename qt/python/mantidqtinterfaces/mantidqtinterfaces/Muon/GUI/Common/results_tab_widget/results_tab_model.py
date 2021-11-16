@@ -145,8 +145,7 @@ class ResultsTabModel(object):
                 WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name
             }
             row_dict = self._add_logs_to_table(row_dict, fit, log_selection)
-            results_table.addRow(
-                self._add_parameters_to_table(row_dict, fit_parameters))
+            results_table.addRow(self._add_parameters_to_table(row_dict, fit_parameters))
 
         ads.Instance().addOrReplace(self.results_table_name(), results_table)
         self._results_context.add_result_table(self.results_table_name())
@@ -164,7 +163,10 @@ class ResultsTabModel(object):
             return row_dict
 
         for log_name in log_selection:
-            row_dict.update({log_name: fit.log_value(log_name)})
+            values = fit.log_value_and_error(log_name)
+            row_dict.update({log_name: values[0]})
+            if values[1]!="":
+                row_dict.update({_error_column_name(log_name): values[1]})
 
         return row_dict
 
@@ -269,6 +271,8 @@ class ResultsTabModel(object):
             wksp_name = all_fits[0].input_workspaces[0]
             if float_log(wksp_name, log_name):
                 table.addColumn('float', log_name, TableColumnType.X.value)
+                # only add the errors column if the value is numerical
+                table.addColumn('float', _error_column_name(log_name), TableColumnType.XErr.value)
             else:
                 table.addColumn('str', log_name, TableColumnType.X.value)
         # assume all fit functions are the same in fit_selection and take

@@ -49,8 +49,8 @@ class MantidNavigationTool:
 class MantidStandardNavigationTools:
     """
     Standard navigation tools.
-    Cnnected to the callbacks:
-    home, back, foward, pan, save_figure, zoom
+    Connected to the callbacks:
+    home, back, forward, pan, save_figure, zoom
     """
     HOME = MantidNavigationTool('Home', 'Reset axes limits', 'mdi.home', 'home', None)
     BACK = MantidNavigationTool('Back', 'Back to previous view', 'mdi.arrow-left', 'back', None)
@@ -122,7 +122,7 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
         NavigationToolbar2.__init__(self, canvas)
 
     def _init_toolbar(self):
-        # Empty init_toolbar method kept for backwards compatability
+        # Empty init_toolbar method kept for backwards compatibility
         pass
 
     def set_message(self, s):
@@ -202,15 +202,16 @@ class MantidNavigationToolbar(NavigationToolbar2, QToolBar):
     def _update_buttons_checked(self):
         # sync button checkstates to match active mode
         if 'pan' in self._actions:
-            self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom'  )
+            self._actions['pan'].setChecked(self._get_mode() == 'PAN' or self._get_mode() == 'pan/zoom')
         if 'zoom' in self._actions:
-            self._actions['zoom'].setChecked(self._get_mode()  == 'ZOOM' or self._get_mode() == 'zoom rect' )
+            self._actions['zoom'].setChecked(self._get_mode() == 'ZOOM' or self._get_mode() == 'zoom rect')
 
     def configure_subplots(self):
         image = os.path.join(matplotlib.get_data_path(),
                              'images', 'matplotlib.png')
         dia = SubplotToolQt(self.canvas.figure, self.canvas.parent())
         dia.setWindowIcon(QIcon(image))
+        dia.setWindowTitle(MantidStandardNavigationTools.CONFIGURE.tooltip)
         dia.exec_()
 
     def set_action_enabled(self, text: str, state: bool):

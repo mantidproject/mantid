@@ -13,8 +13,8 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidMDAlgorithms/UserFunctionMD.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 

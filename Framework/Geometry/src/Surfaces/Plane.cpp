@@ -216,17 +216,14 @@ int Plane::side(const Kernel::V3D &A) const
   return 0;
 }
 
-int Plane::onSurface(const Kernel::V3D &A) const
+bool Plane::onSurface(const Kernel::V3D &A) const
 /**
    Calcuate the side that the point is on
    and returns success if it is on the surface.
    - Uses getSurfaceTolerance to determine the closeness
-   @retval 1 if on the surface
-   @retval 0 if off the surface
-
 */
 {
-  return (side(A) != 0) ? 0 : 1;
+  return (side(A) == 0);
 }
 
 void Plane::print() const

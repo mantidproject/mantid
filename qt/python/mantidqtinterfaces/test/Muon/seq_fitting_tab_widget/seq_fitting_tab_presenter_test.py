@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 from unittest import mock
 
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
@@ -18,8 +19,10 @@ from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 
 
 def wait_for_thread(thread_model):
-    if thread_model:
-        thread_model._thread.wait()
+    if thread_model and thread_model.worker:
+        while thread_model.worker.is_alive():
+            QApplication.sendPostedEvents()
+            time.sleep(0.1)
         QApplication.sendPostedEvents()
 
 

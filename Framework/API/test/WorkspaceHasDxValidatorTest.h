@@ -10,7 +10,7 @@
 
 #include "MantidAPI/WorkspaceHasDxValidator.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 

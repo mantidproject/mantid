@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>

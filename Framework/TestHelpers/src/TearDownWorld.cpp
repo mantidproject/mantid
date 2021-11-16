@@ -7,7 +7,7 @@
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
-#include "MantidTestHelpers/TearDownWorld.h"
+#include "MantidFrameworkTestHelpers/TearDownWorld.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/PropertyManagerDataService.h"

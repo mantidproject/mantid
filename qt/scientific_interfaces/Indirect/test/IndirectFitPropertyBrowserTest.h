@@ -20,10 +20,10 @@
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 #include "ParameterEstimation.h"
 
 using namespace Mantid::API;

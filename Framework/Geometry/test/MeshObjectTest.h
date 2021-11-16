@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
@@ -14,7 +15,6 @@
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MockRNG.h"
 
 #include <boost/optional.hpp>

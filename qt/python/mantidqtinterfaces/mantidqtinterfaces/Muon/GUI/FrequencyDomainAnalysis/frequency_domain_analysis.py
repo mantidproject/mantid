@@ -44,6 +44,8 @@ from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelA
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
+from mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces import AddGroupingWorkspaces
+
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
 TAB_ORDER = ["Home", "Grouping", "Corrections", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results", "Model Fitting"]
@@ -137,6 +139,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.add_model_analysis = AddModelAnalysis(self, feature_dict)
         self.add_raw_plots = AddRawPlots(self, feature_dict)
+        setup_group_ws = AddGroupingWorkspaces(self, feature_dict)
 
         self.setup_tabs()
         self.plot_widget.insert_plot_panes()
@@ -198,6 +201,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.add_model_analysis.set_feature_observables(self)
 
         self.add_raw_plots.add_observers_to_feature(self)
+        setup_group_ws.add_observers_to_feature(self)
 
     def setup_transform(self):
         self.transform.set_up_calculation_observers(

@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidSINQ/PoldiTruncateData.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisElwinTab.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -317,11 +318,11 @@ void IndirectDataAnalysisElwinTab::runFileInput() {
   // Group input workspaces
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
-  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
+  auto runTimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  runTimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runTimeProps));
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
@@ -346,10 +347,10 @@ void IndirectDataAnalysisElwinTab::runFileInput() {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
-  elwinInputProps["InputWorkspaces"] = inputGroupWsName;
+  auto elwinInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  elwinInputProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
+  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(elwinInputProps));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -379,11 +380,11 @@ void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
   // Group input workspaces
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
-  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
+  auto runTimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  runTimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runTimeProps));
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
@@ -408,10 +409,10 @@ void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
-  elwinInputProps["InputWorkspaces"] = inputGroupWsName;
+  auto elwinInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  elwinInputProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
+  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(elwinInputProps));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();

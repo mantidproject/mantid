@@ -87,9 +87,9 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.view.update_dataset_name_combo_box(self.model.dataset_names, emit_signal=False)
 
         # Initially, the y parameters should be updated before the x parameters.
-        self.view.update_y_parameters(self.model.y_parameters())
+        self.view.update_y_parameters(self.model.y_parameters(), self.model.y_parameter_types())
         # Triggers handle_selected_x_changed
-        self.view.update_x_parameters(self.model.x_parameters(), emit_signal=True)
+        self.view.update_x_parameters(self.model.x_parameters(), self.model.y_parameter_types(), emit_signal=True)
 
     def handle_parameter_combinations_error(self, error: str) -> None:
         """Handle when an error occurs while creating workspaces for the different parameter combinations."""

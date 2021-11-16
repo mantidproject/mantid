@@ -14,8 +14,8 @@
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAlgorithms/Plus.h"
 #include "MantidAlgorithms/PolynomialCorrection.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 #include <fstream>

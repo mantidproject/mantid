@@ -12,9 +12,9 @@
 #include <sstream>
 #include <vector>
 
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 
 using Mantid::Kernel::V3D;
 

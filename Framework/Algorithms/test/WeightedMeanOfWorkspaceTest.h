@@ -11,7 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/WeightedMeanOfWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <limits>
 

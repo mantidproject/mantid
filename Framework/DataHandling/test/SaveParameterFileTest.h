@@ -17,6 +17,7 @@
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataHandling/SaveParameterFile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
@@ -25,7 +26,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -11,8 +11,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <math.h>
 
 using Mantid::Algorithms::ConvertAxisByFormula;

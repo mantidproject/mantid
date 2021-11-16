@@ -24,7 +24,7 @@ using Mantid::Catalog::ONCat::ONCat;
 using Mantid::Kernel::Exception::InternetError;
 
 namespace Mantid {
-namespace TestHelpers {
+namespace FrameworkTestHelpers {
 
 using MockResponseMap = std::map<std::string, std::pair<int, std::string>>;
 using MockResponseCallCounts = std::map<std::string, unsigned int>;
@@ -66,5 +66,5 @@ private:
 IOAuthTokenStore_uptr make_mock_token_store();
 IOAuthTokenStore_uptr make_mock_token_store_already_logged_in();
 
-} // namespace TestHelpers
+} // namespace FrameworkTestHelpers
 } // namespace Mantid

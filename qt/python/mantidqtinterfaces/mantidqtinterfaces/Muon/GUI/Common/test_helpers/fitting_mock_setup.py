@@ -122,7 +122,8 @@ def add_mock_methods_to_model_fitting_view(view):
 
 def add_mock_methods_to_model_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x, end_x,
                                             fit_status, chi_squared, param_combination_name, param_group_name,
-                                            results_table_names, x_parameters, y_parameters):
+                                            results_table_names, x_parameters, y_parameters, x_parameter_types,
+                                            y_parameter_types):
     model = add_mock_methods_to_basic_fitting_model(model, dataset_names, current_dataset_index, fit_function, start_x,
                                                     end_x, fit_status, chi_squared)
 
@@ -134,6 +135,8 @@ def add_mock_methods_to_model_fitting_model(model, dataset_names, current_datase
     model.get_first_y_parameter_not = mock.Mock(return_value="A1")
     model.x_parameters = mock.Mock(return_value=x_parameters)
     model.y_parameters = mock.Mock(return_value=y_parameters)
+    model.x_parameter_types = mock.Mock(return_value=x_parameter_types)
+    model.y_parameter_types = mock.Mock(return_value=y_parameter_types)
 
     return model
 

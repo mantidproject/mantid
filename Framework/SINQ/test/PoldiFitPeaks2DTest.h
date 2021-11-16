@@ -13,11 +13,11 @@
 
 #include "MantidKernel/Matrix.h"
 
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
