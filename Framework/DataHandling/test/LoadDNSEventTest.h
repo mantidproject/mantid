@@ -31,7 +31,7 @@ public:
   std::string origVTPDirectory;
   const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
 
-  void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
+  virtual void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
     std::string foundFile =
         Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
     hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
@@ -39,7 +39,7 @@ public:
     ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
   }
 
-  void tearDown() override {
+  virtual void tearDown() override {
     if (hasVTPDirectory)
       ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
     else
@@ -108,84 +108,84 @@ public:
     TS_ASSERT(alg->isExecuted());
   }
 
-  // void test_Executes_2() {
-  //  std::string outWSName("LoadDNSEventTest_OutputWS");
+  void test_Executes_2() {
+    std::string outWSName("LoadDNSEventTest_OutputWS");
 
-  //  auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
-  //  TS_ASSERT_THROWS_NOTHING(alg->execute(););
-  //  TS_ASSERT(alg->isExecuted());
-  //}
+    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+  }
 
-  // void test_ThrowsOnBadFile() {
-  //  std::string outWSName("LoadDNSEventTest_OutputWS");
+  void test_ThrowsOnBadFile() {
+    std::string outWSName("LoadDNSEventTest_OutputWS");
 
-  //  auto alg = makeAlgorithm(m_badFileName, 2, false, outWSName);
-  //  TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-  //  TS_ASSERT(!alg->isExecuted());
-  //}
+    auto alg = makeAlgorithm(m_badFileName, 2, false, outWSName);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
+    TS_ASSERT(!alg->isExecuted());
+  }
 
-  // void test_DataWSStructure() {
-  //  std::string outWSName("LoadDNSEventTest_OutputWS");
+  void test_DataWSStructure() {
+    std::string outWSName("LoadDNSEventTest_OutputWS");
 
-  //  auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
-  //  alg->execute();
+    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
+    alg->execute();
 
-  //  // Retrieve the workspace from data service.
-  //  EventWorkspace_sptr iws;
-  //  TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
-  //  TS_ASSERT(iws);
+    // Retrieve the workspace from data service.
+    EventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
+    TS_ASSERT(iws);
 
-  //  TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
-  //  TS_ASSERT_EQUALS(iws->size(), 1024 * 128); // number of detector cells
+    TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
+    TS_ASSERT_EQUALS(iws->size(), 1024 * 128); // number of detector cells
 
-  //  TS_ASSERT_EQUALS(iws->getNumDims(), 2);
-  //  TS_ASSERT_EQUALS(iws->id(), "EventWorkspace");
+    TS_ASSERT_EQUALS(iws->getNumDims(), 2);
+    TS_ASSERT_EQUALS(iws->id(), "EventWorkspace");
 
-  //  // test dimensions
-  //  const auto tofDim = iws->getDimension(0);
-  //  TS_ASSERT(tofDim);
-  //  TS_ASSERT_EQUALS(tofDim->getName(), "Time-of-flight");
-  //  TS_ASSERT_EQUALS(tofDim->getNBins(), 1);
+    // test dimensions
+    const auto tofDim = iws->getDimension(0);
+    TS_ASSERT(tofDim);
+    TS_ASSERT_EQUALS(tofDim->getName(), "Time-of-flight");
+    TS_ASSERT_EQUALS(tofDim->getNBins(), 1);
 
-  //  const auto specDim = iws->getDimension(1);
-  //  TS_ASSERT(specDim);
-  //  TS_ASSERT_EQUALS(specDim->getName(), "Spectrum");
-  //  TS_ASSERT_EQUALS(specDim->getNBins(),
-  //                   1024 * 128); // number of detector cells
-  //  TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
-  //  TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
+    const auto specDim = iws->getDimension(1);
+    TS_ASSERT(specDim);
+    TS_ASSERT_EQUALS(specDim->getName(), "Spectrum");
+    TS_ASSERT_EQUALS(specDim->getNBins(),
+                     1024 * 128); // number of detector cells
+    TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
+    TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
 
-  //  // test event count:
-  //  const auto rng = boost::irange(static_cast<size_t>(0), iws->size());
-  //  const size_t eventCount = std::accumulate(rng.begin(), rng.end(), static_cast<size_t>(0), [&](auto a, auto b) {
-  //    return a + iws->getSpectrum(b).getEvents().size();
-  //  });
-  //  TS_ASSERT_EQUALS(eventCount, 9998)
-  //  TS_ASSERT_EQUALS(iws->getNumberEvents(), 9998);
-  //  TS_ASSERT_EQUALS(iws->getTofMax(), 99471.3);
-  //  TS_ASSERT_EQUALS(iws->getSpectrum(32217).getNumberEvents(), 808);
-  //  TS_ASSERT_EQUALS(iws->getDimension(0)->getMaximum(), 0.00); // histogram bins not set
-  //  AnalysisDataService::Instance().remove(outWSName);
-  //}
+    // test event count:
+    const auto rng = boost::irange(static_cast<size_t>(0), iws->size());
+    const size_t eventCount = std::accumulate(rng.begin(), rng.end(), static_cast<size_t>(0), [&](auto a, auto b) {
+      return a + iws->getSpectrum(b).getEvents().size();
+    });
+    TS_ASSERT_EQUALS(eventCount, 9998)
+    TS_ASSERT_EQUALS(iws->getNumberEvents(), 9998);
+    TS_ASSERT_EQUALS(iws->getTofMax(), 99471.3);
+    TS_ASSERT_EQUALS(iws->getSpectrum(32217).getNumberEvents(), 808);
+    TS_ASSERT_EQUALS(iws->getDimension(0)->getMaximum(), 0.00); // histogram bins not set
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 
-  // void test_DiscardPreChopperEvents() {
-  //  std::string outWSName("LoadDNSEventTest_OutputWS");
-  //  auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
-  //  TS_ASSERT_THROWS_NOTHING(alg->setProperty("DiscardPreChopperEvents", false));
-  //  alg->execute();
-  //  EventWorkspace_sptr iws;
-  //  TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
-  //  TS_ASSERT_EQUALS(iws->getNumberEvents(), 10520);
-  //}
+  void test_DiscardPreChopperEvents() {
+    std::string outWSName("LoadDNSEventTest_OutputWS");
+    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("DiscardPreChopperEvents", false));
+    alg->execute();
+    EventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
+    TS_ASSERT_EQUALS(iws->getNumberEvents(), 10520);
+  }
 
-  // void test_SetBinBoundary() {
-  //  std::string outWSName("LoadDNSEventTest_OutputWS");
-  //  auto alg = makeAlgorithm(m_fileName, 0, true, outWSName);
-  //  alg->execute();
-  //  EventWorkspace_sptr iws;
-  //  TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
-  //  TS_ASSERT_DELTA(iws->getDimension(0)->getMaximum(), 99471.296, 0.001);
-  //}
+  void test_SetBinBoundary() {
+    std::string outWSName("LoadDNSEventTest_OutputWS");
+    auto alg = makeAlgorithm(m_fileName, 0, true, outWSName);
+    alg->execute();
+    EventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
+    TS_ASSERT_DELTA(iws->getDimension(0)->getMaximum(), 99471.296, 0.001);
+  }
 
 private:
   const std::string m_fileName = "DNS_psd_pulser_ON473_31.mdat";
