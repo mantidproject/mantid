@@ -229,6 +229,7 @@ class SuperplotView:
     _bottom_view = None
 
     def __init__(self, presenter, parent=None):
+        self._parent = parent
         self._presenter = presenter
         self._side_view = SuperplotViewSide(parent)
         self._bottom_view = SuperplotViewBottom(parent)
@@ -251,11 +252,14 @@ class SuperplotView:
                 self._presenter.on_mode_changed)
         bottom.resized.connect(self._presenter.on_resize)
 
-    def get_side_widget(self):
-        return self._side_view
-
-    def get_bottom_widget(self):
-        return self._bottom_view
+    def show(self):
+        """
+        Show the superplot view. This will add the two dockwidgets to their
+        respective position.
+        """
+        self._parent.addDockWidget(Qt.LeftDockWidgetArea, self._side_view)
+        self._parent.addDockWidget(Qt.BottomDockWidgetArea, self._bottom_view)
+        self._bottom_view.setFocus()
 
     def close(self):
         self._side_view.close()
