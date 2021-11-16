@@ -1,8 +1,10 @@
 from mantid.simpleapi import (
-    LoadMD,
+    CopySample,
+    CreateMDHistoWorkspace,
     CreatePeaksWorkspace,
     CreateSingleValuedWorkspace,
-    LoadIsawUB,
+    LoadInstrument,
+    SetGoniometer,
     SetUB,
     ConvertWANDSCDtoQ,
     ConvertHFIRSCDtoMDE,
@@ -12,7 +14,7 @@ from mantid.simpleapi import (
 import systemtesting
 import numpy as np
 
-from mantid import config
+from mantid.kernel import FloatTimeSeriesProperty
 
 
 class ConvertQtoHKLMDHistoTest_match_ConvertWANDSCDtoQ_test(
@@ -22,62 +24,63 @@ class ConvertQtoHKLMDHistoTest_match_ConvertWANDSCDtoQ_test(
         return 8000
 
     def runTest(self):
-        config["Q.convention"] = "Inelastic"
+        S = np.random.random(32*240*100)
 
-        # wavelength (angstrom) -----
-        wavelength = 1.486
+        ConvertWANDSCDtoQTest_data = CreateMDHistoWorkspace(Dimensionality=3, Extents='0.5,32.5,0.5,240.5,0.5,100.5',
+                                                            SignalInput=S.ravel('F'), ErrorInput=np.sqrt(S.ravel('F')),
+                                                            NumberOfBins='32,240,100', Names='y,x,scanIndex',
+                                                            Units='bin,bin,number')
 
-        # minimum and maximum values for Q sample -----
-        min_values = [-7.5, -0.65, -4.4]
-        max_values = [6.8, 0.65, 7.5]
+        ConvertWANDSCDtoQTest_dummy = CreateSingleValuedWorkspace()
+        LoadInstrument(ConvertWANDSCDtoQTest_dummy, InstrumentName='WAND', RewriteSpectraMap=False)
 
-        # ---
+        ConvertWANDSCDtoQTest_data.addExperimentInfo(ConvertWANDSCDtoQTest_dummy)
 
-        data = LoadMD(
-            Filename="/HFIR/HB2C/shared/WANDscripts/test_data/data.nxs"
-        )
+        log = FloatTimeSeriesProperty('s1')
+        for t, v in zip(range(100), np.arange(0, 50, 0.5)):
+            log.addValue(t, v)
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run()['s1'] = log
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('duration', [60.] * 100, True)
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('monitor_count', [120000.] * 100, True)
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('twotheta', list(
+            np.linspace(np.pi * 2 / 3, 0, 240).repeat(32)), True)
+        ConvertWANDSCDtoQTest_data.getExperimentInfo(0).run().addProperty('azimuthal', list(
+            np.tile(np.linspace(-0.15, 0.15, 32), 240)), True)
 
-        peaks = CreatePeaksWorkspace(
-            NumberOfPeaks=0,
-            OutputType="LeanElasticPeak"
-        )
+        peaks = CreatePeaksWorkspace(NumberOfPeaks=0, OutputType='LeanElasticPeak')
 
-        ws = CreateSingleValuedWorkspace()
-        LoadIsawUB(
-            InputWorkspace=ws,
-            Filename="/HFIR/HB2C/shared/WANDscripts/test_data/data.mat",
-        )
-        UB = ws.sample().getOrientedLattice().getUB()
+        SetUB(ConvertWANDSCDtoQTest_data, 5, 5, 7, 90, 90, 120, u=[-1, 0, 1], v=[1, 0, 1])
+        SetGoniometer(ConvertWANDSCDtoQTest_data, Axis0='s1,0,1,0,1', Average=False)
 
-        SetUB(peaks, UB=UB)
+        CopySample(InputWorkspace=ConvertWANDSCDtoQTest_data,
+                   OutputWorkspace=peaks,
+                   CopyName=False,
+                   CopyMaterial=False,
+                   CopyEnvironment=False,
+                   CopyShape=False,
+                   CopyLattice=True)
 
-        Q = ConvertWANDSCDtoQ(
-            InputWorkspace="data",
-            UBWorkspace="peaks",
-            Wavelength=wavelength,
-            Frame="HKL",
-            Uproj="1,1,0",
-            Vproj="-1,1,0",
-            BinningDim0="-6.02,6.02,301",
-            BinningDim1="-6.02,6.02,301",
-            BinningDim2="-6.02,6.02,301",
-        )
+        Q = ConvertWANDSCDtoQ(InputWorkspace=ConvertWANDSCDtoQTest_data,
+                              UBWorkspace=peaks,
+                              Wavelength=1.486,
+                              Frame='HKL',
+                              Uproj='1,1,0',
+                              Vproj='-1,1,0',
+                              BinningDim0='-6.04,6.04,151',
+                              BinningDim1='-6.04,6.04,151',
+                              BinningDim2='-6.04,6.04,151')
 
-        data_norm = ConvertHFIRSCDtoMDE(
-            data,
-            Wavelength=wavelength,
-            MinValues="{},{},{}".format(*min_values),
-            MaxValues="{},{},{}".format(*max_values),
-        )
+        data_norm = ConvertHFIRSCDtoMDE(ConvertWANDSCDtoQTest_data,
+                                        Wavelength=1.486,
+                                        MinValues='-6.04,-6.04,-6.04',
+                                        MaxValues='6.04,6.04,6.04')
 
-        HKL = ConvertQtoHKLMDHisto(
-            data_norm,
-            PeaksWorkspace="peaks",
-            Uproj="1,1,0",
-            Vproj="-1,1,0",
-            Extents="-6.02,6.02,-6.02,6.02,-6.02,6.02",
-            Bins="301,301,301",
-        )
+        HKL = ConvertQtoHKLMDHisto(data_norm,
+                                   PeaksWorkspace=peaks,
+                                   Uproj='1,1,0',
+                                   Vproj='-1,1,0',
+                                   Extents='-6.04,6.04,-6.04,6.04,-6.04,6.04',
+                                   Bins='151,151,151')
 
         for i in range(HKL.getNumDims()):
             print(HKL.getDimension(i).getUnits(), Q.getDimension(i).getUnits())
@@ -132,5 +135,5 @@ class ConvertQtoHKLMDHistoTest_match_ConvertWANDSCDtoQ_test(
         np.testing.assert_almost_equal(
             z[~np.isnan(Q_data)].mean(),
             z[~np.isclose(hkl_data, 0)].mean(),
-            decimal=2
+            decimal=1
         )
