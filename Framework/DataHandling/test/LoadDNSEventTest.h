@@ -31,7 +31,7 @@ public:
   std::string origVTPDirectory;
   const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
 
-  void setUp() { // DNS file slow to create geometry cache so use a pregenerated vtp file.
+  void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
     std::string foundFile =
         Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
     hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
@@ -39,7 +39,7 @@ public:
     ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
   }
 
-  void tearDown() {
+  void tearDown() override {
     if (hasVTPDirectory)
       ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
     else
@@ -90,23 +90,23 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-  // void test_Name() {
-  //  LoadDNSEvent alg;
-  //  TS_ASSERT_EQUALS(alg.name(), "LoadDNSEvent");
-  //}
+  void test_Name() {
+    LoadDNSEvent alg;
+    TS_ASSERT_EQUALS(alg.name(), "LoadDNSEvent");
+  }
 
-  // void test_Properties() {
-  //  auto alg = makeAlgorithm();
-  //  TS_ASSERT_EQUALS(alg->getPropertyValue("chopperChannel"), "2");
-  //  TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5), std::invalid_argument);
-  //}
+  void test_Properties() {
+    auto alg = makeAlgorithm();
+    TS_ASSERT_EQUALS(alg->getPropertyValue("chopperChannel"), "2");
+    TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5), std::invalid_argument);
+  }
 
-  // void test_Executes_1() {
-  //  std::string outWSName("LoadDNSEventTest_OutputWS");
-  //  auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
-  //  TS_ASSERT_THROWS_NOTHING(alg->execute(););
-  //  TS_ASSERT(alg->isExecuted());
-  //}
+  void test_Executes_1() {
+    std::string outWSName("LoadDNSEventTest_OutputWS");
+    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+  }
 
   // void test_Executes_2() {
   //  std::string outWSName("LoadDNSEventTest_OutputWS");
