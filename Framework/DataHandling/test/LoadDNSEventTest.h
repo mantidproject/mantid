@@ -110,7 +110,7 @@ public:
     auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
     ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
     std::string outWSName("LoadDNSEventTest_OutputWS");
-    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
     if (hasVTPDirectory)

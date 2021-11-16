@@ -20,7 +20,7 @@
 #include <chrono>
 #include <iostream>
 
-#define USE_PARALLELISM true
+#define USE_PARALLELISM false
 
 namespace {
 
@@ -131,7 +131,7 @@ void LoadDNSEvent::exec() {
 
   if (chopperChannel == 0) {
     const auto instrumentParametersChopperChannels =
-        outputWS->instrumentParameters().getType<int>("chopper", "channel");
+        outputWS->instrumentParameters().getType<int>("DNS", "chopperchannel");
     if (!instrumentParametersChopperChannels.empty()) {
       chopperChannel = static_cast<uint32_t>(instrumentParametersChopperChannels.at(0));
     } else {
