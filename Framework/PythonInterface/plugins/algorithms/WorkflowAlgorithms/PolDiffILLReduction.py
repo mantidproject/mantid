@@ -699,6 +699,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 counts = mtd[background].dataY(pixel_no)
                 errors = mtd[background].dataE(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
+                # at this point bins should still be equidistant
                 bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
                 lower_peak_edge = int(ep_index - n_sigmas * peak_widths[pixel_no] / bin_width)
                 upper_peak_edge = int(ep_index + n_sigmas * peak_widths[pixel_no] / bin_width)
@@ -713,7 +714,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 errors[:lower_peak_edge] = time_indep_err
                 errors[upper_peak_edge:] = time_indep_err
                 # then, background in the elastic peak region can be calculated:
-                if tof_background_subtraction_method == 'Rectangular':  # averages container counts in the EP region
+                if tof_background_subtraction_method == 'Rectangular':
+                    # assumes rectangular distribution of counts in the EP region
                     counts[lower_peak_edge:upper_peak_edge] = np.mean(counts[lower_peak_edge:upper_peak_edge])
                 counts[lower_peak_edge:upper_peak_edge] -= time_indep_component
                 counts[lower_peak_edge:upper_peak_edge] *= transmission
@@ -793,12 +795,15 @@ class PolDiffILLReduction(PythonAlgorithm):
             if measurement_technique == "TOF":
                 tof_background_subtraction_method = self.getPropertyValue('SubtractTOFBackgroundMethod')
                 if tof_background_subtraction_method == 'Gaussian':
+                    # this way of subtracting background works directly on data, and is incompatible with
+                    # the background subtraction workflow used for powder and single crystal
                     self._subtract_gaussian_time_dep_background(ws, empty_ws, transmission_ws)
                     return
                 else:  # either Rectangular or Data
                     tof_backgrounds = self._extract_time_dependent_background(empty_ws, transmission_ws,
                                                                               tof_background_subtraction_method)
         elif measurement_technique == "TOF":
+            # in case cadmium is provided but empty is not, cadmium is not usually measured in TOF mode
             return
 
         unit_ws = 'unit_ws'
@@ -1180,16 +1185,17 @@ class PolDiffILLReduction(PythonAlgorithm):
         return nMeasurements
 
     def _find_elastic_peak_channels(self, ws):
-        """Finds elastic peaks and puts them in a WorkspaceGroup with the set name."""
+        """Runs FindEPP algorithm on a merged vanadium input, and sets the name for the resulting TableWorkspace."""
         self._elastic_channels_ws = "{}_elastic".format(ws[2:])
         tmp_ws = "{}_tmp".format(ws)
+        # to improve the statistics, merge all inputs to get the best estimate for EP positions for each pixel
         MergeRuns(InputWorkspaces=ws, OutputWorkspace=tmp_ws)
         FindEPP(InputWorkspace=tmp_ws, OutputWorkspace=self._elastic_channels_ws)
         if self.getProperty('ClearCache').value:
             DeleteWorkspace(Workspace=tmp_ws)
 
     def _calibrate_elastic_peak_position(self, ws):
-        """Calibrates the elastic peak position in TOF units to fall at deltaE = 0."""
+        """Calibrates the elastic peak position in TOF units to fall at deltaE = 0 after unit conversion to energy."""
         neutron_mass = physical_constants['neutron mass energy equivalent in MeV'][0] * 1e6  # in eV/c^2
         light_speed = physical_constants['speed of light in vacuum'][0]  # in m/s
         mev_to_ev = 1e-3  # conversion factor
@@ -1200,7 +1206,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         L2_even = instrument.getNumberParameter('sample_distance_even')[0]  # in m
         neutron_speed = np.sqrt(2.0 * Ei / neutron_mass) * light_speed  # in m / s, light_speed to go back to SI
         self._sampleAndEnvironmentProperties['NeutronSpeed'] = float(neutron_speed)
-        tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_speed  # in us
+        tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_speed  # in us, for consistency with time_axis unit
         tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_speed  # in us
         if not self._elastic_channels_ws:
             self._find_elastic_peak_channels(ws)
@@ -1240,7 +1246,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return Ei - c1 / np.power((L2 / neutron_speed) + n_sigmas * ep_sigmas_tof * us_2_s, 2)
 
     def _integrate_elastic_peak(self, ws):
-        """Integrates bins around the elastic peak for vanadium in energy exchange units."""
+        """Integrates bins around the elastic peak in energy exchange units."""
         sigmaE = self._calculate_epp_energy_width(ws)
         max_energy = np.max(sigmaE)
         bin_width = 2.0 * max_energy
@@ -1291,9 +1297,8 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _set_units(self, ws, process):
         """Sets proper units, according to the process, to the workspace ws."""
         unit_symbol = ''
-        unit = 'Normalised Intensity'
+        unit = 'Corrected Intensity'
         if process == 'Vanadium' and self.getProperty('AbsoluteNormalisation').value:
-            unit_symbol = r'$\frac{sr \cdot \mathrm{formula unit} }{0.404 \mathrm{barn} }$'
             unit = 'Normalisation factor'
         if self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal':
             SortXAxis(InputWorkspace=ws, OutputWorkspace=ws, Ordering='Ascending')
@@ -1304,7 +1309,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _rebin_in_energy(self, ws):
-        """Rebins TOF data in energy exchange."""
+        """Rebins data measured in Time-of-flight mode in energy exchange units."""
         if not self.getProperty('EnergyBinning').isDefault:
             Rebin(InputWorkspace=ws, OutputWorkspace=ws, Params=self.getProperty('EnergyBinning').value)
         else:
@@ -1375,7 +1380,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if measurement_technique == 'TOF':
                 if process == 'Vanadium' and ('EPCentre' not in self._sampleAndEnvironmentProperties
                                               or self.getProperty('ElasticChannelsWorkspace').isDefault):
-                    progress.report('Calibrating the elastic peak energy')
+                    progress.report('Finding elastic peak positions')
                     self._find_elastic_peak_channels(ws)
                 else:
                     self._elastic_channels_ws = self.getPropertyValue('ElasticChannelsWorkspace')
@@ -1413,8 +1418,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
-                else:
-                    self._set_units(ws, process)
+                self._set_units(ws, process)
 
         self._finalize(ws, process)
 
