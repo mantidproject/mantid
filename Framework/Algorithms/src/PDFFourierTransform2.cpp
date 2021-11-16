@@ -200,8 +200,9 @@ size_t PDFFourierTransform2::determineMaxIndex(double max, const std::vector<dou
   auto iter = std::upper_bound(X.begin(), X.end(), max) - 1;
   size_t max_index = std::distance(X.begin(), iter);
 
-  // go to first non-nan value. This works for histogram (bin edge) data and
-  // also point data, where point integration ends at the Y value to the left of the max bound
+  // go to first non-nan value. This works for both histogram (bin edge) data and
+  // point data, as the integration proceeds by calculating rectangles between pairs of X values.
+  // For point data the Y value corresponding to the left of this pair is used in the nested for loop in the exec.
   auto back_iter = std::find_if(Y.rbegin(), Y.rend(), static_cast<bool (*)(double)>(std::isnormal));
   size_t first_normal_index = Y.size() - std::distance(Y.rbegin(), back_iter);
   if (first_normal_index < max_index) {
@@ -316,7 +317,8 @@ void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, 
   return;
 }
 
-void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, const HistogramData::HistogramX &R,
+void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR,
+                                                     const HistogramData::HistogramX &R,
                                                      HistogramData::HistogramE &DFOfR) {
   // convert to the correct form of PDF
   double rho0 = determineRho0();
