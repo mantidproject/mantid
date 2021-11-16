@@ -98,13 +98,9 @@ class SuperplotPresenterTest(unittest.TestCase):
         self.m_model.del_workspace.assert_called_once_with("ws1")
         self.m_model.add_workspace.assert_called_once_with("ws2")
 
-    def test_get_side_view(self):
-        self.presenter.get_side_view()
-        self.m_view.get_side_widget.assert_called_once()
-
-    def test_get_bottom_view(self):
-        self.presenter.get_bottom_view()
-        self.m_view.get_bottom_widget.assert_called_once()
+    def test_show(self):
+        self.presenter.show()
+        self.m_view.show.assert_called_once()
 
     def test_close(self):
         self.presenter.close()
