@@ -663,10 +663,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             CreateSingleValuedWorkspace(DataValue=float(transmission), OutputWorkspace=transmission_ws)
         return transmission_ws
 
-    def _extract_time_dependent_background(self, empty_ws, transmission_ws, tof_background_subtraction_method):
-        """Extracts time-independent and time-dependent contributions to the background from the provided
-        workspace (empty container or vanadium) measured in the TOF mode."""
-        # number of channels around the peak, if X-axis data unit is time channels
+    def _set_up_tof_background_parameters(self, empty_ws):
+        """Helper function returnings parameters used in background subtraction in the Time-of-flight mode."""
+        # width in time-of-flight units around the peak
         peak_width = self._sampleAndEnvironmentProperties['EPWidth'].value \
             if 'EPWidth' in self._sampleAndEnvironmentProperties else 25.0
         peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
@@ -674,16 +673,24 @@ class PolDiffILLReduction(PythonAlgorithm):
         epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
         n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmasBckg'].value \
             if 'EPNSigmasBckg' in self._sampleAndEnvironmentProperties else 1.0
-        bckg_list = []
-        to_clean = []
-        transmission = mtd[transmission_ws].readY(0)[0]
         elastic_peaks = epp_table.column("PeakCentre") \
             if peak_centre is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_centre)
         peak_widths = np.array(epp_table.column("Sigma")) \
             if peak_width is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_width)
+        # pad peak widths with mean peak width for narrowPeak FindEPP fitting cases,
+        # where peak width would otherwise be 0.0:
         peak_widths[peak_widths == 0] = np.mean(peak_widths[peak_widths != 0])
+
+        return elastic_peaks, peak_widths, n_sigmas
+
+    def _extract_time_dependent_background(self, empty_ws, transmission_ws, tof_background_subtraction_method):
+        """Extracts time-independent and time-dependent contributions to the background from the provided
+        workspace (empty container or vanadium) measured in the TOF mode."""
+        bckg_list = []
+        to_clean = []
+        elastic_peaks, peak_widths, n_sigmas = self._set_up_tof_background_parameters(empty_ws)
+        transmission = mtd[transmission_ws].readY(0)[0]
         for empty in mtd[empty_ws]:
-            # calculate the background in the region around the elastic peaks separately to the rest of TOF channels
             background = "{}_bckg".format(empty.name())
             bckg_list.append(background)
             CloneWorkspace(InputWorkspace=empty, OutputWorkspace=background)
@@ -823,20 +830,8 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _subtract_gaussian_time_dep_background(self, ws, empty_ws, transmission_ws):
         """Subtracts from the data time-dependent and independent background using a gaussian approximation
         of the shape of container counts in the elastic peak region."""
-        # number of channels around the peak, if X-axis data unit is time channels
-        peak_width = self._sampleAndEnvironmentProperties['EPWidth'].value \
-            if 'EPWidth' in self._sampleAndEnvironmentProperties else 25.0
-        peak_centre = self._sampleAndEnvironmentProperties['EPCentre'].value \
-            if 'EPCentre' in self._sampleAndEnvironmentProperties else None
-        epp_table = mtd[self._elastic_channels_ws] if peak_centre is None else None
-        n_sigmas = self._sampleAndEnvironmentProperties['EPNSigmasBckg'].value \
-            if 'EPNSigmasBckg' in self._sampleAndEnvironmentProperties else 1.0
+        elastic_peaks, peak_widths, n_sigmas = self._set_up_tof_background_parameters(empty_ws)
         transmission = mtd[transmission_ws].readY(0)[0]
-        elastic_peaks = epp_table.column("PeakCentre") \
-            if peak_centre is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_centre)
-        peak_widths = np.array(epp_table.column("Sigma")) \
-            if peak_width is None else np.full(mtd[empty_ws][0].getNumberHistograms(), peak_width)
-        peak_widths[peak_widths == 0] = np.mean(peak_widths[peak_widths != 0])
         max_empty = mtd[empty_ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
             empty_no = entry_no if entry_no < max_empty else entry_no % max_empty
