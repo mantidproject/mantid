@@ -690,7 +690,6 @@ class TestRunner(object):
         exec_locals = dict()
         exitcode = None
         dual_stdout = DualStdOut()
-        line_number = None
         try:
             write_to_dual_stdout = redirect_stdout(dual_stdout)
             with write_to_dual_stdout:
@@ -702,17 +701,13 @@ class TestRunner(object):
             error_class = e.__class__.__name__
             detail = e.args[0]
             line_number = e.lineno
-        except Exception as ex:
-            import traceback
-            error_class = ex.__class__.__name__
-            detail = ex.args[0]
-            cl, exc, tb = sys.exc_info()
-            line_number = traceback.extract_tb(tb)[-1][1]
-        except SystemExit as ex: # catch sys.exit
-            exitcode=ex.args[0]
-        if line_number:
             print(f"{error_class} at line {line_number} of SystemTest for {script._modname}.{script._test_cls_name}: "
                   f"{detail}")
+        except Exception as ex:
+            import traceback
+            traceback.print_exc()
+        except SystemExit as ex: # catch sys.exit
+            exitcode=ex.args[0]
         if exitcode is None:
             if "exitcode" in exec_locals:
                 exitcode = exec_locals['exitcode']
