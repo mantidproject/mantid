@@ -66,17 +66,16 @@ private:
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
   /// Write the profiles of each  principle axis to the output workspace with fixed name
-  void outputProfile(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
-                     const std::vector<double> &principalaxis3, const double &cutoffIsigI, const int &numSigmas,
-                     std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator,
-                     IntegrateQLabEvents &integrator_satellite);
+  void outputAxisProfiles(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
+                          const std::vector<double> &principalaxis3, const double &cutoffIsigI, const int &numSigmas,
+                          std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator);
 
   void outputProfileWS(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
                        const std::vector<double> &principalaxis3, const std::string &wsname);
 
-  void integratePeaksCutoffISigI(std::vector<double> &m_principalaxis1, std::vector<double> &m_principalaxis2,
-                                 std::vector<double> &m_principalaxis3, const int &numSigmas,
-                                 std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator,
+  void integratePeaksCutoffISigI(const double &meanMax, const double &stdMax, std::vector<double> &m_principalaxis1,
+                                 std::vector<double> &m_principalaxis2, std::vector<double> &m_principalaxis3,
+                                 const int &numSigmas, std::vector<DataObjects::Peak> &peaks,
                                  IntegrateQLabEvents &integrator_satellite);
 
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,

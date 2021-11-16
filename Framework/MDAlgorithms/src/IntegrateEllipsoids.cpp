@@ -403,8 +403,7 @@ void IntegrateEllipsoids::exec() {
   m_braggPeakRadius = radius_m;
   m_satellitePeakRadius = satellite_radius;
 
-  // IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
-  IntegrateQLabEvents integrator_satellite(qList, satellite_radius, useOnePercentBackgroundCorrection);
+  IntegrateQLabEvents integrator(qList, satellite_radius, useOnePercentBackgroundCorrection);
 
   // get the events and add
   // them to the inegrator
@@ -418,12 +417,10 @@ void IntegrateEllipsoids::exec() {
   // TODO Refactor - Skip this block to find out how many tests will be broken
   if (eventWS) {
     // process as EventWorkspace
-    // qListFromEventWS(integrator, prog, eventWS);
-    qListFromEventWS(integrator_satellite, prog, eventWS);
+    qListFromEventWS(integrator, prog, eventWS);
   } else {
     // process as Workspace2D
-    // qListFromHistoWS(integrator, prog, histoWS);
-    qListFromHistoWS(integrator_satellite, prog, histoWS);
+    qListFromHistoWS(integrator, prog, histoWS);
   }
 
   double inti;
@@ -537,39 +534,33 @@ void IntegrateEllipsoids::exec() {
     std::vector<double> axes_radii;
     Mantid::Geometry::PeakShape_const_sptr shape;
     if (isSatellitePeak) {
-      integrator_satellite.setRadius(satellite_radius);
+      integrator.setRadius(satellite_radius);
       if (!shareBackground) {
-        shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
-                                                            adaptiveBack_inner_radius, adaptiveBack_outer_radius,
-                                                            axes_radii, inti, sigi, backi);
+        shape =
+            integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
+                                              adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
       } else {
         // check if this satellite peak did NOT have a bragg peak, then we want to integrate it normally
         if (satellitePeaks.size() > 0 &&
             std::find(satellitePeaks.begin(), satellitePeaks.end(), i) != satellitePeaks.end()) {
-          shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
-                                                              adaptiveBack_inner_radius, adaptiveBack_outer_radius,
-                                                              axes_radii, inti, sigi, backi);
+          shape =
+              integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
+                                                adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
         } else {
           // force satellite background radii in containers to use bragg peak background values
           SatelliteBackgroundInnerRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
           SatelliteBackgroundOuterRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
 
           // if sharing background, integrate with background radii = peak radius so that background is 0 for now
-          shape =
-              integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveRadius,
-                                                          adaptiveRadius, axes_radii, inti, sigi, backi);
+          shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveRadius,
+                                                    adaptiveRadius, axes_radii, inti, sigi, backi);
         }
       }
     } else {
-      // TODO - Test : reuse integrator_satellite for nuclear peaks
-      integrator_satellite.setRadius(radius_m);
-      shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
-                                                          adaptiveBack_inner_radius, adaptiveBack_outer_radius,
-                                                          axes_radii, inti, sigi, backi);
-      // integrator.setRadius(radius_m);
-      // shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
-      // adaptiveBack_inner_radius,
-      //                                           adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
+      // Bragg peak
+      integrator.setRadius(radius_m);
+      shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
+                                                adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
       if (shareBackground) {
         // cache this bragg peak's background so we can apply it to all its satellite peaks later
         cachedBraggBackground[i] = backi;
@@ -588,9 +579,6 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
-  // make it correct!  TODO FIXME 282
-  // integrator_satellite.setRadius(satellite_radius);
-
   if (shareBackground) {
     // loop over all bragg peaks and apply the cached background to their satellite peaks
     for (auto it = satellitePeakMap.begin(); it != satellitePeakMap.end(); it++) {
@@ -606,8 +594,7 @@ void IntegrateEllipsoids::exec() {
   }
 
   if (principalaxis1.size() > 1) {
-    outputProfile(principalaxis1, principalaxis2, principalaxis3, cutoffIsigI, numSigmas, peaks, integrator_satellite,
-                  integrator_satellite);
+    outputAxisProfiles(principalaxis1, principalaxis2, principalaxis3, cutoffIsigI, numSigmas, peaks, integrator);
   }
 
   // This flag is used by the PeaksWorkspace to evaluate whether it has been
@@ -622,10 +609,7 @@ void IntegrateEllipsoids::exec() {
   peak_ws->mutableRun().addProperty("SatelliteBackgroundInnerRadius", SatelliteBackgroundInnerRadiusVector, true);
   peak_ws->mutableRun().addProperty("SatelliteBackgroundOuterRadius", SatelliteBackgroundOuterRadiusVector, true);
 
-  g_log.notice("add peak workspace?");
-  g_log.notice() << "Peak workspace name: [" << peak_ws->getName() << "]\n";
   setProperty("OutputWorkspace", peak_ws);
-  g_log.notice("added peak workspace");
 }
 
 void IntegrateEllipsoids::initTargetWSDescr(MatrixWorkspace_sptr &wksp) {
@@ -662,6 +646,9 @@ void IntegrateEllipsoids::calculateE1(const Geometry::DetectorInfo &detectorInfo
   }
 }
 
+/**
+ * @brief Write Axis profile to a MatrixWorkspace (Workspace2D)
+ */
 void IntegrateEllipsoids::outputProfileWS(const std::vector<double> &principalaxis1,
                                           const std::vector<double> &principalaxis2,
                                           const std::vector<double> &principalaxis3, const std::string &wsname) {
@@ -681,11 +668,19 @@ void IntegrateEllipsoids::outputProfileWS(const std::vector<double> &principalax
   wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
 }
 
-void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis1,
-                                        const std::vector<double> &principalaxis2,
-                                        const std::vector<double> &principalaxis3, const double &cutoffIsigI,
-                                        const int &numSigmas, std::vector<Peak> &peaks, IntegrateQLabEvents &integrator,
-                                        IntegrateQLabEvents &integrator_satellite) {
+/**
+ * @brief Export axis profile and optionally 2nd pass axis profile if cutoff of I/sig(I) is specified
+ */
+void IntegrateEllipsoids::outputAxisProfiles(const std::vector<double> &principalaxis1,
+                                             const std::vector<double> &principalaxis2,
+                                             const std::vector<double> &principalaxis3, const double &cutoffIsigI,
+                                             const int &numSigmas, std::vector<Peak> &peaks,
+                                             IntegrateQLabEvents &integrator) {
+
+  // Export principle axis profile to Fixed workspace EllipsoidAxes
+  outputProfileWS(principalaxis1, principalaxis2, principalaxis3, "EllipsoidAxes");
+
+  // Output message
   Statistics stats1 = getStatistics(principalaxis1);
   g_log.notice() << "principalaxis1: "
                  << " mean " << stats1.mean << " standard_deviation " << stats1.standard_deviation << " minimum "
@@ -699,25 +694,6 @@ void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis
                  << " mean " << stats3.mean << " standard_deviation " << stats3.standard_deviation << " minimum "
                  << stats3.minimum << " maximum " << stats3.maximum << " median " << stats3.median << "\n";
 
-  constexpr size_t histogramNumber = 3;
-  Workspace_sptr wsProfile =
-      WorkspaceFactory::Instance().create("Workspace2D", histogramNumber, principalaxis1.size(), principalaxis1.size());
-  g_log.notice() << "Create workspace 2D with " << histogramNumber << " spec with size = " << principalaxis1.size()
-                 << "\n";
-  if (!wsProfile)
-    g_log.error("Not a workspace");
-  Workspace2D_sptr wsProfile2D = std::dynamic_pointer_cast<Workspace2D>(wsProfile);
-  if (!wsProfile2D)
-    g_log.error("Not a workspace2D");
-  AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
-  g_log.notice("Check point X");
-
-  // set output workspace
-  Points points(principalaxis1.size(), LinearGenerator(0, 1));
-  wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
-  wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
-  wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
-
   // Some special case to amend ... ...
   // Re-integrate peaks
   if (cutoffIsigI != EMPTY_DBL()) {
@@ -725,50 +701,14 @@ void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis
     std::vector<double> m_principalaxis1;
     std::vector<double> m_principalaxis2;
     std::vector<double> m_principalaxis3;
-    bool specify_size = true;
+
     double meanMax = std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
     double stdMax = std::max(std::max(stats1.standard_deviation, stats2.standard_deviation), stats3.standard_deviation);
-    double peak_radius = meanMax + numSigmas * stdMax;
-    double back_inner_radius = peak_radius;
-    double back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
-    // will make the background shell volume equal to the peak region volume.
-    for (size_t i = 0; i < peaks.size(); i++) {
-      // check if peak is satellite peak
-      const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
-      //
-      const V3D peak_q = peaks[i].getQLabFrame();
-      std::vector<double> axes_radii;
+    integratePeaksCutoffISigI(meanMax, stdMax, m_principalaxis1, m_principalaxis2, m_principalaxis3, numSigmas, peaks,
+                              integrator);
 
-      double inti{0.}, sigi{0.};
-      std::pair<double, double> backi;
-      if (isSatellitePeak) {
-        integrator_satellite.setRadius(m_satellitePeakRadius);
-        integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                                    back_outer_radius, axes_radii, inti, sigi, backi);
-      } else {
-        integrator_satellite.setRadius(m_braggPeakRadius);
-        integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                                    back_outer_radius, axes_radii, inti, sigi, backi);
-      }
-
-      peaks[i].setIntensity(inti);
-      peaks[i].setSigmaIntensity(sigi);
-      if (axes_radii.size() == 3) {
-        m_principalaxis1.emplace_back(axes_radii[0]);
-        m_principalaxis2.emplace_back(axes_radii[1]);
-        m_principalaxis3.emplace_back(axes_radii[2]);
-      }
-    }
     if (m_principalaxis1.size() > 1) {
-      Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create("Workspace2D", histogramNumber,
-                                                                      m_principalaxis1.size(), m_principalaxis1.size());
-      Workspace2D_sptr wsProfile2D2 = std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
-      AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass", wsProfile2D2);
-
-      Points profilePoints(m_principalaxis1.size(), LinearGenerator(0, 1));
-      wsProfile2D->setHistogram(0, profilePoints, Counts(std::move(m_principalaxis1)));
-      wsProfile2D->setHistogram(1, profilePoints, Counts(std::move(m_principalaxis2)));
-      wsProfile2D->setHistogram(2, profilePoints, Counts(std::move(m_principalaxis3)));
+      outputProfileWS(m_principalaxis1, m_principalaxis2, m_principalaxis3, "EllipsoidAxes_2ndPass");
     }
   }
 }
@@ -776,31 +716,20 @@ void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis
 /**
  * @brief Integrate peaks again with cutoff value of I/Sig(I)
  */
-void IntegrateEllipsoids::integratePeaksCutoffISigI(std::vector<double> &m_principalaxis1,
+void IntegrateEllipsoids::integratePeaksCutoffISigI(const double &meanMax, const double &stdMax,
+
+                                                    std::vector<double> &m_principalaxis1,
                                                     std::vector<double> &m_principalaxis2,
                                                     std::vector<double> &m_principalaxis3, const int &numSigmas,
-                                                    std::vector<Peak> &peaks, IntegrateQLabEvents &integrator,
-                                                    IntegrateQLabEvents &integrator_satellite) {
+                                                    std::vector<Peak> &peaks, IntegrateQLabEvents &integrator) {
   m_principalaxis1.clear();
   m_principalaxis2.clear();
   m_principalaxis3.clear();
 
-  Statistics stats1 = getStatistics(m_principalaxis1);
-  g_log.notice() << "principalaxis1: "
-                 << " mean " << stats1.mean << " standard_deviation " << stats1.standard_deviation << " minimum "
-                 << stats1.minimum << " maximum " << stats1.maximum << " median " << stats1.median << "\n";
-  Statistics stats2 = getStatistics(m_principalaxis2);
-  g_log.notice() << "principalaxis2: "
-                 << " mean " << stats2.mean << " standard_deviation " << stats2.standard_deviation << " minimum "
-                 << stats2.minimum << " maximum " << stats2.maximum << " median " << stats2.median << "\n";
-  Statistics stats3 = getStatistics(m_principalaxis3);
-  g_log.notice() << "principalaxis3: "
-                 << " mean " << stats3.mean << " standard_deviation " << stats3.standard_deviation << " minimum "
-                 << stats3.minimum << " maximum " << stats3.maximum << " median " << stats3.median << "\n";
-
   bool specify_size = true;
-  double meanMax = std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
-  double stdMax = std::max(std::max(stats1.standard_deviation, stats2.standard_deviation), stats3.standard_deviation);
+  // double meanMax = std::max(std::max(stats1.mean, stats2.mean), stats3.mean);
+  // double stdMax = std::max(std::max(stats1.standard_deviation, stats2.standard_deviation),
+  // stats3.standard_deviation);
   double peak_radius = meanMax + numSigmas * stdMax;
   double back_inner_radius = peak_radius;
   double back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3)
@@ -815,9 +744,11 @@ void IntegrateEllipsoids::integratePeaksCutoffISigI(std::vector<double> &m_princ
     double inti{0.}, sigi{0.};
     std::pair<double, double> backi;
     if (isSatellitePeak) {
-      integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                                  back_outer_radius, axes_radii, inti, sigi, backi);
+      integrator.setRadius(m_satellitePeakRadius);
+      integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius, back_outer_radius,
+                                        axes_radii, inti, sigi, backi);
     } else {
+      integrator.setRadius(m_braggPeakRadius);
       integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius, back_outer_radius,
                                         axes_radii, inti, sigi, backi);
     }

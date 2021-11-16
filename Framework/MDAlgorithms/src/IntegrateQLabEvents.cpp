@@ -59,6 +59,10 @@ IntegrateQLabEvents::IntegrateQLabEvents(const SlimEvents &peak_q_list, double r
   }
 }
 
+/**
+ * @brief Set peak integration radius
+ * @param radius :: double integration radius. radius must be larger than 0.
+ */
 void IntegrateQLabEvents::setRadius(const double &radius) { m_radius = radius; }
 
 bool IntegrateQLabEvents::isOrigin(const V3D &q, const double &cellSize) {
@@ -355,7 +359,7 @@ IntegrateQLabEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D c
                                                     abcBackgroundOuterRadii, Mantid::Kernel::QLab,
                                                     "IntegrateEllipsoids");
 }
-double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D QLabFrame,
+double IntegrateQLabEvents::detectorQ(const std::vector<V3D> &E1Vec, const Kernel::V3D &QLabFrame,
                                       const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {

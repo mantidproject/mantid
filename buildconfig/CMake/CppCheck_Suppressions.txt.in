@@ -745,9 +745,7 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertToMD.cpp:3
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertToMDMinMaxLocal.cpp:138
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ImportMDHistoWorkspace.cpp:98
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Integrate3DEvents.cpp:1148
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateQLabEvents.cpp:356
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateMDHistoWorkspace.cpp:217
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/IntegrateQLabEvents.h:274
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/Integrate3DEvents.h:152
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD.cpp:578
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/MDBoxMaskFunction.h:24
