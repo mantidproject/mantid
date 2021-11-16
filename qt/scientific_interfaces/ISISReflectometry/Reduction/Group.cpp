@@ -14,7 +14,9 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Group::Group(std::string name, std::vector<boost::optional<Row>> rows)
-    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {}
+    : m_name(std::move(name)), m_postprocessedWorkspaceName(), m_rows(std::move(rows)) {
+  setAllRowParents();
+}
 
 Group::Group(
 
@@ -222,7 +224,8 @@ void Group::setAllRowParents() {
 }
 
 void Group::updateParent() {
-  if (!m_rows.empty() && std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); })) {
+  if (!m_rows.empty() &&
+      std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); })) {
     setSuccess();
   } else {
     resetState(false);

@@ -246,10 +246,11 @@ void BatchJobManager::algorithmError(IConfiguredAlgorithm_sptr algorithm, std::s
 
 boost::optional<Item &> BatchJobManager::getRunsTableItem(IConfiguredAlgorithm_sptr const &algorithm) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
-  if (!jobAlgorithm->item() || jobAlgorithm->item()->isPreview()) {
+  auto *item = jobAlgorithm->item();
+  if (!item || item->isPreview()) {
     return boost::none;
   }
-  return *jobAlgorithm->item();
+  return *item;
 }
 
 std::vector<std::string> BatchJobManager::algorithmOutputWorkspacesToSave(IConfiguredAlgorithm_sptr algorithm) const {
