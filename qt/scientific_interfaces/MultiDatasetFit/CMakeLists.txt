@@ -27,6 +27,6 @@ mtd_add_qt_library(
   QT4_LINK_LIBS Qwt5
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting
   INSTALL_DIR_BASE ${PLUGINS_DIR}
-  OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks
+  OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS @loader_path/../../Contents/Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )

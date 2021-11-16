@@ -60,7 +60,7 @@ mtd_add_qt_library(
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${QT_LIBRARIES} ${OPENGL_LIBRARIES}
   QT5_LINK_LIBS Qt5::OpenGL Qt5::Qscintilla
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
-  OSX_INSTALL_RPATH @loader_path/../../MacOS
+  OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
 )
