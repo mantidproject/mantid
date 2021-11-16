@@ -114,11 +114,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                      or self.getProperty('AbsoluteNormalisation').value)):
             issues.update(self._validate_self_attenuation_arguments())
 
-        if process == 'Sample' and self.getPropertyValue('MeasurementTechnique') == 'TOF':
-            if self.getProperty('ElasticChannelsWorkspace').isDefault \
-                    and 'EPCentre' not in self.getProperty('SampleAndEnvironmentProperties').value:
-                issues['ElasticChannelsWorkspace'] = 'Elastic peak workspace or EPCentre value must be provided.'
-                issues['SampleAndEnvironmentProperties'] = issues['ElasticChannelsWorkspace']
+        if (process == 'Sample'
+                and self.getPropertyValue('MeasurementTechnique') == 'TOF'
+                and self.getProperty('ElasticChannelsWorkspace').isDefault
+                and 'EPCentre' not in self.getProperty('SampleAndEnvironmentProperties').value):
+            issues['ElasticChannelsWorkspace'] = 'Elastic peak workspace or EPCentre value must be provided.'
+            issues['SampleAndEnvironmentProperties'] = issues['ElasticChannelsWorkspace']
         return issues
 
     def PyInit(self):
