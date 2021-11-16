@@ -620,6 +620,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             numors.add(name[:slast_underscore])
             if name[slast_underscore+1:] not in pol_directions:
                 pol_directions.append(name[slast_underscore+1:])
+        numors = sorted(numors)
         if len(numors) > 1:
             names_list = []
             for direction in pol_directions:
