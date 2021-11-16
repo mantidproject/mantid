@@ -292,6 +292,12 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('FrameOverlapCorrection', tofMeasurement)
 
+        self.declareProperty(name='ConvertToEnergy',
+                             defaultValue=True,
+                             doc='Whether to convert TOF axis into energy exchange or keep it in units of time.')
+
+        self.setPropertySettings('ConvertToEnergy', tofMeasurement)
+
         self.declareProperty('DetectorEnergyEfficiencyCorrection', True,
                              doc='Whether or not to perform detector energy efficiency correction for TOF data.')
 
@@ -307,12 +313,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                                  'Bins above this value will be removed.')
 
         self.setPropertySettings('MaxTOFChannel', tofMeasurement)
-
-        self.declareProperty(name='ConvertToEnergy',
-                             defaultValue=True,
-                             doc='Whether to convert TOF axis into energy exchange or keep it in units of time.')
-
-        self.setPropertySettings('ConvertToEnergy', tofMeasurement)
 
         self.declareProperty(name='SubtractTOFBackgroundMethod',
                              defaultValue='Gaussian',
