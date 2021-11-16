@@ -47,7 +47,7 @@ using namespace Mantid::Kernel;
 namespace {
 
 /// A shift to add/subtract to a point to test if it is an entry/exit point
-constexpr double VALID_INTERCEPT_POINT_SHIFT{8e-6};
+constexpr double VALID_INTERCEPT_POINT_SHIFT{2e-5};
 
 /**
  * Find the solid angle of a triangle defined by vectors a,b,c from point
@@ -1084,7 +1084,6 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
     surface->acceptVisitor(LI);
   }
   const auto &IPoints(LI.getPoints());
-  const auto &dPoints(LI.getDistance());
 
   // sort the points based on its
   // 1. build a vector that contains the relative distance to the starting point
@@ -1104,27 +1103,16 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
 
   // 3. iterating through IPoints by the order of the smallest
   //    relative distance to the largest
-  // * schematics
-  //     (out)  |  (inside)      | (out)
-  // Ps         |                |
-  // o----x-----x-------x--------x----------------------->
-  //      m0    p0      m1       p1
-  //
-  // m0 = 0.5*(Ps + p0): outside ==> p0 is a Entering Type intercept
-  // m1 = 0.5*(Ps + p1): inside ==> p1 is a Leaving Type intercept
   for (size_t i = 0; i < nPoints; ++i) {
     const size_t idx(idxs[i]);
     const auto &currentPt(IPoints[idx]);
     const auto &prePoint = (i == 0) ? track.startPoint() : IPoints[idxs[i - 1]];
-    const auto ditr = dPoints[idx];
-    if (ditr > 0) {
-      // compute the mid point
-      const auto midPoint((prePoint + currentPt) * 0.5);
-      // find the type of currentPt (entering or leaving)
-      const TrackDirection flag = calcValidTypeByMidPoint(midPoint);
-      // add to list
-      track.addPoint(flag, currentPt, *this);
-    }
+    // figuring out the track type (invalid, entering or leaving) by checking
+    // previous point, current point and the downstream point of the current
+    // point.
+    const TrackDirection trackType = calcValidTypeByMidPoint(prePoint, currentPt, track.direction());
+    // add to list
+    track.addPoint(trackType, currentPt, *this);
   }
 
   // NOTE: Original method of identifying intercept type: twiddling with fixed
@@ -1190,14 +1178,43 @@ TrackDirection CSGObject::calcValidType(const Kernel::V3D &point, const Kernel::
 
 /**
  * Check if an intercept is guiding the ray into the shape or leaving the shape
- * @param midPt :: the middle point between the intercept point of interest and its
- *                 previous point
+ * @param prePt :: the previous point on the Line
+ * @param curPt :: the current point on the Line
+ * @param uVec :: Unit vector of the track
  * @retval 1 :: Entry point
  * @retval -1 :: Exit Point
+ * @retval 0 :: Not valid / double valid
  */
-TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &midPt) const {
-  const int flagA = isValid(midPt);
-  return (flagA) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
+TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &prePt, const Kernel::V3D &curPt,
+                                                  const Kernel::V3D &uVec) const {
+  const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
+  // upstream point
+  const auto midPt = (prePt + curPt) * 0.5;
+  const int midPtInsideShape = isValid(midPt);
+  // downstream point
+  const auto dsPt = curPt + shift;
+  const int dsPtInsideShape = isValid(dsPt);
+  // NOTE:
+  // When the track is parallel to the shape, it can still intersect with its
+  // component (infinite) surface.
+  // __Legends__
+  //  o-->: track
+  //  o:    track starting point
+  //  m:    midPt
+  //  x:    curPt
+  //  d:    dsPt
+  //              |                    |               o
+  //              |                    |               |
+  //     ---------|--------------------|---------------x------
+  //              |       SHAPE        |               |
+  //       o--m---x-d---->     o---m---x-d---->        v Invalid
+  //              |   Entering         |    Leaving
+  //     ---------|--------------------|----------------------
+  //              |                    |
+  if (!(midPtInsideShape ^ dsPtInsideShape))
+    return Geometry::TrackDirection::INVALID;
+  else
+    return (midPtInsideShape) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
 }
 
 /**
