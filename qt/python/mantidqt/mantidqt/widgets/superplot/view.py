@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-from qtpy.QtWidgets import QDockWidget, QWidget, QHeaderView, QTreeWidgetItem, \
+from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, \
                            QToolButton
 from qtpy.QtGui import QColor
 from qtpy.QtCore import *
@@ -222,17 +222,16 @@ class SuperplotViewBottom(QDockWidget):
         self.resized.emit()
 
 
-class SuperplotView(QWidget):
+class SuperplotView:
 
     _presenter = None
     _side_view = None
     _bottom_view = None
 
     def __init__(self, presenter, parent=None):
-        super().__init__(parent)
         self._presenter = presenter
-        self._side_view = SuperplotViewSide(self)
-        self._bottom_view = SuperplotViewBottom(self)
+        self._side_view = SuperplotViewSide(parent)
+        self._bottom_view = SuperplotViewBottom(parent)
 
         side = self._side_view
         side.visibilityChanged.connect(self._presenter.on_visibility_changed)
