@@ -175,6 +175,10 @@ if(APPLE AND NOT CONDA_BUILD)
     @ONLY
   )
   if(CONDA_ENV)
+    # Set a version for the MantidPython environment. This is arbitrary, but it make sense to start at v0.1.0. This is
+    # necessary so the postinstall script knows which installer it needs to run. As the installers are suffixed with a
+    # version number. If for some reason you update the MantidPython construct.yaml version number you'll need to update
+    # this as well!
     set(ENV_VERSION "0.1.0")
     configure_file(
       ${CMAKE_CURRENT_SOURCE_DIR}/../../../installers/MacInstaller/postinstall.in ${CMAKE_BINARY_DIR}/postinstall @ONLY
