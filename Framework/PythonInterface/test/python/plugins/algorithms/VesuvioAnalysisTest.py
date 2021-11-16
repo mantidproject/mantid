@@ -40,7 +40,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         table.addRow(['H', 1.0079,  0.,1.,9.9e9,  3.,  4.5,  6.,  -1.5, 0., 0.5])
         table.addRow(['C', 12.0,    0.,1.,9.9e9,  10., 15.5, 30., -1.5, 0., 0.5])
 
-        return table = CreateEmptyTableWorkspace()
+        return table
 
     def generate_constraints_table(self):
         constraints = CreateEmptyTableWorkspace()
