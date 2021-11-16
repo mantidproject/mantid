@@ -87,6 +87,9 @@ private:
 
   MDWSDescription m_targWSDescr;
 
+  double m_braggPeakRadius;
+  double m_satellitePeakRadius;
+
   /**
    * @brief Initialize the output information for the MD conversion framework.
    * @param wksp : The workspace to get information from.

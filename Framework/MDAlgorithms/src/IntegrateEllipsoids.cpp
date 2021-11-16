@@ -400,7 +400,10 @@ void IntegrateEllipsoids::exec() {
   std::vector<double> SatelliteBackgroundOuterRadiusVector(n_peaks, satellite_back_outer_radius);
 
   // make the integrator
-  IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
+  m_braggPeakRadius = radius_m;
+  m_satellitePeakRadius = satellite_radius;
+
+  // IntegrateQLabEvents integrator(qList, radius_m, useOnePercentBackgroundCorrection);
   IntegrateQLabEvents integrator_satellite(qList, satellite_radius, useOnePercentBackgroundCorrection);
 
   // get the events and add
@@ -415,11 +418,11 @@ void IntegrateEllipsoids::exec() {
   // TODO Refactor - Skip this block to find out how many tests will be broken
   if (eventWS) {
     // process as EventWorkspace
-    qListFromEventWS(integrator, prog, eventWS);
+    // qListFromEventWS(integrator, prog, eventWS);
     qListFromEventWS(integrator_satellite, prog, eventWS);
   } else {
     // process as Workspace2D
-    qListFromHistoWS(integrator, prog, histoWS);
+    // qListFromHistoWS(integrator, prog, histoWS);
     qListFromHistoWS(integrator_satellite, prog, histoWS);
   }
 
@@ -534,6 +537,7 @@ void IntegrateEllipsoids::exec() {
     std::vector<double> axes_radii;
     Mantid::Geometry::PeakShape_const_sptr shape;
     if (isSatellitePeak) {
+      integrator_satellite.setRadius(satellite_radius);
       if (!shareBackground) {
         shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
                                                             adaptiveBack_inner_radius, adaptiveBack_outer_radius,
@@ -557,8 +561,15 @@ void IntegrateEllipsoids::exec() {
         }
       }
     } else {
-      shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
-                                                adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
+      // TODO - Test : reuse integrator_satellite for nuclear peaks
+      integrator_satellite.setRadius(radius_m);
+      shape = integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
+                                                          adaptiveBack_inner_radius, adaptiveBack_outer_radius,
+                                                          axes_radii, inti, sigi, backi);
+      // integrator.setRadius(radius_m);
+      // shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius,
+      // adaptiveBack_inner_radius,
+      //                                           adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
       if (shareBackground) {
         // cache this bragg peak's background so we can apply it to all its satellite peaks later
         cachedBraggBackground[i] = backi;
@@ -577,6 +588,9 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
+  // make it correct!  TODO FIXME 282
+  // integrator_satellite.setRadius(satellite_radius);
+
   if (shareBackground) {
     // loop over all bragg peaks and apply the cached background to their satellite peaks
     for (auto it = satellitePeakMap.begin(); it != satellitePeakMap.end(); it++) {
@@ -592,7 +606,7 @@ void IntegrateEllipsoids::exec() {
   }
 
   if (principalaxis1.size() > 1) {
-    outputProfile(principalaxis1, principalaxis2, principalaxis3, cutoffIsigI, numSigmas, peaks, integrator,
+    outputProfile(principalaxis1, principalaxis2, principalaxis3, cutoffIsigI, numSigmas, peaks, integrator_satellite,
                   integrator_satellite);
   }
 
@@ -728,11 +742,13 @@ void IntegrateEllipsoids::outputProfile(const std::vector<double> &principalaxis
       double inti{0.}, sigi{0.};
       std::pair<double, double> backi;
       if (isSatellitePeak) {
+        integrator_satellite.setRadius(m_satellitePeakRadius);
         integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
                                                     back_outer_radius, axes_radii, inti, sigi, backi);
       } else {
-        integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
-                                          back_outer_radius, axes_radii, inti, sigi, backi);
+        integrator_satellite.setRadius(m_braggPeakRadius);
+        integrator_satellite.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, peak_radius, back_inner_radius,
+                                                    back_outer_radius, axes_radii, inti, sigi, backi);
       }
 
       peaks[i].setIntensity(inti);
