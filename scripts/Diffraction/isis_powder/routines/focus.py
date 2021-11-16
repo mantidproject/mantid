@@ -14,20 +14,23 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, absorb,
+          sample_details=None, placzek_run_number=None, cal_file_name=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
-                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details)
+                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details,
+                                        placzek_run_number=placzek_run_number, cal_file_name=cal_file_name)
     elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb,
-                                     sample_details=sample_details)
+                                     sample_details=sample_details, placzek_run_number=placzek_run_number,
+                                     cal_file_name=cal_file_name)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
 def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details,
-                  vanadium_path):
+                  vanadium_path, placzek_run_number=None, cal_file_name=None):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -64,11 +67,27 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
             mantid.SetSample(InputWorkspace=input_workspace,
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer")
+
+    if placzek_run_number and cal_file_name:
+        # Currently only supported for POLARIS instrument
+        raw_ws = mantid.Load(Filename='POLARIS' + str(placzek_run_number) + '.nxs')
+        sample_geometry = common.generate_sample_geometry(sample_details)
+        sample_material = common.generate_sample_material(sample_details)
+        self_scattering_correction = mantid.TotScatCalculateSelfScattering(
+            InputWorkspace=raw_ws,
+            CalFileName=cal_file_name,
+            SampleGeometry=sample_geometry,
+            SampleMaterial=sample_material,
+            CrystalDensity=sample_details.material_object.crystal_density)
+        self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
+                                                             WorkspaceToMatch=input_workspace)
+        input_workspace = mantid.Subtract(LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction)
+
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
                         CalibrationFile=run_details.offset_file_path)
     aligned_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="dSpacing")
-
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
@@ -122,7 +141,8 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details):
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string,
+                          absorb, sample_details, placzek_run_number, cal_file_name):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
@@ -138,7 +158,8 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
-                               sample_details=sample_details, vanadium_path=vanadium_splines)
+                               sample_details=sample_details, vanadium_path=vanadium_splines,
+                               placzek_run_number=placzek_run_number, cal_file_name=cal_file_name)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         if hasattr(vanadium_splines, "OutputWorkspace"):
             vanadium_splines = vanadium_splines.OutputWorkspace
@@ -178,7 +199,8 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     return output_list
 
 
-def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details):
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number,
+                             absorb, sample_details, placzek_run_number, cal_file_name):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
@@ -196,7 +218,8 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
-                               vanadium_path=vanadium_splines)
+                               vanadium_path=vanadium_splines, placzek_run_number=placzek_run_number,
+                               cal_file_name=cal_file_name)
     return output
 
 

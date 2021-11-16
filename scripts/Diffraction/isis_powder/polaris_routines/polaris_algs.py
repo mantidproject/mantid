@@ -85,28 +85,28 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
     focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
 
-    raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
-    sample_geometry = common.generate_sample_geometry(sample_details)
-    sample_material = common.generate_sample_material(sample_details)
-    self_scattering_correction = mantid.TotScatCalculateSelfScattering(
-        InputWorkspace=raw_ws,
-        CalFileName=cal_file_name,
-        SampleGeometry=sample_geometry,
-        SampleMaterial=sample_material,
-        CrystalDensity=sample_details.material_object.crystal_density)
-
-    ws_group_list = []
-    for i in range(self_scattering_correction.getNumberHistograms()):
-        ws_name = 'correction_' + str(i)
-        mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name,
-                              WorkspaceIndexList=[i])
-        ws_group_list.append(ws_name)
-    self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
-    self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
-                                                         WorkspaceToMatch=focused_ws)
-
-    focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
-    focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
+    # raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
+    # sample_geometry = common.generate_sample_geometry(sample_details)
+    # sample_material = common.generate_sample_material(sample_details)
+    # self_scattering_correction = mantid.TotScatCalculateSelfScattering(
+    #     InputWorkspace=raw_ws,
+    #     CalFileName=cal_file_name,
+    #     SampleGeometry=sample_geometry,
+    #     SampleMaterial=sample_material,
+    #     CrystalDensity=sample_details.material_object.crystal_density)
+    #
+    # ws_group_list = []
+    # for i in range(self_scattering_correction.getNumberHistograms()):
+    #     ws_name = 'correction_' + str(i)
+    #     mantid.ExtractSpectra(InputWorkspace=self_scattering_correction, OutputWorkspace=ws_name,
+    #                           WorkspaceIndexList=[i])
+    #     ws_group_list.append(ws_name)
+    # self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
+    # self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
+    #                                                      WorkspaceToMatch=focused_ws)
+    #
+    # focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
+    # focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
