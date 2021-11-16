@@ -10,6 +10,7 @@ from unittest import mock
 import sys
 
 from qtpy.QtWidgets import QApplication
+from qtpy.QtCore import Qt
 
 from mantidqt.widgets.superplot.view import SuperplotView
 
@@ -41,13 +42,15 @@ class SuperplotViewTest(unittest.TestCase):
         self.addCleanup(patch.stop)
 
         self.m_presenter = mock.Mock()
-        self.view = SuperplotView(self.m_presenter)
+        self.m_window = mock.Mock()
+        self.view = SuperplotView(self.m_presenter, self.m_window)
 
-    def test_get_side_widget(self):
-        self.assertEqual(self.view.get_side_widget(), self.view._side_view)
-
-    def test_get_bottom_widget(self):
-        self.assertEqual(self.view.get_bottom_widget(), self.view._bottom_view)
+    def test_show(self):
+        self.view.show()
+        calls = [mock.call(Qt.LeftDockWidgetArea, self.m_dock_side),
+                 mock.call(Qt.BottomDockWidgetArea, self.m_dock_bottom)]
+        self.m_window.addDockWidget.has_calls(calls)
+        self.m_dock_bottom.setFocus.assert_called_once()
 
     def test_close(self):
         self.view.close()
