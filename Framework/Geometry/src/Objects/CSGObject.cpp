@@ -1084,6 +1084,7 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
     surface->acceptVisitor(LI);
   }
   const auto &IPoints(LI.getPoints());
+  const auto &dPoints(LI.getDistance());
 
   // sort the points based on its
   // 1. build a vector that contains the relative distance to the starting point
@@ -1107,12 +1108,15 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
     const size_t idx(idxs[i]);
     const auto &currentPt(IPoints[idx]);
     const auto &prePoint = (i == 0) ? track.startPoint() : IPoints[idxs[i - 1]];
-    // figuring out the track type (invalid, entering or leaving) by checking
-    // previous point, current point and the downstream point of the current
-    // point.
-    const TrackDirection trackType = calcValidTypeByMidPoint(prePoint, currentPt, track.direction());
-    // add to list
-    track.addPoint(trackType, currentPt, *this);
+    const auto ditr = dPoints[idx];
+    if (ditr > 0) {
+      // figuring out the track type (invalid, entering or leaving) by checking
+      // previous point, current point and the downstream point of the current
+      // point.
+      const TrackDirection trackType = calcValidTypeByMidPoint(prePoint, currentPt, track.direction());
+      // add to list
+      track.addPoint(trackType, currentPt, *this);
+    }
   }
 
   // NOTE: Original method of identifying intercept type: twiddling with fixed

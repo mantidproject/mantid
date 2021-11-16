@@ -1143,8 +1143,8 @@ public:
 
     origin = Track(V3D{0., 0., 0.}, BEAM_DIRECTION);
     nsegments = cylinder->interceptSurface(origin);
-    TS_ASSERT_EQUALS(nsegments, 0);
-    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0);
+    TS_ASSERT_EQUALS(nsegments, 1);
+    TS_ASSERT_EQUALS(origin.totalDistInsideObject(), 0.0285528019);
   }
 
   void testTracksForFlatPlate() {
