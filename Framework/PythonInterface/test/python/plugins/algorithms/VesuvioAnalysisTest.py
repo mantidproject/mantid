@@ -43,14 +43,13 @@ class VesuvioAnalysisTest(unittest.TestCase):
         return table = CreateEmptyTableWorkspace()
 
     def generate_constraints_table(self):
-        table = CreateEmptyTableWorkspace()
-        table.addColumn(type="int", name="LHS element")
-        table.addColumn(type="int", name="RHS element")
-        table.addColumn(type="str", name="ScatteringCrossSection")
-        table.addColumn(type="str", name="State")
-        table.addRow([0, 1, "2.*82.03/5.551", "eq"])
+        constraints = CreateEmptyTableWorkspace()
+        constraints.addColumn(type="int", name="LHS element")
+        constraints.addColumn(type="int", name="RHS element")
+        constraints.addColumn(type="str", name="ScatteringCrossSection")
+        constraints.addColumn(type="str", name="State")
 
-        return table = CreateEmptyTableWorkspace()
+        return constraints
 
     def test_no_elements(self):
         alg = self.set_up_alg()
@@ -96,6 +95,22 @@ class VesuvioAnalysisTest(unittest.TestCase):
         self.assertTrue("ConstraintsProfile" in errors)
         self.assertEquals(len(errors),1)
 
+    def test_bad_column_in_constraints_table(self):
+        table = self.generate_table()
+        constraints = CreateEmptyTableWorkspace()
+        constraints.addColumn(type="int", name="LHS element")
+        constraints.addColumn(type="int", name="RHS element")
+        constraints.addColumn(type="str", name="State")
+        constraints.addRow([0, 1, "2.*82.03/5.551", "eq"])
+
+        alg = self.set_up_alg()
+        alg.setProperty('Spectra', [135, 182])
+        alg.setProperty('ComptonProfile', table)
+        alg.setProperty('ConstraintsProfile', constraints)
+        errors = alg.validateInputs()
+        self.assertTrue("ConstraintsProfile" in errors)
+        self.assertEquals(len(errors),1)
+
     def test_case_insensitive_table(self):
         table = CreateEmptyTableWorkspace()
         table.addColumn(type="str", name="Symbol")
@@ -126,9 +141,13 @@ class VesuvioAnalysisTest(unittest.TestCase):
         alg = self.set_up_alg()
         alg.setProperty('ConstraintsProfile', constraints)
         alg.setProperty('Spectra', [135, 182])
+        alg.setProperty('TOFRangeVector', [1,2])
         alg.setProperty('ComptonProfile', table)
+        alg.setProperty('Spectra', [135, 182])
+
         errors = alg.validateInputs()
-        self.assertEquals(len(errors),0)
+        self.assertEquals(len(errors),1)
+        self.assertTrue("TOFRangeVector" in errors)
 
     def test_TOF_range_short(self):
         table = self.generate_table()
