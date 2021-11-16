@@ -9,6 +9,7 @@
 #include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
@@ -24,6 +25,11 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
 }
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
+
+PreviewModel::PreviewModel() {
+  // This simplifies testing greatly
+  createRunDetails("");
+}
 
 /** Set the loaded workspace from the ADS if it exists
  *
@@ -54,13 +60,27 @@ void PreviewModel::loadAndPreprocessWorkspaceAsync(std::string const &workspaceN
   jobManager.startPreprocessing(*m_runDetails);
 }
 
+/** Sum spectra across banks
+ *
+ * @param wsIndices : the workspace indices of the spectra to sum
+ * @param jobManager : the job manager that will execute the algorithm
+ */
+void PreviewModel::sumBanksAsync(IJobManager &jobManager) { jobManager.startSumBanks(*m_runDetails); }
+
 MatrixWorkspace_sptr PreviewModel::getLoadedWs() const { return m_runDetails->getLoadedWs(); }
+MatrixWorkspace_sptr PreviewModel::getSummedWs() const { return m_runDetails->getSummedWs(); }
+
+std::vector<Mantid::detid_t> PreviewModel::getSelectedBanks() const { return m_runDetails->getSelectedBanks(); }
+
+void PreviewModel::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) {
+  m_runDetails->setSelectedBanks(std::move(selectedBanks));
+}
 
 void PreviewModel::createRunDetails(const std::string &workspaceName) {
   m_runDetails = std::make_unique<PreviewRow>(std::vector<std::string>{workspaceName});
 }
 
-std::string PreviewModel::indicesToString(std::vector<size_t> const &indices) const {
+std::string PreviewModel::detIDsToString(std::vector<Mantid::detid_t> const &indices) const {
   return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

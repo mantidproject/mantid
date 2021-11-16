@@ -16,9 +16,19 @@ Powder Diffraction
 - `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
 - Extending :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to the sample and container case.
 - `absorptioncorrutils` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
+- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now has an option to manually specify sample geometry for absorption correction.
 - Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
 - PEARL powder diffraction scripts now cope if absorption correction workspace is different size to the Vanadium workspace without generating NaN values
 - :ref:`AnvredCorrection <algm-AnvredCorrection>` (and :ref:`SphericalAbsorption <algm-SphericalAbsorption>` which calls it) will now take the radius of a spherical sample from the workspace if the radius isn't specified (if the sample is not a sphere this will produce an error).
+- :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` now groups the correction by detector bank in MomentumTransfer (rather than TOF)
+  and includes the following update.
+- :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` now validates that the IncidentSpectra
+  is in units of Wavelength and will output in the same unit as the InputWorkspace. The parameter IncidentSpectra for :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>` has been
+  renamed to fix a typo, which is a breaking change for this algorithm. Note that the addition of 1 to the Placzek correction has been moved out of this algorithm.
+
+Improvements
+############
+- :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
 
 Bugfixes
 ########
@@ -55,5 +65,6 @@ Single Crystal Diffraction
 --------------------------
 - Existing :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
 - Enabling :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` to calibrate each detector bank's size if it is a rectagular detector optionally.
+- Fixed calculation of modulation vector uncertainty in :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>`, new option ``CommonUBForAll`` allow selection of calculation handling multiple run the same as :ref:`IndexPeaks <algm-IndexPeaks>`.
 
 :ref:`Release 6.3.0 <v6.3.0>`

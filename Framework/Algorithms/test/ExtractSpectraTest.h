@@ -16,10 +16,10 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::ExtractSpectra;
 using namespace Mantid;

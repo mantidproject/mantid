@@ -9,9 +9,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;

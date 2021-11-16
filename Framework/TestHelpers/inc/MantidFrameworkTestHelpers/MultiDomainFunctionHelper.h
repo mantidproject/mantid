@@ -14,7 +14,7 @@
 
 namespace Mantid {
 
-namespace TestHelpers {
+namespace FrameworkTestHelpers {
 
 class MultiDomainFunctionTest_Function : public Mantid::API::IFunction1D, public Mantid::API::ParamFunction {
 public:
@@ -38,5 +38,5 @@ Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace2();
 
 Mantid::API::MatrixWorkspace_sptr makeMultiDomainWorkspace3();
 
-} // namespace TestHelpers
+} // namespace FrameworkTestHelpers
 } // namespace Mantid

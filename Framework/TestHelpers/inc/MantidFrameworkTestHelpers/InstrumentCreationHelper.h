@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 namespace Mantid {
 namespace API {

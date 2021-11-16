@@ -65,7 +65,14 @@ if(APPLE OR WIN32)
   if(WIN32)
     target_link_libraries(MantidWorkbenchInstalled PRIVATE Qt5::WinMain)
   endif()
-  install(TARGETS MantidWorkbenchInstalled DESTINATION ${WORKBENCH_BIN_DIR})
+  install(
+    TARGETS MantidWorkbenchInstalled
+    DESTINATION ${WORKBENCH_BIN_DIR}
+    COMPONENT Runtime
+  )
+  if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set_target_properties(MantidWorkbenchInstalled PROPERTIES INSTALL_RPATH "@loader_path/../Frameworks")
+  endif()
 endif()
 
 # process resources files
@@ -118,12 +125,23 @@ if(WIN32)
     FILES ${CMAKE_CURRENT_BINARY_DIR}/resources.py.install
     DESTINATION ${WORKBENCH_SITE_PACKAGES}/workbench/app
     RENAME resources.py
+    COMPONENT Runtime
   )
 else()
   if(CONDA_BUILD)
     set(_output_res_py ${WORKBENCH_SITE_PACKAGES}/workbench/app/resources.py)
   else()
     set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/workbench/app/resources.py)
+  endif()
+  if(APPLE AND CONDA_ENV)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+         "[Paths]\nPlugins = PlugIns\nImports = Resources/qml\nQml2Imports = Resources/qml"
+    )
+    install(
+      FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+      DESTINATION "${WORKBENCH_LIB_DIR}/../Resources"
+      COMPONENT Runtime
+    )
   endif()
   add_custom_command(
     OUTPUT ${_output_res_py}
@@ -157,9 +175,16 @@ if(APPLE AND NOT CONDA_BUILD)
   foreach(_i RANGE 2)
     get_filename_component(_qt_install_prefix ${_qt_install_prefix} DIRECTORY)
   endforeach()
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist DESTINATION ${WORKBENCH_BUNDLE})
   install(
-    CODE "
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/Info.plist
+    DESTINATION ${WORKBENCH_BUNDLE}
+    COMPONENT Runtime
+  )
+
+  # We can't do this in a conda_env as it looks for homebrew packages
+  if(NOT CONDA_ENV)
+    install(
+      CODE "
       execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
                               \${CMAKE_INSTALL_PREFIX}/${WORKBENCH_APP} ${Python_EXECUTABLE} ${_qt_install_prefix}
                       RESULT_VARIABLE install_name_tool_result OUTPUT_VARIABLE _out ERROR_VARIABLE _out COMMAND_ECHO STDOUT)
@@ -168,7 +193,11 @@ if(APPLE AND NOT CONDA_BUILD)
         message(FATAL_ERROR \"Package script failed!!!\n\")
       endif()
   "
-  )
+    )
+  else()
+    include(BundleOSXConda)
+  endif()
+
 endif()
 
 # Testing

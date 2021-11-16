@@ -37,6 +37,7 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyAnyBatchAutoreductionResumed, void());
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
+  MOCK_METHOD0(notifyBatchLoaded, void());
   MOCK_METHOD0(settingsChanged, void());
   MOCK_METHOD1(setTablePrecision, void(int &));
   MOCK_METHOD0(resetTablePrecision, void());

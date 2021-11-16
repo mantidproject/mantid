@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FrameworkManager.h"
@@ -130,7 +130,7 @@ public:
     getParameterMap(outtablews, 0, parammap);
 
     TS_ASSERT_DELTA(parammap["PeakCentre"], 1.2356, 0.03);
-    TS_ASSERT_DELTA(parammap["Height"], 595., 5.00);
+    TS_ASSERT_DELTA(parammap["Height"], 595., 15.00);
 
     // Clean
     AnalysisDataService::Instance().remove(wsname);
@@ -261,7 +261,7 @@ public:
       TS_ASSERT_DELTA(peaklist->Double(i, COL_CENTRE), VANADIUM_CENTRES[i], 0.01);
       TS_ASSERT(peaklist->Double(i, COL_CHISQ) > 0.);
       // other peak shape parameters show of instability
-      double tol_height = 1.;
+      double tol_height = 4.;
       double tol_width = 0.0001;
       if (std::find(BAD.begin(), BAD.end(), i) != BAD.end()) {
         // "light" checks have larger tolerances

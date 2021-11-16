@@ -22,13 +22,13 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;

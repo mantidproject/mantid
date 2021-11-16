@@ -13,9 +13,9 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using Mantid::MantidVec;
 using std::size_t;

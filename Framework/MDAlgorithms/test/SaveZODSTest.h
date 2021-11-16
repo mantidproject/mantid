@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/SaveZODS.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -11,7 +11,7 @@
 #include "MantidAlgorithms/SortEvents.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

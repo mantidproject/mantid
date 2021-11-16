@@ -13,7 +13,7 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/ConvertToEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

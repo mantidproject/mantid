@@ -12,7 +12,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FrameworkManager.h"
 

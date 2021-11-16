@@ -7,12 +7,12 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadBinaryStl.h"
 #include "MantidDataHandling/SaveSampleEnvironmentAndShape.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

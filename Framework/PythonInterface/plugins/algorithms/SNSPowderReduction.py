@@ -233,6 +233,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]),
                              doc="Specifies the Absorption Correction terms to calculate, if any.")
         self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
+        self.declareProperty("SampleGeometry", {}, doc="A dictionary of geometry parameters for the sample.")
         self.declareProperty("MeasuredMassDensity", defaultValue=0.1,
                              validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Measured mass density of sample in g/cc")  # in g/cc, way to validate?
@@ -335,6 +336,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._outTypes = self.getProperty("SaveAs").value.lower()
         self._absMethod = self.getProperty("TypeOfCorrection").value
         self._sampleFormula = self.getProperty("SampleFormula").value
+        self._sampleGeometry = self.getProperty("SampleGeometry").value
         self._massDensity = self.getProperty("MeasuredMassDensity").value
         self._numberDensity = self.getProperty("SampleNumberDensity").value
         self._containerShape = self.getProperty("ContainerShape").value
@@ -432,6 +434,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self._info,  # PropertyManager of run characterizations
             self._sampleFormula,  # Material for absorption correction
             self._massDensity,  # Mass density of the sample
+            self._sampleGeometry, # Geometry parameters for the sample
             self._numberDensity,  # Optional number density of sample to be added
             self._containerShape,  # Shape definition of container
             self._num_wl_bins,  # Number of bins: len(ws.readX(0))-1

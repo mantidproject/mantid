@@ -8,8 +8,8 @@
 #include "MantidDataHandling/SaveOpenGenieAscii.h"
 
 #include "MantidDataHandling/Load.h"
-#include "MantidTestHelpers/FileComparisonHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FileComparisonHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/TemporaryFile.h>
 #include <cxxtest/TestSuite.h>

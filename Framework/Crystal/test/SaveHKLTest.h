@@ -14,6 +14,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -22,8 +24,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>

@@ -10,8 +10,8 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include "MonteCarloTesting.h"
 

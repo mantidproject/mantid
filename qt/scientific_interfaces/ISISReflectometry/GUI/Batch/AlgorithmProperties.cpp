@@ -19,7 +19,7 @@ std::string boolToString(bool value) { return value ? "1" : "0"; }
 
 void update(std::string const &property, std::string const &value, AlgorithmRuntimeProps &properties) {
   if (!value.empty())
-    properties[property] = value;
+    properties.setPropertyValue(property, value);
 }
 
 void update(std::string const &property, boost::optional<std::string> const &value, AlgorithmRuntimeProps &properties) {

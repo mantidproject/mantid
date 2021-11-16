@@ -12,9 +12,9 @@
 #include "MantidAlgorithms/ConvertToHistogram.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

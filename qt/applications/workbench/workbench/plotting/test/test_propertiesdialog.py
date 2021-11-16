@@ -11,18 +11,22 @@
 # system imports
 import unittest
 
+from unittest.mock import MagicMock
+
 # third-party library imports
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 from matplotlib.colors import LogNorm
-from unittest.mock import MagicMock
+from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
+import numpy as np
 
 from mantid.api import WorkspaceFactory
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.plotting.functions import pcolormesh
-from workbench.plotting.propertiesdialog import XAxisEditor, YAxisEditor, ColorbarAxisEditor, LegendEditor
+from workbench.plotting.propertiesdialog import (XAxisEditor, YAxisEditor, ZAxisEditor, ColorbarAxisEditor,
+                                                 LegendEditor, DECIMAL_FORMAT, SCIENTIFIC_FORMAT)
 
 
 @start_qapplication
@@ -53,6 +57,37 @@ class PropertiesDialogTest(unittest.TestCase):
         # test scale
         self.assertEqual(xEditor._memento.log, False)
         self.assertEqual(yEditor._memento.log, True)
+
+    def test_axis_editor_initialised_with_correct_values_3d(self):
+        a = np.array([[1]])
+        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid3d'})
+        ax.plot_surface(a, a, a)
+        # Set properties that can be accessed via the axes menu
+        ax.set_xlim(1, 2)
+        ax.set_ylim(3, 4)
+        ax.set_zlim(5, 6)
+        ax.xaxis.set_major_formatter(ScalarFormatter(useOffset=True))
+        ax.yaxis.set_major_formatter(ScalarFormatter(useOffset=True))
+        ax.zaxis.set_major_formatter(LogFormatterSciNotation())
+        # Create axis editors for each axis
+        x_editor = XAxisEditor(fig.canvas, ax)
+        y_editor = YAxisEditor(fig.canvas, ax)
+        z_editor = ZAxisEditor(fig.canvas, ax)
+        # Check that the correct axis is assigned
+        self.assertEqual(x_editor.axis, ax.xaxis)
+        self.assertEqual(y_editor.axis, ax.yaxis)
+        self.assertEqual(z_editor.axis, ax.zaxis)
+        # Test tick formats
+        self.assertEqual(x_editor._memento.formatter, DECIMAL_FORMAT)
+        self.assertEqual(y_editor._memento.formatter, DECIMAL_FORMAT)
+        self.assertEqual(z_editor._memento.formatter, SCIENTIFIC_FORMAT)
+        # Test limits
+        self.assertEqual(x_editor._memento.min, ax.get_xlim()[0])
+        self.assertEqual(x_editor._memento.max, ax.get_xlim()[1])
+        self.assertEqual(y_editor._memento.min, ax.get_ylim()[0])
+        self.assertEqual(y_editor._memento.max, ax.get_ylim()[1])
+        self.assertEqual(z_editor._memento.min, ax.get_zlim()[0])
+        self.assertEqual(z_editor._memento.max, ax.get_zlim()[1])
 
     def test_changes_apply_to_all_colorfill_plots_if_one_colorbar(self):
         ws = WorkspaceFactory.Instance().create("Workspace2D", NVectors=1, YLength=5, XLength=5)

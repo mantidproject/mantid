@@ -11,9 +11,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/MaskDetectorsIf.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <fstream>
 #include <limits>

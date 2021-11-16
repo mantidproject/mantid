@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/GroupingLoader.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
 namespace MuonGroupingXMLHelper {
 

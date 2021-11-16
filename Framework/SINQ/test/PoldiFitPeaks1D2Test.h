@@ -18,8 +18,8 @@
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Poldi::PoldiFitPeaks1D2;
 using namespace Mantid::Poldi;

@@ -25,8 +25,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <iostream>
 #include <string>

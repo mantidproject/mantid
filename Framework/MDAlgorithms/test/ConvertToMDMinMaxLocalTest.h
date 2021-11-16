@@ -12,12 +12,12 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidMDAlgorithms/ConvertToMDMinMaxLocal.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MDAlgorithms::ConvertToMDMinMaxLocal;
 class ConvertToMDMinMaxLocalTest : public CxxTest::TestSuite {

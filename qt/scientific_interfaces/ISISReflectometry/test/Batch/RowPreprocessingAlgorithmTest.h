@@ -10,8 +10,9 @@
 #include "../../../ISISReflectometry/Reduction/IBatch.h"
 #include "../../../ISISReflectometry/Reduction/PreviewRow.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockBatch.h"
 
 #include <cxxtest/TestSuite.h>
@@ -54,8 +55,15 @@ public:
 
     auto configuredAlg = createConfiguredAlgorithm(batch, row, mockAlg);
     TS_ASSERT_EQUALS(configuredAlg->algorithm(), mockAlg);
-    auto expectedProps = IConfiguredAlgorithm::AlgorithmRuntimeProps{{"InputRunList", inputRuns[0]}};
-    TS_ASSERT_EQUALS(configuredAlg->properties(), expectedProps);
+    MantidQt::API::AlgorithmRuntimeProps expectedProps;
+    expectedProps.setPropertyValue("InputRunList", inputRuns[0]);
+    const auto &setProps = configuredAlg->getAlgorithmRuntimeProps();
+    const auto &propNames = expectedProps.getDeclaredPropertyNames();
+
+    TS_ASSERT(std::all_of(propNames.cbegin(), propNames.cend(), [&setProps, &expectedProps](const std::string &name) {
+      return setProps.existsProperty(name) &&
+             expectedProps.getPropertyValue(name) == expectedProps.getPropertyValue(name);
+    }))
   }
 
   void test_row_is_updated_on_algorithm_complete() {

@@ -18,10 +18,10 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <numeric>
 

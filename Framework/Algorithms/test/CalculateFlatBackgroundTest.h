@@ -13,10 +13,10 @@
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/Minus.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/MersenneTwister.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 

@@ -149,16 +149,7 @@ public:
     const Mantid::Kernel::FacilityInfo &prevFac = Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-
-    // These two create should throw a NotFoundError because the
-    // RemoteJobManager classes are missing and have not done a
-    // DECLARE_REMOTEJOBMANAGER. A positive test is done in the tests
-    // of the job managers
-    TSM_ASSERT_THROWS("create() with " + FermiName + " should throw because its job manager is not declared",
-                      Mantid::API::IRemoteJobManager_sptr jobManager =
-                          Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
-                      const Mantid::Kernel::Exception::NotFoundError &);
-
+    TS_ASSERT(Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"));
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
   }

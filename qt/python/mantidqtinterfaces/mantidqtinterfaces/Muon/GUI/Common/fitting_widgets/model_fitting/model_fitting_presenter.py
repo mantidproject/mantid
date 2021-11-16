@@ -53,7 +53,6 @@ class ModelFittingPresenter(BasicFittingPresenter):
         x_parameter = self.view.x_parameter()
         if x_parameter == self.view.y_parameter():
             self.view.set_selected_y_parameter(self.model.get_first_y_parameter_not(x_parameter))
-
         self.update_selected_parameter_combination_workspace()
 
     def handle_selected_y_changed(self) -> None:
@@ -88,9 +87,9 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.view.update_dataset_name_combo_box(self.model.dataset_names, emit_signal=False)
 
         # Initially, the y parameters should be updated before the x parameters.
-        self.view.update_y_parameters(self.model.y_parameters())
+        self.view.update_y_parameters(self.model.y_parameters(), self.model.y_parameter_types())
         # Triggers handle_selected_x_changed
-        self.view.update_x_parameters(self.model.x_parameters(), emit_signal=True)
+        self.view.update_x_parameters(self.model.x_parameters(), self.model.y_parameter_types(), emit_signal=True)
 
     def handle_parameter_combinations_error(self, error: str) -> None:
         """Handle when an error occurs while creating workspaces for the different parameter combinations."""
@@ -161,6 +160,10 @@ class ModelFittingPresenter(BasicFittingPresenter):
         if dataset_name is not None:
             self.model.current_dataset_index = self.model.dataset_names.index(dataset_name)
             self.view.current_dataset_name = dataset_name
+            # update the x range for the fit
+            start_x_list, end_x_list = self.model._get_new_start_xs_and_end_xs_using_existing_datasets([dataset_name])
+            self.view.start_x = start_x_list[0]
+            self.view.end_x = end_x_list[0]
 
     def update_plot_fit(self) -> None:
         """Updates the fit results on the plot using the currently active fit results."""

@@ -16,14 +16,14 @@
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;

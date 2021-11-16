@@ -129,6 +129,7 @@ set(SRC_FILES
     src/Functions/ReflectivityMulf.cpp
     src/Functions/Resolution.cpp
     src/Functions/SimpleChebfun.cpp
+    src/Functions/SmoothTransition.cpp
     src/Functions/StaticKuboToyabe.cpp
     src/Functions/StaticKuboToyabeTimesExpDecay.cpp
     src/Functions/StaticKuboToyabeTimesGausDecay.cpp
@@ -289,6 +290,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/PawleyFunction.h
     inc/MantidCurveFitting/Functions/PeakParameterFunction.h
     inc/MantidCurveFitting/Functions/Polynomial.h
+    inc/MantidCurveFitting/Functions/PowerLaw.h
     inc/MantidCurveFitting/Functions/ProcessBackground.h
     inc/MantidCurveFitting/Functions/ProductFunction.h
     inc/MantidCurveFitting/Functions/ProductLinearExp.h
@@ -298,6 +300,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ReflectivityMulf.h
     inc/MantidCurveFitting/Functions/Resolution.h
     inc/MantidCurveFitting/Functions/SimpleChebfun.h
+    inc/MantidCurveFitting/Functions/SmoothTransition.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
@@ -458,6 +461,7 @@ set(TEST_FILES
     Functions/ReflectivityMulfTest.h
     Functions/ResolutionTest.h
     Functions/SimpleChebfunTest.h
+    Functions/SmoothTransitionTest.h
     Functions/StaticKuboToyabeTest.h
     Functions/StaticKuboToyabeTimesExpDecayTest.h
     Functions/StaticKuboToyabeTimesGausDecayTest.h

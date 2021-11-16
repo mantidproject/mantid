@@ -10,9 +10,9 @@
 #include "MantidAPI/IMDNode.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/CloneMDWorkspace.h"
 #include "MantidMDAlgorithms/CompareMDWorkspaces.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

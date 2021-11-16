@@ -12,12 +12,12 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NearestNeighbours.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <random>

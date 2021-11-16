@@ -7,9 +7,9 @@
 #pragma once
 
 #include "../ReflMockObjects.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockInstViewModel.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
@@ -38,7 +38,7 @@ using ::testing::ReturnRef;
 
 class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockInstViewModelT = std::unique_ptr<MockInstViewModel>;
-  using MockJobManagerT = std::unique_ptr<IJobManager>;
+  using MockJobManagerT = std::unique_ptr<MockJobManager>;
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
 
@@ -112,12 +112,12 @@ public:
     auto mockView = makeView();
     auto mockModel = makeModel();
     auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
     expectInstViewSetToEditMode(*mockView);
-    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel);
+    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel, *mockJobManager);
     // TODO check that the model is called to sum banks
-    auto presenter =
-        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::make_unique<NiceMock<MockJobManager>>(),
-                                  std::move(mockInstViewModel)));
+    auto presenter = PreviewPresenter(
+        packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
     presenter.notifyInstViewShapeChanged();
   }
 
@@ -131,7 +131,7 @@ private:
 
   MockModelT makeModel() { return std::make_unique<MockPreviewModel>(); }
 
-  std::unique_ptr<IJobManager> makeJobManager() {
+  MockJobManagerT makeJobManager() {
     auto mockJobManager = std::make_unique<MockJobManager>();
     EXPECT_CALL(*mockJobManager, subscribe(NotNull())).Times(1);
     return mockJobManager;
@@ -162,15 +162,15 @@ private:
   }
 
   void expectSumBanksCalledOnSelectedDetectors(MockPreviewView &mockView, MockPreviewModel &mockModel,
-                                               MockInstViewModel &mockInstViewModel) {
+                                               MockInstViewModel &mockInstViewModel, MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
-    auto wsIndices = std::vector<size_t>{2, 3, 4};
-    auto wsIndicesStr = std::string{"2, 3, 4"};
+    auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
+    auto detIDsStr = std::string{"2, 3, 4"};
     EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
-    EXPECT_CALL(mockInstViewModel, detIndicesToWsIndices(Eq(detIndices))).Times(1).WillOnce(Return(wsIndices));
-    EXPECT_CALL(mockModel, indicesToString(wsIndices)).Times(1).WillOnce(Return(wsIndicesStr));
-    // TODO uncomment test when sum banks is implemented
-    // EXPECT_CALL(mockModel, sumBanksAsync(wsIndicesStr)).Times(1);
+    EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, detIDsToString(detIDs)).Times(1).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockModel, setSelectedBanks(detIDs)).Times(1);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
   void expectPlotInstView(MockPreviewView &mockView, MockInstViewModel &mockInstViewModel) {

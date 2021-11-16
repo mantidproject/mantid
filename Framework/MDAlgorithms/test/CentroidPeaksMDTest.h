@@ -10,6 +10,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
@@ -18,7 +19,6 @@
 #include "MantidMDAlgorithms/CentroidPeaksMD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>

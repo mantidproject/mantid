@@ -11,9 +11,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

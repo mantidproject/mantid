@@ -10,11 +10,11 @@
 #include <gmock/gmock.h>
 
 #include "MantidAPI/NumericAxis.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -32,11 +32,9 @@ using namespace Mantid::API;
 using Mantid::Geometry::Instrument;
 using namespace MantidQt::MantidWidgets;
 
-class MockPlotFitAnalysisPanePresenter
-    : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter {
+class MockPlotFitAnalysisPanePresenter : public MantidQt::MantidWidgets::IPlotFitAnalysisPanePresenter {
 public:
-  explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view,
-                                            PlotFitAnalysisPaneModel *model) {
+  explicit MockPlotFitAnalysisPanePresenter(IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model) {
     (void)model;
     (void)view;
     m_addFunc = 0;
@@ -61,12 +59,9 @@ private:
   int m_addFunc;
 };
 
-class MockPlotFitAnalysisPaneView
-    : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView {
+class MockPlotFitAnalysisPaneView : public MantidQt::MantidWidgets::IPlotFitAnalysisPaneView {
 public:
-  explicit MockPlotFitAnalysisPaneView(const double &start = 1.,
-                                       const double &end = 5.,
-                                       QWidget *parent = nullptr) {
+  explicit MockPlotFitAnalysisPaneView(const double &start = 1., const double &end = 5., QWidget *parent = nullptr) {
     (void)start;
     (void)end;
     (void)parent;
@@ -83,14 +78,11 @@ public:
   MOCK_METHOD1(displayWarning, void(const std::string &message));
 
   MOCK_METHOD0(getQWidget, QWidget *());
-  MOCK_METHOD2(setupPlotFitSplitter,
-               void(const double &start, const double &end));
-  MOCK_METHOD2(createFitPane,
-               QWidget *(const double &start, const double &end));
+  MOCK_METHOD2(setupPlotFitSplitter, void(const double &start, const double &end));
+  MOCK_METHOD2(createFitPane, QWidget *(const double &start, const double &end));
 };
 
-class MockPlotFitAnalysisPaneModel
-    : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel {
+class MockPlotFitAnalysisPaneModel : public MantidQt::MantidWidgets::PlotFitAnalysisPaneModel {
 public:
   MockPlotFitAnalysisPaneModel() {
     m_fitCount = 0;
@@ -98,8 +90,7 @@ public:
   };
 
   ~MockPlotFitAnalysisPaneModel(){};
-  IFunction_sptr doFit(const std::string &wsName,
-                       const std::pair<double, double> &range,
+  IFunction_sptr doFit(const std::string &wsName, const std::pair<double, double> &range,
                        const IFunction_sptr func) override {
     m_fitCount += 1;
     (void)wsName;
@@ -107,9 +98,7 @@ public:
     return func;
   };
 
-  IFunction_sptr
-  calculateEstimate(const std::string &workspaceName,
-                    const std::pair<double, double> &range) override {
+  IFunction_sptr calculateEstimate(const std::string &workspaceName, const std::pair<double, double> &range) override {
     (void)workspaceName;
     (void)range;
     m_estimateCount += 1;

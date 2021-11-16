@@ -13,8 +13,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RenameWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Exception.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

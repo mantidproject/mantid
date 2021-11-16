@@ -7,13 +7,13 @@
 #pragma once
 
 #include "MantidAPI/Run.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <json/value.h>

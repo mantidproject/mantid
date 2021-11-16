@@ -16,9 +16,9 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/DetectorEfficiencyCorUser.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using namespace Mantid::API;

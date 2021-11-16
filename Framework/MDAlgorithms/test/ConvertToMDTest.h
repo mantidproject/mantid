@@ -7,13 +7,13 @@
 #pragma once
 
 #include "MantidAPI/BoxController.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include <Poco/File.h>

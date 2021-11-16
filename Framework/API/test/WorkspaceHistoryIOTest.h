@@ -11,8 +11,8 @@
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/Property.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include "Poco/File.h"
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Citation.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <nexus/NeXusFile.hpp>

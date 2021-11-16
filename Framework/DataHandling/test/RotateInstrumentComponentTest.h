@@ -11,7 +11,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::DataHandling::RotateInstrumentComponent;
 

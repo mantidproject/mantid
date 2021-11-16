@@ -11,7 +11,7 @@
 #include "../Muon/ALCLatestFileFinder.h"
 #include "MantidKernel/DateAndTime.h"
 
-#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
 #include <Poco/DateTime.h>
 #include <Poco/File.h>

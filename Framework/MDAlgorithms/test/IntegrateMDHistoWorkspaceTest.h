@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 using Mantid::MDAlgorithms::IntegrateMDHistoWorkspace;
 using namespace Mantid::API;
 

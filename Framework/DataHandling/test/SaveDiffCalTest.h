@@ -15,7 +15,7 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::DataHandling::SaveDiffCal;
 using namespace Mantid::API;

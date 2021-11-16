@@ -9,7 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/CommonBinsValidator.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using Mantid::API::CommonBinsValidator;
 

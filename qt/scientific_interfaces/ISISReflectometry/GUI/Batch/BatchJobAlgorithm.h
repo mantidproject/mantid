@@ -10,6 +10,8 @@
 #include "IBatchJobAlgorithm.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,7 +27,7 @@ public:
   using UpdateFunction = void (*)(const Mantid::API::IAlgorithm_sptr &algorithm, Item &item);
 
   BatchJobAlgorithm(Mantid::API::IAlgorithm_sptr algorithm,
-                    MantidQt::API::ConfiguredAlgorithm::AlgorithmRuntimeProps properties, UpdateFunction updateFunction,
+                    std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> properties, UpdateFunction updateFunction,
                     Item *item);
 
   Item *item() override;

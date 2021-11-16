@@ -332,6 +332,7 @@ public:
 
   std::string getPropertyValue(const std::string &name) const override;
   const std::vector<Kernel::Property *> &getProperties() const override;
+  std::vector<std::string> getDeclaredPropertyNames() const noexcept override;
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const override;

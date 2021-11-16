@@ -7,11 +7,11 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 
