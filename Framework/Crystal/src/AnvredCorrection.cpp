@@ -457,7 +457,7 @@ double AnvredCorrection::getEventWeight(const double lamda, const double two_the
 double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool &muRTooLarge) {
   //  For each of the 19 theta values in (theta = 0:5:90 deg)
   //  fitted ln(1/A*) = sum_{i=1}^{N} pc[i][ith]*(muR)^i
-  //  using A* values in Weber (1969) for 0 < muR < 10 cm^-1.
+  //  using A* values in Weber (1969) for 0 < muR < 9.
   //  These values are given in the static array pc[][]
 
   double mur = (m_smu + (m_amu / 1.8f) * wl) * m_radius;
