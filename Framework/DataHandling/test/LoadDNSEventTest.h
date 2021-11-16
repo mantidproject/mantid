@@ -27,9 +27,9 @@ public:
   // This means the constructor isn't called when running other tests
   static LoadDNSEventTest *createSuite() { return new LoadDNSEventTest(); }
   static void destroySuite(LoadDNSEventTest *suite) { delete suite; }
-  bool hasVTPDirectory;
-  std::string origVTPDirectory;
-  const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+  // bool hasVTPDirectory;
+  // std::string origVTPDirectory;
+  // const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
 
   // virtual void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
   //  std::string foundFile =
@@ -103,7 +103,7 @@ public:
 
   void test_Executes_1() {
     // DNS file slow to create geometry cache so use a pregenerated vtp file.
-    const std::string vtpDirectoryKey = "instrumentDefinition.vtpDirectory";
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
     std::string foundFile =
         Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
     bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
