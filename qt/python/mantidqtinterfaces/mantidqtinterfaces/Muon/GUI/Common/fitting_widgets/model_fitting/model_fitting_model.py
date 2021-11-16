@@ -262,6 +262,7 @@ class ModelFittingModel(BasicFittingModel):
 
     def _get_parameter_unit(self, parameter_name: str, axis: int) -> str:
         """Returns the units of a parameter by searching the Dictionary, UnitFactory and Sample logs."""
+        parameter_name = parameter_name.split('.')[-1]
         unit = self._get_unit_from_unit_dictionary(parameter_name, axis)
         if unit == "":
             unit = self._get_unit_from_sample_logs(parameter_name)
