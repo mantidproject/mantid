@@ -522,7 +522,7 @@ class element:
 
 
 class constraint: # with reference to the "elements" vector positions
-    def __init__(self, lhs_element_position, rhs_element_position, rhs_factor , type):
+    def __init__(self, lhs_element_position, rhs_element_position, rhs_factor, type):
         self.lhs_element_position = lhs_element_position
         self.rhs_element_position = rhs_element_position
         self.rhs_factor = rhs_factor
@@ -575,6 +575,23 @@ def generate_elements(table):
         el = element(mass=value["mass(a.u.)"], intensity_range=intensity, width_range=width, centre_range=centre)
         elements.append(el)
     return elements
+
+
+def generate_constraints(table):
+    table_cols = table.getColumnNames()
+    clean_names = cleanNames(table.getColumnNames())
+    num_rows = table.rowCount()
+    constraints =[]
+    for row in range(num_rows):
+        value = {}
+        for name, clean in zip(table_cols, clean_names):
+            data = table.row(row)[name]
+            value[clean] = data
+        # provide LHS element, RHS element, mult. factor, flag
+        # if flag=True inequality; if flag = False equality
+        cons = constraint(value["lhselement"], value["rhselement"], evaluate(value["scatteringcrosssection"]), value["state"])
+        constraints.append(cons)
+    return constraints
 
 
 def evaluate(input):
