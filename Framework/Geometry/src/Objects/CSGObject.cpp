@@ -1083,8 +1083,10 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
   for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
+
   const auto &IPoints(LI.getPoints());
   const auto &dPoints(LI.getDistance());
+  const auto u_vec = track.direction();
 
   // sort the points based on its
   // 1. build a vector that contains the relative distance to the starting point
@@ -1092,30 +1094,62 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
   // 2. get the index in the sorted order
   const size_t nPoints(IPoints.size());
   std::vector<size_t> idxs(nPoints, 0);
+  std::vector<double> dists(nPoints);
   if (nPoints > 1) {
-    std::vector<double> dists(nPoints);
     for (size_t i = 0; i < nPoints; i++) {
-      dists[i] = IPoints[i].distance(track.startPoint());
+      // This will make intercept before the starting point have negative
+      // distance
+      dists[i] = u_vec.scalar_prod(IPoints[i] - track.startPoint());
     }
     // sort by distance, only keep index
     std::iota(idxs.begin(), idxs.end(), 0);
     std::sort(idxs.begin(), idxs.end(), [&dists](size_t a, size_t b) { return dists[a] < dists[b]; });
+  } else if (nPoints == 1) {
+    idxs[0] = 0;
+    dists[0] = u_vec.scalar_prod(IPoints[0] - track.startPoint());
   }
 
   // 3. iterating through IPoints by the order of the smallest
   //    relative distance to the largest
+  // - Find the first sorted point that has positive distance
+  size_t idx_firstPositive = 0;
   for (size_t i = 0; i < nPoints; ++i) {
+    if (dists[idxs[i]] > 0) {
+      idx_firstPositive = i;
+      break;
+    }
+  }
+  // going through the list
+  for (size_t i = idx_firstPositive; i < nPoints; ++i) {
     const size_t idx(idxs[i]);
+    // - get current point
     const auto &currentPt(IPoints[idx]);
-    const auto &prePoint = (i == 0) ? track.startPoint() : IPoints[idxs[i - 1]];
+    // - get previous intercept with positive distance
+    V3D prePoint;
+    if (i - 1 < idx_firstPositive) {
+      prePoint = track.startPoint();
+    } else {
+      prePoint = IPoints[idxs[i - 1]];
+    }
+    // - get next intercept with positive distance
+    V3D nextPoint;
+    if (i + 1 == nPoints) {
+      nextPoint = currentPt + (currentPt - prePoint);
+    } else {
+      nextPoint = IPoints[idxs[i + 1]];
+    }
+    //
     const auto ditr = dPoints[idx];
     if (ditr > 0) {
-      // figuring out the track type (invalid, entering or leaving) by checking
-      // previous point, current point and the downstream point of the current
-      // point.
-      const TrackDirection trackType = calcValidTypeByMidPoint(prePoint, currentPt, track.direction());
-      // add to list
-      track.addPoint(trackType, currentPt, *this);
+      // NOTE:
+      // - we only care about the intersection points that are in front of the
+      //   starting point of the track
+      // - we ignore the invalid type as they are not intercepting with the shape,
+      //   but certain component of the shape.
+      const TrackDirection trackType = calcValidTypeByMidPoint(prePoint, currentPt, nextPoint);
+      if (trackType != TrackDirection::INVALID) {
+        track.addPoint(trackType, currentPt, *this);
+      }
     }
   }
 
@@ -1184,29 +1218,28 @@ TrackDirection CSGObject::calcValidType(const Kernel::V3D &point, const Kernel::
  * Check if an intercept is guiding the ray into the shape or leaving the shape
  * @param prePt :: the previous point on the Line
  * @param curPt :: the current point on the Line
- * @param uVec :: Unit vector of the track
+ * @param nxtPt :: Unit vector of the track
  * @retval 1 :: Entry point
  * @retval -1 :: Exit Point
  * @retval 0 :: Not valid / double valid
  */
 TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &prePt, const Kernel::V3D &curPt,
-                                                  const Kernel::V3D &uVec) const {
-  const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
+                                                  const Kernel::V3D &nxtPt) const {
   // upstream point
-  const auto midPt = (prePt + curPt) * 0.5;
-  const int midPtInsideShape = isValid(midPt);
+  const auto upstreamPt = (prePt + curPt) * 0.5;
+  const int upstreamPtInsideShape = isValid(upstreamPt);
   // downstream point
-  const auto dsPt = curPt + shift;
-  const int dsPtInsideShape = isValid(dsPt);
+  const auto downstreamPt = (curPt + nxtPt) * 0.5;
+  const int downstreamPtInsideShape = isValid(downstreamPt);
   // NOTE:
   // When the track is parallel to the shape, it can still intersect with its
   // component (infinite) surface.
   // __Legends__
   //  o-->: track
   //  o:    track starting point
-  //  m:    midPt
-  //  x:    curPt
-  //  d:    dsPt
+  //  m:    upstreamPt
+  //  x:    currentPt
+  //  d:    downstreamPt
   //              |                    |               o
   //              |                    |               |
   //     ---------|--------------------|---------------x------
@@ -1215,10 +1248,10 @@ TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &prePt, cons
   //              |   Entering         |    Leaving
   //     ---------|--------------------|----------------------
   //              |                    |
-  if (!(midPtInsideShape ^ dsPtInsideShape))
+  if (!(upstreamPtInsideShape ^ downstreamPtInsideShape))
     return Geometry::TrackDirection::INVALID;
   else
-    return (midPtInsideShape) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
+    return (upstreamPtInsideShape) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
 }
 
 /**
