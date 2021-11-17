@@ -47,7 +47,7 @@ using namespace Mantid::Kernel;
 namespace {
 
 /// A shift to add/subtract to a point to test if it is an entry/exit point
-constexpr double VALID_INTERCEPT_POINT_SHIFT{2e-5};
+constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
 
 /**
  * Find the solid angle of a triangle defined by vectors a,b,c from point
@@ -1077,95 +1077,46 @@ int CSGObject::procString(const std::string &lineStr) {
  * @return Number of segments added
  */
 int CSGObject::interceptSurface(Geometry::Track &track) const {
-  int originalCount = track.count(); // Number of intersections original track
-  // Loop over all the surfaces.
+  // Number of intersections original track
+  int originalCount = track.count();
+
+  // Loop over all the surfaces to get the intercepts, i.e. populating
+  // points into LI
   LineIntersectVisit LI(track.startPoint(), track.direction());
   for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
 
+  // Call the pruner so that we don't have to worry about the duplicates and
+  // the order
+  LI.pruneTrack();
+
+  // IPoints: std::vector<Geometry::V3D>
   const auto &IPoints(LI.getPoints());
+  // dPoints: std::vector<double>, distance to the start point for each point
   const auto &dPoints(LI.getDistance());
-  const auto u_vec = track.direction();
-
-  // sort the points based on its
-  // 1. build a vector that contains the relative distance to the starting point
-  //    of the track/ray
-  // 2. get the index in the sorted order
+  // nPoints: size_t, total number of points, for most shape, this number should
+  //          be a single digit number
   const size_t nPoints(IPoints.size());
-  std::vector<size_t> idxs(nPoints, 0);
-  std::vector<double> dists(nPoints);
-  if (nPoints > 1) {
-    for (size_t i = 0; i < nPoints; i++) {
-      // This will make intercept before the starting point have negative
-      // distance
-      dists[i] = u_vec.scalar_prod(IPoints[i] - track.startPoint());
-    }
-    // sort by distance, only keep index
-    std::iota(idxs.begin(), idxs.end(), 0);
-    std::sort(idxs.begin(), idxs.end(), [&dists](size_t a, size_t b) { return dists[a] < dists[b]; });
-  } else if (nPoints == 1) {
-    idxs[0] = 0;
-    dists[0] = u_vec.scalar_prod(IPoints[0] - track.startPoint());
-  }
 
-  // 3. iterating through IPoints by the order of the smallest
-  //    relative distance to the largest
-  // - Find the first sorted point that has positive distance
-  size_t idx_firstPositive = 0;
-  for (size_t i = 0; i < nPoints; ++i) {
-    if (dists[idxs[i]] > 0) {
-      idx_firstPositive = i;
-      break;
-    }
-  }
-  // going through the list
-  for (size_t i = idx_firstPositive; i < nPoints; ++i) {
-    const size_t idx(idxs[i]);
-    // - get current point
-    const auto &currentPt(IPoints[idx]);
-    // - get previous intercept with positive distance
-    V3D prePoint;
-    if (i - 1 < idx_firstPositive) {
-      prePoint = track.startPoint();
-    } else {
-      prePoint = IPoints[idxs[i - 1]];
-    }
-    // - get next intercept with positive distance
-    V3D nextPoint;
-    if (i + 1 == nPoints) {
-      nextPoint = currentPt + (currentPt - prePoint);
-    } else {
-      nextPoint = IPoints[idxs[i + 1]];
-    }
+  // Loop over all the points and add them to the track
+  for (size_t i = 0; i < nPoints; i++) {
+    // skip over the points that are before the starting points
+    if (dPoints[i] < 0)
+      continue;
+
     //
-    const auto ditr = dPoints[idx];
-    if (ditr > 0) {
-      // NOTE:
-      // - we only care about the intersection points that are in front of the
-      //   starting point of the track
-      // - we ignore the invalid type as they are not intercepting with the shape,
-      //   but certain component of the shape.
-      const TrackDirection trackType = calcValidTypeByMidPoint(prePoint, currentPt, nextPoint);
-      if (trackType != TrackDirection::INVALID) {
-        track.addPoint(trackType, currentPt, *this);
-      }
+    const auto &currentPt(IPoints[i]);
+    const auto &prePt((i == 0 || dPoints[i - 1] <= 0) ? track.startPoint() : IPoints[i - 1]);
+    const auto &nextPt(i + 1 < nPoints ? IPoints[i + 1] : currentPt + currentPt - prePt);
+
+    // get the intercept type
+    const TrackDirection trackType = calcValidTypeBy3Points(prePt, currentPt, nextPt);
+    // only record the intercepts that is interacting with the shape directly
+    if (trackType != TrackDirection::INVALID) {
+      track.addPoint(trackType, currentPt, *this);
     }
   }
-
-  // NOTE: Original method of identifying intercept type: twiddling with fixed
-  //       step size.
-  // auto ditr = dPoints.begin();
-  // auto itrEnd = IPoints.end();
-  // for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
-  //   if (*ditr > 0.0) // only interested in forward going points
-  //   {
-  //     // Is the point and enterance/exit Point
-  //     const TrackDirection flag = calcValidType(*iitr, track.direction());
-  //     if (flag != TrackDirection::INVALID)
-  //       track.addPoint(flag, *iitr, *this);
-  //   }
-  // }
 
   track.buildLink();
   // Return number of track segments added
@@ -1223,8 +1174,8 @@ TrackDirection CSGObject::calcValidType(const Kernel::V3D &point, const Kernel::
  * @retval -1 :: Exit Point
  * @retval 0 :: Not valid / double valid
  */
-TrackDirection CSGObject::calcValidTypeByMidPoint(const Kernel::V3D &prePt, const Kernel::V3D &curPt,
-                                                  const Kernel::V3D &nxtPt) const {
+TrackDirection CSGObject::calcValidTypeBy3Points(const Kernel::V3D &prePt, const Kernel::V3D &curPt,
+                                                 const Kernel::V3D &nxtPt) const {
   // upstream point
   const auto upstreamPt = (prePt + curPt) * 0.5;
   const int upstreamPtInsideShape = isValid(upstreamPt);
