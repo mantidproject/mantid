@@ -58,6 +58,7 @@ focused_bin_widths = [
     -0.0005,  # Bank 5
 ]
 
+# vanadium cropping values are here!
 vanadium_cropping_values = [
     (600, 31000),  # Bank 1
     (1000, 24950),  # Bank 2

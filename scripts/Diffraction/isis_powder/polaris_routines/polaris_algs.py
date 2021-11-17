@@ -63,27 +63,42 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
 
 
 def save_unsplined_vanadium(vanadium_ws, output_path):
-    converted_workspaces = []
-    for ws_index in range(vanadium_ws.getNumberOfEntries()):
-        ws = vanadium_ws.getItem(ws_index)
+    from mantid.api import MatrixWorkspace
+    if isinstance(vanadium_ws, MatrixWorkspace):
+        ws = vanadium_ws
         previous_units = ws.getAxis(0).getUnit().unitID()
 
         if previous_units != WORKSPACE_UNITS.tof:
             ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
 
-        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
-        converted_workspaces.append(ws)
+        ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_full")
+        mantid.SaveNexus(InputWorkspace=ws, Filename=output_path, Append=False)
+        mantid.DeleteWorkspace(ws)
+    else:
+        converted_workspaces = []
+        iterator = vanadium_ws.getNumberOfEntries()
+        for ws_index in range(iterator):
+            ws = vanadium_ws.getItem(ws_index)
+            previous_units = ws.getAxis(0).getUnit().unitID()
 
-    converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
-    mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
-    mantid.DeleteWorkspace(converted_group)
+            if previous_units != WORKSPACE_UNITS.tof:
+                ws = mantid.ConvertUnits(InputWorkspace=ws, Target=WORKSPACE_UNITS.tof)
+
+            ws = mantid.RenameWorkspace(InputWorkspace=ws, OutputWorkspace="van_bank_{}".format(ws_index + 1))
+            converted_workspaces.append(ws)
+
+        converted_group = mantid.GroupWorkspaces(",".join(ws.name() for ws in converted_workspaces))
+        mantid.SaveNexus(InputWorkspace=converted_group, Filename=output_path, Append=False)
+        mantid.DeleteWorkspace(converted_group)
 
 
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
                     sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
                     freq_params=None, debug=False):
     focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    focused_ws = mantid.ConvertUnits(InputWorkspace=focused_ws, Target="MomentumTransfer", EMode='Elastic')
+    for ws in focused_ws:
+        mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws,
+                            Target="MomentumTransfer", EMode='Elastic')
 
     # raw_ws = mantid.Load(Filename='POLARIS'+str(run_number)+'.nxs')
     # sample_geometry = common.generate_sample_geometry(sample_details)
@@ -104,9 +119,9 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     # self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     # self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
     #                                                      WorkspaceToMatch=focused_ws)
-    #
+
     # focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
-    # focused_ws -= 0.31822358452  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
+    focused_ws -= 0.31822358452  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
         focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
     if merge_banks:
@@ -120,7 +135,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     else:
         for ws in focused_ws:
             fast_fourier_filter(ws, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace='focused_ws', InputSofQType="S(Q)-1", PDFType=pdf_type,
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],

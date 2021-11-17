@@ -59,9 +59,11 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        return calibrate.create_van(instrument=self,
-                                    run_details=run_details,
-                                    absorb=do_absorb_corrections)
+        # Daniel is hard coding his function here but there should be an if statement based on the
+        # placzek_run_number bool in focus.py
+        return calibrate.create_van_per_detector(instrument=self,
+                                                 run_details=run_details,
+                                                 absorb=do_absorb_corrections)
 
     def _focus(self,
                run_number_string,
