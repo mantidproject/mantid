@@ -67,6 +67,9 @@ public:
 
   /// Re-set the line
   void setLine(const Kernel::V3D &, const Kernel::V3D &);
+
+  /// Prune out duplicated points and sort by distance to starting point
+  void pruneTrack();
 };
 
 } // namespace Geometry
