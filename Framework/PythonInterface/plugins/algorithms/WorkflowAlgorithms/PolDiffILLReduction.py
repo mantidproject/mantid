@@ -7,7 +7,7 @@
 
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, \
     MultipleFileProperty, ITableWorkspaceProperty, PropertyMode, \
-    Progress, PythonAlgorithm, WorkspaceGroupProperty
+    Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, \
     FloatBoundedValidator, IntArrayBoundedValidator, IntArrayProperty, LogicOperator, \
     PropertyCriterion, PropertyManagerProperty, RebinParamsValidator, StringListValidator
@@ -323,6 +323,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                                  'the EP region. Data uses container counts directly as measured.')
 
         self.setPropertySettings('SubtractTOFBackgroundMethod', tofMeasurement)
+
+        self.declareProperty(name='PerformAnalyserTrCorrection',
+                             defaultValue=True,
+                             doc='Whether to perform analyser transmission correction.')
+
+        self.setPropertySettings('PerformAnalyserTrCorrection', tofMeasurement)
 
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
@@ -920,11 +926,52 @@ class PolDiffILLReduction(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=flip_ratio_names, OutputWorkspace='flipping_ratios')
         return ws
 
+    def _get_transmission_function(self, x):
+        """Returns values of the fitted analyser transmission function for a given x (a single value or an array)."""
+        # parameters below come from fitting two tanh to the Monte Carlo-simulated energy-dependent
+        # analyser transmission. Data used for fitting equivalent to Fig. 9 in doi:10.1063/1.4819739
+        params = [0.30267619, 0.10221528, 0.48709698, 0.1472201, 1.23852658, -3.24899957]
+        return params[0] * np.tanh(params[1] * x + params[2]) + params[3] * np.tanh(params[4] * x + params[5])
+
+    def _get_analyser_transmission_correction(self, ws):
+        """Returns a workspace containing analyser transmission relevant to the energy range of workspace
+        that is to be corrected."""
+        ws_to_match = ws
+        if isinstance(mtd[ws], WorkspaceGroup):
+            ws_to_match = mtd[ws][0].name()
+        tmp_ws = '{}_tmp'.format(ws_to_match)
+        # helper conversion to match the correction function with wavelength values of the workspace to be corrected
+        ConvertUnits(InputWorkspace=ws_to_match, Target='Wavelength', Emode='Direct', OutputWorkspace=tmp_ws)
+        data_x = mtd[tmp_ws].readX(0)
+        # analyser transmission values for the final energies (wavelengths) in the workspace to be corrected
+        bin_centres = data_x[:-1] + (data_x[1:]-data_x[:-1]) / 2  # the calculation is going to be done for bin centres
+        data_y = self._get_transmission_function(bin_centres)
+        # analyser transmission value for the initial energy (wavelength)
+        analyser_tr_ei = \
+            self._get_transmission_function(mtd[ws_to_match].getRun().getLogData('monochromator.wavelength').value)
+        # correction is the ratio between transmissions for the final and the initial energy
+        data_y /= analyser_tr_ei
+        correction_ws = 'analyser_correction_ws'
+        CreateWorkspace(DataX=mtd[ws_to_match].readX(0), DataY=data_y, OutputWorkspace=correction_ws, NSpec=1,
+                        UnitX=mtd[ws_to_match].getAxis(0).getUnit().unitID())
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspace(Workspace=tmp_ws)
+        return correction_ws
+
+    def _correct_analyser_transmission(self, ws):
+        """Corrects for the energy-dependent analyser transmission."""
+        correction_ws = self._get_analyser_transmission_correction(ws)
+        Divide(LHSWorkspace=ws, RHSWorkspace=correction_ws, OutputWorkspace=ws)
+        if self.getProperty('ClearCache').value:
+            DeleteWorkspace(Workspace=correction_ws)
+
     def _detector_analyser_energy_efficiency(self, ws):
         """Corrects for the detector and analyser energy efficiency."""
         if self.getProperty('ConvertToEnergy').value:
             DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
                                       IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+            if self.getProperty("PerformAnalyserTrCorrection").value:
+                self._correct_analyser_transmission(ws)
         else:
             self.log().information('Detector-analyser energy efficiency will not be corrected as unit conversion'
                                    'is not permitted.')
