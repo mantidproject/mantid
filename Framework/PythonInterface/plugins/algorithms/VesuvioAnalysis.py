@@ -171,7 +171,7 @@ class VesuvioAnalysis(PythonAlgorithm):
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
         constraints: TableWorkspace = self.getProperty("ConstraintsProfile").value
         if constraints:
-            if constraints constraints.columnCount()!= len(constraintCols) or \
+            if constraints.columnCount()!= len(constraintCols) or \
                     sorted(cleanNames(constraintCols))!=sorted(cleanNames(constraints.getColumnNames())):
                 issues["ConstraintsProfile"] = "The constraints table should be of the form: "
                 for name in constraintCols:
