@@ -50,12 +50,12 @@ def create_van(instrument, run_details, absorb):
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws,RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
-    focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
-                                                   GroupingFileName=run_details.grouping_file_path)
+    # focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+    #                                                GroupingFileName=run_details.grouping_file_path)
     # convert back to TOF based on engineered detector positions
-    mantid.ApplyDiffCal(InstrumentWorkspace=focused_vanadium,
+    mantid.ApplyDiffCal(InstrumentWorkspace=aligned_ws,
                         ClearCalibration=True)
-    focused_spectra = common.extract_ws_spectra(focused_vanadium)
+    focused_spectra = common.extract_ws_spectra(aligned_ws)
     focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
 
     d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=focused_spectra,
@@ -67,7 +67,7 @@ def create_van(instrument, run_details, absorb):
 
     common.remove_intermediate_workspace(corrected_van_ws)
     common.remove_intermediate_workspace(aligned_ws)
-    common.remove_intermediate_workspace(focused_vanadium)
+    # common.remove_intermediate_workspace(focused_vanadium)
     common.remove_intermediate_workspace(focused_spectra)
 
     return d_spacing_group

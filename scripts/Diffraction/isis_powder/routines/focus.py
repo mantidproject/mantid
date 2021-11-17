@@ -15,22 +15,21 @@ import os
 
 
 def focus(run_number_string, instrument, perform_vanadium_norm, absorb,
-          sample_details=None, placzek_run_number=None, cal_file_name=None):
+          sample_details=None, placzek_run_number=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
                                         run_number=run_number_string, absorb=absorb, sample_details=sample_details,
-                                        placzek_run_number=placzek_run_number, cal_file_name=cal_file_name)
+                                        placzek_run_number=placzek_run_number)
     elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb,
-                                     sample_details=sample_details, placzek_run_number=placzek_run_number,
-                                     cal_file_name=cal_file_name)
+                                     sample_details=sample_details, placzek_run_number=placzek_run_number)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
 def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details,
-                  vanadium_path, placzek_run_number=None, cal_file_name=None):
+                  vanadium_path, placzek_run_number=None):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -67,23 +66,46 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
             mantid.SetSample(InputWorkspace=input_workspace,
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
-    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer")
 
-    if placzek_run_number and cal_file_name:
+    if placzek_run_number:
         # Currently only supported for POLARIS instrument
         raw_ws = mantid.Load(Filename='POLARIS' + str(placzek_run_number) + '.nxs')
         sample_geometry = common.generate_sample_geometry(sample_details)
         sample_material = common.generate_sample_material(sample_details)
         self_scattering_correction = mantid.TotScatCalculateSelfScattering(
             InputWorkspace=raw_ws,
-            CalFileName=cal_file_name,
+            CalFileName=run_details.offset_file_path,
             SampleGeometry=sample_geometry,
             SampleMaterial=sample_material,
             CrystalDensity=sample_details.material_object.crystal_density)
-        self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction,
-                                                             WorkspaceToMatch=input_workspace)
-        input_workspace = mantid.Subtract(LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction)
 
+        input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer", EMode='Elastic')
+        # self_scattering_correction = mantid.ConvertUnits(InputWorkspace=self_scattering_correction, Target="dSpacing",
+        #                                                  EMode='Elastic')
+        mantid.ConvertFromDistribution(self_scattering_correction)
+        self_scattering_correction.setYUnit(input_workspace.YUnit())
+        min_x, max_x = float('inf'), float('-inf')
+        for index in range(input_workspace.getNumberHistograms()):
+            spec_info = input_workspace.spectrumInfo()
+            if not spec_info.isMasked(index) and not spec_info.isMonitor(index):
+                x_data = numpy.ma.masked_invalid(input_workspace.dataX(index))
+                if numpy.min(x_data) < min_x:
+                    min_x = numpy.min(x_data)
+                if numpy.max(x_data) > max_x:
+                    max_x = numpy.max(x_data)
+        width_x = (max_x - min_x) / x_data.size
+        # TO DO: calculate rebin parameters per group
+        # and run GroupDetectors on each separately
+        input_workspace = mantid.Rebin(InputWorkspace=input_workspace,
+                                       Params=[min_x, width_x, max_x],
+                                       IgnoreBinErrors=True)
+        self_scattering_correction = mantid.Rebin(InputWorkspace=self_scattering_correction,
+                                                  Params=[min_x, width_x, max_x],
+                                                  IgnoreBinErrors=True)
+        # apply per detector vanadium correction
+
+        input_workspace = mantid.Subtract(LHSWorkspace=input_workspace, RHSWorkspace=self_scattering_correction)
+        # input_workspace *= 0.31822358452
     # Align
     mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
                         CalibrationFile=run_details.offset_file_path)
@@ -142,7 +164,7 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
 
 
 def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string,
-                          absorb, sample_details, placzek_run_number, cal_file_name):
+                          absorb, sample_details, placzek_run_number):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
@@ -159,7 +181,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string,
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details, vanadium_path=vanadium_splines,
-                               placzek_run_number=placzek_run_number, cal_file_name=cal_file_name)
+                               placzek_run_number=placzek_run_number)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         if hasattr(vanadium_splines, "OutputWorkspace"):
             vanadium_splines = vanadium_splines.OutputWorkspace
@@ -200,7 +222,7 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
 
 
 def _individual_run_focusing(instrument, perform_vanadium_norm, run_number,
-                             absorb, sample_details, placzek_run_number, cal_file_name):
+                             absorb, sample_details, placzek_run_number):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
@@ -218,8 +240,7 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number,
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
                                perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
-                               vanadium_path=vanadium_splines, placzek_run_number=placzek_run_number,
-                               cal_file_name=cal_file_name)
+                               vanadium_path=vanadium_splines, placzek_run_number=placzek_run_number)
     return output
 
 

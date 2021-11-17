@@ -68,8 +68,7 @@ class AbstractInst(object):
                do_van_normalisation,
                do_absorb_corrections,
                sample_details=None,
-               placzek_run_number=None,
-               cal_file_name=None):
+               placzek_run_number=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -82,8 +81,7 @@ class AbstractInst(object):
                            instrument=self,
                            absorb=do_absorb_corrections,
                            sample_details=sample_details,
-                           placzek_run_number=placzek_run_number,
-                           cal_file_name=cal_file_name)
+                           placzek_run_number=placzek_run_number)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """

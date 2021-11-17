@@ -32,13 +32,10 @@ class Polaris(AbstractInst):
     def focus(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        cal_file_name = os.path.join(self._inst_settings.calibration_dir, self._inst_settings.grouping_file_name)
         return self._focus(run_number_string=self._inst_settings.run_number,
                            do_van_normalisation=self._inst_settings.do_van_normalisation,
                            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
-                           sample_details=self._sample_details, placzek_run_number=self._inst_settings.run_number,
-                           cal_file_name=cal_file_name)
-        # DO NOT MERGE probably a little dodgy to set the placzek number as the focus run number
+                           sample_details=self._sample_details, placzek_run_number=self._inst_settings.run_number)
 
     def create_vanadium(self, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
