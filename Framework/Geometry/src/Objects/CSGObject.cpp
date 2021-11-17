@@ -1089,7 +1089,7 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
 
   // Call the pruner so that we don't have to worry about the duplicates and
   // the order
-  LI.pruneTrack();
+  LI.sortAndRemoveDuplicates();
 
   // IPoints: std::vector<Geometry::V3D>
   const auto &IPoints(LI.getPoints());
@@ -1178,10 +1178,10 @@ TrackDirection CSGObject::calcValidTypeBy3Points(const Kernel::V3D &prePt, const
                                                  const Kernel::V3D &nxtPt) const {
   // upstream point
   const auto upstreamPt = (prePt + curPt) * 0.5;
-  const int upstreamPtInsideShape = isValid(upstreamPt);
+  const auto upstreamPtInsideShape = isValid(upstreamPt);
   // downstream point
   const auto downstreamPt = (curPt + nxtPt) * 0.5;
-  const int downstreamPtInsideShape = isValid(downstreamPt);
+  const auto downstreamPtInsideShape = isValid(downstreamPt);
   // NOTE:
   // When the track is parallel to the shape, it can still intersect with its
   // component (infinite) surface.

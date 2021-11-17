@@ -115,7 +115,7 @@ void LineIntersectVisit::procTrack()
  * @brief Prune duplicated interception points in the point list
  *
  */
-void LineIntersectVisit::pruneTrack() {
+void LineIntersectVisit::sortAndRemoveDuplicates() {
   const auto u_vec = m_line.getDirect();
   const auto origin = m_line.getOrigin();
   // sort the points by its distance to the track origin
