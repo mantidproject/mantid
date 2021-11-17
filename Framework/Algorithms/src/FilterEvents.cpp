@@ -1211,6 +1211,8 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
   size_t wsgindex = 0;
   bool descriptiveNames = getProperty("DescriptiveOutputNames");
 
+  std::shared_ptr<EventWorkspace> prototype_ws = create<EventWorkspace>(*m_eventWS);
+
   for (auto const wsgroup : m_targetWorkspaceIndexSet) {
     if (wsgroup < 0)
       throw std::runtime_error("It is not possible to have split-target group "
@@ -1233,7 +1235,7 @@ void FilterEvents::createOutputWorkspacesMatrixCase() {
 
     // create new workspace from input EventWorkspace and all the sample logs
     // are copied to the new one
-    std::shared_ptr<EventWorkspace> optws = create<EventWorkspace>(*m_eventWS);
+    std::shared_ptr<EventWorkspace> optws = prototype_ws->clone();
     // Clear Run without copying first.
     optws->setSharedRun(Kernel::make_cow<Run>());
     m_outputWorkspacesMap.emplace(wsgroup, optws);
