@@ -430,64 +430,22 @@ void IntegrateEllipsoids::exec() {
   // map of satellite peaks for each bragg peak
   std::map<size_t, std::vector<Peak *>> satellitePeakMap;
   // lists containing indices of bragg or satellite peaks
-  std::vector<size_t> braggPeaks;
   std::vector<size_t> satellitePeaks;
   // cached background and sigma background for each bragg peak (including ellipsoid ratio factor)
   std::map<size_t, std::pair<double, double>> cachedBraggBackground;
   if (shareBackground) {
-    for (size_t i = 0; i < n_peaks; i++) {
-      // check if peak is satellite peak
-      const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
-      // grab QLabFrame
-      const V3D peak_q = peaks[i].getQLabFrame();
-      // check if peak is origin (skip if true)
-      const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, satellite_radius)
-                                            : IntegrateQLabEvents::isOrigin(peak_q, radius_m);
-      if (isOrigin) {
-        continue;
-      }
-
-      if (isSatellitePeak) {
-        satellitePeaks.emplace_back(i);
-      } else {
-        braggPeaks.emplace_back(i);
-      }
-    }
-
-    // Generate mapping of all satellite peaks for each bragg peak
-    for (auto it = braggPeaks.begin(); it != braggPeaks.end(); it++) {
-      const auto braggHKL = peaks[*it].getIntHKL();
-
-      // loop over all satellite peaks to determine if it belongs to this bragg
-      for (auto satIt = satellitePeaks.begin(); satIt != satellitePeaks.end();) {
-        const auto satHKL = peaks[*satIt].getIntHKL();
-        if (satHKL == braggHKL) {
-          // this satellite peak shares the HKL vector, so it is a satellite peak of this bragg peak
-          satellitePeakMap[*it].emplace_back(&peaks[*satIt]);
-
-          // remove this sat peak from the list, since it can be associated with only one bragg peak
-          satIt = satellitePeaks.erase(satIt);
-          continue;
-        }
-        satIt++;
-      }
-    }
-
-    // Any leftover satellite peaks in this list means these did not have a bragg peak
-    if (satellitePeaks.size() > 0) {
-      g_log.debug() << "Unable to find Bragg peaks for " << satellitePeaks.size()
-                    << " satellite peaks.. integrating these using the satellite background radii options.\n";
-    }
+    pairBraggSatellitePeaks(n_peaks, peaks, satellitePeakMap, satellitePeaks);
   }
 
+  // Integrate peaks
   for (size_t i = 0; i < n_peaks; i++) {
     // check if peak is satellite peak
     const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
     // grab QLabFrame
     const V3D peak_q = peaks[i].getQLabFrame();
     // check if peak is origin (skip if true)
-    const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, satellite_radius)
-                                          : IntegrateQLabEvents::isOrigin(peak_q, radius_m);
+    const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, m_satellitePeakRadius)
+                                          : IntegrateQLabEvents::isOrigin(peak_q, m_braggPeakRadius);
     if (isOrigin) {
       continue;
     }
@@ -579,18 +537,9 @@ void IntegrateEllipsoids::exec() {
     }
   }
 
+  // Remove background if backgrounds are shared
   if (shareBackground) {
-    // loop over all bragg peaks and apply the cached background to their satellite peaks
-    for (auto it = satellitePeakMap.begin(); it != satellitePeakMap.end(); it++) {
-      for (auto satPeak = it->second.begin(); satPeak != it->second.end(); satPeak++) {
-        // subtract the cached background from the intensity
-        (*satPeak)->setIntensity((*satPeak)->getIntensity() - cachedBraggBackground[it->first].first);
-
-        // update the sigma intensity based on the new background
-        double sigInt = (*satPeak)->getSigmaIntensity();
-        (*satPeak)->setSigmaIntensity(sqrt(sigInt * sigInt + cachedBraggBackground[it->first].second));
-      }
-    }
+    removeSharedBackground(satellitePeakMap, cachedBraggBackground);
   }
 
   if (principalaxis1.size() > 1) {
@@ -666,6 +615,86 @@ void IntegrateEllipsoids::outputProfileWS(const std::vector<double> &principalax
   wsProfile2D->setHistogram(0, points, Counts(std::move(principalaxis1)));
   wsProfile2D->setHistogram(1, points, Counts(std::move(principalaxis2)));
   wsProfile2D->setHistogram(2, points, Counts(std::move(principalaxis3)));
+}
+
+/**
+ * @brief Pair all Braggs with their corresponding satellite peaks
+ * @param n_peaks
+ * @param peaks
+ * @param satellitePeakMap
+ * @param satellitePeaks
+ */
+void IntegrateEllipsoids::pairBraggSatellitePeaks(const size_t &n_peaks, std::vector<DataObjects::Peak> &peaks,
+                                                  std::map<size_t, std::vector<Peak *>> &satellitePeakMap,
+                                                  std::vector<size_t> &satellitePeaks) {
+
+  std::vector<size_t> braggPeaks;
+
+  for (size_t i = 0; i < n_peaks; i++) {
+    // check if peak is satellite peak
+    const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
+    // grab QLabFrame
+    const V3D peak_q = peaks[i].getQLabFrame();
+    // check if peak is origin (skip if true)
+    const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, m_satellitePeakRadius)
+                                          : IntegrateQLabEvents::isOrigin(peak_q, m_braggPeakRadius);
+    if (isOrigin) {
+      continue;
+    }
+
+    if (isSatellitePeak) {
+      satellitePeaks.emplace_back(i);
+    } else {
+      braggPeaks.emplace_back(i);
+    }
+  }
+
+  // Generate mapping of all satellite peaks for each bragg peak
+  for (auto it = braggPeaks.begin(); it != braggPeaks.end(); it++) {
+    const auto braggHKL = peaks[*it].getIntHKL();
+
+    // loop over all satellite peaks to determine if it belongs to this bragg
+    for (auto satIt = satellitePeaks.begin(); satIt != satellitePeaks.end();) {
+      const auto satHKL = peaks[*satIt].getIntHKL();
+      if (satHKL == braggHKL) {
+        // this satellite peak shares the HKL vector, so it is a satellite peak of this bragg peak
+        satellitePeakMap[*it].emplace_back(&peaks[*satIt]);
+
+        // remove this sat peak from the list, since it can be associated with only one bragg peak
+        satIt = satellitePeaks.erase(satIt);
+        continue;
+      }
+      satIt++;
+    }
+  }
+
+  // Any leftover satellite peaks in this list means these did not have a bragg peak
+  if (satellitePeaks.size() > 0) {
+    g_log.debug() << "Unable to find Bragg peaks for " << satellitePeaks.size()
+                  << " satellite peaks.. integrating these using the satellite background radii options.\n";
+  }
+}
+
+/**
+ * @brief Remove shared background from each satellite peak
+ */
+void IntegrateEllipsoids::removeSharedBackground(std::map<size_t, std::vector<Peak *>> &satellitePeakMap,
+                                                 std::map<size_t, std::pair<double, double>> &cachedBraggBackground) {
+
+  // loop over all bragg peaks and apply the cached background to their satellite peaks
+  for (auto it = satellitePeakMap.begin(); it != satellitePeakMap.end(); it++) {
+    const double bkgd_value{cachedBraggBackground[it->first].first};
+    const double bkgd_sigma{cachedBraggBackground[it->first].second};
+    for (auto satPeak = it->second.begin(); satPeak != it->second.end(); satPeak++) {
+      // subtract the cached background from the intensity
+      // (*satPeak)->setIntensity((*satPeak)->getIntensity() - cachedBraggBackground[it->first].first);
+      (*satPeak)->setIntensity((*satPeak)->getIntensity() - bkgd_value);
+
+      // update the sigma intensity based on the new background
+      double sigInt = (*satPeak)->getSigmaIntensity();
+      (*satPeak)->setSigmaIntensity(sqrt(sigInt * sigInt + bkgd_sigma));
+    }
+  }
 }
 
 /**

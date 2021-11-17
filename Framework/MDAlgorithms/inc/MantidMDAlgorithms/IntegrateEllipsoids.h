@@ -81,6 +81,15 @@ private:
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
 
+  /// Pair all Bragg peaks with their related satellite peaks
+  void pairBraggSatellitePeaks(const size_t &n_peaks, std::vector<DataObjects::Peak> &peaks,
+                               std::map<size_t, std::vector<DataObjects::Peak *>> &satellitePeakMap,
+                               std::vector<size_t> &satellitePeaks);
+
+  /// Remove shared background from each satellite peak
+  void removeSharedBackground(std::map<size_t, std::vector<DataObjects::Peak *>> &satellitePeakMap,
+                              std::map<size_t, std::pair<double, double>> &cachedBraggBackground);
+
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;
 
