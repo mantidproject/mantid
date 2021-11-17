@@ -72,8 +72,8 @@ class FittingDataPresenter(object):
 
     def remove_workspace(self, ws_name):
         if ws_name in self.model.get_all_workspace_names():
-            removed = self.model.remove_workspace(ws_name)
-            self.plot_removed_notifier.notify_subscribers(removed)
+            self.model.remove_workspace(ws_name)
+            # plot_presenter will already be notified of ws being removed via its own ADS observer
             self.plotted.discard(ws_name)
             self._repopulate_table()
         elif ws_name in self.model.get_log_workspaces_name():
@@ -99,15 +99,6 @@ class FittingDataPresenter(object):
         if name in self.model.get_all_workspace_names():
             self.model.replace_workspace(name, workspace)
             self._repopulate_table()
-
-    def get_loaded_workspaces(self):
-        return self.model.get_loaded_workspaces()
-
-    def get_bgsub_workspaces(self):
-        return self.model.get_bgsub_workspaces()
-
-    def get_bg_params(self):
-        return self.model.get_bg_params()
 
     def restore_table(self):  # used when the interface is being restored from a save or crash
         self._repopulate_table()
@@ -144,7 +135,7 @@ class FittingDataPresenter(object):
         self._remove_all_table_rows()
         self.row_numbers.clear()
         self.all_plots_removed_notifier.notify_subscribers()
-        workspaces = self.get_loaded_workspaces()
+        workspaces = self.model.get_loaded_workspaces()
         for i, name in enumerate(workspaces):
             try:
                 run_no = self.model.get_sample_log_from_ws(name, "run_number")

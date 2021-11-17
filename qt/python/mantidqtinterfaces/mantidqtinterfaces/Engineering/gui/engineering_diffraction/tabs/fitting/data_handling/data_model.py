@@ -21,15 +21,22 @@ from re import findall, sub
 
 
 class WorkspaceRecord:
+    """ Record that maps the workspace the user has loaded to the derived background-subtracted workspace"""
     def __init__(self, **kwargs):
         self.loaded_ws = kwargs.get('loaded_ws', None)
         self.bgsub_ws_name = kwargs.get('bgsub_ws_name', None)
         self.bgsub_ws = kwargs.get('bgsub_ws', None)
         self.bg_params = kwargs.get('bg_params', [])  # [isSub, niter, xwindow, doSG]
 
-    def get_active_ws(self):
+    def get_bg_active(self):
         if self.bgsub_ws and self.bg_params[0]:
             # first element is isSub checkbox
+            return True
+        else:
+            return False
+
+    def get_active_ws(self):
+        if self.get_bg_active():
             return self.bgsub_ws
         else:
             return self.loaded_ws
@@ -64,9 +71,7 @@ class WorkspaceRecordContainer:
     def get_bgsub_workpace_names(self):
         return [w.bgsub_ws_name for w in self.dict.values()]
 
-    def get_bg_params_dict(self):
-        return dict([(key, value.bg_params) for key, value in self.dict.items()])
-
+    # Set of methods that each return a two column dictionary for the various fields in WorkspaceRecord
     def get_loaded_ws_dict(self):
         return dict([(key, value.loaded_ws) for key, value in self.dict.items()])
 
@@ -76,8 +81,11 @@ class WorkspaceRecordContainer:
     def get_bgsub_ws_name_dict(self):
         return dict([(key, value.bgsub_ws_name) for key, value in self.dict.items()])
 
-    def get_bgsub_ws_dict_keyed_by_bg_name(self):
-        return dict([(value.bgsub_ws_name, value.bgsub_ws) for key, value in self.dict.items()])
+    def get_bg_params_dict(self):
+        return dict([(key, value.bg_params) for key, value in self.dict.items()])
+
+    def get_active_ws_list(self):
+        return dict([(key, value.get_active_ws) for key, value in self.dict.items()])
 
     def get_ws_names_dict(self):
         return dict([(key, [value.bgsub_ws_name, value.bg_params]) for key, value in self.dict.items()])
@@ -85,13 +93,9 @@ class WorkspaceRecordContainer:
     def get_loaded_workspace_name_from_bgsub(self, bgsub_ws_name):
         return next((key for key, val in self.dict.items() if val.bgsub_ws_name == bgsub_ws_name), None)
 
-    def get_active_ws_list(self):
-        return dict([(key, value.bgsub_ws if value.bg_params and value.bg_params[0] else value.loaded_ws)
-                     for key, value in self.dict.items()])
-
     def get_active_ws_name(self, ws_name):
         ws_rec = self.dict[ws_name]
-        if ws_rec.bgsub_ws and ws_rec.bg_params[0]:
+        if ws_rec.get_bg_active():
             return ws_rec.bgsub_ws_name
         else:
             return ws_name
@@ -142,7 +146,7 @@ class FittingDataModel(object):
                         bgsubws= ADS.retrieve(self._data_workspaces[ws_name].bgsub_ws_name)
                     self._last_added.append(ws_name)
                     self._data_workspaces.set_ws(ws_name, ws)
-                    self._data_workspaces[ws_name].bgsub_ws=bgsubws
+                    self._data_workspaces[ws_name].bgsub_ws = bgsubws
                 else:
                     logger.warning(
                         f"Invalid number of spectra in workspace {ws_name}. Skipping restoration of workspace.")
@@ -395,7 +399,7 @@ class FittingDataModel(object):
         ws_loaded = self._data_workspaces.get(name, None)
         if ws_loaded:
             bgsub_ws_name=self._data_workspaces[name].bgsub_ws_name
-            removed = self._data_workspaces.pop(name)
+            removed = self._data_workspaces.pop(name).loaded_ws
             # deleting bg sub workspace will generate further remove_workspace event so ensure this is done after
             # removing record from _data_workspaces to avoid circular call
             if bgsub_ws_name:
