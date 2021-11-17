@@ -533,14 +533,7 @@ public:
     m_ads.remove("test_output_workspace");
   }
 
- void test_Build_Load_Uses_Args_From_Correct_Load() {
-    // importantly the Dynamic Property should not be written into the script
-    std::string result = "Load(Filename='MUSR00022725.nxs', OutputWorkspace='MUSR00022725',"
-        "TimeZeroList='0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55, 0.55,"
-        "0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55,"
-        "0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55, 0.55,"
-        "0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55,0.55',"
-        "DeadTimeTable='dead_time_table', DetectorGroupingTable='grouping_table'\n";
+  void test_Build_Load_Uses_Args_From_Correct_Load() {
 
     auto alg = m_algFactory.create("Load", 1);
     alg->initialize();
@@ -555,7 +548,7 @@ public:
     auto ws = m_ads.retrieveWS<MatrixWorkspace>("MUSR00022725");
     auto wsHist = ws->getHistory();
 
-    // check the dynamic property is in the history records
+    // check the muon specific properties are in the history records
     const auto &hist_props = wsHist.getAlgorithmHistory(0)->getProperties();
     bool foundDeadTimeTable = false;
     bool foundGroupingTable = false;
@@ -568,12 +561,6 @@ public:
     }
     TSM_ASSERT("Could not find the dead time table in the algorithm history.", !foundDeadTimeTable);
     TSM_ASSERT("Could not find the grouping table in the algorithm history.", !foundGroupingTable);
-
-    ScriptBuilder builder(wsHist.createView());
-    std::string scriptText = builder.build();
-
-    // The dynamic property should not be in the script.
-    TS_ASSERT_EQUALS(scriptText, result);
 
     m_ads.remove("MUSR00022725");
   }
