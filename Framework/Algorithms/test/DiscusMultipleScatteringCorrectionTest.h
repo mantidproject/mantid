@@ -334,9 +334,14 @@ public:
     Mantid::Geometry::Track track(V3D(0, 0, 0), V3D(0.0, 0.0, 1.0));
     alg.updateTrackDirection(track, cosTwoTheta, phi);
     TS_ASSERT_EQUALS(track.direction(), V3D(0.0, -sinTwoTheta, cosTwoTheta));
-    // special case of track going vertically
+    // special cases of track going vertically
     Mantid::Geometry::Track trackUp(V3D(0, 0, 0), V3D(0.0, 1.0, 0.0));
-    alg.updateTrackDirection(trackUp, cosTwoTheta, phi);
+    TS_ASSERT_THROWS_NOTHING(alg.updateTrackDirection(trackUp, cosTwoTheta, phi));
+    TS_ASSERT_EQUALS(trackUp.direction(), V3D(0, cosTwoTheta, -sinTwoTheta))
+    //...and vertically down
+    Mantid::Geometry::Track trackDown(V3D(0, 0, 0), V3D(0.0, -1.0, 0.0));
+    TS_ASSERT_THROWS_NOTHING(alg.updateTrackDirection(trackDown, cosTwoTheta, phi));
+    TS_ASSERT_EQUALS(trackDown.direction(), V3D(0, -cosTwoTheta, -sinTwoTheta))
   }
 
   void test_integrateCumulative() {

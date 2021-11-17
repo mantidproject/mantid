@@ -719,17 +719,19 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
   // v_rot = cosT * v + sinT(k x v)
   // with rotation axis k orthogonal to v
   // Define k by first creating two vectors orthogonal to v:
-  // (-vy, vx, 0) by inspection
+  // (vy, -vx, 0) by inspection
   // and then (-vz * vx, -vy * vz, vx * vx + vy * vy) as cross product
   // Then define k as combination of these:
   // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
+  // ...with division by normalisation factor of sqrt(vx * vx + vy * vy)
   // Note: xyz convention here isn't the standard Mantid one. x=beam, z=up
   const auto vy = track.direction()[0];
   const auto vz = track.direction()[1];
   const auto vx = track.direction()[2];
   double UKX, UKY, UKZ;
-  if (vz < 1) {
-    auto A2 = sqrt(1 - vz * vz);
+  if (vz * vz < 1.0) {
+    // calculate A2 from vx^2 + vy^2 rather than 1-vz^2 to reduce floating point rounding error when vz close to 1
+    auto A2 = sqrt(vx * vx + vy * vy);
     auto UQTZ = cos(phi) * A2;
     auto UQTX = -cos(phi) * vz * vx / A2 + sin(phi) * vy / A2;
     auto UQTY = -cos(phi) * vz * vy / A2 - sin(phi) * vx / A2;
@@ -737,9 +739,11 @@ void DiscusMultipleScatteringCorrection::updateTrackDirection(Geometry::Track &t
     UKY = B2 * vy + B3 * UQTY;
     UKZ = B2 * vz + B3 * UQTZ;
   } else {
+    // definition of phi in general formula is dependent on v. So may see phi "redefinition" as vx and vy tend to zero
+    // and you move from general formula to this special case
     UKX = B3 * cos(phi);
     UKY = B3 * sin(phi);
-    UKZ = B2;
+    UKZ = B2 * vz;
   }
   track.reset(track.startPoint(), Kernel::V3D(UKY, UKZ, UKX));
 }
