@@ -554,15 +554,14 @@ Optional keys:
 - *NMoles* - if not provided, the value will be calculated based on the *SampleMass* and *FormulaUnitMass*
 
 
-Detector energy efficiency correction
--------------------------------------
+Detector and analyser energy efficiency corrections
+---------------------------------------------------
 
 This correction is relevant only in the `TOF` reduction mode.
 
-Detector energy efficiency correction can be performed based on the status of the `DetectorEnergyEfficiencyCorrection`
-property of :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`, and by default it is applied to data. In the case
-`DetectorEnergyEfficiencyCorrection` is set to `False`, only the unit conversion from TOF to `DeltaE` is performed.
-
+The detector energy efficiency correction is performed only if `ConvertToEnergy` property is checked, and only when
+`DetectorEnergyEfficiencyCorrection` property of :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` is set to `True`.
+By default it is applied to data.
 
 The data needs to have elastic peak positions calibrated before the detector efficiency can be performed. Positions of elastic peaks
 for each detector and their widths are obtained using :ref:`FindEPP <algm-FindEPP>` algorithm or from the user input via `EPCentre` and `EPWidth`
@@ -587,6 +586,25 @@ where in turn, the :math:`f(E_{i})` for D7 is:
 
 where the constant value of -13.153 is derived from multiplying the pressure of detector tubes (10 Pa), their diameter (2.54 cm),
 and a factor of −0.51784, obtained by D7 responsible scientists using Monte Carlo simulations.
+
+
+The analyser energy correction is a multiplicative correction, applied after the detector efficiency is taken into account, if the `PerformAnalyserTrCorrection`
+property is checked. The correction factor is a ratio of the analyser transmission for the elastic energy and the final energy corresponding to each bin
+(after conversion from time channels to energy exchange). The distribution of analyser transmission values as a function of wavelength (or, equivalently, energy)
+are coming from Monte Carlo simulations performed by D7 scientists, and are shown in Fig. 9 of Ref. [#Steward]_.
+
+Correction factors are obtained by using an output from a fit to the data from Fig. 9 in [#Steward]_. A composite function of two hiperbolic tangents has been fitted
+to the data outside of Mantid, with a total of 6 parameters and the following form:
+
+.. math::
+
+   f (e_{i}) = a_{0} \cdot \mathrm{tanh} ( a_{1} \cdot e_{i} + a_{2} ) + a_{3} \cdot \mathrm{tanh} ( a_{4} \cdot e_{i} + a_{5} ),
+
+which was found to reproduce MonteCarlo simulations well in the wavelength range from 0.5 :math:`\AA` to 10 :math:`\AA`.
+
+Then, the parameters of this fit are used to calculate the analyser transmission for the initial energy and for each bin energy in the workspace that is to be corrected.
+A ratio between the analyser transmission for the initial energy and final energies of each bin is calculated and thus obtained workspace is then used as a multiplicative
+correction of the current sample data.
 
 
 Output

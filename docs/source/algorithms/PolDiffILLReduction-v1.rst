@@ -60,6 +60,7 @@ Different input properties can be specified depending on the value of **ProcessA
 |                  |                                 | * MaskDetectors                            |
 |                  |                                 | * MaxTOFChannel                            |
 |                  |                                 | * SubtractTOFBackgroundMethod              |
+|                  |                                 | * PerformAnalyserTrCorrection              |
 +------------------+---------------------------------+--------------------------------------------+
 | Sample           | * CadmiumWorkspace              | * NormaliseBy                              |
 |                  | * EmptyContainerWorkspace       | * SampleGeometry                           |
@@ -73,6 +74,7 @@ Different input properties can be specified depending on the value of **ProcessA
 |                  |                                 | * MaskDetectors                            |
 |                  |                                 | * MaxTOFChannel                            |
 |                  |                                 | * SubtractTOFBackgroundMethod              |
+|                  |                                 | * PerformAnalyserTrCorrection              |
 +------------------+---------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -114,6 +116,23 @@ When `SubtractTOFBackgroundMethod` is equal to `Data`, the counts coming from em
 sample counts. When this property is set to `Rectangular`, an average of the measured background source counts is used instead of direct counts. This allows to smooth our fluctuations in
 the background source data, which in principle may be quite noisy. The last option is `Gaussian`, which estimates the background source counts as a gaussian distribution, with a centre
 at the elastic peak, the width of the elastic peak, and the integrated counts equal to that of the background source.
+
+Detector and analyser energy correction
+---------------------------------------
+
+The detector and analyser energy corrections are performed only when the `ConvertToEnergy` property is checked.
+
+The detector energy correction is performed using :ref:`DetectorEfficiencyCorUser <algm-DetectorEfficiencyCorUser>` algorithm, with the following function:
+
+.. math:: f(E_{i}) = 1.0 - \mathrm{exp} \left( \frac{-13.153}{\sqrt{E_{i}}} \right),
+
+where the constant value of -13.153 is derived from multiplying the pressure of detector tubes (10 Pa), their diameter (2.54 cm),
+and a factor of −0.51784, obtained by D7 responsible scientists using Monte Carlo simulations.
+
+The analyser energy correction is a multiplicative correction, applied after the detector efficiency is taken into account, if the `PerformAnalyserTrCorrection` property is checked.
+The correction factor is a ratio of the analyser transmission for the elastic energy and the final energy corresponding to each bin (after conversion from time channels to energy exchange).
+The distribution of analyser transmission values as a function of wavelength (or, equivalently, energy) are coming from Monte Carlo simulations performed by D7 scientists, and are
+shown in Fig. 9 of Ref. [#Steward]_.
 
 OutputTreatment
 ---------------
@@ -594,6 +613,14 @@ Output:
 		ConvertToEnergy=True
 		ClearCache=True
    )
+
+References
+----------
+
+.. [#Steward] Stewart, J. R. and Deen, P. P. and Andersen, K. H. and Schober, H. and Barthelemy, J.-F. and Hillier, J. M. and Murani, A. P. and Hayes, T. and Lindenau, B.
+   *Disordered materials studied using neutron polarization analysis on the multi-detector spectrometer, D7*
+   Journal of Applied Crystallography **42** (2009) 69-84
+   `doi: 10.1107/S0021889808039162 <https://doi.org/10.1107/S0021889808039162>`_
 
 .. categories::
 
