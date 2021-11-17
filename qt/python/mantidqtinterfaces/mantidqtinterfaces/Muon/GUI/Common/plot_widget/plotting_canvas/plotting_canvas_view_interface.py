@@ -76,6 +76,10 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
         pass
 
     @abc.abstractmethod
+    def add_shaded_region(self, workspace_name, axis, x_values, y1_values, y2_values):
+        pass
+
+    @abc.abstractmethod
     def remove_workspace_info_from_plot(self, workspace_plot_info_list: List[WorkspacePlotInformation]):
         """Remove a list of workspaces to the plot - The workspaces are contained in a list PlotInformation
         The PlotInformation contains the workspace name, workspace index and target axis."""
