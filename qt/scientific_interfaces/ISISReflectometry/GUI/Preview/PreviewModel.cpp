@@ -35,6 +35,7 @@ PreviewModel::PreviewModel() {
  *
  * @param workspaceName : the workspace name to look for
  * @returns : true if the loaded workspace was set, false if it was not found in the ADS
+ * @throws : if the workspace exists in the ADS but is an unexpected type
  */
 bool PreviewModel::loadWorkspaceFromAds(std::string const &workspaceName) {
   auto &adsInstance = AnalysisDataService::Instance();
@@ -42,6 +43,10 @@ bool PreviewModel::loadWorkspaceFromAds(std::string const &workspaceName) {
     return false;
   }
   auto ws = adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+  if (!ws) {
+    throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
+  }
+
   createRunDetails(workspaceName);
   m_runDetails->setLoadedWs(ws);
   return true;
