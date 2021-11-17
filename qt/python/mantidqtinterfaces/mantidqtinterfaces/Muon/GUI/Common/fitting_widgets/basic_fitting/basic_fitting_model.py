@@ -176,6 +176,18 @@ class BasicFittingModel:
         if value > self.current_start_x:
             self.fitting_context.end_xs[self.fitting_context.current_dataset_index] = value
 
+    def set_current_start_and_end_x(self, start_x, end_x):
+        """Need to set these together because of the checks
+        to make sure that start < end"""
+        if start_x > end_x:
+            return
+        elif start_x > self.current_end_x:
+            self.current_end_x = end_x
+            self.current_start_x = start_x
+        else:
+            self.current_start_x = start_x
+            self.current_end_x = end_x
+
     @property
     def exclude_range(self) -> bool:
         """Returns true if the Exclude Range option is on in the context."""
