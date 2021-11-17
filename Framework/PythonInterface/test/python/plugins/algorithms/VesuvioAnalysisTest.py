@@ -101,7 +101,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         constraints.addColumn(type="int", name="LHS element")
         constraints.addColumn(type="int", name="RHS element")
         constraints.addColumn(type="str", name="State")
-        constraints.addRow([0, 1, "2.*82.03/5.551", "eq"])
+        constraints.addRow([0, 1, "eq"])
 
         alg = self.set_up_alg()
         alg.setProperty('Spectra', [135, 182])

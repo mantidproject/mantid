@@ -169,31 +169,23 @@ class VesuvioAnalysis(PythonAlgorithm):
         TOF = self.getProperty("TOFRangeVector").value
         if len(TOF) != 3:
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
-        constraints = self.getProperty("ConstraintsProfileNumbers").value
-        if len(constraints) != 0 and len(constraints) != 2:
-            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should either be empty or only contain 2 numbers."
-        #check arithmetic is safe
-        if len(constraints) != 0:
-            cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
-            for ch in cross_section:
-                if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                    issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
         constraints: TableWorkspace = self.getProperty("ConstraintsProfile").value
-        if constraints.columnCount()!= len(constraintCols) or \
-                sorted(cleanNames(constraintCols))!=sorted(cleanNames(constraints.getColumnNames())):
-            issues["ConstraintsProfile"] = "The constraints table should be of the form: "
-            for name in constraintCols:
-                issues["ConstraintsProfile"] += name + ", "
-        #check arithmetic is safe
-        cross_section = constraints.column('ScatteringCrossSection')
-        for section in cross_section:
-            for ch in section:
-                if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                    issues["ConstraintsProfile"]= "ScatteringCrossSection must be a valid mathmatical expression. "+ch
-        state = constraints.column('State')
-        for f in [flag for flag in state]:
-            if f not in ["eq", "ineq"]:
-                issues["ConstraintsProfile"]= "State can only have the values ['eq','ineq']"+f
+        if constraints not None:
+            if constraints constraints.columnCount()!= len(constraintCols) or \
+                    sorted(cleanNames(constraintCols))!=sorted(cleanNames(constraints.getColumnNames())):
+                issues["ConstraintsProfile"] = "The constraints table should be of the form: "
+                for name in constraintCols:
+                    issues["ConstraintsProfile"] += name + ", "
+            #check arithmetic is safe
+            cross_section = constraints.column('ScatteringCrossSection')
+            for section in cross_section:
+                for ch in section:
+                    if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
+                        issues["ConstraintsProfile"]= "ScatteringCrossSection must be a valid mathmatical expression. "+ch
+            state = constraints.column('State')
+            for f in [flag for flag in state]:
+                if f not in ["eq", "ineq"]:
+                    issues["ConstraintsProfile"]= "State can only have the values ['eq','ineq']"+f
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
