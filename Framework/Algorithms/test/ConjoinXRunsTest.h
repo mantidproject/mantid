@@ -112,8 +112,9 @@ public:
     group.execute();
     m_testee.setProperty("InputWorkspaces", "group");
     m_testee.setProperty("OutputWorkspace", "out");
-    TS_ASSERT_THROWS_EQUALS(m_testee.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Some invalid Properties found: [ InputWorkspaces ]");
+    std::string err_msg(
+        "Some invalid Properties found: \n InputWorkspaces: Workspace table is not a MatrixWorkspace\n");
+    TS_ASSERT_THROWS_EQUALS(m_testee.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
   }
 
   void testWSWithoutDxValues() {
