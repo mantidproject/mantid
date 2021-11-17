@@ -301,8 +301,6 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 if workspace_name in self._shaded_regions.keys() and workspace_plot_info.errors:
                     # remove old shade first
                     self._shaded_regions[workspace_name].remove()
-                    # clean up the way we get colours -> function
-                    # add safety to pop on the collection and add note to why it works
                     color = get_color_from_artist(artists)
                     self.shade_region(axis, color, workspace_name)
         self.redraw_figure()
