@@ -578,19 +578,20 @@ def generate_elements(table):
 
 
 def generate_constraints(table):
-    table_cols = table.getColumnNames()
-    clean_names = cleanNames(table.getColumnNames())
-    num_rows = table.rowCount()
     constraints =[]
-    for row in range(num_rows):
-        value = {}
-        for name, clean in zip(table_cols, clean_names):
-            data = table.row(row)[name]
-            value[clean] = data
-        # provide LHS element, RHS element, mult. factor, flag
-        # if flag=True inequality; if flag = False equality
-        cons = constraint(value["lhselement"], value["rhselement"], evaluate(value["scatteringcrosssection"]), value["state"])
-        constraints.append(cons)
+    if table and table.rowCount() > 0:
+        table_cols = table.getColumnNames()
+        clean_names = cleanNames(table.getColumnNames())
+        num_rows = table.rowCount()
+        for row in range(num_rows):
+            value = {}
+            for name, clean in zip(table_cols, clean_names):
+                data = table.row(row)[name]
+                value[clean] = data
+            # provide LHS element, RHS element, mult. factor, flag
+            # if flag=True inequality; if flag = False equality
+            cons = constraint(value["lhselement"], value["rhselement"], evaluate(value["scatteringcrosssection"]), value["state"])
+            constraints.append(cons)
     return constraints
 
 

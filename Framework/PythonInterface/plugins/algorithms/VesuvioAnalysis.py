@@ -126,7 +126,8 @@ class VesuvioAnalysis(PythonAlgorithm):
                              validator=StringListValidator(["eq","ineq"]))
         self.declareProperty(ITableWorkspaceProperty("ConstraintsProfile",
                                                      "",
-                                                     direction=Direction.Input),doc="Table with LHS and RHS element of constraint on "
+                                                     Direction.Input, PropertyMode.Optional),
+                                                     doc="Table with LHS and RHS element of constraint on "
                                               "intensities of element peaks. A constraint can only be set when there are at least two "
                                               "elements in the ComptonProfile. For each constraint the ratio of the first to second "
                                               "intensities, each equal to atom stoichiometry times bound scattering "
@@ -170,7 +171,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         if len(TOF) != 3:
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
         constraints: TableWorkspace = self.getProperty("ConstraintsProfile").value
-        if constraints:
+        if constraints and constraints.rowCount() > 0:
             if constraints.columnCount()!= len(constraintCols) or \
                     sorted(cleanNames(constraintCols))!=sorted(cleanNames(constraints.getColumnNames())):
                 issues["ConstraintsProfile"] = "The constraints table should be of the form: "
