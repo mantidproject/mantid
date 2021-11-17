@@ -265,11 +265,11 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         Close all tabs that are currently detached.
         """
         list_of_detached_tabs = []
-
         for key in self.detachedTabs:
             list_of_detached_tabs.append(self.detachedTabs[key])
 
         for detachedTab in list_of_detached_tabs:
+            detachedTab.onCloseSignal.disconnect()
             detachedTab.close()
 
     class DetachedTab(QtWidgets.QMainWindow):

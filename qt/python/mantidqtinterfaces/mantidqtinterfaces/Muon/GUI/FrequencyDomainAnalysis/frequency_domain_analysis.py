@@ -153,7 +153,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         vertical_layout.addWidget(self.tabs)
         vertical_layout.addWidget(self.help_widget.view)
         central_widget.setLayout(vertical_layout)
-
+        central_widget.setSizePolicy(QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum,
+                                     QtWidgets.QSizePolicy.Maximum))
         self.disable_notifier = GenericObservable()
         self.disable_observer = GenericObserver(
             self.disable_notifier.notify_subscribers)
