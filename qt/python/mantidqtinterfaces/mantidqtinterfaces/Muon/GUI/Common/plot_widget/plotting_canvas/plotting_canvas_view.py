@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import List, NamedTuple
+from typing import List
 from matplotlib.container import ErrorbarContainer
+from matplotlib.artist import Artist
 from qtpy import QtWidgets, QtCore
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plot_toolbar import PlotToolbar
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model import WorkspacePlotInformation
@@ -30,12 +31,36 @@ NUMBER_OF_COLOURS = 10
 DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 
-class ShadedRegionInfo(NamedTuple):
-    workspace_name: str
-    axis: int
-    x_values: List[float]
-    y1_values: List[float]
-    y2_values: List[float]
+class ShadedRegionInfo(object):
+    def __init__(self, workspace_name: str,
+                 axis: int,
+                 x_values: List[float],
+                 y1_values: List[float],
+                 y2_values: List[float]):
+        self.workspace_name = workspace_name
+        self.axis = axis
+        self.x_values = x_values
+        self.y1_values = y1_values
+        self.y2_values = y2_values
+        self.ID = None
+
+    def shade_region(self, axis, color):
+        x_values = self.x_values
+        y1 = self.y1_values
+        y2 = self.y2_values
+        self.ID = axis.fill_between(x_values, y1, y2, facecolor=color, interpolate=True, alpha=0.25)
+
+    def remove(self):
+        if self.ID:
+            self.ID.remove()
+            self.ID = None
+
+
+def get_color_from_artist(artist:Artist):
+    if isinstance(artist, ErrorbarContainer):
+        return artist[0].get_color()
+    else:
+        return artist.get_color()
 
 
 class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
@@ -226,8 +251,8 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                     axis.remove_workspace_artists(workspace)
                     self._plot_information_list.remove(plotted_information)
                     # clear shaded regions from plot
-                    if len(axis.collections)>0:
-                        axis.collections.pop()
+                    if len(axis.collections)>0 and plotted_information.workspace_name in self._shaded_regions.keys():
+                        self._shaded_regions[plotted_information.workspace_name].remove()
         # If we have no plotted lines, reset the color cycle
         if self.num_plotted_workspaces == 0:
             self._reset_color_cycle()
@@ -251,10 +276,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             return
         for ws_artist in artist_info:
             for artist in ws_artist._artists:
-                if isinstance(artist, ErrorbarContainer):
-                    color = artist[0].get_color()
-                else:
-                    color = artist.get_color()
+                color = get_color_from_artist(artist)
                 # When we repeat colors we don't want to add colors to the queue if they are already plotted.
                 # We know we are repeating colors if we have more lines than colors, then we check if the color
                 # removed is already the color of an existing line. If it is we don't manually re-add the color
@@ -276,6 +298,13 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             if workspace_name == plotted_workspace_name:
                 axis = self.fig.axes[workspace_plot_info.axis]
                 axis.replace_workspace_artists(workspace)
+                if workspace_name in self._shaded_regions.keys() and workspace_plot_info.errors:
+                    # remove old shade first
+                    self._shaded_regions[workspace_name].remove()
+                    # clean up the way we get colours -> function
+                    # add safety to pop on the collection and add note to why it works
+                    color = get_color_from_artist(artists)
+                    self.shade_region(axis, color, workspace_name)
         self.redraw_figure()
 
     # not used for tiled plots
@@ -287,10 +316,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 artist_info = axis.tracked_workspaces[workspace_name]
                 for ws_artist in artist_info:
                     for artist in ws_artist._artists:
-                        if isinstance(artist, ErrorbarContainer):
-                            color = artist[0].get_color()
-                        else:
-                            color = artist.get_color()
+                        color = get_color_from_artist(artist)
                         plot_kwargs = self._get_plot_kwargs(plot_info)
                         plot_kwargs["color"] = color
                         if workspace_name in self._shaded_regions.keys():
@@ -305,10 +331,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         self.redraw_figure()
 
     def shade_region(self, axis, color, name):
-        x_values = self._shaded_regions[name].x_values
-        y1 = self._shaded_regions[name].y1_values
-        y2 = self._shaded_regions[name].y2_values
-        axis.fill_between(x_values, y1, y2, facecolor=color, interpolate=True, alpha=0.25)
+        self._shaded_regions[name].shade_region(axis, color)
 
     def set_axis_xlimits(self, axis_number, xlims):
         ax = self.fig.axes[axis_number]
