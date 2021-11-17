@@ -923,8 +923,6 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _detector_analyser_energy_efficiency(self, ws):
         """Corrects for the detector and analyser energy efficiency."""
         if self.getProperty('ConvertToEnergy').value:
-            ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
-                         EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
             DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
                                       IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         else:
@@ -1409,12 +1407,13 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._apply_self_attenuation_correction(ws, empty_ws)
                 if measurement_technique == 'TOF':
                     self._calibrate_elastic_peak_position(ws)
+                    if self.getProperty('ConvertToEnergy').value:
+                        progress.report('Converting data to energy exchange unit.')
+                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
+                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
                     if self.getProperty('DetectorEnergyEfficiencyCorrection').value:
                         progress.report('Correcting detector-analyser efficiency')
                         self._detector_analyser_energy_efficiency(ws)
-                    elif self.getProperty('ConvertToEnergy').value:
-                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
-                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
