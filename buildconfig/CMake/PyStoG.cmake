@@ -79,9 +79,5 @@ file(WRITE ${_PyStoG_scripts_dir}/__init__.py ${_PyStoG_INIT_CONTENTS})
 
 # install the results
 foreach(_bundle ${BUNDLES})
-  install(
-    DIRECTORY ${_PyStoG_scripts_dir}
-    DESTINATION ${_bundle}scripts
-    COMPONENT Runtime
-  )
+  install(DIRECTORY ${_PyStoG_scripts_dir} DESTINATION ${_bundle}scripts)
 endforeach()
