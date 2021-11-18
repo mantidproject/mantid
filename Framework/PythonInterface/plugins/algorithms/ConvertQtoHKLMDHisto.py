@@ -7,7 +7,7 @@
 from mantid.api import AlgorithmFactory, IMDEventWorkspaceProperty, IMDHistoWorkspaceProperty, IPeaksWorkspaceProperty,\
     PythonAlgorithm, PropertyMode
 from mantid.kernel import Direction, FloatArrayLengthValidator, FloatArrayProperty, IntArrayProperty
-from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, mtd
+from mantid.simpleapi import BinMD, CloneMDWorkspace, DeleteWorkspace, SetMDFrame, mtd
 import numpy as np
 
 
@@ -123,18 +123,20 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         names = ['[' + ','.join(char_dict.get(j, '{0}{1}')
                                 .format(j, chars[np.argmax(np.abs(w[:, i]))]) for j in w[:, i]) + ']' for i in range(3)]
 
-        q = [self._lattice.qFromHKL(w[i]) for i in range(3)]
+        q = [self._lattice.qFromHKL(w[:,i]) for i in range(3)]
 
         units = ['in {:.3f} A^-1'.format(q[i].norm()) for i in range(3)]
 
-        mdhist = BinMD(InputWorkspace=input_ws, AxisAligned=False, NormalizeBasisVectors=False,
+        output_name = self.getPropertyValue("OutputWorkspace")
+        CloneMDWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_name)
+        SetMDFrame(InputWorkspace=output_name, MDFrame='HKL', Axes='0,1,2')
+
+        mdhist = BinMD(InputWorkspace=output_name, AxisAligned=False, NormalizeBasisVectors=False,
                        BasisVector0='{},{},{},{},{}'.format(names[0], units[0], q[0].X(), q[0].Y(), q[0].Z()),
                        BasisVector1='{},{},{},{},{}'.format(names[1], units[1], q[1].X(), q[1].Y(), q[1].Z()),
                        BasisVector2='{},{},{},{},{}'.format(names[2], units[2], q[2].X(), q[2].Y(), q[2].Z()),
                        OutputExtents=extents,
                        OutputBins=bins)
-
-        SetMDFrame(mdhist, MDFrame='HKL', Axes='0, 1, 2')
 
         self.setProperty("OutputWorkspace", mdhist)
         mdhist.clearOriginalWorkspaces()

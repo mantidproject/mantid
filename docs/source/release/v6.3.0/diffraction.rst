@@ -38,4 +38,8 @@ Single Crystal Diffraction
 - Enabling :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` to calibrate each detector bank's size if it is a rectagular detector optionally.
 - Fixed calculation of modulation vector uncertainty in :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>`, new option ``CommonUBForAll`` allow selection of calculation handling multiple run the same as :ref:`IndexPeaks <algm-IndexPeaks>`.
 
+Bugfixes
+########
+- :ref:`ConvertWANDSCDtoQ<algm-ConvertWANDSCDtoQ>` and :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` units now display correctly in terms of 'in X.XXX A^-1'
+- :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` output orientation fixed
 :ref:`Release 6.3.0 <v6.3.0>`
