@@ -51,6 +51,7 @@ Bugfixes
 - On the model analysis tab, the fit range will now update when the x axis is changed.
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
 - When a new results table is created the Model Analysis tab selects the default parameters to plot based on log values or parameters in the results table.
+- When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
 
 ALC
 ---
@@ -98,6 +99,5 @@ Improvements
   - A bug has been fixed that caused Model fitting to not update it's results table list.
   - Plotting in Model fitting now features a greater number of units for parameters and sample logs.
   - The dates and times for relevant parameters in model fitting have been formatted so that they can be plotted with relative spacing.
-  - When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
 
 
