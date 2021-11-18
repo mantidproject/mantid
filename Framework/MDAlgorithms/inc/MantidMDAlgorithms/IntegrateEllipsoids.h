@@ -66,30 +66,22 @@ private:
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
   /// Write the profiles of each  principle axis to the output workspace with fixed name
-  void outputAxisProfiles(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
-                          const std::vector<double> &principalaxis3, const double &cutoffIsigI, const int &numSigmas,
+  void outputAxisProfiles(std::vector<double> &principalaxis1, std::vector<double> &principalaxis2,
+                          std::vector<double> &principalaxis3, const double &cutoffIsigI, const int &numSigmas,
                           std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator);
 
+  /// Write Axis profile to a MatrixWorkspace (Workspace2D)
   void outputProfileWS(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
                        const std::vector<double> &principalaxis3, const std::string &wsname);
 
-  void integratePeaksCutoffISigI(const double &meanMax, const double &stdMax, std::vector<double> &m_principalaxis1,
-                                 std::vector<double> &m_principalaxis2, std::vector<double> &m_principalaxis3,
+  /// Integrate peaks again with cutoff value of I/Sig(I)
+  void integratePeaksCutoffISigI(const double &meanMax, const double &stdMax, std::vector<double> &principalaxis1,
+                                 std::vector<double> &principalaxis2, std::vector<double> &principalaxis3,
                                  const int &numSigmas, std::vector<DataObjects::Peak> &peaks,
                                  IntegrateQLabEvents &integrator_satellite);
 
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
-
-  /// Integrate a single peak
-  Geometry::PeakShape_const_sptr
-  integratePeak(const size_t peakindex, const V3D &peak_q, IntegrateQLabEvents &integrator, const bool &isSatellitePeak,
-                const bool &shareBackground, const bool &specify_size, const double &adaptiveQBackgroundMultiplier,
-                const std::vector<size_t> &satellitePeaks, std::pair<double, double> &backi,
-                std::vector<double> &axes_radii, double &adaptiveRadius, double &adaptiveBack_inner_radius,
-                double &adaptiveBack_outer_radius, const double &adaptiveQMultiplier,
-                double &satellite_back_inner_radius, double &satellite_back_outer_radius,
-                const double &back_inner_radius, const double &back_outer_radius);
 
   /// Pair all Bragg peaks with their related satellite peaks
   void pairBraggSatellitePeaks(const size_t &n_peaks, std::vector<DataObjects::Peak> &peaks,
@@ -105,7 +97,9 @@ private:
 
   MDWSDescription m_targWSDescr;
 
+  /// peak radius for Bragg peaks
   double m_braggPeakRadius;
+  /// peak radius for satellite peaks
   double m_satellitePeakRadius;
 
   /**
