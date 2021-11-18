@@ -295,8 +295,8 @@ class FittingDataModel(object):
     def get_active_ws_name(self, loaded_ws_name):
         return self._data_workspaces.get_active_ws_name(loaded_ws_name)
 
-    def get_ws_sorted_by_primary_log(self, ws_list):
-        tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
+    def get_ws_sorted_by_primary_log(self, ws_name_list):
+        tof_ws_inds = [ind for ind, ws in enumerate(ws_name_list) if
                        self._data_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                   "primary_log")
@@ -305,9 +305,9 @@ class FittingDataModel(object):
         if primary_log:
             log_table = ADS.retrieve(primary_log)
             isort = argsort(array(log_table.column('avg')))
-            ws_list_tof = [ws_list[iws] for iws in isort if iws in tof_ws_inds]
+            ws_list_tof = [ws_name_list[iws] for iws in isort if iws in tof_ws_inds]
         else:
-            ws_list_tof = ws_list
+            ws_list_tof = ws_name_list
         if sort_ascending == 'false':
             # settings can only be saved as text
             ws_list_tof = ws_list_tof[::-1]

@@ -152,15 +152,13 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_do_background_subtraction_first_time(self, mock_minus, mock_estimate_bg, mock_delete_ws):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": None}
-        self.model._bg_params = dict()
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
         mock_estimate_bg.return_value = self.mock_ws
 
         bg_params = [True, 40, 800, False]
         self.model.create_or_update_bgsub_ws("name1", bg_params)
 
-        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        self.assertEqual(self.model._data_workspaces["name1"].bg_params, bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
         mock_delete_ws.assert_called_once()
@@ -169,15 +167,14 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_do_background_subtraction_bgparams_changed(self, mock_minus, mock_estimate_bg, mock_delete_ws):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": self.mock_ws}
-        self.model._bg_params = {"name1": [True, 80, 1000, False]}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bg_params=[True, 80, 1000, False])
         mock_estimate_bg.return_value = self.mock_ws
 
         bg_params = [True, 40, 800, False]
         self.model.create_or_update_bgsub_ws("name1", bg_params)
 
-        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        self.assertEqual(self.model._data_workspaces["name1"].bg_params, bg_params)
         mock_minus.assert_called_once()
         mock_estimate_bg.assert_called_once()
         mock_delete_ws.assert_called_once()
@@ -185,15 +182,14 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_do_background_subtraction_no_change(self, mock_minus, mock_estimate_bg):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": self.mock_ws}
         bg_params = [True, 80, 1000, False]
-        self.model._bg_params = {"name1": bg_params}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws, bgsub_ws=self.mock_ws,
+                                        bg_params=bg_params)
         mock_estimate_bg.return_value = self.mock_ws
 
         self.model.create_or_update_bgsub_ws("name1", bg_params)
 
-        self.assertEqual(self.model._bg_params["name1"], bg_params)
+        self.assertEqual(self.model._data_workspaces["name1"].bg_params, bg_params)
         mock_minus.assert_not_called()
         mock_estimate_bg.assert_not_called()
 
@@ -202,9 +198,7 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + ".EnggEstimateFocussedBackground")
     @patch(data_model_path + ".Minus")
     def test_invalid_bg_inputs_dont_throw(self, mock_minus, mock_estimate_bg, mock_delete_ws, mock_set_uncertainties):
-        self.model._loaded_workspaces = {"name1": self.mock_ws}
-        self.model._bg_sub_workspaces = {"name1": None}
-        self.model._bg_params = dict()
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
         mock_estimate_bg.side_effect = ValueError("Some problem")
 
         bg_params = [True, -1, 800, False]
@@ -516,13 +510,16 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(data_model_path + '.get_setting')
     @patch(data_model_path + '.ADS')
     def test_get_ws_sorted_by_primary_log_ascending(self, mock_ads, mock_getsetting):
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        self.model._data_workspaces.add("name1", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name2", loaded_ws=self.mock_ws)
+        self.model._data_workspaces.add("name3", loaded_ws=self.mock_ws)
         mock_getsetting.side_effect = ['log', 'true']  # primary log, sort_ascending
         mock_log_table = mock.MagicMock()
         mock_log_table.column.return_value = [2, 0, 1]  # fake log values
         mock_ads.retrieve.return_value = mock_log_table
 
-        ws_list = self.model.get_ws_sorted_by_primary_log()
+        ws_list = self.model.get_active_ws_list()
+        ws_list = self.model.get_ws_sorted_by_primary_log(ws_list)
 
         self.assertEqual(ws_list, ["name2", "name3", "name1"])
 

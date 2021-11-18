@@ -55,7 +55,7 @@ class FittingDataPresenter(object):
 
     def _start_seq_fit(self):
         ws_list = self.model.get_active_ws_list()
-        ws_list = self.model.get_ws_sorted_by_primary_log(ws_list)
+        ws_list = self.model.get_ws_sorted_by_primary_log(ws_list.keys())
         self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=True)
 
     def _start_serial_fit(self):
