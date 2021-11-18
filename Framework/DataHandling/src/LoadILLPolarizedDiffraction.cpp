@@ -179,7 +179,11 @@ void LoadILLPolarizedDiffraction::loadData() {
       for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); ++channel_no) {
         unsigned int counts = data(pixel_no, 0, channel_no);
         spectrum[channel_no] = counts;
-        errors[channel_no] = std::sqrt(counts);
+        if (counts == 0) {
+          errors[channel_no] = 1.0;
+        } else {
+          errors[channel_no] = std::sqrt(counts);
+        }
       }
       workspace->mutableX(pixel_no) = axis;
     }
@@ -195,7 +199,11 @@ void LoadILLPolarizedDiffraction::loadData() {
       for (auto channel_no = 0; channel_no < static_cast<int>(m_numberOfChannels); channel_no++) {
         unsigned int counts = monitorData(0, 0, channel_no);
         spectrum[channel_no] = counts;
-        errors[channel_no] = std::sqrt(counts);
+        if (counts == 0) {
+          errors[channel_no] = 1.0;
+        } else {
+          errors[channel_no] = std::sqrt(counts);
+        }
       }
       workspace->mutableX(monitor_no) = axis;
     }

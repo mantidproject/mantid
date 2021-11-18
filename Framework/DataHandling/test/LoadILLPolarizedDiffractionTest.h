@@ -151,37 +151,37 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[1], 186.64, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[511], 3573.04, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(0)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(1)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(1)[1], 186.64, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(1)[511], 3573.04, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(1)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(130)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(130)[1], 186.64, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(130)[365], 2603.60, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(130)[366], 2610.24, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[365], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(131)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(131)[1], 186.64, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(131)[365], 2603.60, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(131)[366], 2610.24, 0.01)
@@ -201,12 +201,12 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[0], 180.00, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 186.64, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 1.00, 0.01)
 
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[511], 3573.04, 0.01)
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 1.00, 0.01)
     checkTimeFormat(workspaceEntry1);
   }
 
@@ -238,37 +238,37 @@ public:
     TS_ASSERT_EQUALS(workspaceEntry1->x(0)[0], 0)
     TS_ASSERT_EQUALS(workspaceEntry1->x(0)[1], 1)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[0], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(0)[511], 511)
     TS_ASSERT_EQUALS(workspaceEntry1->x(0)[512], 512)
     TS_ASSERT_EQUALS(workspaceEntry1->y(0)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(0)[511], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(1)[0], 0)
     TS_ASSERT_EQUALS(workspaceEntry1->x(1)[1], 1)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[0], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(1)[511], 511)
     TS_ASSERT_EQUALS(workspaceEntry1->x(1)[512], 512)
     TS_ASSERT_EQUALS(workspaceEntry1->y(1)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(1)[511], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(130)[0], 0)
     TS_ASSERT_EQUALS(workspaceEntry1->x(130)[1], 1)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[0], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(130)[365], 365)
     TS_ASSERT_EQUALS(workspaceEntry1->x(130)[366], 366)
     TS_ASSERT_EQUALS(workspaceEntry1->y(130)[365], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(130)[365], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(131)[0], 0)
     TS_ASSERT_EQUALS(workspaceEntry1->x(131)[1], 1)
     TS_ASSERT_EQUALS(workspaceEntry1->y(131)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(131)[0], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(131)[365], 365)
     TS_ASSERT_EQUALS(workspaceEntry1->x(131)[366], 366)
@@ -288,12 +288,12 @@ public:
     TS_ASSERT_EQUALS(workspaceEntry1->x(133)[0], 0)
     TS_ASSERT_EQUALS(workspaceEntry1->x(133)[1], 1)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 1.00, 0.01)
 
     TS_ASSERT_EQUALS(workspaceEntry1->x(133)[511], 511)
     TS_ASSERT_EQUALS(workspaceEntry1->x(133)[512], 512)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
-    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
+    TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 1.00, 0.01)
   }
 
   void test_D7_multifile_sum() {
