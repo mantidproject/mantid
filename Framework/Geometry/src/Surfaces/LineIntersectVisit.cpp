@@ -45,8 +45,6 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  if (!m_skipProcTrack)
-    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Plane &Surf)
@@ -56,8 +54,6 @@ void LineIntersectVisit::Accept(const Plane &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  if (!m_skipProcTrack)
-    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Cone &Surf)
@@ -67,8 +63,6 @@ void LineIntersectVisit::Accept(const Cone &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  if (!m_skipProcTrack)
-    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Cylinder &Surf)
@@ -78,8 +72,6 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  if (!m_skipProcTrack)
-    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Sphere &Surf)
@@ -89,8 +81,6 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  if (!m_skipProcTrack)
-    procTrack();
 }
 
 void LineIntersectVisit::Accept(const General &Surf)
@@ -100,21 +90,6 @@ void LineIntersectVisit::Accept(const General &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  if (!m_skipProcTrack)
-    procTrack();
-}
-
-void LineIntersectVisit::procTrack()
-/**
-  Sorts the m_intersectionPointsOut and distances
-  with a closes first order.
-*/
-{
-  // Calculate the distances to the points
-  m_distancesOut.resize(m_intersectionPointsOut.size());
-  using std::placeholders::_1;
-  std::transform(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(), m_distancesOut.begin(),
-                 std::bind(&Kernel::V3D::distance, m_line.getOrigin(), _1));
 }
 
 /**

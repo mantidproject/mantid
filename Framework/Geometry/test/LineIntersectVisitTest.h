@@ -34,6 +34,7 @@ public:
     B.setPlane(V3D(0.0, 0.0, 0.0), V3D(1.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(extractString(B), "-1 px 0\n");
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     Line::PType Pnts{{0.0, -1.0, -1.0}};
     TS_ASSERT_EQUALS(A.getPoints(), Pnts);
@@ -48,6 +49,7 @@ public:
     Sphere B;
     B.setSurface("s 0.0 0.0 0.0 2");
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
 
     // changed for forward going only intercepts on quadratice surfaces
     // pntOut.emplace_back(-2.0,0.0,0.0);
@@ -67,6 +69,7 @@ public:
     TS_ASSERT_EQUALS(B.getCentre(), V3D(0.0, 1.0, 0.0));
 
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
     // change for forward only intercept
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     const auto &pntOut = A.getPoints();
@@ -88,6 +91,7 @@ public:
     TS_ASSERT_EQUALS(B.getNormal(), V3D(0, 1, 0));
 
     A.Accept(B);
+    A.sortAndRemoveDuplicates();
 
     // forward only
     // pntOut.emplace_back(-1.0,0.0,0.0);
