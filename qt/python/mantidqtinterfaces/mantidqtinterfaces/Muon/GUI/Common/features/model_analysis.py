@@ -49,6 +49,9 @@ class AddModelAnalysis(AddFeature):
 
             GUI.enable_notifier.add_subscriber(GUI.model_fitting_tab.model_fitting_tab_view.enable_tab_observer)
 
+            GUI.context.data_context.instrumentNotifier.add_subscriber(
+                GUI.model_fitting_tab.model_fitting_tab_presenter.instrument_changed_notifier)
+
     def set_feature_observables(self, GUI):
         if TABONLY in self.feature_list or TABANDPLOT in self.feature_list:
 
