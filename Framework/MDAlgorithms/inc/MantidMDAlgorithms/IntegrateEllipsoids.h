@@ -83,11 +83,11 @@ private:
 
   /// Integrate a single peak
   Geometry::PeakShape_const_sptr
-  integratePeak(const size_t peakindex, DataObjects::Peak &peak, const V3D &peak_q, IntegrateQLabEvents &integrator,
-                const bool &isSatellitePeak, const bool &shareBackground, const bool &specify_size,
-                const double &adaptiveQBackgroundMultiplier, const std::vector<size_t> &satellitePeaks,
-                std::pair<double, double> &backi, std::vector<double> &axes_radii, double &adaptiveRadius,
-                double &adaptiveBack_inner_radius, double &adaptiveBack_outer_radius, const double &adaptiveQMultiplier,
+  integratePeak(const size_t peakindex, const V3D &peak_q, IntegrateQLabEvents &integrator, const bool &isSatellitePeak,
+                const bool &shareBackground, const bool &specify_size, const double &adaptiveQBackgroundMultiplier,
+                const std::vector<size_t> &satellitePeaks, std::pair<double, double> &backi,
+                std::vector<double> &axes_radii, double &adaptiveRadius, double &adaptiveBack_inner_radius,
+                double &adaptiveBack_outer_radius, const double &adaptiveQMultiplier,
                 double &satellite_back_inner_radius, double &satellite_back_outer_radius,
                 const double &back_inner_radius, const double &back_outer_radius);
 

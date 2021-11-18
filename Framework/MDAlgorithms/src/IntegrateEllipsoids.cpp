@@ -440,6 +440,7 @@ void IntegrateEllipsoids::exec() {
     const bool isSatellitePeak = (peaks[i].getIntMNP().norm2() > 0);
     // grab QLabFrame
     const V3D peak_q = peaks[i].getQLabFrame();
+
     // check if peak is origin (skip if true)
     const bool isOrigin = isSatellitePeak ? IntegrateQLabEvents::isOrigin(peak_q, m_satellitePeakRadius)
                                           : IntegrateQLabEvents::isOrigin(peak_q, m_braggPeakRadius);
@@ -454,6 +455,7 @@ void IntegrateEllipsoids::exec() {
                                             : adaptiveQMultiplier * lenQpeak + peak_radius;
     // - error checking for adaptive radius
     if (adaptiveRadius < 0.0) {
+      // Unphysical case: radius is negative
       std::ostringstream errmsg;
       errmsg << "Error: Radius for integration sphere of peak " << i << " is negative =  " << adaptiveRadius << '\n';
       g_log.error() << errmsg.str();
@@ -466,44 +468,34 @@ void IntegrateEllipsoids::exec() {
       SatellitePeakRadiusVector[i] = 0.0;
       SatelliteBackgroundInnerRadiusVector[i] = 0.0;
       SatelliteBackgroundOuterRadiusVector[i] = 0.0;
-      continue;
-    }
-
-    double inti;
-    double sigi;
-    std::pair<double, double> backi;
-    std::vector<double> axes_radii;
-
-    // compute adaptive background radius
-    double adaptiveBack_inner_radius = isSatellitePeak
-                                           ? adaptiveQBackgroundMultiplier * lenQpeak + satellite_back_inner_radius
-                                           : adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
-    double adaptiveBack_outer_radius = isSatellitePeak
-                                           ? adaptiveQBackgroundMultiplier * lenQpeak + satellite_back_outer_radius
-                                           : adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
-    // update records in containers
-    if (isSatellitePeak) {
-      SatellitePeakRadiusVector[i] = adaptiveRadius;
-      SatelliteBackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
-      SatelliteBackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
     } else {
-      PeakRadiusVector[i] = adaptiveRadius;
-      BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
-      BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
-    }
+      // Integrate peak properly
+      double inti;
+      double sigi;
+      std::vector<double> axes_radii;
 
-    // integrate the peak to get intensity and error
-    Mantid::Geometry::PeakShape_const_sptr shape;
-    if (isSatellitePeak) {
-      integrator.setRadius(satellite_radius);
-      if (!shareBackground) {
-        shape =
-            integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
-                                              adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
-      } else {
-        // check if this satellite peak did NOT have a bragg peak, then we want to integrate it normally
-        if (satellitePeaks.size() > 0 &&
-            std::find(satellitePeaks.begin(), satellitePeaks.end(), i) != satellitePeaks.end()) {
+      // calculate adaptive background inner and outer radius
+      // compute adaptive background radius
+      double adaptiveBack_inner_radius = isSatellitePeak
+                                             ? adaptiveQBackgroundMultiplier * lenQpeak + satellite_back_inner_radius
+                                             : adaptiveQBackgroundMultiplier * lenQpeak + back_inner_radius;
+      double adaptiveBack_outer_radius = isSatellitePeak
+                                             ? adaptiveQBackgroundMultiplier * lenQpeak + satellite_back_outer_radius
+                                             : adaptiveQBackgroundMultiplier * lenQpeak + back_outer_radius;
+
+      // integrate the peak to get intensity and error
+      Mantid::Geometry::PeakShape_const_sptr shape;
+      if (isSatellitePeak) {
+        // Satellite peak
+        SatellitePeakRadiusVector[i] = adaptiveRadius;
+        SatelliteBackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
+        SatelliteBackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
+
+        std::pair<double, double> backi;
+        integrator.setRadius(m_satellitePeakRadius);
+        if (!shareBackground || (satellitePeaks.size() > 0 &&
+                                 std::find(satellitePeaks.begin(), satellitePeaks.end(), i) != satellitePeaks.end())) {
+          // check if this satellite peak did NOT have a bragg peak, then we want to integrate it normally
           shape =
               integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
                                                 adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
@@ -516,34 +508,36 @@ void IntegrateEllipsoids::exec() {
           shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveRadius,
                                                     adaptiveRadius, axes_radii, inti, sigi, backi);
         }
-      }
-    } else {
-      // Bragg peak
-      integrator.setRadius(radius_m);
-      shape = integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
-                                                adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
-      if (shareBackground) {
-        // cache this bragg peak's background so we can apply it to all its satellite peaks later
-        cachedBraggBackground[i] = backi;
-      }
-    }
 
-    peaks[i].setIntensity(inti);
-    peaks[i].setSigmaIntensity(sigi);
-    peaks[i].setPeakShape(shape);
-    if (axes_radii.size() == 3) {
-      if (inti / sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()) {
-        principalaxis1.emplace_back(axes_radii[0]);
-        principalaxis2.emplace_back(axes_radii[1]);
-        principalaxis3.emplace_back(axes_radii[2]);
+      } else {
+        // Bragg peak
+        PeakRadiusVector[i] = adaptiveRadius;
+        BackgroundInnerRadiusVector[i] = adaptiveBack_inner_radius;
+        BackgroundOuterRadiusVector[i] = adaptiveBack_outer_radius;
+
+        std::pair<double, double> backi;
+        integrator.setRadius(m_braggPeakRadius);
+        shape =
+            integrator.ellipseIntegrateEvents(E1Vec, peak_q, specify_size, adaptiveRadius, adaptiveBack_inner_radius,
+                                              adaptiveBack_outer_radius, axes_radii, inti, sigi, backi);
+        if (shareBackground) {
+          // cache this bragg peak's background so we can apply it to all its satellite peaks later
+          cachedBraggBackground[i] = backi;
+        }
+      }
+
+      peaks[i].setIntensity(inti);
+      peaks[i].setSigmaIntensity(sigi);
+      peaks[i].setPeakShape(shape);
+      if (axes_radii.size() == 3) {
+        if (inti / sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()) {
+          principalaxis1.emplace_back(axes_radii[0]);
+          principalaxis2.emplace_back(axes_radii[1]);
+          principalaxis3.emplace_back(axes_radii[2]);
+        }
       }
     }
   }
-
-  //      if (isSatellitePeak && shareBackground) {
-  //        // cache this bragg peak's background so we can apply it to all its satellite peaks later
-  //        cachedBraggBackground[peakindex] = backi;
-  //      }
 
   // Remove background if backgrounds are shared
   if (shareBackground) {
@@ -707,13 +701,12 @@ void IntegrateEllipsoids::removeSharedBackground(std::map<size_t, std::vector<Pe
 
 /// Integrate a single peak
 Mantid::Geometry::PeakShape_const_sptr IntegrateEllipsoids::integratePeak(
-    const size_t peakindex, DataObjects::Peak &peak, const V3D &peak_q, IntegrateQLabEvents &integrator,
-    const bool &isSatellitePeak, const bool &shareBackground, const bool &specify_size,
-    const double &adaptiveQBackgroundMultiplier, const std::vector<size_t> &satellitePeaks,
-    std::pair<double, double> &backi, std::vector<double> &axes_radii, double &adaptiveRadius,
-    double &adaptiveBack_inner_radius, double &adaptiveBack_outer_radius, const double &adaptiveQMultiplier,
-    double &satellite_back_inner_radius, double &satellite_back_outer_radius, const double &back_inner_radius,
-    const double &back_outer_radius) {
+    const size_t peakindex, const V3D &peak_q, IntegrateQLabEvents &integrator, const bool &isSatellitePeak,
+    const bool &shareBackground, const bool &specify_size, const double &adaptiveQBackgroundMultiplier,
+    const std::vector<size_t> &satellitePeaks, std::pair<double, double> &backi, std::vector<double> &axes_radii,
+    double &adaptiveRadius, double &adaptiveBack_inner_radius, double &adaptiveBack_outer_radius,
+    const double &adaptiveQMultiplier, double &satellite_back_inner_radius, double &satellite_back_outer_radius,
+    const double &back_inner_radius, const double &back_outer_radius) {
 
   // Initialize
   double inti = 0.;
