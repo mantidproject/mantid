@@ -81,6 +81,16 @@ private:
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
 
+  /// Integrate a single peak
+  Geometry::PeakShape_const_sptr
+  integratePeak(const size_t peakindex, DataObjects::Peak &peak, const V3D &peak_q, IntegrateQLabEvents &integrator,
+                const bool &isSatellitePeak, const bool &shareBackground, const bool &specify_size,
+                const double &adaptiveQBackgroundMultiplier, const std::vector<size_t> &satellitePeaks,
+                std::pair<double, double> &backi, std::vector<double> &axes_radii, double &adaptiveRadius,
+                double &adaptiveBack_inner_radius, double &adaptiveBack_outer_radius, const double &adaptiveQMultiplier,
+                double &satellite_back_inner_radius, double &satellite_back_outer_radius,
+                const double &back_inner_radius, const double &back_outer_radius);
+
   /// Pair all Bragg peaks with their related satellite peaks
   void pairBraggSatellitePeaks(const size_t &n_peaks, std::vector<DataObjects::Peak> &peaks,
                                std::map<size_t, std::vector<DataObjects::Peak *>> &satellitePeakMap,
