@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing, GenericObserver
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_presenter import BasicFittingPresenter
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_model import ModelFittingModel
@@ -28,8 +28,6 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.update_plot_x_range_notifier = GenericObservable()
 
         self.results_table_created_observer = GenericObserverWithArgPassing(self.handle_new_results_table_created)
-
-        self.instrument_changed_notifier = GenericObserver(self.handle_instrument_changed)
 
         self.view.set_slot_for_results_table_changed(self.handle_results_table_changed)
         self.view.set_slot_for_selected_x_changed(self.handle_selected_x_changed)
@@ -139,11 +137,6 @@ class ModelFittingPresenter(BasicFittingPresenter):
             self._create_parameter_combination_workspaces(self.handle_parameter_combinations_finished_before_fit)
         else:
             super().handle_fit_clicked()
-
-    def handle_instrument_changed(self) -> None:
-        """Handle when the Instrument is changed."""
-        self.model.result_table_names = []
-        self.view.update_result_table_names([])
 
     def update_dataset_names_in_view_and_model(self) -> None:
         """Updates the results tables currently displayed."""
