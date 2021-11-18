@@ -47,6 +47,7 @@ Improvements
 - The results table now produces errors for log values (when they are available).
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis
 - The results tab will now dispay a warning (red text and a tooltip) if the results table already exists.
+- The plots no longer use scientific notation for the axis values.
 
 Bugfixes
 ########
