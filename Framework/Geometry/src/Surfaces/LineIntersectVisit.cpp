@@ -116,8 +116,8 @@ void LineIntersectVisit::procTrack()
  *
  */
 void LineIntersectVisit::sortAndRemoveDuplicates() {
-  const auto u_vec = m_line.getDirect();
-  const auto origin = m_line.getOrigin();
+  const auto &u_vec = m_line.getDirect();
+  const auto &origin = m_line.getOrigin();
   // sort the points by its distance to the track origin
   std::sort(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(),
             [*this, &u_vec, &origin](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) {
