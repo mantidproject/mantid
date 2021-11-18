@@ -107,6 +107,11 @@ class ResultsTabPresenter(QObject):
         """Update the view of results workspaces based on the current model"""
         workspace_list, function_name = self._get_workspace_list()
         self.view.set_selected_fit_function(function_name)
+
+        current_view = self.view.fit_result_workspaces()
+        not_selected = [key for key in current_view.keys() if not current_view[key][1]]
+        workspace_list = [ws for ws in workspace_list if ws not in not_selected]
+
         selection = self.model.fit_selection(workspace_list)
         self.view.set_fit_result_workspaces(selection)
 
