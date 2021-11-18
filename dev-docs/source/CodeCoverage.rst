@@ -108,7 +108,7 @@ IDE
 
 Your IDE may already have an option to run the test with coverage enabled if it can already run the test directly.
 
-To setup unit tests for Pycharm see the :ref:`Pycharm` page.
+To setup unit tests for Pycharm see the :ref:`pycharm-ref` page.
 
 CLI
 ###

@@ -228,12 +228,14 @@ class SuperplotPresenterTest(unittest.TestCase):
         line.get_label.return_value = "label"
         line.get_color.return_value = "color"
         self.m_axes.plot.return_value = [line]
+        self.m_model.get_workspace_color.return_value = "memorized_color"
         self.presenter._update_plot()
         self.m_axes.remove_artists_if.assert_called_once()
         calls = [mock.call("ws5", 5, "label", "color"),
-                 mock.call("ws2", 1, "label", "color"),
-                 mock.call("ws1", 10, "label", "color")]
+                 mock.call("ws2", 1, "label", "color")]
         self.m_view.modify_spectrum_label.assert_has_calls(calls)
+        self.m_model.set_workspace_color.assert_called_once_with("ws1", "color")
+        self.m_axes.plot.assert_called_once()
 
     def test_on_workspace_selection_changed(self):
         self.presenter._update_plot = mock.Mock()

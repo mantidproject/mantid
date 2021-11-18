@@ -29,7 +29,7 @@ The view has the following imports:
     from qtpy import QtWidgets, QtCore, QtGui
     import matplotlib.pyplot as plt
 
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 The fourth line imports Matplotlib and the last line allows it to
 interface with the GUI.

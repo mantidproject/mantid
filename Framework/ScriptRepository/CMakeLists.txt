@@ -38,7 +38,7 @@ target_link_libraries(
   PRIVATE Mantid::Json
 )
 
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS ScriptRepository PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS ScriptRepository INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

@@ -1,6 +1,6 @@
 # * Find ThreadingBuildingBlocks include dirs and libraries Use this module by invoking find_package with the form:
-#   find_package(TBB [REQUIRED]             # Fail with error if TBB is not found )                      # Once done,
-#   this will define
+#   find_package(TBB [REQUIRED] # Fail with error if TBB is not found )                      # Once done, this will
+#   define
 #
 # TBB_FOUND - system has TBB TBB_INCLUDE_DIRS - the TBB include directories TBB_LIBRARIES - TBB libraries to be lined,
 # doesn't include malloc or malloc proxy TBB::tbb - imported target for the TBB library

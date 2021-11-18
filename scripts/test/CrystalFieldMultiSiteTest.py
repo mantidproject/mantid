@@ -571,7 +571,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
     def test_multi_ion_intensity_scaling_multi_spectrum(self):
         from CrystalField import CrystalField
         params = {'B20': 0.37737, 'B22': 3.9770, 'B40': -0.031787, 'B42': -0.11611, 'B44': -0.12544,
-                  'Temperature': [44.0, 50], 'FWHM': [1.1, 1.6]}
+                  'Temperature': [44.0, 50.0], 'FWHM': [1.1, 1.6]}
         cf1 = CrystalField('Ce', 'C2v', **params)
         cf2 = CrystalField('Pr', 'C2v', **params)
         cf = cf1 + cf2

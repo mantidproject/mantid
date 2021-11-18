@@ -72,7 +72,7 @@ public:
     AddPeakMode,
     ComparePeakMode,
     AlignPeakMode,
-    DrawRegularMode,
+    EditShapeMode,
     DrawFreeMode,
     ErasePeakMode,
     InteractionModeSize

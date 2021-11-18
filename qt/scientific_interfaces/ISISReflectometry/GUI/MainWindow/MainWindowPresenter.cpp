@@ -130,6 +130,14 @@ void MainWindowPresenter::notifyChangeInstrumentRequested(std::string const &new
     onInstrumentChanged();
 }
 
+void MainWindowPresenter::notifyCloseEvent() {
+  if (isCloseEventPrevented()) {
+    m_view->ignoreCloseEvent();
+  } else {
+    m_view->acceptCloseEvent();
+  }
+}
+
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
   // An instrument should have been set up before any calls to this function.
   if (!instrument())
@@ -312,6 +320,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
   m_batchPresenters[tabIndex].get()->notifyChangesSaved();
+  m_batchPresenters[tabIndex].get()->notifyBatchLoaded();
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() { m_view->disableSaveAndLoadBatch(); }

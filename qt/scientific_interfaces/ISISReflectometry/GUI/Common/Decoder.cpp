@@ -81,7 +81,7 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex, const QMap
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
 }
 
-void Decoder::decodeExperiment(const QtExperimentView *gui, const QMap<QString, QVariant> &map) {
+void Decoder::decodeExperiment(QtExperimentView *gui, const QMap<QString, QVariant> &map) {
   gui->m_ui.analysisModeComboBox->setCurrentIndex(map[QString("analysisModeComboBox")].toInt());
   gui->m_ui.debugCheckBox->setChecked(map[QString("debugCheckbox")].toBool());
   gui->m_ui.summationTypeComboBox->setCurrentIndex(map[QString("summationTypeComboBox")].toInt());
@@ -100,6 +100,7 @@ void Decoder::decodeExperiment(const QtExperimentView *gui, const QMap<QString, 
   gui->m_ui.floodCorComboBox->setCurrentIndex(map[QString("floodCorComboBox")].toInt());
   gui->m_ui.floodWorkspaceWsSelector->setCurrentIndex(map[QString("floodWorkspaceWsSelector")].toInt());
   gui->m_stitchEdit->setText(map[QString("stitchEdit")].toString());
+  gui->onSettingsChanged();
 }
 
 void Decoder::decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map) {
@@ -159,7 +160,25 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
   searcher->m_searchCriteria.instrument = map[QString("textInstrument")].toString().toStdString();
 }
 
-namespace HIDDEN_LOCAL {
+namespace {
+using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+
+MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
+                                               ValueFunction valueFunction, boost::optional<int> precision) {
+  auto maybeValue = (qRangeInput.*valueFunction)();
+  auto useOutputValue = false;
+  if (!maybeValue.is_initialized()) {
+    maybeValue = (qRangeOutput.*valueFunction)();
+    useOutputValue = true;
+  }
+  auto result = MantidWidgets::Batch::Cell(optionalToString(maybeValue, precision));
+  if (useOutputValue)
+    result.setOutput();
+  else
+    result.setInput();
+  return result;
+}
+
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
@@ -172,7 +191,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions()))});
 }
-} // namespace HIDDEN_LOCAL
+} // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
                                            const boost::optional<int> &precision) {
@@ -199,7 +218,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        jobTreeView->setCellsAt({location}, HIDDEN_LOCAL::cellsFromRow(row.get(), precision));
+        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precision));
       }
     }
   }
@@ -263,9 +282,8 @@ MantidQt::CustomInterfaces::ISISReflectometry::Group Decoder::decodeGroup(const 
 std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
 Decoder::decodeRows(const QList<QVariant> &list) {
   std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>> rows;
-  for (const auto &rowMap : list) {
-    rows.emplace_back(decodeRow(rowMap.toMap()));
-  }
+  std::transform(list.cbegin(), list.cend(), std::back_inserter(rows),
+                 [this](const auto &rowMap) { return decodeRow(rowMap.toMap()); });
   return rows;
 }
 
@@ -285,9 +303,9 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
     return boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>();
   }
   std::vector<std::string> number;
-  for (const auto &runNumber : map[QString("runNumbers")].toList()) {
-    number.emplace_back(runNumber.toString().toStdString());
-  }
+  const auto runNoList = map[QString("runNumbers")].toList();
+  std::transform(runNoList.cbegin(), runNoList.cend(), std::back_inserter(number),
+                 [](const auto &runNumber) { return runNumber.toString().toStdString(); });
   boost::optional<double> maybeScaleFactor = boost::make_optional<double>(false, 0.0);
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
   if (scaleFactorPresent) {
@@ -349,20 +367,17 @@ TransmissionRunPair Decoder::decodeTransmissionRunPair(const QMap<QString, QVari
   auto secondTransRunsQt = map[QString("secondTransRuns")].toList();
   std::vector<std::string> firstTransRuns;
   std::vector<std::string> secondTransRuns;
-  for (const auto &item : firstTransRunsQt) {
-    firstTransRuns.emplace_back(item.toString().toStdString());
-  }
-  for (const auto &item : secondTransRunsQt) {
-    secondTransRuns.emplace_back(item.toString().toStdString());
-  }
+  std::transform(firstTransRunsQt.cbegin(), firstTransRunsQt.cend(), std::back_inserter(firstTransRuns),
+                 [](const auto &item) { return item.toString().toStdString(); });
+  std::transform(secondTransRunsQt.cbegin(), secondTransRunsQt.cend(), std::back_inserter(secondTransRuns),
+                 [](const auto &item) { return item.toString().toStdString(); });
   return TransmissionRunPair(firstTransRuns, secondTransRuns);
 }
 
 MantidQt::CustomInterfaces::ISISReflectometry::SearchResults Decoder::decodeSearchResults(const QList<QVariant> &list) {
   SearchResults rows;
-  for (const auto &rowMap : list) {
-    rows.emplace_back(decodeSearchResult(rowMap.toMap()));
-  }
+  std::transform(list.cbegin(), list.cend(), std::back_inserter(rows),
+                 [this](const auto &rowMap) { return decodeSearchResult(rowMap.toMap()); });
   return rows;
 }
 
@@ -378,9 +393,9 @@ Decoder::decodeSearchResult(const QMap<QString, QVariant> &map) {
 
 ReductionWorkspaces Decoder::decodeReductionWorkspace(const QMap<QString, QVariant> &map) {
   std::vector<std::string> inputRunNumbers;
-  for (const auto &elem : map[QString("inputRunNumbers")].toList()) {
-    inputRunNumbers.emplace_back(elem.toString().toStdString());
-  }
+  const auto inputRunList = map[QString("inputRunNumbers")].toList();
+  std::transform(inputRunList.cbegin(), inputRunList.cend(), std::back_inserter(inputRunNumbers),
+                 [](const auto &elem) { return elem.toString().toStdString(); });
   auto transmissionRunPair = decodeTransmissionRunPair(map[QString("transPair")].toMap());
   ReductionWorkspaces redWs(inputRunNumbers, transmissionRunPair);
   redWs.setOutputNames(map[QString("iVsLambda")].toString().toStdString(),

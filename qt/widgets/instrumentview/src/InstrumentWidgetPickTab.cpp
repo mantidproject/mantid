@@ -491,31 +491,31 @@ void InstrumentWidgetPickTab::setSelectionType() {
   } else if (m_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangle");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Ellipse");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_ellipse->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Elliptical ring");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_ring_rectangle->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Rectangular ring");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_sector->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Circular sector");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D("sector", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_free_draw->isChecked()) {
@@ -527,7 +527,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
   } else if (m_edit->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Shape editing");
-    surfaceMode = ProjectionSurface::DrawRegularMode;
+    surfaceMode = ProjectionSurface::EditShapeMode;
     plotType = DetectorPlotController::Single;
   }
   m_plotController->setPlotType(plotType);
@@ -537,7 +537,7 @@ void InstrumentWidgetPickTab::setSelectionType() {
     surface->setInteractionMode(surfaceMode);
     auto interactionMode = surface->getInteractionMode();
     if (interactionMode != previousInteractionMode) {
-      if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
+      if (interactionMode == ProjectionSurface::EditShapeMode || interactionMode == ProjectionSurface::MoveMode) {
         updatePlotMultipleDetectors();
       } else {
         m_plot->clearAll();
@@ -601,7 +601,7 @@ void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/, double 
   auto surface = m_instrWidget->getSurface();
   if (surface) {
     auto interactionMode = surface->getInteractionMode();
-    if (interactionMode == ProjectionSurface::DrawRegularMode || interactionMode == ProjectionSurface::MoveMode) {
+    if (interactionMode == ProjectionSurface::EditShapeMode || interactionMode == ProjectionSurface::MoveMode) {
       updatePlotMultipleDetectors();
     }
   }

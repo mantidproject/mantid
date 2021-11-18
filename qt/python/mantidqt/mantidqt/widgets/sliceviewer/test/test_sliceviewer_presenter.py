@@ -111,7 +111,7 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
         self.assertEqual(self.model.get_properties.call_count, 1)
-        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 2)  # extra call during init of pres
         self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
         # new_plot
@@ -140,7 +140,7 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws_MDE.call_count, 1)
         self.assertEqual(self.model.get_properties.call_count, 1)
-        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 2)  # extra call during init of pres
         self.assertEqual(self.view.data_view.dimensions.get_bin_params.call_count, 1)
         self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
@@ -172,7 +172,7 @@ class SliceViewerTest(unittest.TestCase):
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
         self.assertEqual(self.model.get_properties.call_count, 1)
-        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 0)
+        self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)  # extra call during init of pres
         self.assertEqual(self.view.data_view.plot_matrix.call_count, 1)
 
         # new_plot

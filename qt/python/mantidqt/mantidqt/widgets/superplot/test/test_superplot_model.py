@@ -32,6 +32,7 @@ class SuperplotModelTest(unittest.TestCase):
     def test_init(self):
         self.assertEqual(self.model._workspaces, [])
         self.assertEqual(self.model._plotted_data, [])
+        self.assertEqual(self.model._ws_colors, {})
         self.assertIsNone(self.model._plot_mode)
         self.m_obs.signals.sig_ws_deleted.connect.assert_called_once()
         self.m_obs.signals.sig_ws_renamed.connect.assert_called_once()
@@ -84,6 +85,24 @@ class SuperplotModelTest(unittest.TestCase):
         wsList = wsList[0:2]
         self.assertEqual(wsList, ["ws1", "ws2"])
         self.assertEqual(self.model._workspaces, ["ws1", "ws2", "ws3"])
+
+    def test_set_workspace_color(self):
+        self.assertEqual(self.model._ws_colors, {})
+        self.model.set_workspace_color("ws1", "color1")
+        self.assertDictEqual(self.model._ws_colors, {"ws1": "color1"})
+        self.model.set_workspace_color("ws2", "color2")
+        self.assertDictEqual(self.model._ws_colors, {"ws1": "color1",
+                                                     "ws2": "color2"})
+        self.model.set_workspace_color("ws1", "color3")
+        self.assertDictEqual(self.model._ws_colors, {"ws1": "color3",
+                                                     "ws2": "color2"})
+
+    def test_get_workspace_color(self):
+        self.model._ws_colors = {"ws1": "color1", "ws2": "color2"}
+        color = self.model.get_workspace_color("ws1")
+        self.assertEqual(color, "color1")
+        color = self.model.get_workspace_color("ws3")
+        self.assertIsNone(color)
 
     def test_set_bin_mode(self):
         self.assertIsNone(self.model._plot_mode)

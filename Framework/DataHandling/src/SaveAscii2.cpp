@@ -44,8 +44,7 @@ void SaveAscii2::init() {
                   "The name of the workspace containing the data you want to save to a "
                   "Ascii file.");
 
-  const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
-  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, asciiExts),
+  declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Save, m_asciiExts),
                   "The filename of the output Ascii file.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
@@ -115,6 +114,8 @@ void SaveAscii2::init() {
   declareProperty(std::make_unique<ArrayProperty<std::string>>("LogList"),
                   "List of logs to write to the file header. Ignored for Table "
                   "Workspaces.");
+
+  declareProperty("OneSpectrumPerFile", false, "If true, each spectrum will be saved to an individual file");
 }
 
 /**
@@ -246,57 +247,108 @@ void SaveAscii2::exec() {
       }
     }
   }
-  if (!idx.empty()) {
-    nSpectra = static_cast<int>(idx.size());
+
+  // if no interval or spectra list, take all of them
+  if (idx.empty()) {
+    for (int i = 0; i < nSpectra; i++) {
+      idx.insert(i);
+    }
   }
 
   if (m_nBins == 0 || nSpectra == 0) {
     throw std::runtime_error("Trying to save an empty workspace");
   }
-  std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
-  if (!file) {
-    g_log.error("Unable to create file: " + filename);
-    throw Exception::FileError("Unable to create file: ", filename);
-  }
-  // Set the number precision
-  if (prec != EMPTY_INT()) {
-    file.precision(prec);
-  }
-  if (scientific) {
-    file << std::scientific;
-  }
-  const std::vector<std::string> logList = getProperty("LogList");
-  if (!logList.empty()) {
-    writeFileHeader(logList, file);
-  }
-  if (writeHeader) {
-    file << comment << " X " << m_sep << " Y " << m_sep << " E";
-    if (m_writeDX) {
-      file << " " << m_sep << " DX";
-    }
-    file << '\n';
-  }
+  const bool oneSpectrumPerFile = getProperty("OneSpectrumPerFile");
+
+  Progress progress(this, 0.0, 1.0, idx.size());
+
   // populate the meta data map
   if (!m_metaData.empty()) {
     populateAllMetaData();
   }
-  if (idx.empty()) {
-    Progress progress(this, 0.0, 1.0, nSpectra);
-    for (int i = 0; i < nSpectra; i++) {
-      writeSpectrum(i, file);
-      progress.report();
-    }
-  } else {
-    Progress progress(this, 0.0, 1.0, idx.size());
-    for (int i : idx) {
-      writeSpectrum(i, file);
-      progress.report();
-    }
-  }
 
-  file.unsetf(std::ios_base::floatfield);
-  file.close();
+  auto idxIt = idx.begin();
+  while (idxIt != idx.end()) {
+    std::string currentFilename;
+    if (oneSpectrumPerFile)
+      currentFilename = createSpectrumFilename(*idxIt);
+    else
+      currentFilename = filename;
+
+    std::ofstream file(currentFilename, (appendToFile ? std::ios::app : std::ios::out));
+
+    if (file.bad()) {
+      throw Exception::FileError("Unable to create file: ", currentFilename);
+    }
+    // Set the number precision
+    if (prec != EMPTY_INT()) {
+      file.precision(prec);
+    }
+    if (scientific) {
+      file << std::scientific;
+    }
+    const std::vector<std::string> logList = getProperty("LogList");
+    if (!logList.empty()) {
+      writeFileHeader(logList, file);
+    }
+    if (writeHeader) {
+      file << comment << " X " << m_sep << " Y " << m_sep << " E";
+      if (m_writeDX) {
+        file << " " << m_sep << " DX";
+      }
+      file << '\n';
+    }
+
+    // data writting
+    if (oneSpectrumPerFile) {
+      writeSpectrum(*idxIt, file);
+      progress.report();
+      idxIt++;
+    } else {
+      while (idxIt != idx.end()) {
+        writeSpectrum(*idxIt, file);
+        progress.report();
+        idxIt++;
+      }
+    }
+
+    file.unsetf(std::ios_base::floatfield);
+    file.close();
+  }
+}
+
+/** Create the filename used for the export of a specific spectrum. Valid only
+ *  when spectra are exported in separate files.
+ *
+ *  @param workspaceIndex :: index of the corresponding spectrum
+ */
+
+std::string SaveAscii2::createSpectrumFilename(size_t workspaceIndex) {
+  std::string filename = getProperty("Filename");
+  size_t extPosition;
+  for (const std::string &ext : m_asciiExts) {
+    extPosition = filename.find(ext);
+    if (extPosition != std::string::npos)
+      break;
+  }
+  if (extPosition == std::string::npos)
+    extPosition = filename.size();
+
+  std::ostringstream ss;
+  ss << std::string(filename, 0, extPosition) << "_" << workspaceIndex;
+  auto axis = m_ws->getAxis(1);
+  if (axis->isNumeric()) {
+    auto binEdgeAxis = dynamic_cast<BinEdgeAxis *>(axis);
+    if (binEdgeAxis)
+      ss << "_" << binEdgeAxis->label(workspaceIndex) << axis->unit()->label().ascii();
+    else
+      ss << "_" << axis->getValue(workspaceIndex) << axis->unit()->label().ascii();
+  } else if (axis->isText())
+    ss << "_" << axis->label(workspaceIndex);
+  ss << std::string(filename, extPosition);
+
+  return ss.str();
 }
 
 /** Writes a spectrum to the file using a workspace index
@@ -452,8 +504,7 @@ void SaveAscii2::writeTableWorkspace(const ITableWorkspace_const_sptr &tws, cons
 
   std::ofstream file(filename.c_str(), (appendToFile ? std::ios::app : std::ios::out));
 
-  if (!file) {
-    g_log.error("Unable to create file: " + filename);
+  if (file.bad()) {
     throw Exception::FileError("Unable to create file: ", filename);
   }
   // Set the number precision

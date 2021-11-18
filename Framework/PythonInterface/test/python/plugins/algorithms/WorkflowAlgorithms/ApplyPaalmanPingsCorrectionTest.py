@@ -5,17 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import (CreateWorkspace, Load, ConvertUnits,
+from mantid.api import MatrixWorkspace
+from mantid.simpleapi import (mtd, CreateWorkspace, Load, ConvertUnits,
                               SplineInterpolation, ApplyPaalmanPingsCorrection,
-                              DeleteWorkspace, GroupWorkspaces, CloneWorkspace)
+                              DeleteWorkspace, DeleteWorkspaces, GroupWorkspaces, CloneWorkspace)
 import numpy
 
 
 class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         """
         Create sample workspaces.
         """
@@ -34,31 +34,30 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
                               EMode='Indirect',
                               EFixed=1.845)
 
-        self._sample_ws = sample_ws
-        self._can_ws = can_ws
-
         # Load the corrections workspace
-        corrections = Load('irs26176_graphite002_cyl_Abs.nxs')
+        corrections_ws = Load('irs26176_graphite002_cyl_Abs.nxs')
 
         # Interpolate each of the correction factor workspaces
         # Required to use corrections from the old indirect calculate
         # corrections routines
-        for factor_ws in corrections:
+        for factor_ws in mtd['corrections_ws']:
             SplineInterpolation(WorkspaceToMatch=sample_ws,
                                 WorkspaceToInterpolate=factor_ws,
                                 OutputWorkspace=factor_ws,
                                 OutputWorkspaceDeriv='')
 
-        self._corrections_ws = corrections
+        # reduced data from IN16B fixed-window-scan
+        Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
+        GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
+        Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         """
         Remove workspaces from ADS.
         """
 
-        DeleteWorkspace(self._sample_ws)
-        DeleteWorkspace(mtd['can_ws'])
-        DeleteWorkspace(self._corrections_ws)
+        DeleteWorkspaces(['sample_ws', 'can_ws', 'corrections_ws', 'fws_corrections_ass', 'fws_corrections', 'fapi'])
 
     def _verify_workspace(self, ws, correction_type):
         """
@@ -99,60 +98,60 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         return GroupWorkspaces(InputWorkspaces=correction_names, OutputWorkspace="factor_group")
 
     def test_can_subtraction(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CanWorkspace=self._can_ws)
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CanWorkspace='can_ws')
 
         self._verify_workspace(corr, 'can_subtraction')
 
     def test_can_subtraction_with_can_scale(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CanWorkspace=self._can_ws,
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CanWorkspace='can_ws',
                                            CanScaleFactor=0.9)
 
         self._verify_workspace(corr, 'can_subtraction')
 
     def test_can_subtraction_with_can_shift(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CanWorkspace=self._can_ws,
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CanWorkspace='can_ws',
                                            CanShiftFactor=0.03)
 
         self._verify_workspace(corr, 'can_subtraction')
 
     def test_sample_corrections_only(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws)
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CorrectionsWorkspace='corrections_ws')
 
         self._verify_workspace(corr, 'sample_corrections_only')
 
     def test_sample_and_can_corrections(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws,
-                                           CanWorkspace=self._can_ws)
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CorrectionsWorkspace='corrections_ws',
+                                           CanWorkspace='can_ws')
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_sample_and_can_corrections_with_can_scale(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws,
-                                           CanWorkspace=self._can_ws,
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CorrectionsWorkspace='corrections_ws',
+                                           CanWorkspace='can_ws',
                                            CanScaleFactor=0.9)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_sample_and_can_corrections_with_can_shift(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
-                                           CorrectionsWorkspace=self._corrections_ws,
-                                           CanWorkspace=self._can_ws,
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
+                                           CorrectionsWorkspace='corrections_ws',
+                                           CanWorkspace='can_ws',
                                            CanShiftFactor = 0.03)
 
         self._verify_workspace(corr, 'sample_and_can_corrections')
 
     def test_two_factor_approximation(self):
-        two_corrections = self._create_group_of_factors(self._corrections_ws, ['acc', 'ass'])
+        two_corrections = self._create_group_of_factors(mtd['corrections_ws'], ['acc', 'ass'])
 
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace='sample_ws',
                                            CorrectionsWorkspace=two_corrections,
-                                           CanWorkspace=self._can_ws,
+                                           CanWorkspace='can_ws',
                                            CanShiftFactor = 0.03)
         DeleteWorkspace(two_corrections)
         self._verify_workspace(corr, 'sample_and_can_corrections')
@@ -216,23 +215,18 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         DeleteWorkspace(container_1)
 
     def test_fixed_window_scan(self):
-        Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
-        GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
-        in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
-        out_ws = ApplyPaalmanPingsCorrection(SampleWorkspace=in_ws[0], CorrectionsWorkspace='fws_corrections',
+
+        out_ws = ApplyPaalmanPingsCorrection(SampleWorkspace=mtd['fapi'][0], CorrectionsWorkspace='fws_corrections',
                                              OutputWorkspace='wsfapicorr')
         self.assertTrue(out_ws)
         self.assertTrue(isinstance(out_ws, MatrixWorkspace))
-        self.assertEquals(out_ws.blocksize(), in_ws[0].blocksize())
-        self.assertEquals(out_ws.getNumberHistograms(), in_ws[0].getNumberHistograms())
-        self.assertEquals(out_ws.getAxis(0).getUnit().unitID(), in_ws[0].getAxis(0).getUnit().unitID())
+        self.assertEquals(out_ws.blocksize(), mtd['fapi'][0].blocksize())
+        self.assertEquals(out_ws.getNumberHistograms(), mtd['fapi'][0].getNumberHistograms())
+        self.assertEquals(out_ws.getAxis(0).getUnit().unitID(), mtd['fapi'][0].getAxis(0).getUnit().unitID())
 
     def test_group_raise(self):
-        Load(Filename='ILL/IN16B/mc-abs-corr-q.nxs', OutputWorkspace='fws_corrections_ass')
-        GroupWorkspaces(InputWorkspaces=['fws_corrections_ass'], OutputWorkspace='fws_corrections')
-        in_ws = Load(Filename='ILL/IN16B/fapi-fws-q.nxs', OutputWorkspace='fapi')
         kwargs = {
-            'SampleWorkspace': in_ws,
+            'SampleWorkspace': 'fapi',
             'CorrectionsWorkspace': 'fws_corrections',
             'OutputWorkspaced': 'wsfapicorr'
         }

@@ -503,18 +503,12 @@ size_t LoadILLSANS::loadDataFromMonitors(NeXus::NXEntry &firstEntry, size_t firs
         HistogramData::BinEdges histoBinEdges(data.dim2() + 1, HistogramData::LinearGenerator(0.0, 1));
         m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
       } else {
-        if (m_isD16Omega) {
-          HistogramData::Points histoPoints =
-              HistogramData::Points(std::vector<double>(1, 0.5 * (m_defaultBinning[0] + m_defaultBinning[1])));
-          m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
+        if (type != MultichannelType::KINETIC) {
+          HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
+          m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
         } else {
-          if (type != MultichannelType::KINETIC) {
-            HistogramData::BinEdges histoBinEdges = HistogramData::BinEdges(m_defaultBinning);
-            m_localWorkspace->setBinEdges(firstIndex, std::move(histoBinEdges));
-          } else {
-            HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
-            m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
-          }
+          HistogramData::Points histoPoints = HistogramData::Points(m_defaultBinning);
+          m_localWorkspace->setPoints(firstIndex, std::move(histoPoints));
         }
       }
       // Add average monitor counts to a property:
@@ -568,17 +562,12 @@ size_t LoadILLSANS::loadDataFromTubes(NeXus::NXInt &data, const std::vector<doub
       m_localWorkspace->setCounts(index, histoCounts);
       m_localWorkspace->setCountVariances(index, histoVariances);
 
-      if (m_isD16Omega) {
-        const HistogramData::Points histoPoints(std::vector<double>(1, 0.5 * (timeBinning[0] + timeBinning[1])));
+      if (type == MultichannelType::KINETIC) {
+        const HistogramData::Points histoPoints(timeBinning);
         m_localWorkspace->setPoints(index, histoPoints);
       } else {
-        if (type == MultichannelType::KINETIC) {
-          const HistogramData::Points histoPoints(timeBinning);
-          m_localWorkspace->setPoints(index, histoPoints);
-        } else {
-          const HistogramData::BinEdges binEdges(timeBinning);
-          m_localWorkspace->setBinEdges(index, binEdges);
-        }
+        const HistogramData::BinEdges binEdges(timeBinning);
+        m_localWorkspace->setBinEdges(index, binEdges);
       }
     }
   }

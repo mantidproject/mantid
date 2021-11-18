@@ -8,7 +8,8 @@ import re
 
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
-from mantidqt.utils.observer_pattern import Observable, GenericObservable
+from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
+from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
 from mantidqtinterfaces.Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import row_colors, row_tooltips
 
@@ -37,7 +38,7 @@ class PairingTablePresenter(object):
         self._on_guess_alpha_requested = lambda pair_name, group1, group2: 0
 
         # notify if Guess Alpha clicked for any table entries
-        self.guessAlphaNotifier = PairingTablePresenter.GuessAlphaNotifier(self)
+        self.guessAlphaNotifier = GenericObservable()
 
     def show(self):
         self._view.show()
@@ -79,9 +80,7 @@ class PairingTablePresenter(object):
             if not self.validate_alpha(changed_item_text):
                 update_model = False
             else:
-                rounded_item = '{:.3f}'.format(float(changed_item_text)) if '{:.3f}'.format(
-                    float(changed_item_text)) != '0.000' \
-                    else '{:.3g}'.format(float(changed_item_text))
+                rounded_item = round_value(changed_item_text, self._model._context.group_pair_context.alpha_precision)
                 table[row][col] = rounded_item
         if pair_columns[col] == 'to_analyse':
             update_model = False
@@ -258,15 +257,3 @@ class PairingTablePresenter(object):
             self._view.warning_popup("Alpha must be > 0")
             return False
         return True
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Observer / Observable
-    # ------------------------------------------------------------------------------------------------------------------
-
-    class GuessAlphaNotifier(Observable):
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, arg=["", "", ""]):
-            Observable.notify_subscribers(self, arg)

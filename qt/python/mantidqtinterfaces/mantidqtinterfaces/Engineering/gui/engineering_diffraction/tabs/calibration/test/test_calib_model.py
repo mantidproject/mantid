@@ -6,70 +6,36 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-
-from unittest.mock import patch, MagicMock
-
+from unittest.mock import call, patch, create_autospec
+from numpy import array
+from os import path
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from testhelpers import assert_any_call_partial
 
-CERIUM_NUMBER = "305738"
-class_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model.CalibrationModel"
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model"
-
-
-def _convert_units_returns(bank):
-    if bank == '1':
-        return "engggui_calibration_bank_1"
-    elif bank == '2':
-        return "engggui_calibration_bank_2"
-    elif bank == 'cropped':
-        return "engggui_calibration_Cropped"
-
-
-def _run_calibration_returns(single_output=False):
-    calib = [{"difa": 0, "difc": 0, "tzero": 0}, {"difa": 0, "difc": 0, "tzero": 0}]
-    calib_single = [{"difa": 0, "difc": 0, "tzero": 0}]
-    sample = MagicMock()
-    grp_ws = MagicMock()
-    if single_output:
-        return calib_single, sample, grp_ws
-    return calib, sample, grp_ws
 
 
 class CalibrationModelTest(unittest.TestCase):
     def setUp(self):
         self.model = CalibrationModel()
+        self.calibration_info = create_autospec(CalibrationInfo())
         mock.NonCallableMock.assert_any_call_partial = assert_any_call_partial
 
-    def test_fails_on_invalid_run_number(self):
-        self.assertRaises(RuntimeError, self.model.create_new_calibration, "FAIL", "305738", True,
-                          "ENGINX")
-        self.assertRaises(RuntimeError, self.model.create_new_calibration, "307521", "FAIL", True,
-                          "ENGINX")
-
-    @patch(class_path + ".get_info_from_file")
     @patch(file_path + ".path")
-    @patch(file_path + ".EnggUtils")
-    @patch(class_path + ".update_calibration_params_table")
-    def test_load_existing_calibration_files(self, update_table, utils, path, get_info):
-        path.exists.return_value = True
-        get_info.return_value = "TESTINST", "ceria_no", [["params"], ["table"]]
-        utils.load_custom_grouping_workspace.return_value = "grp_ws", "Region"
-        inst, ceria_no, grp_ws, roi_text, bank = self.model.load_existing_calibration_files("dummy.prm")
+    @patch(file_path + ".load_full_instrument_calibration")
+    @patch(file_path + ".CalibrationModel.write_diff_consts_to_table_from_prm")
+    def test_load_existing_calibration_files_valid_prm(self, mock_write_diff_consts, mock_load_full_calib, mock_path):
+        mock_path.exists.return_value = True  # prm file exists
 
-        table_test_params = [["params"], ["table"]]
-        update_table.assert_called_with(table_test_params)
-        self.assertEqual(1, update_table.call_count)
+        self.model.load_existing_calibration_files(self.calibration_info)
 
-        self.assertEqual(1, utils.load_relevant_calibration_files.call_count)
+        mock_load_full_calib.assert_called_once()
+        mock_write_diff_consts.assert_called_once_with(self.calibration_info.prm_filepath)
+        self.calibration_info.load_relevant_calibration_files.assert_called_once()
 
-        self.assertEqual("TESTINST", inst)
-        self.assertEqual("ceria_no", ceria_no)
-        self.assertEqual("grp_ws", grp_ws)
-        self.assertEqual("Region", roi_text)
-
-    def test_get_info_from_file(self):
-        file_content="""ID    ENGIN-X CALIBRATION WITH CeO2 and V-Nb
+    def test_read_diff_constants_from_prm(self):
+        file_content = """ID    ENGIN-X CALIBRATION WITH CeO2 and V-Nb
 INS    CALIB   241391   ceo2
 INS  1 ICONS  18306.98      2.99     14.44
 INS  2 ICONS  18497.75    -29.68    -26.50"""
@@ -77,177 +43,59 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         dummy_file_path = "/foo/bar_123.prm"
         patchable = "builtins.open"
         with mock.patch(patchable, mocked_handle):
-            instrument, ceria_no, params_table = self.model.get_info_from_file(dummy_file_path)
-        self.assertEqual("bar", instrument)
-        self.assertEqual("241391", ceria_no)
-        self.assertEqual([[0, 18306.98, 2.99, 14.44], [1, 18497.75, -29.68, -26.5]], params_table)
+            diff_consts = self.model.read_diff_constants_from_prm(dummy_file_path)
+        deltas = abs(diff_consts - array([[2.99, 18306.98, 14.44], [-29.68, 18497.75, -26.5]]))
+        self.assertTrue((deltas < 1e-10).all())
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(class_path + ".update_calibration_params_table")
-    @patch(class_path + ".create_output_files")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".EnggUtils")
-    @patch(class_path + ".run_calibration")
-    def test_plotting_check(self, calib, utils, load, sample, output_files, update_table,
-                            delete):
-        calib.return_value = _run_calibration_returns()
-        self.model.create_new_calibration(CERIUM_NUMBER, False, "ENGINX")
-        utils.plot_tof_fit.assert_not_called()
-        utils.generate_tof_fit_dictionary.assert_not_called()
-        self.model.create_new_calibration(CERIUM_NUMBER, True, "ENGINX")
-        self.assertEqual(utils.plot_tof_fit.call_count, 1)
-        self.assertEqual(utils.generate_tof_fit_dictionary.call_count, 2)
+    @patch(file_path + ".copy2")
+    @patch(file_path + ".makedirs")
+    @patch(file_path + ".path.exists")
+    @patch(file_path + ".SaveNexus")
+    @patch(file_path + ".CalibrationModel.write_prm_file")
+    def test_create_output_files_makes_savdir_and_saves_both_banks(self, mock_write_prm, mock_save_nxs, mock_exists,
+                                                                   mock_mkdir, mock_copy):
+        mock_exists.return_value = False  # make new directory
+        calibration = CalibrationInfo()  # easier to work with real calibration info object here
+        prm_name = "ENGINX_193749_all_banks.prm"
+        calibration.set_calibration_from_prm_fname(prm_name)
+        calibration.set_calibration_table("cal_table")
+        save_dir = "savedir"
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(class_path + ".update_calibration_params_table")
-    @patch(class_path + ".create_output_files")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".EnggUtils")
-    @patch(class_path + ".run_calibration")
-    def test_plotting_check_cropped(self, calib, utils, load, sample,
-                                    output_files, update_table, delete):
-        calib.return_value = _run_calibration_returns(single_output=True)
-        self.model.create_new_calibration( CERIUM_NUMBER, False, "ENGINX")
-        utils.plot_tof_fit.assert_not_called()
-        utils.generate_tof_fit_dictionary.assert_not_called()
-        self.model.create_new_calibration(CERIUM_NUMBER, True, "ENGINX", bank=1)
-        self.assertEqual(utils.plot_tof_fit.call_count, 1)
-        self.assertEqual(utils.generate_tof_fit_dictionary.call_count, 1)
+        self.model.create_output_files(save_dir, calibration, "ws")
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(class_path + ".update_calibration_params_table")
-    @patch(class_path + ".create_output_files")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".Load")
-    @patch(class_path + ".run_calibration")
-    def test_present_RB_number_results_in_user_output_files(self, calib, load, sample,
-                                                            output_files, update_table, delete):
-        calib.return_value = _run_calibration_returns()
-        self.model.create_new_calibration(CERIUM_NUMBER,
-                                          False,
-                                          "ENGINX",
-                                          rb_num="00110")
-        self.assertEqual(output_files.call_count, 2)
+        mock_mkdir.assert_called_once_with(save_dir)
+        self.calibration_info.save_grouping_workspace.assert_not_called()  # only called if not bank data
+        prm_fpath = path.join(save_dir, prm_name)
+        write_prm_calls = [call("ws", prm_fpath),
+                           call("ws", prm_fpath.replace("all_banks", "bank_1"), spec_nums=[0]),
+                           call("ws", prm_fpath.replace("all_banks", "bank_2"), spec_nums=[1])]
+        mock_write_prm.assert_has_calls(write_prm_calls)
+        nxs_fpath = prm_fpath.replace(".prm", ".nxs")
+        mock_save_nxs.assert_called_once_with(InputWorkspace="cal_table", Filename=nxs_fpath)
+        copy_calls = [call(nxs_fpath, nxs_fpath.replace("all_banks", "bank_1")),
+                      call(nxs_fpath, nxs_fpath.replace("all_banks", "bank_2"))]
+        mock_copy.assert_has_calls(copy_calls)
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(class_path + ".update_calibration_params_table")
-    @patch(class_path + ".create_output_files")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".Load")
-    @patch(class_path + ".run_calibration")
-    def test_absent_run_number_results_in_no_user_output_files(self, calib, load,
-                                                               sample, output_files, update_table, delete):
-        calib.return_value = _run_calibration_returns()
-        self.model.create_new_calibration(CERIUM_NUMBER, False, "ENGINX")
-        self.assertEqual(output_files.call_count, 1)
+    @patch(file_path + ".copy2")
+    @patch(file_path + ".path")
+    @patch(file_path + ".SaveNexus")
+    @patch(file_path + ".CalibrationModel.write_prm_file")
+    def test_create_output_files_saves_custom_group_file(self, mock_write_prm, mock_save_nxs, mock_path, mock_copy):
+        mock_path.exists.return_value = True
+        prm_fname = "prm.prm"
+        mock_path.join.return_value = prm_fname
+        mock_path.splitext.return_value = (prm_fname.replace(".prm", ""), None)
+        self.calibration_info.group.banks = None  # no bank data e.g. custom
+        self.calibration_info.generate_output_file_name.return_value = prm_fname
+        self.calibration_info.get_calibration_table.return_value = "cal_table"  # no bank data e.g. custom
+        save_dir = "savedir"
 
-    @patch(file_path + ".DeleteWorkspace")
-    @patch(class_path + ".update_calibration_params_table")
-    @patch(class_path + ".create_output_files")
-    @patch(file_path + ".path_handling.load_workspace")
-    @patch(file_path + ".Load")
-    @patch(class_path + ".run_calibration")
-    def test_calibration_params_table_is_updated(self, calibrate_alg, load, load_sample,
-                                                 output_files, update_table, delete):
-        calibrate_alg.return_value = _run_calibration_returns()
-        self.model.create_new_calibration(CERIUM_NUMBER, False, "ENGINX")
-        self.assertEqual(calibrate_alg.call_count, 1)
+        self.model.create_output_files(save_dir, self.calibration_info, "ws")
 
-    def test_generate_table_workspace_name(self):
-        self.assertEqual(self.model._generate_table_workspace_name(20),
-                         "engggui_calibration_bank_20")
-
-    @patch(file_path + ".Ads")
-    def test_update_calibration_params_table_retrieves_workspace(self, ads):
-        table = [[0, 18414.900000000001, 0.0, -11.82], [1, 18497.75, 0.0, -26.5]]
-
-        self.model.update_calibration_params_table(table)
-
-        self.assertEqual(ads.retrieve.call_count, 1)
-
-    @patch(file_path + ".Ads")
-    def test_update_calibration_params_table_stops_when_table_empty(self, ads):
-        table = []
-
-        self.model.update_calibration_params_table(table)
-
-        self.assertEqual(ads.retrieve.call_count, 0)
-
-    @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".ConvertUnits")
-    @patch(file_path + ".ApplyDiffCal")
-    @patch(file_path + ".NormaliseByCurrent")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".CloneWorkspace")
-    @patch(file_path + ".PDCalibration")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".EnggUtils")
-    def test_run_calibration_no_bank_no_spec_nums(self, utils, ads, pdc, clone_ws, load, nbc, adc, conv, df):
-        df.side_effect = ["focused_bank_1", "focused_bank_2"]
-        ads.retrieve.return_value = MagicMock()
-        self.model.run_calibration("sample", None, None, None, "full_calib_ws")
-
-        pdc.assert_any_call_partial(InputWorkspace="focused_bank_1",
-                                    OutputCalibrationTable="engggui_calibration_bank_1")
-        pdc.assert_any_call_partial(InputWorkspace="focused_bank_2",
-                                    OutputCalibrationTable="engggui_calibration_bank_2")
-        self.assertEqual(2, pdc.call_count)
-
-    @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".ConvertUnits")
-    @patch(file_path + ".ApplyDiffCal")
-    @patch(file_path + ".NormaliseByCurrent")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".CloneWorkspace")
-    @patch(file_path + ".PDCalibration")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".EnggUtils")
-    def test_run_calibration_bank_no_spec_nums(self, utils, ads, pdc, clone_ws, load, nbc, adc, conv, df):
-        df.side_effect = ["focused_bank_1"]
-        ads.retrieve.return_value = MagicMock()
-        self.model.run_calibration("sample", '1', None, None, "full_calib_ws")
-
-        pdc.assert_any_call_partial(InputWorkspace="focused_bank_1",
-                                    OutputCalibrationTable="engggui_calibration_bank_1")
-        self.assertEqual(1, pdc.call_count)
-
-    @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".ConvertUnits")
-    @patch(file_path + ".ApplyDiffCal")
-    @patch(file_path + ".NormaliseByCurrent")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".CloneWorkspace")
-    @patch(file_path + ".PDCalibration")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".EnggUtils")
-    def test_run_calibration_no_bank_spec_nums(self, utils, ads, pdc, clone_ws, load, nbc, adc, conv, df):
-        df.side_effect = ["focused_Cropped"]
-        ads.retrieve.return_value = MagicMock()
-        self.model.run_calibration("sample", None, None, '28-98', "full_calib_ws")
-
-        pdc.assert_any_call_partial(InputWorkspace="focused_Cropped",
-                                    OutputCalibrationTable="engggui_calibration_Cropped")
-        self.assertEqual(1, pdc.call_count)
-
-    @patch(file_path + ".DiffractionFocussing")
-    @patch(file_path + ".ConvertUnits")
-    @patch(file_path + ".ApplyDiffCal")
-    @patch(file_path + ".NormaliseByCurrent")
-    @patch(file_path + ".Load")
-    @patch(file_path + ".CloneWorkspace")
-    @patch(file_path + ".PDCalibration")
-    @patch(file_path + ".Ads")
-    @patch(file_path + ".EnggUtils")
-    def test_run_calibration_custom_calfile(self, utils, ads, pdc, clone_ws, load, nbc, adc, conv, df):
-        df.side_effect = ["focused_Custom"]
-        ads.retrieve.return_value = MagicMock()
-        self.model.run_calibration("sample", None, "/stuff/mycalfile.cal", None, "full_calib_ws")
-
-        pdc.assert_any_call_partial(InputWorkspace="focused_Custom",
-                                    OutputCalibrationTable="engggui_calibration_Custom")
-        self.assertEqual(1, pdc.call_count)
+        self.calibration_info.save_grouping_workspace.assert_called_once_with(save_dir)
+        mock_write_prm.assert_called_once_with("ws", prm_fname)
+        mock_save_nxs.assert_called_once_with(InputWorkspace="cal_table", Filename=prm_fname.replace(".prm", ".nxs"))
+        mock_copy.assert_not_called()
 
 
 if __name__ == '__main__':

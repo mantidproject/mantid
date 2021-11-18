@@ -34,8 +34,9 @@ IndirectFitDataPresenter::IndirectFitDataPresenter(IIndirectFitDataModel *model,
   connect(m_view, SIGNAL(addClicked()), this, SLOT(showAddWorkspaceDialog()));
 
   connect(m_view, SIGNAL(removeClicked()), this, SLOT(removeSelectedData()));
-  connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataRemoved()));
-  connect(m_view, SIGNAL(removeClicked()), this, SIGNAL(dataChanged()));
+
+  connect(m_view, SIGNAL(unifyClicked()), this, SLOT(unifyRangeToSelectedData()));
+
   connect(m_view, SIGNAL(cellChanged(int, int)), this, SLOT(handleCellChanged(int, int)));
   connect(m_view, SIGNAL(startXChanged(double)), this, SIGNAL(startXChanged(double)));
   connect(m_view, SIGNAL(endXChanged(double)), this, SIGNAL(endXChanged(double)));
@@ -224,9 +225,31 @@ void IndirectFitDataPresenter::setModelExcludeAndEmit(const std::string &exclude
 void IndirectFitDataPresenter::removeSelectedData() {
   auto selectedIndices = m_view->getSelectedIndexes();
   std::sort(selectedIndices.begin(), selectedIndices.end());
+  if (selectedIndices.size() == 0) {
+    // check that there are selected indexes.
+    return;
+  }
   for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
     --item;
     m_model->removeDataByIndex(FitDomainIndex(item->row()));
+  }
+  updateTableFromModel();
+  emit dataRemoved();
+  emit dataChanged();
+}
+
+void IndirectFitDataPresenter::unifyRangeToSelectedData() {
+  auto selectedIndices = m_view->getSelectedIndexes();
+  if (selectedIndices.size() == 0) {
+    // check that there are selected indexes.
+    return;
+  }
+  std::sort(selectedIndices.begin(), selectedIndices.end());
+  auto fitRange = m_model->getFittingRange(FitDomainIndex(selectedIndices.begin()->row()));
+  for (auto item = selectedIndices.end(); item != selectedIndices.begin();) {
+    --item;
+    setModelStartXAndEmit(fitRange.first, FitDomainIndex(item->row()));
+    setModelEndXAndEmit(fitRange.second, FitDomainIndex(item->row()));
   }
   updateTableFromModel();
 }

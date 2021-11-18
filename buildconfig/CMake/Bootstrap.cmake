@@ -1,7 +1,7 @@
 # ######################################################################################################################
 # Configure required dependencies if necessary
 # ######################################################################################################################
-if(MSVC AND NOT CONDA_BUILD)
+if(MSVC AND NOT CONDA_ENV)
   # Git LFS does not work properly with <= 1.9
   find_package(Git 1.9.5 REQUIRED)
   find_package(GitLFS REQUIRED)
@@ -13,7 +13,7 @@ if(MSVC AND NOT CONDA_BUILD)
       CACHE PATH "Location to clone third party dependencies to"
   )
   set(THIRD_PARTY_GIT_URL "https://github.com/mantidproject/thirdparty-msvc2015.git")
-  set(THIRD_PARTY_GIT_SHA1 0a4c81cb2a6809125867022d2d5320c22075a0c6)
+  set(THIRD_PARTY_GIT_SHA1 1f44d901442239ae12c11e33187b3d877bb9f2b2)
   set(THIRD_PARTY_DIR ${EXTERNAL_ROOT}/src/ThirdParty)
   # Generates a script to do the clone/update in tmp
   set(_project_name ThirdParty)
@@ -101,7 +101,7 @@ if(MSVC AND NOT CONDA_BUILD)
   set(BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}")
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
-elseif(MSVC AND CONDA_BUILD)
+elseif(MSVC AND CONDA_ENV)
   # Print out where we are looking for 3rd party stuff
   set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python

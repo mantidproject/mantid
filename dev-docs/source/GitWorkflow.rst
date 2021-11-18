@@ -37,7 +37,7 @@ The steps for a new piece of work can be summarised as follows:
 
 1. Push up or `create <https://guides.github.com/features/issues>`_ an
    issue `here <https://github.com/mantidproject/mantid/issues>`__
-2. Create a branch from master using the naming convention described
+2. Create a branch from ``main`` using the naming convention described
    at :ref:`GitWorkflowNamingBranches`
 3. Do the work and commit changes to the branch. On commit, the
    `pre-commit <https://pre-commit.com/>`_ framework will run, it will
@@ -87,7 +87,7 @@ When creating a pull request you should:
   If the user would not be easily identified by someone picking up the ticket, be prepared to act as a point of contact with the reporter.
 - Ensure the description follows the format described by the `PR
   template
-  <https://github.com/mantidproject/mantid/blob/master/.github/PULL_REQUEST_TEMPLATE.md>`_
+  <https://github.com/mantidproject/mantid/blob/main/.github/PULL_REQUEST_TEMPLATE.md>`_
   on GitHub
 
 A good example is `here <https://github.com/mantidproject/mantid/pull/18713>`__.
@@ -110,7 +110,7 @@ of the remote pointing to the original ``mantid`` repository. If you cloned dire
 then ``remote-name=origin`` else if you cloned from a fork then it is the name of remote that points
 back to the original repository.
 
-Note that these commands will checkout a temporary branch that has the development branch merged with master and not just
+Note that these commands will checkout a temporary branch that has the development branch merged with ``main`` and not just
 the development branch on its own.
 
 The :doc:`GitConfig` page also provides the follow alias to delete all ``pr/`` prefixed branches, which is useful if you have several:
@@ -153,8 +153,8 @@ At the start of a *code freeze* before a major release there will be a
 release branch created named ``release-next``. At this point
 only bugfixes should be applied to this release branch so that it can
 be stabilized for the release. The release branch will be merged to
-``master`` periodically so bugfixes do not need to be separately
-merged to ``master``.
+``main`` periodically so bugfixes do not need to be separately
+merged to ``main``.
 
 New Branches
 ^^^^^^^^^^^^
@@ -163,7 +163,7 @@ During the code freeze it is important to ensure that a new branch is
 created from the correct base branch depending on the scope of the
 changes:
 
-- ``master``: maintenance fixes, new features. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/master``
+- ``main``: maintenance fixes, new features. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/main``
 - ``release-next``: bugfixes. Command: ``git fetch -p && git checkout --no-track -b MYBRANCH_NAME origin/release-next``
 
 Pull Requests
@@ -183,9 +183,9 @@ view shows changes other than your own it is most likely that the base
 branch is incorrect and it needs to be fixed.
 
 As an example consider the scenario where a branch named ``topic`` has
-been based off the ``master`` branch as follows::
+been based off the ``main`` branch as follows::
 
-   o---o---o---o---o  master
+   o---o---o---o---o  main
       |           \
       |            o---o---o  topic
        \
@@ -194,7 +194,7 @@ been based off the ``master`` branch as follows::
 where we actually want the ``topic`` branch based off ``release-next``
 instead i.e. ::
 
-   o---o---o---o---o  master
+   o---o---o---o---o  main
        \
         o---o---o---o---o  release-next
                                 \
@@ -206,4 +206,4 @@ To fix this situation we use the ``rebase`` command, providing the
 .. code-block:: bash
 
     git fetch
-    git rebase --onto origin/release-next $(git merge-base origin/master origin/topic) topic
+    git rebase --onto origin/release-next $(git merge-base origin/main origin/topic) topic

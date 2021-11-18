@@ -269,7 +269,9 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryILLPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryILLSumForeground.py
     algorithms/WorkflowAlgorithms/ReflectometryILL_common.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
+    algorithms/WorkflowAlgorithms/ReflectometryISISSumBanks.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinder.py
     algorithms/WorkflowAlgorithms/SANS/SANSBeamCentreFinderCore.py

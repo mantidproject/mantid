@@ -139,8 +139,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeLower", 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("RangeUpper", 1.))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, e.what(),
-                            std::string("Some invalid Properties found: [ RangeUpper ]"))
+    std::string err_msg("Some invalid Properties found: \n"
+                        " RangeUpper: The upper limit is smaller than the lower.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, e.what(), err_msg)
   }
 
   void test_invalidEndAndStartIndicesThrows() {
@@ -156,8 +157,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartWorkspaceIndex", 2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndWorkspaceIndex", 1))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, e.what(),
-                            std::string("Some invalid Properties found: [ EndWorkspaceIndex ]"))
+    std::string err_msg("Some invalid Properties found: \n"
+                        " EndWorkspaceIndex: The index is smaller than the start.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error const &e, e.what(), err_msg);
   }
 
 private:

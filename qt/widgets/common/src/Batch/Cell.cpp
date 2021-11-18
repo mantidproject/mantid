@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/Batch/Cell.h"
 #include <ostream>
 #include <utility>
+
 namespace MantidQt::MantidWidgets::Batch {
 
 Cell::Cell(std::string contentText, std::string backgroundColor, int borderThickness, std::string borderColor,

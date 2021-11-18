@@ -130,7 +130,7 @@ public:
     getParameterMap(outtablews, 0, parammap);
 
     TS_ASSERT_DELTA(parammap["PeakCentre"], 1.2356, 0.03);
-    TS_ASSERT_DELTA(parammap["Height"], 595., 5.00);
+    TS_ASSERT_DELTA(parammap["Height"], 595., 15.00);
 
     // Clean
     AnalysisDataService::Instance().remove(wsname);
@@ -220,7 +220,7 @@ public:
     const std::vector<double> WIDTHS{0.0007, 0.0009, 0.0001, 0.0012, 0.0013, 0.0012, 0.0013, 0.0011, 0.0015,
                                      0.0030, 0.0023, 0.0038, 0.0021, 0.0034, 0.0042, 0.0062, 0.0099};
     // peaks that have different values on differnt operating systems
-    const std::vector<int> BAD{4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
+    const std::vector<int> BAD{1, 4, 5, 6, 9, 10, 11, 12, 13, 15, 16};
 
     loadNexusProcessed("PG3_4866_focussed_vanadium.nxs", WKSP_NAME_INPUT);
 
@@ -261,7 +261,7 @@ public:
       TS_ASSERT_DELTA(peaklist->Double(i, COL_CENTRE), VANADIUM_CENTRES[i], 0.01);
       TS_ASSERT(peaklist->Double(i, COL_CHISQ) > 0.);
       // other peak shape parameters show of instability
-      double tol_height = 1.;
+      double tol_height = 4.;
       double tol_width = 0.0001;
       if (std::find(BAD.begin(), BAD.end(), i) != BAD.end()) {
         // "light" checks have larger tolerances

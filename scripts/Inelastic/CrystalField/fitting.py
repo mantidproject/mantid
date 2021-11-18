@@ -498,6 +498,8 @@ class CrystalField(object):
             if len(value) != len(self.Temperature):
                 if self.PhysicalProperty is not None and len(value) == len(self.Temperature) - len(self.PhysicalProperty):
                     value = value + [0] * len(self.PhysicalProperty)
+                    # Cast all types to match the first elem so we don't have mixed lists of int/doubles
+                    value = [float(v) for v in value]
                 else:
                     raise RuntimeError('Vector of FWHMs must either have same size as '
                                        'Temperatures (%i) or have size 1.' % (len(self.Temperature)))

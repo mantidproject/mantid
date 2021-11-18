@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -16,9 +17,6 @@ from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
 class testModelWithoutExecute:
 
     def __init__(self):
-        pass
-
-    def output(self):
         pass
 
 
@@ -39,9 +37,6 @@ class testModelWithoutLoadData:
     def execute(self):
         pass
 
-    def output(self):
-        pass
-
 
 class testModel:
 
@@ -50,9 +45,6 @@ class testModel:
 
     def loadData(self, data):
         self._data = data
-
-    def output(self):
-        pass
 
     def execute(self):
         pass
@@ -84,6 +76,13 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         model.output = mock.Mock()
         return model
 
+    def wait_for_thread(self, thread_model):
+        if thread_model and thread_model.worker:
+            while thread_model.worker.is_alive():
+                QApplication.sendPostedEvents()
+                time.sleep(0.1)
+            QApplication.sendPostedEvents()
+
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
@@ -100,20 +99,10 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock()
 
         self.Runner(self.thread)
-        self.thread._thread.wait()
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(self.model.execute.call_count, 1)
-
-    def test_that_output_is_called_if_thread_executes_successfully(self):
-        self.model.execute = mock.Mock()
-        self.model.output = mock.Mock()
-
-        self.Runner(self.thread)
-        self.thread._thread.wait()
-        self._qapp.processEvents()
-
-        self.assertEqual(self.model.output.call_count, 1)
 
     def test_that_starting_and_finishing_callbacks_are_called_when_thread_starts_and_finishes(self):
         start_slot = mock.Mock()
@@ -122,7 +111,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
         self.Runner(self.thread)
-        self.thread._thread.wait()
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
@@ -141,12 +130,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         with self.assertRaises(AttributeError):
             ThreadModel(model)
 
-    def test_that_attribute_error_raised_if_model_does_not_contain_output_method(self):
-        model = testModelWithoutOutput
-
-        with self.assertRaises(AttributeError):
-            ThreadModel(model)
-
     def test_that_tearDown_function_called_automatically(self):
         start_slot = mock.Mock()
         end_slot = mock.Mock()
@@ -154,7 +137,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.thread.threadWrapperSetUp(start_slot, end_slot)
 
         self.Runner(self.thread)
-        self.thread._thread.wait()
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(start_slot.call_count, 1)
@@ -167,7 +150,7 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.model.execute = mock.Mock(side_effect=raise_error)
 
         self.Runner(self.thread)
-        self.thread._thread.wait()
+        self.wait_for_thread(self.thread)
         self._qapp.processEvents()
 
         self.assertEqual(self.warning_box_patcher.call_count, 1)

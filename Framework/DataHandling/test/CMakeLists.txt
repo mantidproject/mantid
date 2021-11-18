@@ -21,7 +21,7 @@ if(CXXTEST_FOUND)
 
   if(ENABLE_LIB3MF)
     target_link_libraries(DataHandlingTest LINK_PRIVATE ${LIB3MF_LIBRARIES})
-    if(CONDA_BUILD)
+    if(CONDA_ENV)
       target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR})
     else()
       target_include_directories(DataHandlingTest PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)

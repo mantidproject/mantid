@@ -50,6 +50,7 @@ void export_Workspace() {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
       .def("getName", &getName, arg("self"), "Returns the name of the workspace. This could be an empty string")
       .def("getTitle", &Workspace::getTitle, arg("self"), "Returns the title of the workspace")
+      .def("isGroup", &Workspace::isGroup, arg("self"), "Returns if it is a group workspace")
       .def("setTitle", &Workspace::setTitle, (arg("self"), arg("title")), "Set the title of the workspace")
       .def("getComment", &Workspace::getComment, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the comment field on the workspace")

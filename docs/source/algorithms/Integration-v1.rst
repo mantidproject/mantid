@@ -35,12 +35,14 @@ can be set to the same value by RangeUpper. If both list and non-list versions
 are given, then the range is chosen which gives stricter limits for each
 histogram.
 
-No rebinning takes place as part of this algorithm: if the ranges given do
-not coincide with a bin boundary then the first bin boundary within the
-range is used. If a value is given that is beyond the limit covered by
-the spectrum then it will be integrated up to its limit. The data that
-falls outside any values set will not contribute to the output
-workspace.
+No rebinning takes place as part of this algorithm. If the integration limits given
+do not coincide with a bin boundary then the behaviour depends on the IncludePartialBins
+parameter. If IncludePartialBins=True then a contribution is calculated for any
+bins that partially sit inside the integration limits. If IncludePartialBins=False
+then the integration only includes bins that sit entirely within the integration limits.
+If an integration limit is given that is beyond the X range covered by the spectrum then
+the integration will proceed up to final bin boundary. The data that falls outside any
+integration limits set will not contribute to the output workspace.
 
 EventWorkspaces
 ###############

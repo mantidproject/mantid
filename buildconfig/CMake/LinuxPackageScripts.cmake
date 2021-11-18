@@ -89,8 +89,8 @@ set(POST_INSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postinst)
 set(PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm)
 set(POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm)
 
-if("${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora") # RHEL/Fedora
-  # these are used if we need to scl enable at runtime
+if("${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora") # RHEL/Fedora these are used if we
+                                                                                  # need to scl enable at runtime
   set(WRAPPER_PREFIX "")
   set(WRAPPER_POSTFIX "")
 

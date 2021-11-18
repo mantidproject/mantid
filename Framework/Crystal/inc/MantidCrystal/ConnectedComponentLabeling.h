@@ -47,7 +47,7 @@ class MANTID_CRYSTAL_DLL ConnectedComponentLabeling {
 
 public:
   /// Constructor
-  ConnectedComponentLabeling(const size_t &startId = 1, const boost::optional<int> &nThreads = boost::none);
+  ConnectedComponentLabeling(const size_t &startId = 1, boost::optional<int> nThreads = boost::none);
 
   /// Getter for the start label id
   size_t getStartLabelId() const;

@@ -7,16 +7,14 @@
 import os
 import sys
 from tempfile import TemporaryDirectory
+import unittest
+import importlib as imp
 
 from mantid.simpleapi import *
 from mantid import api, config
 
 from Direct.ReductionWrapper import *
 import MariReduction as mr
-
-#
-import unittest
-import imp
 
 
 class test_helper(ReductionWrapper):

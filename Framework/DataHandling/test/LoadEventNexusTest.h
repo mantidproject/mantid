@@ -26,6 +26,7 @@
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
 
+#include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -233,6 +234,7 @@ public:
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
 
+    // this file contains events that are sorted in pulse time order
     validate_pulse_time_sorting(eventWS);
   }
 
@@ -257,8 +259,42 @@ public:
       TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
       TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
 
+      // this file contains events that aren't sorted in pulse time order but the event lists per spectra are sorted
       validate_pulse_time_sorting(eventWS);
     }
+  }
+
+  void test_load_event_nexus_POLARIS() {
+    // POLARIS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("POLARIS9fbf7121b4274c833043ae8933ec643ff7b9313d.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
+    const std::string file = "POLARIS00130512.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 19268117);
+    TS_ASSERT_DELTA(eventWS->getTofMin(), 0., 1.0e-3);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 19994.945, 1.0e-3);
+
+    // this file contains events that aren't sorted in pulse time order, even per spectra
+    validate_pulse_time_sorting(eventWS);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
   void test_NumberOfBins() {
@@ -748,8 +784,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     // Pixels have to be padded
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), SingleBankPixelsOnly ? 1024 : 51200);
     // Events - there are fewer now.
@@ -855,8 +890,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     TS_ASSERT_EQUALS(WS->getNumberHistograms(), 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 10730347);
     for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
@@ -898,8 +932,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsname));
     // Valid WS and it is an EventWorkspace
     TS_ASSERT(WS);
-    if (!WS)
-      return;
+
     const auto numHist = WS->getNumberHistograms();
     TS_ASSERT_EQUALS(numHist, 117760);
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 2);
@@ -1011,6 +1044,62 @@ public:
     loader.setPropertyValue("OutputWorkspace", "dummy");
     loader.setPropertyValue("Filename", "SANS2D00059115_corrupted.nxs");
     TS_ASSERT_THROWS(loader.execute(), const InvalidLogPeriods &);
+  }
+
+  void test_load_ILL_no_triggers() {
+    // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
+    // But some of these nexuses don't have any triggers either, so they are modified to be allowed to be loaded.
+
+    LoadEventNexus loader;
+
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/D22B/000242_trunc.event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setProperty("LoadAllLogs", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    EventWorkspace_sptr eventWS;
+    TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
+    TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-01-28T18:07:12"));
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin(), eventWS->getPulseTimeMax());
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin().totalNanoseconds(), 980705232000000000);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 13515.0517592763, 1e-2);
+
+    // check that the logs have been loaded by looking at some random example
+    TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.21, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
+  }
+
+  void test_load_ILL_triggers() {
+    // ILL runs don't have any pulses, so in event mode, they are replaced in the event nexus by trigger signals.
+
+    LoadEventNexus loader;
+
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/D22B/042730_trunc.event.nxs");
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setProperty("LoadAllLogs", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    EventWorkspace_sptr eventWS;
+    TS_ASSERT_THROWS_NOTHING(eventWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("dummy"));
+    // Valid WS and it is an EventWorkspace
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1000);
+    TS_ASSERT_EQUALS(eventWS->run().startTime(), DateAndTime("2021-03-24T20:52:50"));
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMin().totalNanoseconds(), 985467170046478105);
+    TS_ASSERT_EQUALS(eventWS->getPulseTimeMax().totalNanoseconds(), 985467770208320643);
+
+    // check that the logs have been loaded by looking at some random example
+    TS_ASSERT_DELTA(eventWS->run().getPropertyAsSingleValue("reactor_power"), 43.2, 1e-2);
+
+    AnalysisDataService::Instance().remove("dummy");
   }
 
 private:

@@ -60,7 +60,7 @@ Reduction back-end
 
 The back-end is primarily a set of algorithms, with the entry points from the GUI being :ref:`algm-ReflectometryISISLoadAndProcess` (for reducing a row) and :ref:`algm-Stitch1DMany` (for post-processing a group). Any additional processing should be added to these algorithms, or a new wrapper algorithm could be added if appropriate (this might be necessary in future if post-processing will involve more than just stitching).
 
-The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobRunner`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
+The :code:`BatchPresenter` is the main coordinator for executing a reduction. It uses the :code:`BatchJobManager`, which converts the reduction configuration to a format appropriate for the algorithms. The conversion functions are in files called :code:`RowProcessingAlgorithm` and :code:`GroupProcessingAlgorithm`, and any algorithm-specific code should be kept to these files.
 
 Unfortunately the whole batch cannot be farmed off to a single algorithm because we need to update the GUI after each row completes, and we must be able to interrupt processing so that we can cancel a large batch operation. We also need to know whether rows completed successfully before we can set up the group post-processing algorithms. Some queue management is therefore done by the :code:`BatchPresenter`, with the help of the :code:`BatchAlgorithmRunner`.
 

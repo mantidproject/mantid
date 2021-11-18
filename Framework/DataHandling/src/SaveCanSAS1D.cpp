@@ -150,7 +150,7 @@ void SaveCanSAS1D::exec() {
   // write xml manually as the user requires a specific format were the
   // placement of new line characters is controled
   // and this can't be done in using the stylesheet part in Poco or libXML
-  prepareFileToWriteEntry();
+  prepareFileToWriteEntry(getPropertyValue("FileName"));
 
   m_outFile << "\n\t<SASentry name=\"" << m_workspace->getName() << "\">";
 
@@ -167,7 +167,7 @@ void SaveCanSAS1D::exec() {
   searchandreplaceSpecialChars(dataUnit);
 
   std::string sasData;
-  createSASDataElement(sasData);
+  createSASDataElement(sasData, 0);
   m_outFile << sasData;
 
   std::string sasSample;
@@ -200,15 +200,15 @@ void SaveCanSAS1D::exec() {
 }
 /** Opens the output file and either moves the file pointer to beyond the last
  *  entry or blanks the file and writes a header
+ *  @param fileName :: name of the output file
  *  @throw logic_error if append was selected but end of an entry tag couldn't
  * be found
  *  @throw FileError if there was a problem writing to the file
  */
-void SaveCanSAS1D::prepareFileToWriteEntry() {
+void SaveCanSAS1D::prepareFileToWriteEntry(const std::string &fileName) {
   // reduce error handling code by making file access errors throw
   m_outFile.exceptions(std::ios::eofbit | std::ios::failbit | std::ios::badbit);
 
-  const std::string fileName = getPropertyValue("FileName");
   bool append(getProperty("Append"));
 
   // write xml manually as the user requires a specific format were the
@@ -412,8 +412,9 @@ void SaveCanSAS1D::createSASRunElement(std::string &sasRun) {
 
 /** This method creates an XML element named "SASdata"
  *  @param sasData :: string for sasdata element in the xml
+ *  @param workspaceIndex :: workspace index to be exported in SASdata entry
  */
-void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
+void SaveCanSAS1D::createSASDataElement(std::string &sasData, size_t workspaceIndex) {
   std::string dataUnit = m_workspace->YUnitLabel();
   // look for xml special characters and replace with entity refrence
   searchandreplaceSpecialChars(dataUnit);
@@ -428,61 +429,50 @@ void SaveCanSAS1D::createSASDataElement(std::string &sasData) {
   if (dataUnit == "I(q) (cm-1)")
     dataUnit = "1/cm";
 
-  sasData = "\n\t\t<SASdata>";
-  // outFile<<sasData;
-  std::string sasIData;
-  std::string sasIBlockData;
-  std::string sasIHistData;
-  for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i) {
-    const auto intensities = m_workspace->points(i);
-    auto intensityDeltas = m_workspace->pointStandardDeviations(i);
-    if (!intensityDeltas)
-      intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
-    const auto &ydata = m_workspace->y(i);
-    const auto &edata = m_workspace->e(i);
-    for (size_t j = 0; j < ydata.size(); ++j) {
-      // x data is the QData in xml.If histogramdata take the mean
-      std::stringstream x;
-      x << intensities[j];
-      std::stringstream dx_str;
-      dx_str << intensityDeltas[j];
-      sasIData = "\n\t\t\t<Idata><Q unit=\"1/A\">";
-      sasIData += x.str();
-      sasIData += "</Q>";
-      sasIData += "<I unit=";
-      sasIData += "\"";
-      sasIData += dataUnit;
-      sasIData += "\">";
-      //// workspace Y data is the I data in the xml file
-      std::stringstream y;
-      y << (ydata[j]);
-      sasIData += y.str();
-      sasIData += "</I>";
+  const auto intensities = m_workspace->points(workspaceIndex);
+  auto intensityDeltas = m_workspace->pointStandardDeviations(workspaceIndex);
+  if (!intensityDeltas)
+    intensityDeltas = HistogramData::PointStandardDeviations(intensities.size(), 0.0);
+  const auto &ydata = m_workspace->y(workspaceIndex);
+  const auto &edata = m_workspace->e(workspaceIndex);
+  sasData += "\n\t\t<SASdata>";
+  for (size_t j = 0; j < ydata.size(); ++j) {
+    // x data is the QData in xml.If histogramdata take the mean
+    std::stringstream x;
+    x << intensities[j];
+    std::stringstream dx_str;
+    dx_str << intensityDeltas[j];
+    sasData += "\n\t\t\t<Idata><Q unit=\"1/A\">";
+    sasData += x.str();
+    sasData += "</Q>";
+    sasData += "<I unit=";
+    sasData += "\"";
+    sasData += dataUnit;
+    sasData += "\">";
+    //// workspace Y data is the I data in the xml file
+    std::stringstream y;
+    y << (ydata[j]);
+    sasData += y.str();
+    sasData += "</I>";
 
-      // workspace error data is the Idev data in the xml file
-      std::stringstream e;
-      e << edata[j];
+    // workspace error data is the Idev data in the xml file
+    std::stringstream e;
+    e << edata[j];
 
-      sasIData += "<Idev unit=";
-      sasIData += "\"";
-      sasIData += dataUnit;
-      sasIData += "\">";
+    sasData += "<Idev unit=";
+    sasData += "\"";
+    sasData += dataUnit;
+    sasData += "\">";
 
-      sasIData += e.str();
-      sasIData += "</Idev>";
+    sasData += e.str();
+    sasData += "</Idev>";
 
-      sasIData += "<Qdev unit=\"1/A\">";
-      sasIData += dx_str.str();
-      sasIData += "</Qdev>";
+    sasData += "<Qdev unit=\"1/A\">";
+    sasData += dx_str.str();
+    sasData += "</Qdev>";
 
-      sasIData += "</Idata>";
-      // outFile<<sasIData;
-      sasIBlockData += sasIData;
-    }
-    sasIHistData += sasIBlockData;
+    sasData += "</Idata>";
   }
-  sasData += sasIHistData;
-
   sasData += "\n\t\t</SASdata>";
 }
 

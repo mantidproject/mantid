@@ -59,13 +59,13 @@ For a full release, ``C:\MantidInstall\`` is likely the correct install path. Ta
 
 3. Try launching from a command prompt:
 
-.. code-block:: python
+.. code-block:: shell
 
 	C:\MantidInstall\bin\MantidWorkbench
 
 If this does not work, try launching with:
 
-.. code-block:: python
+.. code-block:: shell
 
 	cd C:\MantidInstall\bin
 	set QT_PLUGIN_PATH=%CD%\..\plugins\qt5
@@ -75,7 +75,7 @@ If this does not work, try launching with:
 
 4. Does **Qt** import correctly? In a command prompt / terminal window, run the following:
 
-.. code-block:: python
+.. code-block:: shell
 
     C:\MantidInstall\bin\mantidpython.bat --classic
     import qtpy.QtCore
@@ -83,7 +83,7 @@ If this does not work, try launching with:
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: python
+.. code-block:: shell
 
     C:\MantidInstall\bin\mantidpython.bat --classic
     import mantid.simpleapi
@@ -98,7 +98,7 @@ If this does not work, try launching with:
 
 7. Try renaming **Config Files**:
 
-.. code-block:: python
+.. code-block:: shell
 
 	cd %APPDATA%\mantidproject
 	mv mantidproject.ini mantidproject.ini.backup
@@ -112,11 +112,11 @@ Advanced options:
 
 8. Check the PATH for conflicts with Mantid:
 
-.. code-block:: python
+.. code-block:: shell
 
 	echo %PATH%
 
-.. code-block:: python
+.. code-block:: shell
 
     cd C:\MantidInstall\bin\
     python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
@@ -145,14 +145,14 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
 3. Try launching from the terminal:
 
-.. code-block:: python
+.. code-block:: shell
 
 	/opt/Mantid/bin/mantidworkbench
 
 
 4. Does **Qt** import correctly? In terminal, run the following:
 
-.. code-block:: python
+.. code-block:: shell
 
     /opt/Mantid/bin/mantidpython --classic
     import qtpy.QtCore
@@ -160,7 +160,7 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: python
+.. code-block:: shell
 
     /opt/Mantid/bin/mantidpython --classic
     import mantid.simpleapi
@@ -168,7 +168,7 @@ For a full release, ``/opt/Mantid/`` is likely the correct install path. Take ca
 
 6. Try renaming **Config Files**:
 
-.. code-block:: python
+.. code-block:: shell
 
 	cd $HOME/.config/mantidproject
 	mv mantidproject.ini mantidproject.ini.backup
@@ -191,11 +191,11 @@ Advanced Options:
 
 8. Check the PATH for conflicts with Mantid: e.g. Anything relating to ``.local`` could be a problem.
 
-.. code-block:: python
+.. code-block:: shell
 
 	echo $PATH
 
-.. code-block:: python
+.. code-block:: shell
 
     cd /opt/Mantid/bin/
     python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"
@@ -221,13 +221,13 @@ MacOS
 
 3. Try launching from terminal, by running the following:
 
-.. code-block:: python
+.. code-block:: shell
 
 	/Applications/MantidWorkbench.app/Contents/MacOS/MantidWorkbench
 
 If this does not work, try launching with:
 
-.. code-block:: python
+.. code-block:: shell
 
 	cd /Applications/MantidWorkbench.app/Contents/MacOS
 	export QT_PLUGIN_PATH=$PWD/../PlugIns/
@@ -237,7 +237,7 @@ If this does not work, try launching with:
 
 4. Does **Qt** import correctly?
 
-.. code-block:: python
+.. code-block:: shell
 
     /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
     import qtpy.QtCore
@@ -245,7 +245,7 @@ If this does not work, try launching with:
 
 5. Do **Mantid Algorithms** import correctly?
 
-.. code-block:: python
+.. code-block:: shell
 
     /Applications/MantidWorkbench.app/Contents/MacOS/mantidpython --classic
     import mantid.simpleapi
@@ -260,7 +260,7 @@ If this does not work, try launching with:
 
 7. Try renaming **Config files**:
 
-.. code-block:: python
+.. code-block:: shell
 
 	cd $HOME/.config/mantidproject
 	mv mantidproject.ini mantidproject.ini.backup
@@ -275,11 +275,11 @@ Advanced Options:
 
 8. Check the PATH for conflicts with Mantid: e.g. Anything relating to ``.local`` could be a problem.
 
-.. code-block:: python
+.. code-block:: shell
 
 	echo $PATH
 
-.. code-block:: python
+.. code-block:: shell
 
     cd /Applications/MantidWorkbench.app/Contents/MacOS/
     python -c "import sys; import os; import pprint; pprint.pprint(sys.path); pprint.pprint(os.environ)"

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 from qtpy import QtGui
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.widgets.workspacedisplay.user_notifier import UserNotifier
@@ -108,10 +109,10 @@ class DataCopier(UserNotifier):
         for i in range(top, bottom + 1):
             for j in range(left, right):
                 index = table.model().createIndex(i, j)
-                data.append(str(table.model().data(index)))
+                data.append(str(table.model().data(index, Qt.DisplayRole)))
                 data.append("\t")
             index = table.model().createIndex(i, right)
-            data.append(str(table.model().data(index)))
+            data.append(str(table.model().data(index, Qt.DisplayRole)))
             data.append("\n")
 
         # strip the string to remove the trailing new line

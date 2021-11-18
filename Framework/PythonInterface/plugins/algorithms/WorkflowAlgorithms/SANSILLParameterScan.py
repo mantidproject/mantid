@@ -139,6 +139,11 @@ class SANSILLParameterScan(PythonAlgorithm):
         _, load_ws_name = needs_loading(self.sample, "Load")
         LoadAndMerge(Filename=self.sample, OutputWorkspace=load_ws_name + "_grouped",
                      LoaderOptions={"Wavelength": self.wavelength}, startProgress=0, endProgress=0.7)
+
+        # Omega scans are loaded as histogram data for compatibility reasons, but we need point data from now on.
+        # Converting from histogram to point data is straight forward and no meaningful information can be lost.
+        ConvertToPointData(InputWorkspace=load_ws_name + "_grouped", OutputWorkspace=load_ws_name + "_grouped")
+
         ConjoinXRuns(InputWorkspaces=load_ws_name + "_grouped",
                      OutputWorkspace=load_ws_name + "_joined",
                      SampleLogAsXAxis=self.observable, startProgress=0.7, endProgress=0.75)

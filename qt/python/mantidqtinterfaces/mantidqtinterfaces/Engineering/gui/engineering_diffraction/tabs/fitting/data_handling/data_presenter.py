@@ -30,7 +30,7 @@ class FittingDataPresenter(object):
         self.view.set_on_seq_fit_clicked(self._start_seq_fit)
         self.view.set_on_serial_fit_clicked(self._start_serial_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
-        self.view.set_on_bank_changed(self._update_file_filter)
+        self.view.set_on_region_changed(self._update_file_filter)
         self.view.set_on_xunit_changed(self._update_file_filter)
         self.view.set_table_selection_changed(self._handle_selection_changed)
 
@@ -61,8 +61,8 @@ class FittingDataPresenter(object):
         ws_list = self.model.get_ws_list()
         self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=False)
 
-    def _update_file_filter(self, bank, xunit):
-        self.view.update_file_filter(bank, xunit)
+    def _update_file_filter(self, region, xunit):
+        self.view.update_file_filter(region, xunit)
 
     def on_load_clicked(self):
         if self._validate():
@@ -264,7 +264,7 @@ class FittingDataPresenter(object):
             return False
         return True
 
-    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=100,
+    def _add_row_to_table(self, ws_name, row, run_no=None, bank=None, checked=False, bgsub=False, niter=50,
                           xwindow=None, SG=True):
 
         words = ws_name.split("_")
@@ -272,9 +272,9 @@ class FittingDataPresenter(object):
         if not xwindow:
             ws = self.model.get_loaded_workspaces()[ws_name]
             if ws.getAxis(0).getUnit().unitID() == "TOF":
-                xwindow = 1000
+                xwindow = 600
             else:
-                xwindow = 0.05
+                xwindow = 0.02
         if run_no is not None and bank is not None:
             self.view.add_table_row(run_no, bank, checked, bgsub, niter, xwindow, SG)
         elif len(words) == 4 and words[2] == "bank":

@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<detector-grouping idf-date="1900-01-31T23:59:59" instrument="ENGIN-X">
+	<group ID="0">
+		<detids>200001-200100</detids>
+	</group>
+	<group ID="1">
+		<detids>100001-100120</detids>
+	</group>
+	<group ID="2">
+		<detids>101001-101120</detids>
+	</group>
+	<group ID="3">
+		<detids>102001-102120</detids>
+	</group>
+	<group ID="4">
+		<detids>103001-103120</detids>
+	</group>
+	<group ID="5">
+		<detids>104001-104120</detids>
+	</group>
+	<group ID="6">
+		<detids>105001-105120</detids>
+	</group>
+	<group ID="7">
+		<detids>106001-106120</detids>
+	</group>
+	<group ID="8">
+		<detids>107001-107120</detids>
+	</group>
+	<group ID="9">
+		<detids>108001-108120</detids>
+	</group>
+	<group ID="10">
+		<detids>109001-109120</detids>
+	</group>
+
+	<group ID="11">
+		<detids>110001-110120</detids>
+	</group>
+	<group ID="12">
+		<detids>111001-111120</detids>
+	</group>
+	<group ID="13">
+		<detids>112001-112120</detids>
+	</group>
+	<group ID="14">
+		<detids>113001-113120</detids>
+	</group>
+	<group ID="15">
+		<detids>114001-114120</detids>
+	</group>
+	<group ID="16">
+		<detids>115001-115120</detids>
+	</group>
+	<group ID="17">
+		<detids>116001-116120</detids>
+	</group>
+	<group ID="18">
+		<detids>117001-117120</detids>
+	</group>
+	<group ID="19">
+		<detids>118001-118120</detids>
+	</group>
+	<group ID="20">
+		<detids>119001-119120</detids>
+	</group>
+</detector-grouping>

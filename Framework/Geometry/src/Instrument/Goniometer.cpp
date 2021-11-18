@@ -331,6 +331,7 @@ void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
   int num_axes;
   file->readData("num_axes", num_axes);
   motors.clear();
+  motors.reserve(num_axes);
   for (int i = 0; i < num_axes; i++) {
     GoniometerAxis newAxis;
     newAxis.loadNexus(file, "axis" + Strings::toString(i));

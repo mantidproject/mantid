@@ -111,7 +111,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
     def create_test_settings_presenter(self):
-        settings_model = SettingsModel()
+        settings_model = mock.create_autospec(SettingsModel)
         settings_view = mock.create_autospec(SettingsView)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
@@ -166,7 +166,8 @@ class EngineeringDiffractionDecoderTest(unittest.TestCase):
         _create_fit_workspace()
 
     def tearDown(self):
-        self.gui.close()
+        if hasattr(self, 'gui'):
+            self.gui.close()
 
     def test_blank_gui_decodes(self):
         blank_dict = {'encoder_version': IO_VERSION, 'current_tab': 0, 'settings_dict': SETTINGS_DICT}

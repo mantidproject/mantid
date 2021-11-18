@@ -8,7 +8,7 @@ Building with CMake
   :local:
 
 CMake is the build system for the entirety of Mantid (Framework, MantidQt and MantidWorkbench). It is used to generate native build files for your platform, which can be Makefiles (for use with make, nmake or jom) for command line builds or project/solution files for an IDE (e.g. Visual Studio, Eclipse, Qt Creator, XCode).
-For a "how is it used version" of this guide, look at the scripts used on the builservers for `windows <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/buildscript.bat>`_ or `linux/osx <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/buildscript>`_.
+For a "how is it used version" of this guide, look at the scripts used on the builservers for `windows <https://github.com/mantidproject/mantid/blob/main/buildconfig/Jenkins/buildscript.bat>`_ or `linux/osx <https://github.com/mantidproject/mantid/blob/master/buildconfig/Jenkins/buildscript>`_.
 
 Environment
 ###########
@@ -142,3 +142,35 @@ Tips
 
 * Running unit test executables directly with the CMake-generated ``Mantid.properties`` file will lead to a bunch of logging output to the console. You are encouraged to use CTest instead, which suppresses this output automatically. Otherwise, adding the line ``logging.channels.consoleChannel.class = NullChannel`` to your Mantid.user.properties file will turn if off.
 * If you have more than one gcc and want to build with a version other than the default (e.g. on RedHat), setting CC & CXX environment variables is one way to make it so.
+
+Build system customisation using CMake variables
+###########################################################
+
+The Mantid CMake build can be configured using several ENABLE_XXX variables, for instance ENABLE_DOCS, ENABLE_WORKBENCH and ENABLE_OPENGL
+A full list of these variables, with a description, can be viewed in the CMake GUI after the project has been configured.
+
+Component builds of mantid can be performed using the `MANTID_FRAMEWORK_LIB`, `MANTID_QT_LIB` and `ENABLE_WORKBENCH` cmake variables.
+For instance, we can build just the framework element using,
+
+.. code-block:: sh
+
+  cmake \
+  -DMANTID_FRAMEWORK_LIB=BUILD \
+  -DMANTID_QT_LIB=OFF \
+  -DENABLE_WORKBENCH=OFF \
+  -GNinja \
+  ../
+
+and likewise a mantidqt only build with,
+
+.. code-block:: sh
+
+  cmake \
+  -DMANTID_FRAMEWORK_LIB=SYSTEM \
+  -DMANTID_QT_LIB=BUILD \
+  -DENABLE_WORKBENCH=OFF \
+  -GNinja \
+  ../
+
+Specifying `MANTID_FRAMEWORK_LIB=SYSTEM` requires that we have installed the Framework and its cmake config files somewhere on the CMAKE_PREFIX_PATH.
+This will enable the framework to be found using `find_package(MantidFramework)`.

@@ -51,7 +51,7 @@ spectra.
 More information about the implemented working equations can be found :ref:`here <DynamicalStructureFactorFromAbInitio>`.
 
 Abins is in constant development and suggestions for improvements are very welcome. For any such contributions please
-contact Dr. Sanghamitra Mukhopadhyay (sanghamitra.mukhopadhyay@stfc.ac.uk).
+contact Dr. Sanghamitra Mukhopadhyay.
 If you are developing or hacking on Abins, see the :ref:`AbinsImplementation` notes which outline some of the key conventions, practices and pitfalls.
 
 If Abins is used as part of your data analysis routines, please cite the relevant reference [1]_.

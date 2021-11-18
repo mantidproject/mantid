@@ -28,7 +28,7 @@ int countItemsForLocation(ReductionJobs const &jobs, MantidWidgets::Batch::RowLo
 
   // Rows have a single processing step but we want to ignore them if their
   // parent group is also in the selection or they will be counted twice.
-  if (isRowLocation(location) && containsPath(locations, {groupOf(location)}))
+  if (isRowLocation(location) && containsPath(locations, MantidWidgets::Batch::RowLocation({groupOf(location)})))
     return 0;
 
   auto const &item = jobs.getItemFromPath(location);
@@ -214,7 +214,9 @@ void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfigu
   algorithms.emplace_back(std::move(algorithm));
 }
 
-AlgorithmRuntimeProps BatchJobManager::rowProcessingProperties() const { return createAlgorithmRuntimeProps(m_batch); }
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcessingProperties() const {
+  return createAlgorithmRuntimeProps(m_batch);
+}
 
 void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);

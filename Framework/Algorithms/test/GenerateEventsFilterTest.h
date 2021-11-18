@@ -45,7 +45,7 @@ EventWorkspace_sptr createEventWorkspaceIntLog() {
   EventWorkspace_sptr eventws = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(2, 2, true);
 
   // 2. Run star time
-  int64_t factor = static_cast<int64_t>(1.0E9 + 0.5);
+  int64_t factor = static_cast<int64_t>(1.0E9);
   int64_t runstarttime_ns = 10 * factor;
   int64_t runstoptime_ns = 22 * factor;
   int64_t pulsetime_ns = 5 * factor / 10;
@@ -216,6 +216,221 @@ public:
 
     // 5. Clean
     AnalysisDataService::Instance().remove("Splitters01");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters with logarithmic time bins
+   */
+  void test_genTimeLogInterval() {
+    // Create input Workspace
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
+      std::cout << "Spectrum " << i << ": max pulse time = " << eventWS->getSpectrum(i).getPulseTimeMax() << " = "
+                << eventWS->getSpectrum(i).getPulseTimeMin().totalNanoseconds() << "\n";
+
+    int64_t basetimeinterval_ns = 10;
+
+    // 2. Init and set property
+    GenerateEventsFilter alg;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters01_log"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "InfoWS_log");)
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StartTime", "10"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StopTime", "1000"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+
+    // 3. Running and get result
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Check output
+    DataObjects::SplittersWorkspace_sptr splittersws = std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("Splitters01_log"));
+
+    TS_ASSERT(splittersws);
+
+    size_t numintervals = 7;
+    TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numintervals);
+
+    std::string runstarttimestr = eventWS->run().getProperty("run_start")->value();
+    Types::Core::DateAndTime runstarttime(runstarttimestr);
+    int64_t runstarttime_ns = runstarttime.totalNanoseconds();
+
+    // b) First interval
+    Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
+    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), basetimeinterval_ns + runstarttime_ns);
+    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), basetimeinterval_ns * 2 + runstarttime_ns);
+    TS_ASSERT_EQUALS(splitter0.index(), 0);
+
+    // c) Last interval
+    Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
+    TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(), runstarttime.totalNanoseconds() + 1000);
+    TS_ASSERT_EQUALS(splitterf.index(), numintervals - 1);
+
+    // d) Randomly
+    Kernel::SplittingInterval splitterR = splittersws->getSplitter(5);
+    Types::Core::DateAndTime t0 = splitterR.start();
+    Types::Core::DateAndTime tf = splitterR.stop();
+    int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
+    TS_ASSERT_EQUALS(dt_ns, basetimeinterval_ns * static_cast<int64_t>(std::pow(2, 5)));
+    int64_t dt_runtimestart = t0.totalNanoseconds() - runstarttime_ns;
+    TS_ASSERT_EQUALS(dt_runtimestart, basetimeinterval_ns * static_cast<int64_t>(std::pow(2, 5)));
+
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Splitters01_log");
+    AnalysisDataService::Instance().remove("InfoWS_log");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters with reverse logarithmic time bins
+   */
+  void test_genTimeReverseLogInterval() {
+    // Create input Workspace
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
+      std::cout << "Spectrum " << i << ": max pulse time = " << eventWS->getSpectrum(i).getPulseTimeMax() << " = "
+                << eventWS->getSpectrum(i).getPulseTimeMin().totalNanoseconds() << "\n";
+
+    // 2. Init and set property
+    GenerateEventsFilter alg;
+    int startTime = 1;
+    int stopTime = 8200;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters01_revlog"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "InfoWS_revlog");)
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StartTime", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StopTime", "8200"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseReverseLogarithmic", true));
+
+    // 3. Running and get result
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Check output
+    DataObjects::SplittersWorkspace_sptr splittersws = std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("Splitters01_revlog"));
+
+    TS_ASSERT(splittersws);
+
+    std::string runstarttimestr = eventWS->run().getProperty("run_start")->value();
+    Types::Core::DateAndTime runstarttime(runstarttimestr);
+    int64_t runstarttime_ns = runstarttime.totalNanoseconds();
+
+    size_t numintervals = 13; // the number of log bins then the remaining number of bins
+    // b) First interval - which is actually the last one because we are generating them from the end, ie the closest
+    // to endTime
+    Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
+    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
+    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstarttime_ns + stopTime);
+
+    TS_ASSERT_EQUALS(splitter0.index(), numintervals - 1);
+
+    TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numintervals);
+
+    // c) Last interval - ie the closest to startTime
+    Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
+    TS_ASSERT_EQUALS(splitterf.start().totalNanoseconds(), runstarttime_ns + startTime);
+    TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(),
+                     runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 12)) + 1);
+    TS_ASSERT_EQUALS(splitterf.index(), 0);
+
+    // d) Randomly
+    Kernel::SplittingInterval splitterR = splittersws->getSplitter(4);
+    Types::Core::DateAndTime t0 = splitterR.start();
+    Types::Core::DateAndTime tf = splitterR.stop();
+    int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
+    TS_ASSERT_EQUALS(dt_ns, static_cast<int64_t>(std::pow(2, 4)));
+    TS_ASSERT_EQUALS(t0.totalNanoseconds(), runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 5)) + 1);
+
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Splitters01_revlog");
+    AnalysisDataService::Instance().remove("InfoWS_revlog");
+
+    return;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Test generation of splitters with reverse logarithmic time bins in the case where the bin with values closer to
+   * start is incomplete but added (ie is bigger than the next one)
+   */
+  void test_genTimeReverseLogIntervalIncompleteBin() {
+    // Create input Workspace
+    DataObjects::EventWorkspace_sptr eventWS = createEventWorkspace();
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i)
+      std::cout << "Spectrum " << i << ": max pulse time = " << eventWS->getSpectrum(i).getPulseTimeMax() << " = "
+                << eventWS->getSpectrum(i).getPulseTimeMin().totalNanoseconds() << "\n";
+
+    // 2. Init and set property
+    GenerateEventsFilter alg;
+    int startTime = 1;
+    int stopTime = 14000;
+    alg.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", eventWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "Splitters01_revlog"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InformationWorkspace", "InfoWS_revlog");)
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimeInterval", "-1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StartTime", "1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("StopTime", "14000"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UnitOfTime", "Nanoseconds"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseReverseLogarithmic", true));
+
+    // 3. Running and get result
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // 4. Check output
+    DataObjects::SplittersWorkspace_sptr splittersws = std::dynamic_pointer_cast<DataObjects::SplittersWorkspace>(
+        AnalysisDataService::Instance().retrieve("Splitters01_revlog"));
+
+    TS_ASSERT(splittersws);
+
+    std::string runstarttimestr = eventWS->run().getProperty("run_start")->value();
+    Types::Core::DateAndTime runstarttime(runstarttimestr);
+    int64_t runstarttime_ns = runstarttime.totalNanoseconds();
+
+    size_t numintervals = 14;
+    // b) First interval - which is actually the last one because we are generating them from the end, ie the closest
+    // to endTime.
+    Kernel::SplittingInterval splitter0 = splittersws->getSplitter(0);
+    TS_ASSERT_EQUALS(splitter0.start().totalNanoseconds(), runstarttime_ns + stopTime - startTime);
+    TS_ASSERT_EQUALS(splitter0.stop().totalNanoseconds(), runstarttime_ns + stopTime);
+
+    TS_ASSERT_EQUALS(splitter0.index(), numintervals - 1);
+
+    TS_ASSERT_EQUALS(splittersws->getNumberSplitters(), numintervals);
+
+    // c) Last interval - ie the closest to startTime
+    Kernel::SplittingInterval splitterf = splittersws->getSplitter(numintervals - 1);
+    TS_ASSERT_EQUALS(splitterf.start().totalNanoseconds(), runstarttime_ns + startTime);
+    TS_ASSERT_EQUALS(splitterf.stop().totalNanoseconds(),
+                     runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 13)) + 1);
+    TS_ASSERT_EQUALS(splitterf.index(), 0);
+
+    // d) Randomly
+    Kernel::SplittingInterval splitterR = splittersws->getSplitter(4);
+    Types::Core::DateAndTime t0 = splitterR.start();
+    Types::Core::DateAndTime tf = splitterR.stop();
+    int64_t dt_ns = tf.totalNanoseconds() - t0.totalNanoseconds();
+    TS_ASSERT_EQUALS(dt_ns, static_cast<int64_t>(std::pow(2, 4)));
+    TS_ASSERT_EQUALS(t0.totalNanoseconds(), runstarttime_ns + stopTime - static_cast<int>(std::pow(2, 5)) + 1);
+
+    // 5. Clean
+    AnalysisDataService::Instance().remove("Splitters01_revlog");
+    AnalysisDataService::Instance().remove("InfoWS_revlog");
 
     return;
   }
@@ -464,7 +679,9 @@ public:
     int64_t pulsetime_ns = 100000;
 
     Types::Core::DateAndTime runstarttime(runstarttime_ns);
+    Types::Core::DateAndTime runstoptime(runstoptime_ns);
     eventws->mutableRun().addProperty("run_start", runstarttime.toISO8601String());
+    eventws->mutableRun().addProperty("run_end", runstoptime.toISO8601String());
 
     // Proton charge log
     Kernel::TimeSeriesProperty<double> *protonchargelog = new Kernel::TimeSeriesProperty<double>("proton_charge");

@@ -19,7 +19,8 @@
                 "Qt5_DIR": "$env{CONDA_PREFIX}/lib/cmake/qt5",
                 "HDF5_ROOT": "$env{CONDA_PREFIX}",
                 "OpenSSL_ROOT": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
+                "CONDA_ENV": true,
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
@@ -31,7 +32,7 @@
             "generator": "Visual Studio 16 2019",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true
+                "CONDA_ENV": true
             }
         },
         {
@@ -42,10 +43,11 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
             }
         },
         {
@@ -56,13 +58,12 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Release",
                 "ENABLE_PRECOMMIT": "OFF",
                 "ENABLE_CPACK": "ON",
-                "ENABLE_MANTIDPLOT": "OFF",
                 "DOCS_HTML": "ON",
                 "ENABLE_CONDA": "ON",
                 "COLORED_COMPILER_OUTPUT": "OFF"
@@ -76,13 +77,12 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "ENABLE_PRECOMMIT": "OFF",
                 "ENABLE_CPACK": "ON",
-                "ENABLE_MANTIDPLOT": "OFF",
                 "DOCS_HTML": "ON",
                 "ENABLE_CONDA": "ON",
                 "COLORED_COMPILER_OUTPUT": "OFF",
@@ -97,13 +97,12 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "ENABLE_PRECOMMIT": "OFF",
                 "ENABLE_CPACK": "ON",
-                "ENABLE_MANTIDPLOT": "OFF",
                 "DOCS_HTML": "ON",
                 "ENABLE_CONDA": "ON",
                 "COLORED_COMPILER_OUTPUT": "OFF",
@@ -118,13 +117,12 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "ENABLE_PRECOMMIT": "OFF",
                 "ENABLE_CPACK": "ON",
-                "ENABLE_MANTIDPLOT": "OFF",
                 "DOCS_HTML": "ON",
                 "ENABLE_CONDA": "ON",
                 "COLORED_COMPILER_OUTPUT": "OFF",
@@ -139,18 +137,18 @@
             "generator": "Ninja",
             "cacheVariables": {
                 "CMAKE_PREFIX_PATH": "$env{CONDA_PREFIX}",
-                "CONDA_BUILD": true,
+                "CONDA_ENV": true,
                 "CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH": "FALSE",
                 "CMAKE_BUILD_TYPE": "Debug",
                 "ENABLE_PRECOMMIT": "OFF",
                 "ENABLE_CPACK": "ON",
-                "ENABLE_MANTIDPLOT": "OFF",
                 "DOCS_HTML": "ON",
                 "ENABLE_CONDA": "ON",
                 "COLORED_COMPILER_OUTPUT": "OFF",
                 "COVERAGE": "OFF",
-                "TESTING_TIMEOUT": "1200"
+                "TESTING_TIMEOUT": "1200",
+                "CMAKE_CXX_FLAGS_DEBUG": "-g -O0"
             }
         }
     ]

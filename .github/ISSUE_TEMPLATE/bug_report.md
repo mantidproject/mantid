@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!-- Issues which impact security should have a Vulnerability label added to them -->
+
 <!-- If this issue is raised on behalf of a user they should be named here.
 **Original reporter:** [username facility]/[nobody]
 -->

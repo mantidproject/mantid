@@ -2,6 +2,13 @@
 <parameter-file instrument="D7" valid-from="1900-01-01T00:00:00">
 
   <component-link name="D7">
+    <parameter name="number_banks" type="int" visible="false">
+      <value val="3" />
+    </parameter>
+    <parameter name="number_pixels_per_bank" type="int" visible="false">
+      <value val="44" />
+    </parameter>
+
     <!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
 	 See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
 	 operators -->
@@ -25,17 +32,17 @@
     </parameter>
 
     <parameter name="logbook_default_parameters" type="string" visible="false">
-      <value val="wavelength:/entry0/D7/monochromator/wavelength:f,
+      <value val="proposal_number:/entry0/user/proposal:s,
 		  experiment_identifier:/entry0/experiment_identifier:s,
 		  start_time:/entry0/start_time:s,
-		  end_time:/entry0/end_time:s,
-		  duration:/entry0/duration:d" />
+		  total_duration:/entry0/duration+/entry1/duration+/entry2/duration+/entry3/duration+/entry4/duration+/entry5/duration:d,
+		  count_repeater:/entry0/duration//entry1/duration:f,
+		  polarisation:/entry0/D7/POL/actual_state+/entry2/D7/POL/actual_state+/entry4/D7/POL/actual_state:s" />
     </parameter>
     <parameter name="logbook_optional_parameters" type="string" visible="false">
-      <value val="TOF:/entry0/acquisition_mode:d,
-		  polarisation:/entry0/D7/POL/actual_state+/entry0/D7/POL/actual_stateB1B2:s" />
+      <value val="wavelength:/entry0/D7/monochromator/wavelength:f,
+		  TOF:/entry0/acquisition_mode:d" />
     </parameter>
 
   </component-link>
 </parameter-file>
-

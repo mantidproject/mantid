@@ -22,12 +22,20 @@ Set up
    search paths. Ensure the Training data directory is in the search
    directories.
 #. If you haven't set one up yet, add a folder to save test data into later.
+#. Set the default save directory in ``Manage Directories``
 #. Click OK on the manage-directories dialog and ensure the ``Save Path`` on
-   the SANS GUI displays the correct save path.
+   the SANS GUI (below batch file) displays the correct save path.
 #. Click ``Load User File``; from the Training data in the ``loqdemo`` folder,
    choose ``MaskFile.toml``.
 #. Click ``Load Batch File``; from the Training data in the ``loqdemo`` folder,
    choose ``batch_mode_reduction.csv``.
+
+Automatic Save Selection
+########################
+#. Switch between 1D and 2D at the bottom of the screen, it should automatically switch
+   between CanSAS and NXcanSAS
+#. Change any of the tick boxes (e.g. tick RKH), and switch between 1D and 2D. It should
+   not change.
 
 Runs table editing
 ##################
@@ -82,11 +90,11 @@ In the ``Settings`` tab:
 #. Click ``Display Mask``.
 #. This should give an instrument view with a circle at the centre.
 #. Go to ``Q, Wavelength, Detector Limits`` sub-tab.
-#. Change the ``Phi Limit`` from 0 to 45 and uncheck ``use mirror sector``.
+#. Change the ``Phi Limit`` to read 0 to 45 and uncheck ``use mirror sector``.
 #. Go to ``Mask`` sub-tab.
 #. Click ``Display Mask``.
 #. This should give an instrument view where only angles 0-45 are unmasked.
-#. Change the settings back to -90 - 90 and reselect ``use mirror sector``.
+#. Change the settings back to -90 to 90 and reselect ``use mirror sector``.
 
 Processing
 ##########
@@ -102,7 +110,7 @@ Processing
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory - there should be two saved output files
-   (an ``.xml`` and ``.h5`` file) for each main output as well as the
+   (an ``.xml`` and ``.h5`` file) for each main output (three types) as well as the
    unsubtracted can and sample workspaces, i.e. six output files for each row.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Change the contents of the first cell in the first row to ``74045`` and click
@@ -112,9 +120,8 @@ Processing
 
 *2D reduction*
 
-#. On the ``Runs`` tab, under ``Reduction`` select ``2D``.
-#. Under ``Save Options``, check that ``NXcanSAS (1D/2D)`` is still ticked, and
-   that ``CanSAS (1D)`` is greyed out.
+#. Switch to 2D and manually untick CanSAS (since we have manually
+   changed the save options at this point)
 #. Tick the ``Plot Results`` box.
 #. Click ``Process All``.
 #. A plot window will open; initially empty, then with a line.
@@ -153,10 +160,9 @@ Beam centre finder
 
 In the ``Beam centre`` tab:
 
-#. Both the ``Update main-detector`` and ``Update Hab`` checkboxes should be
-   checked and enabled.
-#. Click Run.
-#. A plot should appear after some seconds, with four lines.
+#. In the drop down run with ``main-detector``, check the values in the first row have changed on completion
+#. Change to ``Hab`` and re-run ensuring only the values for the front has changed
+#. For both plot should appear after some seconds, with four lines.
 #. The four lines should gradually get closer together.
 #. This will run for some time, probably minutes.
 

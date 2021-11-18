@@ -123,7 +123,7 @@ target_include_directories(
 generate_mantid_export_header(Reflectometry FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS Reflectometry PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS Reflectometry INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

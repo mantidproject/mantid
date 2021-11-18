@@ -8,7 +8,7 @@ The Automated Build Process
 Summary
 ^^^^^^^
 
-If your changes break the master builds in any way, on any platform,
+If your changes break the ``main`` builds in any way, on any platform,
 then it is your responsibility to fix the error immediately!
 
 The Details
@@ -36,7 +36,7 @@ to ask someone who does.
 Other Notes
 ^^^^^^^^^^^
 
-The build will fail if it cannot be cleanly merged with master.
+The build will fail if it cannot be cleanly merged with main.
 
 Leeroy will check every 10 minutes for any missed builds, should the
 GitHub hooks fail to activate or the build server was down when the
@@ -48,23 +48,23 @@ The pull request builder we are using is called `Leeroy
 You can find a list of all the pull request Jenkins jobs at `here
 <http://builds.mantidproject.org/view/Pull%20Requests/>`_.
 
-Master Pipeline
-^^^^^^^^^^^^^^^
+Main Pipeline
+^^^^^^^^^^^^^
 
-The `master pipeline <http://builds.mantidproject.org/view/Master%20Pipeline/>`_
-is a series of jobs that periodically run against code on the ``master`` branch.
+The `main pipeline <http://builds.mantidproject.org/view/Main%20Pipeline/>`_
+is a series of jobs that periodically run against code on the ``main`` branch.
 Their purpose is to provide reasonable assurance that the code currently in
-``master`` is usable in its current state.
+``main`` is usable in its current state.
 
 The main tasks carried out by the pipeline are, for each supported platform:
 
-* Build Mantid and installers (``master_clean-PLATFORM``)
-* Run automated testing (``master_clean-PLATFORM``,
-  ``master_systemtests-PLATFORM``, ``master_doctests``)
-* Deploy installers to nightly download locations (``master_deploy``)
+* Build Mantid and installers (``main_clean-PLATFORM``)
+* Run automated testing (``main_clean-PLATFORM``,
+  ``main_systemtests-PLATFORM``)
+* Deploy installers to nightly download locations (``main_deploy``)
 
 The pipeline view in Jenkins shows the order of dependency between these jobs.
 
-The most upstream jobs (i.e. ``master_clean-PLATFORM``) are triggered to start
-at midnight UTC assuming there were changes pushed to the ``master`` branch
+The most upstream jobs (i.e. ``main_clean-PLATFORM``) are triggered to start
+at midnight UTC assuming there were changes pushed to the ``main`` branch
 since the last time they ran.

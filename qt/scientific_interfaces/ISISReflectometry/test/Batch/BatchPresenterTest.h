@@ -498,6 +498,13 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyBatchLoaded() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_runsPresenter, notifyBatchLoaded());
+    presenter->notifyBatchLoaded();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockBatchView> m_view;
   NiceMock<MockBatchJobManager> *m_jobManager;

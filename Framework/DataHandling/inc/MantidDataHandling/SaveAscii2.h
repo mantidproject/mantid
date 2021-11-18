@@ -76,6 +76,7 @@ private:
   std::pair<std::string, std::string> sampleLogValueUnit(const std::string &logName);
   /// Write file header
   void writeFileHeader(const std::vector<std::string> &logList, std::ofstream &file);
+  std::string createSpectrumFilename(size_t workspaceIndex);
 
   /// Map the separator options to their string equivalents
   std::map<std::string, std::string> m_separatorIndex;
@@ -90,6 +91,7 @@ private:
   std::vector<std::string> m_metaData;
   std::map<std::string, std::vector<std::string>> m_metaDataMap;
   std::unique_ptr<AxisHelper::AxisProxy> m_axisProxy;
+  const std::vector<std::string> m_asciiExts = {".dat", ".txt", ".csv"};
 };
 } // namespace DataHandling
 } // namespace Mantid

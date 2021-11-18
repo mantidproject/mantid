@@ -60,13 +60,13 @@ Calibration
     :width: 900px
 
 11. Check that in your save location there is a Calibration folder containing three .prm files
-   `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
+    `ENGINX_305738` with the suffixes `_all_banks`, `_bank_1`, `_bank_2`.
 
 12. Close down the Engineering Diffraction gui and reopen it. The Load Existing Calibration radio
     button should be checked on the Calibration tab and the path should be populated with the
-    `_bank_2`.prm file generated earlier in this test
+    `_all_banks`.prm file generated earlier in this test.
 
-13. Click Load button to reload the .prm file
+13. In the Load Existing Calibration box browse to the `_bank_2`.prm file and click the Load button.
 
 Focus
 -----
@@ -77,7 +77,7 @@ Focus
 
 3. Tick the Plot Focused Workspace option and click Focus. It should produce a plot of a single spectrum for bank 2.
 
-4. Go back to the Calibration tab and load in an existing calibration for both banks `ENGINX_305738_all_banks.prm`
+4. Go back to the Calibration tab and load in an existing calibration for both banks e.g. `ENGINX_305738_all_banks.prm`
 
 5. Go back to the Focus tab and click Focus, after completing calibration it should produce a plot.
 
@@ -85,9 +85,8 @@ Focus
     :width: 900px
 
 6. Check that in your save location there is a Focus folder containing the following files:
-
-   - ENGINX_305761_307521_sample_logs.csv
-   - `ENGINX_305761_307521_bank_1_dSpacing`, `ENGINX_305761_307521_bank_2_dSpacing`, `ENGINX_305761_307521_bank_1_TOF` and `ENGINX_305761_307521_bank_2_TOF` for each of `.abc`, `.gss`, and `.nxs`.
+   - `ENGINX_305761_307521_bank_1_dSpacing.nxs`, `ENGINX_305761_307521_bank_2_dSpacing.nxs`, `ENGINX_305761_307521_bank_1_TOF.nxs` and `ENGINX_305761_307521_bank_2_TOF.nxs` (i.e. two files, for the xunits TOF and d-Spacing, per spectrum)
+   - `ENGINX_305761_307521_all_banks.gss` and `ENGINX_305761_307521_all_banks.abc` (i.e. two ASCII files per run - each file contains all the spectra for a focused run).
 
 Test 2
 ^^^^^^
@@ -114,12 +113,14 @@ This test covers the Cropping functionality in the Calibration tab.
 
 5. Check that only one .prm and one .nxs output file was generated.
 
-6. Go to focus tab and click Focus - again this will generate a single axis on the figure, rather than two.
+6. Go to focus tab and click Focus.
 
 7. Change the RB number to "Custom".
 
 8. Repeat steps 2-5 this time using Custom Spectra `1200-1400` (these spectrum number correspond to the South Bank). Please note that some custom spectra values may
    cause the algorithms to fail.
+
+9. Repeat steps 2-5 with the Texture grouping - there should be 20 spectra per run.
 
 
 Test 4
@@ -207,4 +208,3 @@ This tests the serial fitting capability of the UI (where all loaded workspaces 
 2. The `Serial Fit` button should now be enabled. Click it and the  group of fit workspaces should appear in the ADS, each with a row for each of the runs in the table. All the runs should have been fitted.
 
 3. The order of the runs in the serial fit should be obtainable from the log at notice level - check that this corresponds to the order of the runs in the table.
-

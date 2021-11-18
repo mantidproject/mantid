@@ -53,7 +53,7 @@ public:
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui, const IMainWindowView *mww);
-  void decodeExperiment(const QtExperimentView *gui, const QMap<QString, QVariant> &map);
+  void decodeExperiment(QtExperimentView *gui, const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab, const QMap<QString, QVariant> &map);
   void decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex, int columnsNum, const QList<QVariant> &list);
   void decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list);
