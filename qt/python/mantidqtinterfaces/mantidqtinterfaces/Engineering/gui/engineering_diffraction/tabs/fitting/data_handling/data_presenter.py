@@ -54,13 +54,12 @@ class FittingDataPresenter(object):
         self.model.update_fit(fit_props)
 
     def _start_seq_fit(self):
-        ws_list = self.model.get_active_ws_list()
-        ws_list = self.model.get_ws_sorted_by_primary_log(ws_list.keys())
-        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=True)
+        ws_name_list = self.model.get_active_ws_sorted_by_primary_log()
+        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=True)
 
     def _start_serial_fit(self):
-        ws_list = self.model.get_active_ws_list()
-        self.fit_all_started_notifier.notify_subscribers(ws_list, do_sequential=False)
+        ws_name_list = self.model.get_active_ws_name_list()
+        self.fit_all_started_notifier.notify_subscribers(ws_name_list, do_sequential=False)
 
     def _update_file_filter(self, region, xunit):
         self.view.update_file_filter(region, xunit)
@@ -144,10 +143,7 @@ class FittingDataPresenter(object):
                     bank = "cropped"
                 active_ws_name = self.model.get_active_ws_name(name)
                 plotted = active_ws_name in self.plotted
-                if name in self.model.get_bg_params():
-                    self._add_row_to_table(name, i, run_no, bank, plotted, *self.model.get_bg_params()[name])
-                else:
-                    self._add_row_to_table(name, i, run_no, bank, plotted)
+                self._add_row_to_table(name, i, run_no, bank, plotted, *self.model.get_bg_params()[name])
             except RuntimeError:
                 self._add_row_to_table(name, i)
 
@@ -162,10 +158,10 @@ class FittingDataPresenter(object):
         self._repopulate_table()
 
     def _remove_all_tracked_workspaces(self):
-        removed_ws_list = self.model.delete_workspaces()
-        for ws in removed_ws_list:
-            self.plot_removed_notifier.notify_subscribers(ws)
-            self.plotted.discard(ws.name())
+        self.model.delete_workspaces()
+        self.all_plots_removed_notifier.notify_subscribers()
+        self.plotted.clear()
+        self.row_numbers.clear()
         self._remove_all_table_rows()
 
     def _plotBG(self):
@@ -185,10 +181,10 @@ class FittingDataPresenter(object):
                 # Plot check box
                 ws = self.model.get_active_ws(loaded_ws_name)
                 ws_name = self.model.get_active_ws_name(loaded_ws_name)
-                if self.view.get_item_checked(row, col):  # Plot Box is checked
+                if is_plotted:
                     self.plot_added_notifier.notify_subscribers(ws)
                     self.plotted.add(ws_name)
-                else:  # Plot box is unchecked
+                else:
                     self.plot_removed_notifier.notify_subscribers(ws)
                     self.plotted.discard(ws_name)
             elif col == 3:

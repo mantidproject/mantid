@@ -16,7 +16,7 @@ from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
 from matplotlib.pyplot import subplots
 from numpy import full, nan, max, array, vstack, argsort
 from itertools import chain
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from re import findall, sub
 
 
@@ -44,7 +44,7 @@ class WorkspaceRecord:
 
 class WorkspaceRecordContainer:
     def __init__(self):
-        self.dict = {}
+        self.dict = OrderedDict()
 
     def __getitem__(self, key):
         return self.dict[key]
@@ -84,8 +84,11 @@ class WorkspaceRecordContainer:
     def get_bg_params_dict(self):
         return dict([(key, value.bg_params) for key, value in self.dict.items()])
 
-    def get_active_ws_list(self):
-        return dict([(key, value.get_active_ws) for key, value in self.dict.items()])
+    def get_active_ws_name_list(self):
+        return [self.get_active_ws_name(key) for key, value in self.dict.items()]
+
+    def get_active_ws_dict(self):
+        return dict([(self.get_active_ws_name(key), value.get_active_ws()) for key, value in self.dict.items()])
 
     def get_ws_names_dict(self):
         return dict([(key, [value.bgsub_ws_name, value.bg_params]) for key, value in self.dict.items()])
@@ -286,8 +289,8 @@ class FittingDataModel(object):
     def get_loaded_ws_list(self):
         return list(self._data_workspaces.get_loaded_ws_dict().keys())
 
-    def get_active_ws_list(self):
-        return self._data_workspaces.get_active_ws_list()
+    def get_active_ws_name_list(self):
+        return self._data_workspaces.get_active_ws_name_list()
 
     def get_active_ws(self, loaded_ws_name):
         return self._data_workspaces[loaded_ws_name].get_active_ws()
@@ -295,13 +298,15 @@ class FittingDataModel(object):
     def get_active_ws_name(self, loaded_ws_name):
         return self._data_workspaces.get_active_ws_name(loaded_ws_name)
 
-    def get_ws_sorted_by_primary_log(self, ws_name_list):
-        tof_ws_inds = [ind for ind, ws in enumerate(ws_name_list) if
-                       self._data_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
+    def get_active_ws_sorted_by_primary_log(self):
+        active_ws_dict = self._data_workspaces.get_active_ws_dict()
+        tof_ws_inds = [ind for ind, ws in enumerate(active_ws_dict.values()) if
+                       ws.getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                   "primary_log")
         sort_ascending = get_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                                      "sort_ascending")
+        ws_name_list = list(active_ws_dict.keys())
         if primary_log:
             log_table = ADS.retrieve(primary_log)
             isort = argsort(array(log_table.column('avg')))
@@ -395,6 +400,7 @@ class FittingDataModel(object):
         group_name = self._log_workspaces.name().split('_log')[0] + '_fits'
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
 
+    # handle ADS remove. name workspace has already been deleted
     def remove_workspace(self, name):
         ws_loaded = self._data_workspaces.get(name, None)
         if ws_loaded:
