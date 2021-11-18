@@ -27,7 +27,7 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 PreviewModel::PreviewModel() {
-  // This simplifies testing greatly
+  // This simplifies testing greatly, as it ensures that m_runDetails is never null
   createRunDetails("");
 }
 
@@ -87,5 +87,13 @@ void PreviewModel::createRunDetails(const std::string &workspaceName) {
 
 std::string PreviewModel::detIDsToString(std::vector<Mantid::detid_t> const &indices) const {
   return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
+}
+
+void PreviewModel::exportSummedWsToAds() const {
+  if (auto summedWs = m_runDetails->getSummedWs()) {
+    AnalysisDataService::Instance().addOrReplace("preview_summed_ws", summedWs);
+  } else {
+    g_log.error("Could not export summed WS. No rectangular selection has been made on the instrument viewer.");
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -45,7 +45,8 @@ Improvements
 - The `alpha` values on grouping tab are now to six decimal places.
 - The numerical values in the `run info` box on the home tab are now rounded to either 4 significant figures or a whole number, whichever is more precise.
 - The results table now produces errors for log values (when they are available).
-- Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis
+- Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
+- The plots no longer use scientific notation for the axis values.
 
 Bugfixes
 ########
@@ -54,6 +55,7 @@ Bugfixes
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
 - When a new results table is created the Model Analysis tab selects the default parameters to plot based on log values or parameters in the results table.
 - Undo fit now resets when the function structure changes. This prevents a bug caused by trying to revert the current function to the state of a previous one.
+- When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
 
 ALC
 ---
