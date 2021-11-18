@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "PreviewModel.h"
 #include "test/ReflMockObjects.h"
@@ -43,6 +44,18 @@ public:
     auto workspace = model.getLoadedWs();
     TS_ASSERT(workspace);
     TS_ASSERT_EQUALS(workspace->getName(), workspaceName);
+  }
+
+  void test_load_workspace_from_ads_throws_if_wrong_type() {
+    auto mockJobManager = MockJobManager();
+    EXPECT_CALL(mockJobManager, startPreprocessing(_)).Times(0);
+
+    PreviewModel model;
+    auto workspaceName = std::string("test workspace");
+    // We don't currently support workspace groups so it should throw with this type
+    AnalysisDataService::Instance().addOrReplace(workspaceName, std::make_shared<WorkspaceGroup>());
+
+    TS_ASSERT_THROWS(model.loadWorkspaceFromAds(workspaceName), std::runtime_error const &);
   }
 
   void test_load_workspace_from_file() {

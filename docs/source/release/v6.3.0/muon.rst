@@ -37,6 +37,8 @@ Muon Analysis and Frequency Domain Analysis
 New Features
 ############
 
+- Instead of plotting the confidence interval of a fit as an error bar, it is now represented by a shaded region.
+
 Improvements
 ############
 
@@ -44,6 +46,7 @@ Improvements
 - The numerical values in the `run info` box on the home tab are now rounded to either 4 significant figures or a whole number, whichever is more precise.
 - The results table now produces errors for log values (when they are available).
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
+- The plots no longer use scientific notation for the axis values.
 - On resizing priority is given to plotting.
 
 Bugfixes
@@ -81,9 +84,11 @@ Fitting Functions
 -----------------
 New Features
 ############
+- Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
 - Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
-- Added a :ref:`Power Law <func-PowerLaw>` function to MuonModelling Fit Functions.
+- Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.
 - Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
+
 
 Improvements
 ############
