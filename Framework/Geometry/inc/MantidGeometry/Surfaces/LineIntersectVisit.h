@@ -44,6 +44,7 @@ private:
   Line m_line;                         ///< The line
   Line::PType m_intersectionPointsOut; ///< The intersection point
   DistancesType m_distancesOut;        ///< The distance
+  bool m_skipProcTrack{false};         ///< Skip call to procTrack after each Accept
 
   void procTrack();
 
@@ -70,6 +71,9 @@ public:
 
   /// Prune out duplicated points and sort by distance to starting point
   void sortAndRemoveDuplicates();
+
+  ///
+  void setSkipProcTrack(bool skip) { m_skipProcTrack = skip; }
 };
 
 } // namespace Geometry

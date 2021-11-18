@@ -45,7 +45,8 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  procTrack();
+  if (!m_skipProcTrack)
+    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Plane &Surf)
@@ -55,7 +56,8 @@ void LineIntersectVisit::Accept(const Plane &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  procTrack();
+  if (!m_skipProcTrack)
+    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Cone &Surf)
@@ -65,7 +67,8 @@ void LineIntersectVisit::Accept(const Cone &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  procTrack();
+  if (!m_skipProcTrack)
+    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Cylinder &Surf)
@@ -75,7 +78,8 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  procTrack();
+  if (!m_skipProcTrack)
+    procTrack();
 }
 
 void LineIntersectVisit::Accept(const Sphere &Surf)
@@ -85,7 +89,8 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  procTrack();
+  if (!m_skipProcTrack)
+    procTrack();
 }
 
 void LineIntersectVisit::Accept(const General &Surf)
@@ -95,7 +100,8 @@ void LineIntersectVisit::Accept(const General &Surf)
 */
 {
   m_line.intersect(m_intersectionPointsOut, Surf);
-  procTrack();
+  if (!m_skipProcTrack)
+    procTrack();
 }
 
 void LineIntersectVisit::procTrack()

@@ -1083,6 +1083,12 @@ int CSGObject::interceptSurface(Geometry::Track &track) const {
   // Loop over all the surfaces to get the intercepts, i.e. populating
   // points into LI
   LineIntersectVisit LI(track.startPoint(), track.direction());
+  // NOTE:
+  // By default, LineIntersectVisit will call procTrack to process intercepts
+  // for each acceptVisitor call, which is needed to update the distance list.
+  // Since we are manually invoking sort and pruning later, there is no need
+  // to call procTrack anymore, hence we will disable it here.
+  LI.setSkipProcTrack(true);
   for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
