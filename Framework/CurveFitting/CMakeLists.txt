@@ -54,6 +54,7 @@ set(SRC_FILES
     src/FuncMinimizers/TrustRegionMinimizer.cpp
     src/FunctionDomain1DSpectrumCreator.cpp
     src/Functions/Abragam.cpp
+    src/Functions/Activation.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -129,6 +130,7 @@ set(SRC_FILES
     src/Functions/ReflectivityMulf.cpp
     src/Functions/Resolution.cpp
     src/Functions/SimpleChebfun.cpp
+    src/Functions/SmoothTransition.cpp
     src/Functions/StaticKuboToyabe.cpp
     src/Functions/StaticKuboToyabeTimesExpDecay.cpp
     src/Functions/StaticKuboToyabeTimesGausDecay.cpp
@@ -229,6 +231,7 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
     inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
     inc/MantidCurveFitting/Functions/Abragam.h
+    inc/MantidCurveFitting/Functions/Activation.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
@@ -289,6 +292,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/PawleyFunction.h
     inc/MantidCurveFitting/Functions/PeakParameterFunction.h
     inc/MantidCurveFitting/Functions/Polynomial.h
+    inc/MantidCurveFitting/Functions/PowerLaw.h
     inc/MantidCurveFitting/Functions/ProcessBackground.h
     inc/MantidCurveFitting/Functions/ProductFunction.h
     inc/MantidCurveFitting/Functions/ProductLinearExp.h
@@ -298,6 +302,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ReflectivityMulf.h
     inc/MantidCurveFitting/Functions/Resolution.h
     inc/MantidCurveFitting/Functions/SimpleChebfun.h
+    inc/MantidCurveFitting/Functions/SmoothTransition.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
@@ -395,6 +400,7 @@ set(TEST_FILES
     FunctionFactoryConstraintTest.h
     FunctionParameterDecoratorFitTest.h
     Functions/AbragamTest.h
+    Functions/ActivationTest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
@@ -458,6 +464,7 @@ set(TEST_FILES
     Functions/ReflectivityMulfTest.h
     Functions/ResolutionTest.h
     Functions/SimpleChebfunTest.h
+    Functions/SmoothTransitionTest.h
     Functions/StaticKuboToyabeTest.h
     Functions/StaticKuboToyabeTimesExpDecayTest.h
     Functions/StaticKuboToyabeTimesGausDecayTest.h

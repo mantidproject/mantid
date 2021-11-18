@@ -8,6 +8,7 @@ set(BATCH_SRC_FILES
     ReflAlgorithmFactory.cpp
     RowPreprocessingAlgorithm.cpp
     RowProcessingAlgorithm.cpp
+    SumBanksAlgorithm.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio IMPORTANT: Include files are required in
@@ -29,6 +30,7 @@ set(BATCH_INC_FILES
     ReflAlgorithmFactory.h
     RowPreprocessingAlgorithm.h
     RowProcessingAlgorithm.h
+    SumBanksAlgorithm.h
 )
 
 set(BATCH_MOC_FILES QtBatchView.h)

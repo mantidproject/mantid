@@ -75,21 +75,21 @@ public:
     TS_ASSERT_EQUALS(extractString(A), "-1 pz 5\n");
 
     // Point outside plane on the same side of the normal
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 6)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 8)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 5.1)), 0);
+    TS_ASSERT(!A.onSurface(V3D(0, 0, 6)));
+    TS_ASSERT(!A.onSurface(V3D(10, 10, 8)));
+    TS_ASSERT(!A.onSurface(V3D(10, 10, 5.1)));
     // Point on the plane
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 5)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 5)), 1);
+    TS_ASSERT(A.onSurface(V3D(0, 0, 5)));
+    TS_ASSERT(A.onSurface(V3D(10, 10, 5)));
     // test tolerance default 1e-6
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 5 + 1e-7)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 5 + 2e-6)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 5 - 1e-7)), 1);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 5 - 2e-6)), 0);
+    TS_ASSERT(A.onSurface(V3D(10, 10, 5 + 1e-7)));
+    TS_ASSERT(!A.onSurface(V3D(10, 10, 5 + 2e-6)));
+    TS_ASSERT(A.onSurface(V3D(10, 10, 5 - 1e-7)));
+    TS_ASSERT(!A.onSurface(V3D(10, 10, 5 - 2e-6)));
     // Point on flip side of the plane
-    TS_ASSERT_EQUALS(A.onSurface(V3D(0, 0, 2)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 1)), 0);
-    TS_ASSERT_EQUALS(A.onSurface(V3D(10, 10, 4.9)), 0);
+    TS_ASSERT(!A.onSurface(V3D(0, 0, 2)));
+    TS_ASSERT(!A.onSurface(V3D(10, 10, 1)));
+    TS_ASSERT(!A.onSurface(V3D(10, 10, 4.9)));
   }
 
   void testDotProduct() {

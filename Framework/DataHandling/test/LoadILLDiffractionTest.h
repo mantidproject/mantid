@@ -182,8 +182,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "967100.nxs"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DataType", "Calibrated"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
-                            "Some invalid Properties found: [ DataType ]")
+    std::string err_msg("Some invalid Properties found: \n"
+                        " DataType: Calibrated data requested, but only raw data exists in this NeXus file.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()), err_msg);
   }
 
   void test_D20_scan() {

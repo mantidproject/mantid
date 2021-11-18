@@ -9,6 +9,7 @@ set(TEST_FILES
     Batch/BatchJobManagerProcessingTest.h
     Batch/RowProcessingAlgorithmTest.h
     Batch/RowPreprocessingAlgorithmTest.h
+    Batch/SumBanksAlgorithmTest.h
     Event/EventPresenterTest.h
     MainWindow/MainWindowPresenterTest.h
     RunsTable/RunsTablePresenterRowDeletionTest.h

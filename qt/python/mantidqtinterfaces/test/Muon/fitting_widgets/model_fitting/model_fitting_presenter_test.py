@@ -172,11 +172,12 @@ class ModelFittingPresenterTest(unittest.TestCase):
 
     def test_that_handle_parameter_combinations_created_successfully_will_update_the_view(self):
         self.presenter.handle_selected_x_and_y_changed = mock.Mock()
-
+        self.presenter.update_selected_parameter_combination_workspace = mock.Mock()
         self.presenter.handle_parameter_combinations_created_successfully()
 
         self.mock_model_dataset_names.assert_has_calls([mock.call(), mock.call()])
         self.view.set_datasets_in_function_browser.assert_called_once_with(self.dataset_names)
+        self.presenter.update_selected_parameter_combination_workspace.assert_called_once()
         self.view.update_dataset_name_combo_box.assert_called_once_with(self.dataset_names, emit_signal=False)
         self.view.update_y_parameters.assert_called_once_with(self.y_parameters, self.y_parameter_types)
         self.view.update_x_parameters.assert_called_once_with(self.x_parameters, self.x_parameter_types, emit_signal=True)
@@ -218,6 +219,7 @@ class ModelFittingPresenterTest(unittest.TestCase):
         # set up mocks
         new_start_x = -5.2
         new_end_x = 42.
+        self.model.set_current_start_and_end_x = mock.Mock()
         self.model._get_new_start_xs_and_end_xs_using_existing_datasets = mock.Mock(return_value=([new_start_x],[new_end_x]))
         # check current start and end x
         self.assertEqual(self.view.start_x, 0.0)
@@ -233,6 +235,7 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.model._get_new_start_xs_and_end_xs_using_existing_datasets.assert_called_once()
         self.assertEqual(self.mock_view_start_x.mock_calls, [mock.call(), mock.call(new_start_x)])
         self.assertEqual(self.mock_view_end_x.mock_calls, [mock.call(), mock.call(new_end_x)])
+        self.model.set_current_start_and_end_x.assert_called_once_with(new_start_x, new_end_x)
 
     def test_that_clear_current_fit_function_for_undo_will_only_clear_the_current_function(self):
         self.presenter.clear_current_fit_function_for_undo()

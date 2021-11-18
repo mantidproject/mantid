@@ -832,6 +832,54 @@ class BasicFittingModelTest(unittest.TestCase):
         add_to_group.assert_not_called()
         make_group.assert_called_once_with(["ws"], "group")
 
+    def test_set_current_start_and_end_x_as_expected(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 5
+        new_end_x = 10
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, new_start_x)
+        self.assertEqual(self.model.current_end_x, new_end_x)
+
+    def test_set_current_start_and_end_x_with_start_bigger_end(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 30
+        new_end_x = 50
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, new_start_x)
+        self.assertEqual(self.model.current_end_x, new_end_x)
+
+    def test_set_current_start_and_end_x_fail(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 50
+        new_end_x = 10
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.0)
+
 
 if __name__ == '__main__':
     unittest.main()

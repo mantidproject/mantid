@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "InstViewModel.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -32,10 +33,11 @@ InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &work
 }
 
 void InstViewModel::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
-  // TODO refactor the component info stuff into the surface constructor so we don't need to get it here
   m_actor = createInstrumentViewActor(workspace);
+  m_actor->initialize(true, true);
 }
 
+// TODO refactor getting the sample pos and axis into the surface constructor so we don't need to get it here
 Mantid::Kernel::V3D InstViewModel::getSamplePos() const {
   const auto &componentInfo = m_actor->componentInfo();
   return componentInfo.samplePosition();
@@ -47,7 +49,7 @@ Mantid::Kernel::V3D InstViewModel::getAxis() const {
 
 MantidWidgets::InstrumentActor *InstViewModel::getInstrumentViewActor() const { return m_actor.get(); }
 
-std::vector<size_t> InstViewModel::detIndicesToWsIndices(std::vector<size_t> const &detIndices) const {
-  return m_actor->getWorkspaceIndices(detIndices);
+std::vector<Mantid::detid_t> InstViewModel::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
+  return m_actor->getDetIDs(detIndices);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
