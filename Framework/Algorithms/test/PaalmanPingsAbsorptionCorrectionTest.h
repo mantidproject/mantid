@@ -130,10 +130,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(absorptionCorrection_ass = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve("absorptionCorrection_ass")));
 
-    TS_ASSERT_DELTA(ass->readY(0)[0], absorptionCorrection_ass->readY(0)[0], 1e-14);
-    TS_ASSERT_DELTA(ass->readY(1)[0], absorptionCorrection_ass->readY(1)[0], 1e-14);
-    TS_ASSERT_DELTA(ass->readY(2)[0], absorptionCorrection_ass->readY(2)[0], 1e-14);
-    TS_ASSERT_DELTA(ass->readY(3)[0], absorptionCorrection_ass->readY(3)[0], 1e-14);
+    TS_ASSERT_DELTA(ass->readY(0)[0], absorptionCorrection_ass->readY(0)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->readY(1)[0], absorptionCorrection_ass->readY(1)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->readY(2)[0], absorptionCorrection_ass->readY(2)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->readY(3)[0], absorptionCorrection_ass->readY(3)[0], 1e-7);
 
     // now compare for A_c,c
     absorptionCorrectionAlg->setPropertyValue("ScatterFrom", "Container");
@@ -143,9 +143,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(absorptionCorrection_acc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve("absorptionCorrection_acc")));
 
-    TS_ASSERT_DELTA(acc->readY(0)[0], absorptionCorrection_acc->readY(0)[0], 1e-14);
-    TS_ASSERT_DELTA(acc->readY(1)[0], absorptionCorrection_acc->readY(1)[0], 1e-14);
-    TS_ASSERT_DELTA(acc->readY(2)[0], absorptionCorrection_acc->readY(2)[0], 1e-14);
-    TS_ASSERT_DELTA(acc->readY(3)[0], absorptionCorrection_acc->readY(3)[0], 1e-14);
+    TS_ASSERT_DELTA(acc->readY(0)[0], absorptionCorrection_acc->readY(0)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->readY(1)[0], absorptionCorrection_acc->readY(1)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->readY(2)[0], absorptionCorrection_acc->readY(2)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->readY(3)[0], absorptionCorrection_acc->readY(3)[0], 1e-7);
   }
 };
