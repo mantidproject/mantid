@@ -45,12 +45,14 @@ class SequentialTableWidget(object):
         if not self._check_parameter_and_values_length(parameters, values):
             return
         self.block_signals(True)
+        print("moo", values)
         self._model.set_fit_parameters_and_values(parameters, values)
         self.block_signals(False)
         self._view.resizeColumnsToContents()
 
     def set_parameter_values_for_row(self, row, parameter_values):
         self.block_signals(True)
+        print("boo", row)
         self._model.set_fit_parameter_values_for_row(row, parameter_values)
         self.block_signals(False)
         self._view.resizeColumnsToContents()
