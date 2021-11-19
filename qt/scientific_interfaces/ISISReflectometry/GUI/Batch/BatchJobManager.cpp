@@ -284,7 +284,7 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
 }
 
 size_t BatchJobManager::getNumberOfInitialisedRowsInGroup(const int groupIndex) const {
-  auto group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
+  auto const &group = m_batch.runsTable().reductionJobs().groups()[groupIndex];
   return static_cast<int>(std::count_if(group.rows().cbegin(), group.rows().cend(),
                                         [](const boost::optional<Row> &row) { return row.is_initialized(); }));
 }

@@ -148,7 +148,7 @@ ReductionJobs oneGroupWithARowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow("12345", 0.5));
-  reductionJobs.appendGroup(group1);
+  reductionJobs.appendGroup(std::move(group1));
   return reductionJobs;
 }
 

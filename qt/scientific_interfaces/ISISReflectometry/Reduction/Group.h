@@ -27,6 +27,14 @@ public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
 
+  ~Group() = default;
+
+  Group(Group&& group) = default;
+  Group(const Group &group) = delete;
+
+  Group &operator=(Group &&) = default;
+  Group &operator=(Group const &) = delete;
+
   bool isGroup() const override;
   bool isPreview() const override;
   std::string const &name() const;

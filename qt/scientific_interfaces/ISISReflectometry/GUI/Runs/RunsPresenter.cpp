@@ -429,7 +429,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
   UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
-    auto jobs = runsTable().reductionJobs();
+    auto &jobs = mutableRunsTable().mutableReductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
@@ -440,7 +440,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
       mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName());
     }
 
-    tablePresenter()->mergeAdditionalJobs(jobs);
+    // TODO remove this if tests still pass
+    // tablePresenter()->mergeAdditionalJobs(jobs);
   }
 }
 
