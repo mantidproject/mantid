@@ -48,6 +48,7 @@ Improvements
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
 - The plots no longer use scientific notation for the axis values.
 - On resizing priority is given to plotting.
+- The Sequentially Fit all button is now visible for 4K displays
 
 Bugfixes
 ########
