@@ -27,6 +27,7 @@ void QtPreviewView::loadToolbarIcons() {
   m_ui.iv_zoom_button->setIcon(MantidQt::Icons::getIcon("mdi.magnify", "black", 1.3));
   m_ui.iv_edit_button->setIcon(MantidQt::Icons::getIcon("mdi.pencil", "black", 1.3));
   m_ui.iv_rect_select_button->setIcon(MantidQt::Icons::getIcon("mdi.selection", "black", 1.3));
+  m_ui.contour_ads_export_button->setIcon(MantidQt::Icons::getIcon("mdi.file-export", "black", 1.3));
 }
 
 void QtPreviewView::subscribe(PreviewViewSubscriber *notifyee) noexcept { m_notifyee = notifyee; }
@@ -37,6 +38,7 @@ void QtPreviewView::connectSignals() const {
   connect(m_ui.iv_zoom_button, SIGNAL(clicked()), this, SLOT(onInstViewZoomClicked()));
   connect(m_ui.iv_edit_button, SIGNAL(clicked()), this, SLOT(onInstViewEditClicked()));
   connect(m_ui.iv_rect_select_button, SIGNAL(clicked()), this, SLOT(onInstViewSelectRectClicked()));
+  connect(m_ui.contour_ads_export_button, SIGNAL(clicked()), this, SLOT(onContourExportToAdsClicked()));
 }
 
 void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWorkspaceRequested(); }
@@ -44,6 +46,9 @@ void QtPreviewView::onLoadWorkspaceRequested() const { m_notifyee->notifyLoadWor
 void QtPreviewView::onInstViewZoomClicked() const { m_notifyee->notifyInstViewZoomRequested(); }
 void QtPreviewView::onInstViewEditClicked() const { m_notifyee->notifyInstViewEditRequested(); }
 void QtPreviewView::onInstViewSelectRectClicked() const { m_notifyee->notifyInstViewSelectRectRequested(); }
+void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
+
+void QtPreviewView::onContourExportToAdsClicked() const { m_notifyee->notifyContourExportAdsRequested(); }
 
 std::string QtPreviewView::getWorkspaceName() const { return m_ui.workspace_line_edit->text().toStdString(); }
 
@@ -55,9 +60,9 @@ void QtPreviewView::plotInstView(MantidWidgets::InstrumentActor *instActor, V3D 
   m_instDisplay->setSurface(std::make_shared<MantidWidgets::UnwrappedCylinder>(instActor, samplePos, axis));
   connect(m_instDisplay->getSurface().get(), SIGNAL(shapeChangeFinished()), this, SLOT(onInstViewShapeChanged()));
 }
-
 void QtPreviewView::setInstViewZoomState(bool isChecked) { m_ui.iv_zoom_button->setDown(isChecked); }
 void QtPreviewView::setInstViewEditState(bool isChecked) { m_ui.iv_edit_button->setDown(isChecked); }
+
 void QtPreviewView::setInstViewSelectRectState(bool isChecked) { m_ui.iv_rect_select_button->setDown(isChecked); }
 
 void QtPreviewView::setInstViewZoomMode() {
@@ -72,8 +77,6 @@ void QtPreviewView::setInstViewSelectRectMode() {
   m_instDisplay->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
   m_instDisplay->getSurface()->startCreatingShape2D("rectangle", Qt::green, QColor(255, 255, 255, 80));
 }
-
-void QtPreviewView::onInstViewShapeChanged() const { m_notifyee->notifyInstViewShapeChanged(); }
 
 void QtPreviewView::setInstViewToolbarEnabled(bool enable) {
   m_ui.iv_zoom_button->setEnabled(enable);

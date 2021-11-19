@@ -40,6 +40,8 @@ public:
   void notifyInstViewSelectRectRequested() override;
   void notifyInstViewShapeChanged() override;
 
+  void notifyContourExportAdsRequested() override;
+
   // JobManagerSubscriber overrides
   void notifyLoadWorkspaceCompleted() override;
   void notifySumBanksCompleted() override;

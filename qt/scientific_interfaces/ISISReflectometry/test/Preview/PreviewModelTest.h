@@ -110,6 +110,34 @@ public:
     TS_ASSERT_EQUALS("", result);
   }
 
+  void test_export_summed_ws_to_ads() {
+    PreviewModel model;
+    auto mockJobManager = MockJobManager();
+    auto ws = generateSummedWs(mockJobManager, model);
+
+    model.exportSummedWsToAds();
+    auto &ads = AnalysisDataService::Instance();
+    const std::string expectedName = "preview_summed_ws";
+
+    TS_ASSERT(ads.doesExist(expectedName));
+    TS_ASSERT_EQUALS(ws, ads.retrieveWS<MatrixWorkspace>(expectedName));
+    ads.remove(expectedName);
+  }
+
+  void test_export_summed_ws_with_no_ws_set_does_not_throw() {
+    PreviewModel model;
+    // This should emit an error, but we cannot observe this from our test
+    model.exportSummedWsToAds();
+  }
+
 private:
+  MatrixWorkspace_sptr generateSummedWs(MockJobManager &mockJobManager, PreviewModel &model) {
+    auto expectedWs = createWorkspace();
+    auto wsSumBanksEffect = [&expectedWs](PreviewRow &row) { row.setSummedWs(expectedWs); };
+    ON_CALL(mockJobManager, startSumBanks(_)).WillByDefault(Invoke(wsSumBanksEffect));
+    model.sumBanksAsync(mockJobManager);
+    return expectedWs;
+  }
+
   MatrixWorkspace_sptr createWorkspace() { return WorkspaceCreationHelper::create2DWorkspace(1, 1); }
 };

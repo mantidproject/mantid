@@ -1,3 +1,4 @@
+
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
@@ -67,7 +68,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
 
     def test_adding_new_fit_to_existing_fits_preserves_current_selections(
             self):
-        orig_ws_list_state = ['ws1', 'ws3']
+        orig_ws_list_state = {'ws1': [0, True, True], 'ws3': [1, False, True]}
         final_ws_list_state = ['ws1', 'ws3']
         test_functions = ['func1', 'func2']
         self.mock_model.fit_functions.return_value = test_functions
@@ -81,7 +82,7 @@ class ResultsTabPresenterTest(unittest.TestCase):
         presenter.on_new_fit_performed()
 
         self.mock_model.fit_functions.assert_called_once_with()
-        self.mock_model.fit_selection.assert_called_once_with(orig_ws_list_state)
+        self.mock_model.fit_selection.assert_called_once_with(['ws1'])
         self.mock_view.set_fit_function_names.assert_called_once_with(
             test_functions)
         self.mock_view.set_fit_result_workspaces.assert_called_once_with(
