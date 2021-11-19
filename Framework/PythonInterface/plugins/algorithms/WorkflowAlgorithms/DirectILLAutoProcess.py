@@ -384,22 +384,20 @@ class DirectILLAutoProcess(PythonAlgorithm):
             kwargs['EPPCreationMethod'] = 'Calculate EPP'
             kwargs['ElasticChannel'] = 'Elastic Channel AUTO'
             kwargs['FlatBkg'] = 'Flat Bkg ON'
-        if ws not in mtd:
-            if vanadium:
-                self.vanadium_epp = "{}_epp".format(ws)
-                kwargs['OutputEPPWorkspace'] = self.vanadium_epp
-                self.to_clean.append(self.vanadium_epp)
-            DirectILLCollectData(Run=sample, OutputWorkspace=ws,
-                                 IncidentEnergyCalibration=self.incident_energy_calibration,
-                                 IncidentEnergyWorkspace=self.incident_energy_ws,
-                                 ElasticChannelWorkspace=self.elastic_channel_ws,
-                                 **kwargs)
-            instrument = mtd[ws].getInstrument().getName()
-            if self.instrument and instrument != self.instrument:
-                self.log().error("Sample data: {} comes from different instruments that the rest of the data:"
-                                 " {} and {}".format(sample, instrument, self.instrument))
-            else:
-                self.instrument = instrument
+            self.vanadium_epp = "{}_epp".format(ws)
+            kwargs['OutputEPPWorkspace'] = self.vanadium_epp
+            self.to_clean.append(self.vanadium_epp)
+        DirectILLCollectData(Run=sample, OutputWorkspace=ws,
+                             IncidentEnergyCalibration=self.incident_energy_calibration,
+                             IncidentEnergyWorkspace=self.incident_energy_ws,
+                             ElasticChannelWorkspace=self.elastic_channel_ws,
+                             **kwargs)
+        instrument = mtd[ws].getInstrument().getName()
+        if self.instrument and instrument != self.instrument:
+            self.log().error("Sample data: {} comes from different instruments that the rest of the data:"
+                             " {} and {}".format(sample, instrument, self.instrument))
+        else:
+            self.instrument = instrument
         return ws
 
     def _clean_up(self, to_clean):
