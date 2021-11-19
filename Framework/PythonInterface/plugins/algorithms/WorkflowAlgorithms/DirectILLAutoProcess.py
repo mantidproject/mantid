@@ -147,7 +147,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
         else:
             self.masking = True
         self.flat_bkg_scaling = self.getProperty('FlatBkgScaling').value
-        self.ebinning_params = self.getProperty('EnergyBinning').value
+        self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
         if self.vanadium:
@@ -267,16 +267,16 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup('MaskedAngles', masking_group_name)
         self.setPropertyGroup('MaskWithVanadium', masking_group_name)
 
-        self.declareProperty(FloatArrayProperty(name='EnergyBinning',
+        self.declareProperty(FloatArrayProperty(name='EnergyExchangeBinning',
                                                 validator=validRebinParams),
-                             doc='Energy binning parameters.')
+                             doc='Energy exchange binning parameters.')
 
         self.declareProperty(FloatArrayProperty(name='MomentumTransferBinning',
                                                 validator=validRebinParams),
                              doc='Momentum transfer binning parameters.')
 
         rebinning_group = 'Binning parameters'
-        self.setPropertyGroup('EnergyBinning', rebinning_group)
+        self.setPropertyGroup('EnergyExchangeBinning', rebinning_group)
         self.setPropertyGroup('MomentumTransferBinning', rebinning_group)
 
         self.declareProperty(name='AbsorptionCorrection',
