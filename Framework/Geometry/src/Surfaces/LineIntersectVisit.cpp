@@ -102,7 +102,7 @@ void LineIntersectVisit::sortAndRemoveDuplicates() {
   if (m_intersectionPointsOut.size() > 1) {
     // sort the points by its distance to the track origin
     std::sort(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(),
-              [&u_vec, &origin](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) {
+              [&u_vec](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) {
                 const auto dist_a = u_vec.scalar_prod(Pt_a);
                 const auto dist_b = u_vec.scalar_prod(Pt_b);
                 return dist_a < dist_b;
