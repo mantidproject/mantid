@@ -179,8 +179,7 @@ void ParallaxCorrection::exec() {
                     << componentName << ". Reason: " << valid << "\n";
       continue;
     }
-    const auto componentIndex = componentInfo.indexOfAny(componentName);
-    const auto &detectorIndices = componentInfo.detectorsInSubtree(componentIndex);
+    const auto &detectorIndices = componentInfo.detectorsInSubtree(componentInfo.indexOfAny(componentName));
     if (detectorIndices.empty()) {
       g_log.error() << "No detectors found in component " << componentName << "\n";
       continue;

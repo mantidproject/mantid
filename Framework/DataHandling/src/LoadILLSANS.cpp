@@ -499,7 +499,7 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry, const std::string
   nextIndex = loadDataFromTubes(dataLeft, binningLeft, nextIndex);
   nextIndex = loadDataFromTubes(dataDown, binningDown, nextIndex);
   nextIndex = loadDataFromTubes(dataUp, binningUp, nextIndex);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  loadDataFromMonitors(firstEntry, nextIndex);
 }
 
 /**
