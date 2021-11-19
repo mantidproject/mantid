@@ -135,9 +135,9 @@ class DirectILLAutoProcess(PythonAlgorithm):
             CreateSingleValuedWorkspace(DataValue=self.incident_energy,
                                         OutputWorkspace=self.incident_energy_ws)
             self.to_clean.append(self.incident_energy_ws)
-        if not self.getProperty('ElasticChannelEnergy').isDefault:
-            self.elastic_channel_ws = 'elastic_channel_energy_ws'
-            CreateSingleValuedWorkspace(DataValue=self.getProperty('ElasticChannelEnergy').value,
+        if not self.getProperty('ElasticChannelIndex').isDefault:
+            self.elastic_channel_ws = 'elastic_channel_index_ws'
+            CreateSingleValuedWorkspace(DataValue=self.getProperty('ElasticChannelIndex').value,
                                         OutputWorkspace=self.elastic_channel_ws)
             self.to_clean.append(self.elastic_channel_ws)
         if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
@@ -231,17 +231,17 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              validator=positiveFloat,
                              doc='Value for the calibrated incident energy (meV).')
 
-        self.declareProperty(name='ElasticChannelEnergy',
+        self.declareProperty(name='ElasticChannelIndex',
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
-                             doc='Value for the energy of the elastic peak (meV).')
+                             doc='Index number for the centre of the elastic peak.')
 
         self.declareProperty('SampleAngleOffset', 0.0,
                              doc='Value for the offset parameter in omega scan (degrees).')
 
         parameters_group = 'Parameters'
         self.setPropertyGroup('IncidentEnergy', parameters_group)
-        self.setPropertyGroup('ElasticChannelEnergy', parameters_group)
+        self.setPropertyGroup('ElasticChannelIndex', parameters_group)
         self.setPropertyGroup('SampleAngleOffset', parameters_group)
 
         # The mask workspace replaces MaskWorkspace parameter from PantherSingle and DiagnosticsWorkspace from directred
