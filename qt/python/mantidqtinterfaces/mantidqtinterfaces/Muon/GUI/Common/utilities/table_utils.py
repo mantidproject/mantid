@@ -207,12 +207,18 @@ class DoubleItemDelegate(QStyledItemDelegate):
         validator = LineEditDoubleValidator(line_edit, float(0.0))
         validator.setBottom(-sys.float_info.max)
         validator.setTop(sys.float_info.max)
-        validator.setDecimals(6)
         line_edit.setValidator(validator)
         return line_edit
 
+    @staticmethod
+    def convert_for_display(number):
+        """need to convert to a float then
+        back to a string to make sure it
+        always has scientific notation"""
+        return str(float(number))
+
     def setEditorData(self, editor, index):
-        editor.setText(str(index.data()))
+        editor.setText(self.convert_for_display(index.data()))
 
     def setModelData(self, editor, model, index):
-        model.setData(index, editor.text(), QtCore.Qt.EditRole)
+        model.setData(index, self.convert_for_display(editor.text()), QtCore.Qt.EditRole)

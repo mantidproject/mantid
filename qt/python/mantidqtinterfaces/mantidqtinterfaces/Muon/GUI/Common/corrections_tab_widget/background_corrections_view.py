@@ -389,7 +389,6 @@ class BackgroundCorrectionsView(widget, ui_form):
         if self._selected_row is not None and self._selected_column is not None and self._selected_column != USE_RAW_COLUMN_INDEX:
             value = float(self.correction_options_table.item(self._selected_row, self._selected_column).text())
             self._set_selected_value(value)
-            print("waaa", value, self.correction_options_table.item(self._selected_row, self._selected_column).text())
 
     def _set_selected_value(self, value: float) -> None:
         """Sets the currently selected cell to the float value provided."""
