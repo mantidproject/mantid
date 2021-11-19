@@ -523,3 +523,102 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
         Q1DWeighted('front', '0.06,-0.01,0.655', NumberOfWedges=0, OutputWorkspace='iqf')
         Q1DWeighted('back', '0.005,-0.01,0.066', NumberOfWedges=0, OutputWorkspace='iqb')
         GroupWorkspaces(InputWorkspaces=['iq', 'iqf', 'iqb'], OutputWorkspace='out')
+
+
+class ILL_SANS_D33_MONO_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a standard monochromatic reduction with the v2 of the algorithm and data from the D33.
+    No water normalisation is performed.
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D33_MONO_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['iq', 'ILL_SANS_D33_MONO.nxs']
+
+    def runTest(self):
+
+        # Load the mask
+        LoadNexusProcessed(Filename='D33_mask.nxs', OutputWorkspace='mask')
+
+        # Process the dark current Cd/B4C for sample
+        SANSILLReduction(Runs='027885',
+                         NormaliseBy='Time',
+                         ProcessAs='DarkCurrent',
+                         OutputWorkspace='dcws')
+
+        # Process the empty beam for sample
+        SANSILLReduction(Runs='027916',
+                         NormaliseBy='Time',
+                         ProcessAs='EmptyBeam',
+                         DarkCurrentWorkspace='dcws',
+                         OutputWorkspace='ebws',
+                         OutputFluxWorkspace='flws')
+
+        # Process the empty beam for transmissions
+        SANSILLReduction(Runs='027858',
+                         NormaliseBy='Time',
+                         ProcessAs='EmptyBeam',
+                         DarkCurrentWorkspace='dcws',
+                         OutputWorkspace='ebwstr',
+                         OutputFluxWorkspace='flwstr')
+
+        # Sample container transmission
+        SANSILLReduction(Runs='027860',
+                         NormaliseBy='Time',
+                         ProcessAs='Transmission',
+                         DarkCurrentWorkspace='dcws',
+                         EmptyBeamWorkspace='ebwstr',
+                         FluxWorkspace='flwstr',
+                         OutputWorkspace='sc_tr')
+
+        # Sample container
+        SANSILLReduction(Runs='027930',
+                         NormaliseBy='Time',
+                         ProcessAs='EmptyContainer',
+                         DarkCurrentWorkspace='dcws',
+                         EmptyBeamWorkspace='ebws',
+                         TransmissionWorkspace='sc_tr',
+                         OutputWorkspace='sc')
+
+        # Sample transmission
+        SANSILLReduction(Runs='027985',
+                         NormaliseBy='Time',
+                         ProcessAs='Transmission',
+                         DarkCurrentWorkspace='dcws',
+                         EmptyBeamWorkspace='ebwstr',
+                         FluxWorkspace='flwstr',
+                         OutputWorkspace='s_tr')
+
+        # Sample
+        SANSILLReduction(Runs='027925',
+                         NormaliseBy='Time',
+                         ProcessAs='Sample',
+                         MaskWorkspace='mask',
+                         DarkCurrentWorkspace='dcws',
+                         EmptyContainerWorkspace='sc',
+                         EmptyBeamWorkspace='ebws',
+                         FluxWorkspace='flws',
+                         TransmissionWorkspace='s_tr',
+                         OutputWorkspace='sample')
+
+        Q1DWeighted('sample', '0.01,-0.01,0.655', NumberOfWedges=0, OutputWorkspace='iq')
