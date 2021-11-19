@@ -8,7 +8,7 @@
 #include "Common/DllConfig.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
 #include <map>
@@ -18,14 +18,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumbers);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumbers);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::string> parseRunNumber(std::string const &runNumberString);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<std::string> parseRunNumber(std::string const &runNumberString);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::string>
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<std::string>
 parseRunNumberOrWhitespace(std::string const &runNumberString);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseTheta(std::string const &theta);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseTheta(std::string const &theta);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
@@ -36,13 +36,13 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
                                                        std::string const &step);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<boost::optional<double>> parseScaleFactor(std::string const &scaleFactor);
+std::optional<std::optional<double>> parseScaleFactor(std::string const &scaleFactor);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options);
+std::optional<std::map<std::string, std::string>> parseOptions(std::string const &options);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<boost::optional<std::string>> parseProcessingInstructions(std::string const &instructions);
+std::optional<std::optional<std::string>> parseProcessingInstructions(std::string const &instructions);
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

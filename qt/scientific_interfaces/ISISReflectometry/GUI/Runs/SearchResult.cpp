@@ -24,8 +24,8 @@ SearchResult::SearchResult(std::string runNumber, std::string title, std::string
 
 void SearchResult::parseRun(std::string const &runNumber) {
   auto const maybeRunNumber = parseRunNumber(runNumber);
-  if (maybeRunNumber.is_initialized())
-    m_runNumber = maybeRunNumber.get();
+  if (maybeRunNumber.has_value())
+    m_runNumber = maybeRunNumber.value();
   else
     addError("Run number is not specified");
 }
@@ -52,7 +52,7 @@ void SearchResult::parseMetadataFromTitle() {
 
   // Validate that the angle parses correctly
   auto const maybeTheta = parseTheta(m_theta);
-  if (!maybeTheta.is_initialized())
+  if (!maybeTheta.has_value())
     addError(std::string("Invalid theta value in run title: ").append(m_theta));
 }
 

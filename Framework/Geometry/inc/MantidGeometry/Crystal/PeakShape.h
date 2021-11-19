@@ -8,8 +8,9 @@
 
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/System.h"
-#include <boost/optional.hpp>
+
 #include <memory>
+#include <optional>
 #include <string>
 
 namespace Mantid {
@@ -34,7 +35,7 @@ public:
   /// For selecting different radius types.
   enum RadiusType { Radius = 0, OuterRadius = 1, InnerRadius = 2 };
   /// Radius
-  virtual boost::optional<double> radius(RadiusType type) const = 0;
+  virtual std::optional<double> radius(RadiusType type) const = 0;
   /// Destructor
   virtual ~PeakShape() = default;
 };

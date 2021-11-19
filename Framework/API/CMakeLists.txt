@@ -13,7 +13,6 @@ set(SRC_FILES
     src/ArchiveSearchFactory.cpp
     src/Axis.cpp
     src/BinEdgeAxis.cpp
-    src/BoostOptionalToAlgorithmProperty.cpp
     src/BoxController.cpp
     src/BoxControllerSettingsAlgorithm.cpp
     src/CatalogManager.cpp
@@ -143,6 +142,7 @@ set(SRC_FILES
     src/SpectraAxisValidator.cpp
     src/SpectrumDetectorMapping.cpp
     src/SpectrumInfo.cpp
+    src/StdOptionalToAlgorithmProperty.cpp
     src/TableRow.cpp
     src/TextAxis.cpp
     src/TransformScaleFactory.cpp
@@ -184,7 +184,6 @@ set(INC_FILES
     inc/MantidAPI/ArchiveSearchFactory.h
     inc/MantidAPI/Axis.h
     inc/MantidAPI/BinEdgeAxis.h
-    inc/MantidAPI/BoostOptionalToAlgorithmProperty.h
     inc/MantidAPI/BoxController.h
     inc/MantidAPI/BoxControllerSettingsAlgorithm.h
     inc/MantidAPI/CatalogFactory.h
@@ -352,6 +351,7 @@ set(INC_FILES
     inc/MantidAPI/SpectrumInfo.h
     inc/MantidAPI/SpectrumInfoItem.h
     inc/MantidAPI/SpectrumInfoIterator.h
+    inc/MantidAPI/StdOptionalToAlgorithmProperty.h
     inc/MantidAPI/TableRow.h
     inc/MantidAPI/TextAxis.h
     inc/MantidAPI/TransformScaleFactory.h

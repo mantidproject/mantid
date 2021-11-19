@@ -181,7 +181,7 @@ void ExperimentPresenter::updateFloodCorrectionEnabledState() {
     m_view->disableFloodCorrectionInputs();
 }
 
-boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {
+std::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(), m_view->getTransmissionEndOverlap());
   auto const bothOrNoneMustBeSet = false;
 
@@ -191,7 +191,7 @@ boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView
     m_view->showTransmissionRangeInvalid();
 
   if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
-    return boost::none;
+    return std::nullopt;
   else
     return range;
 }
@@ -207,7 +207,7 @@ std::string ExperimentPresenter::transmissionStitchParamsFromView() {
   // If set, the params should be a list containing an odd number of double
   // values (as per the Params property of Rebin)
   auto maybeParamsList = parseList(stitchParams, parseDouble);
-  if (maybeParamsList.is_initialized() && maybeParamsList->size() % 2 != 0) {
+  if (maybeParamsList.has_value() && maybeParamsList->size() % 2 != 0) {
     m_view->showTransmissionStitchParamsValid();
     return stitchParams;
   }
@@ -225,9 +225,9 @@ TransmissionStitchOptions ExperimentPresenter::transmissionStitchOptionsFromView
 
 std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView() {
   auto maybeStitchParameters = parseOptions(m_view->getStitchOptions());
-  if (maybeStitchParameters.is_initialized()) {
+  if (maybeStitchParameters.has_value()) {
     m_view->showStitchParametersValid();
-    return maybeStitchParameters.get();
+    return maybeStitchParameters.value();
   }
 
   m_view->showStitchParametersInvalid();
@@ -315,7 +315,7 @@ void ExperimentPresenter::updateViewFromModel() {
                                           PolarizationCorrectionType::None);
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
-    m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+    m_view->setFloodWorkspace(m_model.floodCorrections().workspace().value());
   else
     m_view->setFloodWorkspace("");
   m_view->setStitchOptions(m_model.stitchParametersString());

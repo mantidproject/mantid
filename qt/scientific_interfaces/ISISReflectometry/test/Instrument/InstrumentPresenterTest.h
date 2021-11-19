@@ -69,7 +69,7 @@ public:
 
   void testWavelengthRangeIsValidButNotUpdatedIfUnset() {
     auto const range = RangeInLambda(0.0, 0.0);
-    runTestForValidWavelengthRange(range, boost::none);
+    runTestForValidWavelengthRange(range, std::nullopt);
   }
 
   void testIntegratedMonitorsToggled() {
@@ -121,7 +121,7 @@ public:
 
   void testMonitorIntegralRangeIsValidButNotUpdatedIfUnset() {
     auto const range = RangeInLambda(0.0, 0.0);
-    runTestForValidMonitorIntegralRange(range, boost::none);
+    runTestForValidMonitorIntegralRange(range, std::nullopt);
   }
 
   void testSetValidMonitorBackgroundRange() {
@@ -151,7 +151,7 @@ public:
 
   void testMonitorBackgroundRangeIsValidButNotUpdatedIfUnset() {
     auto const range = RangeInLambda(0.0, 0.0);
-    runTestForValidMonitorBackgroundRange(range, boost::none);
+    runTestForValidMonitorBackgroundRange(range, std::nullopt);
   }
 
   void testCorrectDetectorsToggledUpdatesModel() {
@@ -372,7 +372,7 @@ private:
     EXPECT_CALL(m_mainPresenter, isAutoreducing()).Times(1).WillOnce(Return(false));
   }
 
-  void runTestForValidWavelengthRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
+  void runTestForValidWavelengthRange(RangeInLambda const &range, std::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getLambdaMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getLambdaMax()).WillOnce(Return(range.max()));
@@ -388,11 +388,11 @@ private:
     EXPECT_CALL(m_view, getLambdaMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showLambdaRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), boost::none);
+    TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), std::nullopt);
     verifyAndClear();
   }
 
-  void runTestForValidMonitorIntegralRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
+  void runTestForValidMonitorIntegralRange(RangeInLambda const &range, std::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getMonitorIntegralMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorIntegralMax()).WillOnce(Return(range.max()));
@@ -408,11 +408,11 @@ private:
     EXPECT_CALL(m_view, getMonitorIntegralMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorIntegralRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), boost::none);
+    TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), std::nullopt);
     verifyAndClear();
   }
 
-  void runTestForValidMonitorBackgroundRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
+  void runTestForValidMonitorBackgroundRange(RangeInLambda const &range, std::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getMonitorBackgroundMin()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getMonitorBackgroundMax()).WillOnce(Return(range.max()));
@@ -428,7 +428,7 @@ private:
     EXPECT_CALL(m_view, getMonitorBackgroundMax()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showMonitorBackgroundRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), boost::none);
+    TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), std::nullopt);
     verifyAndClear();
   }
 };

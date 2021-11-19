@@ -74,8 +74,8 @@ public:
 
   QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
   std::vector<RowLocation> selectedRowLocations() const override;
-  boost::optional<std::vector<Subtree>> selectedSubtrees() const override;
-  boost::optional<std::vector<RowLocation>> selectedSubtreeRoots() const override;
+  std::optional<std::vector<Subtree>> selectedSubtrees() const override;
+  std::optional<std::vector<RowLocation>> selectedSubtreeRoots() const override;
 
   bool hasNoSelectedDescendants(QModelIndex const &index) const;
   void appendAllUnselectedDescendants(QModelIndexList &selectedRows, QModelIndex const &index) const;

@@ -29,7 +29,7 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
 
 std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
 
-LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
+LookupRow const *Batch::findLookupRow(std::optional<double> thetaAngle) const {
   return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
 }
 
@@ -37,7 +37,7 @@ void Batch::resetState() { m_runsTable.resetState(); }
 
 void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 
-boost::optional<Item &> Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+Item* Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

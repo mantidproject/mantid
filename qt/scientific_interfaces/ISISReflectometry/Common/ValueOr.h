@@ -5,16 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include <boost/optional.hpp>
+#include <optional>
 
 /**
  * This method is required to support RHEL7 since it uses boost 1.53.
- * which only has get_value_or unlike std::optional (c++17) or later boost
+ * which only has value_or unlike std::optional (c++17) or later boost
  * versions.
  *
  * Once RHEL7 support is dropped usages should be replaced with the more
  * readable .value_or member function.
  */
-template <typename T, typename U> T value_or(boost::optional<T> const &value, U &&ifEmpty) {
-  return value.get_value_or(ifEmpty);
+template <typename T, typename U> T value_or(std::optional<T> const &value, U &&ifEmpty) {
+  return value.value_or(ifEmpty);
 }

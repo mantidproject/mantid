@@ -19,7 +19,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-std::string stringValueOrEmpty(boost::optional<double> value) { return value ? std::to_string(*value) : ""; }
+std::string stringValueOrEmpty(std::optional<double> value) { return value ? std::to_string(*value) : ""; }
 
 Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
   auto defaults = OptionDefaults(std::move(instrument));

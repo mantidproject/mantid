@@ -86,7 +86,7 @@ class MockExternalPlotter : public ExternalPlotter {
 public:
   /// Public Methods
   MOCK_METHOD4(plotSpectra, void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars,
-                                 boost::optional<QHash<QString, QVariant>> const &kwargs));
+                                 std::optional<QHash<QString, QVariant>> const &kwargs));
   MOCK_METHOD3(plotSpectra,
                void(std::string const &workspaceName, std::string const &workspaceIndices, bool errorBars));
   MOCK_METHOD3(plotBins, void(std::string const &workspaceName, std::string const &binIndices, bool errorBars));

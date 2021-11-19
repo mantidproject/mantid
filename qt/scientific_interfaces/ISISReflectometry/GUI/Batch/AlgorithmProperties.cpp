@@ -22,9 +22,9 @@ void update(std::string const &property, std::string const &value, AlgorithmRunt
     properties.setPropertyValue(property, value);
 }
 
-void update(std::string const &property, boost::optional<std::string> const &value, AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, std::optional<std::string> const &value, AlgorithmRuntimeProps &properties) {
   if (value)
-    update(property, value.get(), properties);
+    update(property, value.value(), properties);
 }
 
 void update(std::string const &property, bool value, AlgorithmRuntimeProps &properties) {
@@ -43,9 +43,9 @@ void update(std::string const &property, double value, AlgorithmRuntimeProps &pr
   update(property, std::to_string(value), properties);
 }
 
-void update(std::string const &property, boost::optional<double> const &value, AlgorithmRuntimeProps &properties) {
+void update(std::string const &property, std::optional<double> const &value, AlgorithmRuntimeProps &properties) {
   if (value)
-    update(property, value.get(), properties);
+    update(property, value.value(), properties);
 }
 
 void updateFromMap(AlgorithmRuntimeProps &properties, std::map<std::string, std::string> const &parameterMap) {

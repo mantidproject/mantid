@@ -24,6 +24,7 @@
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
+#include <optional>
 #include <QApplication>
 #include <utility>
 
@@ -146,7 +147,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
 }
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                         const QMap<QString, QVariant> &map, boost::optional<int> precision,
+                         const QMap<QString, QVariant> &map, std::optional<int> precision,
                          QtCatalogSearcher *searcher) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter, map[QString("runsTable")].toMap(), std::move(precision));
   gui->m_ui.comboSearchInstrument->setCurrentIndex(map[QString("comboSearchInstrument")].toInt());
@@ -161,13 +162,13 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
 }
 
 namespace {
-using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+using ValueFunction = std::optional<double> (RangeInQ::*)() const;
 
 MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, boost::optional<int> precision) {
+                                               ValueFunction valueFunction, std::optional<int> precision) {
   auto maybeValue = (qRangeInput.*valueFunction)();
   auto useOutputValue = false;
-  if (!maybeValue.is_initialized()) {
+  if (!maybeValue.has_value()) {
     maybeValue = (qRangeOutput.*valueFunction)();
     useOutputValue = true;
   }
@@ -179,7 +180,7 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const std::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
@@ -194,7 +195,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
 } // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
-                                           const boost::optional<int> &precision) {
+                                           const std::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
   auto groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
@@ -218,14 +219,14 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precision));
+        jobTreeView->setCellsAt({location}, cellsFromRow(row.value(), precision));
       }
     }
   }
 }
 
 void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                              const QMap<QString, QVariant> &map, boost::optional<int> precision) {
+                              const QMap<QString, QVariant> &map, std::optional<int> precision) {
   MantidQt::API::SignalBlocker signalBlockerView(gui);
 
   m_projectSave = map[QString("projectSave")].toBool();
@@ -279,9 +280,9 @@ MantidQt::CustomInterfaces::ISISReflectometry::Group Decoder::decodeGroup(const 
   return group;
 }
 
-std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
+std::vector<std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
 Decoder::decodeRows(const QList<QVariant> &list) {
-  std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>> rows;
+  std::vector<std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>> rows;
   std::transform(list.cbegin(), list.cend(), std::back_inserter(rows),
                  [this](const auto &rowMap) { return decodeRow(rowMap.toMap()); });
   return rows;
@@ -297,16 +298,16 @@ ReductionOptionsMap decodeReductionOptions(const QMap<QString, QVariant> &map) {
 }
 } // namespace
 
-boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
+std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>
 Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   if (map.size() == 0) {
-    return boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>();
+    return std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>();
   }
   std::vector<std::string> number;
   const auto runNoList = map[QString("runNumbers")].toList();
   std::transform(runNoList.cbegin(), runNoList.cend(), std::back_inserter(number),
                  [](const auto &runNumber) { return runNumber.toString().toStdString(); });
-  boost::optional<double> maybeScaleFactor = boost::make_optional<double>(false, 0.0);
+  std::optional<double> maybeScaleFactor;
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
   if (scaleFactorPresent) {
     maybeScaleFactor = map[QString("scaleFactor")].toDouble();
@@ -340,23 +341,23 @@ RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
   if (stepPresent) {
     step = map[QString("step")].toDouble();
   }
-  // Preffered implementation is using boost::optional<double> instead of bool
+  // Preffered implementation is using std::optional<double> instead of bool
   // and double but older versions of GCC seem to be complaining about
   // -Wmaybe-uninitialized
   if (minPresent && maxPresent && stepPresent) {
     return RangeInQ(min, step, max);
   } else if (minPresent && maxPresent) {
-    return RangeInQ(min, boost::none, max);
+    return RangeInQ(min, std::nullopt, max);
   } else if (minPresent && stepPresent) {
     return RangeInQ(min, step);
   } else if (minPresent) {
     return RangeInQ(min);
   } else if (stepPresent && maxPresent) {
-    return RangeInQ(boost::none, step, max);
+    return RangeInQ(std::nullopt, step, max);
   } else if (stepPresent) {
-    return RangeInQ(boost::none, step);
+    return RangeInQ(std::nullopt, step);
   } else if (maxPresent) {
-    return RangeInQ(boost::none, boost::none, max);
+    return RangeInQ(std::nullopt, std::nullopt, max);
   } else {
     return RangeInQ();
   }

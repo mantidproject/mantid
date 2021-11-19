@@ -159,15 +159,11 @@ void RunsPresenter::notifyStartMonitorComplete() { startMonitorComplete(); }
 
 void RunsPresenter::notifyRowStateChanged() { tablePresenter()->notifyRowStateChanged(); }
 
-void RunsPresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
-  tablePresenter()->notifyRowStateChanged(item);
-}
+void RunsPresenter::notifyRowStateChanged(Item *item) { tablePresenter()->notifyRowStateChanged(item); }
 
 void RunsPresenter::notifyRowOutputsChanged() { tablePresenter()->notifyRowOutputsChanged(); }
 
-void RunsPresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
-  tablePresenter()->notifyRowOutputsChanged(item);
-}
+void RunsPresenter::notifyRowOutputsChanged(Item *item) { tablePresenter()->notifyRowOutputsChanged(item); }
 
 void RunsPresenter::notifyBatchLoaded() { m_tablePresenter->notifyBatchLoaded(); }
 
@@ -436,8 +432,8 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
       if (result.hasError() || result.exclude())
         continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
-      assert(row.is_initialized());
-      mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName());
+      assert(row.has_value());
+      mergeRowIntoGroup(jobs, row.value(), m_thetaTolerance, result.groupName());
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);

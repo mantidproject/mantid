@@ -9,7 +9,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+using ValueFunction = std::optional<double> (RangeInQ::*)() const;
 
 namespace { // unnamed
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromGroup(Group const &group,
@@ -20,10 +20,10 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromGroup(Group const &gr
 }
 
 MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, boost::optional<int> precision) {
+                                               ValueFunction valueFunction, std::optional<int> precision) {
   auto maybeValue = (qRangeInput.*valueFunction)();
   auto useOutputValue = false;
-  if (!maybeValue.is_initialized()) {
+  if (!maybeValue.has_value()) {
     maybeValue = (qRangeOutput.*valueFunction)();
     useOutputValue = true;
   }
@@ -35,7 +35,7 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, std::optional<int> precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
@@ -52,9 +52,9 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, b
 void JobsViewUpdater::groupAppended(int groupIndex, Group const &group) {
   m_view.appendChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation(), cellsFromGroup(group, m_view.deadCell()));
   for (auto const &row : group.rows())
-    if (row.is_initialized())
+    if (row.has_value())
       m_view.appendChildRowOf(MantidQt::MantidWidgets::Batch::RowLocation({groupIndex}),
-                              cellsFromRow(row.get(), m_precision));
+                              cellsFromRow(row.value(), m_precision));
 }
 
 void JobsViewUpdater::groupRemoved(int groupIndex) {
@@ -73,6 +73,6 @@ void JobsViewUpdater::rowModified(int groupIndex, int rowIndex, Row const &row) 
 
 void JobsViewUpdater::setPrecision(const int &precision) { m_precision = precision; }
 
-void JobsViewUpdater::resetPrecision() { m_precision = boost::none; }
+void JobsViewUpdater::resetPrecision() { m_precision = std::nullopt; }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

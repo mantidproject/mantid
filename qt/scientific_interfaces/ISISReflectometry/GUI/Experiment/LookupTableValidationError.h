@@ -17,14 +17,14 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL LookupTableValidationError {
 public:
   LookupTableValidationError(std::vector<InvalidDefaultsError> validationErrors,
-                             boost::optional<ThetaValuesValidationError> fullTableError);
+                             std::optional<ThetaValuesValidationError> fullTableError);
 
   std::vector<InvalidDefaultsError> const &errors() const;
-  boost::optional<ThetaValuesValidationError> fullTableError() const;
+  std::optional<ThetaValuesValidationError> fullTableError() const;
 
 private:
   std::vector<InvalidDefaultsError> m_validationErrors;
-  boost::optional<ThetaValuesValidationError> m_fullTableError;
+  std::optional<ThetaValuesValidationError> m_fullTableError;
 };
 
 } // namespace ISISReflectometry

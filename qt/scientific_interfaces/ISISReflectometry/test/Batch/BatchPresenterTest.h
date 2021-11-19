@@ -334,7 +334,7 @@ public:
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(&row));
     EXPECT_CALL(*m_jobManager, algorithmStarted(algorithm)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
@@ -346,7 +346,7 @@ public:
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     auto row = makeRow();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(&row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
@@ -357,7 +357,7 @@ public:
   void testNotifyAlgorithmStartedSkipsNonItems() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(*m_jobManager, algorithmStarted(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(0);
@@ -368,7 +368,7 @@ public:
   void testNotifyAlgorithmCompleteSkipsNonItems() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(*m_jobManager, algorithmComplete(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(0);
@@ -379,7 +379,7 @@ public:
   void testNotifyAlgorithmErrorSkipsNonItems() {
     auto presenter = makePresenter();
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(boost::none));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(*m_jobManager, algorithmError(_, _)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(0);
@@ -393,7 +393,7 @@ public:
     EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(true));
     auto const workspaces = std::vector<std::string>{"test1", "test2"};
     auto row = makeRow();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(&row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm)).Times(1).WillOnce(Return(workspaces));
     EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(1);
@@ -406,7 +406,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(false));
     auto row = makeRow();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(&row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(_)).Times(0);
     EXPECT_CALL(*m_savePresenter, saveWorkspaces(_)).Times(0);
@@ -419,7 +419,7 @@ public:
     IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
     auto const errorMessage = std::string("test error");
     auto row = makeRow();
-    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(&row));
     EXPECT_CALL(*m_jobManager, algorithmError(algorithm, errorMessage)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged(_)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowOutputsChanged(_)).Times(1);

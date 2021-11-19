@@ -90,7 +90,7 @@ protected:
 
   Row *getRow(BatchJobManagerFriend &jobManager, int groupIndex, int rowIndex) {
     auto &reductionJobs = jobManager.m_batch.mutableRunsTable().mutableReductionJobs();
-    auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].get();
+    auto *row = &reductionJobs.mutableGroups()[groupIndex].mutableRows()[rowIndex].value();
     return row;
   }
 

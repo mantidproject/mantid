@@ -99,7 +99,7 @@ private:
   bool isAnyBatchUnsaved() const override;
   bool isRoundChecked() const override;
   int &getRoundPrecision() const override;
-  boost::optional<int> roundPrecision() const override;
+  std::optional<int> roundPrecision() const override;
   bool isWarnProcessAllChecked() const override;
   bool isWarnProcessPartialGroupChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
@@ -108,7 +108,7 @@ private:
   void optionsChanged() const;
   void showHelp();
   void addNewBatch(IBatchView *batchView);
-  void initNewBatch(IBatchPresenter *batchPresenter, std::string const &instrument, boost::optional<int> precision);
+  void initNewBatch(IBatchPresenter *batchPresenter, std::string const &instrument, std::optional<int> precision);
   void updateInstrument(const std::string &instrumentName);
   void setDefaultInstrument(const std::string &newInstrument);
   void onInstrumentChanged();

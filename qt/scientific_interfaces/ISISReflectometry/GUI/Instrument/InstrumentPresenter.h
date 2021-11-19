@@ -12,7 +12,7 @@
 #include "IInstrumentView.h"
 #include "InstrumentOptionDefaults.h"
 #include "MantidGeometry/Instrument_fwd.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -52,9 +52,9 @@ private:
   Instrument m_model;
   IBatchPresenter *m_mainPresenter;
 
-  boost::optional<RangeInLambda> wavelengthRangeFromView();
-  boost::optional<RangeInLambda> monitorBackgroundRangeFromView();
-  boost::optional<RangeInLambda> monitorIntegralRangeFromView();
+  std::optional<RangeInLambda> wavelengthRangeFromView();
+  std::optional<RangeInLambda> monitorBackgroundRangeFromView();
+  std::optional<RangeInLambda> monitorIntegralRangeFromView();
   MonitorCorrections monitorCorrectionsFromView();
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();

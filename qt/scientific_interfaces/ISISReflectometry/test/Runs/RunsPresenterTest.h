@@ -632,7 +632,7 @@ public:
     auto presenter = makePresenter();
     auto row = makeRow();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged(_)).Times(1);
-    presenter.notifyRowStateChanged(row);
+    presenter.notifyRowStateChanged(&row);
     verifyAndClear();
   }
 
@@ -647,7 +647,7 @@ public:
     auto presenter = makePresenter();
     auto row = makeRow();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowOutputsChanged(_)).Times(1);
-    presenter.notifyRowOutputsChanged(row);
+    presenter.notifyRowOutputsChanged(&row);
     verifyAndClear();
   }
 
@@ -923,7 +923,7 @@ private:
     // Construct the corresponding model expected in the main table
     auto jobs = ReductionJobs();
     auto group = Group(groupName);
-    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
+    group.appendRow(Row({run}, theta, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                         ReductionWorkspaces({run}, TransmissionRunPair())));
     jobs.appendGroup(group);
     return jobs;

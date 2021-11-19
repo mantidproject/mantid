@@ -12,8 +12,8 @@
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "Reduction/Batch.h"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,15 +33,14 @@ public:
   virtual void notifyAutoreductionResumed() = 0;
   virtual void notifyAutoreductionPaused() = 0;
   virtual void setReprocessFailedItems(bool reprocessFailed) = 0;
-  virtual boost::optional<Item &> getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) = 0;
+  virtual Item *getRunsTableItem(API::IConfiguredAlgorithm_sptr const &algorithm) = 0;
   virtual void algorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void algorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) = 0;
   virtual void algorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) = 0;
   virtual std::vector<std::string>
   algorithmOutputWorkspacesToSave(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) const = 0;
-  virtual boost::optional<Item const &> notifyWorkspaceDeleted(std::string const &wsName) = 0;
-  virtual boost::optional<Item const &> notifyWorkspaceRenamed(std::string const &oldName,
-                                                               std::string const &newName) = 0;
+  virtual Item *notifyWorkspaceDeleted(std::string const &wsName) = 0;
+  virtual Item *notifyWorkspaceRenamed(std::string const &oldName, std::string const &newName) = 0;
   virtual void notifyAllWorkspacesDeleted() = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> getAlgorithms() = 0;
   virtual std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;

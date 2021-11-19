@@ -245,6 +245,6 @@ RunsTableViewFactory::RunsTableViewFactory(std::vector<std::string> instruments)
 QtRunsTableView *RunsTableViewFactory::operator()() const { return new QtRunsTableView(m_instruments); }
 
 int RunsTableViewFactory::indexOfElseFirst(std::string const &instrument) const {
-  return indexOf(m_instruments, [&instrument](std::string const &inst) { return instrument == inst; }).get_value_or(0);
+  return indexOf(m_instruments, [&instrument](std::string const &inst) { return instrument == inst; }).value_or(0);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

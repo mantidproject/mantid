@@ -11,13 +11,13 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-Clipboard::Clipboard() : m_subtrees(boost::none), m_subtreeRoots(boost::none) {}
+Clipboard::Clipboard() : m_subtrees(std::nullopt), m_subtreeRoots(std::nullopt) {}
 
-Clipboard::Clipboard(boost::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> subtrees,
-                     boost::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> subtreeRoots)
+Clipboard::Clipboard(std::optional<std::vector<MantidQt::MantidWidgets::Batch::Subtree>> subtrees,
+                     std::optional<std::vector<MantidQt::MantidWidgets::Batch::RowLocation>> subtreeRoots)
     : m_subtrees(std::move(subtrees)), m_subtreeRoots(std::move(subtreeRoots)) {}
 
-bool Clipboard::isInitialized() const { return m_subtrees.is_initialized() && m_subtreeRoots.is_initialized(); }
+bool Clipboard::isInitialized() const { return m_subtrees.has_value() && m_subtreeRoots.has_value(); }
 
 int Clipboard::numberOfRoots() const {
   if (!isInitialized())
@@ -80,11 +80,11 @@ Group Clipboard::createGroupForRoot(int rootIndex) const {
   return result;
 }
 
-std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
+std::vector<std::optional<Row>> Clipboard::createRowsForAllRoots() const {
   if (containsGroups(*this))
     throw std::runtime_error("Attempted to get row for group clipboard item");
 
-  auto result = std::vector<boost::optional<Row>>();
+  auto result = std::vector<std::optional<Row>>();
   for (auto const &subtree : subtrees()) {
     auto rowsToAdd = createRowsForSubtree(subtree);
     for (auto &row : rowsToAdd)
@@ -93,13 +93,13 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
   return result;
 }
 
-std::vector<boost::optional<Row>> Clipboard::createRowsForRootChildren(int rootIndex) const {
+std::vector<std::optional<Row>> Clipboard::createRowsForRootChildren(int rootIndex) const {
   return createRowsForSubtree(subtrees()[rootIndex]);
 }
 
-std::vector<boost::optional<Row>>
+std::vector<std::optional<Row>>
 Clipboard::createRowsForSubtree(MantidQt::MantidWidgets::Batch::Subtree const &subtree) const {
-  auto result = std::vector<boost::optional<Row>>();
+  auto result = std::vector<std::optional<Row>>();
 
   for (auto const &row : subtree) {
     // Skip the root item if it is a group
@@ -113,22 +113,22 @@ Clipboard::createRowsForSubtree(MantidQt::MantidWidgets::Batch::Subtree const &s
     if (validationResult.isValid())
       result.emplace_back(validationResult.assertValid());
     else
-      result.emplace_back(boost::none);
+      result.emplace_back(std::nullopt);
   }
 
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Subtree> &Clipboard::mutableSubtrees() { return m_subtrees.get(); }
+std::vector<MantidQt::MantidWidgets::Batch::Subtree> &Clipboard::mutableSubtrees() { return m_subtrees.value(); }
 
-std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &Clipboard::subtrees() const { return m_subtrees.get(); }
+std::vector<MantidQt::MantidWidgets::Batch::Subtree> const &Clipboard::subtrees() const { return m_subtrees.value(); }
 
 std::vector<MantidQt::MantidWidgets::Batch::RowLocation> const &Clipboard::subtreeRoots() const {
-  return m_subtreeRoots.get();
+  return m_subtreeRoots.value();
 }
 
 std::vector<MantidQt::MantidWidgets::Batch::RowLocation> &Clipboard::mutableSubtreeRoots() {
-  return m_subtreeRoots.get();
+  return m_subtreeRoots.value();
 }
 
 bool containsGroups(Clipboard const &clipboard) {

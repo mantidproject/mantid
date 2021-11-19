@@ -13,7 +13,7 @@
 #include "RunsTable.h"
 #include "Slicing.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt {
@@ -39,10 +39,10 @@ public:
   std::vector<Group> selectedGroups() const;
   template <typename T>
   bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
-  LookupRow const *findLookupRow(boost::optional<double> thetaAngle = boost::none) const;
+  LookupRow const *findLookupRow(std::optional<double> thetaAngle = std::nullopt) const;
   void resetState();
   void resetSkippedItems();
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  Item* getItemWithOutputWorkspaceOrNone(std::string const &wsName);
 
 private:
   Experiment const &m_experiment;

@@ -219,7 +219,7 @@ public:
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
 
     EXPECT_CALL(m_view, getFloodCorrectionType()).WillOnce(Return("Workspace"));
-    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().value()));
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.experiment().floodCorrections(), floodCorr);
@@ -257,7 +257,7 @@ public:
 
   void testTransmissionRunRangeIsValidButNotUpdatedIfUnset() {
     RangeInLambda range(0.0, 0.0);
-    runTestForValidTransmissionRunRange(range, boost::none);
+    runTestForValidTransmissionRunRange(range, std::nullopt);
   }
 
   void testTransmissionParamsAreValidWithPositiveValue() { runTestForValidTransmissionParams("0.02"); }
@@ -557,7 +557,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInView() {
-    auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
+    auto lookupRow = LookupRow(std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(0.01, 0.03, 0.2), 0.7,
                                std::string("390-415"), std::string("370-389,416-430"));
     auto model = makeModelWithLookupRow(std::move(lookupRow));
     auto defaultOptions = expectDefaults(model);
@@ -571,12 +571,12 @@ public:
 
   void testInstrumentChangedUpdatesLookupRowInModel() {
     auto model =
-        makeModelWithLookupRow(LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+        makeModelWithLookupRow(LookupRow(std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(0.01, 0.03, 0.2),
                                          0.7, std::string("390-415"), std::string("370-389,416-430")));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2), 0.7,
+    auto expected = LookupRow(std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(0.01, 0.03, 0.2), 0.7,
                               std::string("390-415"), std::string("370-389,416-430"));
     TS_ASSERT_EQUALS(presenter.experiment().lookupTable().size(), 1);
     TS_ASSERT_EQUALS(presenter.experiment().lookupTable().front(), expected);
@@ -819,7 +819,7 @@ private:
     verifyAndClear();
   }
 
-  void runTestForValidTransmissionRunRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
+  void runTestForValidTransmissionRunRange(RangeInLambda const &range, std::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
@@ -835,7 +835,7 @@ private:
     EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), boost::none);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), std::nullopt);
     verifyAndClear();
   }
 
@@ -843,14 +843,14 @@ private:
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "13463", ""}; }
   LookupRow defaultsWithFirstAngle() {
-    return LookupRow(0.5, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none, boost::none,
-                     boost::none);
+    return LookupRow(0.5, TransmissionRunPair("13463", ""), std::nullopt, RangeInQ(), std::nullopt, std::nullopt,
+                     std::nullopt);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "13463", "13464"}; }
   LookupRow defaultsWithSecondAngle() {
-    return LookupRow(2.3, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none, boost::none,
-                     boost::none);
+    return LookupRow(2.3, TransmissionRunPair("13463", "13464"), std::nullopt, RangeInQ(), std::nullopt, std::nullopt,
+                     std::nullopt);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "13463", "13464"}; }
   OptionsRow optionsRowWithFirstTransmissionRun() { return {"", "13463"}; }

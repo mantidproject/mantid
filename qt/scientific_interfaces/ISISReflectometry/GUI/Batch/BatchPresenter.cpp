@@ -119,8 +119,8 @@ void BatchPresenter::notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm
     return;
   }
   m_jobManager->algorithmStarted(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) {
@@ -129,8 +129,8 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
     return;
   }
   m_jobManager->algorithmComplete(algorithm);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
   /// TODO Longer term it would probably be better if algorithms took care
   /// of saving their outputs so we could remove this callback
   if (m_savePresenter->shouldAutosave()) {
@@ -145,8 +145,8 @@ void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, s
     return;
   }
   m_jobManager->algorithmError(algorithm, message);
-  m_runsPresenter->notifyRowOutputsChanged(item.value());
-  m_runsPresenter->notifyRowStateChanged(item.value());
+  m_runsPresenter->notifyRowOutputsChanged(item);
+  m_runsPresenter->notifyRowStateChanged(item);
 }
 
 /** Start processing the next batch of algorithms.

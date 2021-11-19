@@ -346,17 +346,17 @@ void QtExperimentView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<double> value) {
+void QtExperimentView::setText(QLineEdit &lineEdit, std::optional<double> value) {
   if (value)
-    setText(lineEdit, value.get());
+    setText(lineEdit, value.value());
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<int> value) {
+void QtExperimentView::setText(QLineEdit &lineEdit, std::optional<int> value) {
   if (value)
-    setText(lineEdit, value.get());
+    setText(lineEdit, value.value());
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<std::string> const &text) {
+void QtExperimentView::setText(QLineEdit &lineEdit, std::optional<std::string> const &text) {
   if (text && !text->empty())
     setText(lineEdit, text);
 }
@@ -378,9 +378,9 @@ void QtExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
 
 // void QtExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName,
-//                             boost::optional<double> value) {
+//                             std::optional<double> value) {
 //  if (value)
-//    setText(table, propertyName, value.get());
+//    setText(table, propertyName, value.value());
 //}
 //
 // void QtExperimentView::setText(QTableWidget &table,
@@ -391,9 +391,9 @@ void QtExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
 //
 // void QtExperimentView::setText(QTableWidget &table,
 //                             std::string const &propertyName,
-//                             boost::optional<std::string> text) {
+//                             std::optional<std::string> text) {
 //  if (text && !text->empty())
-//    setText(table, propertyName, text.get());
+//    setText(table, propertyName, text.value());
 //}
 //
 // void QtExperimentView::setText(QTableWidget &table,

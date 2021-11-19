@@ -9,7 +9,7 @@
 #include "Common/DllConfig.h"
 #include "TransmissionRunPair.h"
 #include <boost/algorithm/string/join.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 

@@ -8,13 +8,13 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRow::LookupRow(boost::optional<double> theta,
+LookupRow::LookupRow(std::optional<double> theta,
 
                      TransmissionRunPair transmissionRuns,
-                     boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-                     boost::optional<double> scaleFactor,
-                     boost::optional<ProcessingInstructions> processingInstructions,
-                     boost::optional<ProcessingInstructions> backgroundProcessingInstructions)
+                     std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
+                     std::optional<double> scaleFactor,
+                     std::optional<ProcessingInstructions> processingInstructions,
+                     std::optional<ProcessingInstructions> backgroundProcessingInstructions)
     : m_theta(std::move(theta)), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
       m_scaleFactor(std::move(scaleFactor)),
       m_transmissionProcessingInstructions(std::move(transmissionProcessingInstructions)),
@@ -23,21 +23,21 @@ LookupRow::LookupRow(boost::optional<double> theta,
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized(); }
+bool LookupRow::isWildcard() const { return !m_theta.has_value(); }
 
-boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
+std::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
 
 RangeInQ const &LookupRow::qRange() const { return m_qRange; }
 
-boost::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
+std::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
 
-boost::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
+std::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
 
-boost::optional<ProcessingInstructions> LookupRow::transmissionProcessingInstructions() const {
+std::optional<ProcessingInstructions> LookupRow::transmissionProcessingInstructions() const {
   return m_transmissionProcessingInstructions;
 }
 
-boost::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructions() const {
+std::optional<ProcessingInstructions> LookupRow::backgroundProcessingInstructions() const {
   return m_backgroundProcessingInstructions;
 }
 

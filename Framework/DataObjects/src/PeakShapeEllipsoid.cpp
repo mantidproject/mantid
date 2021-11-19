@@ -99,7 +99,7 @@ PeakShapeEllipsoid *PeakShapeEllipsoid::clone() const { return new PeakShapeElli
 
 std::string PeakShapeEllipsoid::shapeName() const { return PeakShapeEllipsoid::ellipsoidShapeName(); }
 
-boost::optional<double> PeakShapeEllipsoid::radius(RadiusType type) const {
+std::optional<double> PeakShapeEllipsoid::radius(RadiusType type) const {
   std::vector<double>::const_iterator it;
   switch (type) {
   case (RadiusType::Radius):
@@ -112,7 +112,7 @@ boost::optional<double> PeakShapeEllipsoid::radius(RadiusType type) const {
     it = std::max_element(m_abc_radiiBackgroundInner.cbegin(), m_abc_radiiBackgroundInner.cend());
     break;
   }
-  return boost::optional<double>{*it};
+  return std::optional<double>{*it};
 }
 
 const std::string PeakShapeEllipsoid::ellipsoidShapeName() { return "ellipsoid"; }

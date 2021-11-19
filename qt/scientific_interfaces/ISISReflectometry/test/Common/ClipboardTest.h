@@ -92,7 +92,7 @@ public:
   void testCreateRowsForAllRootsSucceeds() {
     auto clipboard = clipboardWithARow();
     auto result = clipboard.createRowsForAllRoots();
-    auto expected = std::vector<boost::optional<Row>>{makeRow("12345", 0.5)};
+    auto expected = std::vector<std::optional<Row>>{makeRow("12345", 0.5)};
     TS_ASSERT_EQUALS(result, expected);
   }
 

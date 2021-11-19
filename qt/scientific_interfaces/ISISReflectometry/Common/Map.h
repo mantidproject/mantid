@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include <algorithm>
-#include <boost/optional.hpp>
+#include <optional>
 #include <iterator>
 #include <sstream>
 #include <type_traits>
@@ -26,11 +26,11 @@ std::vector<Out> map(Container const &in, Transform transform) {
 }
 
 template <typename In, typename Transform, typename Out = typename std::result_of<Transform(In)>::type>
-boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
-  if (in.is_initialized())
-    return transform(in.get());
+std::optional<Out> map(std::optional<In> const &in, Transform transform) {
+  if (in.has_value())
+    return transform(in.value());
   else
-    return boost::none;
+    return std::nullopt;
 }
 
 /** Converts an optional value to string
@@ -39,9 +39,9 @@ boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
  * @return The value as a string or an empty string
  *
  */
-template <typename T> std::string optionalToString(boost::optional<T> maybeValue) {
+template <typename T> std::string optionalToString(std::optional<T> maybeValue) {
   return map(maybeValue, [](T const &value) -> std::string { return std::to_string(value); })
-      .get_value_or(std::string());
+      .value_or(std::string());
 }
 
 /** Converts value to string with specified precision
@@ -65,9 +65,9 @@ template <typename T> std::string valueToString(T value, int precision) {
  * @return The value as a string (with specified precision if given)
  *
  */
-template <typename T> std::string valueToString(T value, boost::optional<int> precision) {
-  if (precision.is_initialized())
-    return valueToString(value, precision.get());
+template <typename T> std::string valueToString(T value, std::optional<int> precision) {
+  if (precision.has_value())
+    return valueToString(value, precision.value());
   return std::to_string(value);
 }
 
@@ -79,10 +79,10 @@ template <typename T> std::string valueToString(T value, boost::optional<int> pr
  * string
  *
  */
-template <typename T> std::string optionalToString(boost::optional<T> maybeValue, boost::optional<int> precision) {
-  if (maybeValue.is_initialized()) {
-    if (precision.is_initialized()) {
-      return valueToString(maybeValue.get(), precision.get());
+template <typename T> std::string optionalToString(std::optional<T> maybeValue, std::optional<int> precision) {
+  if (maybeValue.has_value()) {
+    if (precision.has_value()) {
+      return valueToString(maybeValue.value(), precision.value());
     }
     return optionalToString(maybeValue);
   }

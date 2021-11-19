@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
+#include "MantidAPI/StdOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument_fwd.h"
 #include "Reduction/Instrument.h"
 #include <string>

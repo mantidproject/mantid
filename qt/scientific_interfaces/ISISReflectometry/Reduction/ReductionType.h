@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include <boost/optional.hpp>
+#include <optional>
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {

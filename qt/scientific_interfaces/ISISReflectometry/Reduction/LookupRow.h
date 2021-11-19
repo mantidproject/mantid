@@ -9,8 +9,9 @@
 #include "ProcessingInstructions.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
+
 #include <array>
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -55,28 +56,28 @@ public:
                                                            "ProcessingInstructions",
                                                            "BackgroundProcessingInstructions"};
 
-  LookupRow(boost::optional<double> theta, TransmissionRunPair tranmissionRuns,
-            boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-            boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
-            boost::optional<ProcessingInstructions> backgroundProcessingInstructions);
+  LookupRow(std::optional<double> theta, TransmissionRunPair tranmissionRuns,
+            std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
+            std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
+            std::optional<ProcessingInstructions> backgroundProcessingInstructions);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
-  boost::optional<double> thetaOrWildcard() const;
+  std::optional<double> thetaOrWildcard() const;
   RangeInQ const &qRange() const;
-  boost::optional<double> scaleFactor() const;
-  boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
-  boost::optional<ProcessingInstructions> processingInstructions() const;
-  boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
+  std::optional<double> scaleFactor() const;
+  std::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
+  std::optional<ProcessingInstructions> processingInstructions() const;
+  std::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
 
 private:
-  boost::optional<double> m_theta;
+  std::optional<double> m_theta;
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
-  boost::optional<double> m_scaleFactor;
-  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
-  boost::optional<ProcessingInstructions> m_processingInstructions;
-  boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
+  std::optional<double> m_scaleFactor;
+  std::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
+  std::optional<ProcessingInstructions> m_processingInstructions;
+  std::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(LookupRow const &lhs, LookupRow const &rhs);

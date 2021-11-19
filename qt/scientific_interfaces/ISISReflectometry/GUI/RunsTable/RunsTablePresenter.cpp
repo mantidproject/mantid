@@ -53,11 +53,11 @@ bool groupNameExists(std::string const &groupName, ReductionJobs const &jobs,
 
   // Check if the group name exists in the jobs
   auto maybeExistingGroupIndex = jobs.indexOfGroupWithName(groupName);
-  if (!maybeExistingGroupIndex.is_initialized())
+  if (!maybeExistingGroupIndex.has_value())
     return false;
 
   // If it exists but in one of the roots to ignore, return false
-  auto existingGroupLocation = MantidWidgets::Batch::RowLocation({maybeExistingGroupIndex.get()});
+  auto existingGroupLocation = MantidWidgets::Batch::RowLocation({maybeExistingGroupIndex.value()});
   if (std::find(rootsToIgnore.cbegin(), rootsToIgnore.cend(), existingGroupLocation) != rootsToIgnore.cend())
     return false;
 
@@ -601,8 +601,8 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
     return;
 
   auto maybeReplacementRoots = m_view->jobs().selectedSubtreeRoots();
-  if (maybeReplacementRoots.is_initialized() && m_clipboard.isInitialized()) {
-    auto &replacementRoots = maybeReplacementRoots.get();
+  if (maybeReplacementRoots.has_value() && m_clipboard.isInitialized()) {
+    auto &replacementRoots = maybeReplacementRoots.value();
     makePastedGroupNamesUnique(m_clipboard, replacementRoots, m_model.reductionJobs());
     if (replacementRoots.empty())
       pasteGroupsAtEnd();
@@ -742,13 +742,13 @@ void RunsTablePresenter::notifyRowStateChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> item) {
+void RunsTablePresenter::notifyRowStateChanged(Item * item) {
   if (!item)
     return;
 
   updateProgressBar();
-  auto const location = m_model.reductionJobs().getLocation(item.get());
-  setRowStylingForItem(location, item.get());
+  auto const location = m_model.reductionJobs().getLocation(*item);
+  setRowStylingForItem(location, *item);
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {
@@ -767,11 +767,11 @@ void RunsTablePresenter::notifyRowOutputsChanged() {
   }
 }
 
-void RunsTablePresenter::notifyRowOutputsChanged(boost::optional<Item const &> item) {
-  if (!item.is_initialized() || item->isGroup())
+void RunsTablePresenter::notifyRowOutputsChanged(Item * item) {
+  if (!item || item->isGroup())
     return;
 
-  auto const &row = dynamic_cast<Row const &>(item.get());
+  auto const &row = dynamic_cast<Row const &>(*item);
   auto const location = m_model.reductionJobs().getLocation(row);
   m_jobViewUpdater.rowModified(groupOf(location), rowOf(location), row);
 }

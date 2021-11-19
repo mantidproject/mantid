@@ -32,8 +32,8 @@ public:
 
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
 
-    TS_ASSERT(roots.is_initialized());
-    TS_ASSERT_EQUALS(expectedRoots, roots.get());
+    TS_ASSERT(roots.has_value());
+    TS_ASSERT_EQUALS(expectedRoots, roots.value());
   }
 
   void testTwoSiblingsResultsInTwoRoots() {
@@ -48,8 +48,8 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(roots.is_initialized());
-    TS_ASSERT_EQUALS(expectedRoots, roots.get());
+    TS_ASSERT(roots.has_value());
+    TS_ASSERT_EQUALS(expectedRoots, roots.value());
   }
 
   void testParentAndChildResultsInParent() {
@@ -59,8 +59,8 @@ public:
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(roots.is_initialized());
-    TS_ASSERT_EQUALS(expectedRoots, roots.get());
+    TS_ASSERT(roots.has_value());
+    TS_ASSERT_EQUALS(expectedRoots, roots.value());
   }
 
   void testParentWithChildAndSiblingResultsInParentAndSibling() {
@@ -76,8 +76,8 @@ public:
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1}), RowLocation({2})});
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(roots.is_initialized());
-    TS_ASSERT_EQUALS(expectedRoots, roots.get());
+    TS_ASSERT(roots.has_value());
+    TS_ASSERT_EQUALS(expectedRoots, roots.value());
   }
 
   void testFindsRootOfNonTrivialTree() {
@@ -94,8 +94,8 @@ public:
     auto expectedRoots = std::vector<RowLocation>({RowLocation({1})});
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(roots.is_initialized());
-    TS_ASSERT_EQUALS(expectedRoots, roots.get());
+    TS_ASSERT(roots.has_value());
+    TS_ASSERT_EQUALS(expectedRoots, roots.value());
   }
 
   void testFailsForLevelGap() {
@@ -108,7 +108,7 @@ public:
     });
     // clang-format on
 
-    TS_ASSERT(!findSubtreeRoots(region).is_initialized());
+    TS_ASSERT(!findSubtreeRoots(region).has_value());
   }
 
   void testForRealisticTree() {
@@ -140,8 +140,8 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(roots.is_initialized());
-    TS_ASSERT_EQUALS(expectedRoots, roots.get());
+    TS_ASSERT(roots.has_value());
+    TS_ASSERT_EQUALS(expectedRoots, roots.value());
   }
 
   void testFailsForShallowRoot() {
@@ -159,7 +159,7 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 
   void testFailsForDeepRoot() {
@@ -177,7 +177,7 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 
   void testFailsForDeepRootImmediatelyAfterFirstRoot() {
@@ -190,7 +190,7 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 
   void testFailsForShallowRootImmediatelyAfterFirstRoot() {
@@ -203,7 +203,7 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 
   void testFailsForDisconnectedRoots() {
@@ -216,7 +216,7 @@ public:
     // clang-format on
 
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 
   void testForDocumentationFailTree() {
@@ -233,6 +233,6 @@ public:
     });
     // clang-format on
     auto roots = findSubtreeRoots(region);
-    TS_ASSERT(!roots.is_initialized())
+    TS_ASSERT(!roots.has_value())
   }
 };

@@ -39,7 +39,7 @@ void updateWorkspaceProperties(AlgorithmRuntimeProps &properties, Group const &g
 
   // Get the list of input workspaces from the output of each row
   auto workspaces = std::vector<std::string>();
-  std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces](boost::optional<Row> const &row) -> void {
+  std::for_each(group.rows().cbegin(), group.rows().cend(), [&workspaces](std::optional<Row> const &row) -> void {
     if (row)
       workspaces.emplace_back(row->reducedWorkspaceNames().iVsQ());
   });
@@ -62,12 +62,12 @@ void updateGroupFromOutputProperties(const IAlgorithm_sptr &algorithm, Item &gro
   group.setOutputNames(std::vector<std::string>{stitched});
 }
 
-void updateParamsFromResolution(AlgorithmRuntimeProps &properties, boost::optional<double> const &resolution) {
-  if (!resolution.is_initialized())
+void updateParamsFromResolution(AlgorithmRuntimeProps &properties, std::optional<double> const &resolution) {
+  if (!resolution.has_value())
     return;
 
   // Negate the resolution to give logarithmic binning
-  AlgorithmProperties::update("Params", -(resolution.get()), properties);
+  AlgorithmProperties::update("Params", -(resolution.value()), properties);
 }
 
 void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow const *lookupRow) {
@@ -78,22 +78,22 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
 }
 
 void updateGroupProperties(AlgorithmRuntimeProps &properties, Group const &group) {
-  auto resolution = boost::make_optional<double>(false, double());
+  std::optional<double> resolution;
 
   for (auto const &row : group.rows()) {
-    if (!row.is_initialized())
+    if (!row.has_value())
       continue;
 
     // Use the input Q step if provided, or the output Q step otherwise, if set
-    if (row->qRange().step().is_initialized())
+    if (row->qRange().step().has_value())
       resolution = row->qRange().step();
-    else if (row->qRangeOutput().step().is_initialized())
+    else if (row->qRangeOutput().step().has_value())
       resolution = row->qRangeOutput().step();
 
     // For now just use the first resolution found. Longer term it would be
     // better to check that all rows have the same resolution and set a warning
     // if not.
-    if (resolution.is_initialized())
+    if (resolution.has_value())
       break;
   }
 

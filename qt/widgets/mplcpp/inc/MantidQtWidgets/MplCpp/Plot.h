@@ -13,8 +13,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
-#include <boost/none_t.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace MantidQt {
@@ -33,8 +32,8 @@ enum class MantidAxType : int { Bin = 0, Spectrum = 1 };
  * Makes a call to mantidqt.plotting.plot.
  *
  * Each of the inputs to this function are optional and thus can be replaced
- * with boost::none if no other item should be given. However it does require
- * that boost::none be given for all items that are not the defaulted bools, on
+ * with std::nullopt if no other item should be given. However it does require
+ * that std::nullopt be given for all items that are not the defaulted bools, on
  * every call.
  *
  * @param workspaces A vector of workspace names that are present in the ADS
@@ -66,31 +65,31 @@ enum class MantidAxType : int { Bin = 0, Spectrum = 1 };
  * function in Python
  */
 MANTID_MPLCPP_DLL Common::Python::Object plot(const std::vector<std::string> &workspaces,
-                                              boost::optional<std::vector<int>> spectrumNums,
-                                              boost::optional<std::vector<int>> wkspIndices,
-                                              boost::optional<Common::Python::Object> fig = boost::none,
-                                              boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-                                              boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-                                              boost::optional<std::string> windowTitle = boost::none,
+                                              std::optional<std::vector<int>> spectrumNums,
+                                              std::optional<std::vector<int>> wkspIndices,
+                                              std::optional<Common::Python::Object> fig = std::nullopt,
+                                              std::optional<QHash<QString, QVariant>> plotKwargs = std::nullopt,
+                                              std::optional<QHash<QString, QVariant>> axProperties = std::nullopt,
+                                              std::optional<std::string> windowTitle = std::nullopt,
                                               bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
  * \overload plot(const std::vector<std::string> &workspaces,
-     boost::optional<std::vector<int>> spectrumNums,
-     boost::optional<std::vector<int>> wkspIndices,
-     boost::optional<Common::Python::Object> fig = boost::none,
-     boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-     boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-     boost::optional<std::string> windowTitle = boost::none,
+     std::optional<std::vector<int>> spectrumNums,
+     std::optional<std::vector<int>> wkspIndices,
+     std::optional<Common::Python::Object> fig = std::nullopt,
+     std::optional<QHash<QString, QVariant>> plotKwargs = std::nullopt,
+     std::optional<QHash<QString, QVariant>> axProperties = std::nullopt,
+     std::optional<std::string> windowTitle = std::nullopt,
      bool errors = false, bool overplot = false)
  */
 MANTID_MPLCPP_DLL Common::Python::Object plot(const QStringList &workspaces,
-                                              boost::optional<std::vector<int>> spectrumNums,
-                                              boost::optional<std::vector<int>> wkspIndices,
-                                              boost::optional<Common::Python::Object> fig = boost::none,
-                                              boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-                                              boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-                                              boost::optional<std::string> windowTitle = boost::none,
+                                              std::optional<std::vector<int>> spectrumNums,
+                                              std::optional<std::vector<int>> wkspIndices,
+                                              std::optional<Common::Python::Object> fig = std::nullopt,
+                                              std::optional<QHash<QString, QVariant>> plotKwargs = std::nullopt,
+                                              std::optional<QHash<QString, QVariant>> axProperties = std::nullopt,
+                                              std::optional<std::string> windowTitle = std::nullopt,
                                               bool errors = false, bool overplot = false, bool tiled = false);
 
 /**
@@ -123,11 +122,11 @@ MANTID_MPLCPP_DLL Common::Python::Object plot(const QStringList &workspaces,
  * function in Python
  */
 MANTID_MPLCPP_DLL Common::Python::Object
-plotsubplots(const QStringList &workspaces, boost::optional<std::vector<int>> spectrumNums,
-             boost::optional<std::vector<int>> wkspIndices, boost::optional<Common::Python::Object> fig = boost::none,
-             boost::optional<QHash<QString, QVariant>> plotKwargs = boost::none,
-             boost::optional<QHash<QString, QVariant>> axProperties = boost::none,
-             boost::optional<std::string> windowTitle = boost::none, bool errors = false);
+plotsubplots(const QStringList &workspaces, std::optional<std::vector<int>> spectrumNums,
+             std::optional<std::vector<int>> wkspIndices, std::optional<Common::Python::Object> fig = std::nullopt,
+             std::optional<QHash<QString, QVariant>> plotKwargs = std::nullopt,
+             std::optional<QHash<QString, QVariant>> axProperties = std::nullopt,
+             std::optional<std::string> windowTitle = std::nullopt, bool errors = false);
 
 /**
  * Makes a call to mantidqt.plotting.pcolormesh.
@@ -140,7 +139,7 @@ plotsubplots(const QStringList &workspaces, boost::optional<std::vector<int>> sp
  * function in Python
  */
 MANTID_MPLCPP_DLL Common::Python::Object pcolormesh(const QStringList &workspaces,
-                                                    boost::optional<Common::Python::Object> fig = boost::none);
+                                                    std::optional<Common::Python::Object> fig = std::nullopt);
 
 } // namespace MplCpp
 } // namespace Widgets

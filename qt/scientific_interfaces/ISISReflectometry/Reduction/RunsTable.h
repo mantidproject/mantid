@@ -35,7 +35,7 @@ public:
   bool isInSelection(T const &item, std::vector<MantidWidgets::Batch::RowLocation> const &selectedRowLocations) const;
   void resetState();
   void resetSkippedItems();
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
+  Item* getItemWithOutputWorkspaceOrNone(std::string const &wsName);
   std::vector<Group> selectedGroups() const;
   std::vector<Row> selectedRows() const;
 

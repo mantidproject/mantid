@@ -11,8 +11,8 @@
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/IConfiguredAlgorithm.h"
 
-#include <boost/optional.hpp>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 

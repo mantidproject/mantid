@@ -8,7 +8,7 @@
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 namespace MantidQt::MantidWidgets::Batch {
 
-auto FindSubtreeRoots::operator()(std::vector<RowLocation> region) -> boost::optional<std::vector<RowLocation>> {
+auto FindSubtreeRoots::operator()(std::vector<RowLocation> region) -> std::optional<std::vector<RowLocation>> {
   std::sort(region.begin(), region.end());
   if (!region.empty()) {
     auto subtreeRootDepth = region[0].depth();
@@ -16,7 +16,7 @@ auto FindSubtreeRoots::operator()(std::vector<RowLocation> region) -> boost::opt
       removeIfDepthNotEqualTo(region, subtreeRootDepth);
       return region;
     } else {
-      return boost::none;
+      return std::nullopt;
     }
   } else {
     return std::vector<RowLocation>();

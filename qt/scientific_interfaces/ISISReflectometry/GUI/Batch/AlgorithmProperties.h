@@ -10,7 +10,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <map>
 #include <string>
 
@@ -25,7 +25,7 @@ using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
 // strings to set the relevant property in an AlgorithmRuntimeProps
 
 void update(std::string const &property, std::string const &value, AlgorithmRuntimeProps &properties);
-void update(std::string const &property, boost::optional<std::string> const &value, AlgorithmRuntimeProps &properties);
+void update(std::string const &property, std::optional<std::string> const &value, AlgorithmRuntimeProps &properties);
 
 void update(std::string const &property, bool value, AlgorithmRuntimeProps &properties);
 
@@ -35,7 +35,7 @@ void update(std::string const &property, size_t value, AlgorithmRuntimeProps &pr
 
 void update(std::string const &property, double value, AlgorithmRuntimeProps &properties);
 
-void update(std::string const &property, boost::optional<double> const &value, AlgorithmRuntimeProps &properties);
+void update(std::string const &property, std::optional<double> const &value, AlgorithmRuntimeProps &properties);
 
 void updateFromMap(AlgorithmRuntimeProps &properties, std::map<std::string, std::string> const &parameterMap);
 

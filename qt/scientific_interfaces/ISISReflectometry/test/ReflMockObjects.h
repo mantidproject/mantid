@@ -111,9 +111,9 @@ public:
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
-  MOCK_METHOD1(notifyRowStateChanged, void(boost::optional<Item const &>));
+  MOCK_METHOD1(notifyRowStateChanged, void(Item *));
   MOCK_METHOD0(notifyRowOutputsChanged, void());
-  MOCK_METHOD1(notifyRowOutputsChanged, void(boost::optional<Item const &>));
+  MOCK_METHOD1(notifyRowOutputsChanged, void(Item *));
   MOCK_METHOD0(notifyReductionPaused, void());
   MOCK_METHOD0(notifyReductionResumed, void());
   MOCK_METHOD0(resumeAutoreduction, bool());
@@ -336,14 +336,14 @@ public:
   MOCK_METHOD0(notifyAutoreductionResumed, void());
   MOCK_METHOD0(notifyAutoreductionPaused, void());
   MOCK_METHOD1(setReprocessFailedItems, void(bool));
-  MOCK_METHOD1(getRunsTableItem, boost::optional<Item &>(MantidQt::API::IConfiguredAlgorithm_sptr const &algorithm));
+  MOCK_METHOD1(getRunsTableItem, Item*(MantidQt::API::IConfiguredAlgorithm_sptr const &algorithm));
   MOCK_METHOD1(algorithmStarted, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD1(algorithmComplete, void(MantidQt::API::IConfiguredAlgorithm_sptr));
   MOCK_METHOD2(algorithmError, void(MantidQt::API::IConfiguredAlgorithm_sptr, std::string const &));
   MOCK_CONST_METHOD1(algorithmOutputWorkspacesToSave,
                      std::vector<std::string>(MantidQt::API::IConfiguredAlgorithm_sptr));
-  MOCK_METHOD1(notifyWorkspaceDeleted, boost::optional<Item const &>(std::string const &));
-  MOCK_METHOD2(notifyWorkspaceRenamed, boost::optional<Item const &>(std::string const &, std::string const &));
+  MOCK_METHOD1(notifyWorkspaceDeleted, Item *(std::string const &));
+  MOCK_METHOD2(notifyWorkspaceRenamed, Item *(std::string const &, std::string const &));
   MOCK_METHOD0(notifyAllWorkspacesDeleted, void());
   MOCK_METHOD0(getAlgorithms, std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>());
   MOCK_CONST_METHOD0(rowProcessingProperties, std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>());

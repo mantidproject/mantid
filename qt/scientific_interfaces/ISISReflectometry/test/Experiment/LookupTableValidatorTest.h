@@ -48,18 +48,18 @@ public:
     auto table = Table({Cells({"0.5"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), 0.5);
   }
 
   void testTwoUniqueAngleRows() {
     auto table = Table({Cells({"0.5"}), Cells({"2.3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 2);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
-    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().get(), 2.3);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), 0.5);
+    TS_ASSERT(results[1].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().value(), 2.3);
   }
 
   void testTwoNonUniqueAngleRowsIsInvalid() {
@@ -92,8 +92,8 @@ public:
     auto table = Table({Cells({"", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].transmissionProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].transmissionProcessingInstructions().get(), "1-3");
+    TS_ASSERT(results[0].transmissionProcessingInstructions().has_value());
+    TS_ASSERT_EQUALS(results[0].transmissionProcessingInstructions().value(), "1-3");
   }
 
   void testInvalidTransmissionProcessingInstructions() {
@@ -130,8 +130,8 @@ public:
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].processingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].processingInstructions().get(), "1-3");
+    TS_ASSERT(results[0].processingInstructions().has_value());
+    TS_ASSERT_EQUALS(results[0].processingInstructions().value(), "1-3");
   }
 
   void testInvalidProcessingInstructions() {
@@ -143,8 +143,8 @@ public:
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].backgroundProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().get(), "1-3");
+    TS_ASSERT(results[0].backgroundProcessingInstructions().has_value());
+    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().value(), "1-3");
   }
 
   void testInvalidBackgroundProcessingInstructions() {
@@ -156,10 +156,10 @@ public:
     auto table = Table({Cells({"0.5"}), Cells({"0.501"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 2);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
-    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().get(), 0.501);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), 0.5);
+    TS_ASSERT(results[1].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().value(), 0.501);
   }
 
   void testAnglesThatDifferByLessThanTolerance() {
@@ -200,8 +200,8 @@ private:
     auto result = validator(table, TOLERANCE);
     TS_ASSERT(result.isError());
     auto validationError = result.assertError();
-    TS_ASSERT(validationError.fullTableError().is_initialized());
-    TS_ASSERT_EQUALS(validationError.fullTableError().get(), thetaValuesError);
+    TS_ASSERT(validationError.fullTableError().has_value());
+    TS_ASSERT_EQUALS(validationError.fullTableError().value(), thetaValuesError);
     TS_ASSERT_EQUALS(validationError.errors(), expectedErrors);
   }
 

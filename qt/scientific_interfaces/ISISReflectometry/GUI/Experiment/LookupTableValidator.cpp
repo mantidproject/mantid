@@ -22,7 +22,7 @@ auto LookupTableValidator::operator()(ContentType const &lookupTableContent, dou
     if (validationErrors.empty())
       return ResultType(std::move(lookupTable));
     else
-      return ResultType(LookupTableValidationError(std::move(validationErrors), boost::none));
+      return ResultType(LookupTableValidationError(std::move(validationErrors), std::nullopt));
   } else {
     appendThetaErrorForAllRows(validationErrors, lookupTableContent.size());
     return ResultType(LookupTableValidationError(std::move(validationErrors), thetaValidationResult.assertError()));
@@ -67,7 +67,7 @@ bool LookupTableValidator::hasUniqueThetas(LookupTable lookupTable, int wildcard
 
   sortInPlaceWildcardsFirstThenByTheta(lookupTable);
   auto thetasWithinTolerance = [tolerance](LookupRow const &lhs, LookupRow const &rhs) -> bool {
-    double const difference = lhs.thetaOrWildcard().get() - rhs.thetaOrWildcard().get();
+    double const difference = lhs.thetaOrWildcard().value() - rhs.thetaOrWildcard().value();
     return std::abs(difference) < tolerance;
   };
 
@@ -91,7 +91,7 @@ void LookupTableValidator::sortInPlaceWildcardsFirstThenByTheta(LookupTable &loo
     else if (rhs.isWildcard())
       return false;
     else
-      return lhs.thetaOrWildcard().get() < rhs.thetaOrWildcard().get();
+      return lhs.thetaOrWildcard().value() < rhs.thetaOrWildcard().value();
   };
   std::sort(lookupTable.begin(), lookupTable.end(), thetaLessThan);
 }

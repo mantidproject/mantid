@@ -6,15 +6,16 @@ set(MPL_SRC_FILES src/Mpl/ContourPreviewPlot.cpp src/Mpl/ExternalPlotter.cpp src
 )
 
 set(MPL_MOC_FILES
-    inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h
-    inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h
-    inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
+    inc/MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h inc/MantidQtWidgets/Plotting/Mpl/PeakPicker.h
+    inc/MantidQtWidgets/Plotting/Mpl/PreviewPlot.h inc/MantidQtWidgets/Plotting/Mpl/RangeSelector.h
+    inc/MantidQtWidgets/Plotting/Mpl/SingleSelector.h
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set(MPL_INC_FILES
     ${MPL_MOC_FILES} inc/MantidQtWidgets/Plotting/AxisID.h inc/MantidQtWidgets/Plotting/ContourPreviewPlot.h
     inc/MantidQtWidgets/Plotting/PeakPicker.h inc/MantidQtWidgets/Plotting/PreviewPlot.h
+    inc/MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h
 )
 
 set(MPL_UI_FILES inc/MantidQtWidgets/Plotting/ContourPreviewPlot.ui inc/MantidQtWidgets/Plotting/PreviewPlot.ui)

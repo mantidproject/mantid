@@ -17,8 +17,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs, std::string const &groupName) {
   auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
-  if (maybeGroupIndex.is_initialized())
-    return jobs.mutableGroups()[maybeGroupIndex.get()];
+  if (maybeGroupIndex.has_value())
+    return jobs.mutableGroups()[maybeGroupIndex.value()];
   else
     return jobs.appendGroup(Group(groupName));
 }
@@ -44,7 +44,7 @@ Group &ReductionJobs::appendGroup(Group group) {
   return m_groups.back();
 }
 
-boost::optional<int> ReductionJobs::indexOfGroupWithName(std::string const &groupName) const {
+std::optional<int> ReductionJobs::indexOfGroupWithName(std::string const &groupName) const {
   return indexOf(m_groups, [&groupName](Group const &group) -> bool { return group.name() == groupName; });
 }
 
@@ -129,14 +129,14 @@ void insertEmptyGroup(ReductionJobs &jobs, int beforeGroup) {
 }
 
 void insertEmptyRow(ReductionJobs &jobs, int groupIndex, int beforeRow) {
-  jobs.mutableGroups()[groupIndex].insertRow(boost::none, beforeRow);
+  jobs.mutableGroups()[groupIndex].insertRow(std::nullopt, beforeRow);
 }
 
-void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex, boost::optional<Row> const &newValue) {
-  if (newValue.is_initialized()) {
+void updateRow(ReductionJobs &jobs, int groupIndex, int rowIndex, std::optional<Row> const &newValue) {
+  if (newValue.has_value()) {
     jobs.mutableGroups()[groupIndex].updateRow(rowIndex, newValue);
   } else {
-    jobs.mutableGroups()[groupIndex].updateRow(rowIndex, boost::none);
+    jobs.mutableGroups()[groupIndex].updateRow(rowIndex, std::nullopt);
   }
 }
 
@@ -144,11 +144,11 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row, double thetaToleranc
   auto &group = findOrMakeGroupWithName(jobs, groupName);
   auto indexOfRowToUpdate = group.indexOfRowWithTheta(row.theta(), thetaTolerance);
 
-  if (indexOfRowToUpdate.is_initialized()) {
-    auto rowToUpdate = group[indexOfRowToUpdate.get()].get();
+  if (indexOfRowToUpdate.has_value()) {
+    auto rowToUpdate = group[indexOfRowToUpdate.value()].value();
     auto newRowValue = mergedRow(rowToUpdate, row);
     if (newRowValue.runNumbers() != rowToUpdate.runNumbers())
-      group.updateRow(indexOfRowToUpdate.get(), newRowValue);
+      group.updateRow(indexOfRowToUpdate.value(), newRowValue);
   } else {
     group.insertRowSortedByAngle(row);
   }
@@ -209,8 +209,8 @@ MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Row const &row) con
   for (auto const &group : m_groups) {
     // See if the row is in this group
     auto const &rows = group.rows();
-    auto rowIter = std::find_if(rows.cbegin(), rows.cend(), [&row](boost::optional<Row> const &currentRow) -> bool {
-      return currentRow && &currentRow.get() == &row;
+    auto rowIter = std::find_if(rows.cbegin(), rows.cend(), [&row](std::optional<Row> const &currentRow) -> bool {
+      return currentRow && &currentRow.value() == &row;
     });
     if (rowIter == rows.cend()) {
       // Try the next group
@@ -234,17 +234,17 @@ Group const &ReductionJobs::getParentGroup(Row const &row) const {
   return m_groups[groupIndex];
 }
 
-boost::optional<Item &> ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+Item *ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   for (auto &group : m_groups) {
     // Return this group if it has the output we're looking for
     if (group.postprocessedWorkspaceName() == wsName)
-      return group;
+      return &group;
     // If it has a child row with this workspace output, return it
     auto maybeRow = group.getItemWithOutputWorkspaceOrNone(wsName);
     if (maybeRow)
-      return boost::optional<Item &>(maybeRow.get());
+      return maybeRow;
   }
-  return boost::none;
+  return nullptr;
 }
 
 Group const &ReductionJobs::getGroupFromPath(const MantidWidgets::Batch::RowLocation &rowLocation) const {
@@ -255,7 +255,7 @@ Group const &ReductionJobs::getGroupFromPath(const MantidWidgets::Batch::RowLoca
   }
 }
 
-boost::optional<Row> const &ReductionJobs::getRowFromPath(const MantidWidgets::Batch::RowLocation &rowLocation) const {
+std::optional<Row> const &ReductionJobs::getRowFromPath(const MantidWidgets::Batch::RowLocation &rowLocation) const {
   if (isRowLocation(rowLocation)) {
     return groups()[groupOf(rowLocation)].rows()[rowOf(rowLocation)];
   } else {
@@ -267,7 +267,7 @@ bool ReductionJobs::validItemAtPath(const MantidWidgets::Batch::RowLocation &row
   if (isGroupLocation(rowLocation))
     return true;
 
-  return getRowFromPath(rowLocation).is_initialized();
+  return getRowFromPath(rowLocation).has_value();
 }
 
 Item const &ReductionJobs::getItemFromPath(const MantidWidgets::Batch::RowLocation &rowLocation) const {
@@ -275,9 +275,9 @@ Item const &ReductionJobs::getItemFromPath(const MantidWidgets::Batch::RowLocati
     return getGroupFromPath(rowLocation);
   } else {
     auto &maybeRow = getRowFromPath(rowLocation);
-    if (!maybeRow.is_initialized())
+    if (!maybeRow.has_value())
       throw std::invalid_argument("Attempted to access invalid row");
-    return maybeRow.get();
+    return maybeRow.value();
   }
 }
 

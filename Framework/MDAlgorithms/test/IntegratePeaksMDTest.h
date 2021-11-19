@@ -373,8 +373,8 @@ public:
 
     // Check the shape is what we expect
     TS_ASSERT_EQUALS(peakRadius, sphericalShape->radius());
-    TS_ASSERT_EQUALS(backgroundOuterRadius, sphericalShape->backgroundOuterRadius().get());
-    TS_ASSERT_EQUALS(backgroundInnerRadius, sphericalShape->backgroundInnerRadius().get());
+    TS_ASSERT_EQUALS(backgroundOuterRadius, sphericalShape->backgroundOuterRadius().value());
+    TS_ASSERT_EQUALS(backgroundInnerRadius, sphericalShape->backgroundInnerRadius().value());
   }
 };
 

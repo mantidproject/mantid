@@ -11,7 +11,7 @@
 #include "ISavePresenter.h"
 #include "ISaveView.h"
 #include "MantidKernel/ConfigPropertyObserver.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <memory>
 #include <string>
 #include <vector>

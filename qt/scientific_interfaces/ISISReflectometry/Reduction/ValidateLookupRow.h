@@ -11,7 +11,7 @@
 #include "ParseReflectometryStrings.h"
 #include "TransmissionRunPair.h"
 #include <array>
-#include <boost/optional.hpp>
+#include <optional>
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -26,15 +26,15 @@ public:
   ValidationResult<LookupRow, std::vector<int>> operator()(LookupRow::ValueArray const &cellText);
 
 private:
-  boost::optional<boost::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
-  boost::optional<TransmissionRunPair> parseTransmissionRuns(LookupRow::ValueArray const &cellText);
-  boost::optional<boost::optional<std::string>>
+  std::optional<std::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
+  std::optional<TransmissionRunPair> parseTransmissionRuns(LookupRow::ValueArray const &cellText);
+  std::optional<std::optional<std::string>>
   parseTransmissionProcessingInstructions(LookupRow::ValueArray const &cellText);
-  boost::optional<RangeInQ> parseQRange(LookupRow::ValueArray const &cellText);
-  boost::optional<boost::optional<double>> parseScaleFactor(LookupRow::ValueArray const &cellText);
-  boost::optional<std::map<std::string, std::string>> parseOptions(LookupRow::ValueArray const &cellText);
-  boost::optional<boost::optional<std::string>> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
-  boost::optional<boost::optional<std::string>>
+  std::optional<RangeInQ> parseQRange(LookupRow::ValueArray const &cellText);
+  std::optional<std::optional<double>> parseScaleFactor(LookupRow::ValueArray const &cellText);
+  std::optional<std::map<std::string, std::string>> parseOptions(LookupRow::ValueArray const &cellText);
+  std::optional<std::optional<std::string>> parseProcessingInstructions(LookupRow::ValueArray const &cellText);
+  std::optional<std::optional<std::string>>
   parseBackgroundProcessingInstructions(LookupRow::ValueArray const &cellText);
 
   std::vector<int> m_invalidColumns;

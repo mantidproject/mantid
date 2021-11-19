@@ -14,7 +14,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelper {
 
 namespace { // unnamed
 Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
-  auto row = Row({}, 0.0, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
+  auto row = Row({}, 0.0, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                  ReductionWorkspaces({}, TransmissionRunPair()));
   row.setOutputNames(outputNames);
   return row;
@@ -24,40 +24,40 @@ Row makeRowWithOutputNames(std::vector<std::string> const &outputNames) {
 /* Rows */
 
 Row makeEmptyRow() {
-  return Row({}, 0.0, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
+  return Row({}, 0.0, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
              ReductionWorkspaces({}, TransmissionRunPair()));
 }
 
 Row makeRow(double theta) {
-  return Row({}, theta, TransmissionRunPair({"22348", "22349"}), RangeInQ(), boost::none, ReductionOptionsMap(),
+  return Row({}, theta, TransmissionRunPair({"22348", "22349"}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
              ReductionWorkspaces({}, TransmissionRunPair()));
 }
 
 Row makeRow(std::string const &run, double theta) {
-  return Row({run}, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(), boost::none, ReductionOptionsMap(),
+  return Row({run}, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
              ReductionWorkspaces({run}, TransmissionRunPair({"Trans A", "Trans B"})));
 }
 
 Row makeSimpleRow(std::string const &run, double theta) {
-  return Row({run}, theta, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
+  return Row({run}, theta, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
              ReductionWorkspaces({run}, TransmissionRunPair()));
 }
 
 Row makeRow(std::string const &run, double theta, std::string const &trans1, std::string const &trans2,
-            boost::optional<double> qMin, boost::optional<double> qMax, boost::optional<double> qStep,
-            boost::optional<double> scale, ReductionOptionsMap const &optionsMap) {
+            std::optional<double> qMin, std::optional<double> qMax, std::optional<double> qStep,
+            std::optional<double> scale, ReductionOptionsMap const &optionsMap) {
   return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
              RangeInQ(std::move(qMin), std::move(qMax), std::move(qStep)), std::move(scale), optionsMap,
              ReductionWorkspaces({run}, TransmissionRunPair({trans1, trans2})));
 }
 
 Row makeRow(std::vector<std::string> const &runs, double theta) {
-  return Row(runs, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(), boost::none, ReductionOptionsMap(),
+  return Row(runs, theta, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
              ReductionWorkspaces(runs, TransmissionRunPair({"Trans A", "Trans B"})));
 }
 
 Row makeCompletedRow() {
-  auto row = Row({}, 0.0, TransmissionRunPair(), RangeInQ(), boost::none, ReductionOptionsMap(),
+  auto row = Row({}, 0.0, TransmissionRunPair(), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                  ReductionWorkspaces({}, TransmissionRunPair()));
   row.setSuccess();
   return row;
@@ -69,7 +69,7 @@ Row makeRowWithMainCellsFilled(double theta) {
 }
 
 Row makeRowWithOptionsCellFilled(double theta, ReductionOptionsMap options) {
-  return Row({}, theta, TransmissionRunPair(), RangeInQ(), boost::none, std::move(options),
+  return Row({}, theta, TransmissionRunPair(), RangeInQ(), std::nullopt, std::move(options),
              ReductionWorkspaces({}, TransmissionRunPair()));
 }
 
@@ -79,32 +79,32 @@ Group makeEmptyGroup() { return Group("Test group 1"); }
 
 Group makeGroupWithOneRow() {
   return Group("single_row_group",
-               std::vector<boost::optional<Row>>{makeRowWithOutputNames({"IvsLam", "IvsQ", "IvsQBin"})});
+               std::vector<std::optional<Row>>{makeRowWithOutputNames({"IvsLam", "IvsQ", "IvsQBin"})});
 }
 
 Group makeGroupWithTwoRows() {
   return Group("multi_row_group",
-               std::vector<boost::optional<Row>>{makeRowWithOutputNames({"IvsLam_1", "IvsQ_1", "IvsQ_binned_1"}),
+               std::vector<std::optional<Row>>{makeRowWithOutputNames({"IvsLam_1", "IvsQ_1", "IvsQ_binned_1"}),
                                                  makeRowWithOutputNames({"IvsLam_2", "IvsQ_2", "IvsQ_binned_2"})});
 }
 
 Group makeGroupWithTwoRowsWithDifferentAngles() {
-  return Group("multi_angle_group", std::vector<boost::optional<Row>>{makeRow("12345", 0.2), makeRow("12346", 0.9)});
+  return Group("multi_angle_group", std::vector<std::optional<Row>>{makeRow("12345", 0.2), makeRow("12346", 0.9)});
 }
 
 Group makeGroupWithTwoRowsWithNonstandardNames() {
   return Group("multi_row_group",
-               std::vector<boost::optional<Row>>{makeRowWithOutputNames({"testLam1", "testQ1", "testQBin1"}),
+               std::vector<std::optional<Row>>{makeRowWithOutputNames({"testLam1", "testQ1", "testQBin1"}),
                                                  makeRowWithOutputNames({"testLam2", "testQ2", "testQBin2"})});
 }
 
 Group makeGroupWithTwoRowsWithMixedQResolutions() {
   auto group1 = Group("Test group 1");
-  group1.appendRow(boost::none);
+  group1.appendRow(std::nullopt);
   group1.appendRow(makeRow());
-  group1.appendRow(Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.015, 0.9), boost::none,
+  group1.appendRow(Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.015, 0.9), std::nullopt,
                        ReductionOptionsMap(), ReductionWorkspaces({"22222"}, TransmissionRunPair({}))));
-  group1.appendRow(Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.016, 0.9), boost::none,
+  group1.appendRow(Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(0.5, 0.016, 0.9), std::nullopt,
                        ReductionOptionsMap(), ReductionWorkspaces({"33333"}, TransmissionRunPair({}))));
   return group1;
 }
@@ -112,9 +112,9 @@ Group makeGroupWithTwoRowsWithMixedQResolutions() {
 Group makeGroupWithTwoRowsWithOutputQResolutions() {
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow());
-  group1.appendRow(Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(), boost::none, ReductionOptionsMap(),
+  group1.appendRow(Row({"22222"}, 0.5, TransmissionRunPair({}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                        ReductionWorkspaces({"22222"}, TransmissionRunPair({}))));
-  auto row = Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(), boost::none, ReductionOptionsMap(),
+  auto row = Row({"33333"}, 0.5, TransmissionRunPair({}), RangeInQ(), std::nullopt, ReductionOptionsMap(),
                  ReductionWorkspaces({"33333"}, TransmissionRunPair({})));
   row.setOutputQRange(RangeInQ(0.5, 0.016, 0.9));
   group1.appendRow(row);
@@ -139,7 +139,7 @@ ReductionJobs twoEmptyGroupsModel() {
 ReductionJobs oneGroupWithAnInvalidRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
-  group1.appendRow(boost::none);
+  group1.appendRow(std::nullopt);
   reductionJobs.appendGroup(group1);
   return reductionJobs;
 }
@@ -155,7 +155,7 @@ ReductionJobs oneGroupWithARowModel() {
 ReductionJobs oneGroupWithARowWithInputQRangeModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
-  auto row = Row({"12345"}, 0.5, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(0.5, 0.01, 0.9), boost::none,
+  auto row = Row({"12345"}, 0.5, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(0.5, 0.01, 0.9), std::nullopt,
                  ReductionOptionsMap(), ReductionWorkspaces({"12345"}, TransmissionRunPair({"Trans A", "Trans B"})));
   group1.appendRow(row);
   reductionJobs.appendGroup(group1);
@@ -176,7 +176,7 @@ ReductionJobs oneGroupWithARowWithInputQRangeModelMixedPrecision() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   auto row =
-      Row({"12345"}, 0.555555, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(0.55567, 0.012, 0.9), boost::none,
+      Row({"12345"}, 0.555555, TransmissionRunPair({"Trans A", "Trans B"}), RangeInQ(0.55567, 0.012, 0.9), std::nullopt,
           ReductionOptionsMap(), ReductionWorkspaces({"12345"}, TransmissionRunPair({"Trans A", "Trans B"})));
   group1.appendRow(row);
   reductionJobs.appendGroup(group1);
@@ -281,12 +281,12 @@ ReductionJobs twoGroupsWithTwoRowsAndOneEmptyGroupModel() {
 ReductionJobs twoGroupsWithOneRowAndOneInvalidRowModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
-  group1.appendRow(boost::none);
+  group1.appendRow(std::nullopt);
   reductionJobs.appendGroup(std::move(group1));
 
   auto group2 = Group("Test group 2");
   group2.appendRow(makeRow("22345", 0.5));
-  group2.appendRow(boost::none);
+  group2.appendRow(std::nullopt);
   reductionJobs.appendGroup(std::move(group2));
 
   return reductionJobs;
@@ -300,7 +300,7 @@ ReductionJobs oneGroupWithOneRowAndOneGroupWithOneRowAndOneInvalidRowModel() {
 
   auto group2 = Group("Test group 2");
   group2.appendRow(makeRow("22345", 0.5));
-  group2.appendRow(boost::none);
+  group2.appendRow(std::nullopt);
   reductionJobs.appendGroup(std::move(group2));
 
   return reductionJobs;
@@ -310,7 +310,7 @@ ReductionJobs twoGroupsWithMixedRowsModel() {
   auto reductionJobs = ReductionJobs();
   auto group1 = Group("Test group 1");
   group1.appendRow(makeRow("12345", 0.5));
-  group1.appendRow(boost::none);
+  group1.appendRow(std::nullopt);
   group1.appendRow(makeRow("12346", 0.8));
   reductionJobs.appendGroup(std::move(group1));
 
@@ -342,19 +342,19 @@ ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
 /* Experiment */
 
 LookupTable makeLookupTable() {
-  auto lookupRow = LookupRow(boost::none, TransmissionRunPair(), boost::none,
-                             RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none);
+  auto lookupRow = LookupRow(std::nullopt, TransmissionRunPair(), std::nullopt,
+                             RangeInQ(std::nullopt, std::nullopt, std::nullopt), std::nullopt, std::nullopt, std::nullopt);
   return LookupTable{std::move(lookupRow)};
 }
 
 LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
   return LookupTable{
       // wildcard row with no angle
-      LookupRow(boost::none, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
+      LookupRow(std::nullopt, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
                 RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7")),
       // two angle rows
-      LookupRow(0.5, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
-                ProcessingInstructions("2-3"), boost::none),
+      LookupRow(0.5, TransmissionRunPair("22347", ""), std::nullopt, RangeInQ(0.008, 0.02, 1.2), 0.8,
+                ProcessingInstructions("2-3"), std::nullopt),
       LookupRow(
           2.3,
           TransmissionRunPair(std::vector<std::string>{"22348", "22349"}, std::vector<std::string>{"22358", "22359"}),
@@ -384,7 +384,7 @@ PolarizationCorrections makeEmptyPolarizationCorrections() {
 }
 
 FloodCorrections makeFloodCorrections() {
-  return FloodCorrections(FloodCorrectionType::Workspace, boost::optional<std::string>("test_workspace"));
+  return FloodCorrections(FloodCorrectionType::Workspace, std::optional<std::string>("test_workspace"));
 }
 
 TransmissionStitchOptions makeTransmissionStitchOptions() {

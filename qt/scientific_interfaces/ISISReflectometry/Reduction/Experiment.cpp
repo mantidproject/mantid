@@ -17,8 +17,8 @@ Experiment::Experiment()
       m_polarizationCorrections(PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_lookupTable(LookupTable({LookupRow(boost::none, TransmissionRunPair(), boost::none, RangeInQ(), boost::none,
-                                           ProcessingInstructions(), boost::none)})) {}
+      m_lookupTable(LookupTable({LookupRow(std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(), std::nullopt,
+                                           ProcessingInstructions(), std::nullopt)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,
@@ -62,12 +62,12 @@ std::vector<LookupRow::ValueArray> Experiment::lookupTableToArray() const {
   return result;
 }
 
-LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaAngle, double tolerance) const {
+LookupRow const *Experiment::findLookupRow(const std::optional<double> &thetaAngle, double tolerance) const {
   LookupTable::const_iterator match;
   if (thetaAngle) {
     match = std::find_if(
         m_lookupTable.cbegin(), m_lookupTable.cend(), [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-          return !candiate.isWildcard() && std::abs(*thetaAngle - candiate.thetaOrWildcard().get()) <= tolerance;
+          return !candiate.isWildcard() && std::abs(*thetaAngle - candiate.thetaOrWildcard().value()) <= tolerance;
         });
   } else {
     match = std::find_if(m_lookupTable.cbegin(), m_lookupTable.cend(),
@@ -78,7 +78,7 @@ LookupRow const *Experiment::findLookupRow(const boost::optional<double> &thetaA
     return &(*match);
   } else if (thetaAngle) {
     // Try again without a specific angle i.e. look for a wildcard row
-    return findLookupRow(boost::none, tolerance);
+    return findLookupRow(std::nullopt, tolerance);
   } else {
     return nullptr;
   }

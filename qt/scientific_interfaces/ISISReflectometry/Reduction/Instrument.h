@@ -23,22 +23,22 @@ namespace ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL Instrument {
 public:
   Instrument();
-  Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
+  Instrument(std::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
              DetectorCorrections detectorCorrections);
 
-  boost::optional<RangeInLambda> const &wavelengthRange() const;
+  std::optional<RangeInLambda> const &wavelengthRange() const;
   bool integratedMonitors() const;
   MonitorCorrections const &monitorCorrections() const;
   DetectorCorrections const &detectorCorrections() const;
 
   size_t monitorIndex() const;
-  boost::optional<RangeInLambda> monitorIntegralRange() const;
-  boost::optional<RangeInLambda> monitorBackgroundRange() const;
+  std::optional<RangeInLambda> monitorIntegralRange() const;
+  std::optional<RangeInLambda> monitorBackgroundRange() const;
   bool correctDetectors() const;
   DetectorCorrectionType detectorCorrectionType() const;
 
 private:
-  boost::optional<RangeInLambda> m_wavelengthRange;
+  std::optional<RangeInLambda> m_wavelengthRange;
   MonitorCorrections m_monitorCorrections;
   DetectorCorrections m_detectorCorrections;
 };

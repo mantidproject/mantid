@@ -85,9 +85,9 @@ public:
   void notifyPasteRowsRequested() override;
   void notifyFilterReset() override;
   void notifyRowStateChanged() override;
-  void notifyRowStateChanged(boost::optional<Item const &> item) override;
+  void notifyRowStateChanged(Item *item) override;
   void notifyRowOutputsChanged() override;
-  void notifyRowOutputsChanged(boost::optional<Item const &> item) override;
+  void notifyRowOutputsChanged(Item *item) override;
 
 private:
   void applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location);

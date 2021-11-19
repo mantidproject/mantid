@@ -32,8 +32,8 @@ public:
   virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyRowStateChanged() = 0;
-  virtual void notifyRowStateChanged(boost::optional<Item const &> item) = 0;
-  virtual void notifyRowOutputsChanged(boost::optional<Item const &> item) = 0;
+  virtual void notifyRowStateChanged(Item * item) = 0;
+  virtual void notifyRowOutputsChanged(Item * item) = 0;
   virtual void notifyRowOutputsChanged() = 0;
   virtual void notifyBatchLoaded() = 0;
 

@@ -153,24 +153,24 @@ private:
     }
   }
 
-  void testRow(const boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row> &row,
+  void testRow(const std::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row> &row,
                const QMap<QString, QVariant> &map) {
     if (row) {
-      auto runNumbers = row.get().runNumbers();
+      auto runNumbers = row.value().runNumbers();
       auto runNumbersVariants = map[QString("runNumbers")].toList();
       for (auto index = 0u; index < runNumbers.size(); ++index) {
         TS_ASSERT_EQUALS(runNumbers[index], runNumbersVariants[index].toString().toStdString());
       }
-      TS_ASSERT_EQUALS(row.get().theta(), map[QString("theta")].toDouble())
-      testRangeInQ(row.get().qRange(), map[QString("qRange")].toMap());
-      auto scaleFactorPresent = static_cast<bool>(row.get().scaleFactor());
+      TS_ASSERT_EQUALS(row.value().theta(), map[QString("theta")].toDouble())
+      testRangeInQ(row.value().qRange(), map[QString("qRange")].toMap());
+      auto scaleFactorPresent = static_cast<bool>(row.value().scaleFactor());
       TS_ASSERT_EQUALS(scaleFactorPresent, map[QString("scaleFactorPresent")].toBool());
       if (scaleFactorPresent) {
-        TS_ASSERT_EQUALS(row.get().scaleFactor().get(), map[QString("scaleFactor")].toDouble())
+        TS_ASSERT_EQUALS(row.value().scaleFactor().value(), map[QString("scaleFactor")].toDouble())
       }
-      testTransmissionRunPair(row.get().transmissionWorkspaceNames(), map[QString("transRunNums")].toMap());
-      testReductionWorkspaces(row.get().reducedWorkspaceNames(), map[QString("reductionWorkspaces")].toMap());
-      testReductionOptions(row.get().reductionOptions(), map[QString("reductionOptions")].toMap());
+      testTransmissionRunPair(row.value().transmissionWorkspaceNames(), map[QString("transRunNums")].toMap());
+      testReductionWorkspaces(row.value().reducedWorkspaceNames(), map[QString("reductionWorkspaces")].toMap());
+      testReductionOptions(row.value().reductionOptions(), map[QString("reductionOptions")].toMap());
     } else {
       // Row is an empty boost optional so map size should be 0
       TS_ASSERT_EQUALS(0, map.size())
@@ -185,11 +185,11 @@ private:
     TS_ASSERT_EQUALS(static_cast<bool>(max), map[QString("maxPresent")].toBool())
     TS_ASSERT_EQUALS(static_cast<bool>(step), map[QString("stepPresent")].toBool())
     if (min)
-      TS_ASSERT_EQUALS(min.get(), map[QString("min")].toDouble())
+      TS_ASSERT_EQUALS(min.value(), map[QString("min")].toDouble())
     if (max)
-      TS_ASSERT_EQUALS(max.get(), map[QString("max")].toDouble())
+      TS_ASSERT_EQUALS(max.value(), map[QString("max")].toDouble())
     if (step)
-      TS_ASSERT_EQUALS(step.get(), map[QString("step")].toDouble())
+      TS_ASSERT_EQUALS(step.value(), map[QString("step")].toDouble())
   }
 
   void testTransmissionRunPair(const TransmissionRunPair &pair, const QMap<QString, QVariant> &map) {
