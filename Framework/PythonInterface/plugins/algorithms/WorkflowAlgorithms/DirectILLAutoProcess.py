@@ -8,7 +8,7 @@
 import DirectILL_common as common
 from mantid.api import AlgorithmFactory, FileAction, MatrixWorkspaceProperty, \
     MultipleFileProperty, PropertyMode, PythonAlgorithm, \
-    WorkspaceGroupProperty
+    WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
     FloatBoundedValidator, IntArrayProperty, Property, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
@@ -110,6 +110,19 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 issues['DetectorGrouping'] = grouping_err_msg
                 issues[common.PROP_GROUPING_ANGLE_STEP] = grouping_err_msg
 
+        if not self.getProperty('VanadiumWorkspace').isDefault \
+                and self.getPropertyValue('VanadiumWorkspace') not in mtd:
+            # attempts to load the file, raises a runtime error if the desired file does not exist
+            vanadium_ws = self.getPropertyValue('VanadiumWorkspace')
+            try:
+                Load(Filename=vanadium_ws,
+                     OutputWorkspace=vanadium_ws)
+                if not isinstance(mtd[vanadium_ws], WorkspaceGroup):
+                    RenameWorkspace(InputWorkspace=vanadium_ws, OutputWorkspace='{}_1'.format(vanadium_ws))
+                    GroupWorkspaces(InputWorkspaces='{}_1'.format(vanadium_ws), OutputWorkspace=vanadium_ws)
+            except ValueError:
+                issues['VanadiumWorkspace'] = "Desired vanadium workspace: {} cannot be found.".format(vanadium_ws)
+
         if self.getProperty('MaskWithVanadium').value and self.getProperty('VanadiumWorkspace').isDefault:
             issues['VanadiumWorkspace'] = 'Please provide a vanadium input for a masking reference.'
 
@@ -182,10 +195,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              validator=StringListValidator(reduction_options),
                              doc='Choose the appropriate reduction type for the data to process.')
 
-        self.declareProperty(WorkspaceGroupProperty('VanadiumWorkspace', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
-                             doc='Vanadium input workspace.')
+        self.declareProperty('VanadiumWorkspace', '',
+                             doc='File(s) or workspaces containing vanadium data.')
 
         self.declareProperty(MatrixWorkspaceProperty('EmptyContainerWorkspace', '',
                                                      direction=Direction.Input,
