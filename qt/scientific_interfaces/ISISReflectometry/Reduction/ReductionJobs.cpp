@@ -230,14 +230,6 @@ MantidWidgets::Batch::RowLocation ReductionJobs::getLocation(Row const &row) con
   throw std::runtime_error("Internal error: could not find table location for row");
 }
 
-Group const &ReductionJobs::getParentGroup(Row const &row) const {
-  auto const location = getLocation(row);
-  if (location.path().empty())
-    throw std::runtime_error("Internal error: could not find parent group for row");
-  auto const groupIndex = location.path()[0];
-  return m_groups[groupIndex];
-}
-
 boost::optional<Item &> ReductionJobs::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   for (auto &group : m_groups) {
     // Return this group if it has the output we're looking for

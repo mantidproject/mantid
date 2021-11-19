@@ -274,8 +274,8 @@ std::vector<std::string> BatchJobManager::getWorkspacesToSave(Row const &row) co
   // workspaces for the row if the group does not have postprocessing, because
   // in that case users just want to see the postprocessed output instead.
   auto workspaces = std::vector<std::string>();
-  auto const group = m_batch.runsTable().reductionJobs().getParentGroup(row);
-  if (group.hasPostprocessing())
+  auto *const group = row.getParent();
+  if (group && group->hasPostprocessing())
     return workspaces;
 
   // We currently only save the binned workspace in Q
