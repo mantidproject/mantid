@@ -102,14 +102,14 @@ void LineIntersectVisit::sortAndRemoveDuplicates() {
   if (m_intersectionPointsOut.size() > 1) {
     // sort the points by its distance to the track origin
     std::sort(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(),
-              [*this, &u_vec, &origin](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) {
-                const auto dist_a = u_vec.scalar_prod(Pt_a - origin);
-                const auto dist_b = u_vec.scalar_prod(Pt_b - origin);
+              [&u_vec, &origin](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) {
+                const auto dist_a = u_vec.scalar_prod(Pt_a);
+                const auto dist_b = u_vec.scalar_prod(Pt_b);
                 return dist_a < dist_b;
               });
     // remove consecutive duplicated points
     auto last = std::unique(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(),
-                            [*this](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) { return Pt_a == Pt_b; });
+                            [](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) { return Pt_a == Pt_b; });
     // erase the tail
     m_intersectionPointsOut.erase(last, m_intersectionPointsOut.end());
   }
@@ -117,7 +117,7 @@ void LineIntersectVisit::sortAndRemoveDuplicates() {
   // update the distance list
   m_distancesOut.resize(m_intersectionPointsOut.size());
   std::transform(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(), m_distancesOut.begin(),
-                 [*this, &u_vec, &origin](const Kernel::V3D &Pt) { return u_vec.scalar_prod(Pt - origin); });
+                 [&u_vec, &origin](const Kernel::V3D &Pt) { return u_vec.scalar_prod(Pt - origin); });
 }
 
 } // namespace Mantid::Geometry
