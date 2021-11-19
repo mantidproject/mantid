@@ -183,7 +183,7 @@ int Group::totalItems() const {
   // Include the group if postprocessing is applicable
   auto initCount = hasPostprocessing() ? 1 : 0;
   // Include all valid rows
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, std::optional<Row> const &row) {
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int count, std::optional<Row> const &row) {
     if (row.has_value())
       return count + 1;
     else
@@ -195,7 +195,7 @@ int Group::completedItems() const {
   // Include the group if it has been postprocessing
   auto initCount = complete() ? 1 : 0;
   // Include all valid rows that have been processed
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int &count, std::optional<Row> const &row) {
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](int count, std::optional<Row> const &row) {
     if (row.has_value() && row->complete())
       return count + 1;
     else
