@@ -237,10 +237,11 @@ class PyChopGui(QMainWindow):
         try:
             eitxt = float(self.widgets['EiEdit']['Edit'].text())
         except ValueError:
-            raise ValueError('No Ei specified, or Ei string not understood')
-        self.engine.setEi(eitxt)
-        if self.eiPlots.isChecked():
-            self.calc_callback()
+            self.errormessage('No Ei specified, or Ei string not understood')
+        else:
+            self.engine.setEi(eitxt)
+            if self.eiPlots.isChecked():
+                self.calc_callback()
 
     def setS2(self):
         """
@@ -249,10 +250,12 @@ class PyChopGui(QMainWindow):
         try:
             S2txt = float(self.widgets['S2Edit']['Edit'].text())
         except:
-            raise ValueError('No S2 specified, or S2 string not understood')
-        if np.abs(S2txt) > 150:
-            raise ValueError('S2 must be between -150 and 150 degrees')
-        self.hyspecS2 = S2txt
+            self.errormessage('No S2 specified, or S2 string not understood')
+        else:
+            if np.abs(S2txt) > 150:
+                self.errormessage('S2 must be between -150 and 150 degrees')
+            else:
+                self.hyspecS2 = S2txt
 
     def calc_callback(self):
         """
@@ -269,8 +272,8 @@ class PyChopGui(QMainWindow):
             if self.errormess:
                 idx = [i for i, ei in enumerate(self.eis) if np.abs(ei - self.engine.getEi()) < 1.e-4]
                 if idx and self.flux[idx[0]] == 0:
-                    raise ValueError(self.errormess)
-                self.errormessage(self.errormess)
+                    raise ValueError(self.errormess) # No rep has any flux, skips plot
+                self.errormessage(self.errormess)    # Some rep have flux, still plot
             self.plot_res()
             self.plot_frame()
             if self.instSciAct.isChecked():
@@ -305,7 +308,7 @@ class PyChopGui(QMainWindow):
                 self.res = self.engine.getResolution(en)
                 self.flux = self.engine.getFlux()
                 if len(w) > 0:
-                    raise ValueError(w[0].message)
+                    self.errormessage(w[0].message)
 
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
@@ -555,6 +558,7 @@ class PyChopGui(QMainWindow):
             new_inst = Instrument(yaml_file)
         except (RuntimeError, AttributeError, ValueError) as err:
             self.errormessage(err)
+            return
         newname = new_inst.name
         if newname in self.instruments.keys() and not self.overwriteload.isChecked():
             overwrite, newname = self._ask_overwrite()
@@ -624,7 +628,7 @@ class PyChopGui(QMainWindow):
             res = self.engine.getResolution(en)
         except ValueError as err:
             self.errormessage(err)
-            raise ValueError(err)
+            return
         tsqvan, tsqdic, tsqmodchop = obj.getVanVar()
         v_mod, v_chop = tuple(np.sqrt(tsqmodchop[:2]) * 1e6)
         x0, _, x1, x2, _ = obj.chopper_system.getDistances()
