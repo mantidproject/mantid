@@ -82,12 +82,12 @@ Output:
 .. testoutput:: ExVesuvioAnalysis
 
    variable value
-   f1.sigma1 4.961
+   f1.sigma1 4.939
    f1.c4 0.000
    f1.c6 0.000
    f1.A 0.080
    f1.B0 0.000
-   Cost function value 0.212
+   Cost function value 0.267
 
 .. categories::
 
