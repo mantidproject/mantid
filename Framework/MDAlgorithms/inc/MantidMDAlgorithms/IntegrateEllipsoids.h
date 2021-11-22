@@ -65,13 +65,42 @@ private:
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
 
+  /// Write the profiles of each  principle axis to the output workspace with fixed name
+  void outputAxisProfiles(std::vector<double> &principalaxis1, std::vector<double> &principalaxis2,
+                          std::vector<double> &principalaxis3, const double &cutoffIsigI, const int &numSigmas,
+                          std::vector<DataObjects::Peak> &peaks, IntegrateQLabEvents &integrator);
+
+  /// Write Axis profile to a MatrixWorkspace (Workspace2D)
+  void outputProfileWS(const std::vector<double> &principalaxis1, const std::vector<double> &principalaxis2,
+                       const std::vector<double> &principalaxis3, const std::string &wsname);
+
+  /// Integrate peaks again with cutoff value of I/Sig(I)
+  void integratePeaksCutoffISigI(const double &meanMax, const double &stdMax, std::vector<double> &principalaxis1,
+                                 std::vector<double> &principalaxis2, std::vector<double> &principalaxis3,
+                                 const int &numSigmas, std::vector<DataObjects::Peak> &peaks,
+                                 IntegrateQLabEvents &integrator_satellite);
+
   void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS, const std::string &property,
                         const std::string &values);
+
+  /// Pair all Bragg peaks with their related satellite peaks
+  void pairBraggSatellitePeaks(const size_t &n_peaks, std::vector<DataObjects::Peak> &peaks,
+                               std::map<size_t, std::vector<DataObjects::Peak *>> &satellitePeakMap,
+                               std::vector<size_t> &satellitePeaks);
+
+  /// Remove shared background from each satellite peak
+  void removeSharedBackground(std::map<size_t, std::vector<DataObjects::Peak *>> &satellitePeakMap,
+                              std::map<size_t, std::pair<double, double>> &cachedBraggBackground);
 
   /// save for all detector pixels
   std::vector<Kernel::V3D> E1Vec;
 
   MDWSDescription m_targWSDescr;
+
+  /// peak radius for Bragg peaks
+  double m_braggPeakRadius;
+  /// peak radius for satellite peaks
+  double m_satellitePeakRadius;
 
   /**
    * @brief Initialize the output information for the MD conversion framework.
