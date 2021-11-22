@@ -39,7 +39,7 @@ target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kerne
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidNexusTargets")
   mtd_install_framework_lib(TARGETS Nexus EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()

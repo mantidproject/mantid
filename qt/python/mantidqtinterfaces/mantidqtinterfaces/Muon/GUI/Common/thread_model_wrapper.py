@@ -16,9 +16,6 @@ class ThreadModelWrapper(object):
     def cancel(self):
         pass
 
-    def output(self):
-        pass
-
     def execute(self):
         self.callback()
 
@@ -33,9 +30,6 @@ class ThreadModelWrapperWithOutput(object):
         pass
 
     def cancel(self):
-        pass
-
-    def output(self):
         pass
 
     def execute(self):

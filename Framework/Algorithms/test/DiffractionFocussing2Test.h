@@ -15,10 +15,10 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "Poco/StreamChannel.h"
 #include <cxxtest/TestSuite.h>
 

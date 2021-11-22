@@ -10,8 +10,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/PolynomialCorrection.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -12,7 +12,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::FunctionDomain1DSpectrumCreator;
 

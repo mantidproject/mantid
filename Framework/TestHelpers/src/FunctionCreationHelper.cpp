@@ -4,10 +4,10 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/FunctionCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FunctionCreationHelper.h"
 #include "MantidKernel/Exception.h"
 
-namespace Mantid::TestHelpers {
+namespace Mantid::FrameworkTestHelpers {
 
 std::string FunctionChangesNParams::name() const { return "FunctionChangesNParams"; }
 
@@ -55,4 +55,4 @@ void FunctionChangesNParams::functionDeriv1D(Mantid::API::Jacobian *out, const d
   }
 }
 
-} // namespace Mantid::TestHelpers
+} // namespace Mantid::FrameworkTestHelpers

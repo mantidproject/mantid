@@ -25,19 +25,20 @@ add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 # Additional compiler flags
 # ######################################################################################################################
 # Replace "/" with "\" for use in command prompt
-if(NOT CONDA_BUILD)
+if(NOT CONDA_ENV)
   string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_INCLUDE_DIR "${THIRD_PARTY_DIR}/include/")
   string(REGEX REPLACE "/" "\\\\" THIRD_PARTY_LIB_DIR "${THIRD_PARTY_DIR}/lib/")
-  # /MP            - Compile .cpp files in parallel /W3            - Warning Level 3 (This is also the default)
-  # /external:I    - Ignore third party library warnings (similar to "isystem" in GCC)
   set(CMAKE_CXX_FLAGS
       "${CMAKE_CXX_FLAGS} /external:I ${THIRD_PARTY_INCLUDE_DIR} /external:I ${THIRD_PARTY_LIB_DIR}\\python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}\\ "
   )
 endif()
 
+# /MP - Compile .cpp files in parallel /W3 - Warning Level 3 (This is also the default) /external:I - Ignore third party
+# library  warnings (similar to "isystem" in GCC) /bigobj Compile large test targets by losing compatibility with MSVC
+# 2005
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
-  /MP /W3 \
+  /MP /W3 /bigobj \
   /experimental:external /external:W0 "
 )
 
@@ -59,7 +60,7 @@ find_package(Threads)
 # ######################################################################################################################
 # Qt5 is always in the same place
 # ######################################################################################################################
-if(NOT CONDA_BUILD)
+if(NOT CONDA_ENV)
   set(Qt5_DIR ${THIRD_PARTY_DIR}/lib/qt5/lib/cmake/Qt5)
 endif()
 
@@ -74,7 +75,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 # Configure IDE/commandline startup scripts
 # ######################################################################################################################
 set(WINDOWS_BUILDCONFIG ${PROJECT_SOURCE_DIR}/buildconfig/windows)
-if(NOT CONDA_BUILD)
+if(NOT CONDA_ENV)
   configure_file(${WINDOWS_BUILDCONFIG}/thirdpartypaths.bat.in ${PROJECT_BINARY_DIR}/thirdpartypaths.bat @ONLY)
 else()
   set(CONDA_BASE_DIR $ENV{CONDA_PREFIX})
@@ -92,7 +93,7 @@ else()
 endif()
 
 # Setup debugger environment to launch in VS without setting paths
-if(NOT CONDA_BUILD)
+if(NOT CONDA_ENV)
   set(MSVC_PATHS "${THIRD_PARTY_DIR}/bin$<SEMICOLON>${THIRD_PARTY_DIR}/lib/qt5/bin$<SEMICOLON>%PATH%")
 else()
   set(MSVC_PATHS "$ENV{CONDA_PREFIX}/Library/bin$<SEMICOLON>$ENV{CONDA_PREFIX}/Library/lib$<SEMICOLON>%PATH%")
@@ -113,13 +114,13 @@ configure_file(${WINDOWS_BUILDCONFIG}/pycharm.env.in ${PROJECT_BINARY_DIR}/pycha
 
 # The IDE may not be installed as we could be just using the build tools
 if(EXISTS ${MSVC_IDE_LOCATION}/devenv.exe)
-  if(CONDA_BUILD)
+  if(CONDA_ENV)
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio_conda.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
   else()
     configure_file(${WINDOWS_BUILDCONFIG}/visual-studio.bat.in ${PROJECT_BINARY_DIR}/visual-studio.bat @ONLY)
   endif()
 endif()
-if(CONDA_BUILD)
+if(CONDA_ENV)
   configure_file(${WINDOWS_BUILDCONFIG}/pycharm_conda.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)
 else()
   configure_file(${WINDOWS_BUILDCONFIG}/pycharm.bat.in ${PROJECT_BINARY_DIR}/pycharm.bat @ONLY)

@@ -11,8 +11,8 @@
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>

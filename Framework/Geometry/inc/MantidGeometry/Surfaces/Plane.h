@@ -56,7 +56,7 @@ public:
   int setPlane(const Kernel::V3D &, const Kernel::V3D &);
   //  int setPlane(const std::string&);
   int side(const Kernel::V3D &) const override;
-  int onSurface(const Kernel::V3D &) const override;
+  bool onSurface(const Kernel::V3D &) const override;
   // stuff for finding intersections etc.
   double dotProd(const Plane &) const;                 ///< returns normal dot product
   Kernel::V3D crossProd(const Plane &) const;          ///< returns normal cross product

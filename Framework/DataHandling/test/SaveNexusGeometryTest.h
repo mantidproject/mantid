@@ -12,9 +12,9 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/SaveNexusGeometry.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidTestHelpers/FileResource.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <H5Cpp.h>
 #include <cxxtest/TestSuite.h>

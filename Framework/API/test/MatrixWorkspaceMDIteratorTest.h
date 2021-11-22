@@ -8,9 +8,9 @@
 
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 #include <cxxtest/TestSuite.h>
 

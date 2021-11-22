@@ -11,10 +11,10 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
 

@@ -11,8 +11,11 @@ import sys
 import unittest
 
 from qtpy.QtWidgets import QStatusBar
+from qtpy.QtCore import QItemSelectionModel
 
 from unittest.mock import Mock, call, patch
+from mantid.simpleapi import CreateEmptyTableWorkspace
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.utils.testing.mocks.mock_plotlib import MockAx, MockPlotLib
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQSelectionModel
@@ -77,6 +80,7 @@ def with_mock_presenter(add_selection_model=False, add_plot=False):
     return real_decorator
 
 
+@start_qapplication
 class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
     notify_no_selection_to_copy_package = 'mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier.notify_no_selection_to_copy'
     copy_cells_package = 'mantidqt.widgets.workspacedisplay.data_copier.DataCopier.copy_cells'
@@ -201,6 +205,33 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(3, mock_copy_cells.call_count)
         twd.action_keypress_copy()
         self.assertEqual(4, mock_copy_cells.call_count)
+
+    def _mock_clipboard(self, clip):
+        """Used to replace the clipboard call when copying data, but retain the data in mock_clip"""
+        self.mock_clip = clip
+
+    def test_copy_cells(self):
+        """Check that the data copied from cells is correct."""
+        ws = CreateEmptyTableWorkspace()
+        # Add some data to the table
+        ws.addColumn(type="int", name="test column")
+        test_value = 3
+        ws.addRow([test_value])
+
+        # Currently copying data only works if batch is true.
+        table = TableWorkspaceDisplay(ws, batch=True)
+        # Mock the copy_to_clipboard function with a side_effect that stores the clipboard content in a member variable.
+        table.copy_to_clipboard = Mock(side_effect=self._mock_clipboard)
+
+        selection = table.view.selectionModel()
+        model_index = table.view.model().createIndex(0, 0)
+        selection.select(model_index, QItemSelectionModel.ClearAndSelect)
+
+        # Copy data to clipboard
+        table.action_copy_cells()
+
+        # Value copied to clipboard should be the same as value in workspace.
+        self.assertEqual(str(test_value), self.mock_clip)
 
     @with_mock_presenter(add_selection_model=True)
     def test_action_delete_row(self, ws, view, twd):

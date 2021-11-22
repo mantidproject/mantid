@@ -22,6 +22,7 @@ set(TEST_PY_FILES
     LogFilterTest.py
     LoggerTest.py
     MandatoryValidatorTest.py
+    MantidVersionTest.py
     MaterialBuilderTest.py
     MemoryStatsTest.py
     NullValidatorTest.py

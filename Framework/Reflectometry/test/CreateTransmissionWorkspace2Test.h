@@ -10,9 +10,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidReflectometry/CreateTransmissionWorkspace2.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <algorithm>
 #include <cxxtest/TestSuite.h>
 

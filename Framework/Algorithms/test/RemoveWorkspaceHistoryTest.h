@@ -11,7 +11,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/RemoveWorkspaceHistory.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel;
 using Mantid::Algorithms::RemoveWorkspaceHistory;

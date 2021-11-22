@@ -173,6 +173,10 @@ class SetSampleFromLogs(DistributedDataProcessorAlgorithm):
                   ContainerGeometry=geometryContainer,
                   ContainerMaterial=materialContainer)
 
+        # validate that sample shape was set to something with volume!=0
+        if (wksp.sample().getShape().volume() == 0):
+            raise RuntimeError("Resulting sample shape has volume of 0")
+
 
 # Register algorithm with Mantid.
 AlgorithmFactory.subscribe(SetSampleFromLogs)

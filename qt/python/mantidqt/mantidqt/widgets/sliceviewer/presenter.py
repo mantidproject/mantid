@@ -9,8 +9,7 @@
 # 3rdparty imports
 from qtpy.QtCore import Qt
 
-import mantid.api
-import mantid.kernel
+from mantid.kernel import Logger, SpecialCoordinateSystem
 import sip
 
 # local imports
@@ -37,7 +36,7 @@ class SliceViewer(ObservingPresenter):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
-        self._logger = mantid.kernel.Logger("SliceViewer")
+        self._logger = Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
         self.conf = conf
@@ -62,7 +61,10 @@ class SliceViewer(ObservingPresenter):
             self.view.data_view.norm_opts.currentTextChanged.connect(self.normalization_changed)
         if not self.model.can_support_peaks_overlays():
             self.view.data_view.disable_tool_button(ToolItemText.OVERLAY_PEAKS)
-        if not self.model.can_support_nonorthogonal_axes():
+        # check whether to enable non-orthog view
+        # don't know whether can always assume init with display indices (0,1) - so get sliceinfo
+        sliceinfo = self.get_sliceinfo()
+        if not sliceinfo.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
         self.view.data_view.help_button.clicked.connect(self.action_open_help_window)
@@ -152,26 +154,26 @@ class SliceViewer(ObservingPresenter):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
         pass
 
-    def get_sliceinfo(self):
-        """Returns a SliceInfo object describing the current slice"""
+    def get_frame(self) -> SpecialCoordinateSystem:
+        """Returns frame of workspace - require access for adding a peak in peaksviewer"""
+        return self.model.get_frame()
+
+    def get_sliceinfo(self, force_nonortho_mode: bool = False):
+        """
+        :param force_nonortho_mode: if True then don't use orthogonal angles even if non_ortho mode == False - this
+            is necessary because when non-ortho view is toggled the data_view is not updated at the point a new
+            SliceInfo is created
+        :return: a SliceInfo object describing the current slice and transform (which by default will be orthogonal
+                 if non-ortho mode is False)
+        """
         dimensions = self.view.data_view.dimensions
-        sliceinfo = SliceInfo(frame=self.model.get_frame(),
-                              point=dimensions.get_slicepoint(),
-                              transpose=dimensions.transpose,
-                              range=dimensions.get_slicerange(),
-                              qflags=dimensions.qflags,
-                              nonortho_transform=self.view.data_view.nonortho_transform)
-        # NOTE THIS IS A TEMPORARY FIX FOR RELEASE 6.2
-        # We want to remove circular dependence of transform between model, data_view and slice_info
-        # which could be done by removing transform from slice_info and always getting from model
-        try:
-            # try to update transform from model - but don't update transform in view as this will perform non-orthog
-            # transform on transpose of non-orthog axes without clicking button
-            sliceinfo.set_transform(self.model.create_nonorthogonal_transform(sliceinfo))
-        except Exception:
-            # not possible to make transform - should be raised as RuntimeError but playing it safe for this temp fix
-            pass
-        return sliceinfo
+        non_ortho_mode = True if force_nonortho_mode else self.view.data_view.nonorthogonal_mode
+        axes_angles = self.model.get_axes_angles(force_orthogonal=not non_ortho_mode)  # None if can't support transform
+        return SliceInfo(point=dimensions.get_slicepoint(),
+                         transpose=dimensions.transpose,
+                         range=dimensions.get_slicerange(),
+                         qflags=dimensions.qflags,
+                         axes_angles=axes_angles)
 
     def get_slicepoint(self):
         """Returns the current slicepoint as a list of 3 elements.
@@ -191,8 +193,7 @@ class SliceViewer(ObservingPresenter):
         if data_view.nonorthogonal_mode:
             if sliceinfo.can_support_nonorthogonal_axes():
                 # axes need to be recreated to have the correct transform associated
-                data_view.create_axes_nonorthogonal(
-                    self.model.create_nonorthogonal_transform(sliceinfo))
+                data_view.create_axes_nonorthogonal(sliceinfo.get_northogonal_transform())
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
                 data_view.create_axes_orthogonal()
@@ -359,8 +360,8 @@ class SliceViewer(ObservingPresenter):
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
-            data_view.create_axes_nonorthogonal(
-                self.model.create_nonorthogonal_transform(self.get_sliceinfo()))
+            # set transform from sliceinfo but ignore view as non-ortho state not set yet
+            data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
             self.show_all_data_requested()
         else:
             data_view.create_axes_orthogonal()
@@ -461,7 +462,7 @@ class SliceViewer(ObservingPresenter):
                 sliceinfo = self.get_sliceinfo()
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
-                self._logger.debug(f"Coordinates transformed into {sliceinfo.frame} frame, pos={pos}")
+                self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
                 self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
 

@@ -10,7 +10,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVecPtr;
 using Mantid::Algorithms::ConvertToHistogram;

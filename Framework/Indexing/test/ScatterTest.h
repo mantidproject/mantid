@@ -14,7 +14,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace Mantid::Indexing;

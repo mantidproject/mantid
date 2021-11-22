@@ -81,8 +81,9 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                     ax_mock.set_facecolor.assert_called_once_with(
                         presenter.current_view_props.canvas_color)
 
-    def test_apply_properties_calls_setters_with_correct_properties_autoscale(self):
-        ax_mock = mock.MagicMock()
+    @mock.patch('mantid.plots.axesfunctions.update_colorplot_datalimits')
+    def test_apply_properties_calls_setters_with_correct_properties_autoscale(self, mock_colorplot_autoscale):
+        ax_mock = mock.MagicMock(images=None)
         ax_mock.get_autoscalex_on = mock.Mock(return_value=True)
         ax_mock.get_autoscaley_on = mock.Mock(return_value=True)
         presenter = self._generate_presenter()
@@ -112,6 +113,8 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                         presenter.current_view_props.canvas_color)
                     ax_mock.set_xlim.assert_not_called()
                     ax_mock.set_ylim.assert_not_called()
+                    # update_colorplot_datalimits shouldn't be called for this axes
+                    mock_colorplot_autoscale.assert_not_called()
 
     def test_apply_all_properties_calls_setters_with_correct_properties(self):
         ax_mock_1 = mock.MagicMock()
@@ -145,8 +148,8 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                             presenter.current_view_props.canvas_color)
 
     def test_apply_all_properties_calls_setters_with_correct_properties_autoscale(self):
-        ax_mock_1 = mock.MagicMock()
-        ax_mock_2 = mock.MagicMock()
+        ax_mock_1 = mock.MagicMock(images=None)
+        ax_mock_2 = mock.MagicMock(images=None)
         ax_mock_1.get_autoscalex_on = mock.Mock(return_value=True)
         ax_mock_1.get_autoscaley_on = mock.Mock(return_value=True)
         presenter = self._generate_presenter()
@@ -176,6 +179,25 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                             presenter.current_view_props.canvas_color)
                         ax_mock.set_xlim.assert_not_called()
                         ax_mock.set_ylim.assert_not_called()
+
+    @mock.patch('mantid.plots.axesfunctions.update_colorplot_datalimits')
+    def test_apply_calls_correct_autoscale_for_colorfill_plot(self, mock_colorplot_autoscale):
+        """Check that the correct autoscaling function is called for a colorfill plot"""
+        # Set images to True to simulate a colorfill plot.
+        ax_mock = mock.MagicMock(images=True)
+        ax_mock.get_autoscalex_on = mock.Mock(return_value=True)
+        ax_mock.get_autoscaley_on = mock.Mock(return_value=True)
+        presenter = self._generate_presenter()
+        with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock):
+            with mock.patch.object(presenter, 'update_view', lambda: None):
+                with mock.patch.object(presenter, 'axis_changed', lambda: None):
+                    presenter.current_view_props = presenter.get_selected_ax_properties()
+                    presenter.apply_properties()
+                    # update_colorplot_datalimits() should be called once for each axis (x and y)
+                    self.assertEqual(2, mock_colorplot_autoscale.call_count)
+                    x_call = mock.call(ax_mock, ax_mock.images, axis='x')
+                    y_call = mock.call(ax_mock, ax_mock.images, axis='y')
+                    mock_colorplot_autoscale.assert_has_calls([x_call, y_call])
 
     def test_get_axes_names_dict(self):
         actual_dict = get_axes_names_dict(self.fig)

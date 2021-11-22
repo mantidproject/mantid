@@ -7,8 +7,9 @@
 #pragma once
 
 #include "InstViewModel.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "test/ReflMockObjects.h"
 
 #include <cxxtest/TestSuite.h>
@@ -19,8 +20,16 @@ using ::testing::_;
 
 class InstViewModelTest : public CxxTest::TestSuite {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static InstViewModelTest *createSuite() { return new InstViewModelTest(); }
+  static void destroySuite(InstViewModelTest *suite) { delete suite; }
+
+  // Init framework because the model uses an instrument actor which needs to call algorithms
+  InstViewModelTest() { Mantid::API::FrameworkManager::Instance(); }
+
   void test_update_workspace_updates_actor() {
-    auto model = makeInstViewModelWithWorkspace();
+    auto model = makeInstViewModel();
 
     auto previousActor = model.getInstrumentViewActor();
     auto ws = createWorkspace();
@@ -32,8 +41,17 @@ public:
     TS_ASSERT_EQUALS(result->getWorkspace(), ws)
   }
 
+  void test_update_workspace_initializes_actor() {
+    auto model = makeInstViewModel();
+    auto ws = createWorkspace();
+    model.updateWorkspace(ws);
+
+    const auto result = model.getInstrumentViewActor();
+    TS_ASSERT(result->isInitialized());
+  }
+
   void test_get_sample_pos() {
-    auto model = makeInstViewModelWithWorkspace();
+    auto model = makeInstViewModel();
     auto ws = createWorkspace();
     model.updateWorkspace(ws);
 
@@ -50,25 +68,18 @@ public:
   }
 
   void test_convert_det_ids_to_ws_indices() {
-    auto model = makeInstViewModelWithWorkspace();
+    auto model = makeInstViewModel();
     auto ws = createWorkspaceMultiDetector();
     model.updateWorkspace(ws);
 
     auto const detIndices = std::vector<size_t>{1, 2, 3};
-    auto const expected = std::vector<size_t>{1, 2, 3};
-    auto const workspaceIndices = model.detIndicesToWsIndices(detIndices);
+    auto const expected = std::vector<Mantid::detid_t>{2, 3, 4};
+    auto const workspaceIndices = model.detIndicesToDetIDs(detIndices);
     TS_ASSERT_EQUALS(workspaceIndices, expected);
   }
 
 private:
   InstViewModel makeInstViewModel() { return InstViewModel(makeMessageHandler()); }
-
-  InstViewModel makeInstViewModelWithWorkspace() {
-    auto mockMessageHandler = makeMessageHandler();
-    // We get a warning due to extract mask failing for our dummy workspace
-    expectExtractMaskFails(*mockMessageHandler);
-    return InstViewModel(std::move(mockMessageHandler));
-  }
 
   Mantid::API::MatrixWorkspace_sptr createWorkspace() {
     return WorkspaceCreationHelper::create2DWorkspaceWithReflectometryInstrument();
@@ -79,8 +90,4 @@ private:
   }
 
   std::unique_ptr<MockMessageHandler> makeMessageHandler() { return std::make_unique<MockMessageHandler>(); }
-
-  void expectExtractMaskFails(MockMessageHandler &mockMessageHandler) {
-    EXPECT_CALL(mockMessageHandler, giveUserWarning(_, _)).Times(1);
-  }
 };

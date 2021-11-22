@@ -1,14 +1,12 @@
 if(CXXTEST_FOUND)
 
-  # This is required to pick up NexusTestHelper
-  include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build this helper class into the test executable. It will
   # go out of scope at the end of this file so doesn't need un-setting
-  set(TESTHELPER_SRCS ../../TestHelpers/src/NexusTestHelper.cpp ../../TestHelpers/src/LoggingCleaner.cpp)
 
   cxxtest_add_test(KernelTest ${TEST_FILES})
-  target_include_directories(KernelTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR} ../../TestHelpers/inc)
+  target_include_directories(KernelTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
   target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json gmock Boost::filesystem)
+  add_framework_test_helpers(KernelTest)
   add_dependencies(FrameworkTests KernelTest)
   # Test data
   add_dependencies(KernelTest StandardTestData)

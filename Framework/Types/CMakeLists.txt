@@ -31,7 +31,7 @@ target_link_libraries(Types PUBLIC Boost::date_time Boost::regex)
 generate_mantid_export_header(Types FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidTypesTargets")
   mtd_install_framework_lib(TARGETS Types INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()

@@ -13,14 +13,14 @@
  *  I.e. It can only be used by plugin/algorithm-level packages (e.g.
  *DataHandling)
  *********************************************************************************/
-#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 /*****************************************************
  * SANS instrument helper class

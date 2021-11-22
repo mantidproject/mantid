@@ -8,8 +8,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/CompactMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using Mantid::MDAlgorithms::CompactMD;
 using namespace Mantid::API;

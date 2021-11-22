@@ -15,7 +15,7 @@
  *  than API (e.g. any algorithm or concrete workspace), even if via the
  *factory.
  *********************************************************************************/
-#include "MantidTestHelpers/BoxControllerDummyIO.h"
+#include "MantidFrameworkTestHelpers/BoxControllerDummyIO.h"
 #include "MantidKernel/Exception.h"
 
 #include <string>

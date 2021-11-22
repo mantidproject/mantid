@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAlgorithms/CopyDetectorMapping.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

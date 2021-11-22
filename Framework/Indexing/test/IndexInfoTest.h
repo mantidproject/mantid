@@ -14,7 +14,7 @@
 #include "MantidParallel/Communicator.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #ifdef MPI_EXPERIMENTAL
 #include <boost/mpi/environment.hpp>
 #endif

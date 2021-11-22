@@ -41,4 +41,6 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )
 
-add_subdirectory(test)
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_subdirectory(test)
+endif()

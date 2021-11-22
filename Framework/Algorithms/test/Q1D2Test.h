@@ -16,7 +16,7 @@
 #include "MantidDataHandling/MaskDetectors.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
 

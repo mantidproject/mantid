@@ -43,6 +43,7 @@ public:
   virtual void notifyAnyBatchReductionResumed() = 0;
   virtual void notifyAnyBatchReductionPaused() = 0;
   virtual void notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
+  virtual void notifyCloseEvent() = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;

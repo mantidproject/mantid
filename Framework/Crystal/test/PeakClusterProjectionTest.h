@@ -14,12 +14,12 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidCrystal/PeakClusterProjection.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cmath>
 

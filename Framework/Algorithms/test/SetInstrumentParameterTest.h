@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/SetInstrumentParameter.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <string>
 
 using Mantid::Algorithms::SetInstrumentParameter;

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import (Load, LoadNexusProcessed, SetSampleFromLogs)
+from mantid.simpleapi import (Load, LoadNexusProcessed, SetSampleFromLogs, AddSampleLog)
 from math import pi
 
 PAC06_RADIUS = 0.00295
@@ -65,6 +65,23 @@ class SetSampleFromLogsTest(unittest.TestCase):
 
         # verify the results
         self.validateSample(wksp.sample(), "Si", PAC06_HEIGHT)
+
+        del wksp  # remove from the ADS
+
+    def testVolumeZero_raises(self):
+        wksp = self.loadPG3Data("testVolumeZero")
+        # Set height to 0, should fail
+        AddSampleLog(wksp,
+                     LogName='BL11A:CS:ITEMS:HeightInContainer',
+                     LogText='0.', LogType='Number Series', NumberType='Double')
+
+        material = {}
+        environment = {"Name": "InAir"}
+        geometry = {}
+
+        with self.assertRaises(RuntimeError):
+            SetSampleFromLogs(InputWorkspace=wksp, Environment=environment,
+                              Material=material, Geometry=geometry)
 
         del wksp  # remove from the ADS
 

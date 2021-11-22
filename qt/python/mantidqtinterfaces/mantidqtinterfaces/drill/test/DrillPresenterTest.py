@@ -55,15 +55,15 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.onAutomaticFilling()
         self.mTable.setCellContents.assert_called_with(0, 1, "11,101,1001")
         self.mTable.setCellContents.reset_mock()
-        self.mTable.getCellContents.return_value = "test1,test,test_10"
+        self.mTable.getCellContents.return_value = "test01,test,test_10"
         self.presenter.onAutomaticFilling()
         self.mTable.setCellContents.assert_called_with(0, 1,
-                                                           "test2,test,test_11")
+                                                       "test02,test,test_11")
         self.mTable.setCellContents.reset_mock()
         # multiple columns
         self.view.increment.value.return_value = 7
         self.mTable.getSelectedCells.return_value = [(0, 0), (1, 0),
-                                                         (0, 1), (1, 1)]
+                                                     (0, 1), (1, 1)]
         self.mTable.getRowsFromSelectedCells.return_value = [0, 1]
         self.mTable.getCellContents.return_value = "10+15,100:200,1:10:2"
         self.presenter.onAutomaticFilling()

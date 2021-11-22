@@ -10,9 +10,9 @@
 
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/FilterByXValue.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidWorkflowAlgorithms/StepScan.h"
 
 using Mantid::DataObjects::EventWorkspace_sptr;

@@ -10,7 +10,7 @@
  *  This file MAY NOT be modified to use anything from a package other than
  *Kernel.
  *********************************************************************************/
-#include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include <Poco/File.h>
 #include <memory>

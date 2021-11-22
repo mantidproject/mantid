@@ -19,6 +19,7 @@ Guides
    Architecture
    BuildingOnOSX
    BuildingWithCMake
+   CMakeBestPractices
    Standards/index
    Testing/index
    DoxygenSetup

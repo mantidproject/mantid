@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy import QtCore, QtGui, QtWidgets
-from qtpy.QtCore import Signal
+from qtpy.QtCore import Signal, QSettings
 from qtpy.QtWidgets import QMessageBox
 
 from mantidqt.interfacemanager import InterfaceManager
@@ -32,6 +32,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     quit_signal = Signal()
     free_text_edited = False
     interface_manager = InterfaceManager()
+    CONTACT_INFO = "ContactInfo"
+    NAME = "Name"
+    EMAIL = "Email"
 
     def __init__(self, parent=None, show_continue_terminate=False):
         super(self.__class__, self).__init__(parent)
@@ -79,6 +82,18 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         # Set default focus to the editing box, rather then letting qt try and guess
         self.input_free_text.setFocus()
 
+        # Prefill name and email saved in QSettings
+        qSettings = QSettings()
+        qSettings.beginGroup(self.CONTACT_INFO)
+        self.saved_name = str(qSettings.value(self.NAME, ""))
+        self.saved_email = str(qSettings.value(self.EMAIL, ""))
+        qSettings.endGroup()
+        if self.saved_name or self.saved_email:
+            self.input_name_line_edit.setText(self.saved_name)
+            self.input_email_line_edit.setText(self.saved_email)
+            self.nonIDShareButton.setEnabled(True)
+            self.rememberContactInfoCheckbox.setChecked(True)
+
     def quit(self):
         self.quit_signal.emit()
 
@@ -121,7 +136,9 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         self.interface_manager.showWebPage(link)
 
     def set_button_status(self):
-        if self.input_text == '' and not self.input_name and not self.input_email:
+        if not self.input_name and not self.input_email:
+            self.nonIDShareButton.setEnabled(True)
+        elif self.input_name == self.saved_name and self.input_email == self.saved_email:
             self.nonIDShareButton.setEnabled(True)
         else:
             self.nonIDShareButton.setEnabled(False)

@@ -12,8 +12,8 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/ReplicateMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <string>
 #include <vector>
 

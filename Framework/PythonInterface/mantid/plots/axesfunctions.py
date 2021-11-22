@@ -815,11 +815,12 @@ def tricontourf(axes, workspace, *args, **kwargs):
     return axes.tricontourf(x, y, z, *args, **kwargs)
 
 
-def update_colorplot_datalimits(axes, mappables):
+def update_colorplot_datalimits(axes, mappables, axis='both'):
     """
-    For an colorplot (imshow, pcolor*) plots update the data limits on the axes
+    For a colorplot (imshow, pcolor*) plots update the data limits on the axes
     to circumvent bugs in matplotlib
     :param mappables: An iterable of mappable for this axes
+    :param axis: {'both', 'x', 'y'} which axis to operate on.
     """
     # ax.relim in matplotlib < 2.2 doesn't take into account of images
     # and it doesn't support collections at all as of verison 3 so we'll take
@@ -831,11 +832,14 @@ def update_colorplot_datalimits(axes, mappables):
         xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
         xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
-    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
-    axes.autoscale()
-    if axes._autoscaleXon:
+
+    update_x = axis in ['x', 'both']
+    update_y = axis in ['y', 'both']
+    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)), update_x, update_y)
+    axes.autoscale(axis=axis)
+    if axes.get_autoscalex_on():
         axes.set_xlim((xmin_all, xmax_all), auto=None)
-    if axes._autoscaleYon:
+    if axes.get_autoscaley_on():
         axes.set_ylim((ymin_all, ymax_all), auto=None)
 
 

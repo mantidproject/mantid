@@ -24,6 +24,14 @@ class PlottingCanvasPresenterInterface(abc.ABC):
         pass
 
     @abc.abstractmethod
+    def add_shaded_region(self, workspaces, indices):
+        """Adds shaded regions to the plot instead of errors
+        :param workspaces: List of workspaces
+        :param indices: List of the workspace indices
+        """
+        pass
+
+    @abc.abstractmethod
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot
         :param workspace_names: List of workspace names

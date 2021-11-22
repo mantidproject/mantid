@@ -32,8 +32,8 @@ class AxesTabWidgetView(QWidget):
         # QTabWidget not suitable because we reuse controls for each axis
         self.axis_tab_bar = QTabBar(parent=self)
         self.x_tab = self.axis_tab_bar.addTab("x")
-        self.x_tab = self.axis_tab_bar.addTab("y")
-        self.x_tab = self.axis_tab_bar.addTab("z")
+        self.y_tab = self.axis_tab_bar.addTab("y")
+        self.z_tab = self.axis_tab_bar.addTab("z")
         self.axis_tab_bar_layout.replaceWidget(self.dummy_axis_tab_bar, self.axis_tab_bar)
 
         self.lower_limit_validator = LineEditDoubleValidator(self.lower_limit_line_edit, 0.0)

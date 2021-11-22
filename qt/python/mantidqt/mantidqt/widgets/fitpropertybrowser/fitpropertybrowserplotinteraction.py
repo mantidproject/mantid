@@ -119,9 +119,6 @@ class FitPropertyBrowserPlotInteraction(QObject):
         :param out_ws_name: Output workspace name
         :return: Output guess workspace
         """
-        ws_index = self.fit_browser.workspaceIndex()
-        startX = self.fit_browser.startX()
-        endX = self.fit_browser.endX()
         workspace = AnalysisDataService.retrieve(ws_name)
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.setChild(True)
@@ -134,9 +131,10 @@ class FitPropertyBrowserPlotInteraction(QObject):
             if self.fit_browser.getErrColumnName():
                 alg.setProperty('ErrColumn', self.fit_browser.getErrColumnName())
         else:
-            alg.setProperty('WorkspaceIndex', ws_index)
-        alg.setProperty('StartX', startX)
-        alg.setProperty('EndX', endX)
+            alg.setProperty('WorkspaceIndex', self.fit_browser.workspaceIndex())
+        alg.setProperty('StartX', self.fit_browser.startX())
+        alg.setProperty('EndX', self.fit_browser.endX())
+        alg.setProperty('IgnoreInvalidData', self.fit_browser.ignoreInvalidData())
         alg.setProperty('OutputWorkspace', out_ws_name)
         alg.execute()
 

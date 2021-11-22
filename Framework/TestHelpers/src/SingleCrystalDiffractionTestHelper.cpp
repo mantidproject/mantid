@@ -7,17 +7,17 @@
 /* Test functions for algorithms for single crystal diffraction
  */
 
-#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
+#include "MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/normal_distribution.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
 #include <random>

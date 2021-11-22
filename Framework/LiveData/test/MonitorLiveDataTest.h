@@ -14,10 +14,10 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidLiveData/MonitorLiveData.h"
-#include "MantidTestHelpers/FacilityHelper.h"
 
 #include <Poco/ActiveResult.h>
 #include <Poco/Thread.h>

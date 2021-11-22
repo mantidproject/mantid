@@ -64,7 +64,8 @@ void SphericalAbsorption::init() {
                   "The number density of the sample in number of atoms per "
                   "cubic angstrom, if not set with SetSampleMaterial");
   declareProperty("SphericalSampleRadius", EMPTY_DBL(), mustBePositive,
-                  "The radius of the spherical sample in centimetres");
+                  "The radius of the spherical sample in centimetresif "
+                  "not set with SetSample.");
 }
 
 void SphericalAbsorption::exec() {

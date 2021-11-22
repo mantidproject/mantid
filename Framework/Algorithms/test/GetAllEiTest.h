@@ -8,10 +8,10 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/GetAllEi.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 
