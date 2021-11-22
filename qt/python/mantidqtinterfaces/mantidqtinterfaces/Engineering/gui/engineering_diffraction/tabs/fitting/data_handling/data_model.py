@@ -26,7 +26,7 @@ class FittingWorkspaceRecord:
         self.loaded_ws = kwargs.get('loaded_ws', None)
         self.bgsub_ws_name = kwargs.get('bgsub_ws_name', None)
         self.bgsub_ws = kwargs.get('bgsub_ws', None)
-        self.bg_params = kwargs.get('bg_params', [])  # [isSub, niter, xwindow, doSG]
+        self.bg_params = kwargs.get('bg_params', [])
 
     def get_bg_active(self):
         if self.bgsub_ws and self.bg_params[0]:
@@ -40,6 +40,13 @@ class FittingWorkspaceRecord:
             return self.bgsub_ws
         else:
             return self.loaded_ws
+
+    def __setattr__(self, key, value):
+        if key == 'bg_params':
+            if not isinstance(value, list):
+                raise AttributeError("bg_params must be a list")
+
+        self.__dict__[key] = value  # initialize self.key
 
 
 class FittingWorkspaceRecordContainer:
@@ -61,9 +68,9 @@ class FittingWorkspaceRecordContainer:
     def add(self, ws_name, **kwargs):
         self.dict[ws_name] = FittingWorkspaceRecord(**kwargs)
 
-    def add_from_names_dict(self, dict):
-        for key, value in dict.items():
-            self.add(key, ws_name=value.ws_name, bgsub_name=value.bgsub_ws_name, bg_params=value.bg_params)
+    def add_from_names_dict(self, names_dict):
+        for key, value in names_dict.items():
+            self.add(key, bgsub_ws_name=value[0], bg_params=value[1])
 
     def get_loaded_workpace_names(self):
         return list(self.dict.keys())
@@ -148,7 +155,7 @@ class FittingDataModel(object):
                     if self._data_workspaces[ws_name].bg_params:
                         bgsubws= ADS.retrieve(self._data_workspaces[ws_name].bgsub_ws_name)
                     self._last_added.append(ws_name)
-                    self._data_workspaces.set_ws(ws_name, ws)
+                    self._data_workspaces[ws_name].loaded_ws = ws
                     self._data_workspaces[ws_name].bgsub_ws = bgsubws
                 else:
                     logger.warning(
@@ -485,7 +492,7 @@ class FittingDataModel(object):
         ws_bg_params = self._data_workspaces[ws_name].bg_params
         if not ws_bg or ws_bg_params == [] or bg_params[1:] != ws_bg_params[1:]:
             background = self.estimate_background(ws_name, *bg_params[1:])
-            self._data_workspaces[ws_name].bg_params=bg_params
+            self._data_workspaces[ws_name].bg_params = bg_params
             bgsub_ws_name = ws_name + "_bgsub"
             bgsub_ws = Minus(LHSWorkspace=ws, RHSWorkspace=background, OutputWorkspace=bgsub_ws_name)
             self._data_workspaces[ws_name].bgsub_ws = bgsub_ws
