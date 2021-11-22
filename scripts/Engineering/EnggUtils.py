@@ -18,11 +18,13 @@ ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
 
 class GROUP(Enum):
     """Group Enum with attributes: banks (list of banks required for calibration) and grouping ws name"""
+
     def __new__(self, value, banks):
         obj = object.__new__(self)
         obj._value_ = value  # overwrite value to be first arg
         obj.banks = banks  # set attribute bank
         return obj
+
     # value of enum is the file suffix of .prm (for easy creation)
     #       value,  banks
     BOTH = "banks", [1, 2]
@@ -67,9 +69,9 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
         yfit = np.array([UnitConversion.run("dSpacing", "TOF", xpt, 0, DeltaEModeType.Elastic, diff_consts)
                          for xpt in x])
         # plot polynomial fit to TOF vs dSpacing
-        if ispec + 1 > len(figs)*ncols_per_fig:
+        if ispec + 1 > len(figs) * ncols_per_fig:
             # create new figure
-            ncols = ncols_per_fig if not nspec-ispec < ncols_per_fig else nspec % ncols_per_fig
+            ncols = ncols_per_fig if not nspec - ispec < ncols_per_fig else nspec % ncols_per_fig
             fig, ax = subplots(2, ncols, sharex=True, sharey='row', subplot_kw={'projection': 'mantid'})
             ax = np.reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if ncols==1
             ax[0, 0].set_ylabel('Fitted TOF (\u03BCs)')
@@ -81,7 +83,7 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
         ax[0, icol].errorbar(x, y, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
         ax[0, icol].plot(x, yfit, '-r', label='quadratic fit')
         # plot residuals
-        ax[1, icol].errorbar(x, y-yfit, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='resids')
+        ax[1, icol].errorbar(x, y - yfit, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='resids')
         ax[1, icol].axhline(color='r', ls='-')
         ax[1, icol].set_xlabel('d-spacing (Ang)')
         icol += 1
@@ -101,16 +103,29 @@ def default_ceria_expected_peaks(final=False):
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks
     properties of algorithms like PDCalibration
-
-    @param :: final - if true, returns a list better suited to a secondary fitting
+    @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
     @Returns :: a list of peaks in d-spacing as a float list
     """
     _CERIA_EXPECTED_PEAKS = [1.104598643, 1.352851554, 1.631600313, 1.913220892, 2.705702376]
-    _CERIA_EXPECTED_PEAKS_FINAL = [0.855618487, 0.901900955, 0.914694494, 0.956610446, 1.04142562, 1.104598643,
-                                   1.210027059, 1.241461538, 1.352851554, 1.562138267, 1.631600313, 1.913220892,
-                                   2.705702376]
+    _CERIA_EXPECTED_PEAKS_FINAL = [0.781069, 0.855618487, 0.901900955, 0.914694494, 0.956610446, 1.04142562,
+                                   1.104598643, 1.210027059, 1.241461538, 1.352851554, 1.562138267, 1.631600313,
+                                   1.913220892, 2.705702376]
 
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
+
+
+def default_ceria_expected_peak_windows(final=False):
+    """
+    Get the list of windows over which to fit ceria peaks in calls to PDCalibration
+    @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
+    @Returns :: a list of peak windows in d-spacing as a float list
+    """
+    _CERIA_EXPECTED_WINDOW = [1.06515, 1.15210,  1.30425, 1.41292, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
+    _CERIA_EXPECTED_WINDOW_FINAL = [0.77, 0.805, 0.83702, 0.88041, 0.88041, 0.90893, 0.90893, 0.93474, 0.93474, 0.98908,
+                                    1.01625, 1.06515, 1.06515, 1.15210, 1.16297, 1.22817, 1.22817, 1.29338, 1.30425,
+                                    1.41292, 1.53242, 1.59224, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
+
+    return _CERIA_EXPECTED_WINDOW_FINAL if final else _CERIA_EXPECTED_WINDOW
 
 
 def read_in_expected_peaks(filename, expected_peaks):
