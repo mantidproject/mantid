@@ -4,11 +4,11 @@
 Model Exercise Solution
 =======================
 
-The model should now contain the following class:
+The model should now contain the following top level function:
 
 .. code-block:: python
 
-    def line_colours(object):
+    def line_colours():
         colour_table = ["red", "blue", "black"]
         return colour_table
 
