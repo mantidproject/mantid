@@ -80,12 +80,17 @@ class FittingDataPresenter(object):
 
     def rename_workspace(self, old_name, new_name):
         # Note - ws.name() not updated yet so need to rely on new_name parameter
+        # Also Note - ADS rename is always associated with a ADS replace so
+        # rely on the replace to _repopulate_table. Prefer not to call twice
+        # to avoid issue with legend entries doubling up
         if old_name in self.model.get_all_workspace_names():
             self.model.update_workspace_name(old_name, new_name)
             if old_name in self.plotted:
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
-            self._repopulate_table()
+            if old_name in self.row_numbers: #bgsub not in row_numbers
+                row_no = self.row_numbers.pop(old_name)
+                self.row_numbers[new_name] = row_no
 
     # handle ADS clear
     def clear_workspaces(self):

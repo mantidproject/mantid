@@ -20,7 +20,7 @@ from collections import defaultdict, OrderedDict
 from re import findall, sub
 
 
-class WorkspaceRecord:
+class FittingWorkspaceRecord:
     """ Record that maps the workspace the user has loaded to the derived background-subtracted workspace"""
     def __init__(self, **kwargs):
         self.loaded_ws = kwargs.get('loaded_ws', None)
@@ -42,7 +42,7 @@ class WorkspaceRecord:
             return self.loaded_ws
 
 
-class WorkspaceRecordContainer:
+class FittingWorkspaceRecordContainer:
     def __init__(self):
         self.dict = OrderedDict()
 
@@ -59,7 +59,7 @@ class WorkspaceRecordContainer:
         return self.dict.get(key, default_value)
 
     def add(self, ws_name, **kwargs):
-        self.dict[ws_name] = WorkspaceRecord(**kwargs)
+        self.dict[ws_name] = FittingWorkspaceRecord(**kwargs)
 
     def add_from_names_dict(self, dict):
         for key, value in dict.items():
@@ -71,7 +71,7 @@ class WorkspaceRecordContainer:
     def get_bgsub_workpace_names(self):
         return [w.bgsub_ws_name for w in self.dict.values()]
 
-    # Set of methods that each return a two column dictionary for the various fields in WorkspaceRecord
+    # Set of methods that each return a two column dictionary for the various fields in FittingWorkspaceRecord
     def get_loaded_ws_dict(self):
         return dict([(key, value.loaded_ws) for key, value in self.dict.items()])
 
@@ -136,7 +136,7 @@ class FittingDataModel(object):
         self._fit_results = {}  # {WorkspaceName: fit_result_dict}
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
-        self._data_workspaces = WorkspaceRecordContainer()
+        self._data_workspaces = FittingWorkspaceRecordContainer()
 
     def restore_files(self, ws_names):
         self._data_workspaces.add_from_names_dict(ws_names)

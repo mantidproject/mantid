@@ -162,7 +162,7 @@ class FittingDataPresenterTest(unittest.TestCase):
     def test_rename_workspace_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
-        self.model.get_all_workspace_names.return_value = ["name1", "name2"]
+        self.model.get_all_workspace_names.return_value = ["name1", "name2", "new"] # just return all so has no effect
         # lambda function to replace dict with new key and same ordering as before
         self.model.update_workspace_name.side_effect = lambda old, new: model_dict.update(
             {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
@@ -170,6 +170,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.rename_workspace("name1", "new")
+        # ADS rename always accompanied by replace so call that as well here
+        self.presenter.replace_workspace("new", self.ws1)
         self.assertEqual({"new": self.ws1, "name2": self.ws2}, model_dict)
         self.assertTrue("new" in self.presenter.row_numbers)
         self.assertFalse("name1" == self.presenter.row_numbers)
