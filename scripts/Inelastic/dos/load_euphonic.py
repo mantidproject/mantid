@@ -93,8 +93,10 @@ def get_data_with_euphonic(filename: str,
                        dict of elements and isotopes)
 
     """
-    modes = euphonic_calculate_modes(filename=filename, cutoff=cutoff,
-                                     gamma=gamma, asr=acoustic_sum_rule)
+    modes = euphonic_calculate_modes(filename=filename,
+                                     cutoff=cutoff,
+                                     gamma=gamma,
+                                     acoustic_sum_rule=acoustic_sum_rule)
 
     file_data = {'num_ions': len(modes.crystal.atom_type),
                  'num_branches': modes.frequencies.magnitude.shape[1],
