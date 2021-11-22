@@ -32,7 +32,7 @@ and Phonopy (*phonopy.yaml* file generated with ``INCLUDE_ALL = .TRUE.``)
 
 The user may also provide an experimental file with measured dynamical structure factor S in order to directly
 compare theoretical and experimental spectra.
-Abins produces one dimensional INS spectrum which can be compared against TOSCA, IN1-LAGRANGE and similar instruments;
+Abins produces one dimensional INS spectrum that can be compared against TOSCA, IN1-LAGRANGE and similar instruments;
 a semi-empirical powder averaging model accounts for q- and energy-dependent intensity behaviour in this system.
 The user-input temperature value is included in a Debye-Waller term, recreating the intensity fall-off with increasing
 wavelength.
