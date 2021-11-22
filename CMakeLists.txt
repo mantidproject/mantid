@@ -110,12 +110,6 @@ set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
 # Bootstrap any dependencies
 include(Bootstrap)
 
-# Configure Eigen early
-if(BUILD_MANTIDFRAMEWORK)
-  include(Eigen)
-endif()
-include(Span)
-
 if(MSVC)
   include(MSVCSetup)
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -124,6 +118,11 @@ endif()
 
 # Cross-platform setup
 include(CommonSetup)
+
+if(BUILD_MANTIDFRAMEWORK)
+  include(Eigen)
+endif()
+include(Span)
 
 # Find OpenGL
 if(ENABLE_OPENGL)
