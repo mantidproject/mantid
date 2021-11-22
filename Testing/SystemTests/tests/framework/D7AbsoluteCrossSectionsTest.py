@@ -32,7 +32,7 @@ class ILL_D7_Powder_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
-        return ['normalized_powder_XYZ', 'ILL_D7_Powder_6p.nxs']
+        return ['normalized_powder_XYZ', 'ILL_D7_Powder_6p_updated.nxs']
 
     def runTest(self):
         vanadium_mass = 8.535
