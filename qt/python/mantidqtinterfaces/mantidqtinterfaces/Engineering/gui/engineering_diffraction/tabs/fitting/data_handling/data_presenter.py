@@ -146,6 +146,8 @@ class FittingDataPresenter(object):
                 self._add_row_to_table(name, i, run_no, bank, plotted, *self.model.get_bg_params()[name])
             except RuntimeError:
                 self._add_row_to_table(name, i)
+            # update row_numbers at end so _handle_table_cell_changed only acts once row is ready
+            self.row_numbers[name] = i
 
     def _remove_selected_tracked_workspaces(self):
         row_numbers = self._remove_selected_table_rows()
@@ -153,7 +155,7 @@ class FittingDataPresenter(object):
             ws_name = self.row_numbers.pop(row_no)
             removed_ws_list = self.model.delete_workspace(ws_name)
             for ws in removed_ws_list:
-                #self.plot_removed_notifier.notify_subscribers(ws) will be done in _repopulate_table
+                #plot_removed_notifier will be done in _repopulate_table
                 self.plotted.discard(ws.name())
         self._repopulate_table()
 
@@ -172,8 +174,9 @@ class FittingDataPresenter(object):
             self.model.plot_background_figure(ws_name)
 
     def _handle_table_cell_changed(self, row, col):
-
         if row in self.row_numbers:
+            # this is written on assumption that all columns are present.
+            # events fired by view.add_table_row are queued so handler called after add_table_row completes
             loaded_ws_name = self.row_numbers[row]
             is_plotted = self.view.get_item_checked(row, 2)
             is_sub = self.view.get_item_checked(row, 3)
@@ -271,7 +274,6 @@ class FittingDataPresenter(object):
                 "INSTRUMENT_RUNNUMBER_bank_BANK. Using workspace name as identifier.".format(ws_name)
             )
             self.view.add_table_row(ws_name, "N/A", plotted, bgsub, niter, xwindow, SG)
-        self.row_numbers[ws_name] = row
 
     def _remove_table_row(self, row_no):
         self.view.remove_table_row(row_no)
