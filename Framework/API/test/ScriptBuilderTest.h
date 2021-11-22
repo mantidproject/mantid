@@ -534,6 +534,8 @@ public:
   }
 
   void test_Build_Load_Uses_Args_From_Correct_Load() {
+    std::string dead_time_string = "DeadTimeTable='dead_time_table'";
+    std::string grouping_string = "GroupingTable='grouping_table'";
 
     auto alg = m_algFactory.create("Load", 1);
     alg->initialize();
@@ -561,6 +563,13 @@ public:
     }
     TSM_ASSERT("Could not find the dead time table in the algorithm history.", !foundDeadTimeTable);
     TSM_ASSERT("Could not find the grouping table in the algorithm history.", !foundGroupingTable);
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    // The dynamic property should not be in the script.
+    TS_ASSERT(scriptText.find(dead_time_string) != std::string::npos);
+    TS_ASSERT(scriptText.find(grouping_string) != std::string::npos);
 
     m_ads.remove("MUSR00022725");
   }
