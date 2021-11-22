@@ -47,6 +47,7 @@ Improvements
 - The results table now produces errors for log values (when they are available).
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
 - The plots no longer use scientific notation for the axis values.
+- On resizing priority is given to plotting.
 
 Bugfixes
 ########
@@ -55,6 +56,7 @@ Bugfixes
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
 - When a new results table is created the Model Analysis tab selects the default parameters to plot based on log values or parameters in the results table.
 - Fixed a bug that prevented the GUI working with workspace history and project recovery.
+- Detaching tabs, then closing Mantid no longer causes a crash.
 - When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
 
 ALC
@@ -85,6 +87,7 @@ Fitting Functions
 New Features
 ############
 - Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
+- Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to MuonModelling\Magentism Fit Functions.
 - Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
 - Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.
 - Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
@@ -92,6 +95,7 @@ New Features
 
 Improvements
 ############
+- created a new category, 'Magnetism', in the MuonModelling Fit Functions list.
 - :ref:`Gaussian <func-Gaussian>`, :ref:`Lorentzian <func-Lorentzian>` and :ref:`Polynomial fitting <func-Polynomial>` functions can now also be found under MuonModelling in the Fitting Functions Tree.
 
 :ref:`Release 6.3.0 <v6.3.0>`
