@@ -267,7 +267,7 @@ void LoadILLSANS::initWorkSpace(NeXus::NXEntry &firstEntry, const std::string &i
 
   size_t nextIndex;
   nextIndex = loadDataFromTubes(data, m_defaultBinning, 0);
-  nextIndex = loadDataFromMonitors(firstEntry, nextIndex);
+  loadDataFromMonitors(firstEntry, nextIndex);
   if (data.dim1() == 128) {
     m_resMode = "low";
   }
