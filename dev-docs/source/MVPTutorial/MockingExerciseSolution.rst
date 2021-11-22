@@ -11,7 +11,7 @@ Mocking Exercise Solution
     import view
 
     import unittest
-    from mantid.py3compat import mock
+    from unittest import mock
 
     class PresenterTest(unittest.TestCase):
         def setUp(self):
