@@ -13,7 +13,7 @@ widgets that may be used in multiple GUIs.
 
 We will combine the View widget from the exercise and the PlotView widget from the
 previous section into a single view. To achieve this we will create a
-'master' view:
+'main' view:
 
 .. code-block:: python
 
@@ -23,7 +23,7 @@ previous section into a single view. To achieve this we will create a
     import plot_view
     import view
 
-    class MasterView(QtWidgets.QWidget):
+    class MainView(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
             super().__init__(parent)
@@ -37,9 +37,9 @@ previous section into a single view. To achieve this we will create a
             self.setLayout(grid)
 
 The important thing to note here is that when the PlotView and View
-are created the parent is set to be the MasterView.
+are created the parent is set to be the MainView.
 
-The main only needs to import the master_view:
+The main only needs to import the main_view:
 
 .. code-block:: python
 
@@ -48,12 +48,12 @@ The main only needs to import the master_view:
             super().__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
-            my_view = master_view.MasterView()
+            my_view = main_view.MainView()
 
             # set the view for the main window
             self.setCentralWidget(my_view)
             self.setWindowTitle("view tutorial")
 
 You may notice that this main does not incorporate the presenter.
-Now that we have embedded our two views into MasterView, Presenter
+Now that we have embedded our two views into MainView, Presenter
 should also be split in the same way.
