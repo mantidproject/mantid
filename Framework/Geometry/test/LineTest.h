@@ -151,7 +151,7 @@ public:
     // forward only solution for cylinders
     TS_ASSERT_EQUALS(pntOut.size(), 1);
     TS_ASSERT_EQUALS(pntOut.front(), V3D(1.0, 0.0, 0.0));
-    TS_ASSERT_EQUALS(cylinder.onSurface(pntOut.front()), 1);
+    TS_ASSERT_EQUALS(cylinder.onSurface(pntOut.front()), true);
 
     // no intercept case - point outside cylinder pointing away
     Line bad(V3D(2, 0, 0), V3D(1, 0, 0));
@@ -176,7 +176,7 @@ public:
     Line::PType case1_out;
     case1.intersect(case1_out, cylinder);
     for (const auto &point : case1_out) {
-      TS_ASSERT_EQUALS(cylinder.onSurface(point), 1);
+      TS_ASSERT_EQUALS(cylinder.onSurface(point), true);
       const double radius = sqrt(point[0] * point[0] + point[2] * point[2]);
       TS_ASSERT_DELTA(radius, cylinder.getRadius(), 0.01 * cylinder.getRadius());
       std::cout << "AA found " << point << std::endl;
@@ -187,7 +187,7 @@ public:
     Line::PType case2_out;
     case2.intersect(case2_out, cylinder);
     for (const auto &point : case2_out) {
-      TS_ASSERT_EQUALS(cylinder.onSurface(point), 1);
+      TS_ASSERT_EQUALS(cylinder.onSurface(point), true);
       const double radius = sqrt(point[0] * point[0] + point[2] * point[2]);
       TS_ASSERT_DELTA(radius, cylinder.getRadius(), 0.01 * cylinder.getRadius());
       std::cout << "BB found " << point << std::endl;
@@ -238,7 +238,7 @@ public:
       const double z = sqrt(RADIUS * RADIUS - x * x);
       for (size_t j = 0; j < numY; ++j) {
         const V3D position(x, static_cast<double>(j) * STEP - Y_OFFSET, z);
-        TS_ASSERT_EQUALS(cylinder2mm.onSurface(position), 1);
+        TS_ASSERT_EQUALS(cylinder2mm.onSurface(position), true);
       }
     }
   }
