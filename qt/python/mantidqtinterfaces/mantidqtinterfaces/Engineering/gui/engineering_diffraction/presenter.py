@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from Engineering.common import path_handling
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from .tabs.common import CalibrationObserver
 from .tabs.calibration.model import CalibrationModel
@@ -93,8 +92,8 @@ class EngineeringDiffractionPresenter(object):
 
     def update_calibration(self, calibration):
         instrument = calibration.get_instrument()
-        sample_no = path_handling.get_run_number_from_path(calibration.get_sample(), instrument)
-        self.statusbar_observable.notify_subscribers(f"CeO2: {sample_no}, Instrument: {instrument}")
+        ceria_no = calibration.get_ceria_runno()
+        self.statusbar_observable.notify_subscribers(f"CeO2: {ceria_no}, Instrument: {instrument}")
 
     @staticmethod
     def get_saved_rb_number() -> str:

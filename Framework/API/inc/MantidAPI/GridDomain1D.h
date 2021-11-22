@@ -32,7 +32,6 @@ public:
   /// number of dimensions in the grid
   size_t nDimensions() { return 1; }
   void reScale(const std::string &scaling);
-  void SetScalingName(const std::string scaling);
   std::vector<double> &getPoints() { return m_points; }
 
 private:

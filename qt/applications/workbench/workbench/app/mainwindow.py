@@ -13,7 +13,7 @@ Defines the QMainWindow of the application and the main() entry point.
 import builtins
 import os
 
-from mantid.api import FrameworkManager
+from mantid.api import FrameworkManager, AlgorithmManager
 from mantid.kernel import ConfigService, logger
 from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
@@ -577,8 +577,17 @@ class MainWindow(QMainWindow):
                     event.ignore()
                     return
 
+        # Close windows
+        app = QApplication.instance()
+        if app is not None:
+            for window in app.topLevelWindows():
+                if not window.close():
+                    # Allow GUIs to cancel the closure if they want to save
+                    event.ignore()
+                    return
+
         # Close editors
-        if self.editor is None or self.editor.app_closing():
+        if self.editor is None or (self.editor.editors.current_editor() and self.editor.app_closing()):
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
@@ -588,9 +597,12 @@ class MainWindow(QMainWindow):
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
 
-            app = QApplication.instance()
+            # Close any remaining windows
             if app is not None:
                 app.closeAllWindows()
+
+            # Cancel all running (managed) algorithms
+            AlgorithmManager.Instance().cancelAll()
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly

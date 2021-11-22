@@ -13,7 +13,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadSESANS.h"
 #include "MantidDataHandling/SaveSESANS.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>

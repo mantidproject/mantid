@@ -1,77 +1,66 @@
 # Testing
 set(TEST_FILES
-  Instrument/InstrumentOptionDefaultsTest.h
-  Instrument/InstrumentPresenterTest.h
-  Batch/BatchPresenterTest.h
-  Batch/BatchJobRunnerProgressBarTest.h
-  Batch/BatchJobRunnerWorkspacesTest.h
-  Batch/GroupProcessingAlgorithmTest.h
-  Batch/BatchJobRunnerProcessingTest.h
-  Batch/RowProcessingAlgorithmTest.h
-  Event/EventPresenterTest.h
-  MainWindow/MainWindowPresenterTest.h
-  RunsTable/RunsTablePresenterRowDeletionTest.h
-  RunsTable/RunsTablePresenterGroupInsertionTest.h
-  RunsTable/RunsTablePresenterRowInsertionTest.h
-  RunsTable/RunsTablePresenterProcessingTest.h
-  RunsTable/RunsTablePresenterDisplayTest.h
-  RunsTable/RunsTablePresenterGroupDeletionTest.h
-  RunsTable/RunsTablePresenterMergeJobsTest.h
-  Save/SavePresenterTest.h
-  Runs/RunsPresenterTest.h
-  Runs/CatalogRunNotifierTest.h
-  Runs/QtCatalogSearcherTest.h
-  Runs/SearchResultTest.h
-  Options/OptionsDialogPresenterTest.h
-  Common/ClipboardTest.h
-  Common/DecoderTest.h
-  Common/EncoderTest.h
-  Common/PlotterTestQt5.h
-  Experiment/ExperimentPresenterTest.h
-  Experiment/LookupTableValidatorTest.h
-  Experiment/ExperimentOptionDefaultsTest.h
-  Reduction/ReductionJobsMergeTest.h
-  Reduction/ParseReflectometryStringsTest.h
-  Reduction/ValidateLookupRowTest.h
-  Reduction/GroupTest.h
-  Reduction/ValidateRowTest.h
-
-  Preview/PreviewModelTest.h
-  Preview/PreviewPresenterTest.h
+    Instrument/InstrumentOptionDefaultsTest.h
+    Instrument/InstrumentPresenterTest.h
+    Batch/BatchPresenterTest.h
+    Batch/BatchJobManagerProgressBarTest.h
+    Batch/BatchJobManagerWorkspacesTest.h
+    Batch/GroupProcessingAlgorithmTest.h
+    Batch/BatchJobManagerProcessingTest.h
+    Batch/RowProcessingAlgorithmTest.h
+    Batch/RowPreprocessingAlgorithmTest.h
+    Batch/SumBanksAlgorithmTest.h
+    Event/EventPresenterTest.h
+    MainWindow/MainWindowPresenterTest.h
+    RunsTable/RunsTablePresenterRowDeletionTest.h
+    RunsTable/RunsTablePresenterGroupInsertionTest.h
+    RunsTable/RunsTablePresenterRowInsertionTest.h
+    RunsTable/RunsTablePresenterProcessingTest.h
+    RunsTable/RunsTablePresenterDisplayTest.h
+    RunsTable/RunsTablePresenterGroupDeletionTest.h
+    RunsTable/RunsTablePresenterMergeJobsTest.h
+    Save/SavePresenterTest.h
+    Runs/RunsPresenterTest.h
+    Runs/CatalogRunNotifierTest.h
+    Runs/QtCatalogSearcherTest.h
+    Runs/SearchResultTest.h
+    Options/OptionsDialogPresenterTest.h
+    Common/ClipboardTest.h
+    Common/DecoderTest.h
+    Common/EncoderTest.h
+    Common/PlotterTestQt5.h
+    Experiment/ExperimentPresenterTest.h
+    Experiment/LookupTableValidatorTest.h
+    Experiment/ExperimentOptionDefaultsTest.h
+    Reduction/ReductionJobsMergeTest.h
+    Reduction/ParseReflectometryStringsTest.h
+    Reduction/ValidateLookupRowTest.h
+    Reduction/GroupTest.h
+    Reduction/ValidateRowTest.h
+    Preview/InstViewModelTest.h
+    Preview/PreviewJobManagerTest.h
+    Preview/PreviewModelTest.h
+    Preview/PreviewPresenterTest.h
 )
 
-set(CXXTEST_EXTRA_HEADER_INCLUDE
-    ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
+set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesReflectometryTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidScientificInterfacesISISReflectometryTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS
-    ../../../../Framework/CurveFitting/inc
-    ../../../../Framework/DataObjects/inc
-    ../../../../Framework/TestHelpers/inc
-    ../GUI/Preview
-    Preview
-  TEST_HELPER_SRCS
-    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/IndirectFitDataCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/ReflectometryHelper.cpp
-    ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
-  LINK_LIBS
-    ${CORE_MANTIDLIBS}
-    DataObjects
-    gmock
-    ${POCO_LIBRARIES}
-    ${Boost_LIBRARIES}
-    PythonInterfaceCore
-    Python::Python
-  MTD_QT_LINK_LIBS
-    MantidScientificInterfacesISISReflectometry
-    MantidQtWidgetsCommon
-    MantidQtWidgetsPlotting
-    MantidQtWidgetsMplCpp
-  PARENT_DEPENDENCIES
-    GUITests)
+  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../GUI/Preview Preview
+               Reduction
+  LINK_LIBS ${CORE_MANTIDLIBS}
+            Mantid::DataObjects
+            gmock
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            Mantid::PythonInterfaceCore
+            Python::Python
+  MTD_QT_LINK_LIBS MantidScientificInterfacesISISReflectometry MantidQtWidgetsCommon MantidQtWidgetsPlotting
+                   MantidQtWidgetsInstrumentView MantidQtWidgetsMplCpp
+  PARENT_DEPENDENCIES GUITests
+)
+
+add_framework_test_helpers(MantidScientificInterfacesISISReflectometryTestQt5)

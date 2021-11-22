@@ -23,6 +23,70 @@
       <parameter name="y-pixel-size" type="number">
         <value val="8"/>
       </parameter>
+
+      <!-- These parameters are used to define headers and entries for GenerateLogbook algorithm -->
+      <parameter name="logbook_default_parameters" type="string" visible="false">
+	<value val="SampleDescription:/entry0/sample_description:s,
+		    TotalTime:/entry0/duration:d,
+		    RateMonitor1:/entry0/monitor1/monrate:f,
+		    TotalCountsDet:/entry0/D22/detector/detsum:d,
+		    RateCountsDet:/entry0/D22/detector/detrate:f,
+		    StartTime:/entry0/start_time:s,
+		    Wavelength:/entry0/D22/selector/wavelength:f,
+		    Attenuator:/entry0/D22/attenuator/attenuation_value:f,
+		    Collimation:/entry0/D22/collimation/actual_position:f,
+		    SD:/entry0/D22/detector/det_actual:f,
+		    BeamStopY:/entry0/D22/beamstop/by_actual:f" />
+      </parameter>
+      <parameter name="logbook_optional_parameters" type="string" visible="false">
+	<value val="AcquisitionMode:/entry0/acquisition_mode:d,
+		    Beamstop:/entry0/D22/beamstop/actual_beamstop_number:f,
+		    VelocitySelectorSpeed:/entry0/D22/selector/rotation_speed:f,
+		    VelocitySelectorTilt:/entry0/D22/selector/selrot_actual:f,
+		    Diaphragm1:/entry0/D22/collimation/Dia1_actual_position:f,
+		    Diaphragm2:/entry0/D22/collimation/Dia2_actual_position:f,
+		    Diaphragm3:/entry0/D22/collimation/Dia3_actual_position:f,
+		    Diaphragm4:/entry0/D22/collimation/Dia4_actual_position:f,
+		    Diaphragm5:/entry0/D22/collimation/Dia5_actual_position:f,
+		    Diaphragm6:/entry0/D22/collimation/Dia6_actual_position:f,
+		    Diaphragm7:/entry0/D22/collimation/Dia7_actual_position:f,
+		    Diaphragm8:/entry0/D22/collimation/Dia8_actual_position:f,
+		    Guide1:/entry0/D22/collimation/Coll1_actual_position:f,
+		    Guide2:/entry0/D22/collimation/Coll2_actual_position:f,
+		    Guide3:/entry0/D22/collimation/Coll3_actual_position:f,
+		    Guide4:/entry0/D22/collimation/Coll4_actual_position:f,
+		    Guide5:/entry0/D22/collimation/Coll5_actual_position:f,
+		    Guide6:/entry0/D22/collimation/Coll6_actual_position:f,
+		    Guide7:/entry0/D22/collimation/Coll7_actual_position:f,
+		    TotalCountsMonitor1:/entry0/monitor1/monsum:d,
+		    TotalCountsMonitor2:/entry0/monitor2/monsum:d,
+		    RateMonitor2:/entry0/monitor2/monrate:f,
+		    ReactorPower:/entry0/reactor_power:f,
+		    BeamstopX:/entry0/D22/beamstop/bx_actual:f,
+		    san:/entry0/sample/san_actual:f,
+		    omega:/entry0/sample/omega_actual:f,
+		    phi:/entry0/sample/phi_actual:f,
+		    sdi:/entry0/sample/sdi_actual:f,
+		    sht:/entry0/sample/sht_actual:f,
+		    str:/entry0/sample/str_actual:f,
+		    trs:/entry0/sample/trs_actual:f,
+		    SampleTemperature:/entry0/sample/temperature:f,
+		    AirTemperature:/entry0/sample/air_temperature:f,
+		    RackTemperature:/entry0/sample/rack_temperature:f,
+		    Bath1Temperature:/entry0/sample/bath1_regulation_temperature:f,
+		    Bath2Temperature:/entry0/sample/bath2_regulation_temperature:f,
+		    BathSelector:/entry0/sample/bath_selector_actual:f,
+		    Position:/entry0/sample/sample_changer_value:f,
+		    SampleThickness:/entry0/sample/thickness:f,
+		    SampleApertureWidth:/entry0/D22/Beam/sample_ap_x_or_diam:f,
+		    SampleApertureHeight:/entry0/D22/Beam/sample_ap_y:f" />
+      </parameter>
+      <parameter name="log_list_to_save" type="string" visible="false">
+      <value val="facility,instrument_name,experiment_identifier,
+		  experiment_title,start_time,end_time,numor_list,
+		  processedAs,wavelength,sample_transmission_numors,
+                  collimation.actual_position,L2"/>
+      </parameter>
     </component-link>
 
     <!-- These parameters are used in ParallaxCorrection algorithm -->

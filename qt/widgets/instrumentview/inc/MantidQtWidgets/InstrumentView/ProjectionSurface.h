@@ -72,7 +72,7 @@ public:
     AddPeakMode,
     ComparePeakMode,
     AlignPeakMode,
-    DrawRegularMode,
+    EditShapeMode,
     DrawFreeMode,
     ErasePeakMode,
     InteractionModeSize
@@ -296,6 +296,7 @@ protected slots:
   void alignPeaks(const QRect &rect);
 
   void colorMapChanged();
+  void refreshView();
 
 protected:
   //-----------------------------------

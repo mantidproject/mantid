@@ -54,6 +54,9 @@ class InstrumentViewDecoder(InstrumentViewAttributes):
         #  Then 'decode' set the values from the dictionary
         self.widget_decoder.decode(obj_dic, instrument_widget, project_path, load_mask)
 
+        # ensure everything is loaded before returning the view
+        instrument_view.wait()
+
         # Show the end result
         return instrument_view
 

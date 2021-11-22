@@ -13,11 +13,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/WrapPython.h"
 #include "MantidQtWidgets/MplCpp/BackendQt.h"
 #include "MantidQtWidgets/Plotting/Mpl/ExternalPlotter.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

@@ -122,10 +122,9 @@ public:
     offset = 0;
     handle->seekg(0, std::ios::beg);
 
-    size_t loaded_size;
     while (offset < num_elements) {
       // Load that block of data
-      loaded_size = loadBlock(buffer.get(), buffer_size);
+      const auto loaded_size = loadBlock(buffer.get(), buffer_size);
       // Insert into the data
       data.insert(data.end(), buffer.get(), std::next(buffer.get(), loaded_size));
     }
@@ -157,10 +156,9 @@ public:
     offset = 0;
     handle->seekg(0, std::ios::beg);
 
-    size_t loaded_size;
     while (offset < num_elements) {
       // Load that block of data
-      loaded_size = loadBlock(buffer, buffer_size);
+      const auto loaded_size = loadBlock(buffer, buffer_size);
       // Insert into the data
       data.insert(data.end(), buffer, (buffer + loaded_size));
     }

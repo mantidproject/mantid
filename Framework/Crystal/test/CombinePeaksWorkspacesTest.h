@@ -13,8 +13,8 @@
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::CombinePeaksWorkspaces;
 

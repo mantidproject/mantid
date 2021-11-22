@@ -11,7 +11,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/Algorithms/Fit.h"

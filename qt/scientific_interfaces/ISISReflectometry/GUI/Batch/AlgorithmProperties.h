@@ -8,6 +8,7 @@
 
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidKernel/Strings.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
 #include <boost/optional.hpp>
 #include <map>
@@ -18,7 +19,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 namespace AlgorithmProperties {
 
-using AlgorithmRuntimeProps = std::map<std::string, std::string>;
+using AlgorithmRuntimeProps = MantidQt::API::IAlgorithmRuntimeProps;
 
 // These convenience functions convert properties of various types into
 // strings to set the relevant property in an AlgorithmRuntimeProps

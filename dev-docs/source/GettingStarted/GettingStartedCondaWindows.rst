@@ -21,6 +21,11 @@ Install `Git <https://git-scm.com/>`_
 * Install the latest version of Git, and ensure git bash was installed and the git executable location was added to your PATH, if you didn't do this as part of your installation you can do this `manually <https://docs.microsoft.com/en-us/previous-versions/office/developer/sharepoint-2010/ee537574(v=office.14)#to-add-a-path-to-the-path-environment-variable>`_.
 * We no longer need Git LFS as conda handles the dependencies that used to be in the third party directory.
 
+Turn off Python association in Windows
+--------------------------------------
+* Because of the way Windows associates Python files with it's Windows Store version of python we need to turn off this association. If you don't turn this off you will have issues when running the pre-commit framework.
+* Navigate to your Settings -> Manage App Execution Aliases, and turn off all Python Aliases.
+
 Clone the mantid source code
 ----------------------------
 
@@ -43,7 +48,6 @@ Setup the mantid conda environment
     * Open an Anaconda prompt (Mambaforge).
     * Add the path of your Mambaforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
 
-* Temporary fix for Mambaforge on Windows. Run ``conda config --add channels main`` this will add the main channel and allow Windows developers to install ``cyrus-sasl`` (A dependency of librdkafka) which is not available on Windows yet via conda-forge.
 * Create the mantid conda environment by navigating to your mantid source code directory in your terminal and running ``conda env create -f mantid-developer-win.yml``
 
 Configure CMake and generate build files
@@ -62,3 +66,8 @@ Compile and Build using Visual Studio
 * Open visual studio with ``visualstudio.bat`` then click build.
 * It's not possible to compile in Debug on Windows with conda libraries, however Release, and RelWithDebInfo for Debugging will compile fine.
 * Once in visual studio, the correct target to use as a startup project in visual studio is ``workbench``, not ``MantidWorkbench``. You can then press F5 to start workbench.
+
+CMake Conda variables
+-----------------------
+There are two Conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a Conda environment, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
+The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. These options can be passed to CMake on the command line using -DCONDA_ENV=True for example.

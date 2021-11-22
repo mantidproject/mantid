@@ -806,6 +806,80 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.assertEqual(message, "No data or fit function selected for fitting.")
 
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    def test_add_workspaces_to_group(self, retrieve_ws, check_exists, add_to_group, make_group):
+        check_exists.return_value = True
+        retrieve_ws.return_value = "group ws"
+
+        self.model._add_workspaces_to_group(["ws"], "group")
+        retrieve_ws.assert_called_once_with("group")
+        add_to_group.assert_called_once_with(["ws"], "group ws")
+        make_group.assert_not_called()
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.make_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.add_list_to_group')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.check_if_workspace_exist')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.retrieve_ws')
+    def test_add_workspaces_to_new_group(self, retrieve_ws, check_exists, add_to_group, make_group):
+        check_exists.return_value = False
+        retrieve_ws.return_value = "group ws"
+
+        self.model._add_workspaces_to_group(["ws"], "group")
+        retrieve_ws.assert_not_called()
+        add_to_group.assert_not_called()
+        make_group.assert_called_once_with(["ws"], "group")
+
+    def test_set_current_start_and_end_x_as_expected(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 5
+        new_end_x = 10
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, new_start_x)
+        self.assertEqual(self.model.current_end_x, new_end_x)
+
+    def test_set_current_start_and_end_x_with_start_bigger_end(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 30
+        new_end_x = 50
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, new_start_x)
+        self.assertEqual(self.model.current_end_x, new_end_x)
+
+    def test_set_current_start_and_end_x_fail(self):
+
+        self.model.dataset_names = self.dataset_names
+        self.model.current_dataset_index = 0
+        self.model.start_xs = [0.0, 0.0]
+        self.model.end_xs = [15.0, 15.0]
+
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.)
+        new_start_x = 50
+        new_end_x = 10
+
+        self.model.set_current_start_and_end_x(new_start_x, new_end_x)
+        self.assertEqual(self.model.current_start_x, 0.0)
+        self.assertEqual(self.model.current_end_x, 15.0)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -20,15 +20,15 @@ namespace MantidQt::MantidWidgets {
  * excluded from grouping.
  * @param fname :: Name of the file to save the grouping to.
  */
-DetXMLFile::DetXMLFile(const std::vector<int> &detector_list, const QList<int> &exclude, const QString &fname) {
+DetXMLFile::DetXMLFile(const std::vector<int> &detector_list, const std::vector<int> &exclude, const QString &fname) {
   m_fileName = fname;
   m_delete = false;
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
   out << R"(<group name="sum"> <detids val=")";
-  auto idet = detector_list.begin();
-  for (; idet != detector_list.end(); ++idet) {
-    if (!exclude.contains(*idet)) {
+  auto idet = detector_list.cbegin();
+  for (; idet != detector_list.cend(); ++idet) {
+    if (std::find(exclude.cbegin(), exclude.cend(), *idet) == exclude.cend()) {
       out << *idet << ',';
     }
   }
@@ -40,7 +40,7 @@ DetXMLFile::DetXMLFile(const std::vector<int> &detector_list, const QList<int> &
  * - one detector, Option Sum - one group which is a sum of the detectors If
  * fname is empty create a temporary file
  */
-DetXMLFile::DetXMLFile(const QList<int> &dets, Option opt, const QString &fname) {
+DetXMLFile::DetXMLFile(const std::vector<int> &dets, Option opt, const QString &fname) {
   if (dets.empty()) {
     m_fileName = "";
     m_delete = false;
@@ -69,7 +69,7 @@ DetXMLFile::DetXMLFile(const QList<int> &dets, Option opt, const QString &fname)
 }
 
 /// Make grouping file where each detector is put into its own group
-void DetXMLFile::makeListFile(const QList<int> &dets) {
+void DetXMLFile::makeListFile(const std::vector<int> &dets) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
   foreach (int det, dets) { out << "<group name=\"" << det << "\"> <detids val=\"" << det << "\"/> </group> \n"; }
@@ -78,7 +78,7 @@ void DetXMLFile::makeListFile(const QList<int> &dets) {
 
 /// Make grouping file for putting the detectors into one group (summing the
 /// detectors)
-void DetXMLFile::makeSumFile(const QList<int> &dets) {
+void DetXMLFile::makeSumFile(const std::vector<int> &dets) {
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
   out << R"(<group name="sum"> <detids val=")";

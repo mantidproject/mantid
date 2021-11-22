@@ -23,8 +23,7 @@
 #include <QTime>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace API {
+namespace MantidQt::API {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("ScriptRepositoryView");
@@ -188,11 +187,11 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   connect(ui->repo_treeView, SIGNAL(activated(const QModelIndex &)), this, SLOT(cell_activated(const QModelIndex &)));
   connect(ui->repo_treeView, SIGNAL(currentCell(const QModelIndex &)), this, SLOT(currentChanged(const QModelIndex &)));
 
-  ConfigServiceImpl &config = ConfigService::Instance();
-  QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
-  QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
-                     "text-decoration: underline; "
-                     "color:#0000ff;\">%2</span></a></p></body></html>";
+  const ConfigServiceImpl &config = ConfigService::Instance();
+  const QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
+  const QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
+                           "text-decoration: underline; "
+                           "color:#0000ff;\">%2</span></a></p></body></html>";
   QString path_label;
   if (loc.size() < 50)
     path_label = loc;
@@ -619,5 +618,4 @@ void ScriptRepositoryView::openFolderLink(const QString &link) {
     g_log.error() << error_msg << "Could not find directory.\n";
 }
 
-} // namespace API
-} // namespace MantidQt
+} // namespace MantidQt::API

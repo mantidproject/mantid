@@ -34,7 +34,13 @@ class FittingPlotToolbar(MantidNavigationToolbar):
         self.push_current()
 
     def toggle_fit(self):
-        self._actions['toggle_fit']
+        fit_action = self._actions['toggle_fit']
+        if fit_action.isChecked():
+            # disable pan and zoom
+            if self._actions['zoom'].isChecked():
+                self.zoom()
+            if self._actions['pan'].isChecked():
+                self.pan()
         self.sig_toggle_fit_triggered.emit()
 
     def handle_fit_browser_close(self):

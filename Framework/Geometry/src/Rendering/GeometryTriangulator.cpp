@@ -37,6 +37,7 @@ GNU_DIAG_OFF("cast-qual")
 #include <BRepMesh_IncrementalMesh.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
+#include <Standard_Version.hxx>
 #include <StdFail_NotDone.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
@@ -52,6 +53,29 @@ GNU_DIAG_ON("cast-qual")
 #pragma warning enable 191
 #endif
 
+namespace {
+auto getNode(const Handle(Poly_Triangulation) facing, Standard_Integer i) {
+#if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
+  return facing->Node(i);
+#else
+  // Compat shim to support OCCT 7.5 and below
+  TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
+  tab = facing->Nodes();
+  return tab.Value(i);
+#endif
+}
+
+auto getTriangle(const Handle(Poly_Triangulation) facing, Standard_Integer i) {
+#if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
+  return facing->Triangle(i);
+#else
+  // Compat shim to support OCCT 7.5 and below
+  Poly_Array1OfTriangle tri(1, facing->NbTriangles());
+  tri = facing->Triangles();
+  return tri.Value(i);
+#endif
+}
+} // namespace
 #endif // ENABLE_OPENCASCADE
 
 namespace Mantid::Geometry::detail {
@@ -61,10 +85,12 @@ Kernel::Logger g_log("GeometryTriangulator");
 } // namespace
 
 GeometryTriangulator::GeometryTriangulator(const CSGObject *obj)
-    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj) {
+    : m_isTriangulated(false), m_nFaces(0), m_nPoints(0), m_csgObj(obj)
 #ifdef ENABLE_OPENCASCADE
-  m_objSurface = nullptr;
+      ,
+      m_objSurface(nullptr)
 #endif
+{
 }
 
 GeometryTriangulator::GeometryTriangulator(std::unique_ptr<RenderingMesh> obj)
@@ -192,10 +218,8 @@ void GeometryTriangulator::setupPoints() {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
       TopLoc_Location L;
       Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
-      tab = facing->Nodes();
       for (Standard_Integer i = 1; i <= (facing->NbNodes()); i++) {
-        gp_Pnt pnt = tab.Value(i);
+        const auto pnt = getNode(facing, i);
         m_points[index * 3 + 0] = pnt.X();
         m_points[index * 3 + 1] = pnt.Y();
         m_points[index * 3 + 2] = pnt.Z();
@@ -216,12 +240,8 @@ void GeometryTriangulator::setupFaces() {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
       TopLoc_Location L;
       Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
-      tab = facing->Nodes();
-      Poly_Array1OfTriangle tri(1, facing->NbTriangles());
-      tri = facing->Triangles();
       for (Standard_Integer i = 1; i <= (facing->NbTriangles()); i++) {
-        Poly_Triangle trian = tri.Value(i);
+        Poly_Triangle trian = getTriangle(facing, i);
         Standard_Integer index1, index2, index3;
         trian.Get(index1, index2, index3);
         m_faces[index * 3 + 0] = static_cast<uint32_t>(maxindex + index1 - 1);

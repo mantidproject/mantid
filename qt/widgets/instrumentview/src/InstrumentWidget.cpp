@@ -8,9 +8,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/Common/TSVSerialiser.h"
-#endif
+#include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
@@ -59,6 +57,7 @@
 #include <QStackedLayout>
 #include <QString>
 #include <QTemporaryFile>
+#include <QThread>
 #include <QUrl>
 #include <QVBoxLayout>
 #include <QWidget>
@@ -108,44 +107,53 @@ public:
 
 /**
  * Constructor.
+ * @param useThread :: Controls whether the InstrumentActor is created in a background thread. Set to false to keep
+ * original behavior where full instrument is loaded with the window. If using the thread, then use waitForThread()
+ * after creating the widget.
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
-                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps)
+                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps,
+                                   bool useThread)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(std::move(wsName)), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(
           QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"))),
       mViewChanged(false), m_blocked(false), m_instrumentDisplayContextMenuOn(false),
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}), m_wsReplace(false), m_help(nullptr),
-      m_qtConnect(std::move(deps.qtConnect)) {
-
+      m_qtConnect(std::move(deps.qtConnect)), m_qtMetaObject(std::move(deps.qtMetaObject)),
+      m_messageHandler(std::move(deps.messageHandler)), m_finished(false), m_autoscaling(autoscaling),
+      m_scaleMin(scaleMin), m_scaleMax(scaleMax), m_setDefaultView(setDefaultView), m_resetGeometry(resetGeometry),
+      m_useThread(useThread) {
   QWidget *aWidget = new QWidget(this);
   if (!m_instrumentDisplay) {
     m_instrumentDisplay =
         std::make_unique<InstrumentDisplay>(aWidget, std::move(deps.glDisplay), std::move(deps.qtDisplay));
   }
 
+  if (!m_messageHandler) {
+    m_messageHandler = std::make_unique<MessageHandler>();
+  }
+
   setFocusPolicy(Qt::StrongFocus);
   m_mainLayout = new QVBoxLayout(this);
-  auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
+  m_controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   // Add Tab control panel
   mControlsTab = new QTabWidget(this);
-  controlPanelLayout->addWidget(mControlsTab);
-  controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  m_controlPanelLayout->addWidget(mControlsTab);
+  m_controlPanelLayout->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
   m_instrumentDisplay->installEventFilter(this);
   m_instrumentDisplay->getGLDisplay()->setMinimumWidth(600);
   m_qtConnect->connect(this, SIGNAL(enableLighting(bool)), m_instrumentDisplay->getGLDisplay(),
                        SLOT(enableLighting(bool)));
 
-  controlPanelLayout->addWidget(aWidget);
+  m_controlPanelLayout->addWidget(aWidget);
 
-  m_mainLayout->addWidget(controlPanelLayout);
-
-  m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
+  m_mainLayout->addWidget(m_controlPanelLayout);
 
   m_xIntegration = new XIntegrationControl(this);
+  m_xIntegration->setEnabled(false);
   m_mainLayout->addWidget(m_xIntegration);
   m_qtConnect->connect(m_xIntegration, SIGNAL(changed(double, double)), this,
                        SLOT(setIntegrationRange(double, double)));
@@ -163,6 +171,18 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   m_mainLayout->addLayout(infoLayout);
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
+
+  if (m_useThread) {
+    // disable all controls until background thread has finished
+    m_controlPanelLayout->setEnabled(false);
+    resetInstrumentActor(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView);
+  } else {
+    // create and setup the instrument actor immediately if not using the background thread
+    m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                          scaleMin, scaleMax);
+    m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::DirectConnection,
+                                 Q_ARG(bool, resetGeometry), Q_ARG(bool, setDefaultView));
+  }
 
   // Background colour
   setBackgroundColor(settings.value("BackgroundColor", QColor(0, 0, 0, 1.0)).value<QColor>());
@@ -194,13 +214,14 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
   const int tabsSize = windowWidth / 4;
   QList<int> sizes;
   sizes << tabsSize << windowWidth - tabsSize;
-  controlPanelLayout->setSizes(sizes);
-  controlPanelLayout->setStretchFactor(0, 0);
-  controlPanelLayout->setStretchFactor(1, 1);
+  m_controlPanelLayout->setSizes(sizes);
+  m_controlPanelLayout->setStretchFactor(0, 0);
+  m_controlPanelLayout->setStretchFactor(1, 1);
 
   resize(windowWidth, 650);
 
   tabChanged(0);
+  updateInfoText("Loading instrument...");
 
   m_qtConnect->connect(this, SIGNAL(needSetIntegrationRange(double, double)), this,
                        SLOT(setIntegrationRange(double, double)), Qt::QueuedConnection);
@@ -208,17 +229,24 @@ InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGe
 
   setWindowTitle(QString("Instrument - ") + m_workspaceName);
 
-  const bool resetActor(false);
-  init(resetGeometry, autoscaling, scaleMin, scaleMax, setDefaultView, resetActor);
+  // finish widget init now if not using the background thread
+  if (!m_useThread) {
+    initWidget(true, true);
+  }
 }
 
 /**
  * Destructor
  */
 InstrumentWidget::~InstrumentWidget() {
+  if (m_useThread) {
+    cancelThread();
+  }
+
   if (m_instrumentActor) {
     saveSettings();
   }
+  m_instrumentActor.reset();
 }
 
 void InstrumentWidget::hideHelp() { m_help->setVisible(false); }
@@ -260,19 +288,9 @@ Mantid::Kernel::V3D InstrumentWidget::getSurfaceAxis(const int surfaceType) cons
  * Must be called straight after constructor.
  * @param resetGeometry :: Set true for resetting the view's geometry: the
  * bounding box and rotation. Default is true.
- * @param autoscaling :: True to start with autoscaling option on.
- * @param scaleMin :: Minimum value of the colormap scale. Ignored if
- * autoscaling == true.
- * @param scaleMax :: Maximum value of the colormap scale. Ignored if
- * autoscaling == true.
  * @param setDefaultView :: Set the default surface type
- * @param resetActor :: If true reset the instrumentActor object
  */
-void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
-                            bool resetActor) {
-  if (resetActor) {
-    m_instrumentActor.reset(new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
-  }
+void InstrumentWidget::init(bool resetGeometry, bool setDefaultView) {
 
   auto surface = getSurface();
   if (resetGeometry || !surface) {
@@ -299,11 +317,24 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling, double scaleMi
 }
 
 /**
+ * Wrapper around the init function that is called
+ * when thread creating the InstrumentActor is finished
+ */
+void InstrumentWidget::initWidget(bool resetGeometry, bool setDefaultView) {
+  // re-enable side panels now that the instrument is loaded
+  m_controlPanelLayout->setEnabled(true);
+  m_xIntegration->setEnabled(true);
+  init(resetGeometry, setDefaultView);
+
+  m_finished = true;
+}
+
+/**
  * Deletes instrument actor before re-initializing.
  * @param resetGeometry
  */
 void InstrumentWidget::resetInstrument(bool resetGeometry) {
-  init(resetGeometry, true, 0.0, 0.0, false);
+  init(resetGeometry, false);
   updateInstrumentDetectors();
 }
 
@@ -312,6 +343,67 @@ void InstrumentWidget::resetSurface() {
   surface->updateDetectors();
   update();
 }
+
+/**
+ * Re-creates the instrument actor and initializes it
+ * in a background thread
+ * @param resetGeometry :: Set true for resetting the view's geometry: the
+ * bounding box and rotation. Default is true.
+ * @param autoscaling :: True to start with autoscaling option on.
+ * @param scaleMin :: Minimum value of the colormap scale. Ignored if
+ * autoscaling == true.
+ * @param scaleMax :: Maximum value of the colormap scale. Ignored if
+ * autoscaling == true.
+ * @param setDefaultView :: Set the default surface type
+ */
+void InstrumentWidget::resetInstrumentActor(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax,
+                                            bool setDefaultView) {
+  if (m_useThread && m_thread.isRunning()) {
+    cancelThread();
+  }
+
+  m_finished = false;
+
+  // disable main GUI elements while thread is running - these are re-enabled afterwards in initWidget
+  m_controlPanelLayout->setEnabled(false);
+  m_xIntegration->setEnabled(false);
+  updateInfoText("Loading instrument...");
+
+  m_instrumentActor = std::make_unique<InstrumentActor>(m_workspaceName.toStdString(), *m_messageHandler, autoscaling,
+                                                        scaleMin, scaleMax);
+  if (m_useThread) {
+    m_instrumentActor->moveToThread(&m_thread);
+    m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
+    m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(destroyed()), this, SLOT(threadFinished()));
+    m_qtConnect->connect(&m_thread, SIGNAL(destroyed()), this, SLOT(threadFinished()));
+    m_thread.start();
+  } else {
+    m_qtConnect->connect(m_instrumentActor.get(), SIGNAL(initWidget(bool, bool)), this, SLOT(initWidget(bool, bool)));
+  }
+  m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "initialize", Qt::QueuedConnection, Q_ARG(bool, resetGeometry),
+                               Q_ARG(bool, setDefaultView));
+}
+
+void InstrumentWidget::cancelThread() {
+  if (m_instrumentActor) {
+    m_instrumentActor->blockSignals(true);
+    m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "cancel", Qt::DirectConnection);
+  }
+
+  m_thread.requestInterruption();
+  m_thread.quit();
+  if (!m_thread.wait(10000)) {
+    // terminate after waiting a delay to catch edge case where workbench is closed while
+    // this background thread is running
+    m_thread.terminate();
+    m_thread.wait();
+  }
+}
+
+/**
+ * Callback from InstrumentActor whenever it is destroyed so that waitForThread can exit
+ */
+void InstrumentWidget::threadFinished() { m_finished = true; }
 
 /**
  * Select the tab to be displayed
@@ -420,6 +512,26 @@ bool InstrumentWidget::isIntegrable() {
     return true;
   }
 }
+
+/**
+ * Returns whether the background thread creating the InstrumentActor is still executing
+ */
+bool InstrumentWidget::isThreadRunning() const { return m_thread.isRunning(); }
+
+/**
+ * Blocks until the background InstrumentActor setup thread is finished
+ */
+void InstrumentWidget::waitForThread() const {
+  while (!m_finished) {
+    QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+  }
+}
+
+/**
+ * Returns whether the remaining initialization of the widget
+ * after the background thread finished is done
+ */
+bool InstrumentWidget::isFinished() const { return m_finished; }
 
 /**
  * Update the info text displayed at the bottom of the window.
@@ -578,7 +690,9 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
   renameWorkspace(newWs);
-  m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
+  // re-create the underlying instrument in the background and reset the autoscale, scales, and default view options to
+  // the values that this window was launched with originally
+  resetInstrumentActor(true, m_autoscaling, 0.0, 0.0, false);
 
   // update the view and colormap
   auto surface = getSurface();
@@ -617,6 +731,10 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
 void InstrumentWidget::updateIntegrationWidget(bool init) {
   // discrete integration range is only used if all the bins are common and integers and not an event workspace, as a
   // convention
+  if (!m_instrumentActor->isInitialized()) {
+    // skip if background thread is still running, this will get called when it finishes as part of init
+    return;
+  }
   auto ws = m_instrumentActor->getWorkspace();
 
   bool isNotEventWs = ws->id() != "EventWorkspace";
@@ -884,7 +1002,11 @@ void InstrumentWidget::saveSettings() {
     settings.setValue("ShowPeakRows", getSurface()->getShowPeakRowsFlag());
     settings.setValue("ShowPeakLabels", getSurface()->getShowPeakLabelsFlag());
     settings.setValue("ShowPeakRelativeIntensities", getSurface()->getShowPeakRelativeIntensityFlag());
-    foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+    // only save tab states if the instrument actor loading finished and this widget was updated
+    // through initWidget
+    if (m_finished) {
+      foreach (InstrumentWidgetTab *tab, m_tabs) { tab->saveSettings(settings); }
+    }
   }
   settings.endGroup();
 }
@@ -1081,6 +1203,17 @@ bool InstrumentWidget::eventFilter(QObject *obj, QEvent *ev) {
   return QWidget::eventFilter(obj, ev);
 }
 
+void InstrumentWidget::closeEvent(QCloseEvent *e) {
+  // stop the background thread if it is running
+  if (m_thread.isRunning()) {
+    if (m_instrumentActor) {
+      m_qtMetaObject->invokeMethod(m_instrumentActor.get(), "cancel");
+    }
+    m_thread.quit();
+  }
+  e->accept();
+}
+
 /**
  * Disable colormap autoscaling
  */
@@ -1219,14 +1352,11 @@ void InstrumentWidget::setSurface(ProjectionSurface *surface) {
 
 /// Return the size of the OpenGL display widget in logical pixels
 QSize InstrumentWidget::glWidgetDimensions() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  auto sizeinLogicalPixels = [](const QWidget *w) -> QSize { return QSize(w->width(), w->height()); };
-#else
   auto sizeinLogicalPixels = [](const QWidget *w) -> QSize {
     const auto devicePixelRatio = w->window()->devicePixelRatio();
     return QSize(w->width() * devicePixelRatio, w->height() * devicePixelRatio);
   };
-#endif
+
   if (m_instrumentDisplay->getGLDisplay())
     return sizeinLogicalPixels(m_instrumentDisplay->getGLDisplay());
   else if (m_instrumentDisplay->getQtDisplay())
@@ -1293,7 +1423,7 @@ bool InstrumentWidget::isGLEnabled() const { return m_useOpenGL; }
 /**
  * Create and add the tab widgets.
  */
-void InstrumentWidget::createTabs(QSettings &settings) {
+void InstrumentWidget::createTabs(const QSettings &settings) {
   // Render Controls
   m_renderTab = new InstrumentWidgetRenderTab(this);
   m_qtConnect->connect(m_renderTab, SIGNAL(setAutoscaling(bool)), this, SLOT(setColorMapAutoscaling(bool)));
@@ -1418,7 +1548,7 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
   // try to detect if the instrument changes (unlikely if the workspace
   // hasn't, but theoretically possible)
   bool resetGeometry = matrixWS->detectorInfo().size() != m_instrumentActor->ndetectors();
-  resetInstrument(resetGeometry);
+  resetInstrumentActor(resetGeometry, m_autoscaling, m_scaleMin, m_scaleMax, m_setDefaultView);
   updateIntegrationWidget();
 }
 
@@ -1428,6 +1558,10 @@ void InstrumentWidget::handleWorkspaceReplacement(const std::string &wsName,
  * @param workspace_ptr :: Pointer to the workspace to be deleted
  */
 void InstrumentWidget::preDeleteHandle(const std::string &ws_name, const std::shared_ptr<Workspace> &workspace_ptr) {
+  // stop the background loading thread
+  if (m_thread.isRunning()) {
+    m_thread.quit();
+  }
   if (hasWorkspace(ws_name)) {
     emit preDeletingHandle();
     close();
@@ -1535,24 +1669,7 @@ bool InstrumentWidget::isCurrentTab(InstrumentWidgetTab *tab) const {
  * @return string representing the current state of the instrumet widget.
  */
 std::string InstrumentWidget::saveToProject() const {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  TSVSerialiser tsv;
-
-  // serialise widget properties
-  tsv.writeLine("WorkspaceName") << getWorkspaceNameStdString();
-  tsv.writeLine("SurfaceType") << getSurfaceType();
-  tsv.writeSection("surface", getSurface()->saveToProject());
-  tsv.writeLine("CurrentTab") << getCurrentTab();
-  tsv.writeLine("EnergyTransfer") << m_xIntegration->getMinimum() << m_xIntegration->getMaximum();
-
-  // serialise widget subsections
-  tsv.writeSection("actor", m_instrumentActor->saveToProject());
-  tsv.writeSection("tabs", saveTabs());
-
-  return tsv.outputLines();
-#else
   throw std::runtime_error("InstrumentWidget::saveToProject() not implemented for Qt >= 5");
-#endif
 }
 
 /**
@@ -1583,53 +1700,8 @@ void InstrumentWidget::loadTabs(const std::string &lines) const {
  * file.
  */
 void InstrumentWidget::loadFromProject(const std::string &lines) {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  TSVSerialiser tsv(lines);
-
-  if (tsv.selectLine("SurfaceType")) {
-    int surfaceType;
-    tsv >> surfaceType;
-    setSurfaceType(surfaceType);
-  }
-
-  if (tsv.selectSection("actor")) {
-    std::string actorLines;
-    tsv >> actorLines;
-    m_instrumentActor->loadFromProject(actorLines);
-  }
-
-  if (tsv.selectLine("CurrentTab")) {
-    int tab;
-    tsv >> tab;
-    selectTab(tab);
-  }
-
-  if (tsv.selectLine("EnergyTransfer")) {
-    double min, max;
-    bool isIntegrable = true;
-    tsv >> min >> max >> isIntegrable;
-    if (isIntegrable) {
-      setBinRange(min, max);
-    }
-  }
-
-  if (tsv.selectSection("Surface")) {
-    std::string surfaceLines;
-    tsv >> surfaceLines;
-    getSurface()->loadFromProject(surfaceLines);
-  }
-
-  if (tsv.selectSection("tabs")) {
-    std::string tabLines;
-    tsv >> tabLines;
-    loadTabs(tabLines);
-  }
-
-  updateInstrumentView();
-#else
   Q_UNUSED(lines);
   throw std::runtime_error("InstrumentWidget::loadFromProject() not implemented for Qt >= 5");
-#endif
 }
 
 } // namespace MantidQt::MantidWidgets

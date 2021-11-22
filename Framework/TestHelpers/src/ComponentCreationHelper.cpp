@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -438,8 +438,6 @@ Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(con
                                                                              const std::vector<double> &azim) {
 
   auto testInst = std::make_shared<Instrument>("processed");
-  double cylRadius(0.004);
-  double cylHeight(0.0002);
   // find characteristic sizes of the detectors;
   double dAzi_min(FLT_MAX);
   double dPol_min(FLT_MAX);
@@ -467,8 +465,8 @@ Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(con
       }
     }
   }
-  cylRadius = L2_min * sin(dAzi_min * 0.5);
-  cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
+  double cylRadius = L2_min * sin(dAzi_min * 0.5);
+  double cylHeight = 2 * L2_min * sin(dPol_min * 0.5);
 
   // One object
   auto pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0, -cylHeight / 2.0, 0.0),
@@ -839,7 +837,7 @@ Instrument_sptr createSimpleInstrumentWithRotation(const Mantid::Kernel::V3D &so
                                                    const Mantid::Kernel::V3D &detectorPos,
                                                    const Mantid::Kernel::Quat &relativeBankRotation,
                                                    const Mantid::Kernel::Quat &relativeDetRotation,
-                                                   const Mantid::Kernel::V3D detOffset) {
+                                                   const Mantid::Kernel::V3D &detOffset) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
   instrument->setReferenceFrame(
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));

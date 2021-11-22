@@ -7,6 +7,7 @@
 from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable,GenericObserver
 from mantidqt.widgets.muonperiodinfo import MuonPeriodInfo
 import mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils as file_utils
+from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
 import mantidqtinterfaces.Muon.GUI.Common.utilities.xml_utils as xml_utils
 import mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
 from mantidqtinterfaces.Muon.GUI.Common import thread_model
@@ -132,7 +133,7 @@ class GroupingTabPresenter(object):
                                                    "ForwardSpectra": [0],
                                                    "BackwardSpectra": [1]})
 
-        self._model.update_pair_alpha(pair_name, new_alpha)
+        self._model.update_pair_alpha(pair_name, round_value(new_alpha, self._model._context.group_pair_context.alpha_precision))
         self.pairing_table_widget.update_view_from_model()
 
         self.handle_update_all_clicked()

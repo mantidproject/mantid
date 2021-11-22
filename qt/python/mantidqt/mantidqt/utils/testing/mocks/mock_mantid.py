@@ -105,6 +105,7 @@ class MockWorkspace:
         self.getColumnNames = StrictMock(return_value=self._column_names)
         self.column_count = self.COLS
         self.columnCount = StrictMock(return_value=self.column_count)
+        self.isColumnReadOnly = StrictMock(return_value=False)
 
         self.row_count = self.ROWS
         self.rowCount = StrictMock(return_value=self.row_count)

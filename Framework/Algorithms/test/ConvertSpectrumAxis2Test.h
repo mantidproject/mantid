@@ -16,8 +16,8 @@
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::HistogramData::detail;
@@ -33,12 +33,14 @@ private:
     Mantid::Algorithms::ConvertSpectrumAxis2 conv;
 
     if (target == "SignedInPlaneTwoTheta" || target == "InPlaneTwoTheta") {
+      // three positions for the pixel : -45, 0 and 45 degrees
+      double xPos[3] = {-1., 0., 1.};
       for (size_t i = 0; i < 3; i++) {
         Mantid::DataHandling::MoveInstrumentComponent moveComp;
         moveComp.initialize();
         moveComp.setChild(true);
         moveComp.setProperty("Workspace", inputWS);
-        moveComp.setProperty("X", -1.);
+        moveComp.setProperty("X", xPos[i]);
         moveComp.setProperty("Y", 0.);
         moveComp.setProperty("Z", 1.);
         std::ostringstream lexer;
@@ -113,16 +115,17 @@ private:
     MatrixWorkspace_const_sptr input, output;
     TS_ASSERT_THROWS_NOTHING(input = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputWSTheta));
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWSTheta));
-    // Workspaces should now have a numeric axes up the side, with units of
-    // angle.
+    // Workspaces should now have a numeric axes up the side, with units of angle.
     const Axis *thetaAxis = nullptr;
     TS_ASSERT_THROWS_NOTHING(thetaAxis = output->getAxis(1));
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
     TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
-    // the detectors are vertically aligned
-    TS_ASSERT_DELTA((*thetaAxis)(0), 45, 0.0001);
+
+    // the axis is sorted
+    TS_ASSERT_DELTA((*thetaAxis)(0), 0, 0.0001);
     TS_ASSERT_DELTA((*thetaAxis)(1), 45, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(2), 45, 0.0001);
 
     // Check workspace axes are of correct length.
     TS_ASSERT_THROWS((*thetaAxis)(3), const Mantid::Kernel::Exception::IndexError &);
@@ -140,9 +143,10 @@ private:
     TS_ASSERT(thetaAxis->isNumeric());
     TS_ASSERT_EQUALS(thetaAxis->unit()->caption(), "Scattering angle");
     TS_ASSERT_EQUALS(thetaAxis->unit()->label(), "degrees");
-    // the detectors are vertically aligned
+
     TS_ASSERT_DELTA((*thetaAxis)(0), -45, 0.0001);
-    TS_ASSERT_DELTA((*thetaAxis)(1), -45, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(1), 0, 0.0001);
+    TS_ASSERT_DELTA((*thetaAxis)(2), 45, 0.0001);
 
     // Check workspace axes are of correct length.
     TS_ASSERT_THROWS((*thetaAxis)(3), const Mantid::Kernel::Exception::IndexError &);

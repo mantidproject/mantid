@@ -177,6 +177,43 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.presenter.on_update_rows()
         self.presenter.update_centre_positions.assert_called_once()
 
+    def test_update_center_positions_with_valid_front(self):
+        self.BeamCentreModel.rear_pos_1 = 1.1
+        self.BeamCentreModel.rear_pos_2 = 1.2
+        self.BeamCentreModel.front_pos_1 = 2.1
+        self.BeamCentreModel.front_pos_2 = 2.2
+        self.presenter.update_centre_positions()
+
+        self.assertEqual(1.1, self.view.rear_pos_1)
+        self.assertEqual(1.2, self.view.rear_pos_2)
+        self.assertEqual(2.1, self.view.front_pos_1)
+        self.assertEqual(2.2, self.view.front_pos_2)
+
+    def test_update_center_positions_with_empty_front(self):
+        self.BeamCentreModel.rear_pos_1 = 1.1
+        self.BeamCentreModel.rear_pos_2 = 1.2
+        self.BeamCentreModel.front_pos_1 = ""
+        self.BeamCentreModel.front_pos_2 = ""
+        self.presenter.update_centre_positions()
+
+        self.assertEqual(1.1, self.view.rear_pos_1)
+        self.assertEqual(1.2, self.view.rear_pos_2)
+        self.assertEqual(self.BeamCentreModel.rear_pos_1, self.view.front_pos_1)
+        self.assertEqual(self.BeamCentreModel.rear_pos_2, self.view.front_pos_2)
+
+    def test_update_center_positions_with_zero_front(self):
+        self.BeamCentreModel.rear_pos_1 = 1.1
+        self.BeamCentreModel.rear_pos_2 = 1.2
+        # Zero is a valid value, so should be respected
+        self.BeamCentreModel.front_pos_1 = 0.
+        self.BeamCentreModel.front_pos_2 = 0.
+        self.presenter.update_centre_positions()
+
+        self.assertEqual(1.1, self.view.rear_pos_1)
+        self.assertEqual(1.2, self.view.rear_pos_2)
+        self.assertEqual(0., self.view.front_pos_1)
+        self.assertEqual(0., self.view.front_pos_2)
+
 
 if __name__ == '__main__':
     unittest.main()

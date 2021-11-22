@@ -7,17 +7,17 @@
 /* Test functions for algorithms for single crystal diffraction
  */
 
-#include "MantidTestHelpers/SingleCrystalDiffractionTestHelper.h"
+#include "MantidFrameworkTestHelpers/SingleCrystalDiffractionTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/normal_distribution.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cmath>
 #include <random>
@@ -198,10 +198,10 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
  * generator to take too long to be used in a unit test. Instead this will
  * generate a uniform background in a "box" around a peak.
  *
- * @param index :: index of the peak to create a uniform background for
+ * @param peakIndex :: index of the peak to create a uniform background for
  */
-void WorkspaceBuilder::createBackground(const int index) {
-  const auto &peak = m_peaksWorkspace->getPeak(index);
+void WorkspaceBuilder::createBackground(const int peakIndex) {
+  const auto &peak = m_peaksWorkspace->getPeak(peakIndex);
   const auto detectorId = peak.getDetectorID();
   const auto tofExact = peak.getTOF();
   const auto &info = m_eventWorkspace->detectorInfo();

@@ -97,6 +97,8 @@ private:
   void execEvent();
   /// Algorithm cleanup
   void cleanup();
+  /// validate inputs
+  std::map<std::string, std::string> validateInputs() override;
 
   void retrieveBaseProperties();
   // void constructSample(API::Sample& sample);

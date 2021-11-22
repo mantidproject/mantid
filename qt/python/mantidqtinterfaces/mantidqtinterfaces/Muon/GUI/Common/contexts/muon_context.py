@@ -18,9 +18,10 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Pha
     run_minus, run_crop_workspace, run_create_workspace, run_convert_to_points, run_convert_to_histogram, run_divide
 import mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws, delete_ws
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_to_group
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, WorkspaceGroupDefinition
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqt.utils.observer_pattern import Observable
 from mantidqtinterfaces.Muon.GUI.Common.muon_base import MuonRun
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
@@ -87,6 +88,9 @@ class MuonContext(object):
     @property
     def current_runs(self):
         return self._data_context.current_runs
+
+    def do_grouping(self):
+        add_to_group(self._data_context.instrument, self.workspace_suffix)
 
     def calculate_counts(self, run, group, rebin=False):
         """Calculates the counts workspace for the given run and group."""
@@ -371,36 +375,35 @@ class MuonContext(object):
     def show_raw_data(self):
         self.ads_observer.observeRename(False)
         for run in self.data_context.current_runs:
-            with WorkspaceGroupDefinition():
-                run_string = run_list_to_string(run)
-                loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
-                                       'OutputWorkspace']
-                loaded_workspace_deadtime_table = self.corrections_context.get_default_dead_time_table_name_for_run(
-                    self.data_context.instrument, run)
-                directory = get_base_data_directory(
-                    self,
-                    run_string)
+            run_string = run_list_to_string(run)
+            loaded_workspace = self.data_context._loaded_data.get_data(run=run, instrument=self.data_context.instrument)['workspace'][
+                                   'OutputWorkspace']
+            loaded_workspace_deadtime_table = self.corrections_context.get_default_dead_time_table_name_for_run(
+                self.data_context.instrument, run)
+            directory = get_base_data_directory(
+                self,
+                run_string)
 
-                deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
-                                                                 str(run[0]), workspace_suffix=self.workspace_suffix)
-                MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
-                self.corrections_context.set_default_dead_time_table_name_for_run(self.data_context.instrument, run,
-                                                                                  deadtime_name)
+            deadtime_name = get_deadtime_data_workspace_name(self.data_context.instrument,
+                                                             str(run[0]), workspace_suffix=self.workspace_suffix)
+            MuonWorkspaceWrapper(loaded_workspace_deadtime_table).show(directory + deadtime_name)
+            self.corrections_context.set_default_dead_time_table_name_for_run(self.data_context.instrument, run,
+                                                                              deadtime_name)
 
-                if len(loaded_workspace) > 1:
-                    # Multi-period data
-                    for i, single_ws in enumerate(loaded_workspace):
-                        name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                       multi_period=True,
-                                                                       period=str(i + 1),
-                                                                       workspace_suffix=self.workspace_suffix)
-                        single_ws.show(name)
-                else:
-                    # Single period data
+            if len(loaded_workspace) > 1:
+                # Multi-period data
+                for i, single_ws in enumerate(loaded_workspace):
                     name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
-                                                                   multi_period=False,
+                                                                   multi_period=True,
+                                                                   period=str(i + 1),
                                                                    workspace_suffix=self.workspace_suffix)
-                    loaded_workspace[0].show(name)
+                    single_ws.show(name)
+            else:
+                # Single period data
+                name = directory + get_raw_data_workspace_name(self.data_context.instrument, run_string,
+                                                               multi_period=False,
+                                                               workspace_suffix=self.workspace_suffix)
+                loaded_workspace[0].show(name)
 
         self.ads_observer.observeRename(True)
 

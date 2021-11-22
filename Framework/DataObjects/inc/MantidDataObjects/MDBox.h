@@ -76,6 +76,7 @@ public:
   void clearFileBacked(bool loadDiskBackedData) override;
   //-----------------------------------------------------------------------------------------------
   void saveAt(API::IBoxControllerIO *const, uint64_t /*position*/) const override;
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t, size_t, std::vector<coord_t> &) override;
   void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/, size_t /* Size */) override;
   void reserveMemoryForLoad(uint64_t /* Size */) override;
   /**drop events data from memory but keep averages (and file-backed info) */
@@ -210,6 +211,8 @@ private:
   MDBox(const MDBox &);
   /// common part of mdBox constructor
   void initMDBox(const size_t nBoxEvents);
+  /// member to avoid reallocation
+  std::vector<coord_t> m_tableData;
 
 public:
   /// Typedef for a shared pointer to a MDBox

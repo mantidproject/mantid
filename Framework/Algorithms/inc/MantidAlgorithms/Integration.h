@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ISpectrum.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
@@ -69,6 +70,8 @@ private:
   /// Create the outputworkspace
   API::MatrixWorkspace_sptr getOutputWorkspace(API::MatrixWorkspace_sptr inWS, const int minSpec, const int maxSpec);
   std::map<std::string, std::string> validateInputs() override;
+  void integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum &outSpec, const std::vector<double> *Fin,
+                         std::vector<double> *Fout, double lowerLimit, double upperLimit, bool incPartBins);
 };
 
 } // namespace Algorithms

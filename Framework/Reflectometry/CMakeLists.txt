@@ -22,7 +22,8 @@ set(SRC_FILES
     src/SpecularReflectionCalculateTheta.cpp
     src/SpecularReflectionCalculateTheta2.cpp
     src/SpecularReflectionPositionCorrect.cpp
-    src/SpecularReflectionPositionCorrect2.cpp)
+    src/SpecularReflectionPositionCorrect2.cpp
+)
 
 set(INC_FILES
     inc/MantidReflectometry/CalculateSlits.h
@@ -48,7 +49,8 @@ set(INC_FILES
     inc/MantidReflectometry/SpecularReflectionCalculateTheta.h
     inc/MantidReflectometry/SpecularReflectionCalculateTheta2.h
     inc/MantidReflectometry/SpecularReflectionPositionCorrect.h
-    inc/MantidReflectometry/SpecularReflectionPositionCorrect2.h)
+    inc/MantidReflectometry/SpecularReflectionPositionCorrect2.h
+)
 
 set(TEST_FILES
     CalculateSlitsTest.h
@@ -69,42 +71,34 @@ set(TEST_FILES
     SpecularReflectionCalculateTheta2Test.h
     SpecularReflectionCalculateThetaTest.h
     SpecularReflectionPositionCorrect2Test.h
-    SpecularReflectionPositionCorrectTest.h)
+    SpecularReflectionPositionCorrectTest.h
+)
 
-set(TEST_PY_FILES
-    ReflectometryBackgroundSubtractionTest.py
-    ReflectometryReductionOne2Test.py)
+set(TEST_PY_FILES ReflectometryBackgroundSubtractionTest.py ReflectometryReductionOne2Test.py)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
 # Add a precompiled header where they are supported
-enable_precompiled_headers (inc/MantidReflectometry/PrecompiledHeader.h SRC_FILES )
+enable_precompiled_headers(inc/MantidReflectometry/PrecompiledHeader.h SRC_FILES)
 # Add the target for this directory
 add_library(Reflectometry ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Reflectometry ALIAS Reflectometry)
 
-target_include_directories(Reflectometry PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Reflectometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Set the name of the generated library
-set_target_properties(Reflectometry
-                      PROPERTIES OUTPUT_NAME
-                                 MantidReflectometry
-                                 COMPILE_DEFINITIONS
-                                 "IN_MANTID_REFLECTOMETRY")
+set_target_properties(
+  Reflectometry PROPERTIES OUTPUT_NAME MantidReflectometry COMPILE_DEFINITIONS "IN_MANTID_REFLECTOMETRY"
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Reflectometry
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(Reflectometry PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Reflectometry PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
@@ -112,26 +106,25 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Reflectometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Reflectometry PUBLIC Mantid::Kernel Mantid::API Mantid::Geometry Mantid::DataObjects PRIVATE Mantid::Indexing Mantid::HistogramData)
+target_link_libraries(
+  Reflectometry
+  PUBLIC Mantid::Kernel Mantid::API Mantid::Geometry Mantid::DataObjects
+  PRIVATE Mantid::Indexing Mantid::HistogramData
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Reflectometry PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Reflectometry>
-  $<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Reflectometry PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Reflectometry>
+                       $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(Reflectometry FALSE)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS Reflectometry PLUGIN_LIB)
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS Reflectometry PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    Reflectometry
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS Reflectometry INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()
-

@@ -12,6 +12,8 @@
 #include "MantidDataHandling/SetSample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -21,8 +23,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "Poco/File.h"
 #include "Poco/Path.h"

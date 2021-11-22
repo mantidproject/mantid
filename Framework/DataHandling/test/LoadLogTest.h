@@ -15,11 +15,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <vector>
 
 using namespace Mantid::API;

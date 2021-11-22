@@ -172,4 +172,20 @@ public:
     TS_ASSERT_DELTA(bc->lower(), 1.3, 0.0001);
     TS_ASSERT_DELTA(bc->upper(), 3.4, 0.0001);
   }
+
+  // Penalty factor should always be positive and non-zero.
+  void testPenaltyFactorAlwaysPositive() {
+    BoundaryConstraint negativePenaltyBC;
+    negativePenaltyBC.setPenaltyFactor(-1.0);
+    TS_ASSERT(negativePenaltyBC.getPenaltyFactor() > 0.0);
+
+    BoundaryConstraint zeroPenaltyBC;
+    zeroPenaltyBC.setPenaltyFactor(0.0);
+    TS_ASSERT(zeroPenaltyBC.getPenaltyFactor() > 0.0);
+
+    const double penalty = 10.0;
+    BoundaryConstraint positivePenaltyBC;
+    positivePenaltyBC.setPenaltyFactor(penalty);
+    TS_ASSERT_EQUALS(positivePenaltyBC.getPenaltyFactor(), penalty);
+  }
 };

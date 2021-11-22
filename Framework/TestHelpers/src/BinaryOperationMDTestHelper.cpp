@@ -9,16 +9,16 @@
  *
  *  These functions MAY ONLY be used in a test in the MDAlgorithms package.
  *********************************************************************************/
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;

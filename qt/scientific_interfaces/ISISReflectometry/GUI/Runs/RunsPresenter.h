@@ -32,7 +32,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 // Forward decs
-class IMessageHandler;
+class IReflMessageHandler;
 class IPythonRunner;
 
 using MantidWidgets::ProgressableView;
@@ -56,7 +56,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL RunsPresenter : public IRunsPresenter,
 public:
   RunsPresenter(IRunsView *mainView, ProgressableView *progressView,
                 const RunsTablePresenterFactory &makeRunsTablePresenter, double thetaTolerance,
-                std::vector<std::string> instruments, IMessageHandler *messageHandler);
+                std::vector<std::string> instruments, IReflMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -82,6 +82,7 @@ public:
   void notifyRowStateChanged(boost::optional<Item const &> item) override;
   void notifyRowOutputsChanged() override;
   void notifyRowOutputsChanged(boost::optional<Item const &> item) override;
+  void notifyBatchLoaded() override;
 
   void notifyReductionPaused() override;
   void notifyReductionResumed() override;
@@ -140,7 +141,7 @@ private:
   /// The main presenter
   IBatchPresenter *m_mainPresenter;
   /// The message reporting implementation
-  IMessageHandler *m_messageHandler;
+  IReflMessageHandler *m_messageHandler;
   /// The list of instruments
   std::vector<std::string> m_instruments;
   /// The tolerance used when looking up settings by theta

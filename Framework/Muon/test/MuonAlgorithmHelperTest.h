@@ -13,7 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

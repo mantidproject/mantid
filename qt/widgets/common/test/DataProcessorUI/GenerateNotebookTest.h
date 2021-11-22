@@ -15,10 +15,10 @@
 #include <boost/algorithm/string/split.hpp>
 
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/DataProcessorTestHelper.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/GenerateNotebook.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/VectorString.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
-#include "MantidTestHelpers/DataProcessorTestHelper.h"
 
 using namespace DataProcessorTestHelper;
 using namespace MantidQt::MantidWidgets;

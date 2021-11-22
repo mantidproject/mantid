@@ -16,12 +16,12 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "PropertyManagerHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>

@@ -9,8 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/AverageLogData.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::AverageLogData;
 

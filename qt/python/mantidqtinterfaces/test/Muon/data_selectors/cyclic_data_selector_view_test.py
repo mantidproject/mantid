@@ -114,6 +114,19 @@ class CyclicDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
     def test_that_current_dataset_index_will_return_none_when_there_is_nothing_selected_in_the_combobox(self):
         self.assertEqual(self.view.current_dataset_index, None)
 
+    def test_that_set_current_dataset_index_will_change_dataset_index_to_correct_value(self):
+        dataset_names = ["Name1", "Name2", "Name3"]
+        self.view.update_dataset_name_combo_box(dataset_names)
+
+        self.view.set_current_dataset_index(0)
+        self.assertEqual(self.view.current_dataset_index, 0)
+
+        self.view.set_current_dataset_index(2)
+        self.assertEqual(self.view.current_dataset_index, 2)
+
+        self.view.set_current_dataset_index(3)
+        self.assertEqual(self.view.current_dataset_index, 2)
+
 
 if __name__ == '__main__':
     unittest.main()

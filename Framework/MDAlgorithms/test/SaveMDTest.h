@@ -11,10 +11,10 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/SaveMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

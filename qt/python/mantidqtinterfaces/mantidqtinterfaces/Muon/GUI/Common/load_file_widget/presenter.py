@@ -124,7 +124,6 @@ class BrowseFileWidgetPresenter(object):
         self._view.warning_popup(message)
 
     def handle_load_thread_finished(self):
-        self._load_thread.deleteLater()
         self._load_thread = None
 
         if not self.thread_success:

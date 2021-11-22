@@ -11,8 +11,8 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
 #include "MantidMuon/MuonGroupingAsymmetry.h"
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

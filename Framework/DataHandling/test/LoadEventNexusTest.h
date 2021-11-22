@@ -14,6 +14,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -23,9 +25,8 @@
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
+#include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -233,6 +234,7 @@ public:
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(),
                      (150 * 150) + 2) // Two monitors
 
+    // this file contains events that are sorted in pulse time order
     validate_pulse_time_sorting(eventWS);
   }
 
@@ -257,8 +259,42 @@ public:
       TS_ASSERT_DELTA(eventWS->getTofMin(), 9.815, 1.0e-3);
       TS_ASSERT_DELTA(eventWS->getTofMax(), 130748.563, 1.0e-3);
 
+      // this file contains events that aren't sorted in pulse time order but the event lists per spectra are sorted
       validate_pulse_time_sorting(eventWS);
     }
+  }
+
+  void test_load_event_nexus_POLARIS() {
+    // POLARIS file slow to create geometry cache so use a pregenerated vtp file. Details of the geometry don't matter
+    // for this test
+    const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
+    std::string foundFile =
+        Kernel::ConfigService::Instance().getFullPath("POLARIS9fbf7121b4274c833043ae8933ec643ff7b9313d.vtp", true, 0);
+    bool hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
+    auto origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
+    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
+    const std::string file = "POLARIS00130512.nxs";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 19268117);
+    TS_ASSERT_DELTA(eventWS->getTofMin(), 0., 1.0e-3);
+    TS_ASSERT_DELTA(eventWS->getTofMax(), 19994.945, 1.0e-3);
+
+    // this file contains events that aren't sorted in pulse time order, even per spectra
+    validate_pulse_time_sorting(eventWS);
+    if (hasVTPDirectory)
+      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
+    else
+      ConfigService::Instance().remove(vtpDirectoryKey);
   }
 
   void test_NumberOfBins() {
@@ -983,7 +1019,8 @@ public:
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+    runner.runSerial(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+    runner.runParallel(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
   }
 
   void test_MPI_load_ISIS() {
@@ -992,7 +1029,8 @@ public:
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+    runner.runSerial(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+    runner.runParallel(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
   void test_load_fails_on_corrupted_run() {

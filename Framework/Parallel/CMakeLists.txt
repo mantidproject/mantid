@@ -12,7 +12,8 @@ set(SRC_FILES
     src/Request.cpp
     src/StorageMode.cpp
     src/ThreadingBackend.cpp
-    src/IO/EventLoaderHelpers.cpp)
+    src/IO/EventLoaderHelpers.cpp
+)
 
 set(INC_FILES
     inc/MantidParallel/Collectives.h
@@ -33,7 +34,8 @@ set(INC_FILES
     inc/MantidParallel/Request.h
     inc/MantidParallel/Status.h
     inc/MantidParallel/StorageMode.h
-    inc/MantidParallel/ThreadingBackend.h)
+    inc/MantidParallel/ThreadingBackend.h
+)
 
 set(TEST_FILES
     ChunkerTest.h
@@ -48,13 +50,12 @@ set(TEST_FILES
     PulseTimeGeneratorTest.h
     RequestTest.h
     StorageModeTest.h
-    ThreadingBackendTest.h)
+    ThreadingBackendTest.h
+)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -63,24 +64,17 @@ add_library(Parallel ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Parallel ALIAS Parallel)
 add_dependencies(Parallel EventParallelLoader Mantid::Kernel)
 
-target_include_directories(Parallel PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Parallel PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Set the name of the generated library
-set_target_properties(Parallel
-                      PROPERTIES OUTPUT_NAME
-                                 MantidParallel
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_PARALLEL)
+set_target_properties(Parallel PROPERTIES OUTPUT_NAME MantidParallel COMPILE_DEFINITIONS IN_MANTID_PARALLEL)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Parallel
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(Parallel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Parallel
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(Parallel PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
@@ -95,31 +89,29 @@ endif()
 # Add executable for Nexus parallel loader child process
 add_executable(EventParallelLoader ${SRC_FILES} ${INC_FILES})
 
-target_include_directories(EventParallelLoader PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  EventParallelLoader PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 add_dependencies(EventParallelLoader Mantid::Kernel)
 # set the name of generated executable
-set_target_properties(EventParallelLoader
-                      PROPERTIES OUTPUT_NAME
-                                 MantidNexusParallelLoader
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_PARALLEL)
+set_target_properties(
+  EventParallelLoader PROPERTIES OUTPUT_NAME MantidNexusParallelLoader COMPILE_DEFINITIONS IN_MANTID_PARALLEL
+)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(EventParallelLoader
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(EventParallelLoader
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(EventParallelLoader PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET EventParallelLoader PROPERTY FOLDER "MantidFramework")
 
-
-target_link_libraries(EventParallelLoader PUBLIC Mantid::Kernel PRIVATE Boost::serialization)
+target_link_libraries(
+  EventParallelLoader
+  PUBLIC Mantid::Kernel
+  PRIVATE Boost::serialization
+)
 
 if(UNIX AND NOT APPLE)
   target_link_libraries(EventParallelLoader PRIVATE rt)
@@ -128,21 +120,12 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
-
 # Installation settings
-if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidParallelTargets")
-mtd_install_framework_lib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidParallelTargets")
+  mtd_install_framework_lib(TARGETS Parallel EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
-mtd_install_targets(TARGETS
-                    Parallel
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+  mtd_install_targets(TARGETS Parallel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()
 
-mtd_install_targets(TARGETS
-                    EventParallelLoader
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+mtd_install_targets(TARGETS EventParallelLoader INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

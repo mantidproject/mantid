@@ -113,7 +113,7 @@ std::string ErrorReporter::generateErrorMessage() const {
   } else {
     message["email"] = "";
     message["name"] = "";
-    message["textBox"] = "";
+    message["textBox"] = m_textbox;
     message["stacktrace"] = "";
   }
 

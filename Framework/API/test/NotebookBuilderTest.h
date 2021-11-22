@@ -12,7 +12,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/NotebookBuilder.h"
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

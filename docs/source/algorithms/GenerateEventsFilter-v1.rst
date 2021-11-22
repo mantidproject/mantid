@@ -172,16 +172,58 @@ Algorithm Parameters and Examples
 Here are the introductions to some important parameters (i.e., algorithm's properties).
 
 
-Parameter: ``Centre``
-#####################
+Parameter: ``LogBoundary``
+##########################
 
-The input Boolean parameter ``centre`` is for filtering by log value(s).
+The input string parameter ``LogBoundary`` is for filtering by log value(s).
+
 If option ``centre`` is taken, then for each interval,
 
 -  starting time = log\_time - tolerance\_time;
 -  stopping time = log\_time - tolerance\_time;
 
 It is a shift to left.
+
+**Logs that only record changes**
+
+In SNS, most of the sample environment devices record values upon changing.
+Therefore, the ``LogBoundary`` value shall set to ``Left`` but not ``Centre``.
+And in this case, ``TimeTolerance`` is ignored.
+
+Please check with the instrument scientist to confirm how the sample log values are recorded.
+
+Here is an example how the time splitter works with the a motor's position.
+
+.. figure:: /images/SNAP_motor_filter.png
+
+        For this SNAP run, the user wants to filter events with motor (BL3:Mot:Hexa:MotZ) position
+        at value equal to 6.65 with tolerance as 0.1.
+        The red curve shows the boundary of the time splitters (i.e., event filters).
+
+
+Time Tolerance and Log Boundary
+###############################
+
+How ``TimeTolerance`` is applied in this algorithm is similar to that in :ref:`FilterByLogValue<algm-FilterByLogValue>`
+except that this algorithm does not support ``PulseFilter``.
+
+
+- If ``LogBoundary`` is ``Left``, ``TimeTolerance`` is ignored in the algorithm.
+
+- If ``LogBoundary`` is set to ``Centre``,
+  assuming the log entries are
+  ``(t0, v0), (t1, v1), (t2, v2), (t3, v3), ... (t_n, v_n) ...``.
+
+  - If there is a log entry ``(t_i, v_i)`` is between ``MinimumValue`` and ``MaximumValue``,
+    while ``v_{i-1}`` and ``v_{i+1}`` are not in the desired log value range,
+    all events between ``t_i - TimeTolerance`` and ``t_i + TimeTolerance)`` are kept.
+
+  - If there are several consecutive log entries that have values in the desired log value range,
+    such as ``(t_i, v_i), ..., (t_j, v_j)``,
+    events between ``t_i - TimeTolerance`` and ``t_j + TimToleranc`` are kept.
+
+  A good value is 1/2 your measurement interval if the intervals are constant.
+
 
 Parameter: ``FastLog``
 ######################

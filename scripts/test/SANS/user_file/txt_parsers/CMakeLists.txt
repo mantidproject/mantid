@@ -1,6 +1,4 @@
-set(TEST_PY_FILES
-    ParsedDictConverterTest.py
-)
+set(TEST_PY_FILES ParsedDictConverterTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

@@ -89,7 +89,7 @@ bool containsOneOf(std::string const &str, std::string const &delimiters) {
 
 // These attributes require the function to be fully reconstructed, as a
 // different number of properties will be required
-const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n")};
+const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n"), QString("Formula")};
 } // namespace
 
 namespace MantidQt::MantidWidgets {

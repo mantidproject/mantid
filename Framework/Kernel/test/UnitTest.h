@@ -577,8 +577,8 @@ public:
   }
 
   void testdSpacing_fromTOF() {
-    const std::vector<double> x_in{0., 1001.1, 16000.};
-    const std::vector<double> y_in{2., 3., 4.};
+    const std::vector<double> x_in{-1., 0., 1001.1, 16000.};
+    const std::vector<double> y_in{1., 2., 3., 4.};
     std::vector<double> x(x_in.begin(), x_in.end());
     std::vector<double> y(y_in.begin(), y_in.end());
     double difc =
@@ -588,10 +588,6 @@ public:
     TS_ASSERT(y == y_in);
     for (size_t i = 0; i < x.size(); ++i)
       TS_ASSERT_DELTA(x[i], x_in[i] / difc, 0.000001);
-
-    // test for exception thrown for negative tof
-    x[0] = -1.0;
-    TS_ASSERT_THROWS(d.fromTOF(x, y, 1.0, 1, {{UnitParams::difc, difc}}), const std::runtime_error &);
 
     // test for exception thrown
     x[0] = 1.0;

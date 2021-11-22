@@ -20,7 +20,7 @@ CrystalField
 
 Improvements
 ############
-- Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to IntensityScaling.
+- Added documentation and warning messages in the :ref:`Crystal Field Python Interface` related to :ref:`IntensityScaling <cf_intensity_scaling>`.
 - The order of detector efficiency correction and rebinning in :ref:`algm-DirectILLReduction` has been inversed.
 - :ref:`LoadILLTOF <algm-LoadILLTOF>` now adds input run number to a metadata field `run_list`, intended to contain a full list of run numbers, handled by :ref:`MergeRuns <algm-MergeRuns>`.
 
@@ -39,7 +39,6 @@ MSlice
 
 Improvements
 ############
-- Added tests for script generation functions.
 - **Added new tab with plots manager to** :ref:`MSlice GUI<MSlice-ref>`.
 
 .. image::  ../../images/MSlice_plot_manager.png
@@ -52,8 +51,17 @@ Improvements
    :align: center
    :height: 700px
 
+- Added tests for script generation functions.
+- Improved clipboard usage for scripts generated in :ref:`MSlice<MSlice-ref>` using a Linux environment.
+
 BugFixes
 ########
 - Fixed an issue that caused overplot information on slice plots to get lost after replotting.
+- :ref:`MSlice GUI<MSlice-ref>` now opens to the loading tab instead of the plotting tab.
+- Fixed a bug that caused an error when generating a script from a cut plot.
+- Fixed a bug that caused crashes when resizing interactive cut plots.
+- Added better exception handling for attempts to delete a workspace for a second time.
+- Fixed a bug that caused crashes when selecting a Bragg peak when there is no Bragg peak in the data.
+
 
 :ref:`Release 6.2.0 <v6.2.0>`

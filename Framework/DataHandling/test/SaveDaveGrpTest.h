@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidDataHandling/SaveDaveGrp.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"

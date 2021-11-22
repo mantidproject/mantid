@@ -13,6 +13,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 #include <QStringList>
@@ -179,13 +180,13 @@ void ApplyAbsorptionCorrections::run() {
   setRunIsRunning(true);
 
   // Create / Initialize algorithm
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
+  auto absCorProps = std::unique_ptr<MantidQt::API::AlgorithmRuntimeProps>();
   IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps["SampleWorkspace"] = m_sampleWorkspaceName;
+  absCorProps->setPropertyValue("SampleWorkspace", m_sampleWorkspaceName);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
@@ -221,7 +222,7 @@ void ApplyAbsorptionCorrections::run() {
       }
     }
 
-    absCorProps["CanWorkspace"] = cloneName;
+    absCorProps->setPropertyValue("CanWorkspace", cloneName);
 
     const bool useCanScale = m_uiForm.ckScaleCan->isChecked();
     if (useCanScale) {
@@ -263,7 +264,7 @@ void ApplyAbsorptionCorrections::run() {
         interpolateAll = true;
       // fall through
       case QMessageBox::Yes:
-        addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+        addInterpolationStep(factorWs, absCorProps->getProperty("SampleWorkspace"));
         break;
       default:
         m_batchAlgoRunner->clearQueue();
@@ -321,7 +322,7 @@ void ApplyAbsorptionCorrections::run() {
   applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
   // Add corrections algorithm to queue
-  m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
+  m_batchAlgoRunner->addAlgorithm(applyCorrAlg, std::move(absCorProps));
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
@@ -342,8 +343,8 @@ void ApplyAbsorptionCorrections::run() {
  * @param toMatch Name of the workspace to match
  */
 void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr &toInterpolate, std::string toMatch) {
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
-  interpolationProps["WorkspaceToMatch"] = std::move(toMatch);
+  auto interpolationProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  interpolationProps->setPropertyValue("WorkspaceToMatch", std::move(toMatch));
 
   IAlgorithm_sptr interpolationAlg = AlgorithmManager::Instance().create("SplineInterpolation");
   interpolationAlg->initialize();
@@ -351,7 +352,7 @@ void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr
   interpolationAlg->setProperty("WorkspaceToInterpolate", toInterpolate->getName());
   interpolationAlg->setProperty("OutputWorkspace", toInterpolate->getName());
 
-  m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
+  m_batchAlgoRunner->addAlgorithm(interpolationAlg, std::move(interpolationProps));
 }
 
 /**

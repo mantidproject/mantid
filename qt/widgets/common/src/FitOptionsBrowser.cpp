@@ -368,9 +368,9 @@ void FitOptionsBrowser::updateMinimizer() {
   auto minimizerProperties = minimizer->getProperties();
   for (auto &minimizerProperty : minimizerProperties) {
     auto prop = createPropertyProperty(minimizerProperty);
-    if (!minimizerProperty)
-      continue;
-    m_minimizerGroup->addSubProperty(prop);
+    if (prop) {
+      m_minimizerGroup->addSubProperty(prop);
+    }
   }
 }
 
@@ -401,6 +401,9 @@ void FitOptionsBrowser::displayNormalFitProperties() {
  * @param property :: An algorithm property.
  */
 QtProperty *FitOptionsBrowser::createPropertyProperty(Mantid::Kernel::Property *property) {
+  if (!property) {
+    throw std::runtime_error("Unable to create a QtProperty.");
+  }
   QString propName = QString::fromStdString(property->name());
   QtProperty *prop = nullptr;
   if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {

@@ -155,7 +155,7 @@ void HintingLineEdit::nextSuggestion() {
   clearSuggestion();
   // Find the next suggestion in the hint map
   if (m_match != m_matches.end()) {
-    m_match++;
+    ++m_match;
     if (m_match == m_matches.end())
       m_match = m_matches.begin();
     insertSuggestion();
@@ -170,7 +170,7 @@ void HintingLineEdit::prevSuggestion() {
     if (m_match == m_matches.cbegin()) {
       m_match = m_matches.cend() - 1;
     } else {
-      m_match--;
+      --m_match;
     }
     insertSuggestion();
   }

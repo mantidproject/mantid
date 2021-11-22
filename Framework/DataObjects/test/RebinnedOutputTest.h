@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;

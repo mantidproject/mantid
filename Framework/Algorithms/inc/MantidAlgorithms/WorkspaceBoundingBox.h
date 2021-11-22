@@ -24,7 +24,7 @@ Kernel::Logger g_log("WorkspaceBoundingBox");
  */
 class WorkspaceBoundingBox {
 public:
-  WorkspaceBoundingBox(API::MatrixWorkspace_const_sptr workspace);
+  WorkspaceBoundingBox(const API::MatrixWorkspace_const_sptr &workspace);
   WorkspaceBoundingBox();
   ~WorkspaceBoundingBox();
 

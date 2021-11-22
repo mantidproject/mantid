@@ -12,7 +12,8 @@ import matplotlib
 
 matplotlib.use('AGG')  # noqa
 
-from numpy import zeros
+import numpy as np
+import time
 
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from unittest.mock import MagicMock, Mock, patch
@@ -261,6 +262,26 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         mock_config_service.setString.assert_called_once_with('curvefitting.defaultPeak', 'Lorentzian')
 
+    def test_fit_property_browser_correctly_updates_contents_from_fitted_func(self):
+        fig, canvas, ws = self._create_and_plot_matrix_workspace('ws_name', distribution=True)
+        property_browser = self._create_widget(canvas=canvas)
+        property_browser.show()
+        property_browser.setStartX(0)
+        property_browser.setEndX(1)
+        property_browser.loadFunction('name=LinearBackground,A0=0,A1=0')
+
+        # run the fit
+        property_browser.fit()
+
+        # we need to sleep for a bit, as when the fit is complete the gui still needs to be updated
+        time.sleep(2)
+
+        # the new function is stored in the browsers PropertyHandler
+        func = property_browser.currentHandler().ifun()
+
+        # it should show a linear line with intercept 2 and gradient 1
+        self.assertEqual(str(func.getFunction(0)), 'name=LinearBackground,A0=2,A1=1')
+
     # Private helper functions
     @classmethod
     def _create_widget(cls, canvas=MagicMock(), toolbar_manager=Mock()):
@@ -288,7 +309,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
     @classmethod
     def _create_and_plot_matrix_workspace(cls, name="workspace", distribution=False):
-        ws = CreateWorkspace(OutputWorkspace=name, DataX=zeros(10), DataY=zeros(10),
+        ws = CreateWorkspace(OutputWorkspace=name, DataX=np.arange(10), DataY=2+np.arange(10),
                              NSpec=5, Distribution=distribution)
         fig = plot([ws], spectrum_nums=[1])
         canvas = fig.canvas

@@ -13,7 +13,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/PropertyManager.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>
 #include <numeric>

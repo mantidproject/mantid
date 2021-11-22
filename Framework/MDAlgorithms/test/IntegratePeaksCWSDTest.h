@@ -11,10 +11,10 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/IntegratePeaksCWSD.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -54,6 +54,7 @@ set(SRC_FILES
     src/FuncMinimizers/TrustRegionMinimizer.cpp
     src/FunctionDomain1DSpectrumCreator.cpp
     src/Functions/Abragam.cpp
+    src/Functions/Activation.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -112,12 +113,15 @@ set(SRC_FILES
     src/Functions/LinearBackground.cpp
     src/Functions/LogNormal.cpp
     src/Functions/Lorentzian.cpp
+    src/Functions/MagneticOrderParameter.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
+    src/Functions/MuoniumDecouplingCurve.cpp
     src/Functions/NeutronBk2BkExpConvPVoigt.cpp
     src/Functions/PawleyFunction.cpp
     src/Functions/PeakParameterFunction.cpp
     src/Functions/Polynomial.cpp
+    src/Functions/PowerLaw.cpp
     src/Functions/ProcessBackground.cpp
     src/Functions/ProductFunction.cpp
     src/Functions/ProductLinearExp.cpp
@@ -127,6 +131,7 @@ set(SRC_FILES
     src/Functions/ReflectivityMulf.cpp
     src/Functions/Resolution.cpp
     src/Functions/SimpleChebfun.cpp
+    src/Functions/SmoothTransition.cpp
     src/Functions/StaticKuboToyabe.cpp
     src/Functions/StaticKuboToyabeTimesExpDecay.cpp
     src/Functions/StaticKuboToyabeTimesGausDecay.cpp
@@ -163,7 +168,8 @@ set(SRC_FILES
     src/SeqDomain.cpp
     src/SeqDomainSpectrumCreator.cpp
     src/SpecialFunctionHelper.cpp
-    src/TableWorkspaceDomainCreator.cpp)
+    src/TableWorkspaceDomainCreator.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp)
 
@@ -226,6 +232,7 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
     inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
     inc/MantidCurveFitting/Functions/Abragam.h
+    inc/MantidCurveFitting/Functions/Activation.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
@@ -279,12 +286,15 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/LinearBackground.h
     inc/MantidCurveFitting/Functions/LogNormal.h
     inc/MantidCurveFitting/Functions/Lorentzian.h
+    inc/MantidCurveFitting/Functions/MagneticOrderParameter.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
+    inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
     inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
     inc/MantidCurveFitting/Functions/PawleyFunction.h
     inc/MantidCurveFitting/Functions/PeakParameterFunction.h
     inc/MantidCurveFitting/Functions/Polynomial.h
+    inc/MantidCurveFitting/Functions/PowerLaw.h
     inc/MantidCurveFitting/Functions/ProcessBackground.h
     inc/MantidCurveFitting/Functions/ProductFunction.h
     inc/MantidCurveFitting/Functions/ProductLinearExp.h
@@ -294,6 +304,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ReflectivityMulf.h
     inc/MantidCurveFitting/Functions/Resolution.h
     inc/MantidCurveFitting/Functions/SimpleChebfun.h
+    inc/MantidCurveFitting/Functions/SmoothTransition.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
@@ -333,7 +344,8 @@ set(INC_FILES
     inc/MantidCurveFitting/SeqDomain.h
     inc/MantidCurveFitting/SeqDomainSpectrumCreator.h
     inc/MantidCurveFitting/SpecialFunctionSupport.h
-    inc/MantidCurveFitting/TableWorkspaceDomainCreator.h)
+    inc/MantidCurveFitting/TableWorkspaceDomainCreator.h
+)
 
 set(TEST_FILES
     Algorithms/CalculateChiSquaredTest.h
@@ -390,6 +402,7 @@ set(TEST_FILES
     FunctionFactoryConstraintTest.h
     FunctionParameterDecoratorFitTest.h
     Functions/AbragamTest.h
+    Functions/ActivationTest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
@@ -436,12 +449,15 @@ set(TEST_FILES
     Functions/LinearBackgroundTest.h
     Functions/LogNormalTest.h
     Functions/LorentzianTest.h
+    Functions/MagneticOrderParameterTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
+    Functions/MuoniumDecouplingCurveTest.h
     Functions/NeutronBk2BkExpConvPVoigtTest.h
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
     Functions/PolynomialTest.h
+    Functions/PowerLawTest.h
     Functions/ProcessBackgroundTest.h
     Functions/ProductFunctionTest.h
     Functions/ProductLinearExpTest.h
@@ -451,6 +467,7 @@ set(TEST_FILES
     Functions/ReflectivityMulfTest.h
     Functions/ResolutionTest.h
     Functions/SimpleChebfunTest.h
+    Functions/SmoothTransitionTest.h
     Functions/StaticKuboToyabeTest.h
     Functions/StaticKuboToyabeTimesExpDecayTest.h
     Functions/StaticKuboToyabeTimesGausDecayTest.h
@@ -483,13 +500,12 @@ set(TEST_FILES
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
     SpecialFunctionSupportTest.h
-    TableWorkspaceDomainCreatorTest.h)
+    TableWorkspaceDomainCreatorTest.h
+)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -504,50 +520,40 @@ enable_precompiled_headers(inc/MantidCurveFitting/PrecompiledHeader.h SRC_FILES)
 add_library(CurveFitting ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::CurveFitting ALIAS CurveFitting)
 
-target_include_directories(CurveFitting PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  CurveFitting PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
-
 # Set the name of the generated library
-set_target_properties(CurveFitting
-                      PROPERTIES OUTPUT_NAME
-                                 MantidCurveFitting
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_CURVEFITTING)
+set_target_properties(CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting COMPILE_DEFINITIONS IN_MANTID_CURVEFITTING)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(CurveFitting
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(CurveFitting
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(CurveFitting PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET CurveFitting PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(CurveFitting PUBLIC Mantid::API Mantid::Kernel Mantid::DataObjects PRIVATE Mantid::HistogramData Mantid::Geometry)
+target_link_libraries(
+  CurveFitting
+  PUBLIC Mantid::API Mantid::Kernel Mantid::DataObjects
+  PRIVATE Mantid::HistogramData Mantid::Geometry
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(CurveFitting PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/CurveFitting>
-  $<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  CurveFitting PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/CurveFitting> $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    CurveFitting
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS CurveFitting INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()

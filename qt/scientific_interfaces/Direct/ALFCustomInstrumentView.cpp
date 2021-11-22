@@ -24,10 +24,12 @@ ALFCustomInstrumentView::ALFCustomInstrumentView(const std::string &instrument, 
 void ALFCustomInstrumentView::setUpInstrument(const std::string &fileName,
                                               std::vector<std::function<bool(std::map<std::string, bool>)>> &binders) {
 
-  m_extractSingleTubeObservable = new Observable();
-  m_averageTubeObservable = new Observable();
+  m_extractSingleTubeObservable = std::make_unique<Observable>();
+  m_averageTubeObservable = std::make_unique<Observable>();
 
-  auto instrumentWidget = new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName));
+  auto instrumentWidget =
+      new MantidWidgets::InstrumentWidget(QString::fromStdString(fileName), nullptr, true, true, 0.0, 0.0, true,
+                                          MantidWidgets::InstrumentWidget::Dependencies(), false);
   instrumentWidget->removeTab("Instrument");
   instrumentWidget->removeTab("Draw");
   instrumentWidget->hideHelp();

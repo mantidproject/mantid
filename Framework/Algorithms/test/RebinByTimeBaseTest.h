@@ -18,11 +18,11 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <gmock/gmock.h>
 #include <memory>
 

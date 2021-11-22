@@ -28,8 +28,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
-namespace MantidQt {
-namespace MantidWidgets {
+namespace MantidQt::MantidWidgets {
 
 /**
  * Constructor.
@@ -244,5 +243,4 @@ void SelectFunctionDialog::helpClicked() const {
   }
 }
 
-} // namespace MantidWidgets
-} // namespace MantidQt
+} // namespace MantidQt::MantidWidgets

@@ -19,6 +19,7 @@ Guides
    Architecture
    BuildingOnOSX
    BuildingWithCMake
+   CMakeBestPractices
    Standards/index
    Testing/index
    DoxygenSetup
@@ -64,7 +65,6 @@ Development Process
    TSC
    DesignDocumentGuides
    CodeCoverage
-   RenameAlgorithm
 
 :doc:`DevelopmentAndReleaseCycle`
    An overview of the development cycle.
@@ -99,8 +99,6 @@ Development Process
 :doc:`DesignDocumentGuides`
    How to write a good design document.
 
-:doc:`RenameAlgorithm`
-   How to rename an existing algorithm.
 
 =====
 Tools

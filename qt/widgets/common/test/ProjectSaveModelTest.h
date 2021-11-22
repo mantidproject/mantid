@@ -7,11 +7,11 @@
 #pragma once
 
 #include "MantidAPI/Workspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 
 #include <cxxtest/TestSuite.h>

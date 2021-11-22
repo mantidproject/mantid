@@ -6,10 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/IMessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/ColorMap.h"
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
@@ -20,6 +22,7 @@
 
 #include <limits>
 #include <memory>
+#include <string>
 #include <vector>
 
 //------------------------------------------------------------------
@@ -63,9 +66,13 @@ public:
   static constexpr double INVALID_VALUE = std::numeric_limits<double>::lowest();
 
   /// Constructor
-  InstrumentActor(const QString &wsName, bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(const std::string &wsName, MantidWidgets::IMessageHandler &messageHandler, bool autoscaling = true,
+                  double scaleMin = 0.0, double scaleMax = 0.0);
+  InstrumentActor(Mantid::API::MatrixWorkspace_sptr workspace, MantidWidgets::IMessageHandler &messageHandler,
+                  bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0);
   ///< Destructor
   ~InstrumentActor();
+
   /// Draw the instrument in 3D
   void draw(bool picking = false) const;
   /// Return the bounding box in 3D
@@ -99,6 +106,8 @@ public:
   /// Remove the attached mask workspace without applying the mask.
   /// Remove the bin masking data.
   void clearMasks();
+
+  bool isInitialized() const { return m_initialized; }
 
   /// Get the color map.
   const ColorMap &getColorMap() const;
@@ -150,7 +159,7 @@ public:
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
-  QList<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
+  std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
@@ -162,6 +171,8 @@ public:
   GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector Index.
   size_t getWorkspaceIndex(size_t index) const;
+  /// Get the workspace indices of a list of detectors by their detector Index
+  std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const;
   /// Get the integrated counts of a detector by its detector Index.
   double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors
@@ -210,6 +221,12 @@ public:
 
 signals:
   void colorMapChanged() const;
+  void refreshView() const;
+  void initWidget(bool resetGeometry, bool setDefaultView) const;
+
+public slots:
+  void initialize(bool resetGeometry, bool setDefaultView);
+  void cancel();
 
 private:
   static constexpr double TOLERANCE = 0.00001;
@@ -231,7 +248,7 @@ private:
                           size_t size) const;
 
   /// The workspace whose data are shown
-  const std::weak_ptr<const Mantid::API::MatrixWorkspace> m_workspace;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;
   /// The helper masking workspace keeping the mask build in the mask tab but
   /// not applied to the data workspace.
   mutable std::shared_ptr<Mantid::API::MatrixWorkspace> m_maskWorkspace;
@@ -265,6 +282,10 @@ private:
   /// Stores the number of grid Layers
   size_t m_numGridLayers;
 
+  bool m_initialized;
+  double m_scaleMin;
+  double m_scaleMax;
+
   /// Colors in order of component info
   std::vector<size_t> m_monitors;
   std::vector<size_t> m_components;
@@ -275,9 +296,13 @@ private:
   std::unique_ptr<Mantid::Geometry::ComponentInfo> m_physicalComponentInfo;
   std::unique_ptr<Mantid::Geometry::DetectorInfo> m_physicalDetectorInfo;
   std::unique_ptr<InstrumentRenderer> m_renderer;
+  MantidWidgets::IMessageHandler &m_messageHandler;
+
+  mutable Mantid::API::AlgorithmID m_algID;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
+  friend class InstrumentWidgetRenderTab;
 };
 
 } // namespace MantidWidgets

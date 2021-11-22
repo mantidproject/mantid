@@ -10,6 +10,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_data_selector_view import ModelFittingDataSelectorView
+from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
 from qtpy.QtWidgets import QApplication
 
@@ -52,22 +53,29 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.update_result_table_names(result_table_names)
         self.assertEqual(self.view.number_of_result_tables(), 3)
+        self.assertEqual(self.view.current_result_table_index, 0)
 
         self.view.add_results_table_name("Name4")
         self.assertEqual(self.view.number_of_result_tables(), 4)
+        self.assertEqual(self.view.current_result_table_index, 3)
 
     def test_that_update_x_and_y_parameters_will_update_the_x_and_y_parameters(self):
-        x_parameters = ["workspace_name", "A0", "A1"]
-        y_parameters = ["workspace_name", "A0", "A1", "Chi Squared"]
+        x_parameters = ["workspace_name", "sample_temp", "A0", "A1"]
+        x_parameter_types = [TableColumnType.NoType.value, TableColumnType.X.value, TableColumnType.Y.value,
+                             TableColumnType.Y.value]
+        y_parameters = ["workspace_name", "sample_temp", "A0", "A1", "Chi Squared"]
+        y_parameter_types = [TableColumnType.NoType.value, TableColumnType.X.value, TableColumnType.Y.value,
+                             TableColumnType.Y.value, TableColumnType.Y.value]
 
-        self.view.update_x_parameters(x_parameters)
-        self.view.update_y_parameters(y_parameters)
+        self.view.update_x_parameters(x_parameters, x_parameter_types)
+        self.view.update_y_parameters(y_parameters, y_parameter_types)
 
         x_data = [self.view.x_selector.itemText(i) for i in range(self.view.x_selector.count())]
         y_data = [self.view.y_selector.itemText(i) for i in range(self.view.y_selector.count())]
-
-        self.assertTrue(x_data, x_parameters)
-        self.assertTrue(y_data, y_parameters)
+        self.assertEqual(x_data, x_parameters)
+        self.assertEqual(y_data, y_parameters)
+        self.assertEqual(self.view.x_parameter, "sample_temp")
+        self.assertEqual(self.view.y_parameter, "A0")
 
 
 if __name__ == '__main__':

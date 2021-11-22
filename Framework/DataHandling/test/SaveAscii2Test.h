@@ -16,7 +16,7 @@
 #include "MantidDataHandling/SaveAscii2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
