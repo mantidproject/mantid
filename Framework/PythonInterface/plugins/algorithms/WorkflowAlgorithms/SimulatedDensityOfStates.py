@@ -272,7 +272,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                 file_data, self._element_isotope = get_data_with_euphonic(
                     euphonic_filename,
                     cutoff=float(self.getPropertyValue('ForceConstantsSampling')),
-                    asr=None)
+                    acoustic_sum_rule=None)
             else:
                 raise ValueError("Could not load file using Euphonic: you may need to install this library.")
 

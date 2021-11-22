@@ -467,9 +467,9 @@ class IO(object):
 
         # chop content of a file into chunks to minimize memory consumption for hash creation
         with io.open(file=filename, mode="rb",
-                     buffering=BUF, newline=None) as f:
+                     buffering=BUF, newline=None) as file_handle:
             while True:
-                data = f.read(BUF)
+                data = file_handle.read(BUF)
                 if not data:
                     break
                 hash_calculator.update(data)

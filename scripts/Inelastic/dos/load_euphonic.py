@@ -27,7 +27,7 @@ def euphonic_available():
 
 def euphonic_calculate_modes(filename: str, cutoff: float = 20.,
                              gamma: bool = True,
-                             asr: Optional[str] = 'reciprocal'):
+                             acoustic_sum_rule: Optional[str] = 'reciprocal'):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
@@ -37,10 +37,11 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.,
         cutoff in Angstrom.
     :param gamma:
         Shift sampling grid to include the Gamma-point.
-    :param asr:
+    :param acoustic_sum_rule:
         Apply acoustic sum rule correction to force constants: options are
         'realspace' and 'reciprocal', specifying different implementations of
-        the correction. If None, no correction is applied.
+        the correction. If None, no correction is applied. This option is
+        referred to as "asr" in the Euphonic python API and command-line tools.
 
     :returns: euphonic.QpointPhononModes
 
@@ -65,13 +66,15 @@ def euphonic_calculate_modes(filename: str, cutoff: float = 20.,
 
     logger.notice('Calculating phonon modes on {} grid'.format(
         'x'.join(map(str, mp_sampling))))
-    modes = fc.calculate_qpoint_phonon_modes(qpts, asr=asr)
+    modes = fc.calculate_qpoint_phonon_modes(qpts, asr=acoustic_sum_rule)
 
     return modes
 
 
-def get_data_with_euphonic(filename: str, cutoff: float = 20.,
-                           gamma: bool = True, asr: Optional[str] = None):
+def get_data_with_euphonic(filename: str,
+                           cutoff: float = 20.,
+                           gamma: bool = True,
+                           acoustic_sum_rule: Optional[str] = None):
     """
     Read force constants file with Euphonic and sample frequencies/modes
 
@@ -81,7 +84,7 @@ def get_data_with_euphonic(filename: str, cutoff: float = 20.,
         cutoff.
     :param gamma:
         Shift sampling grid to include the Gamma-point.
-    :param asr:
+    :param acoustic_sum_rule:
         Apply acoustic sum rule correction to force constants: options are
         'realspace' and 'reciprocal', specifying different implementations of
         the correction. If None, no correction is applied.
@@ -91,7 +94,7 @@ def get_data_with_euphonic(filename: str, cutoff: float = 20.,
 
     """
     modes = euphonic_calculate_modes(filename=filename, cutoff=cutoff,
-                                     gamma=gamma, asr=asr)
+                                     gamma=gamma, asr=acoustic_sum_rule)
 
     file_data = {'num_ions': len(modes.crystal.atom_type),
                  'num_branches': modes.frequencies.magnitude.shape[1],
