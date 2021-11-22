@@ -30,14 +30,14 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
     def validate(self):
         # bank 1
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18425.452, delta=1e-2)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -7.650, delta=1e-2)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -17.501, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18422, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.3, delta=0.3)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -15.0, delta=0.5)
         # bank 2
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18421.872, delta=1e-2)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.137, delta=1e-2)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -15.595, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18423.5, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.6, delta=0.3)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -17.3, delta=0.5)
         # assert foc data in TOF (conversion to d already tested by assertions on diff consts)
 
     def cleanup(self):
@@ -58,9 +58,9 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
     def validate(self):
         # bank 1
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18425.452, delta=1e-2)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -7.650, delta=1e-2)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -17.501, delta=1e-2)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18422, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.3, delta=0.3)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -15.0, delta=0.5)
 
     def cleanup(self):
         ADS.clear()
