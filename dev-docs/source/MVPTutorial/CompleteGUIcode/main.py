@@ -20,7 +20,7 @@ A wrapper class for setting the main window
 
 class Demo(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        super(Demo, self).__init__(parent)
+        super().__init__(parent)
 
         data_model = model_data.DataGenerator()
         colour_list = model_colour.line_colours()
