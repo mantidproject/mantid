@@ -950,6 +950,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         wavelength = mtd[tr].getRun()['wavelength'].value
         name = f'{out}_transmissions_w{wavelength:.1f}A'
         RenameWorkspace(tr, name)
+        tr_ws = mtd[name]
+        for i in range(tr_ws.getNumberHistograms()):
+            tr_ws.setX(i, [wavelength])
+        tr_ws.getAxis(0).setUnit('Wavelength')
         return name
 
     def package(self, samples, transmissions):
@@ -963,6 +967,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                         self.set_distribution([v], True)
                     outputs.append(self.rename(k, v))
         for tr in transmissions:
+            Transpose(InputWorkspace=tr['SampleTransmission'], OutputWorkspace=tr['SampleTransmission'])
+            self.replace_axis(tr['SampleTransmission'], self.name_axis, 1)
             outputs.append(self.rename_tr(tr['SampleTransmission']))
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=out_ws)
         self.setProperty('OutputWorkspace', out_ws)
