@@ -142,36 +142,39 @@ void LoadHKL::exec() {
   double theta = sc1 * radtodeg * 0.5;
 
   // find roots of polynomial that describes
-  const size_t ndeg = sizeof pc / sizeof pc[0]; // order of poly
-  double coefs[ndeg];
-  std::vector<double> murs;
-  murs.reserve(2);
-  auto ith_lo = static_cast<size_t>(theta / 5.);
-  for (size_t ith = ith_lo; ith < ith_lo + 2; ith++) {
-    for (size_t ideg = 0; ideg < ndeg; ideg++) {
-      coefs[ideg] = pc[ndeg - 1 - ideg][ith];
-    }
-    coefs[0] = coefs[0] - std::log(1.0 / astar1);
-    double roots[2 * (ndeg - 1)];
-    gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc(ndeg);
-    gsl_poly_complex_solve(coefs, ndeg, w, roots);
-    gsl_poly_complex_workspace_free(w);
+  double radius = 0.0;
+  if (std::isfinite(astar1)) {
+    const size_t ndeg = sizeof pc / sizeof pc[0]; // order of poly
+    double coefs[ndeg];
+    std::vector<double> murs;
+    murs.reserve(2);
+    auto ith_lo = static_cast<size_t>(theta / 5.);
+    for (size_t ith = ith_lo; ith < ith_lo + 2; ith++) {
+      for (size_t ideg = 0; ideg < ndeg; ideg++) {
+        coefs[ideg] = pc[ndeg - 1 - ideg][ith];
+      }
+      coefs[0] = coefs[0] - std::log(1.0 / astar1);
+      double roots[2 * (ndeg - 1)];
+      gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc(ndeg);
+      gsl_poly_complex_solve(coefs, ndeg, w, roots);
+      gsl_poly_complex_workspace_free(w);
 
-    for (size_t irt = 0; irt < ndeg - 1; irt++) {
-      if (roots[2 * irt] > 0 && roots[2 * irt] < 9 && std::abs(roots[2 * irt + 1]) < 1e-15) {
-        murs.emplace_back(roots[2 * irt]); // real root in range 0 < muR < 9 cm^-1 (fitted in AnvredCorrection)
+      for (size_t irt = 0; irt < ndeg - 1; irt++) {
+        if (roots[2 * irt] > 0 && roots[2 * irt] < 9 && std::abs(roots[2 * irt + 1]) < 1e-15) {
+          murs.emplace_back(roots[2 * irt]); // real root in range 0 < muR < 9 cm^-1 (fitted in AnvredCorrection)
+        }
       }
     }
-  }
-
-  double radius = 0.0;
-  if (murs.size() == 2) {
-    double frac = (theta - ith_lo * 5.0) / 5.0;
-    radius = (murs[0] * (1 - frac) + murs[1] * frac) / mu1;
-    g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
-                   << " calculated from tbar and transmission of 2 peaks\n";
+    if (murs.size() == 2) {
+      double frac = (theta - ith_lo * 5.0) / 5.0;
+      radius = (murs[0] * (1 - frac) + murs[1] * frac) / mu1;
+      g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
+                     << " calculated from tbar and transmission of 2 peaks\n";
+    } else {
+      g_log.warning() << "Radius set to 0.0 cm - failed to find physical root to polynomial in AnvredCorrections\n";
+    }
   } else {
-    g_log.warning() << "Radius set to 0.0 cm - failed to find physical root to polynomial in AnvredCorrections\n";
+    g_log.warning() << "Radius set to 0.0 cm - non-physical transmission supplied.\n";
   }
 
   API::Run &mrun = ws->mutableRun();
