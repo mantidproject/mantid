@@ -183,7 +183,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     efocus: The incident enrgy that all choppers are focussed on
     freq1: The frequency of the resolution choppers
     freqpr: frequency of the pulse removal chopper
-    instrumentpars: a list of instrument parameters [see ISISDisk.py]
+    instrumentpars: a list of instrument parameters [see Instruments.py]
     chop2Phase: the second choppers phase, adjustable to take the guessing out
 
     Original Matlab code R. Bewley STFC
@@ -201,8 +201,11 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
     chop_times = []             # empty list to hold each chopper opening period
 
     # figures out phase information
-    if not (hasattr(ph_ind_v, '__len__') and len(ph_ind_v) == len(dist)) and ph_ind_v:
-        ph_ind = [i==(ph_ind_v[-1] if hasattr(ph_ind_v, '__len__') else ph_ind_v) for i in range(len(dist))]
+    if not hasattr(ph_ind_v, '__len__'):
+        ph_ind_v = [ph_ind_v]
+    ph_ind = np.array([False] * len(dist))
+    if not len(ph_ind_v) == len(dist) and ph_ind_v:
+        ph_ind[ph_ind_v] = True
         chop2Phase = phase = chop2Phase if hasattr(chop2Phase, '__len__') else [chop2Phase]
         if len(chop2Phase) != len(dist):
             if len(chop2Phase) == len(ph_ind_v):
@@ -211,8 +214,6 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
                     phase[ph_ind_v[i]] = chop2Phase[i]
             else:
                 phase = [chop2Phase[-1] if ph_ind[i] else False for i in range(len(dist))]
-    else:
-        ph_ind = [False] * len(dist)
 
     # do we want multiple frames?
     source_rep, nframe = tuple(rep[:2]) if (hasattr(rep, '__len__') and len(rep) > 1) else (rep, 1)
@@ -228,7 +229,7 @@ def calcChopTimes(efocus, freq, instrumentpars, chop2Phase=5):
             chopVel = 2*np.pi*radius[i] * numDisk[i] * freq[i]
             # full opening time
             t_full_op = uSec * (slot_width[i]+guide_width[i]) / chopVel
-            realTimeOp = np.array([chop2Phase, chop2Phase+t_full_op])
+            realTimeOp = np.array([phase[i], phase[i]+t_full_op])
         else:
             # the opening time of the chopper so that it is open for the focus wavelength
             t_open = lam2TOF * lam * dist[i]
