@@ -567,7 +567,6 @@ public:
     ScriptBuilder builder(wsHist.createView());
     std::string scriptText = builder.build();
 
-    // The dynamic property should not be in the script.
     TS_ASSERT(scriptText.find(dead_time_string) != std::string::npos);
     TS_ASSERT(scriptText.find(grouping_string) != std::string::npos);
 
