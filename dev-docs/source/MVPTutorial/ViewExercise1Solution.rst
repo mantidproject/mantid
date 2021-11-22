@@ -21,7 +21,7 @@ main.py
     """
     class Demo(QtWidgets.QMainWindow):
         def __init__(self,parent=None):
-            super(Demo,self).__init__(parent)
+            super().__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
             my_view = view.View()
@@ -53,7 +53,7 @@ view.py
     class View(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
-            super(view, self).__init__(parent)
+            super().__init__(parent)
 
             grid = QtWidgets.QVBoxLayout(self)
 

@@ -37,7 +37,7 @@ And the Main module should now pass the two models into the presenter:
 .. code-block:: python
 
     def __init__(self, parent=None):
-        super(Demo,self).__init__(parent)
+        super().__init__(parent)
 
         self.window = QtWidgets.QMainWindow()
         my_view = view.View()

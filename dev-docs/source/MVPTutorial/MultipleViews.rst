@@ -26,7 +26,7 @@ previous section into a single view. To achieve this we will create a
     class MasterView(QtWidgets.QWidget):
 
         def __init__(self, parent=None):
-            super(MasterView, self).__init__(parent)
+            super().__init__(parent)
 
             grid = QtWidgets.QVBoxLayout(self)
             self.plot_view = plot_view.PlotView(parent=self)
@@ -45,7 +45,7 @@ The main only needs to import the master_view:
 
     class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(Demo, self).__init__(parent)
+            super().__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
             my_view = master_view.MasterView()
