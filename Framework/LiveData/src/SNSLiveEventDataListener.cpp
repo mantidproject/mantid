@@ -461,6 +461,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // m_eventBuffer->m_monitorWorkspace), so lock the mutex
   std::lock_guard<std::mutex> scopedLock(m_mutex);
 
+  if (!m_eventBuffer->monitorWorkspace())
+    return false;
+
   auto monitorBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
   const auto pktTime = timeFromPacket(pkt);
 
@@ -1314,6 +1317,11 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 /// monitor IDs set
 void SNSLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
+
+  // don't create monitor workspace if there are no monitors
+  if (monitors.size() == 0)
+    return;
+
   auto monitorsBuffer = WorkspaceFactory::Instance().create("EventWorkspace", monitors.size(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *monitorsBuffer, true);
   // Set the id numbers
@@ -1420,10 +1428,12 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
   // Create a fresh monitor workspace and insert into the new 'main' workspace
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
-  auto newMonitorBuffer =
-      WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
-  temp->setMonitorWorkspace(newMonitorBuffer);
+  if (monitorBuffer) {
+    auto newMonitorBuffer =
+        WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
+    WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
+    temp->setMonitorWorkspace(newMonitorBuffer);
+  }
 
   // Lock the mutex and swap the workspaces
   {
