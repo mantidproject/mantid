@@ -320,6 +320,13 @@ void SNSLiveEventDataListener::run() {
     std::string newMsg("Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
     m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
+  } catch (std::exception &e) { // exception handler for generic exceptions
+    g_log.fatal() << "Caught an exception.\n"
+                  << "Exception message: " << e.what() << ".\n"
+                  << "Thread will exit.\n";
+    m_isConnected = false;
+
+    m_backgroundException = std::make_shared<std::runtime_error>(e.what());
   } catch (...) { // Default exception handler
     g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
                 " Thread is exiting.");
