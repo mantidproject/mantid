@@ -85,18 +85,18 @@ view.py
 
             self.setLayout(grid)
 
-     def setTableRow(self, name, row):
+        def setTableRow(self, name, row):
             text = QtWidgets.QTableWidgetItem(name)
             text.setFlags(QtCore.Qt.ItemIsEnabled)
             col = 0
             self.table.setItem(row, col, text)
 
-     def addWidgetToTable(self, name, widget, row):
+        def addWidgetToTable(self, name, widget, row):
             self.setTableRow(name,row)
             col = 1
             self.table.setCellWidget(row, col, widget)
 
-     def addItemToTable(self, name, widget, row):
+        def addItemToTable(self, name, widget, row):
             self.setTableRow(name, row)
             col = 1
             self.table.setItem(row, col, widget)

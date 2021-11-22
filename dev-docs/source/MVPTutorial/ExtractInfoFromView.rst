@@ -47,7 +47,7 @@ be used.
             print ("hellow from view")
             self.doSomethingSignal.emit()
 
-            def getValue(self):
+        def getValue(self):
             return float(self.value.text())
 
 The last function ``getValue`` returns the value of the line
