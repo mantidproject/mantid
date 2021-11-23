@@ -12,8 +12,7 @@ LookupRow::LookupRow(std::optional<double> theta,
 
                      TransmissionRunPair transmissionRuns,
                      std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-                     std::optional<double> scaleFactor,
-                     std::optional<ProcessingInstructions> processingInstructions,
+                     std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
                      std::optional<ProcessingInstructions> backgroundProcessingInstructions)
     : m_theta(std::move(theta)), m_transmissionRuns(std::move(transmissionRuns)), m_qRange(std::move(qRange)),
       m_scaleFactor(std::move(scaleFactor)),

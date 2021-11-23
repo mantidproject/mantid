@@ -37,7 +37,7 @@ void RunsTable::resetState() { m_reductionJobs.resetState(); }
 
 void RunsTable::resetSkippedItems() { m_reductionJobs.resetSkippedItems(); }
 
-Item* RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+Item *RunsTable::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_reductionJobs.getItemWithOutputWorkspaceOrNone(wsName);
 }
 

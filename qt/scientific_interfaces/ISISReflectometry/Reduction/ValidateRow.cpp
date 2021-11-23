@@ -88,8 +88,7 @@ std::optional<std::optional<double>> RowValidator::parseScaleFactor(std::vector<
   return optionalScaleFactorOrNoneIfError;
 }
 
-std::optional<std::map<std::string, std::string>>
-RowValidator::parseOptions(std::vector<std::string> const &cellText) {
+std::optional<std::map<std::string, std::string>> RowValidator::parseOptions(std::vector<std::string> const &cellText) {
   auto options = ::MantidQt::CustomInterfaces::ISISReflectometry::parseOptions(cellText[OPTIONS_COLUMN]);
   if (!options.has_value())
     m_invalidColumns.emplace_back(OPTIONS_COLUMN);

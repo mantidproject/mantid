@@ -37,7 +37,7 @@ void Batch::resetState() { m_runsTable.resetState(); }
 
 void Batch::resetSkippedItems() { m_runsTable.resetSkippedItems(); }
 
-Item* Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
+Item *Batch::getItemWithOutputWorkspaceOrNone(std::string const &wsName) {
   return m_runsTable.getItemWithOutputWorkspaceOrNone(wsName);
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
