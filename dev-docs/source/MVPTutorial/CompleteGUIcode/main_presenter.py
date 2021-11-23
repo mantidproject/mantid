@@ -8,7 +8,7 @@ import presenter
 import plot_presenter
 
 
-class MasterPresenter(object):
+class MainPresenter(object):
 
     def __init__(self, view, data_model, colour_list):
         self.view = view
