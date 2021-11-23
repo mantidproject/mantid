@@ -9,7 +9,12 @@
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 
+#include "MantidKernel/WarningSuppressions.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Dense>
+GNU_DIAG_ON("conversion")
 #include <H5Cpp.h>
 #include <boost/filesystem.hpp>
 #include <string>

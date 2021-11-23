@@ -16,7 +16,12 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
 
+#include "MantidKernel/WarningSuppressions.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Dense>
+GNU_DIAG_ON("conversion")
 #include <boost/math/special_functions/pow.hpp>
 
 namespace {

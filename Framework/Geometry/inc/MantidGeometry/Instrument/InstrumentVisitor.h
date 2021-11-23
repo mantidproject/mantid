@@ -9,7 +9,12 @@
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Geometry>
+GNU_DIAG_ON("conversion")
 #include <Eigen/StdVector>
 #include <cstddef>
 #include <memory>
