@@ -733,8 +733,12 @@ class AbinsAlgorithm:
                 force_constants_from_file(filename_full_path)
                 return dict(Invalid=False, Comment="")
             except Exception as error:
+                if hasattr(error, 'message'):
+                    message = error.message
+                else:
+                    message = str(error)
                 return dict(Invalid=True,
-                            Comment=f"Problem opening force constants file with Euphonic.: {error.message}")
+                            Comment=f"Problem opening force constants file with Euphonic.: {message}")
         else:
             return dict(Invalid=True,
                         Comment=("Could not import Euphonic module. "
