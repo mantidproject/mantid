@@ -718,19 +718,15 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       // combined
       track.clearIntersectionResults();
       track.reset(posFrom, unitVector);
-      // track.clearIntersectionResults();
       const auto rayLen1_container = getDistanceInsideObject(shapeContainer, track);
       track.clearIntersectionResults();
       track.reset(posFrom, unitVector);
-      // track.clearIntersectionResults();
       const auto rayLen1_sample = getDistanceInsideObject(shapeSample, track);
       track.clearIntersectionResults();
       track.reset(posTo, unitVector);
-      // track.clearIntersectionResults();
       const auto rayLen2_container = getDistanceInsideObject(shapeContainer, track);
       track.clearIntersectionResults();
       track.reset(posTo, unitVector);
-      // track.clearIntersectionResults();
       const auto rayLen2_sample = getDistanceInsideObject(shapeSample, track);
       //
       L12sContainer[idx] = checkzero(rayLen1_container - rayLen2_container);
