@@ -364,6 +364,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 current_output = np.array([sample_sofq, sample_softw])
                 current_output = current_output[[isinstance(elem, str) for elem in current_output]]
                 output_samples.extend(current_output)
+            self._group_detectors(current_output)
             if self.save_output:
                 self._save_output(current_output)
 
@@ -423,6 +424,22 @@ class DirectILLAutoProcess(PythonAlgorithm):
                     InputWorkspace=ws_name,
                     Filename='{}.nxs'.format(ws_name)
                 )
+
+    def _group_detectors(self, ws_list):
+        """Groups detectors for workspaces in the provided list according to the defined grouping pattern."""
+        grouping_pattern = None
+        if not self.getProperty('DetectorGrouping').isDefault:
+            grouping_pattern = self.getProperty('DetectorGrouping').value
+        elif not self.getProperty('GroupPixelsBy').isDefault:
+            group_by = self.getProperty('GroupPixelsBy').value
+            if group_by > 1:
+                n_pixels = mtd[ws_list[0]].getNumberHistograms()
+                grouping_pattern = ",".join(
+                    ["{}-{}".format(pixel_id, pixel_id + group_by - 1) for pixel_id in range(0, n_pixels, group_by)])
+        if grouping_pattern is not None:
+            for ws in ws_list:
+                GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws,
+                               GroupingPattern=grouping_pattern)
 
     def _prepare_masks(self):
         """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
