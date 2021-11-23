@@ -134,7 +134,7 @@ public:
       const double delta(1e-05);
       TS_ASSERT_DELTA(singleScatterResult->y(SPECTRUMINDEXTOTEST)[0], analyticResult, delta);
       // no analytical result for double scatter so just check against current result that we assume is correct
-      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[0], 0.001977, delta);
+      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[0], 0.0019967460, delta);
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
   }
