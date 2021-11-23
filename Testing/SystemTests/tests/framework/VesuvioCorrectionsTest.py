@@ -624,7 +624,3 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
                          msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
     self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance,
                     msg="abs({:.6f} - {:.6f}) > {:.6f}".format(peak_bin, expected_bin, bin_tolerance))
-
-
-if __name__ == "__main__":
-    unittest.main()

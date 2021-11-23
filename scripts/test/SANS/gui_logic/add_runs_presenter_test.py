@@ -7,8 +7,6 @@
 import os
 import unittest
 
-from assert_called import assert_called
-from fake_signal import FakeSignal
 from mantid.kernel import ConfigService
 from unittest import mock
 from sans.common.enums import SANSInstrument
@@ -16,6 +14,7 @@ from sans.gui_logic.models.sum_runs_model import SumRunsModel
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter, AddRunsFilenameManager
+from test.SANS.gui_logic.fake_signal import FakeSignal
 from ui.sans_isis.add_runs_page import AddRunsPage
 from ui.sans_isis.sans_data_processor_gui import SANSDataProcessorGui
 
@@ -119,7 +118,7 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
 
         presenter = self._make_presenter()
         presenter._handle_selection_changed(run_selection=runs)
-        assert_called(self.view.enable_summation_settings)
+        self.view.enable_summation_settings.assert_called_once()
 
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
     def test_enables_summation_settings_when_event_and_histogram_data(self, _):
@@ -132,7 +131,7 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
 
         presenter = self._make_presenter()
         presenter._handle_selection_changed(run_selection=runs)
-        assert_called(self.view.enable_summation_settings)
+        self.view.enable_summation_settings.assert_called_once()
 
 
 class SummationConfigurationTest(AddRunsPagePresenterTestCase):
@@ -295,14 +294,15 @@ class SumButtonTest(AddRunsPagePresenterTestCase):
         fake_run_selection.__iter__.return_value = fake_run_list
 
         self.presenter._handle_selection_changed(run_selection=fake_run_selection)
-        assert_called(self.view.enable_sum)
+        self.view.enable_sum.assert_called_once()
 
     def test_disables_sum_button_when_no_rows(self):
         fake_run_selection = mock.Mock()
         fake_run_selection.has_any_runs.return_value = False
 
+        self.view.disable_sum.reset_mock()
         self.presenter._handle_selection_changed(run_selection=fake_run_selection)
-        assert_called(self.view.disable_sum)
+        self.view.disable_sum.assert_called_once()
 
 
 class AddRunsFilenameManagerTest(unittest.TestCase):

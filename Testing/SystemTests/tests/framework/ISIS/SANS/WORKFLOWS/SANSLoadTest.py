@@ -514,7 +514,3 @@ class SANSLoadDataRunnerTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self._success
-
-
-if __name__ == '__main__':
-    unittest.main()
