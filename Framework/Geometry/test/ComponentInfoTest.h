@@ -21,9 +21,14 @@
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Geometry>
+GNU_DIAG_ON("conversion")
 #include <memory>
 
 using namespace Mantid;

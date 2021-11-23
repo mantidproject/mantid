@@ -7,7 +7,12 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Core>
+GNU_DIAG_ON("conversion")
 
 namespace Mantid {
 namespace Geometry {
