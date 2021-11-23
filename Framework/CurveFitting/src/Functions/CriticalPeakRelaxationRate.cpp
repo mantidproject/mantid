@@ -9,7 +9,6 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/Functions/CriticalPeakRelaxationRate.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 #include <cmath>
 
@@ -50,13 +49,12 @@ void CriticalPeakRelaxationRate::functionDeriv1D(Jacobian *out, const double *xV
   const double scale = getParameter("Scaling");
   const double tc = getParameter("CriticalTemp");
   const double exp = getParameter("Exponent");
-  const double bg = getParameter("Background");
 
   for (size_t i = 0; i < nData; i++) {
-    double expression = abs(tc- xValues[i]);
+    double expression = abs(tc - xValues[i]);
 
     const double diffScale = pow(expression, -exp);
-    const double diffTc = scale * exp * (xValues[i] - tc) * pow(expression, (-exp-2));
+    const double diffTc = scale * exp * (xValues[i] - tc) * pow(expression, (-exp - 2));
     const double diffExp = scale * pow(expression, -exp) * log(expression);
 
     out->set(i, 0, diffScale);
@@ -73,5 +71,5 @@ void CriticalPeakRelaxationRate::checkParams(const double *xValues, const size_t
       throw std::invalid_argument("Use the exclude range option with x=" + std::to_string(xValues[i]) + " and y = inf");
     }
   }
-  }
+}
 } // namespace Mantid::CurveFitting::Functions

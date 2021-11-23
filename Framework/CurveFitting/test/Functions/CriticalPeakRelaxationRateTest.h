@@ -13,7 +13,6 @@
 #include "MantidCurveFitting/Functions/CriticalPeakRelaxationRate.h"
 #include "MantidCurveFitting/Jacobian.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-//#include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
