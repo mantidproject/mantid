@@ -56,6 +56,7 @@ Bugfixes
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
 - When a new results table is created the Model Analysis tab selects the default parameters to plot based on log values or parameters in the results table.
 - Undo fit now resets when the function structure changes. This prevents a bug caused by trying to revert the current function to the state of a previous one.
+- Fixed a bug that prevented the GUI working with workspace history and project recovery.
 - Detaching tabs, then closing Mantid no longer causes a crash.
 - When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
 

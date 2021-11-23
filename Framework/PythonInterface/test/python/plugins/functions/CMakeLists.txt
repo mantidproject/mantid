@@ -5,6 +5,7 @@ set(TEST_PY_FILES
     AFM_ZFTest.py
     AttributeTest.py
     BesselTest.py
+    ChudleyElliotTest.py
     CombGaussLorentzKTTest.py
     DampedBesselTest.py
     CompositePCRmagnetTest.py
@@ -31,6 +32,8 @@ set(TEST_PY_FILES
     PCRmagnetRedfieldTest.py
     PCRmagnetfnormTest.py
     PEARLTransVoigtTest.py
+    PrimStretchedExpFTTest.py
+    RedfieldTest.py
     RFresonanceTest.py
     SpinGlassTest.py
     StandardSCTest.py

@@ -36,10 +36,10 @@ class FindGlobalBMatrixTest(unittest.TestCase):
     def test_finds_average_lattice_parameter(self):
         # create two peak tables with UB corresponding to different lattice constant, a
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks1")
-        UB = np.diag([1.0/3.8, 0.25, 0.1])  # alatt = [3.8, 4, 10]
+        UB = np.diag([1.0 / 3.9, 0.25, 0.1])  # alatt = [3.9, 4, 10]
         SetUB(peaks1, UB=UB)
         peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks2")
-        UB = np.diag([1.0/4.2, 0.25, 0.1])  # alatt = [4.2, 4, 10]
+        UB = np.diag([1.0 / 4.1, 0.25, 0.1])  # alatt = [4.1, 4, 10]
         SetUB(peaks2, UB=UB)
         # Add some peaks
         add_peaksHKL([peaks1, peaks2], range(0, 3), range(0, 3), 4)
@@ -48,7 +48,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
                           Tolerance=0.15)
 
         # check lattice  - should have average a=4.0
-        self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=2e-2, delta_angle=2.5e-1)
+        self.assert_lattice([peaks1, peaks2], 4.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=5e-2, delta_angle=2.5e-1)
         self.assert_matrix([peaks1], getBMatrix(peaks2), getBMatrix, delta=1e-10)  # should have same B matrix
         self.assert_matrix([peaks1, peaks2], np.eye(3), getUMatrix, delta=5e-2)
 
