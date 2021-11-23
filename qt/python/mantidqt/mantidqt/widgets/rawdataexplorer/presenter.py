@@ -103,8 +103,6 @@ class RawDataExplorerPresenter(QObject):
         self.set_working_directory(self.working_dir)
         self.preview_manager = PreviewManager.Instance()
 
-        self.populate_targets()
-
         self.setup_connections()
 
         self.model.sig_new_preview.connect(self.on_new_preview)
@@ -161,14 +159,11 @@ class RawDataExplorerPresenter(QObject):
         Triggered when the selection changed in the file system widget.
         """
         selection = self.view.get_selection()
-        # target_type = self.view.get_current_target()
 
         # TODO get preview per instrument
         self.view.fileTree.setCursor(Qt.BusyCursor)
-        if self.view.get_current_target() == "New":
-            self.model.new_preview(selection)
-        else:
-            self.model.modify_preview(selection)
+
+        self.model.modify_preview(selection)
         self.view.fileTree.unsetCursor()
 
     def on_new_preview(self, previewModel):
@@ -238,22 +233,6 @@ class RawDataExplorerPresenter(QObject):
                 self.displays.add_ws_to_last(preview_type, ws_to_show)
                 workspaces_to_show = self.displays.get_last_workspaces(preview_type)
                 self.view.plot_2D(workspaces_to_show, last_window)
-
-    def populate_targets(self):
-        """
-        Set the available target options in the combo box.
-        """
-
-        current_preview = PreviewType.IVIEW
-        current_target = self.view.get_current_target()
-
-        targets = ["Same", "New"]
-        if current_preview == PreviewType.PLOT1D:
-            targets.append("Over")
-        if current_preview in [PreviewType.PLOT1D, PreviewType.PLOT2D]:
-            targets.append("Tile")
-        self.view.populate_targets(targets)
-        self.view.set_target(current_target)
 
     def is_accumulate_checked(self):
         """
