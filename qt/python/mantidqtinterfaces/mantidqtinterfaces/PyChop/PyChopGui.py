@@ -217,43 +217,55 @@ class PyChopGui(QMainWindow):
 
     def _merlin_chopper(self):
         if 'MERLIN' in self.engine.instname:
-            if 'G' in self.engine.getChopper() and self.instSciAct.isChecked():
+            if 'G' in self.engine.getChopper():
                 self.widgets['MultiRepCheck'].setEnabled(True)
                 self.tabs.setTabEnabled(self.tdtabID, True)
-                self.widgets['Chopper0Phase']['Edit'].setText('1500')
-                self.widgets['Chopper0Phase']['Label'].setText('Disk chopper phase delay time')
-                self.widgets['Chopper0Phase']['Edit'].show()
-                self.widgets['Chopper0Phase']['Label'].show()
+                if self.instSciAct.isChecked():
+                    self.widgets['Chopper0Phase']['Edit'].setText('1500')
+                    self.widgets['Chopper0Phase']['Label'].setText('Disk chopper phase delay time')
+                    self.widgets['Chopper0Phase']['Edit'].show()
+                    self.widgets['Chopper0Phase']['Label'].show()
             else:
                 self.widgets['MultiRepCheck'].setEnabled(False)
                 self.widgets['MultiRepCheck'].setChecked(False)
                 self.tabs.setTabEnabled(self.tdtabID, False)
                 self._hide_phases()
 
-    def setEi(self):
+    def setEi(self, raise_error=False):
         """
         Sets the incident energy (or focused incident energy for multi-rep case).
         """
         try:
             eitxt = float(self.widgets['EiEdit']['Edit'].text())
         except ValueError:
-            self.errormessage('No Ei specified, or Ei string not understood')
+            if raise_error:
+                raise
+            else:
+                self.errormessage('No Ei specified, or Ei string not understood')
         else:
             self.engine.setEi(eitxt)
             if self.eiPlots.isChecked():
                 self.calc_callback()
 
-    def setS2(self):
+    def setS2(self, raise_error=False):
         """
         Sets the S2 tank rotation for HYSPEC instrument
         """
         try:
             S2txt = float(self.widgets['S2Edit']['Edit'].text())
         except:
-            self.errormessage('No S2 specified, or S2 string not understood')
+            errmsg = 'No S2 specified, or S2 string not understood'
+            if raise_error:
+                raise ValueError(errmsg)
+            else:
+                self.errormessage(errmsg)
         else:
             if np.abs(S2txt) > 150:
-                self.errormessage('S2 must be between -150 and 150 degrees')
+                errmsg = 'S2 must be between -150 and 150 degrees'
+                if raise_error:
+                    raise ValueError(errmsg)
+                else:
+                    self.errormessage(errmsg)
             else:
                 self.hyspecS2 = S2txt
 
@@ -264,9 +276,10 @@ class PyChopGui(QMainWindow):
         try:
             if self.engine.getChopper() is None:
                 self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
-            self.setEi()
+            if not self.eiPlots.isChecked():
+                self.setEi(raise_error=True)
             if self.engine.name=='HYSPEC':
-                self.setS2()
+                self.setS2(raise_error=True)
             self.setFreq()
             self.calculate()
             if self.errormess:
@@ -308,7 +321,8 @@ class PyChopGui(QMainWindow):
                 self.res = self.engine.getResolution(en)
                 self.flux = self.engine.getFlux()
                 if len(w) > 0:
-                    self.errormessage(w[0].message)
+                    raise ValueError(w[0].message)
+                    # will be caught by calc_callback()
 
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
@@ -623,12 +637,9 @@ class PyChopGui(QMainWindow):
         obj = Instrument(obj_in)
         obj.setEi(ei)
         en = np.linspace(0, 0.95*ei, 10)
-        try:
-            flux = self.engine.getFlux()
-            res = self.engine.getResolution(en)
-        except ValueError as err:
-            self.errormessage(err)
-            return
+        # ValueErrors here will be caught in showText() or writeText()
+        flux = self.engine.getFlux()
+        res = self.engine.getResolution(en)
         tsqvan, tsqdic, tsqmodchop = obj.getVanVar()
         v_mod, v_chop = tuple(np.sqrt(tsqmodchop[:2]) * 1e6)
         x0, _, x1, x2, _ = obj.chopper_system.getDistances()
@@ -699,6 +710,7 @@ class PyChopGui(QMainWindow):
         try:
             generatedText = self.genText()
         except ValueError:
+            self.errormessage(err)
             return
         self.txtwin = QDialog()
         self.txtedt = QTextEdit()
@@ -722,11 +734,16 @@ class PyChopGui(QMainWindow):
         """
         Saves the generated text to a file (opens file dialog).
         """
+        try:
+            generatedText = self.genText()
+        except ValueError:
+            self.errormessage(err)
+            return
         fname = QFileDialog.getSaveFileName(self, 'Open file', '')
         if isinstance(fname, tuple):
             fname = fname[0]
         fid = open(fname, 'w')
-        fid.write(self.genText())
+        fid.write(generatedText)
         fid.close()
 
     def update_script(self):

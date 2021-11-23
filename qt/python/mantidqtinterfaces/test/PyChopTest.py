@@ -145,6 +145,9 @@ class MockImports():
             rv = self.replace[replacement]
         elif root_name in self.loaded_modules:
             rv = self.loaded_modules[root_name]
+            for mods in fromlist:
+                if mods not in self.loaded_from:
+                    self.loaded_from[mods] = rv
         elif name in self.loaded_from:
             rv = self.loaded_from[name]
         else:
@@ -174,7 +177,7 @@ class MockImports():
             else:
                 return self.real_import(name, globals, locals, fromlist, level)
         else:
-            return MockedModule()
+            return mock.MagicMock()
 
     def __getattr__(self, module_name):
         if module_name in self.loaded_modules:
@@ -268,7 +271,7 @@ class PyChopGuiTests(unittest.TestCase):
                                                 'Slider':MockedModule(mock_class=fake_Slider)})
         # Mess around with import mechanism _inside_ PyChopGui so GUI libs not really imported
         with patch('builtins.__import__', cls.mock_modules.import_func):
-            from mantidqtinterfaces.PyChop import PyChopGui
+            from PyChop import PyChopGui
             cls.window = PyChopGui.PyChopGui()
             cls.window.eiPlots.isChecked = mock.MagicMock(return_value=False)
             cls.mock_modules.matplotlib.__version__ = '2.1.0'
@@ -282,6 +285,16 @@ class PyChopGuiTests(unittest.TestCase):
             self.window.setInstrument('HYSPEC')
             self.window.calc_callback()
             setS2.assert_called()
+        # Test that the value of S2 is set correctly
+        with patch.object(self.window.widgets['S2Edit']['Edit'], 'text') as S2txt, \
+             patch.object(self.window, 'errormessage') as errmsg:
+            S2txt.return_value = '55'
+            self.window.setS2()
+            assert self.window.hyspecS2 == 55
+            # Valid values are from -150 to +150
+            S2txt.return_value = '155'
+            self.window.setS2()
+            errmsg.assert_called()
 
     def test_plot_flux_ei(self):
         # Tests that Hyspec routines are only called when the instrument is Hyspec
@@ -292,6 +305,54 @@ class PyChopGuiTests(unittest.TestCase):
             self.window.widgets['EiEdit']['Edit'].text = mock.MagicMock(return_value=120)
             self.window.calc_callback()
             plot_flux_ei.assert_called()
+
+    def test_independent_phases(self):
+        # Test that if we have N independent phases, we get N text boxes to input them
+        # There are no instruments which currently has more than 1 independent phases
+        # So we just use a modified version of LET
+        let_choppers = self.window.instruments['LET'].chopper_system
+        let_choppers.isPhaseIndependent = [1, 2]
+        let_choppers.defaultPhase = [5, 2200]
+        let_choppers.phaseNames = ['Chopper 2 delay', 'Chopper 3 delay']
+        self.window.setInstrument('LET')
+        # 2 calls per chopper to insert a label and an edit box each
+        assert self.window.leftPanel.insertWidget.call_count == 4
+        # All `QLabel`s are the same mock object
+        calls = self.mock_modules.QLabel().setText.call_args_list
+        assert calls[-2] == mock.call('Chopper 2 delay')
+        assert calls[-1] == mock.call('Chopper 3 delay')
+
+    def test_update_on_Ei_press_enter(self):
+        # Test that when we press "enter" in the Ei box, that plots are generated
+        # if the "eiPlots" option is selected
+        with patch.object(self.window, 'calc_callback') as calc:
+            self.window.eiPlots.isChecked = mock.MagicMock(return_value=True)
+            self.window.setInstrument('ARCS')
+            self.window.widgets['EiEdit']['Edit'].setText('50')
+            self.window.setEi()
+            calc.assert_called_once()
+
+    def test_merlin_specials(self):
+        # Tests Merlin special routines are called for Merlin
+        self.window.setInstrument('MERLIN')
+        # Checks that the pulse removal phase is hiden from users unless the 
+        # "instrument_scientist" mode is enabled
+        self.window.instSciAct.isChecked = mock.MagicMock(return_value=False)
+        self.window.widgets['Chopper0Phase']['Edit'].hide.assert_called()
+        # Merlin can run with either the "G" chopper in RRM-mode
+        # or the "S" chopper without RRM
+        self.window.widgets['MultiRepCheck'].setEnabled.reset_mock()
+        self.window.setChopper('G')
+        self.window.widgets['MultiRepCheck'].setEnabled.assert_called_with(True)
+        with patch.object(self.window, '_hide_phases') as hide_phases:
+            self.window.setChopper('S')
+            self.window.widgets['MultiRepCheck'].setEnabled.assert_called_with(False)
+            hide_phases.assert_called()
+        # Now check that with inst sci mode on, user can change the pulse removal phase
+        self.window.widgets['Chopper0Phase']['Edit'].show.reset_mock()
+        self.window.instSciAct.isChecked = mock.MagicMock(return_value=True)
+        self.window.setChopper('G')
+        self.window.widgets['Chopper0Phase']['Edit'].show.assert_called()
 
 
 if __name__ == "__main__":
