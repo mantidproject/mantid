@@ -400,7 +400,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
             self.instrument = instrument
         return ws
 
-    def _clean_up(self, to_clean):
+    @staticmethod
+    def _clean_up(to_clean):
         """Performs the clean up of intermediate workspaces that are created and used throughout the code."""
         if len(to_clean) > 0:
             DeleteWorkspaces(WorkspaceList=to_clean)
