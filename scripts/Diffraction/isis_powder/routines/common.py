@@ -611,7 +611,10 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
+        if not ws.isDistribution():
+            output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
+        else:
+            output_list.append(ws)
 
     return output_list
 

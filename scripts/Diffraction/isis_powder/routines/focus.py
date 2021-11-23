@@ -75,14 +75,39 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         mantid.DeleteWorkspace(solid_angle)
 
     # Focus the spectra into banks
-    focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
-                                             GroupingFileName=run_details.grouping_file_path)
+    if aligned_ws.isDistribution():
+        mantid.LoadCalFile(InputWorkspace=aligned_ws,
+                           CalFileName=run_details.grouping_file_path,
+                           Workspacename='cal_workspace',
+                           MakeOffsetsWorkspace=False,
+                           MakeMaskWorkspace=False,
+                           MakeGroupingWorkspace=True)
+        min_x, max_x = float('inf'), float('-inf')
+        for index in range(aligned_ws.getNumberHistograms()):
+            spec_info = aligned_ws.spectrumInfo()
+            if spec_info.hasDetectors(index) and not spec_info.isMasked(index) and not spec_info.isMonitor(index):
+                x_data = numpy.ma.masked_invalid(aligned_ws.dataX(index))
+                if numpy.min(x_data) < min_x:
+                    min_x = numpy.min(x_data)
+                if numpy.max(x_data) > max_x:
+                    max_x = numpy.max(x_data)
+        width_x = (max_x - min_x) / x_data.size
+        # TO DO: calculate rebin parameters per group
+        # and run GroupDetectors on each separately
+        aligned_ws = mantid.Rebin(InputWorkspace=aligned_ws,
+                                  Params=[min_x, width_x, max_x],
+                                  IgnoreBinErrors=True)
+        focused_ws = mantid.GroupDetectors(InputWorkspace=aligned_ws,
+                                           CopyGroupingFromWorkspace='cal_workspace_group')
+    else:
+        focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+                                                 GroupingFileName=run_details.grouping_file_path)
 
     instrument.apply_calibration_to_focused_data(focused_ws)
 
     calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
                                                      input_workspace=focused_ws,
-                                                     perform_vanadium_norm=perform_vanadium_norm,
+                                                     perform_vanadium_norm=False if focused_ws.isDistribution() else perform_vanadium_norm,
                                                      vanadium_splines=vanadium_path)
 
     output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
