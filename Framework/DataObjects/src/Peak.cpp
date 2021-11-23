@@ -9,7 +9,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
@@ -47,7 +46,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::
   // Initialization of m_inst, sourcePos, m_samplePos
   setInstrument(m_inst);
   // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName, m_initialEnergy, m_finalEnergy
-  setQLabFrame(QLabFrame, detectorDistance);
+  setQLabFrame(QLabFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -69,7 +68,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::
   // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
   // Initialization of m_detectorID, detPos, m_det, m_row, m_col, m_bankName, m_initialEnergy, m_finalEnergy
-  this->setQSampleFrame(QSampleFrame, detectorDistance);
+  this->setQSampleFrame(QSampleFrame, std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -186,7 +185,7 @@ Peak::Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak, const Geometry::In
            boost::optional<double> detectorDistance)
     : BasePeak(lpeak) {
   this->setInstrument(inst);
-  this->setQLabFrame(lpeak.getQLabFrame(), detectorDistance);
+  this->setQLabFrame(lpeak.getQLabFrame(), std::move(detectorDistance));
 }
 
 //----------------------------------------------------------------------------------------------

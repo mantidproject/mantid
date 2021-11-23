@@ -21,25 +21,63 @@ using namespace Mantid;
 using namespace mathSupport;
 class MathSupportTest : public CxxTest::TestSuite {
 public:
-  void testSolveQuadratic() {    // Test quadratic solution
-    double xp1w2[3] = {1, 2, 1}; //(x+1)^2 one solution
+  void testSolveQuadratic() { // Test quadratic solution
     std::pair<std::complex<double>, std::complex<double>> output;
-    TS_ASSERT_EQUALS(solveQuadratic(xp1w2, output), 1);
-    std::pair<std::complex<double>, std::complex<double>> result(std::complex<double>(-1.0, 0.0),
-                                                                 std::complex<double>(-1.0, 0.0));
-    TS_ASSERT_EQUALS(output, result);
 
-    double test2[3] = {1, 0, -1}; // two rational roots
+    // y = (x+1)^2 one solution
+    double test1[3] = {1, 2, 1};
+    TS_ASSERT_EQUALS(solveQuadratic(test1, output), 1);
+    std::pair<std::complex<double>, std::complex<double>> result1(std::complex<double>(-1.0, 0.0),
+                                                                  std::complex<double>(-1.0, 0.0));
+    TS_ASSERT_EQUALS(output, result1);
+
+    // y = x^2 -1
+    // two rational roots
+    double test2[3] = {1, 0, -1};
     TS_ASSERT_EQUALS(solveQuadratic(test2, output), 2);
     std::pair<std::complex<double>, std::complex<double>> result2(std::complex<double>(-1.0, 0.0),
                                                                   std::complex<double>(1.0, 0.0));
     TS_ASSERT_EQUALS(output, result2);
 
-    double test3[3] = {1, 0, 1}; // two complex roots
+    // y = x^2 + 1
+    // two complex roots
+    double test3[3] = {1, 0, 1};
     TS_ASSERT_EQUALS(solveQuadratic(test3, output), 2);
     std::pair<std::complex<double>, std::complex<double>> result3(std::complex<double>(0.0, -1.0),
                                                                   std::complex<double>(0.0, 1.0));
     TS_ASSERT_EQUALS(output, result3);
+
+    // y = x
+    // solution is 0 (only one root)
+    double test4[3] = {0, 1, 0};
+    TS_ASSERT_EQUALS(solveQuadratic(test4, output), 1);
+    std::pair<std::complex<double>, std::complex<double>> result4(std::complex<double>(0.0, 0.0),
+                                                                  std::complex<double>(0.0, 0.0));
+    TS_ASSERT_EQUALS(output, result4);
+
+    // y = x - 1
+    // solution is 1
+    double test5[3] = {0, 1, -1};
+    TS_ASSERT_EQUALS(solveQuadratic(test5, output), 1);
+    std::pair<std::complex<double>, std::complex<double>> result5(std::complex<double>(1.0, 0.0),
+                                                                  std::complex<double>(1.0, 0.0));
+    TS_ASSERT_EQUALS(output, result5);
+
+    // y = x^2
+    // solution is 0
+    double test6[3] = {1, 0, 0};
+    TS_ASSERT_EQUALS(solveQuadratic(test6, output), 1);
+    std::pair<std::complex<double>, std::complex<double>> result6(std::complex<double>(0.0, 0.0),
+                                                                  std::complex<double>(0.0, 0.0));
+    TS_ASSERT_EQUALS(output, result6);
+
+    // y = x*(x-1)
+    // solution is 0 and 1
+    double test7[3] = {1, -1, 0};
+    TS_ASSERT_EQUALS(solveQuadratic(test7, output), 2);
+    std::pair<std::complex<double>, std::complex<double>> result7(std::complex<double>(1.0, 0.0),
+                                                                  std::complex<double>(0.0, 0.0));
+    TS_ASSERT_EQUALS(output, result7);
   }
 
   void testSolveCubic() {
