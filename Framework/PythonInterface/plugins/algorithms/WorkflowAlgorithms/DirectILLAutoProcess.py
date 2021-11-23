@@ -485,8 +485,19 @@ class DirectILLAutoProcess(PythonAlgorithm):
                        Criterion='y < {}'.format(self.getPropertyValue('MaskThreshold')))
         return ws
 
-    def _subtract_background(self, ws):
-        pass
+    def _subtract_empty_container(self, ws):
+        """Subtracts empty container counts from the sample workspace."""
+        empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
+        empty_correction_ws = "{}_correction".format(empty_ws)
+        empty_scaling = self.getProperty('EmptyContainerScaling').value
+        Scale(InputWorkspace=empty_ws,
+              OutputWorkspace=empty_correction_ws,
+              Factor=empty_scaling)
+        Minus(LHSWorkspace=ws,
+              RHSWorkspace=mtd[empty_correction_ws][0],
+              OutputWorkspace=ws)
+        if self.clear_cache:
+            DeleteWorkspace(Workspace=empty_correction_ws)
 
     def _process_vanadium(self, ws):
         """Processes vanadium and creates workspaces with diagnostics, integrated vanadium, and reduced vanadium."""
@@ -508,7 +519,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
                   OutputWorkspace=ws, EnableLogging=False)
 
         if self.empty:
-            self._subtract_background(ws)
+            self._subtract_empty_container(ws)
 
         vanadium_integral = '{}_integral'.format(numor)
         DirectILLIntegrateVanadium(InputWorkspace=ws,
@@ -599,10 +610,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
     def _process_sample(self, ws, sample_no):
         """Does the sample data reduction for single crystal."""
         to_remove = [ws]
+        if self.empty:
+            self._subtract_empty_container(ws)
         if self.masking:
             ws = self._apply_mask(ws)
-        if self.empty:
-            self._subtract_background(ws)
         numor = ws[:ws.rfind('_')]
         processed_sample_tw = None
         if self.reduction_type == 'SingleCrystal':
