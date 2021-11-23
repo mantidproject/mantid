@@ -129,7 +129,3 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def _outputFile(self):
         return 'PowderReduceP2D_Test'
-
-
-if __name__ == '__main__':
-    unittest.main()

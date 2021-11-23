@@ -29,5 +29,6 @@ public:
   virtual void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) = 0;
 
   virtual std::string detIDsToString(std::vector<Mantid::detid_t> const &indices) const = 0;
+  virtual void exportSummedWsToAds() const = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -104,7 +104,6 @@ foreach(_bundle ${BUNDLES})
   install(
     DIRECTORY ../instrument/
     DESTINATION ${_bundle}/instrument
-    COMPONENT Runtime
     PATTERN "*UNIT_TESTING*" EXCLUDE
     PATTERN ".gitignore" EXCLUDE
   )
@@ -115,7 +114,6 @@ foreach(_bundle ${BUNDLES})
       install(
         DIRECTORY ../scripts/
         DESTINATION ${_bundle}/scripts
-        COMPONENT Runtime
         PATTERN "*.pyc" EXCLUDE
         PATTERN ".svn" EXCLUDE
         PATTERN ".gitignore" EXCLUDE
@@ -129,7 +127,6 @@ foreach(_bundle ${BUNDLES})
       install(
         DIRECTORY ../scripts/
         DESTINATION ${_bundle}scripts
-        COMPONENT Runtime
         PATTERN "*.pyc" EXCLUDE
         PATTERN ".svn" EXCLUDE
         PATTERN ".gitignore" EXCLUDE
@@ -147,7 +144,6 @@ foreach(_bundle ${BUNDLES})
     install(
       DIRECTORY ../scripts/
       DESTINATION ${_bundle}scripts
-      COMPONENT Runtime
       PATTERN "*.pyc" EXCLUDE
       PATTERN ".svn" EXCLUDE
       PATTERN ".gitignore" EXCLUDE
@@ -178,17 +174,14 @@ if(CONDA_ENV)
     COMPATIBILITY SameMajorVersion
   )
 
-  install(
-    FILES "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
-          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
-    COMPONENT Devel
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
+                "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
+          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
   )
 
   install(
     FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
           ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
-    COMPONENT Devel
   )
 endif()

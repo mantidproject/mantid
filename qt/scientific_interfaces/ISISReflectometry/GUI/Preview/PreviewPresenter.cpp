@@ -27,10 +27,14 @@ PreviewPresenter::PreviewPresenter(Dependencies dependencies)
  */
 void PreviewPresenter::notifyLoadWorkspaceRequested() {
   auto const name = m_view->getWorkspaceName();
-  if (m_model->loadWorkspaceFromAds(name)) {
-    notifyLoadWorkspaceCompleted();
-  } else {
-    m_model->loadAndPreprocessWorkspaceAsync(name, *m_jobManager);
+  try {
+    if (m_model->loadWorkspaceFromAds(name)) {
+      notifyLoadWorkspaceCompleted();
+    } else {
+      m_model->loadAndPreprocessWorkspaceAsync(name, *m_jobManager);
+    }
+  } catch (std::runtime_error const &ex) {
+    g_log.error(ex.what());
   }
 }
 
@@ -91,4 +95,6 @@ void PreviewPresenter::notifyInstViewShapeChanged() {
   m_model->setSelectedBanks(indices);
   m_model->sumBanksAsync(*m_jobManager);
 }
+
+void PreviewPresenter::notifyContourExportAdsRequested() { m_model->exportSummedWsToAds(); }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

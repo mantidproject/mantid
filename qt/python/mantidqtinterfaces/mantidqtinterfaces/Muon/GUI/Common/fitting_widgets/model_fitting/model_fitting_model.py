@@ -140,8 +140,13 @@ class ModelFittingModel(BasicFittingModel):
     def _save_values_from_table_column(self, column_name: str, values: list, type: int) -> None:
         """Saves the values from a results table column in the correct location based on the column name."""
         if "Error" not in column_name:
-            self.fitting_context.x_parameters[column_name] = [values, type]
-            self.fitting_context.y_parameters[column_name] = [values, type]
+            if column_name in ['run_start_seconds', 'run_end_seconds']:
+                values = [value-values[0] for value in values]
+                self.fitting_context.x_parameters[column_name] = [values, type]
+                self.fitting_context.y_parameters[column_name] = [values, type]
+            else:
+                self.fitting_context.x_parameters[column_name] = [values, type]
+                self.fitting_context.y_parameters[column_name] = [values, type]
         else:
             self.fitting_context.x_parameter_errors[column_name.replace("Error", "")] = values
             self.fitting_context.y_parameter_errors[column_name.replace("Error", "")] = values
@@ -262,6 +267,7 @@ class ModelFittingModel(BasicFittingModel):
 
     def _get_parameter_unit(self, parameter_name: str, axis: int) -> str:
         """Returns the units of a parameter by searching the Dictionary, UnitFactory and Sample logs."""
+        parameter_name = parameter_name.split('.')[-1]
         unit = self._get_unit_from_unit_dictionary(parameter_name, axis)
         if unit == "":
             unit = self._get_unit_from_sample_logs(parameter_name)

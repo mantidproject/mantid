@@ -29,6 +29,6 @@ mtd_add_qt_library(
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES} Mantid::Json
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
-  OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks
+  OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS @loader_path/../../Contents/Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR}"
 )

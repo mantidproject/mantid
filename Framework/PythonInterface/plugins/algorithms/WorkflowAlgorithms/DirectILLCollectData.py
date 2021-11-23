@@ -476,7 +476,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              doc='Normalisation method.')
         self.setPropertyGroup(common.PROP_NORMALISATION, PROPGROUP_MON_NORMALISATION)
         self.declareProperty(name=common.PROP_MON_PEAK_SIGMA_MULTIPLIER,
-                             defaultValue=3.0,
+                             defaultValue=7.0,
                              validator=positiveFloat,
                              direction=Direction.Input,
                              doc="Width of the monitor peak in multiples " + " of 'Sigma' in monitor's EPP table.")

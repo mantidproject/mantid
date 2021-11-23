@@ -227,9 +227,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             chars=['H','K','L']
             names = ['['+','.join(char_dict.get(j, '{0}{1}')
                                   .format(j,chars[np.argmax(np.abs(W[:,i]))]) for j in W[:,i])+']' for i in range(3)]
-            units = 'in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1'.format(ol.qFromHKL(W[0]).norm(),
-                                                                          ol.qFromHKL(W[1]).norm(),
-                                                                          ol.qFromHKL(W[2]).norm())
+            # Slicing because we want the column vector and not the row vector
+            units = 'in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1'.format(ol.qFromHKL(W[:,0]).norm(),
+                                                                          ol.qFromHKL(W[:,1]).norm(),
+                                                                          ol.qFromHKL(W[:,2]).norm())
             frames = 'HKL,HKL,HKL'
             k = 1/self.getProperty("Wavelength").value # Not 2pi/wavelength to save dividing by 2pi later
         else:

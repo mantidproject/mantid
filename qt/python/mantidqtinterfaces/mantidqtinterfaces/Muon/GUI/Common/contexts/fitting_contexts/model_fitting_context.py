@@ -12,6 +12,8 @@ PARAMETERUNITS = {
     'Frequency': ['MHz', 'MHz'],
     'Lambda': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$'],
     'Phi': ['Radians', 'Radians'],
+    'run_start_seconds': ['s', 's'],
+    'run_end_seconds': ['s', 's'],
     'sample_magn_field': ['G', 'G'],
     'sample_temp': ['K', 'K'],
     'Sigma': [r'\mu s^{-1}', r'$\mu$ $s^{-1}$']

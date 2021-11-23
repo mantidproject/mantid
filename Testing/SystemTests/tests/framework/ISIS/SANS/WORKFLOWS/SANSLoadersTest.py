@@ -249,7 +249,3 @@ class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.disableChecking.append('Instrument')
         return self._success
-
-
-if __name__ == '__main__':
-    unittest.main()

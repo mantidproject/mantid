@@ -677,9 +677,6 @@ foreach(_header ${OLD_UI_HEADERS})
   file(REMOVE ${_header})
 endforeach()
 
-# Python unit tests
-set(TEST_PY_FILES test/FileFinderWidgetTest.py)
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -838,6 +835,7 @@ set(QT5_TEST_FILES
 if(NOT APPLE)
   list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
 endif()
+
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsCommonTest
@@ -854,5 +852,7 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon
     PARENT_DEPENDENCIES GUITests
   )
+
   add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
 endif()

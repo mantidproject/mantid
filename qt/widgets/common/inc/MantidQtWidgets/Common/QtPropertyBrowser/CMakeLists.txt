@@ -98,8 +98,4 @@ elseif(${CMAKE_CXX_COMPILER_ID} MATCHES "GNU")
 endif()
 
 # Installation settings
-install(
-  TARGETS ${PROJECT_NAME}
-  DESTINATION ${LIB_DIR}
-  COMPONENT Runtime
-)
+install(TARGETS ${PROJECT_NAME} DESTINATION ${LIB_DIR})

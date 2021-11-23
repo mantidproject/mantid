@@ -54,6 +54,7 @@ set(SRC_FILES
     src/FuncMinimizers/TrustRegionMinimizer.cpp
     src/FunctionDomain1DSpectrumCreator.cpp
     src/Functions/Abragam.cpp
+    src/Functions/Activation.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -112,6 +113,7 @@ set(SRC_FILES
     src/Functions/LinearBackground.cpp
     src/Functions/LogNormal.cpp
     src/Functions/Lorentzian.cpp
+    src/Functions/MagneticOrderParameter.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
     src/Functions/MuoniumDecouplingCurve.cpp
@@ -230,6 +232,7 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
     inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
     inc/MantidCurveFitting/Functions/Abragam.h
+    inc/MantidCurveFitting/Functions/Activation.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
@@ -283,6 +286,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/LinearBackground.h
     inc/MantidCurveFitting/Functions/LogNormal.h
     inc/MantidCurveFitting/Functions/Lorentzian.h
+    inc/MantidCurveFitting/Functions/MagneticOrderParameter.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
     inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
@@ -398,6 +402,7 @@ set(TEST_FILES
     FunctionFactoryConstraintTest.h
     FunctionParameterDecoratorFitTest.h
     Functions/AbragamTest.h
+    Functions/ActivationTest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
@@ -444,6 +449,7 @@ set(TEST_FILES
     Functions/LinearBackgroundTest.h
     Functions/LogNormalTest.h
     Functions/LorentzianTest.h
+    Functions/MagneticOrderParameterTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
     Functions/MuoniumDecouplingCurveTest.h

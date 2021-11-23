@@ -14,6 +14,8 @@ set(TEST_PY_FILES
     CalculateFluxTest.py
     CalculateSampleTransmissionTest.py
     CheckForSampleLogsTest.py
+    CleanFileCacheTest.py
+    ClipPeaksTest.py
     ConjoinSpectraTest.py
     ConvertQtoHKLMDHistoTest.py
     ConvertWANDSCDtoQTest.py
@@ -23,6 +25,7 @@ set(TEST_PY_FILES
     CorrectLogTimesTest.py
     CreateLeBailFitInputTest.py
     CorrectTOFTest.py
+    CreateCacheFilenameTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
     CylinderPaalmanPingsCorrection2Test.py
@@ -34,6 +37,7 @@ set(TEST_PY_FILES
     DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
+    EnggEstimateFocussedBackgroundTest.py
     EnggFitTOFFromPeaksTest.py
     EnggFitPeaksTest.py
     EnggFocusTest.py
@@ -44,6 +48,8 @@ set(TEST_PY_FILES
     ExportSpectraMaskTest.py
     FilterLogByTimeTest.py
     FitGaussianTest.py
+    FindGoniometerFromUBTest.py
+    FindGlobalBMatrixTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
     GenerateLogbookTest.py
@@ -56,6 +62,7 @@ set(TEST_PY_FILES
     HB3APredictPeaksTest.py
     HFIRCalculateGoniometerTest.py
     HFIRSANS2WavelengthTest.py
+    IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
     LeadPressureCalcTest.py

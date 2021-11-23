@@ -38,6 +38,7 @@ Bugfixes
 
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
 - Fix bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where calculation aborts with exception due to floating point rounding error when track segment close to vertical
+- The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 
 Fit Functions
 -------------

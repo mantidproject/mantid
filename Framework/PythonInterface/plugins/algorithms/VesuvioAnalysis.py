@@ -95,10 +95,7 @@ class VesuvioAnalysis(PythonAlgorithm):
                              validator=IntListValidator([0,1,2,3,4]))
         self.declareProperty("OutputName", "polyethylene",doc="The base name for the outputs." )
         self.declareProperty("Runs", "38898-38906", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
-        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last). Please note that "
-                                                                         "spectra with a number lower than 135 are treated as back "
-                                                                         "scattering spectra, with a number of 135 or above as forward "
-                                                                         "scattering spectra.")
+        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last).")
         self.declareProperty(FloatArrayProperty("TOFRangeVector", [110.,1.5,460.]),
                              doc="In micro seconds (lower bound, binning, upper bound).")
         self.declareProperty(
@@ -115,20 +112,24 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                                      "",
                                                      direction=Direction.Input),doc="Table for Compton profiles")
-        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", [0,1]))
+        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", []), doc="List with LHS and RHS element of constraint on "
+                                              "intensities of element peaks. A constraint can only be set when there are at least two "
+                                              "elements in the ComptonProfile.")
         self.declareProperty(
             "ConstraintsProfileScatteringCrossSection",
             "2.*82.03/5.551",
-            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering"
-            "cross section. Simple arithmetic can be included but the result may be rounded.")
-        self.declareProperty("ConstraintsProfileState", "eq", validator=StringListValidator(["eq","ineq"]))
+            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering "
+            "cross section. Simple arithmetic can be included but the result may be rounded. This setting is ignored when no "
+            "ConstraintsProfileNumbers are set.")
+        self.declareProperty("ConstraintsProfileState", "eq", doc="This setting is ignored when no ConstraintsProfileNumbers are set.",
+                             validator=StringListValidator(["eq","ineq"]))
         self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
                              " about the first element specified in the elements string. Then such spectra are converted to the Y space"
                              " of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and"
                              " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermite function up to the sixth"
-                             "order.")
+                             " order.")
 
     def validateInputs(self):
         tableCols = [
@@ -155,13 +156,14 @@ class VesuvioAnalysis(PythonAlgorithm):
         if len(TOF) != 3:
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
         constraints = self.getProperty("ConstraintsProfileNumbers").value
-        if len(constraints)!=2:
-            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should only contain 2 numbers."
-        #check aritmatic is safe
-        cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
-        for ch in cross_section:
-            if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
+        if len(constraints) != 0 and len(constraints) != 2:
+            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should either be empty or only contain 2 numbers."
+        #check arithmetic is safe
+        if len(constraints) != 0:
+            cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
+            for ch in cross_section:
+                if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
+                    issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
@@ -202,10 +204,12 @@ class VesuvioAnalysis(PythonAlgorithm):
         # if flag=True inequality; if flag = False equality
         constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value
         # check this is valid in the validate inputs
-        cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
-        state = self.getProperty("ConstraintsProfileState").value
-        C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
-        constraints = [C1]
+        constraints = []
+        if len(constraints_profile_num) > 0:
+            cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
+            state = self.getProperty("ConstraintsProfileState").value
+            C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
+            constraints = [C1]
 
         # spectra to be masked
         spectra_to_be_masked = self.getProperty("SpectraToBeMasked").value
