@@ -307,30 +307,3 @@ class RawDataExplorerView(QWidget):
             presenter = SliceViewer(ws=mtd[ws_to_show])
             presenter.view.show()
             return presenter.view
-
-    # Combobox getters
-    def get_current_target(self):
-        """
-        Get the current target's name.
-        @return the currently selected target, as a string
-        """
-        return str(self.targetType.currentText())
-
-    # Combobox option setters
-    def populate_targets(self, targets):
-        """
-        Write the new possible targets in the target combobox.
-        @param targets: the list of the possible targets, as strings.
-        """
-        self.targetType.clear()
-        for target in targets:
-            self.targetType.addItem(target)
-
-    def set_target(self, target):
-        """
-        Set the currently selected target to target. Does nothing if it not a valid option.
-        @param target: the target to select, as string.
-        """
-        index = self.targetType.findText(target)
-        if index != -1:
-            self.targetType.setCurrentIndex(index)

@@ -37,9 +37,6 @@
    <item row="1" column="0" colspan="3">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QComboBox" name="targetType"/>
-     </item>
-     <item>
       <widget class="QCheckBox" name="accumulate">
        <property name="text">
         <string>Accumulate</string>
