@@ -14,7 +14,6 @@ from qtpy.QtWidgets import QVBoxLayout
 
 # local package imports
 from workbench.plugins.base import PluginWidget
-from workbench.plotting.globalfiguremanager import GlobalFigureManager
 from mantidqt.widgets.rawdataexplorer.presenter import RawDataExplorerPresenter
 
 
@@ -38,7 +37,7 @@ class RawDataExplorer(PluginWidget):
         self.main.add_dockwidget(self)
 
     def get_plugin_title(self):
-        return "RDExp"
+        return "Raw Data"
 
     def readSettings(self, _):
         pass
