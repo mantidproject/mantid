@@ -133,7 +133,7 @@ class PyChopGui(QMainWindow):
         if self.engine.chopper_system.isPhaseIndependent:
             for idx in range(len(self.engine.chopper_system.isPhaseIndependent)):
                 if idx > self.n_indep_phase:
-                    chopper_number = self.engine.chopper_system.isPhaseIndependent[idx]
+                    #chopper_number = self.engine.chopper_system.isPhaseIndependent[idx]
                     phase_label = QLabel("")
                     phase_edit = QLineEdit(self)
                     phase_edit.returnPressed.connect(self.setFreq)
@@ -169,12 +169,12 @@ class PyChopGui(QMainWindow):
             self.tabs.setTabEnabled(self.qetabID, True)
         # show s2 for HYSPEC only
         if 'HYSPEC' in str(instname):
-            self.widgets[f"S2Edit"]['Edit'].show()
-            self.widgets[f"S2Edit"]['Edit'].setText(str(self.hyspecS2))
-            self.widgets[f"S2Edit"]['Label'].show()
+            self.widgets["S2Edit"]['Edit'].show()
+            self.widgets["S2Edit"]['Edit'].setText(str(self.hyspecS2))
+            self.widgets["S2Edit"]['Label'].show()
         else:
-            self.widgets[f"S2Edit"]['Edit'].hide()
-            self.widgets[f"S2Edit"]['Label'].hide()
+            self.widgets["S2Edit"]['Edit'].hide()
+            self.widgets["S2Edit"]['Label'].hide()
 
     def setChopper(self, choppername):
         """
@@ -709,7 +709,7 @@ class PyChopGui(QMainWindow):
         """
         try:
             generatedText = self.genText()
-        except ValueError:
+        except ValueError as err:
             self.errormessage(err)
             return
         self.txtwin = QDialog()
@@ -736,7 +736,7 @@ class PyChopGui(QMainWindow):
         """
         try:
             generatedText = self.genText()
-        except ValueError:
+        except ValueError as err:
             self.errormessage(err)
             return
         fname = QFileDialog.getSaveFileName(self, 'Open file', '')

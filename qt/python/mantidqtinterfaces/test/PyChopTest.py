@@ -271,7 +271,7 @@ class PyChopGuiTests(unittest.TestCase):
                                                 'Slider':MockedModule(mock_class=fake_Slider)})
         # Mess around with import mechanism _inside_ PyChopGui so GUI libs not really imported
         with patch('builtins.__import__', cls.mock_modules.import_func):
-            from PyChop import PyChopGui
+            from mantidqtinterfaces.PyChop import PyChopGui
             cls.window = PyChopGui.PyChopGui()
             cls.window.eiPlots.isChecked = mock.MagicMock(return_value=False)
             cls.mock_modules.matplotlib.__version__ = '2.1.0'
@@ -335,7 +335,7 @@ class PyChopGuiTests(unittest.TestCase):
     def test_merlin_specials(self):
         # Tests Merlin special routines are called for Merlin
         self.window.setInstrument('MERLIN')
-        # Checks that the pulse removal phase is hiden from users unless the 
+        # Checks that the pulse removal phase is hiden from users unless the
         # "instrument_scientist" mode is enabled
         self.window.instSciAct.isChecked = mock.MagicMock(return_value=False)
         self.window.widgets['Chopper0Phase']['Edit'].hide.assert_called()
