@@ -99,13 +99,36 @@ CMake variable and defaults to ``build/ExternalData``.
 Using Existing Data
 ###################
 
-There are two places files may be found:
+For unit testings, there are two places files may be found:
 
 - `.../Testing/Data/ <https://github.com/mantidproject/mantid/tree/master/Testing/Data>`__
   for :ref:`unit test <RunningTheUnitTests>`, :ref:`doc test <DocumentationGuideForDevs>`, and :ref:`system test <SystemTests>` data
 - `.../instrument/unit_testing <https://github.com/mantidproject/mantid/tree/master/instrument/unit_testing>`__
   for test :ref:`IDF <InstrumentDefinitionFile>` files
 
+For system testings, there is one more location developers use to dump reference
+data files:
+
+- `.../Testing/SystemTests/tests/framework/reference`
+
+Generally speaking, the testing system will look for the default locations for
+corresponding tests:
+
+- `.../Testing/Data/DocTest`
+- `.../Testing/Data/SystemTest`
+- `.../Testing/Data/UnitTest`
+
+However, it is known that some developers like to reuse the same data files for
+different type of tests, therefore sometime the DocTest and SystemTest is using
+data from UnitTest, which means you should fetch all testing data before trying
+to run any test locally.
+Furthermore, this location is mostly considered as a centralized location for all
+testing data.
+But some groups prefer to treat this location for storing **input** testing data
+only, therefore the testing system will look for the reference folder mentioned
+above if it cannot find the reference data here.
+Overall, it is important to talk to the senior developers in your team to learn
+the preferred location for storing testing data.
 
 .. _DataFilesForTesting_AddingANewFile:
 
