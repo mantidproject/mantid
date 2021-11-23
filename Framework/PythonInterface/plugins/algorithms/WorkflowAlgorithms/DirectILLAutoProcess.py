@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import DirectILL_common as common
-from mantid.api import AlgorithmFactory, FileAction, MatrixWorkspaceProperty, \
-    MultipleFileProperty, PropertyMode, PythonAlgorithm, \
-    WorkspaceGroup, WorkspaceGroupProperty
+from mantid.api import AlgorithmFactory, FileAction, MultipleFileProperty, PropertyMode, \
+    PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
     FloatBoundedValidator, IntArrayProperty, Property, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
@@ -198,17 +197,17 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.declareProperty('VanadiumWorkspace', '',
                              doc='File(s) or workspaces containing vanadium data.')
 
-        self.declareProperty(MatrixWorkspaceProperty('EmptyContainerWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceGroupProperty('EmptyContainerWorkspace', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
                              doc='Empty container workspace.')
 
         self.declareProperty('EmptyContainerScaling', 1.0,
                              doc='Scaling factor for the empty container.')
 
-        self.declareProperty(MatrixWorkspaceProperty('CadmiumWorkspace', '',
-                                                     direction=Direction.Input,
-                                                     optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceGroupProperty('CadmiumWorkspace', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
                              doc='Cadmium absorber workspace.')
 
         self.declareProperty('FlatBackground', "",
