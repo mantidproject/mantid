@@ -131,7 +131,7 @@ class CalibrationInfo:
         try:
             Load(Filename=filepath, OutputWorkspace=self.calibration_table)
         except Exception as e:
-            logger.error("Unable to loading calibration file " + filepath + ". Error: " + str(e))
+            logger.error("Unable to load calibration file " + filepath + ". Error: " + str(e))
 
         # load in custom grouping - checks if applicable inside method
         if not self.group.banks:
