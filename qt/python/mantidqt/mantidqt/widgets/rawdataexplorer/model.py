@@ -9,7 +9,7 @@
 from os import path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import Load, config, mtd, SumRowColumn
+from mantid.simpleapi import Load, config, mtd
 from mantid.api import PreviewType
 
 
@@ -114,12 +114,11 @@ class RawDataExplorerModel(QObject):
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
 
-        ws_to_show = self.prepare_data(ws_name)
-        preview = self.choose_preview(ws_to_show)
+        preview = self.choose_preview(ws_name)
 
         if preview is None:
             return
-        preview_model = PreviewModel(preview, ws_to_show)
+        preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
@@ -139,21 +138,18 @@ class RawDataExplorerModel(QObject):
             if not mtd.doesExist(ws_name):
                 Load(Filename=filename, OutputWorkspace=ws_name)
 
-        # modify the data so it shows what's relevant
-        ws_to_show = self.prepare_data(ws_name)
-
         # determine the preview given the prepared data
-        preview = self.choose_preview(ws_to_show)
+        preview = self.choose_preview(ws_name)
 
         if preview is None:
             return
 
         for i in range(len(self._previews) - 1, -1, -1):
             if self._previews[i].get_preview_type() == preview:
-                self._previews[i].set_workspace_name(ws_to_show)
+                self._previews[i].set_workspace_name(ws_name)
                 return
 
-        preview_model = PreviewModel(preview, ws_to_show)
+        preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
@@ -184,38 +180,6 @@ class RawDataExplorerModel(QObject):
                 return PreviewType.PLOT1D
         else:
             return PreviewType.PLOTSPECTRUM
-
-    @staticmethod
-    def prepare_data(ws_name):
-        """
-        Format the data to a more useful representation.
-        @param ws_name: the name of the workspace to format
-        @return the name of the workspace containing the final data
-        """
-        new_ws = "__" + ws_name
-        ws = mtd[ws_name]
-
-        if ws.isGroup():
-            # that's probably D7 or some processed data
-            print("INVALID ENTRY : GROUP WORKSPACE")
-            if ws.getNumberOfEntries() == 1:
-                ws_name = ws.getNames()[0]
-                ws = mtd[ws_name]
-            else:
-                # TODO if multiple workspaces, use a tiled plot (which we don't manage for now)
-                return
-
-        if ws.getNumberHistograms() > 1:
-            if ws.blocksize() > 1:
-                pass
-            else:
-                if str(ws.getAxis(1).getUnit().symbol()) == "":
-                    # hopefully this data is not treated
-                    SumRowColumn(InputWorkspace=ws_name, OutputWorkspace=new_ws, Orientation="D_V")
-                    ws_name = new_ws
-        else:
-            pass
-        return ws_name
 
 
 def accumulate_name(last_ws, ws_to_add):
