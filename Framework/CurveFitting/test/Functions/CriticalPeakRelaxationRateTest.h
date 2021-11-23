@@ -74,7 +74,7 @@ public:
 
     for (size_t i = 0; i < numPoints; i++) {
       double expression = abs(xValues[i] - tc);
-      TS_ASSERT_DELTA(yValues[i], scale / pow(expression, exp) + bg, 1e-12);
+      TS_ASSERT_DELTA(yValues[i], scale / pow(expression, exp) + bg, 1e-4);
     }
   }
 
