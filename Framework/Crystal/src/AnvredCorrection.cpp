@@ -543,7 +543,7 @@ void AnvredCorrection::BuildLamdaWeights() {
 }
 
 void AnvredCorrection::scale_init(const Instrument_const_sptr &inst, const double L2, const double depth,
-                                  double pathlength, const std::string &bankName) {
+                                  double &pathlength, const std::string &bankName) {
   // Distance to center of detector
   std::shared_ptr<const IComponent> det0 = inst->getComponentByName(bankName);
   if ("CORELLI" == inst->getName()) // for Corelli with sixteenpack under bank

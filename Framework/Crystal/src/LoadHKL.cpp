@@ -166,7 +166,7 @@ void LoadHKL::exec() {
       }
     }
     if (murs.size() == 2) {
-      double frac = (theta - ith_lo * 5.0) / 5.0;
+      double frac = (theta - static_cast<double>(ith_lo) * 5.0) / 5.0;
       radius = (murs[0] * (1 - frac) + murs[1] * frac) / mu1;
       g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
                      << " calculated from tbar and transmission of 2 peaks\n";

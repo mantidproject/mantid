@@ -125,7 +125,7 @@ private:
   double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
   void BuildLamdaWeights();
   double absor_sphere(const double twoth, const double wl, bool &muRTooLarge);
-  void scale_init(const Geometry::Instrument_const_sptr &inst, const double L2, const double depth, double pathlength,
+  void scale_init(const Geometry::Instrument_const_sptr &inst, const double L2, const double depth, double &pathlength,
                   const std::string &bankName);
   void scale_exec(std::string &bankName, const double lambda, const double depth,
                   const Geometry::Instrument_const_sptr &inst, const double pathlength, double value);
