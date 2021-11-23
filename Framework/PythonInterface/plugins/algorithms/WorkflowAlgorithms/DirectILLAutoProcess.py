@@ -351,21 +351,21 @@ class DirectILLAutoProcess(PythonAlgorithm):
         sample_runs = self.getPropertyValue('Runs').split(',')
         output_samples = []
         for sample_no, sample in enumerate(sample_runs):
-            current_it_output = []  # output of the current iteration of reduction
+            current_output = []  # output of the current iteration of reduction
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
             if self.masking and sample_no == 0:  # prepares masks once, and when the instrument is known
                 self.mask_ws = self._prepare_masks()
             if self.process == 'Vanadium':
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
-                current_it_output = [ws_sofq, ws_softw, ws_diag, ws_integral]
-                output_samples.extend(current_it_output)
+                current_output = [ws_sofq, ws_softw, ws_diag, ws_integral]
+                output_samples.extend(current_output)
             elif self.process == 'Sample':
                 sample_sofq, sample_softw = self._process_sample(ws, sample_no)
-                current_it_output = np.array([sample_sofq, sample_softw])
-                current_it_output = current_it_output[[isinstance(elem, str) for elem in current_it_output]]
-                output_samples.extend(current_it_output)
+                current_output = np.array([sample_sofq, sample_softw])
+                current_output = current_output[[isinstance(elem, str) for elem in current_output]]
+                output_samples.extend(current_output)
             if self.save_output:
-                self._save_output(current_it_output)
+                self._save_output(current_output)
 
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
