@@ -300,10 +300,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              validator=StringListValidator(['Numerical', 'MonteCarlo']),
                              doc='Choice of calculation method for the attenuation calculation.')
 
-        self.declareProperty(PropertyManagerProperty('SampleMaterial', dict()),
+        self.declareProperty(PropertyManagerProperty('SampleMaterial'),
                              doc='Sample material definitions.')
 
-        self.declareProperty(PropertyManagerProperty('SampleGeometry', dict()),
+        self.declareProperty(PropertyManagerProperty('SampleGeometry'),
                              doc="Dictionary for the sample geometry.")
 
         self.declareProperty(PropertyManagerProperty('ContainerMaterial', dict()),
