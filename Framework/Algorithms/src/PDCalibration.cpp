@@ -820,7 +820,7 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0, do
   minex_func.params = &peaks;
 
   // Set up GSL minimzer - simplex is overkill
-  const gsl_multimin_fminimizer_type *minimizerType = gsl_multimin_fminimizer_nmsimplex;
+  const gsl_multimin_fminimizer_type *minimizerType = gsl_multimin_fminimizer_nmsimplex2;
   gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc(minimizerType, numParams);
   gsl_multimin_fminimizer_set(minimizer, &minex_func, fitParams, stepSizes);
 
