@@ -15,6 +15,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include <Poco/Net/SocketAddress.h>
 #include <string>
+#include <string_view>
 
 namespace Mantid {
 namespace API {
@@ -49,7 +50,10 @@ public:
    * @param address The IP address and port to contact
    * @return True if the connection was successfully established
    */
-  virtual bool connect(const Poco::Net::SocketAddress &address) = 0;
+  // Workaround https://github.com/google/googletest/issues/3384
+  // Which is fixed in GCC 12+, by replacing SocketAddress with std::string
+  // which emulates our usage closely enough
+  virtual bool connect(const std::string_view address) = 0;
 
   /** Commence the collection of data from the DAS. Must be called before
    * extractData().

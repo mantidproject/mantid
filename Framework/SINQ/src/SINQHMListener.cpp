@@ -42,7 +42,7 @@ SINQHMListener::SINQHMListener() : LiveListener(), httpcon(), response(), oldSta
   rank = 0;
 }
 
-bool SINQHMListener::connect(const Poco::Net::SocketAddress &address) {
+bool SINQHMListener::connect(const std::string_view address) {
   std::string host = address.toString();
   std::string::size_type i = host.find(':');
   if (i != std::string::npos) {

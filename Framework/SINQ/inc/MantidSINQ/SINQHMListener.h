@@ -33,7 +33,7 @@ public:
   bool supportsHistory() const override { return false; }
   bool buffersEvents() const override { return false; }
 
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const std::string_view address) override;
   void start(Mantid::Types::Core::DateAndTime startTime = Mantid::Types::Core::DateAndTime()) override;
   std::shared_ptr<Mantid::API::Workspace> extractData() override;
   bool isConnected() override;

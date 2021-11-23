@@ -83,7 +83,7 @@ FileEventDataListener::~FileEventDataListener() {
   }
 }
 
-bool FileEventDataListener::connect(const Poco::Net::SocketAddress & /*address*/) {
+bool FileEventDataListener::connect(const std::string_view /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }

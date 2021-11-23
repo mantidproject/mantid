@@ -130,7 +130,7 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
 /// debugging and testing).
 /// @param address The address to attempt to connect to
 /// @return Returns true if the connection succeeds.  False otherwise.
-bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
+bool SNSLiveEventDataListener::connect(const std::string_view address)
 // The SocketAddress class will throw various exceptions if it encounters an
 // error.  We're assuming the calling function will catch any exceptions
 // that are important.
@@ -141,7 +141,7 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString() == "0.0.0.0") {
+  if (Poco::Net::SocketAddress socketAddress(std::string{address}); socketAddress.host().toString() == "0.0.0.0") {
     Poco::Net::SocketAddress tempAddress("localhost:31415");
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
@@ -151,9 +151,9 @@ bool SNSLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
     }
   } else {
     try {
-      m_socket.connect(address); // BLOCKING connect
+      m_socket.connect(socketAddress); // BLOCKING connect
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
+      g_log.debug() << "Connection to " << address << " failed.\n";
       return false;
     }
   }

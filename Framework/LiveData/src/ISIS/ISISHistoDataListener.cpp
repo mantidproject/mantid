@@ -89,10 +89,9 @@ void ISISHistoDataListener::IDCReporter(int status, int code, const char *messag
  * required for the connection
  *  @return True if the connection was successfully established
  */
-bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
-
-  m_daeName = address.toString();
+bool ISISHistoDataListener::connect(const std::string_view address) {
   // remove the port part
+  m_daeName = address;
   auto i = m_daeName.find(':');
   if (i != std::string::npos) {
     m_daeName.erase(i);
@@ -101,7 +100,7 @@ bool ISISHistoDataListener::connect(const Poco::Net::SocketAddress &address) {
   // set IDC reporter function for errors
   IDCsetreportfunc(&ISISHistoDataListener::IDCReporter);
 
-  if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle, address.port()) != 0) {
+  if (IDCopen(m_daeName.c_str(), 0, 0, &m_daeHandle, Poco::Net::SocketAddress(std::string{address}).port()) != 0) {
     m_daeHandle = nullptr;
     return false;
   }

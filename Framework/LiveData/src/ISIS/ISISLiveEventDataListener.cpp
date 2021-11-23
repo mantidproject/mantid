@@ -78,23 +78,26 @@ ISISLiveEventDataListener::~ISISLiveEventDataListener() {
 }
 
 // connect the listener to DAE
-bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address) {
+bool ISISLiveEventDataListener::connect(const std::string_view address) {
   // If we don't have an address, force a connection to the test server running
   // on
   // localhost on the default port
-  if (address.host().toString() == "0.0.0.0") {
-    Poco::Net::SocketAddress tempAddress("127.0.0.1:10000");
+  Poco::Net::SocketAddress pocoAddress(std::string{address});
+
+  if (pocoAddress.host().toString() == "0.0.0.0") {
+    const std::string_view tempAddressString{"127.0.0.1:10000"};
+    Poco::Net::SocketAddress tempAddress(std::string{tempAddressString});
     try {
       m_socket.connect(tempAddress); // BLOCKING connect
     } catch (...) {
-      g_log.error() << "Connection to " << tempAddress.toString() << " failed.\n";
+      g_log.error() << "Connection to " << tempAddressString << " failed.\n";
       return false;
     }
   } else {
     try {
-      m_socket.connect(address); // BLOCKING connect
+      m_socket.connect(pocoAddress); // BLOCKING connect
     } catch (...) {
-      g_log.debug() << "Connection to " << address.toString() << " failed.\n";
+      g_log.debug() << "Connection to " << address << " failed.\n";
       return false;
     }
   }
@@ -102,7 +105,7 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   m_socket.setReceiveTimeout(Poco::Timespan(RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
   g_log.debug() << "Connected to " << m_socket.address().toString() << '\n';
 
-  std::string daeName = address.toString();
+  std::string daeName = std::string{address};
   // remove the port part
   auto i = daeName.find(':');
   if (i != std::string::npos) {
@@ -118,9 +121,9 @@ bool ISISLiveEventDataListener::connect(const Poco::Net::SocketAddress &address)
   IDCsetreportfunc(&ISISLiveEventDataListener::IDCReporter);
 
   int retVal = 0;
-  if (address.port() > 10000) {
+  if (pocoAddress.port() > 10000) {
     // we are using a custom port, set the DAE port as one higher
-    retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, static_cast<uint16_t>(address.port() + 1));
+    retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle, static_cast<uint16_t>(pocoAddress.port() + 1));
   } else {
     // we are using the default port, take the default DAE port
     retVal = IDCopen(daeName.c_str(), 0, 0, &m_daeHandle);

@@ -25,7 +25,7 @@ TestGroupDataListener::TestGroupDataListener() : ILiveListener(), m_buffer() {
   this->createWorkspace();
 }
 
-bool TestGroupDataListener::connect(const Poco::Net::SocketAddress &) {
+bool TestGroupDataListener::connect(const std::string_view) {
   // Do nothing.
   return true;
 }

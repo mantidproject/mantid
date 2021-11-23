@@ -51,7 +51,7 @@ public:
   // Actions
   //----------------------------------------------------------------------
 
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const std::string_view address) override;
   void start(Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
   void setAlgorithm(const Mantid::API::IAlgorithm &callingAlgorithm) override;

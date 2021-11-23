@@ -34,7 +34,7 @@ void KafkaHistoListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgo
 }
 
 /// @copydoc ILiveListener::connect
-bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
+bool KafkaHistoListener::connect(const std::string_view address) {
   if (m_instrumentName.empty()) {
     g_log.error("KafkaHistoListener::connect requires a non-empty instrument name");
   }
@@ -45,8 +45,9 @@ bool KafkaHistoListener::connect(const Poco::Net::SocketAddress &address) {
         sampleEnvTopic(m_instrumentName + KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
         chopperTimestampTopic(m_instrumentName + KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX);
 
-    m_decoder = std::make_unique<KafkaHistoStreamDecoder>(std::make_shared<KafkaBroker>(address.toString()), histoTopic,
-                                                          runInfoTopic, sampleEnvTopic, chopperTimestampTopic);
+    m_decoder =
+        std::make_unique<KafkaHistoStreamDecoder>(std::make_shared<KafkaBroker>(std::string{address}), histoTopic,
+                                                  runInfoTopic, sampleEnvTopic, chopperTimestampTopic);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaHistoListener::connect - Connection Error: " << exc.what() << "\n";
     return false;

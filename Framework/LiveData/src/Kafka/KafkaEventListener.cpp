@@ -39,7 +39,7 @@ void KafkaEventListener::setAlgorithm(const Mantid::API::IAlgorithm &callingAlgo
 }
 
 /// @copydoc ILiveListener::connect
-bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
+bool KafkaEventListener::connect(const std::string_view address) {
   if (m_instrumentName.empty()) {
     g_log.error("KafkaEventListener::connect requires a non-empty instrument name");
   }
@@ -76,7 +76,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
   }
 
   const std::size_t bufferThreshold = getProperty("BufferThreshold");
-  auto broker = std::make_shared<KafkaBroker>(address.toString());
+  auto broker = std::make_shared<KafkaBroker>(std::string(address));
   try {
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(broker, eventTopic, runInfoTopic, sampleEnvTopic,
                                                           chopperTopic, monitorTopic, bufferThreshold);

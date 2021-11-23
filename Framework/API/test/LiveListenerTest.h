@@ -19,18 +19,18 @@ public:
     // Set this flag to true for testing
     m_dataReset = true;
   }
-  GNU_DIAG_OFF_SUGGEST_OVERRIDE
-  MOCK_CONST_METHOD0(name, std::string());
-  MOCK_CONST_METHOD0(supportsHistory, bool());
-  MOCK_CONST_METHOD0(buffersEvents, bool());
-  MOCK_METHOD1(connect, bool(const Poco::Net::SocketAddress &));
-  MOCK_METHOD1(start, void(Mantid::Types::Core::DateAndTime));
-  MOCK_METHOD0(extractData, std::shared_ptr<Mantid::API::Workspace>());
-  MOCK_METHOD0(isConnected, bool());
-  MOCK_METHOD0(runStatus, RunStatus());
-  MOCK_CONST_METHOD0(runNumber, int());
-  MOCK_METHOD1(setAlgorithm, void(const Mantid::API::IAlgorithm &));
-  GNU_DIAG_ON_SUGGEST_OVERRIDE
+
+  MOCK_METHOD(std::string, name, (), (const, override));
+  MOCK_METHOD(bool, supportsHistory, (), (const, override));
+  MOCK_METHOD(bool, buffersEvents, (), (const, override));
+  MOCK_METHOD(int, runNumber, (), (const, override));
+
+  MOCK_METHOD(void, setAlgorithm, (const Mantid::API::IAlgorithm &), (override));
+  MOCK_METHOD(bool, connect, (const std::string_view), (override));
+  MOCK_METHOD(void, start, (Mantid::Types::Core::DateAndTime), (override));
+  MOCK_METHOD(std::shared_ptr<Mantid::API::Workspace>, extractData, (), (override));
+  MOCK_METHOD(bool, isConnected, (), (override));
+  MOCK_METHOD(RunStatus, runStatus, (), (override));
 };
 
 class LiveListenerTest : public CxxTest::TestSuite {

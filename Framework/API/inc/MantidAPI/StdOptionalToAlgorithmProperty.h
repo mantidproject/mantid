@@ -10,7 +10,8 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
+
+#include <optional>
 #include <string>
 
 namespace Mantid {
@@ -67,8 +68,8 @@ T checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg, const st
  */
 template <typename T>
 std::optional<T> checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
-                                                     const Mantid::Geometry::Instrument_const_sptr &instrument,
-                                                     const std::string &idf_name) {
+                                                   const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                                   const std::string &idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);

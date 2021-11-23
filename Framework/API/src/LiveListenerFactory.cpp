@@ -79,11 +79,11 @@ std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(const Kernel::Liv
 
   if (connect) {
     try {
-      Poco::Net::SocketAddress address;
+      std::string address;
 
       // To allow listener::connect to be called even when no address is given
       if (!info.address().empty())
-        address = Poco::Net::SocketAddress(info.address());
+        address = info.address();
 
       // If we can't connect, throw an exception to be handled below
       if (!listener->connect(address)) {

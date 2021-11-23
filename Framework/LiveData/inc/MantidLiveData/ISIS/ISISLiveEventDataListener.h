@@ -66,7 +66,7 @@ public:
    *  @param address   The IP address and port to contact
    *  @return True if the connection was successfully established
    */
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const std::string_view address) override;
 
   /** Commence the collection of data from the DAS. Must be called before
    * extractData().

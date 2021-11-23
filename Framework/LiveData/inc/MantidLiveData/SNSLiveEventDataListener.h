@@ -33,7 +33,7 @@ public:
   bool supportsHistory() const override { return true; }
   bool buffersEvents() const override { return true; }
 
-  bool connect(const Poco::Net::SocketAddress &address) override;
+  bool connect(const std::string_view address) override;
   void start(const Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
   std::shared_ptr<API::Workspace> extractData() override;
 

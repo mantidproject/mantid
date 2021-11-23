@@ -40,7 +40,7 @@ FakeEventDataListener::FakeEventDataListener()
 /// Destructor
 FakeEventDataListener::~FakeEventDataListener() { m_timer.stop(); }
 
-bool FakeEventDataListener::connect(const Poco::Net::SocketAddress & /*address*/) {
+bool FakeEventDataListener::connect(const std::string_view /*address*/) {
   // Do nothing for now. Later, put in stuff to help test failure modes.
   return true;
 }
