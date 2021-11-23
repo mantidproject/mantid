@@ -769,7 +769,7 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   double errsum = 0.0;
   for (size_t i = 0; i < numPeaks; ++i) {
     const double tofCalib = dSpacingUnit.singleToTOF(dspace[i]);
-    const double errsum_i = std::fabs(tofObs[i] - tofCalib) * weights[i];
+    const double errsum_i = std::pow(tofObs[i] - tofCalib, 2) * weights[i];
     errsum += errsum_i;
   }
 
