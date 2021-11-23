@@ -32,3 +32,6 @@ set(CMAKE_BUILD_TYPE
     ${CMAKE_BUILD_TYPE_OLD}
     CACHE STRING "Choose the type of build" FORCE
 )
+
+# Suppress https://gitlab.com/libeigen/eigen/-/issues/2169 on OSX Clang
+target_compile_options(eigen INTERFACE $<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang>:-Wno-unknown-warning-option>)
