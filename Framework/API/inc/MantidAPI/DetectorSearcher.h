@@ -13,7 +13,12 @@
 #include "MantidKernel/NearestNeighbours.h"
 #include "MantidKernel/V3D.h"
 
+#include "MantidKernel/WarningSuppressions.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Core>
+GNU_DIAG_ON("conversion")
 
 /**
   DetectorSearcher is a helper class to find a specific detector within

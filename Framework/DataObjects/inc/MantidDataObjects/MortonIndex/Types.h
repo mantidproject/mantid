@@ -10,8 +10,13 @@
 // with of the number is one WORD bigger, than actual
 // number size, see here
 // https://www.boost.org/doc/libs/1_61_0/libs/multiprecision/doc/html/boost_multiprecision/tut/ints/cpp_int.html
+#include "MantidKernel/WarningSuppressions.h"
 #include "WideInt.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Dense>
+GNU_DIAG_ON("conversion")
 #include <ostream>
 
 namespace morton_index {

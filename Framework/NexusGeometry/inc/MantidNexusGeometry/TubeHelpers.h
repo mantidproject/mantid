@@ -7,8 +7,13 @@
 #pragma once
 
 #include "MantidGeometry/IDTypes.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/TubeBuilder.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Core>
+GNU_DIAG_ON("conversion")
 #include <vector>
 // Eigen typedefs
 using Pixels = Eigen::Matrix<double, 3, Eigen::Dynamic>;

@@ -25,7 +25,12 @@
 
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidKernel/WarningSuppressions.h"
+
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Dense>
+GNU_DIAG_ON("conversion")
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
