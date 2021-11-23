@@ -41,6 +41,6 @@ Bugfixes
 - Fixed an issue to plot negative values with logarithm scaling in slice view.
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Stopped workbench from ignoring GUIs that want to cancel closing
-
+- Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 
 :ref:`Release 6.3.0 <v6.3.0>`
