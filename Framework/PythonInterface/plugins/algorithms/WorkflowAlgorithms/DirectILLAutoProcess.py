@@ -363,10 +363,12 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 current_output = np.array([sample_sofq, sample_softw])
                 current_output = current_output[[isinstance(elem, str) for elem in current_output]]
                 output_samples.extend(current_output)
+            else:  # Empty or Cadmium
+                current_output = ws
+                output_samples.append(current_output)
             self._group_detectors(current_output)
             if self.save_output:
                 self._save_output(current_output)
-
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
         if self.clear_cache:  # final clean up
