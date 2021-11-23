@@ -8,10 +8,15 @@
 
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Objects/IObject.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include "MantidNexusGeometry/TubeBuilder.h"
+
 #include <Eigen/Core>
+// https://gitlab.com/libeigen/eigen/-/issues/1217
+GNU_DIAG_OFF("conversion")
 #include <Eigen/Geometry>
+GNU_DIAG_ON("conversion")
 #include <memory>
 #include <string>
 
