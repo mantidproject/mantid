@@ -17,6 +17,9 @@ from Engineering.EnggUtils import GROUP
 CWDIR = os.path.join(config['datasearch.directories'].split(';')[0], "ENGINX")
 FULL_CALIB = os.path.join(CWDIR, "ENGINX_whole_inst_calib.nxs")
 
+BANK_DIFF_CONSTS = {'North': {UnitParams.difc: 18422, UnitParams.difa: -6.6, UnitParams.tzero: -15},
+                    'South': {UnitParams.difc: 18427, UnitParams.difa: -7.9, UnitParams.tzero: -19.4}}
+
 
 class FocusBothBanks(systemtesting.MantidSystemTest):
 
@@ -30,15 +33,18 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
     def validate(self):
         # bank 1
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18422, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.3, delta=0.3)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -15.0, delta=0.5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS['North'][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['North'][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['North'][UnitParams.tzero], delta=2)
         # bank 2
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18423.5, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.6, delta=0.3)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -17.3, delta=0.5)
-        # assert foc data in TOF (conversion to d already tested by assertions on diff consts)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS['South'][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['South'][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['South'][UnitParams.tzero], delta=2)
+        # compare foc data in TOF (conversion to d already tested by assertions on diff consts)
+        self.tolerance = 0.5
+        self.disableChecking.extend(['Instrument'])  # don't check
+        return self._ws_foc.name(), "299080_engggui_focusing_output_ws_bank.nxs"
 
     def cleanup(self):
         ADS.clear()
@@ -56,23 +62,38 @@ class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped")
 
     def validate(self):
-        # bank 1
+        # only assert diff constants (both banks tests normalisation etc.)
         diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
-        self.assertAlmostEqual(diff_consts[UnitParams.difc], 18422, delta=1)
-        self.assertAlmostEqual(diff_consts[UnitParams.difa], -6.3, delta=0.3)
-        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -15.0, delta=0.5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS['North'][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['North'][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['North'][UnitParams.tzero], delta=2)
 
     def cleanup(self):
         ADS.clear()
         _try_delete_cal_and_focus_dirs(CWDIR)
 
-# class FocusTexture(systemtesting.MantidSystemTest):
-#     def validate(self):
-#         self.tolerance = 1e-3
-#         outputlist = ["ENGINX_299080_236516_texture_{i}" for i in range(1, 21)]
-#         filelist = ["engg_texture_bank_{}.nxs".format(i) for i in range(1, 11)]
-#         validation_list = [x for t in zip(*[outputlist, filelist]) for x in t]
-#         return validation_list
+
+class FocusTexture(systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture")
+
+    def validate(self):
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 20)
+        # don't assert diff constants of one group
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(10)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 17250, delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.5, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -20.3, delta=2)
+        # compare TOF workspaces
+        self.tolerance = 0.5
+        self.disableChecking.extend(['Instrument'])  # don't check
+        return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture.nxs"
 
 
 def _try_delete_cal_and_focus_dirs(parent_dir):
