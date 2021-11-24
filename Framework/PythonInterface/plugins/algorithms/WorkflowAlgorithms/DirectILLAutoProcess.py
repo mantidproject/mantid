@@ -419,7 +419,14 @@ class DirectILLAutoProcess(PythonAlgorithm):
         """Saves the output workspaces to an external file."""
         for ws_name in ws_to_save:
             if self.reduction_type == 'SingleCrystal':
-                psi = mtd[ws_name].run().getProperty('a3.value').value
+                omega_log = 'SRot.value'  # IN5, IN6
+                if self.instrument == 'PANTHER':
+                    omega_log = 'a3.value'
+                elif self.instrument == 'SHARP':
+                    omega_log = 'srotation.value'
+                elif self.instrument == 'IN4':
+                    omega_log = 'SampleRotation.value'
+                psi = mtd[ws_name].run().getProperty(omega_log).value
                 psi_offset = self.getProperty('SampleAngleOffset').value
                 offset = psi - psi_offset
                 SaveNXSPE(
