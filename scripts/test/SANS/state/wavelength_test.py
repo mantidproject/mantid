@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import (SANSFacility, SANSInstrument, RebinType, RangeStepType)
+from sans.common.enums import (SANSFacility, SANSInstrument, RangeStepType)
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateWavelength import (StateWavelength, get_wavelength_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
@@ -67,14 +67,12 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         builder.state.wavelength_interval.wavelength_full_range = (10.0, 20.0)
         builder.state.wavelength_interval.wavelength_step = 3.0
         builder.set_wavelength_step_type(RangeStepType.LIN)
-        builder.set_rebin_type(RebinType.REBIN)
 
         # Assert
         state = builder.build()
 
         self.assertEqual(state.wavelength_interval.wavelength_full_range,  (10.0, 20.0))
         self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
-        self.assertEqual(state.rebin_type, RebinType.REBIN)
 
 
 if __name__ == '__main__':

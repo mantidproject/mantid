@@ -38,14 +38,12 @@ Creates interaction with a line
 */
 class MANTID_GEOMETRY_DLL LineIntersectVisit : public BaseVisit {
 public:
-  using DType = boost::container::small_vector<double, 5>;
+  using DistancesType = boost::container::small_vector<double, 5>;
 
 private:
-  Line ATrack;       ///< The line
-  Line::PType PtOut; ///< The intersection point
-  DType DOut;        ///< The distance
-
-  void procTrack();
+  Line m_line;                         ///< The line
+  Line::PType m_intersectionPointsOut; ///< The intersection point
+  DistancesType m_distancesOut;        ///< The distance
 
 public:
   LineIntersectVisit(const Kernel::V3D &, const Kernel::V3D &);
@@ -59,14 +57,17 @@ public:
 
   // Accessor
   /// Get the distance
-  const DType &getDistance() const { return DOut; }
+  const DistancesType &getDistance() const { return m_distancesOut; }
   /// Get the intersection points
-  const Line::PType &getPoints() const { return PtOut; }
+  const Line::PType &getPoints() const { return m_intersectionPointsOut; }
   /// Get the number of intersection points
-  unsigned long getNPoints() const { return (unsigned long)PtOut.size(); }
+  unsigned long getNPoints() const { return (unsigned long)m_intersectionPointsOut.size(); }
 
   /// Re-set the line
   void setLine(const Kernel::V3D &, const Kernel::V3D &);
+
+  /// Prune out duplicated points and sort by distance to starting point
+  void sortAndRemoveDuplicates();
 };
 
 } // namespace Geometry

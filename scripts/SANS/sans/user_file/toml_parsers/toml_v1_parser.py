@@ -227,7 +227,6 @@ class _TomlV1ParserImpl(TomlParserImplBase):
 
         to_set = DuplicateWavelengthStates(
             transmission=self.calculate_transmission,
-            normalize=self.normalize_to_monitor,
             wavelength=self.wavelength,
             pixel=self.wavelength_and_pixel)
 

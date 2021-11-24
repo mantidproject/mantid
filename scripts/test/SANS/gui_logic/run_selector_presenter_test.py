@@ -6,14 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from assert_called import assert_called
-from fake_signal import FakeSignal
 from unittest import mock
 from sans.gui_logic.models.RunSelectionModel import RunSelectionModel
 from sans.gui_logic.models.run_file import SummableRunFile
 from sans.gui_logic.models.run_finder import SummableRunFinder
 from sans.gui_logic.presenter.RunSelectorPresenter import RunSelectorPresenter
 from ui.sans_isis.run_selector_widget import RunSelectorWidget
+from test.SANS.gui_logic.fake_signal import FakeSignal
 
 
 class RunSelectorPresenterTest(unittest.TestCase):
@@ -78,7 +77,7 @@ class RunSelectorPresenterTest(unittest.TestCase):
         self.run_finder.find_all_from_query.return_value = ('', [])
 
         self.view.addRuns.emit()
-        assert_called(self.view.run_not_found)
+        self.view.run_not_found.assert_called()
 
     def test_adds_multiple_search_results_to_model_when_add_run_pressed(self):
         run_names = ['1', '009', '12']
@@ -114,15 +113,15 @@ class RunSelectorPresenterTest(unittest.TestCase):
 
     def test_clears_all_runs_from_model_when_clear_pressed(self):
         self.view.removeAllRuns.emit()
-        assert_called(self.run_selection.clear_all_runs)
+        self.run_selection.clear_all_runs.assert_called()
 
     def test_manage_directories_launches_dialog(self):
         self.view.manageDirectories.emit()
-        assert_called(self.view.show_directories_manager)
+        self.view.show_directories_manager.assert_called()
 
     def test_browse_to_directory(self):
         self.view.browse.emit()
-        assert_called(self.view.show_file_picker)
+        self.view.show_file_picker.assert_called()
 
 
 if __name__ == '__main__':

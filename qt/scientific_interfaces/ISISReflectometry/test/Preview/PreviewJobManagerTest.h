@@ -151,6 +151,30 @@ public:
     TS_ASSERT_THROWS(jobManager.notifyAlgorithmError(configuredAlgRef, ""), std::logic_error const &);
   }
 
+  void test_notify_algorithm_complete_catches_runtime_errors() {
+    auto mockJobRunner = MockJobRunner();
+    auto mockSubscriber = MockJobManagerSubscriber();
+    auto row = makePreviewRow();
+    auto configuredAlg = makeConfiguredAlg(row, makeStubAlg(), updateFuncThatThrowsExpectedError);
+
+    EXPECT_CALL(mockSubscriber, notifyLoadWorkspaceCompleted).Times(0);
+
+    auto jobManager = makeJobManager(&mockJobRunner);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+
+    jobManager.notifyAlgorithmComplete(configuredAlgRef);
+  }
+
+  void test_notify_algorithm_complete_does_not_catch_unexpected_errors() {
+    auto mockJobRunner = MockJobRunner();
+    auto row = makePreviewRow();
+    auto configuredAlg = makeConfiguredAlg(row, makeStubAlg(), updateFuncThatThrowsUnexpectedError);
+    auto jobManager = makeJobManager(&mockJobRunner);
+    auto configuredAlgRef = std::static_pointer_cast<IConfiguredAlgorithm>(configuredAlg);
+
+    TS_ASSERT_THROWS(jobManager.notifyAlgorithmComplete(configuredAlgRef), std::invalid_argument const &);
+  }
+
 private:
   class StubAlgPreprocess : public StubAlgorithm {
   public:
@@ -177,6 +201,8 @@ private:
 
   PreviewRow makePreviewRow() { return PreviewRow({"12345"}); }
 
+  IAlgorithm_sptr makeStubAlg() { return std::make_shared<StubAlgorithm>(); }
+
   // Create a basic configured algorithm using a StubAlgorithm
   IConfiguredAlgorithm_sptr makeConfiguredAlg() {
     IAlgorithm_sptr stubAlg = std::make_shared<StubAlgorithm>();
@@ -186,12 +212,14 @@ private:
 
   // Create a configured batch job algorithm that has an item and callback function set up on it
   // Uses StubAlgorithm by default, or can take an override.
-  std::shared_ptr<BatchJobAlgorithm> makeConfiguredAlg(Item &item,
-                                                       IAlgorithm_sptr mockAlg = std::make_shared<StubAlgorithm>()) {
+  std::shared_ptr<BatchJobAlgorithm>
+  makeConfiguredAlg(Item &item, IAlgorithm_sptr mockAlg = std::make_shared<StubAlgorithm>(),
+                    BatchJobAlgorithm::UpdateFunction updateFunc = AlgCompleteCallback::updateRowOnAlgorithmComplete) {
     AlgCompleteCallback::m_callbackWasCalled = false;
     auto properties = std::make_unique<AlgorithmRuntimeProps>();
-    return std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties),
-                                               AlgCompleteCallback::updateRowOnAlgorithmComplete, &item);
+    auto configuredAlg =
+        std::make_shared<BatchJobAlgorithm>(std::move(mockAlg), std::move(properties), updateFunc, &item);
+    return configuredAlg;
   }
 
   std::shared_ptr<ConfiguredAlgorithm> makeConfiguredPreprocessAlg(Item &item) {
@@ -220,4 +248,15 @@ private:
 
   // For a configured batch job algorithm with a callback function set on it, ensure that the callback was called
   void assertUpdateItemCallbackWasCalled() { TS_ASSERT(AlgCompleteCallback::m_callbackWasCalled); }
+
+  // A fake callback function to pass to the configured job algorithm that throws an expected error type (RuntimeError)
+  static void updateFuncThatThrowsExpectedError(const Mantid::API::IAlgorithm_sptr &, Item &) {
+    throw std::runtime_error("Test error");
+  }
+
+  // A fake callback function to pass to the configured job algorithm that throws an expected error type (not a
+  // RuntimeError)
+  static void updateFuncThatThrowsUnexpectedError(const Mantid::API::IAlgorithm_sptr &, Item &) {
+    throw std::invalid_argument("Test error");
+  }
 };

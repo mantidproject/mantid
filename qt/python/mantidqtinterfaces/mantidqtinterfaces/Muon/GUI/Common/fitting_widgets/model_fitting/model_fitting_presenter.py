@@ -90,6 +90,8 @@ class ModelFittingPresenter(BasicFittingPresenter):
         self.view.update_y_parameters(self.model.y_parameters(), self.model.y_parameter_types())
         # Triggers handle_selected_x_changed
         self.view.update_x_parameters(self.model.x_parameters(), self.model.y_parameter_types(), emit_signal=True)
+        #update start and end x
+        self.update_selected_parameter_combination_workspace()
 
     def handle_parameter_combinations_error(self, error: str) -> None:
         """Handle when an error occurs while creating workspaces for the different parameter combinations."""
@@ -140,8 +142,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_instrument_changed(self) -> None:
         """Handle when the Instrument is changed."""
-        self.model.result_table_names = []
-        self.view.update_result_table_names([])
+        self.update_selected_parameter_combination_workspace()
 
     def update_dataset_names_in_view_and_model(self) -> None:
         """Updates the results tables currently displayed."""
@@ -162,6 +163,9 @@ class ModelFittingPresenter(BasicFittingPresenter):
             self.view.current_dataset_name = dataset_name
             # update the x range for the fit
             start_x_list, end_x_list = self.model._get_new_start_xs_and_end_xs_using_existing_datasets([dataset_name])
+            # update values in context
+            self.model.set_current_start_and_end_x(start_x_list[0], end_x_list[0])
+            #update values in view
             self.view.start_x = start_x_list[0]
             self.view.end_x = end_x_list[0]
 

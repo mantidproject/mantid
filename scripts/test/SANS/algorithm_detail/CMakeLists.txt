@@ -16,6 +16,7 @@ set(TEST_PY_FILES
     move_workspaces_test.py
     normalize_to_sans_monitor_test.py
     sans_slice_event_test.py
+    scale_sans_workspace_test.py
     strip_end_nans_test.py
 )
 

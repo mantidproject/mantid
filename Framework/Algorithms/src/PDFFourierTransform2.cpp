@@ -171,17 +171,16 @@ size_t PDFFourierTransform2::determineMinIndex(double min, const std::vector<dou
     min = X.front();
   }
 
-  // get index for the min from the X-range
-  auto iter = std::upper_bound(X.begin(), X.end(), min);
+  // get index for the min from the X-range, tightening the range if a partial x bin value is provided
+  auto iter = std::lower_bound(X.begin(), X.end(), min);
   size_t min_index = std::distance(X.begin(), iter);
-  if (min_index == 0)
-    min_index += 1; // so there doesn't have to be a check in integration loop
 
   // go to first non-nan value
-  iter = std::find_if(std::next(Y.begin(), min_index), Y.end(), static_cast<bool (*)(double)>(std::isnormal));
-  size_t first_normal_index = std::distance(Y.begin(), iter);
+  auto iter_first_normal =
+      std::find_if(std::next(Y.begin(), min_index), Y.end(), static_cast<bool (*)(double)>(std::isnormal));
+  size_t first_normal_index = std::distance(Y.begin(), iter_first_normal);
   if (first_normal_index > min_index) {
-    g_log.information("Specified input min where data is nan/inf. Adjusting to data range.");
+    g_log.information("Specified input min where data is nan/inf or zero. Adjusting to data range.");
     min_index = first_normal_index;
   }
 
@@ -197,15 +196,17 @@ size_t PDFFourierTransform2::determineMaxIndex(double max, const std::vector<dou
     max = X.back();
   }
 
-  // get pointers for the data range
-  auto iter = std::lower_bound(X.begin(), X.end(), max);
+  // get index for the max from the X-range, tightening the range if a partial x bin value is provided
+  auto iter = std::upper_bound(X.begin(), X.end(), max) - 1;
   size_t max_index = std::distance(X.begin(), iter);
 
-  // go to first non-nan value
+  // go to first non-nan value. This works for both histogram (bin edge) data and
+  // point data, as the integration proceeds by calculating rectangles between pairs of X values.
+  // For point data the Y value corresponding to the left of this pair is used in the nested for loop in the exec.
   auto back_iter = std::find_if(Y.rbegin(), Y.rend(), static_cast<bool (*)(double)>(std::isnormal));
-  size_t first_normal_index = Y.size() - std::distance(Y.rbegin(), back_iter) - 1;
+  size_t first_normal_index = Y.size() - std::distance(Y.rbegin(), back_iter);
   if (first_normal_index < max_index) {
-    g_log.information("Specified input max where data is nan/inf. Adjusting to data range.");
+    g_log.information("Specified input max where data is nan/inf or zero. Adjusting to data range.");
     max_index = first_normal_index;
   }
 
@@ -231,7 +232,7 @@ double PDFFourierTransform2::determineRho0() {
 }
 
 void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vector<double> &Q,
-                                             std::vector<double> &DFOfQ, std::vector<double> &DQ) {
+                                             std::vector<double> &DFOfQ, const std::vector<double> &DQ) {
   // convert to S(Q)-1
   string soqType = getProperty("SofQType");
   string inputSOQType = getProperty("InputSofQType");
@@ -264,8 +265,8 @@ void PDFFourierTransform2::convertToSQMinus1(std::vector<double> &FOfQ, std::vec
   return;
 }
 
-void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, std::vector<double> &R,
-                                                   std::vector<double> &DFOfR, std::vector<double> &DR) {
+void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, const std::vector<double> &R,
+                                                   std::vector<double> &DFOfR, const std::vector<double> &DR) {
   string PDFType = getProperty("PDFType");
   double rho0 = determineRho0();
   if (PDFType == LITTLE_G_OF_R) {
@@ -293,7 +294,7 @@ void PDFFourierTransform2::convertToLittleGRMinus1(std::vector<double> &FOfR, st
   return;
 }
 
-void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, HistogramData::HistogramX &Q,
+void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, const HistogramData::HistogramX &Q,
                                                HistogramData::HistogramE &DFOfQ) {
   // convert to S(Q)-1string
   string soqType = getProperty("SofQType");
@@ -316,7 +317,8 @@ void PDFFourierTransform2::convertFromSQMinus1(HistogramData::HistogramY &FOfQ, 
   return;
 }
 
-void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR, HistogramData::HistogramX &R,
+void PDFFourierTransform2::convertFromLittleGRMinus1(HistogramData::HistogramY &FOfR,
+                                                     const HistogramData::HistogramX &R,
                                                      HistogramData::HistogramE &DFOfR) {
   // convert to the correct form of PDF
   double rho0 = determineRho0();

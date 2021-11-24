@@ -37,6 +37,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getSummedWs() const override;
 
   void setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) override;
+  void exportSummedWsToAds() const override;
 
 private:
   // This should be an optional instead of a point, but we have issues reassigning it because boost::optional doesn't
