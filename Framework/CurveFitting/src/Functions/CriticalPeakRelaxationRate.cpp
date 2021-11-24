@@ -28,61 +28,30 @@ void CriticalPeakRelaxationRate::init() {
   declareParameter("Exponent", 1.0, "coefficient for critical exponent");
   declareParameter("Background1", 0.0, "coefficient for non-critical background when x < Critical Temperature");
   declareParameter("Background2", 0.0, "coefficient for non-critical background when x > Critical Temperature");
-  declareAttribute("Delta", Attribute(0.1));
+  declareAttribute("Delta", Attribute(0.01));
 }
 
 void CriticalPeakRelaxationRate::function1D(double *out, const double *xValues, const size_t nData) const {
-  /*checkParams(xValues, nData);*/
 
-  const double scale = getParameter("Scaling");
-  const double tc = getParameter("CriticalTemp");
-  const double exp = getParameter("Exponent");
-  const double bg1 = getParameter("Background1");
-  const double bg2 = getParameter("Background2");
-  const double d = getAttribute("Delta").asDouble();
+  const double Scale = getParameter("Scaling");
+  const double Tc = getParameter("CriticalTemp");
+  const double Exp = getParameter("Exponent");
+  const double Bg1 = getParameter("Background1");
+  const double Bg2 = getParameter("Background2");
+  const double Delta = getAttribute("Delta").asDouble();
 
   for (size_t i = 0; i < nData; i++) {
-    double denom = pow(abs(xValues[i] - tc), exp);
-    if (xValues[i] + d < tc || xValues[i] - d > tc) {
-      if (xValues[i] < tc) {
-        out[i] = bg1 + scale / denom;
+    double denom = pow(abs(xValues[i] - Tc), Exp);
+    if (xValues[i] + Delta < Tc || xValues[i] - Delta > Tc) {
+      if (xValues[i] < Tc) {
+        out[i] = Bg1 + Scale / denom;
       } else {
-        out[i] = bg2 + scale / denom;
+        out[i] = Bg2 + Scale / denom;
       }
     } else {
-      out[i] = 0.0;
+      out[i] = 1e6;
     }
   }
 }
 
-// void CriticalPeakRelaxationRate::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-//  checkParams(xValues, nData);
-//
-//  const double scale = getParameter("Scaling");
-//  const double tc = getParameter("CriticalTemp");
-//  const double exp = getParameter("Exponent");
-//
-//  for (size_t i = 0; i < nData; i++) {
-//    double expression = abs(tc - xValues[i]);
-//
-//    const double diffScale = pow(expression, -exp);
-//    const double diffTc = scale * exp * (xValues[i] - tc) * pow(expression, (-exp - 2));
-//    const double diffExp = scale * pow(expression, -exp) * log(expression);
-//
-//    out->set(i, 0, diffScale);
-//    out->set(i, 1, diffTc);
-//    out->set(i, 2, diffExp);
-//    out->set(i, 3, 1);
-//  }
-//}
-
-// void CriticalPeakRelaxationRate::checkParams(const double *xValues, const size_t nData) const {
-//  const double tc = getParameter("CriticalTemp");
-//  for (size_t i = 0; i < nData; i++) {
-//    if (xValues[i] == tc) {
-//      throw std::invalid_argument("Use the exclude range option with x=" + std::to_string(xValues[i]) + " and y =
-//      inf");
-//    }
-//  }
-//}
 } // namespace Mantid::CurveFitting::Functions

@@ -32,7 +32,7 @@ CriticalPeakRelaxationRate parameters:
 <LI> Exponent - coefficient for critical exponent (default 1.0)</LI>
 <LI> Background1 - coefficient for non-critical background when x < Critical Temperature (default 0.0)</LI>
 <LI> Background2 - coefficient for non-critical background when x > Critical Temperature (default 0.0)</LI>
-<LI> Delta </LI>
+<LI> Delta - coefficient to determine distance from the peak to start/end fitting </LI>
 </UL>
 */
 

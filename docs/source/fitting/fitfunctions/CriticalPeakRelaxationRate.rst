@@ -14,10 +14,12 @@ The Critical Peak Relexation Rate is defined as:
 .. math:: y = \frac{S_c}{(|x - T_c|)^a} + B_g
 
 where:
-- S_c - Scaling
-- T_c - Critical temperature
-- a - Critical exponent
-- B_g - is a non-critical background
+- :math:`S_c` - Scaling
+- :math:`T_c` - Critical temperature
+- :math:`a` - Critical exponent
+- :math:`B_g` - is a non-critical background
+
+When fitting users should set :math:`T_c` as the temperature at which the peak occurs. Users are also asked to supply two values for :math:`B_g`. The first should be the value of y when x is at it's minimum. The second should be the value of y when x is at its maximum, minus the first background value.
 
 
 Examples
