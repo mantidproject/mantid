@@ -289,7 +289,7 @@ element size for container is needed.
         InputWorkspace = ws,
         Method="SampleAndContainer",
         ElementSize=0.5,
-        ContainerElementSize=0.1,
+        ContainerElementSize=0.45,
         OutputWorkspace="rst",
     )
 
