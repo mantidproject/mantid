@@ -155,6 +155,11 @@ class RawDataExplorerView(QWidget):
     """
     _previews = None
 
+    """
+    Full path of the last file clicked
+    """
+    _last_clicked = None
+
     file_tree_path_changed = Signal(str)
 
     def __init__(self, presenter, parent=None):
@@ -209,15 +214,15 @@ class RawDataExplorerView(QWidget):
         """
         self._previews.remove(preview)
 
-    def get_selection(self):
+    def get_last_clicked(self):
         """
-        Get the selected files. The set contains the full path of the files and
-        the files match the tree widget name filter.
-        @return (set(str)): selected filenames
-        """
-        return self._current_selection
+        Get last file clicked
 
-    def on_file_clicked(self, index):
+        @return the full path to the last file clicked by the user
+        """
+        return self._last_clicked
+
+    def on_file_clicked(self, last_clicked_index):
         """
         Triggered when a file is clicked in the tree widget. This method check
         the selected items and sends a signal if it changed.
@@ -226,12 +231,16 @@ class RawDataExplorerView(QWidget):
         file_model = self.fileTree.model()
         selected_indexes = selection_model.selectedRows()
         selection = set()
+
         for index in selected_indexes:
             file_path = file_model.filePath(index)
             if not path.isfile(file_path):
                 continue
             if file_path not in selection:
                 selection.add(file_path)
+            if index == last_clicked_index:
+                self._last_clicked = file_model.filePath(last_clicked_index)
+
         if selection != self._current_selection:
             self._current_selection = selection
             self._presenter.on_selection_changed()
