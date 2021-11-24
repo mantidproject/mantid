@@ -169,7 +169,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
     def PyInit(self):
 
-        positiveFloat = FloatBoundedValidator(0., exclusive=True)
+        positiveFloat = FloatBoundedValidator(0., exclusive=False)
         positiveInt = IntBoundedValidator(0, exclusive=False)
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
         orderedPairsValidator = FloatArrayOrderedPairsValidator()
@@ -543,14 +543,19 @@ class DirectILLAutoProcess(PythonAlgorithm):
 
         sofq_output = '{}_SofQ'.format(numor)
         softw_output = '{}_SofTW'.format(numor)
+        optional_parameters = dict()
+        if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
+            optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+        if not self.getProperty('EnergyExchangeBinning').isDefault:
+            optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+        if not self.getProperty('MomentumTransferBinning').isDefault:
+            optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
         DirectILLReduction(InputWorkspace=ws,
                            OutputWorkspace=sofq_output,
                            OutputSofThetaEnergyWorkspace=softw_output,
                            IntegratedVanadiumWorkspace=vanadium_integral,
                            DiagnosticsWorkspace=vanadium_diagnostics,
-                           GroupingAngleStep=self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value,
-                           EnergyRebinningParams=self.getProperty('EnergyExchangeBinning').value,
-                           QBinningParams=self.getProperty('MomentumTransferBinning').value
+                           **optional_parameters
                            )
 
         if len(to_remove) > 0 and self.clear_cache:
@@ -673,15 +678,20 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 self._correct_self_attenuation(ws, sample_no)
             vanadium_integral = self.vanadium_integral[0] if self.vanadium_integral else ""
             vanadium_diagnostics = self.vanadium_diagnostics[0] if self.vanadium_diagnostics else ""
+            optional_parameters = dict()
+            if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
+                optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+            if not self.getProperty('EnergyExchangeBinning').isDefault:
+                optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+            if not self.getProperty('MomentumTransferBinning').isDefault:
+                optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
             DirectILLReduction(
                 InputWorkspace=ws,
                 OutputWorkspace=processed_sample,
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
                 IntegratedVanadiumWorkspace=vanadium_integral,
                 DiagnosticsWorkspace=vanadium_diagnostics,
-                GroupingAngleStep=self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value,
-                EnergyRebinningParams=self.getProperty('EnergyExchangeBinning').value,
-                QBinningParams=self.getProperty('MomentumTransferBinning').value
+                **optional_parameters
             )
         if len(to_remove) > 0 and self.clear_cache:
             self._clean_up(to_remove)
