@@ -540,7 +540,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
                            OutputWorkspace=sofq_output,
                            OutputSofThetaEnergyWorkspace=softw_output,
                            IntegratedVanadiumWorkspace=vanadium_integral,
-                           DiagnosticsWorkspace=vanadium_diagnostics
+                           DiagnosticsWorkspace=vanadium_diagnostics,
+                           GroupingAngleStep=self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value,
+                           EnergyRebinningParams=self.getProperty('EnergyExchangeBinning').value,
+                           QBinningParams=self.getProperty('MomentumTransferBinning').value
                            )
 
         if len(to_remove) > 0 and self.clear_cache:
@@ -662,7 +665,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
                 OutputWorkspace=processed_sample,
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
                 IntegratedVanadiumWorkspace=vanadium_integral,
-                DiagnosticsWorkspace=vanadium_diagnostics
+                DiagnosticsWorkspace=vanadium_diagnostics,
+                GroupingAngleStep=self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value,
+                EnergyRebinningParams=self.getProperty('EnergyExchangeBinning').value,
+                QBinningParams=self.getProperty('MomentumTransferBinning').value
             )
         if len(to_remove) > 0 and self.clear_cache:
             self._clean_up(to_remove)
