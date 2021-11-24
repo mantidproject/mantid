@@ -170,7 +170,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     def PyInit(self):
 
         positiveFloat = FloatBoundedValidator(0., exclusive=True)
-        positiveInt = IntBoundedValidator(0, exclusive=True)
+        positiveInt = IntBoundedValidator(0, exclusive=False)
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
         orderedPairsValidator = FloatArrayOrderedPairsValidator()
 
