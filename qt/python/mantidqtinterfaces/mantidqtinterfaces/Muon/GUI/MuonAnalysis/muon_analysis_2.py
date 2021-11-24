@@ -481,4 +481,5 @@ class MuonAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.closeEvent(event)
         self.context.ads_observer.unsubscribe()
         self.grouping_tab_widget.group_tab_presenter.closePeriodInfoWidget()
+        self.plot_widget.close()
         super(MuonAnalysisGui, self).closeEvent(event)
