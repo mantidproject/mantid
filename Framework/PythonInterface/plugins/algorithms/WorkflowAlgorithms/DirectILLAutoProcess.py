@@ -333,10 +333,16 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              validator=positiveFloat,
                              doc='A scattering angle step to which to group detectors, in degrees.')
 
+        self.declareProperty(name='GroupingBehaviour',
+                             defaultValue="Sum",
+                             validator=StringListValidator(['Sum', 'Average']),
+                             doc='Defines which behaviour should be used when grouping pixels.')
+
         grouping_options_group = 'Grouping options'
         self.setPropertyGroup('DetectorGrouping', grouping_options_group)
         self.setPropertyGroup('GroupPixelsBy', grouping_options_group)
         self.setPropertyGroup(common.PROP_GROUPING_ANGLE_STEP, grouping_options_group)
+        self.setPropertyGroup('GroupingBehaviour', grouping_options_group)
 
         self.declareProperty(name="SaveOutput",
                              defaultValue=True,
@@ -441,7 +447,8 @@ class DirectILLAutoProcess(PythonAlgorithm):
         if grouping_pattern is not None:
             for ws in ws_list:
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws,
-                               GroupingPattern=grouping_pattern)
+                               GroupingPattern=grouping_pattern,
+                               Behaviour=self.getPropertyValue('GroupingBehaviour'))
 
     def _prepare_masks(self):
         """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
