@@ -30,7 +30,9 @@ CriticalPeakRelaxationRate parameters:
 <LI> Scaling - coefficient for scaling (default 1.0)</LI>
 <LI> CriticalTemp - coefficient for barrier energy (default 0.01)</LI>
 <LI> Exponent - coefficient for critical exponent (default 1.0)</LI>
-<LI> Background - coefficient for non-critical background (default 0.0)</LI>
+<LI> Background1 - coefficient for non-critical background when x < Critical Temperature (default 0.0)</LI>
+<LI> Background2 - coefficient for non-critical background when x > Critical Temperature (default 0.0)</LI>
+<LI> Delta </LI>
 </UL>
 */
 
@@ -39,9 +41,7 @@ public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "CriticalPeakRelaxationRate"; }
   void function1D(double *out, const double *xValues, const size_t nData) const override;
-  void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
   const std::string category() const override { return "Muon\\MuonModelling\\Magnetism"; }
-  void checkParams(const double *xValues, const size_t nData) const;
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
