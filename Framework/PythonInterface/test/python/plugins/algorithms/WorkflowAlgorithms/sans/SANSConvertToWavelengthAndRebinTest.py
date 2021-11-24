@@ -4,9 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import json
 import unittest
 
-from mantid.api import FrameworkManager
+import numpy
+
+from mantid.api import FrameworkManager, WorkspaceGroup
 from mantid.dataobjects import EventWorkspace
 from sans.common.general_functions import (create_unmanaged_algorithm)
 from sans.common.constants import EMPTY_NAME
@@ -29,75 +32,86 @@ def provide_workspace(is_event=True):
 
 
 class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
+    WAV_PAIRS = "WavelengthPairs"
 
     @classmethod
     def setUpClass(cls):
         FrameworkManager.Instance()
+
+    def test_invalid_json_raises(self):
+        workspace = provide_workspace(is_event=True)
+        convert_options = {"InputWorkspace": workspace,
+                           "OutputWorkspace": EMPTY_NAME,
+                           "RebinMode": "InterpolatingRebin",
+                           self.WAV_PAIRS: "invalidJSON",
+                           "WavelengthStep": 1.5,
+                           "WavelengthStepType":  RangeStepType.LIN.value}
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
+        with self.assertRaisesRegex(RuntimeError, "WavelengthPairs"):
+            convert_alg.execute()
+
+    def test_single_nested_json_raises(self):
+        convert_options = {"InputWorkspace": provide_workspace(),
+                           "OutputWorkspace": EMPTY_NAME,
+                           "RebinMode": "InterpolatingRebin",
+                           self.WAV_PAIRS: json.dumps([1.0, 2.0]),
+                           "WavelengthStep": 1.5,
+                           "WavelengthStepType":  RangeStepType.LIN.value}
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
+        with self.assertRaisesRegex(RuntimeError, "WavelengthPairs"):
+            convert_alg.execute()
 
     def test_that_event_workspace_and_interpolating_rebin_raises(self):
         workspace = provide_workspace(is_event=True)
         convert_options = {"InputWorkspace": workspace,
                            "OutputWorkspace": EMPTY_NAME,
                            "RebinMode": "InterpolatingRebin",
-                           "WavelengthLow": 1.0,
-                           "WavelengthHigh": 3.0,
+                           self.WAV_PAIRS: json.dumps([[1.0, 3.0]]),
                            "WavelengthStep": 1.5,
                            "WavelengthStepType":  RangeStepType.LIN.value}
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
-        had_run_time_error = False
-        try:
+        with self.assertRaisesRegex(RuntimeError, "RebinMode"):
             convert_alg.execute()
-        except RuntimeError:
-            had_run_time_error = True
-        self.assertTrue(had_run_time_error)
 
     def test_that_negative_wavelength_values_raise(self):
         workspace = provide_workspace(is_event=True)
         convert_options = {"InputWorkspace": workspace,
                            "OutputWorkspace": EMPTY_NAME,
                            "RebinMode": "Rebin",
-                           "WavelengthLow": -1.0,
-                           "WavelengthHigh": 3.0,
+                           self.WAV_PAIRS: json.dumps([[-1.0, 3.0]]),
                            "WavelengthStep": 1.5,
                            "WavelengthStepType":  RangeStepType.LOG.value}
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
-        had_run_time_error = False
-        try:
+        with self.assertRaisesRegex(RuntimeError, self.WAV_PAIRS):
             convert_alg.execute()
-        except RuntimeError:
-            had_run_time_error = True
-        self.assertTrue(had_run_time_error)
 
     def test_that_lower_wavelength_larger_than_higher_wavelength_raises(self):
         workspace = provide_workspace(is_event=True)
         convert_options = {"InputWorkspace": workspace,
                            "OutputWorkspace": EMPTY_NAME,
                            "RebinMode": "Rebin",
-                           "WavelengthLow":  4.0,
-                           "WavelengthHigh": 3.0,
+                           self.WAV_PAIRS: json.dumps([[4.0, 3.0]]),
                            "WavelengthStep": 1.5,
                            "WavelengthStepType":  RangeStepType.LOG.value}
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
-        had_run_time_error = False
-        try:
+        with self.assertRaisesRegex(RuntimeError, self.WAV_PAIRS):
             convert_alg.execute()
-        except RuntimeError:
-            had_run_time_error = True
-        self.assertTrue(had_run_time_error)
 
     def test_that_event_workspace_with_conversion_is_still_event_workspace(self):
         workspace = provide_workspace(is_event=True)
         convert_options = {"InputWorkspace": workspace,
                            "OutputWorkspace": EMPTY_NAME,
                            "RebinMode": "Rebin",
-                           "WavelengthLow": 1.0,
-                           "WavelengthHigh": 10.0,
+                           self.WAV_PAIRS: json.dumps([[1.0, 10.0]]),
                            "WavelengthStep": 1.0,
                            "WavelengthStepType": RangeStepType.LIN.value}
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         convert_alg.execute()
         self.assertTrue(convert_alg.isExecuted())
-        output_workspace = convert_alg.getProperty("OutputWorkspace").value
+        output_workspaces = convert_alg.getProperty("OutputWorkspace").value
+        self.assertTrue(isinstance(output_workspaces, WorkspaceGroup))
+        self.assertEqual(1, len(output_workspaces))
+        output_workspace = output_workspaces.getItem(0)
         self.assertTrue(isinstance(output_workspace, EventWorkspace))
         # Check the rebinning part
         data_x0 = output_workspace.dataX(0)
@@ -114,13 +128,15 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         convert_options = {"InputWorkspace": workspace,
                            "OutputWorkspace": EMPTY_NAME,
                            "RebinMode": "Rebin",
-                           "WavelengthLow": 1.0,
+                           self.WAV_PAIRS: json.dumps([[1.0, None]]),
                            "WavelengthStep": 1.0,
                            "WavelengthStepType": RangeStepType.LIN.value}
         convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
         convert_alg.execute()
         self.assertTrue(convert_alg.isExecuted())
-        output_workspace = convert_alg.getProperty("OutputWorkspace").value
+        output_workspaces = convert_alg.getProperty("OutputWorkspace").value
+        self.assertTrue(isinstance(output_workspaces, WorkspaceGroup))
+        output_workspace = output_workspaces.getItem(0)
         self.assertTrue(isinstance(output_workspace, EventWorkspace))
 
         # Check the rebinning part
@@ -133,6 +149,27 @@ class SANSSConvertToWavelengthImplementationTest(unittest.TestCase):
         axis0 = output_workspace.getAxis(0)
         unit = axis0.getUnit()
         self.assertEqual(unit.unitID(),  "Wavelength")
+
+    def test_multiple_pairs(self):
+        workspace = provide_workspace(is_event=True)
+        expected_x_data = [[1.0, 2.0], [2.0, 3.0], [1.0, 3.0]]
+        convert_options = {"InputWorkspace": workspace,
+                           "OutputWorkspace": EMPTY_NAME,
+                           "RebinMode": "Rebin",
+                           self.WAV_PAIRS: json.dumps(expected_x_data),
+                           "WavelengthStep": 1.0,
+                           "WavelengthStepType": RangeStepType.LIN.value}
+        convert_alg = create_unmanaged_algorithm("SANSConvertToWavelengthAndRebin", **convert_options)
+        convert_alg.execute()
+        self.assertTrue(convert_alg.isExecuted())
+        output_workspaces = convert_alg.getProperty("OutputWorkspace").value
+
+        self.assertTrue(isinstance(output_workspaces, WorkspaceGroup))
+        self.assertEqual(len(expected_x_data), len(output_workspaces))
+
+        for i, (expected, ws) in enumerate(zip(expected_x_data, output_workspaces)):
+            x_expected_bins = numpy.arange(expected[0], expected[1] + 1, step=1)  # Emulate x bin data with interval 1
+            self.assertTrue(numpy.array_equal(x_expected_bins, ws.dataX(0)), f"Ws index {i} was not equal")
 
 
 if __name__ == '__main__':

@@ -37,6 +37,7 @@ Bugfixes
 ########
 
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
+- The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 
 Fit Functions
 -------------
@@ -50,6 +51,7 @@ Data Objects
 Geometry
 ----------
 - add additional unit test for Rasterize class.
+- fix an issue in CSGObject such that the intercept type is no longer tied to an arbitrary value that make Track returns unstable results.
 
 Python
 ------

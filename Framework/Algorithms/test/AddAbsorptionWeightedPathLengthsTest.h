@@ -91,7 +91,7 @@ public:
     // weighted path length will be less than 2mm because off centre scatter
     // points that are near the detector will have significantly shorter paths
     // than those on the opposite side of the sphere
-    TS_ASSERT_DELTA(0.1502, peak.getAbsorptionWeightedPathLength(), delta);
+    TS_ASSERT_DELTA(0.1508, peak.getAbsorptionWeightedPathLength(), delta);
   }
 
   void test_no_sample() {

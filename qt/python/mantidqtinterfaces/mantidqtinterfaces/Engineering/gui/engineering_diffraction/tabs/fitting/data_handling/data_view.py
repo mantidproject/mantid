@@ -95,7 +95,9 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.button_SerialFit.clicked.connect(slot)
 
     def set_on_table_cell_changed(self, slot):
-        self.table_selection.cellChanged.connect(slot)  # Row, Col
+        # this signal gets triggered from a separate thread sometimes (eg load). So to make the handler
+        # more simple, always issue as a queued signal
+        self.table_selection.cellChanged.connect(slot, QtCore.Qt.QueuedConnection)
 
     def set_table_selection_changed(self, slot):
         self.table_selection.itemSelectionChanged.connect(slot)
@@ -125,7 +127,7 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         self.button_SeqFit.setEnabled(enabled)
         self.button_SerialFit.setEnabled(enabled)
 
-    def add_table_row(self, run_no, bank, checked, bgsub, niter, xwindow, SG):
+    def add_table_row(self, run_no, bank, plotted, bgsub, niter, xwindow, SG):
         row_no = self.table_selection.rowCount()
         self.table_selection.insertRow(row_no)
 
@@ -137,22 +139,24 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         bank_item.setFlags(name_item.flags() & ~QtCore.Qt.ItemIsEditable)
         self.table_selection.setItem(row_no, 1, bank_item)
 
-        check_box = QtWidgets.QTableWidgetItem()
-        check_box.setFlags(check_box.flags() & ~QtCore.Qt.ItemIsEditable)
-        self.table_selection.setItem(row_no, 2, check_box)
-        if checked:
-            check_box.setCheckState(QtCore.Qt.Checked)
+        plotted_check_box = QtWidgets.QTableWidgetItem()
+
+        plotted_check_box.setFlags(plotted_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
+        if plotted:
+            plotted_check_box.setCheckState(QtCore.Qt.Checked)
         else:
-            check_box.setCheckState(QtCore.Qt.Unchecked)
+            plotted_check_box.setCheckState(QtCore.Qt.Unchecked)
+        # setItem last so that cellChanged signal only fired once
+        self.table_selection.setItem(row_no, 2, plotted_check_box)
 
         bgsub_check_box = QtWidgets.QTableWidgetItem()
         bgsub_check_box.setFlags(bgsub_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         bgsub_check_box.setToolTip('Estimate the background using iterative low-pass (smoothing) filter algorithm')
-        self.table_selection.setItem(row_no, 3, bgsub_check_box)
         if bgsub:
             bgsub_check_box.setCheckState(QtCore.Qt.Checked)
         else:
             bgsub_check_box.setCheckState(QtCore.Qt.Unchecked)
+        self.table_selection.setItem(row_no, 3, bgsub_check_box)
 
         niter_item = QtWidgets.QTableWidgetItem()
         niter_item.setData(QtCore.Qt.EditRole, int(niter))
@@ -170,11 +174,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
         SG_check_box.setFlags(SG_check_box.flags() & ~QtCore.Qt.ItemIsEditable)
         SG_check_box.setToolTip(
             'Apply linear Savitzky–Golay filter before first iteration of background subtraction (recommended)')
-        self.table_selection.setItem(row_no, 6, SG_check_box)
         if SG:
             SG_check_box.setCheckState(QtCore.Qt.Checked)
         else:
             SG_check_box.setCheckState(QtCore.Qt.Unchecked)
+        self.table_selection.setItem(row_no, 6, SG_check_box)
 
     def remove_table_row(self, row_no):
         self.table_selection.removeRow(row_no)
