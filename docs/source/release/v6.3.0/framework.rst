@@ -51,6 +51,7 @@ Data Objects
 Geometry
 ----------
 - add additional unit test for Rasterize class.
+- fix an issue in CSGObject such that the intercept type is no longer tied to an arbitrary value that make Track returns unstable results.
 
 Python
 ------

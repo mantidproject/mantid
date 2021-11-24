@@ -197,7 +197,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cp
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:400
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1411
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1342
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1343
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
@@ -347,10 +346,10 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cp
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:519
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:520
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:191
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:674
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:37
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:49
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:75
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:673
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:36
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:48
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:74
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/ScanningWorkspaceBuilder.h:52
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
