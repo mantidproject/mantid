@@ -7,9 +7,12 @@
 # pylint: disable=too-few-public-methods
 
 """ SANSConvertToWavelengthAndRebin algorithm converts to wavelength units and performs a rebin."""
+import json
+from json import JSONDecodeError
+from typing import List, Tuple
 
-from mantid.api import (DistributedDataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode,
-                        Progress)
+from mantid.api import (DistributedDataProcessorAlgorithm, WorkspaceGroupProperty, MatrixWorkspaceProperty,
+                        AlgorithmFactory, PropertyMode, Progress, WorkspaceGroup)
 from mantid.dataobjects import EventWorkspace
 from mantid.kernel import (Direction, StringListValidator, Property)
 from sans.common.constants import EMPTY_NAME
@@ -19,6 +22,8 @@ from sans.common.general_functions import (create_unmanaged_algorithm, append_to
 
 
 class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
+    WAV_PAIRS = "WavelengthPairs"
+
     def category(self):
         return 'SANS\\Wavelength'
 
@@ -31,10 +36,8 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
                                                      optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc='The workspace which is to be converted to wavelength')
 
-        self.declareProperty('WavelengthLow', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
-                             doc='The low value of the wavelength binning.')
-        self.declareProperty('WavelengthHigh', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
-                             doc='The high value of the wavelength binning.')
+        self.declareProperty(self.WAV_PAIRS, defaultValue="", direction=Direction.Input,
+                             doc='A JSON encoded list of wavelength ranges. E.g. [[1., 2.], [2., 3.]]')
         self.declareProperty('WavelengthStep', defaultValue=Property.EMPTY_DBL, direction=Direction.Input,
                              doc='The step size of the wavelength binning.')
 
@@ -52,22 +55,36 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
                              validator=allowed_rebin_methods, direction=Direction.Input,
                              doc="The method which is to be applied to the rebinning.")
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     optional=PropertyMode.Mandatory, direction=Direction.Output),
-                             doc='The output workspace.')
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                                                    optional=PropertyMode.Mandatory, direction=Direction.Output),
+                             doc='A grouped workspace containing the output workspaces'
+                                 ' in the same order as the input pairs.')
 
     def PyExec(self):
         workspace = get_input_workspace_as_copy_if_not_same_as_output_workspace(self)
-
-        progress = Progress(self, start=0.0, end=1.0, nreports=3)
+        wavelength_pairs: List[Tuple[float, float]] = json.loads(self.getProperty(self.WAV_PAIRS).value)
+        progress = Progress(self, start=0.0, end=1.0, nreports=1 + len(wavelength_pairs))  # 1 - convert units
 
         # Convert the units into wavelength
         progress.report("Converting workspace to wavelength units.")
         workspace = self._convert_units_to_wavelength(workspace)
 
         # Get the rebin option
+        output_group = WorkspaceGroup()
+        for pair in wavelength_pairs:
+            rebin_string = self._get_rebin_string(workspace, *pair)
+            progress.report(f"Converting wavelength range: {rebin_string}")
+
+            # Perform the rebin
+            rebin_options = self._get_rebin_params(rebin_string, workspace)
+            out_ws = self._perform_rebin(rebin_options)
+
+            append_to_sans_file_tag(out_ws, "_toWavelength")
+            output_group.addWorkspace(out_ws)
+        self.setProperty("OutputWorkspace", output_group)
+
+    def _get_rebin_params(self, rebin_string, workspace):
         rebin_type = RebinType(self.getProperty("RebinMode").value)
-        rebin_string = self._get_rebin_string(workspace)
         if rebin_type is RebinType.REBIN:
             rebin_options = {"InputWorkspace": workspace,
                              "PreserveEvents": True,
@@ -75,29 +92,34 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         else:
             rebin_options = {"InputWorkspace": workspace,
                              "Params": rebin_string}
-
-        # Perform the rebin
-        progress.report("Performing rebin.")
-        workspace = self._perform_rebin(rebin_type, rebin_options, workspace)
-
-        append_to_sans_file_tag(workspace, "_toWavelength")
-        self.setProperty("OutputWorkspace", workspace)
-        progress.report("Finished converting to wavelength.")
+        return rebin_options
 
     def validateInputs(self):
         errors = dict()
         # Check the wavelength
-        wavelength_low = self.getProperty("WavelengthLow").value
-        wavelength_high = self.getProperty("WavelengthHigh").value
-        if wavelength_low is not None and wavelength_high is not None and wavelength_low > wavelength_high:
-            errors.update({"WavelengthLow": "The lower wavelength setting needs to be smaller "
-                                            "than the higher wavelength setting."})
+        wavelength_json = self.getProperty(self.WAV_PAIRS).value
+        try:
+            wavelengths: List[Tuple[float, float]] = json.loads(wavelength_json)
+        except JSONDecodeError as e:
+            errors.update({self.WAV_PAIRS: f"Failed to decode JSON. Exception was: {e}"})
+            return errors
 
-        if wavelength_low is not None and wavelength_low < 0:
-            errors.update({"WavelengthLow": "The wavelength cannot be smaller than 0."})
+        if not all(isinstance(internal_item, list) for internal_item in wavelengths):
+            errors.update({self.WAV_PAIRS: "A list of pairs (i.e. list of lists) is required."
+                                           " A single pair must be container within an outer list too."})
+            return errors  # The below checks aren't really possible as we don't have a clue what we have now
 
-        if wavelength_high is not None and wavelength_high < 0:
-            errors.update({"WavelengthHigh": "The wavelength cannot be smaller than 0."})
+        def _check_individual_pair(wavelength_low, wavelength_high):
+            if wavelength_low is not None and wavelength_high is not None and wavelength_low > wavelength_high:
+                errors.update({self.WAV_PAIRS: "The lower wavelength setting needs to be smaller "
+                                               "than the higher wavelength setting."})
+            if wavelength_low is not None and wavelength_low < 0:
+                errors.update({self.WAV_PAIRS: "The wavelength cannot be smaller than 0."})
+            if wavelength_high is not None and wavelength_high < 0:
+                errors.update({self.WAV_PAIRS: "The wavelength cannot be smaller than 0."})
+
+        for pair in wavelengths:
+            _check_individual_pair(*pair)
 
         wavelength_step = self.getProperty("WavelengthStep").value
         if wavelength_step is not None and wavelength_step < 0:
@@ -120,10 +142,7 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
         convert_alg.execute()
         return convert_alg.getProperty("OutputWorkspace").value
 
-    def _get_rebin_string(self, workspace):
-        wavelength_low = self.getProperty("WavelengthLow").value
-        wavelength_high = self.getProperty("WavelengthHigh").value
-
+    def _get_rebin_string(self, workspace, wavelength_low, wavelength_high):
         # If the wavelength has not been specified, then get it from the workspace. Only the first spectrum is checked
         # The lowest wavelength value is to be found in the spectrum located at workspaces index 0 is a very
         # strong assumption, but it existed in the previous implementation.
@@ -135,15 +154,15 @@ class SANSConvertToWavelengthAndRebin(DistributedDataProcessorAlgorithm):
 
         wavelength_step = self.getProperty("WavelengthStep").value
         step_type = RangeStepType(self.getProperty("WavelengthStepType").value)
-        pre_factor = -1 if step_type == RangeStepType.LOG else 1
+        pre_factor = -1 if step_type in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else 1
         wavelength_step *= pre_factor
         return str(wavelength_low) + "," + str(wavelength_step) + "," + str(wavelength_high)
 
-    def _perform_rebin(self, rebin_type, rebin_options, workspace):
+    def _perform_rebin(self, rebin_options):
+        rebin_type = RebinType(self.getProperty("RebinMode").value)
         rebin_name = "Rebin" if rebin_type is RebinType.REBIN else "InterpolatingRebin"
         rebin_alg = create_unmanaged_algorithm(rebin_name, **rebin_options)
         rebin_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
-        rebin_alg.setProperty("OutputWorkspace", workspace)
         rebin_alg.execute()
         return rebin_alg.getProperty("OutputWorkspace").value
 

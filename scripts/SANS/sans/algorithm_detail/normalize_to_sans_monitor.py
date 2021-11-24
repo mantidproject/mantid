@@ -5,14 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
+import json
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from sans.state.StateObjects.StateWavelength import StateWavelength
 
 
-def normalize_to_monitor(state_adjustment_normalize_to_monitor, workspace, wav_range, scale_factor=1.0):
+def normalize_to_monitor(normalize_to_monitor: StateNormalizeToMonitor, wavelengths: StateWavelength,
+                         workspace, wav_range, scale_factor=1.0):
     # 1. Extract the spectrum of the incident monitor
-    incident_monitor_spectrum_number = state_adjustment_normalize_to_monitor.incident_monitor
+    incident_monitor_spectrum_number = normalize_to_monitor.incident_monitor
     workspace = _extract_monitor(workspace=workspace, spectrum_number=incident_monitor_spectrum_number)
 
     # 2. Multiply the workspace by the specified scaling factor.
@@ -20,13 +24,13 @@ def normalize_to_monitor(state_adjustment_normalize_to_monitor, workspace, wav_r
         workspace = _scale(workspace, scale_factor)
 
     # 3. Remove the prompt peak (if it exists)
-    workspace = _perform_prompt_peak_correction(workspace, state_adjustment_normalize_to_monitor)
+    workspace = _perform_prompt_peak_correction(workspace, normalize_to_monitor)
 
     # 4. Perform a flat background correction
-    workspace = _perform_flat_background_correction(workspace, state_adjustment_normalize_to_monitor)
+    workspace = _perform_flat_background_correction(workspace, normalize_to_monitor)
 
     # 5. Convert to wavelength with the specified bin settings.
-    workspace = _convert_to_wavelength(workspace, state_adjustment_normalize_to_monitor, wav_range)
+    workspace = _convert_to_wavelength(workspace, wavelengths,  normalize_to_monitor, wav_range)
 
     return workspace
 
@@ -142,27 +146,28 @@ def _perform_flat_background_correction(workspace, normalize_to_monitor_state):
     return workspace
 
 
-def _convert_to_wavelength(workspace, normalize_to_monitor_state, wav_range):
+def _convert_to_wavelength(workspace, wavelength_state: StateWavelength,
+                           norm_state: StateNormalizeToMonitor, wav_range):
     """
     Converts the workspace from time-of-flight units to wavelength units
 
     :param workspace: a time-of-flight workspace.
-    :param normalize_to_monitor_state: a SANSStateNormalizeToMonitor object.
+    :param wavelength_state: the current wavelength state
+    :param norm_state: the current monitor normalization params
     :return: a wavelength workspace.
     """
-    wavelength_step = normalize_to_monitor_state.wavelength_interval.wavelength_step
-    wavelength_step_type = normalize_to_monitor_state.wavelength_step_type_lin_log
-    wavelength_rebin_mode = normalize_to_monitor_state.rebin_type
+    wavelength_step = wavelength_state.wavelength_interval.wavelength_step
+    wavelength_step_type = wavelength_state.wavelength_step_type_lin_log
     convert_name = "SANSConvertToWavelengthAndRebin"
     convert_options = {"InputWorkspace": workspace,
-                       "WavelengthLow": wav_range[0],
-                       "WavelengthHigh": wav_range[1],
+                       "WavelengthPairs": json.dumps([(wav_range[0], wav_range[1])]),
                        "WavelengthStep": wavelength_step,
                        "WavelengthStepType": wavelength_step_type.value,
-                       "RebinMode": wavelength_rebin_mode.value}
+                       "RebinMode": norm_state.rebin_type.value}
 
     convert_alg = create_unmanaged_algorithm(convert_name, **convert_options)
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     convert_alg.setProperty("OutputWorkspace", workspace)
     convert_alg.execute()
-    return convert_alg.getProperty("OutputWorkspace").value
+    group_ws = convert_alg.getProperty("OutputWorkspace").value
+    return group_ws.getItem(0)

@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import json
+
 from sans.algorithm_detail.calculate_transmission_helper import (get_detector_id_for_spectrum_number,
                                                                  get_workspace_indices_for_monitors,
                                                                  apply_flat_background_correction_to_monitors,
@@ -259,8 +261,7 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
 
     convert_name = "SANSConvertToWavelengthAndRebin"
     convert_options = {"InputWorkspace": workspace,
-                       "WavelengthLow": wavelength_low,
-                       "WavelengthHigh": wavelength_high,
+                       "WavelengthPairs": json.dumps([(wavelength_low, wavelength_high)]),
                        "WavelengthStep": wavelength_step,
                        "WavelengthStepType": wavelength_step_type.value,
                        "RebinMode": rebin_type.value}
@@ -268,7 +269,8 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
     convert_alg.setPropertyValue("OutputWorkspace", EMPTY_NAME)
     convert_alg.setProperty("OutputWorkspace", workspace)
     convert_alg.execute()
-    return convert_alg.getProperty("OutputWorkspace").value
+    group_ws = convert_alg.getProperty("OutputWorkspace").value
+    return group_ws.getItem(0)
 
 
 def _perform_prompt_peak_correction(workspace, prompt_peak_correction_min, prompt_peak_correction_max,
