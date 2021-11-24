@@ -142,8 +142,7 @@ class ModelFittingPresenter(BasicFittingPresenter):
 
     def handle_instrument_changed(self) -> None:
         """Handle when the Instrument is changed."""
-        self.model.result_table_names = []
-        self.view.update_result_table_names([])
+        self.update_selected_parameter_combination_workspace()
 
     def update_dataset_names_in_view_and_model(self) -> None:
         """Updates the results tables currently displayed."""
