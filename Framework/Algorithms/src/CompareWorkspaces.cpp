@@ -1157,6 +1157,10 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
+        if (isRelErr) {
+          // divide diff by avg |Q| and then compare to 0 using absolute tol
+          s1 /= 0.5 * (q1.norm() + q2.norm());
+        }
       } else if (name == "QSample") {
         V3D q1 = ipws1->getPeak(peakIndex).getQSampleFrame();
         V3D q2 = ipws2->getPeak(peakIndex).getQSampleFrame();
@@ -1165,11 +1169,15 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
           s1 += (q1[i] - q2[i]) * (q1[i] - q2[i]);
         }
         s1 = std::sqrt(s1);
+        if (isRelErr) {
+          // divide diff by avg |Q| and then compare to 0 using absolute tol
+          s1 /= 0.5 * (q1.norm() + q2.norm());
+        }
       } else {
         g_log.information() << "Column " << name << " is not compared\n";
       }
       bool mismatch = false;
-      if (isRelErr && relErr(s1, s2, tolerance)) {
+      if (isRelErr && relErr(s1, s2, tolerance) && name != "QLab" && name != "QSample") {
         mismatch = true;
       } else if (std::fabs(s1 - s2) > tolerance) {
         mismatch = true;
