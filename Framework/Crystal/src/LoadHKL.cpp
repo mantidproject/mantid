@@ -143,7 +143,7 @@ void LoadHKL::exec() {
 
   // find roots of polynomial that describes
   double radius = 0.0;
-  if (std::isfinite(astar1)) {
+  if (std::isfinite(astar1) && astar1 >= 1) {
     const size_t ndeg = sizeof pc / sizeof pc[0]; // order of poly
     double coefs[ndeg];
     std::vector<double> murs;
