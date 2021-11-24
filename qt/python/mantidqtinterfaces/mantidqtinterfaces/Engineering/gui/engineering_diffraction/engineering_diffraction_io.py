@@ -35,11 +35,10 @@ class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
             obj_dic["settings_dict"] = presenter.settings_presenter.settings
         else:
             obj_dic["settings_dict"] = presenter.settings_presenter.model.get_settings_dict(SETTINGS_KEYS_TYPES)
-        if data_widget.presenter.get_loaded_workspaces():
-            obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
+        if data_widget.model._data_workspaces.get_ws_names_dict():
+            obj_dic["data_workspaces"] = data_widget.model._data_workspaces.get_ws_names_dict()
             obj_dic["fit_results"] = data_widget.model.get_fit_results()
             obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
-            obj_dic["background_params"] = data_widget.model.get_bg_params()
             if plot_widget.view.fit_browser.read_current_fitprop():
                 obj_dic["fit_properties"] = plot_widget.view.fit_browser.read_current_fitprop()
                 obj_dic["plot_diff"] = str(plot_widget.view.fit_browser.plotDiff())
@@ -61,7 +60,7 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         if obj_dic["encoder_version"] != IO_VERSION:
             logger.error("Engineering Diffraction Interface encoder used different version, restoration may fail")
 
-        ws_names = obj_dic.get("data_loaded_workspaces", None)  # workspaces are in ADS, need restoring into interface
+        ws_names = obj_dic.get("data_workspaces", None)  # workspaces are in ADS, need restoring into interface
         gui = EngineeringDiffractionGui()
         presenter = gui.presenter
         gui.tabs.setCurrentIndex(obj_dic["current_tab"])
@@ -69,7 +68,6 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
         presenter.settings_presenter.settings = obj_dic["settings_dict"]
         if ws_names is not None:
             fit_data_widget = presenter.fitting_presenter.data_widget
-            fit_data_widget.model._bg_params = obj_dic["background_params"]
             fit_data_widget.model.restore_files(ws_names)
             fit_data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
             fit_data_widget.presenter.restore_table()
