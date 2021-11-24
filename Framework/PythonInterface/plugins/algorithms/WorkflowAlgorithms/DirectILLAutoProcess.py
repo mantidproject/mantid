@@ -9,7 +9,7 @@ import DirectILL_common as common
 from mantid.api import AlgorithmFactory, FileAction, MultipleFileProperty, PropertyMode, \
     PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
-    FloatBoundedValidator, IntArrayProperty, Property, PropertyManagerProperty, \
+    FloatBoundedValidator, IntBoundedValidator, IntArrayProperty, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
 from mantid.simpleapi import *
 
@@ -170,6 +170,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
     def PyInit(self):
 
         positiveFloat = FloatBoundedValidator(0., exclusive=True)
+        positiveInt = IntBoundedValidator(0, exclusive=True)
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
         orderedPairsValidator = FloatArrayOrderedPairsValidator()
 
@@ -237,13 +238,13 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
 
         self.declareProperty(name='IncidentEnergy',
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=0.0,
                              validator=positiveFloat,
                              doc='Value for the calibrated incident energy (meV).')
 
         self.declareProperty(name='ElasticChannelIndex',
-                             defaultValue=Property.EMPTY_DBL,
-                             validator=positiveFloat,
+                             defaultValue=0,
+                             validator=positiveInt,
                              doc='Index number for the centre of the elastic peak.')
 
         self.declareProperty('SampleAngleOffset', 0.0,
@@ -305,10 +306,10 @@ class DirectILLAutoProcess(PythonAlgorithm):
         self.declareProperty(PropertyManagerProperty('SampleGeometry'),
                              doc="Dictionary for the sample geometry.")
 
-        self.declareProperty(PropertyManagerProperty('ContainerMaterial', dict()),
+        self.declareProperty(PropertyManagerProperty('ContainerMaterial'),
                              doc='Container material definitions.')
 
-        self.declareProperty(PropertyManagerProperty('ContainerGeometry', dict()),
+        self.declareProperty(PropertyManagerProperty('ContainerGeometry'),
                              doc="Dictionary for the container geometry.")
 
         attenuation_group = 'Sample attenuation'
@@ -328,7 +329,7 @@ class DirectILLAutoProcess(PythonAlgorithm):
                              doc='Step to use when grouping detectors to reduce the granularity of the output.')
 
         self.declareProperty(name=common.PROP_GROUPING_ANGLE_STEP,
-                             defaultValue=Property.EMPTY_DBL,
+                             defaultValue=0.0,
                              validator=positiveFloat,
                              doc='A scattering angle step to which to group detectors, in degrees.')
 
