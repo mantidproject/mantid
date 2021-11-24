@@ -551,11 +551,6 @@ useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GravitySANSHe
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/He3TubeEfficiency.cpp:289
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/IntegrateByComponent.cpp:192
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDCalibration.cpp:1293
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:234
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:267
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:268
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:296
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:319
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PeakParameterHelper.cpp:102
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:96
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:101
