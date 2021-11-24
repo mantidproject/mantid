@@ -600,12 +600,18 @@ class DirectILLAutoProcess(PythonAlgorithm):
             ContainerMaterial=container_material
         )
         if self.getProperty('SelfAttenuationMethod').value == 'MonteCarlo':
+            sparse_parameters = dict()
+            if self.getPropertyValue('AbsorptionCorrection') == 'Fast':
+                sparse_parameters['SparseInstrument'] = True
+                n_detector_rows = 5
+                n_detector_cols = 10
+                sparse_parameters['NumberOfDetectorRows'] = n_detector_rows
+                sparse_parameters['NumberOfDetectorColumns'] = n_detector_cols
+
             PaalmanPingsMonteCarloAbsorption(
                 InputWorkspace=ws,
                 CorrectionsWorkspace=self.absorption_corr,
-                SparseInstrument=True,
-                NumberOfDetectorRows=5,
-                NumberOfDetectorColumns=10
+                **sparse_parameters
             )
         else:
             PaalmanPingsAbsorptionCorrection(
