@@ -158,12 +158,12 @@ class RawDataExplorerPresenter(QObject):
         """
         Triggered when the selection changed in the file system widget.
         """
-        selection = self.view.get_selection()
+        last_clicked = self.view.get_last_clicked()
 
         # TODO get preview per instrument
         self.view.fileTree.setCursor(Qt.BusyCursor)
 
-        self.model.modify_preview(selection)
+        self.model.modify_preview(last_clicked)
         self.view.fileTree.unsetCursor()
 
     def on_new_preview(self, previewModel):

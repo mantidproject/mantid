@@ -9,7 +9,7 @@
 from os import path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import Load, config, mtd
+from mantid.simpleapi import Load, config, mtd, Plus
 from mantid.api import PreviewType
 
 
@@ -98,45 +98,34 @@ class RawDataExplorerModel(QObject):
         self.presenter.populate_acquisitions()
         # TODO emit a signal to modify both preview manager and target
 
-    def new_preview(self, filenames):
+    def new_preview(self, filename):
         """
         Add a preview to the model.
-        @param filenames: a list of the names of the files to show
+        @param filename: the full path to the file to show
         """
 
-        # TODO Plus/Minus if several workspaces
-        if len(filenames) != 1:
-            return
-
-        ws_name = ""
-        for filename in filenames:
-            ws_name = path.basename(filename)[:-4]
-            if not mtd.doesExist(ws_name):
-                Load(Filename=filename, OutputWorkspace=ws_name)
+        ws_name = path.basename(filename)[:-4]
+        if not mtd.doesExist(ws_name):
+            Load(Filename=filename, OutputWorkspace=ws_name)
 
         preview = self.choose_preview(ws_name)
 
         if preview is None:
             return
+
         preview_model = PreviewModel(preview, ws_name)
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
-    def modify_preview(self, filenames):
+    def modify_preview(self, filename):
         """
         Modify the last preview of the same type. If none is found, a new preview is opened.
-        @param filenames: a list of the names of the files to show
+        @param filename: the full path to the file to show
         """
 
-        # TODO Plus/Minus if several workspaces
-        if len(filenames) != 1:
-            return
-
-        ws_name = ""
-        for filename in filenames:
-            ws_name = path.basename(filename)[:-4]
-            if not mtd.doesExist(ws_name):
-                Load(Filename=filename, OutputWorkspace=ws_name)
+        ws_name = path.basename(filename)[:-4]
+        if not mtd.doesExist(ws_name):
+            Load(Filename=filename, OutputWorkspace=ws_name)
 
         # determine the preview given the prepared data
         preview = self.choose_preview(ws_name)
@@ -144,9 +133,11 @@ class RawDataExplorerModel(QObject):
         if preview is None:
             return
 
-        for i in range(len(self._previews) - 1, -1, -1):
-            if self._previews[i].get_preview_type() == preview:
-                self._previews[i].set_workspace_name(ws_name)
+        for current_preview in reversed(self._previews):
+            if current_preview.get_preview_type() == preview:
+                if self.presenter.is_accumulate_checked():
+                    ws_name = self.accumulate(current_preview.get_workspace_name(), ws_name)
+                current_preview.set_workspace_name(ws_name)
                 return
 
         preview_model = PreviewModel(preview, ws_name)
@@ -181,20 +172,35 @@ class RawDataExplorerModel(QObject):
         else:
             return PreviewType.PLOTSPECTRUM
 
+    @staticmethod
+    def accumulate(target_ws, ws_to_add):
+        """
+        Accumulate the new workspace on the currently relevant opened workspace
+        @param target_ws: the workspace on which to sum
+        @param ws_to_add: the new workspace to add
+        @return the name of the workspace containing the accumulation, that is to be shown
+        """
 
-def accumulate_name(last_ws, ws_to_add):
-    """
-    Create the name of a workspace created through accumulation
-    @param last_ws: the name of the workspace on which to accumulate
-    @param ws_to_add: the name of the workspace that will be added
-    @return the name of the accumulated workspace
-    """
-    split = last_ws.split("_")
-    if len(split) >= 2:
-        ws_name = split[0] + "_..._" + ws_to_add
-    elif len(split) == 1:
-        ws_name = last_ws + "_" + ws_to_add
-    else:
-        # shouldn't reach this case with the naming convention, but if it happens, default to the new name
-        ws_name = ws_to_add
-    return ws_name
+        final_ws = RawDataExplorerModel.accumulate_name(target_ws, ws_to_add)
+
+        # TODO what to do if sum is not possible ? gracefully handle svp
+        Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=final_ws)
+        return final_ws
+
+    @staticmethod
+    def accumulate_name(last_ws, ws_to_add):
+        """
+        Create the name of a workspace created through accumulation
+        @param last_ws: the name of the workspace on which to accumulate
+        @param ws_to_add: the name of the workspace that will be added
+        @return the name of the accumulated workspace
+        """
+        split = last_ws.split("_")
+        if len(split) >= 2:
+            ws_name = split[0] + "_..._" + ws_to_add
+        elif len(split) == 1:
+            ws_name = last_ws + "_" + ws_to_add
+        else:
+            # shouldn't reach this case with the naming convention, but if it happens, default to the new name
+            ws_name = ws_to_add
+        return ws_name
