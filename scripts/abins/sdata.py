@@ -275,7 +275,8 @@ class SData(collections.abc.Sequence):
 
         return order_index - 1
 
-    def add_autoconvolution_spectra(self, max_order: Optional[int] = None) -> None:
+    def add_autoconvolution_spectra(self, max_order: Optional[int] = None,
+                                    normalise: bool = True) -> None:
         """
         Atom-by-atom, add higher order spectra by convolution with fundamentals
 
@@ -293,7 +294,11 @@ class SData(collections.abc.Sequence):
 
         for atom_key, atom_data in self._data.items():
             fundamental_spectrum = atom_data['s']['order_1']
-            kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / np.sum(fundamental_spectrum)
+            if normalise:
+                normalisation = np.sum(fundamental_spectrum)
+            else:
+                normalisation = 1.
+            kernel = fundamental_spectrum * abins.parameters.autoconvolution['scale'] / normalisation
 
             for order_index in range(self._get_highest_existing_order(atom_data), max_order):
                 spectrum = convolve(atom_data['s'][f'order_{order_index}'], kernel, mode='full')[:fundamental_spectrum.size]
@@ -370,7 +375,7 @@ class SData(collections.abc.Sequence):
 
         return new_sdata
 
-    def __imul__(self, other: np.ndarray) -> None:
+    def __imul__(self, other: Union[float, np.ndarray]) -> None:
         """Multiply S data in-place by an array over energies and orders
 
         Columns correspond to energies, rows correspond to quantum orders.
@@ -378,12 +383,19 @@ class SData(collections.abc.Sequence):
         .apply_dw() method.
 
         """
+        if isinstance(other, float):
+            for atom_data in self:
+                for order, weights in atom_data.items():
+                    weights *= other
+            return self
+
         if isinstance(other, np.ndarray) and len(other.shape) == 1:
             other = other[np.newaxis, :]
         elif isinstance(other, np.ndarray) and len(other.shape) == 2:
             pass
         else:
-            raise IndexError("Can only multiply SData by 1- or 2-D array.")
+            raise IndexError(
+                "Can only multiply SData by a scalar float, 1- or 2-D array. ")
 
         for order_index, order_multiplier in enumerate(other):
             for atom_data in self:

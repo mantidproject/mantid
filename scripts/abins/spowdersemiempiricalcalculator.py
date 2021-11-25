@@ -114,12 +114,13 @@ class SPowderSemiEmpiricalCalculator:
         self._bin_centres = self._bins[:-1] + (bin_width / 2)
 
         if self._autoconvolution:
-            fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']
+            self._fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']
             self._fine_bins = np.arange(start=abins.parameters.sampling['min_wavenumber'],
                                         stop=(abins.parameters.sampling['max_wavenumber'] + bin_width),
-                                        step=(bin_width / fine_bin_factor),
+                                        step=(bin_width / self._fine_bin_factor),
                                         dtype=FLOAT_TYPE)
-            self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / fine_bin_factor / 2)
+            self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / self._fine_bin_factor / 2)
+            self._fine_bin_width = self._fine_bins[1] - self._fine_bins[0]
 
         else:
             self._fine_bins = None
@@ -348,8 +349,24 @@ class SPowderSemiEmpiricalCalculator:
                                   f"analytic powder-averaging. "
                                   f"Adding autoconvolution data up to order {max_dw_order}.",
                                   reporter=self.progress_reporter)
-            sdata.add_autoconvolution_spectra()
+
+            # Remove q-dependence by mapping to q = 1/AA
+            q2 = self._instrument.calculate_q_powder(input_data=self._fine_bin_centres, angle=angle)
+            q2n = q2 ** np.arange(1, self._quantum_order_num + 1)[:, np.newaxis]
+            sdata *= (1 / q2n)
+
+            sdata.add_autoconvolution_spectra(normalise=False)
             sdata = sdata.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
+
+            # Re-apply appropriate q-dependence to each order, along with 1/(n!) term
+            from scipy.special import factorial
+            q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
+
+            factorials = factorial(range(1, max_dw_order + 1))[:, np.newaxis]
+            factorials[:min_order + 1] = 1.  # If the order was calculated by a different method, no 1/n! is needed
+
+            q2n_over_n_factorial = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis] / factorials
+            sdata *= q2n_over_n_factorial
 
         else:
             self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by analytic powder-averaging.",
