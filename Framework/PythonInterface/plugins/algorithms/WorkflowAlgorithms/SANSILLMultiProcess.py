@@ -968,7 +968,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                     outputs.append(self.rename(k, v))
         for tr in transmissions:
             Transpose(InputWorkspace=tr['SampleTransmission'], OutputWorkspace=tr['SampleTransmission'])
-            self.replace_axis(tr['SampleTransmission'], self.name_axis, 1)
+            self.replace_axis(tr['SampleTransmission'], self.generate_name_axis(tr['SampleTransmission']), 1)
             outputs.append(self.rename_tr(tr['SampleTransmission']))
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=out_ws)
         self.setProperty('OutputWorkspace', out_ws)
