@@ -10,7 +10,8 @@ from os import path
 from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd, Plus
-from mantid.api import PreviewType
+
+from .PreviewFinder import PreviewFinder
 
 
 class PreviewModel(QObject):
@@ -159,18 +160,30 @@ class RawDataExplorerModel(QObject):
         """
         ws = mtd[ws_name]
 
+        preview_finder = PreviewFinder()
+
         if ws.isGroup():
             # that's probably D7 or some processed data
-            print("INVALID ENTRY : GROUP WORKSPACE")
-            return
+            if ws.size() == 0:
+                return
 
-        if ws.getNumberHistograms() > 1:
-            if ws.blocksize() > 1:
-                return PreviewType.PLOT2D
+            first_ws = ws.getItem(0)
+            instrument_name = first_ws.getInstrument().getName()
+            is_acquisition_type_needed = preview_finder.need_acquisition_mode(instrument_name)
+            if is_acquisition_type_needed:
+                # TODO determine acquisition type somehow
+                return None
             else:
-                return PreviewType.PLOT1D
-        else:
-            return PreviewType.PLOTSPECTRUM
+                return preview_finder.get_preview(instrument_name)
+
+        instrument_name = ws.getInstrument().getName()
+        is_acquisition_type_needed = preview_finder.need_acquisition_mode(instrument_name)
+
+        if not is_acquisition_type_needed:
+            return preview_finder.get_preview(instrument_name)
+
+        # TODO determine acquisition type somehow
+        return None
 
     @staticmethod
     def accumulate(target_ws, ws_to_add):
