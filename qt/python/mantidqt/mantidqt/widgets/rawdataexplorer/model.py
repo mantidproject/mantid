@@ -11,7 +11,7 @@ from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd, Plus
 
-from .PreviewFinder import PreviewFinder
+from .PreviewFinder import PreviewFinder, AcquisitionType
 
 
 class PreviewModel(QObject):
@@ -152,38 +152,48 @@ class RawDataExplorerModel(QObject):
         """
         self._previews.remove(previewModel)
 
-    @staticmethod
-    def choose_preview(ws_name):
+    def choose_preview(self, ws_name):
         """
         Reading the dimensions of the data, this determines the plot to use to show it.
         @param ws_name: the name of the workspace which data are to be shown
+        @return the preview type if it was determined, else None
         """
-        ws = mtd[ws_name]
+        workspace = mtd[ws_name]
 
         preview_finder = PreviewFinder()
 
-        if ws.isGroup():
+        if workspace.isGroup():
             # that's probably D7 or some processed data
-            if ws.size() == 0:
+            if workspace.size() == 0:
                 return
 
-            first_ws = ws.getItem(0)
-            instrument_name = first_ws.getInstrument().getName()
-            is_acquisition_type_needed = preview_finder.need_acquisition_mode(instrument_name)
-            if is_acquisition_type_needed:
-                # TODO determine acquisition type somehow
-                return None
-            else:
-                return preview_finder.get_preview(instrument_name)
-
-        instrument_name = ws.getInstrument().getName()
+            workspace = workspace.getItem(0)
+        instrument_name = workspace.getInstrument().getName()
         is_acquisition_type_needed = preview_finder.need_acquisition_mode(instrument_name)
-
-        if not is_acquisition_type_needed:
+        if is_acquisition_type_needed:
+            acquisition_mode = self.determine_acquisition_mode(workspace)
+            return preview_finder.get_preview(instrument_name, acquisition_mode)
+        else:
             return preview_finder.get_preview(instrument_name)
 
-        # TODO determine acquisition type somehow
-        return None
+    @staticmethod
+    def determine_acquisition_mode(workspace):
+        """
+        Reading the workspace run's parameters, attempts to find what kind of acquisition was used to get this data.
+        @param workspace: the workspace to check
+        @return (AcquisitionType) the predicted acquisition type
+        """
+        if workspace.blocksize() > 1:
+            # TODO FIND A BETTER WAY TO DISSOCIATE THE 2
+            # particularly, TOF can also be only channels -> what then ?
+            if str(workspace.getAxis(0).getUnit().symbol()) == "microsecond":
+                # TOF case
+                return AcquisitionType.TOF
+            else:
+                # SCAN case
+                return AcquisitionType.SCAN
+        else:
+            return AcquisitionType.MONO
 
     @staticmethod
     def accumulate(target_ws, ws_to_add):
