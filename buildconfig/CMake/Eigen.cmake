@@ -12,6 +12,7 @@ option(EIGEN_BUILD_DOC OFF)
 option(BUILD_TESTING OFF)
 option(EIGEN_LEAVE_TEST_IN_ALL_TARGET OFF)
 option(EIGEN_BUILD_PKGCONFIG OFF)
+option(EIGEN_TEST_NOQT ON) # Only used in demos and tests
 
 # Preserve shared attrs
 set(CMAKE_INSTALL_PREFIX_OLD ${CMAKE_INSTALL_PREFIX})
