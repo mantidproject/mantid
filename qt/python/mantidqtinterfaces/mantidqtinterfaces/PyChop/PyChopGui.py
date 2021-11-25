@@ -133,7 +133,6 @@ class PyChopGui(QMainWindow):
         if self.engine.chopper_system.isPhaseIndependent:
             for idx in range(len(self.engine.chopper_system.isPhaseIndependent)):
                 if idx > self.n_indep_phase:
-                    #chopper_number = self.engine.chopper_system.isPhaseIndependent[idx]
                     phase_label = QLabel("")
                     phase_edit = QLineEdit(self)
                     phase_edit.returnPressed.connect(self.setFreq)
@@ -203,7 +202,10 @@ class PyChopGui(QMainWindow):
                 if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
                     phase = str(phase)
                 else:
-                    phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
+                    try:
+                        phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
+                    except ValueError:
+                        raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
                 phases.append(phase)
         if phases:
             self.engine.setFrequency(freq_in, phase=phases)
@@ -231,43 +233,30 @@ class PyChopGui(QMainWindow):
                 self.tabs.setTabEnabled(self.tdtabID, False)
                 self._hide_phases()
 
-    def setEi(self, raise_error=False):
+    def setEi(self):
         """
         Sets the incident energy (or focused incident energy for multi-rep case).
         """
         try:
             eitxt = float(self.widgets['EiEdit']['Edit'].text())
         except ValueError:
-            if raise_error:
-                raise
-            else:
-                self.errormessage('No Ei specified, or Ei string not understood')
+            raise ValueError('No Ei specified, or Ei string not understood')
         else:
             self.engine.setEi(eitxt)
             if self.eiPlots.isChecked():
                 self.calc_callback()
 
-    def setS2(self, raise_error=False):
+    def setS2(self):
         """
         Sets the S2 tank rotation for HYSPEC instrument
         """
         try:
             S2txt = float(self.widgets['S2Edit']['Edit'].text())
         except:
-            errmsg = 'No S2 specified, or S2 string not understood'
-            if raise_error:
-                raise ValueError(errmsg)
-            else:
-                self.errormessage(errmsg)
-        else:
-            if np.abs(S2txt) > 150:
-                errmsg = 'S2 must be between -150 and 150 degrees'
-                if raise_error:
-                    raise ValueError(errmsg)
-                else:
-                    self.errormessage(errmsg)
-            else:
-                self.hyspecS2 = S2txt
+            raise ValueError('No S2 specified, or S2 string not understood')
+        if np.abs(S2txt) > 150:
+            raise ValueError('S2 must be between -150 and 150 degrees')
+        self.hyspecS2 = S2txt
 
     def calc_callback(self):
         """
@@ -277,9 +266,9 @@ class PyChopGui(QMainWindow):
             if self.engine.getChopper() is None:
                 self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
             if not self.eiPlots.isChecked():
-                self.setEi(raise_error=True)
+                self.setEi()
             if self.engine.name=='HYSPEC':
-                self.setS2(raise_error=True)
+                self.setS2()
             self.setFreq()
             self.calculate()
             if self.errormess:
@@ -801,25 +790,34 @@ class PyChopGui(QMainWindow):
             self.hlploop = QEventLoop()
             self.hlploop.exec_()
 
+    def _catch(self, fn):
+        # Wrapper to catch exceptions in callbacks
+        def wrapped(*args, **kwargs):
+            try:
+                fn(*args, **kwargs)
+            except Exception as err:
+                self.errormessage(err)
+        return wrapped
+
     def drawLayout(self):
         """
         Draws the GUI layout.
         """
         self.widgetslist = [
-            ['pair', 'show', 'Instrument', 'combo', self.instruments, self.setInstrument, 'InstrumentCombo'],
-            ['pair', 'show', 'Chopper', 'combo', '', self.setChopper, 'ChopperCombo'],
-            ['pair', 'show', 'Frequency', 'combo', '', self.setFreq, 'FrequencyCombo'],
-            ['pair', 'hide', 'Pulse remover chopper freq', 'combo', '', self.setFreq, 'PulseRemoverCombo'],
-            ['pair', 'show', 'Ei', 'edit', '', self.setEi, 'EiEdit'],
-            ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self.setFreq, 'Chopper2Phase'],
-            ['pair', 'hide', 'S2', 'edit', '', self.setS2, 'S2Edit'],
+            ['pair', 'show', 'Instrument', 'combo', self.instruments, self._catch(self.setInstrument), 'InstrumentCombo'],
+            ['pair', 'show', 'Chopper', 'combo', '', self._catch(self.setChopper), 'ChopperCombo'],
+            ['pair', 'show', 'Frequency', 'combo', '', self._catch(self.setFreq), 'FrequencyCombo'],
+            ['pair', 'hide', 'Pulse remover chopper freq', 'combo', '', self._catch(self.setFreq), 'PulseRemoverCombo'],
+            ['pair', 'show', 'Ei', 'edit', '', self._catch(self.setEi), 'EiEdit'],
+            ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self._catch(self.setFreq), 'Chopper2Phase'],
+            ['pair', 'hide', 'S2', 'edit', '', self._catch(self.setS2), 'S2Edit'],
             ['spacer'],
             ['single', 'show', 'Calculate and Plot', 'button', self.calc_callback, 'CalculateButton'],
             ['single', 'show', 'Hold current plot', 'check', lambda: None, 'HoldCheck'],
             ['single', 'show', 'Show multi-reps', 'check', lambda: None, 'MultiRepCheck'],
             ['spacer'],
-            ['single', 'show', 'Show data ascii window', 'button', self.showText, 'ShowAsciiButton'],
-            ['single', 'show', 'Save data as ascii', 'button', self.saveText, 'SaveAsciiButton']
+            ['single', 'show', 'Show data ascii window', 'button', self._catch(self.showText), 'ShowAsciiButton'],
+            ['single', 'show', 'Save data as ascii', 'button', self._catch(self.saveText), 'SaveAsciiButton']
         ]
         self.droplabels = []
         self.dropboxes = []

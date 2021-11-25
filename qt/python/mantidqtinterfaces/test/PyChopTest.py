@@ -238,7 +238,7 @@ class PyChopGuiTests(unittest.TestCase):
                 self.parent = parent
 
             def set_label(self, label):                           # noqa: E306
-                parent.legends[self] = label
+                self.parent.legends[self] = label
 
         class fake_Axes(mock.MagicMock):                          # noqa: E306
             def __init__(self, *args, **kwargs):
@@ -286,15 +286,14 @@ class PyChopGuiTests(unittest.TestCase):
             self.window.calc_callback()
             setS2.assert_called()
         # Test that the value of S2 is set correctly
-        with patch.object(self.window.widgets['S2Edit']['Edit'], 'text') as S2txt, \
-             patch.object(self.window, 'errormessage') as errmsg:
+        with patch.object(self.window.widgets['S2Edit']['Edit'], 'text') as S2txt:
             S2txt.return_value = '55'
             self.window.setS2()
             assert self.window.hyspecS2 == 55
             # Valid values are from -150 to +150
             S2txt.return_value = '155'
-            self.window.setS2()
-            errmsg.assert_called()
+            with self.assertRaises(ValueError):
+                self.window.setS2()
 
     def test_plot_flux_ei(self):
         # Tests that Hyspec routines are only called when the instrument is Hyspec
