@@ -611,7 +611,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
             to_remove.append(ws_name)
         GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
-        if len(to_remove) > 1:
+        if len(to_remove) > 0:
             DeleteWorkspaces(WorkspaceList=to_remove)
         return ws
 
