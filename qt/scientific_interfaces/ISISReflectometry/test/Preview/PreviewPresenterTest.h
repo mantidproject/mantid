@@ -35,6 +35,7 @@ using ::testing::NotNull;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Throw;
 
 class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockInstViewModelT = std::unique_ptr<MockInstViewModel>;
@@ -74,6 +75,35 @@ public:
     presenter.notifyLoadWorkspaceRequested();
   }
 
+  void test_notify_load_workspace_catches_runtime_error() {
+    auto mockModel = makeModel();
+    auto mockView = makeView();
+    auto const workspaceName = std::string("test workspace");
+    auto error = std::runtime_error("Test error");
+
+    EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
+    EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    EXPECT_CALL(*mockView, plotInstView(_, _, _)).Times(0);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    TS_ASSERT_THROWS_NOTHING(presenter.notifyLoadWorkspaceRequested());
+  }
+
+  void test_notify_load_workspace_does_not_catch_unexpected_error() {
+    auto mockModel = makeModel();
+    auto mockView = makeView();
+    auto const workspaceName = std::string("test workspace");
+    auto error = std::invalid_argument("Test error");
+
+    EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
+    EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    EXPECT_CALL(*mockView, plotInstView(_, _, _)).Times(0);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
+  }
   void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
@@ -119,6 +149,16 @@ public:
     auto presenter = PreviewPresenter(
         packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
     presenter.notifyInstViewShapeChanged();
+  }
+
+  void test_notify_contour_export_to_ads_requested() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+
+    EXPECT_CALL(*mockModel, exportSummedWsToAds()).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+
+    presenter.notifyContourExportAdsRequested();
   }
 
 private:
@@ -179,7 +219,7 @@ private:
     EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
     EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axes));
-    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes)));
+    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes))).Times(1);
   }
 
   void expectInstViewToolbarEnabled(MockPreviewView &mockView) {

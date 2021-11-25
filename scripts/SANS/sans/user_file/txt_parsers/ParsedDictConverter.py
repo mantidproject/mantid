@@ -790,9 +790,6 @@ class ParsedDictConverter(IStateParser):
 
         # The monitor-specific background settings
         _set_background_tof_monitor(state, self._input_dict)
-
-        # Get the wavelength rebin settings
-        _set_wavelength_limits(state, self._input_dict)
         return builder.build()
 
     # We have taken the implementation originally provided, so we can't help the complexity

@@ -131,8 +131,10 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Some invalid Properties found: [ InputWorkspaces ]");
+    std::string err_msg(
+        "Some invalid Properties found: \n InputWorkspaces: Workspace ws1 is ragged which is not supported.\n"
+        "Workspace ws2 is ragged which is not supported.\n");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
   }
 
   void test_OneWorkspace() {
@@ -142,8 +144,9 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Some invalid Properties found: [ InputWorkspaces ]");
+    std::string err_msg(
+        "Some invalid Properties found: \n InputWorkspaces: Please provide at least 2 workspaces to stitch.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
   }
 
   void test_HistogramData() {
@@ -154,8 +157,10 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Some invalid Properties found: [ InputWorkspaces ]");
+    std::string err_msg("Some invalid Properties found: \n"
+                        " InputWorkspaces: Workspace ws1 contains histogram data, only point data are supported.\n"
+                        "Workspace ws2 contains histogram data, only point data are supported.\n");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
   }
 
   void test_IncompatibleWorkspaces() {
@@ -166,8 +171,9 @@ public:
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", std::vector<std::string>({"ws1", "ws2"})));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "out"))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()),
-                            "Some invalid Properties found: [ InputWorkspaces ]");
+    std::string err_msg("Some invalid Properties found: \n"
+                        " InputWorkspaces: Workspace ws2 is not compatible: different number of histograms; \n");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, std::string(e.what()), err_msg);
   }
 
   void test_NotEnoughOverlap() {

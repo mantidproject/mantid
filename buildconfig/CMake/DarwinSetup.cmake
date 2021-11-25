@@ -123,10 +123,7 @@ endif()
 
 if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(CPACK_GENERATOR DragNDrop)
-  set(CMAKE_INSTALL_PREFIX
-      ""
-      CACHE PATH ""
-  )
+  set(CMAKE_INSTALL_PREFIX "")
   # Replace hdiutil command to retry on detach failure
   set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CMAKE_MACOSX_RPATH 1)
@@ -141,17 +138,13 @@ if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
   set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-  if(NOT CONDA_ENV)
-    install(
-      PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-      DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
-      RENAME mantidpython
-    )
-  endif()
   install(
-    FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
-    DESTINATION ${WORKBENCH_BUNDLE}Resources/
-    COMPONENT Runtime
+    PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
+    DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
+    RENAME mantidpython
+  )
+  install(FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
+          DESTINATION ${WORKBENCH_BUNDLE}Resources/
   )
   set(BUNDLES ${INBUNDLE} ${WORKBENCH_BUNDLE})
 

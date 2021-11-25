@@ -139,18 +139,108 @@ public:
     TS_ASSERT_EQUALS(A.getOrigin(), V3D(0.0, 0.0, 0.0));
     TS_ASSERT_EQUALS(A.getDirect(), V3D(1.0, 0.0, 0.0));
 
-    Cylinder B;
-    B.setSurface("c/y 0.0 0.0 1.0");
-    TS_ASSERT_EQUALS(B.getCentre(), V3D(0.0, 0.0, 0.0));
-    TS_ASSERT_EQUALS(B.getRadius(), 1);
-    TS_ASSERT_EQUALS(B.getNormal(), V3D(0, 1, 0));
+    Cylinder cylinder;
+    cylinder.setSurface("c/y 0.0 0.0 1.0");
+    TS_ASSERT_EQUALS(cylinder.getCentre(), V3D(0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(cylinder.getRadius(), 1);
+    TS_ASSERT_EQUALS(cylinder.getNormal(), V3D(0, 1, 0));
 
     Line::PType pntOut;
-    A.intersect(pntOut, B);
+    A.intersect(pntOut, cylinder);
 
     // forward only solution for cylinders
     TS_ASSERT_EQUALS(pntOut.size(), 1);
     TS_ASSERT_EQUALS(pntOut.front(), V3D(1.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(cylinder.onSurface(pntOut.front()), true);
+
+    // no intercept case - point outside cylinder pointing away
+    Line bad(V3D(2, 0, 0), V3D(1, 0, 0));
+    Line::PType badOut;
+    bad.intersect(badOut, cylinder);
+    TS_ASSERT_EQUALS(badOut.size(), 0);
+  }
+
+  void multScattCylinderDetails(Cylinder &cylinder, const V3D &point1, const V3D &point2) {
+    // NOTE:
+    // The results are not necessarily in the same order with the current
+    // quadratic solver (allowing imaginary roots make it more complicated for
+    // the usage here).
+    // Since we do not want to replace the current solver for stability reasons,
+    // we can only test the following two targets:
+    // - The solution, i.e. intercept, must be on the surface
+    // - The projected distance (into the circular plane) must be close to the
+    //   cylinder radius.
+
+    // from point1 to point2
+    Line case1(point1, Kernel::normalize(point2 - point1));
+    Line::PType case1_out;
+    case1.intersect(case1_out, cylinder);
+    for (const auto &point : case1_out) {
+      TS_ASSERT_EQUALS(cylinder.onSurface(point), true);
+      const double radius = sqrt(point[0] * point[0] + point[2] * point[2]);
+      TS_ASSERT_DELTA(radius, cylinder.getRadius(), 0.01 * cylinder.getRadius());
+      std::cout << "AA found " << point << std::endl;
+    }
+
+    // from point2 to point1 -- duplicated from lines above
+    Line case2(point2, Kernel::normalize(point1 - point2));
+    Line::PType case2_out;
+    case2.intersect(case2_out, cylinder);
+    for (const auto &point : case2_out) {
+      TS_ASSERT_EQUALS(cylinder.onSurface(point), true);
+      const double radius = sqrt(point[0] * point[0] + point[2] * point[2]);
+      TS_ASSERT_DELTA(radius, cylinder.getRadius(), 0.01 * cylinder.getRadius());
+      std::cout << "BB found " << point << std::endl;
+    }
+  }
+
+  void testMultScattCylinder() {
+    // these tests are a subset of the work done in MultipleScatteringCorrection
+    Cylinder cylinder2mm;
+    cylinder2mm.setNorm(V3D(0, 1, 0));
+    cylinder2mm.setRadius(0.002);
+
+    // verify correct cylinder was created
+    TS_ASSERT_EQUALS(cylinder2mm.getCentre(), V3D(0.0, 0.0, 0.0));
+    TS_ASSERT_EQUALS(cylinder2mm.getRadius(), 0.002);
+    TS_ASSERT_EQUALS(cylinder2mm.getNormal(), V3D(0, 1, 0));
+
+    // both out and parallel to the plane
+    std::cout << "\nTesting Four pairs of points\n";
+    // Set 1
+    std::cout << "First set of Points:" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {0.00194856, -0.00475, 0.001125}, {0, -0.00475, 0.00225});
+    // Set 2
+    std::cout << "Second set of Points" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {-0.00194856, -0.00370, -0.000625}, {0, -0.00475, 0.00225});
+    // Set 3 (the line intercept the symmetry axis, but end points reside on different planes)
+    std::cout << "Third set of Points" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00305, -0.000625}, {-0.000625, -0.00475, -0.00108253});
+    // Set 4 (the line intercept the symmetry axis, and end points reside on the same planes)
+    std::cout << "Forth set of Points" << std::endl;
+    multScattCylinderDetails(cylinder2mm, {-0.00108253, -0.00375, -0.000625}, {-0.000625, -0.00375, -0.00108253});
+  }
+
+  void testCylinderOnSurface() {
+    // 2mm cylinder aligned with the y-axis
+    constexpr double RADIUS{0.002};
+    Cylinder cylinder2mm;
+    cylinder2mm.setNorm(V3D(0, 1, 0));
+    cylinder2mm.setRadius(RADIUS);
+
+    // create points on the cylinder to make sure they are all found on the surface
+    const size_t numX{10};
+    constexpr double STEP{RADIUS / static_cast<double>(numX)};
+    const size_t numY{4};
+    constexpr double Y_OFFSET{0.5 * STEP * static_cast<double>(numY)};
+    for (size_t i = 0; i < numX; ++i) {
+      const double x = static_cast<double>(i) * STEP;
+      const double z = sqrt(RADIUS * RADIUS - x * x);
+      for (size_t j = 0; j < numY; ++j) {
+        const V3D position(x, static_cast<double>(j) * STEP - Y_OFFSET, z);
+        TS_ASSERT_EQUALS(cylinder2mm.onSurface(position), true);
+      }
+    }
   }
 
   // A Line with equation equivalent to x axis will cut A Cylinder with 1 radius

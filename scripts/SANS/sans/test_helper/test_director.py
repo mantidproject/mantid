@@ -11,7 +11,7 @@ from sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
 from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
 from sans.state.AllStates import get_all_states_builder
-from sans.state.StateObjects.StateWavelength import get_wavelength_builder
+from sans.state.StateObjects.StateWavelength import get_wavelength_builder, StateWavelength
 from sans.state.StateObjects.StateSave import get_save_builder
 from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
 from sans.state.StateObjects.StateScale import get_scale_builder
@@ -112,7 +112,6 @@ class TestDirector(object):
             wavelength_builder.state.wavelength_interval.wavelength_full_range = wavelength_range
             wavelength_builder.state.wavelength_interval.selected_ranges = [wavelength_range]
             wavelength_builder.set_wavelength_step_type(RangeStepType.LIN)
-            wavelength_builder.set_rebin_type(RebinType.REBIN)
             self.wavelength_state = wavelength_builder.build()
 
         # Build the SANSStateSave
@@ -138,15 +137,10 @@ class TestDirector(object):
         if self.adjustment_state is None:
             # NormalizeToMonitor
             normalize_to_monitor_builder = get_normalize_to_monitor_builder(self.data_state)
-            wavelength_range = (1.0, 10.0)
-            normalize_to_monitor_builder.state.wavelength_interval.wavelength_full_range = wavelength_range
-            normalize_to_monitor_builder.state.wavelength_interval.selected_ranges = [wavelength_range]
-            normalize_to_monitor_builder.state.wavelength_interval.wavelength_step = 2.0
-            normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.LIN)
-            normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
             normalize_to_monitor_builder.set_background_TOF_general_start(1000.)
             normalize_to_monitor_builder.set_background_TOF_general_stop(2000.)
             normalize_to_monitor_builder.set_incident_monitor(1)
+            normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
             normalize_to_monitor = normalize_to_monitor_builder.build()
 
             # CalculateTransmission
@@ -213,4 +207,17 @@ class TestDirector(object):
         state_builder.set_adjustment(self.adjustment_state)
         state_builder.set_convert_to_q(self.convert_to_q_state)
         state_builder.state.instrument_info = self.inst_info_state
-        return state_builder.build()
+        state = state_builder.build()
+        state.wavelength = self._create_state_wavelength()
+        return state
+
+    @staticmethod
+    def _create_state_wavelength() -> StateWavelength:
+        obj = StateWavelength()
+        wavelength_range = (1.0, 10.0)
+        obj.wavelength_interval.wavelength_full_range = wavelength_range
+        obj.wavelength_interval.selected_ranges = [wavelength_range]
+        obj.wavelength_interval.wavelength_step = 2.0
+        obj.wavelength_step_type = RangeStepType.LIN
+        obj.rebin_type = RebinType.REBIN
+        return obj

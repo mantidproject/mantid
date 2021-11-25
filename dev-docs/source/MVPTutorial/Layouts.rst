@@ -6,7 +6,7 @@ In the previous task a label was added to the view. However, the label
 appeared below the button. It would be sensible to place the label
 next to the button. This is possible by using **layouts**.
 
-So far we have used the vertical layout (``QtGui.QVBoxLayout``) and we
+So far we have used the vertical layout (``QtWidgets.QVBoxLayout``) and we
 will now use the horizontal layout. It is possible to add sub-layouts
 to a layout, which we will do here by adding a horizontal layout to
 the vertical one. The order in which widgets are added to the layout
@@ -17,7 +17,7 @@ In the view we will replace the ``__init__`` with the following:
 .. code-block:: python
 
     def __init__(self, parent=None):
-        super(view, self).__init__(parent)
+        super().__init__(parent)
 
         self.button = QtWidgets.QPushButton('Hi', self)
         self.button.setStyleSheet("background-color:lightgrey")

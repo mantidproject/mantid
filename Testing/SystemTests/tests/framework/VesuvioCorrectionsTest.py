@@ -167,7 +167,7 @@ class TestGammaAndMsCorrectWorkspaceIndexOne(systemtesting.MantidSystemTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_gb_peak = 0.013566
         corrections_ts_peak = 0.157938
-        corrections_ms_peak = 0.000212
+        corrections_ms_peak = 0.000200
         corrections_ts_bin = 726
         corrections_ms_bin = 709
 
@@ -224,7 +224,7 @@ class TestGammaAndMsCorrectWorkspaceIndexTwo(systemtesting.MantidSystemTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_gb_peak = 0.010067042262
         corrections_ts_peak = 0.156099834417
-        corrections_ms_peak = 0.000224572965
+        corrections_ms_peak = 0.000211000000
         correction_ms_bin = 709
 
         _validate_matrix_peak_height(self, corrections_wsg.getItem(0), corrections_gb_peak, 457)
@@ -280,7 +280,7 @@ class TestMsCorrectWithContainer(systemtesting.MantidSystemTest):
         _validate_group_structure(self, corrections_wsg, 3)
         corrections_gb_peak = 0.026998
         corrections_ts_peak = 0.138476
-        corrections_ms_peak = 0.000186
+        corrections_ms_peak = 0.000176
         corrections_ts_bin = 726
         corrections_ms_bin = 709
 
@@ -624,7 +624,3 @@ def _validate_matrix_peak_height(self, matrix_ws, expected_height, expected_bin,
                          msg="abs({:.6f} - {:.6f}) > {:.6f}".format(expected_height,peak_height, tolerance_value))
     self.assertTrue(abs(peak_bin - expected_bin) <= bin_tolerance,
                     msg="abs({:.6f} - {:.6f}) > {:.6f}".format(peak_bin, expected_bin, bin_tolerance))
-
-
-if __name__ == "__main__":
-    unittest.main()

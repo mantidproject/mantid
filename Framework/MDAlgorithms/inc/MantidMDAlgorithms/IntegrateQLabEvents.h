@@ -100,6 +100,9 @@ public:
   /// Determine if an input Q-vector lies in the cell associated to the origin
   static bool isOrigin(const V3D &q, const double &cellSize);
 
+  /// Set peak integration radius
+  void setRadius(const double &radius);
+
   /**
    * @brief distribute the events among the cells of the partitioned QLab
    * space.
@@ -271,7 +274,7 @@ private:
    * @param QLabFrame: The Peak center.
    * @param r: Peak radius.
    */
-  double detectorQ(const std::vector<V3D> &E1Vec, const V3D QLabFrame, const std::vector<double> &r);
+  double detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame, const std::vector<double> &r);
 
   // Private data members
   double m_radius; // size of sphere to use for events around a peak

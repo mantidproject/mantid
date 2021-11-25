@@ -10,10 +10,10 @@ import view
 import plot_view
 
 
-class MasterView(QtWidgets.QWidget):
+class MainView(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
-        super(MasterView, self).__init__(parent)
+        super().__init__(parent)
 
         grid = QtWidgets.QVBoxLayout(self)
         self.plot_view = plot_view.PlotView()

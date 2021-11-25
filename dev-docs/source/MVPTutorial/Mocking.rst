@@ -20,10 +20,8 @@ First are the import statements
     import view
 
     import unittest
-    from mantid.py3compat import mock
+    from unittest import mock
 
-A different import is used for ``mock``, depending on whether we're
-using Python 2 or 3.
 
 The test class is then initialised:
 
@@ -48,20 +46,20 @@ to ``mock.Mock``.
 A test is shown below:
 
 .. code-block:: python
+    :dedent: 4
 
-        def test_doSomething(self):
-            self.presenter.handleButton()
-            assert(self.view.getValue.call_count == 1)
+            def test_doSomething(self):
+                self.presenter.handleButton()
+                self.view.getValue.assert_called_once()
 
-We call the ``handleButton`` function and then use ``call_count`` to
-ensure that the method from the view is called the correct number of
-times. This is a more robust method for checking how many times a
-function is called.
+We call the ``handleButton`` function and then use ``assert_called_once``
+to ensure that the method from the view is called the correct number of
+times. This is a robust method for checking how many times a function is
+called.
 
-There is a ``assert_called_once`` function however this should be
-avoided as it can easily lead to errors. This is because it is
-expected that the function ``assert_called_twice`` exists but it does
-not, however when you run the test it will always pass.
+We could also use ``self.assertEqual(1, self.view.getValue.call_count)`` or
+a python ``assert`` statement. However using more specific asserts from the
+``mock`` and ``unittest`` libraries can make intent and error messages clearer.
 
 The last bit of code is to execute the tests:
 

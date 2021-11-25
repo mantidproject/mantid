@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import NamedTuple, List
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_convert_to_points, run_convert_to_histogram
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 
 
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
@@ -115,3 +117,12 @@ class PlottingCanvasModel(object):
             return ''
         else:
             return list(self._axes_workspace_map.keys())
+
+    def get_shade_lines(self, name, index):
+        ws = retrieve_ws(name)
+        if ws.isHistogramData():
+            ws = retrieve_ws(run_convert_to_points(name))
+            x_data, y1_data, y2_data = self._plot_model.get_shade_lines(ws, index)
+            run_convert_to_histogram(name)
+            return x_data, y1_data, y2_data
+        return self._plot_model.get_shade_lines(ws, index)

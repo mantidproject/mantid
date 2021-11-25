@@ -27,7 +27,7 @@ Mantid::Kernel::Logger g_log("Reflectometry Preview Model");
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 PreviewModel::PreviewModel() {
-  // This simplifies testing greatly
+  // This simplifies testing greatly, as it ensures that m_runDetails is never null
   createRunDetails("");
 }
 
@@ -35,6 +35,7 @@ PreviewModel::PreviewModel() {
  *
  * @param workspaceName : the workspace name to look for
  * @returns : true if the loaded workspace was set, false if it was not found in the ADS
+ * @throws : if the workspace exists in the ADS but is an unexpected type
  */
 bool PreviewModel::loadWorkspaceFromAds(std::string const &workspaceName) {
   auto &adsInstance = AnalysisDataService::Instance();
@@ -42,6 +43,10 @@ bool PreviewModel::loadWorkspaceFromAds(std::string const &workspaceName) {
     return false;
   }
   auto ws = adsInstance.retrieveWS<MatrixWorkspace>(workspaceName);
+  if (!ws) {
+    throw std::runtime_error("Unsupported workspace type; expected MatrixWorkspace");
+  }
+
   createRunDetails(workspaceName);
   m_runDetails->setLoadedWs(ws);
   return true;
@@ -82,5 +87,13 @@ void PreviewModel::createRunDetails(const std::string &workspaceName) {
 
 std::string PreviewModel::detIDsToString(std::vector<Mantid::detid_t> const &indices) const {
   return Mantid::Kernel::Strings::simpleJoin(indices.cbegin(), indices.cend(), ",");
+}
+
+void PreviewModel::exportSummedWsToAds() const {
+  if (auto summedWs = m_runDetails->getSummedWs()) {
+    AnalysisDataService::Instance().addOrReplace("preview_summed_ws", summedWs);
+  } else {
+    g_log.error("Could not export summed WS. No rectangular selection has been made on the instrument viewer.");
+  }
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

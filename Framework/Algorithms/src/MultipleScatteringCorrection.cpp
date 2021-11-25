@@ -58,9 +58,14 @@ inline const V3D getDirection(const V3D &posInitial, const V3D &posFinal) { retu
 
 // make code slightly clearer
 inline double getDistanceInsideObject(const IObject &shape, Track &track) {
-  shape.interceptSurface(track);
-  return track.totalDistInsideObject();
+  if (shape.interceptSurface(track) > 0) {
+    return track.totalDistInsideObject();
+  } else {
+    return 0.0;
+  }
 }
+
+inline double checkzero(const double x) { return std::abs(x) < std::numeric_limits<float>::min() ? 0.0 : x; }
 } // namespace
 
 /**
@@ -662,7 +667,7 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       // getDistanceInsideObject returns the line segment inside the shape from the given ray (defined by track)
       // therefore, the distance between the two point (element) can be found by the difference of the two line
       // segments.
-      L12s[idx] = (rayLengthOne1 - rayLengthOne2);
+      L12s[idx] = checkzero(rayLengthOne1 - rayLengthOne2);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -711,21 +716,21 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       const V3D unitVector = getDirection(posFrom, posTo);
 
       // combined
-      track.reset(posFrom, unitVector);
       track.clearIntersectionResults();
+      track.reset(posFrom, unitVector);
       const auto rayLen1_container = getDistanceInsideObject(shapeContainer, track);
+      track.clearIntersectionResults();
       track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
       const auto rayLen1_sample = getDistanceInsideObject(shapeSample, track);
-      track.reset(posTo, unitVector);
       track.clearIntersectionResults();
+      track.reset(posTo, unitVector);
       const auto rayLen2_container = getDistanceInsideObject(shapeContainer, track);
-      track.reset(posTo, unitVector);
       track.clearIntersectionResults();
+      track.reset(posTo, unitVector);
       const auto rayLen2_sample = getDistanceInsideObject(shapeSample, track);
       //
-      L12sContainer[idx] = rayLen1_container - rayLen2_container;
-      L12sSample[idx] = rayLen1_sample - rayLen2_sample;
+      L12sContainer[idx] = checkzero(rayLen1_container - rayLen2_container);
+      L12sSample[idx] = checkzero(rayLen1_sample - rayLen2_sample);
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -836,8 +841,11 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2,          
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
                                : calcLinearIdxFromUpperTriangular(nElements, j, i);
         // compute a2 component
-        exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
-        a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
+        const auto l12 = L12s[idx_l12];
+        if (l12 > 0.0) {
+          exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
+          a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
+        }
       }
       A2 += a2 * elementVolumes[i];
     }
@@ -884,9 +892,11 @@ void MultipleScatteringCorrection::pairWiseSum(
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, i, j)
                                : calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, j, i);
         const double l12 = L12sContainer[idx_l12] + L12sSample[idx_l12];
-        exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
-                   (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
-        a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
+        if (l12 > 0.0) {
+          exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
+                     (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
+          a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
+        }
       }
       A2 += a2 * factor_i * elementVolumes[i];
     }

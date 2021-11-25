@@ -36,9 +36,5 @@ set(MSLICE_DEV
 
 # Installation MSLICE_DEV is only set in PARENT_SCOPE! so don't use it here
 foreach(_bundle ${BUNDLES})
-  install(
-    DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
-    DESTINATION ${_bundle}scripts/ExternalInterfaces/mslice
-    COMPONENT Runtime
-  )
+  install(DIRECTORY ${_mslice_external_root}/src/mslice/mslice/ DESTINATION ${_bundle}scripts/ExternalInterfaces/mslice)
 endforeach()

@@ -613,11 +613,10 @@ bool Algorithm::executeInternal() {
       // Throw because something was invalid
       if (numErrors > 0) {
         std::stringstream msg;
-        msg << "Some invalid Properties found: [ ";
+        msg << "Some invalid Properties found: ";
         for (auto &error : errors) {
-          msg << error.first << " ";
+          msg << "\n " << error.first << ": " << error.second;
         }
-        msg << "]";
         notificationCenter().postNotification(new ErrorNotification(this, "Some invalid Properties found"));
         throw std::runtime_error(msg.str());
       }

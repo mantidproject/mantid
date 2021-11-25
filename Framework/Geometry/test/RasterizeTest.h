@@ -133,7 +133,14 @@ public:
     const auto raster = Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
-    constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
+    size_t NUM_ELEMENTS = 0;
+    const double dR = (CYLINDER_RADIUS - CYLINDER_INNER_RADIUS) / static_cast<double>(NUM_ANNULLI);
+    size_t Ni = static_cast<size_t>(CYLINDER_INNER_RADIUS / dR) * 6;
+    for (size_t i = 0; i < NUM_ANNULLI; i++) {
+      Ni += 6;
+      NUM_ELEMENTS += Ni;
+    }
+    NUM_ELEMENTS *= NUM_SLICE;
     simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
 
     // check to ensure that all points are within the shell of the hollow cylinder
@@ -175,7 +182,14 @@ public:
     const auto raster = Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
-    constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
+    size_t NUM_ELEMENTS = 0;
+    const double dR = (CYLINDER_RADIUS - CYLINDER_INNER_RADIUS) / static_cast<double>(NUM_ANNULLI);
+    size_t Ni = static_cast<size_t>(CYLINDER_INNER_RADIUS / dR) * 6;
+    for (size_t i = 0; i < NUM_ANNULLI; i++) {
+      Ni += 6;
+      NUM_ELEMENTS += Ni;
+    }
+    NUM_ELEMENTS *= NUM_SLICE;
     simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
   }
 
