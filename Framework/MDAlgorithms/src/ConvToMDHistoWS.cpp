@@ -79,7 +79,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
     size_t iSpctr = m_detIDMap[i];
     int32_t det_id = m_detID[i];
 
-    const auto &X = m_InWS2D->x(iSpctr);
+    const auto &Xedges = m_InWS2D->binEdges(iSpctr);
     const auto &Signal = m_InWS2D->y(iSpctr);
     const auto &Error = m_InWS2D->e(iSpctr);
 
@@ -87,39 +87,24 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
     if (!m_QConverter->calcYDepCoordinates(locCoord, i))
       continue; // skip y outside of the range;
 
-    bool histogram(true);
-    if (X.size() == Signal.size())
-      histogram = false;
-
-    // convert units
+    // unit converter for this spectrum
     localUnitConv.updateConversion(i);
-    std::vector<double> XtargetUnits;
-    XtargetUnits.resize(X.size());
-
-    if (histogram) {
-      double xm1 = localUnitConv.convertUnits(X[0]);
-      for (size_t j = 1; j < XtargetUnits.size(); j++) {
-        double xm = localUnitConv.convertUnits(X[j]);
-        XtargetUnits[j - 1] = 0.5 * (xm + xm1);
-        xm1 = xm;
-      }
-      XtargetUnits.back() = xm1; // just in case, should not be used
-    } else
-      for (size_t j = 0; j < XtargetUnits.size(); j++)
-        XtargetUnits[j] = localUnitConv.convertUnits(X[j]);
 
     //=> START INTERNAL LOOP OVER THE "TIME"
     for (size_t j = 0; j < specSize; ++j) {
-      double signal = Signal[j];
+      const auto xLeftInUnit = localUnitConv.convertUnits(Xedges[j]);
+      const auto xRightInUnit = localUnitConv.convertUnits(Xedges[j + 1]);
+      const auto binWidth = 0.5 * std::fabs(xRightInUnit - xLeftInUnit);
+      double signal = Signal[j] / binWidth;
       // drop NaN events
       if (isNaN(signal))
         continue;
       // drop 0 -value signals if necessary.
       if (ignoreZeros && (signal == 0.))
         continue;
-      double errorSq = Error[j] * Error[j];
+      double errorSq = Error[j] * Error[j] / (binWidth * binWidth);
 
-      if (!m_QConverter->calcMatrixCoord(XtargetUnits[j], locCoord, signal, errorSq))
+      if (!m_QConverter->calcMatrixCoord(0.5 * (xLeftInUnit + xRightInUnit), locCoord, signal, errorSq))
         continue; // skip ND outside the range
       //  ADD RESULTING EVENTS TO THE BUFFER
       // coppy all data into data buffer for future transformation into events;
