@@ -9,7 +9,7 @@ import os
 
 
 def create_run_details_object(run_number_string, inst_settings, is_vanadium_run, empty_run_number,
-                              grouping_file_name, vanadium_string, splined_name_list=None, van_abs_file_name=None):
+                              grouping_file_name, vanadium_string, output_run_string, splined_name_list=None, van_abs_file_name=None):
     """
     Creates and returns a run details object which holds various
     properties about the current run.
@@ -19,6 +19,7 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     :param empty_run_number: Empty run number(s) from mapping file
     :param grouping_file_name: Filename of the grouping file found in the calibration folder
     :param vanadium_string: Vanadium run number(s) from mapping file
+    :param output_run_string: Name to be used for output files and workspaces
     :param splined_name_list: (Optional) List of unique properties to generate a splined vanadium name from
     :param van_abs_file_name: (Optional) The name of the vanadium absorption file
     :return: RunDetails object with attributes set to applicable values
@@ -45,8 +46,6 @@ def create_run_details_object(run_number_string, inst_settings, is_vanadium_run,
     if is_vanadium_run:
         # The run number should be the vanadium number in this case
         run_number = vanadium_string
-
-    output_run_string = vanadium_string if is_vanadium_run else run_number_string
 
     # Get the file extension if set
     file_extension = getattr(inst_settings, "file_extension")
@@ -122,3 +121,28 @@ class _RunDetails(object):
         self.vanadium_absorption_path = vanadium_abs_path
         self.output_suffix = output_suffix
         self.van_paths = van_paths
+
+    def update_file_paths(self, inst_settings, new_splined_name_list, run_number_string):
+        """Updates the file path for splined, unsplined and summed_empty files using a new splined name list,
+        this is necessary on instruments where the path may change e.g. Pearl due to long-mode
+        :param inst_settings The current Instrument settings
+        :param new_splined_name_list  List of unique properties to generate a splined vanadium name from
+        :param run_number_string Run number string to use as key in mapping dictionary look up
+        """
+
+        cal_map_dict = get_cal_mapping_dict(run_number_string=run_number_string,
+                                            cal_mapping_path=inst_settings.cal_mapping_path)
+        offset_file_name = common.cal_map_dictionary_key_helper(dictionary=cal_map_dict, key="offset_file_name")
+
+        # Prepend the properties used for creating a van spline so we can fingerprint the output files
+        splined_list = new_splined_name_list if new_splined_name_list else []
+        splined_list.append(os.path.basename(offset_file_name))
+
+        splined_van_name = common.generate_splined_name(self.vanadium_run_numbers, splined_list)
+        self.splined_vanadium_file_path = os.path.join(self.van_paths, splined_van_name)
+
+        unsplined_van_name = common.generate_unsplined_name(self.vanadium_run_numbers, splined_list)
+        self.unsplined_vanadium_file_path = os.path.join(self.van_paths, unsplined_van_name)
+
+        summed_empty_name = common.generate_summed_empty_name(self.empty_runs, splined_list)
+        self.summed_empty_file_path = os.path.join(self.van_paths, summed_empty_name)

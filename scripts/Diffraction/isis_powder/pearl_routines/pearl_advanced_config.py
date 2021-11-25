@@ -18,11 +18,11 @@ general_params = {
          "tt88_grouping_filename": "pearl_group_12_1_TT88.cal",
          "tt70_grouping_filename": "pearl_group_12_1_TT70.cal",
          "tt35_grouping_filename": "pearl_group_12_1_TT35.cal",
-         "nxs_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.nxs",
-         "gss_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.gsas",
+         "nxs_filename": "{runno}{suffix}_{tt_mode}{_long_mode}.nxs",
+         "gss_filename": "{runno}{suffix}_{tt_mode}{_long_mode}.gsas",
          "dat_files_directory": "",
-         "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof.xye",
-         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d.xye"
+         "tof_xye_filename": "{runno}{suffix}_{tt_mode}{_long_mode}_tof.xye",
+         "dspacing_xye_filename": "{runno}{suffix}_{tt_mode}{_long_mode}_d.xye"
     },
 
     "subtract_empty_instrument": True,

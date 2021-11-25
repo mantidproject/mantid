@@ -14,14 +14,15 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None, file_name_override=None):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
-                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details)
+                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details,
+                                        file_name_override=file_name_override)
     elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb,
-                                     sample_details=sample_details)
+                                     sample_details=sample_details, file_name_override=file_name_override)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
@@ -147,9 +148,10 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details):
+def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details, file_name_override):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
-                                                          instrument=instrument)
+                                                          instrument=instrument,
+                                                          file_name_override=file_name_override)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
     vanadium_splines = None
     van = "van_{}".format(run_details.vanadium_run_numbers)
@@ -203,7 +205,7 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     return output_list
 
 
-def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details):
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details, file_name_override):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)

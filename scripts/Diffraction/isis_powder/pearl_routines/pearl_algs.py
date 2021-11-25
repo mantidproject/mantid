@@ -108,7 +108,7 @@ def _get_run_numbers_for_key(current_mode_run_numbers, key):
                                                 append_to_error_message=err_message)
 
 
-def get_run_details(run_number_string, inst_settings, is_vanadium_run):
+def get_run_details(run_number_string, inst_settings, is_vanadium_run, inst_prefix):
     all_run_numbers = get_cal_mapping_dict(run_number_string, inst_settings.cal_mapping_path)
     empty_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="empty_run_numbers")
     vanadium_runs = _get_run_numbers_for_key(current_mode_run_numbers=all_run_numbers, key="vanadium_run_numbers")
@@ -121,10 +121,17 @@ def get_run_details(run_number_string, inst_settings, is_vanadium_run):
     if inst_settings.tt_mode == "custom":
         spline_identifier.append(os.path.splitext(os.path.basename(grouping_file_name))[0])
 
+    if inst_settings.filename_override:
+        output_run_string = os.path.splitext(inst_settings.filename_override)[0]
+    elif is_vanadium_run:
+        output_run_string = vanadium_runs
+    else:
+        output_run_string = inst_prefix + run_number_string
     return create_run_details_object(run_number_string=run_number_string, inst_settings=inst_settings,
                                      is_vanadium_run=is_vanadium_run, splined_name_list=spline_identifier,
                                      grouping_file_name=grouping_file_name, empty_run_number=empty_runs,
-                                     vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file)
+                                     vanadium_string=vanadium_runs, van_abs_file_name=inst_settings.van_absorb_file,
+                                     output_run_string=output_run_string)
 
 
 def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values, integration_range, ex_regions):

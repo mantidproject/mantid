@@ -39,6 +39,7 @@ class Pearl(AbstractInst):
                 if not hasattr(self._inst_settings, 'attenuation_file'):
                     raise RuntimeError("Attenuation cannot be applied because attenuation_file not specified")
             return self._focus(run_number_string=self._inst_settings.run_number,
+                               file_name_override=self._inst_settings.filename_override,
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
                                do_van_normalisation=self._inst_settings.van_norm)
 
@@ -107,15 +108,18 @@ class Pearl(AbstractInst):
         if self._inst_settings.tt_mode == "custom":
             grouping_file_name = pearl_algs._pearl_get_tt_grouping_file_name(self._inst_settings)
             tt_mode_string += os.path.splitext(os.path.basename(grouping_file_name))[0]
-        run_number_string_key = self._generate_run_details_fingerprint(
-            run_number_string, self._inst_settings.file_extension, tt_mode_string, self._inst_settings.long_mode)
+        args = (run_number_string, self._inst_settings.file_extension, self._inst_settings.tt_mode_string, self._inst_settings.long_mode)
+        if self._inst_settings.filename_override:
+            args = (*args, self._inst_settings.filename_override)
+        run_number_string_key = self._generate_run_details_fingerprint(*args)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 
         self._cached_run_details[run_number_string_key] = pearl_algs.get_run_details(
             run_number_string=run_number_string,
             inst_settings=self._inst_settings,
-            is_vanadium_run=self._is_vanadium)
+            is_vanadium_run=self._is_vanadium,
+            inst_prefix=self._inst_prefix)
         return self._cached_run_details[run_number_string_key]
 
     def _add_formatting_options(self, format_options):
@@ -197,7 +201,7 @@ class Pearl(AbstractInst):
                                                         run_details=run_details, focus_mode=output_mode,
                                                         attenuation_filepath=attenuation_path)
 
-        group_name = "PEARL{0!s}_{1}{2}-Results-D-Grp"
+        group_name = "{0!s}_{1}{2}-Results-D-Grp"
         mode = "_long" if self._inst_settings.long_mode else ""
         group_name = group_name.format(run_details.output_run_string, self._inst_settings.tt_mode,
                                        mode)

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections
 import copy
+import os.path
 import warnings
 
 import mantid.kernel as kernel
@@ -197,8 +198,11 @@ def generate_run_numbers(run_number_string):
 
     # If its a string we must parse it
     run_number_string = run_number_string.strip()
-    run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
-    run_list = _run_number_generator(processed_string=run_boundaries)
+    if any(x in run_number_string for x in ['_', '-']):
+        run_boundaries = run_number_string.replace('_', '-')  # Accept either _ or - delimiters
+        run_list = _run_number_generator(processed_string=run_boundaries)
+    else:
+        run_list = [run_number_string]
     return run_list
 
 
@@ -332,7 +336,7 @@ def keep_single_ws_unit(d_spacing_group, tof_group, unit_to_keep):
         raise ValueError("The user specified unit to keep is unknown")
 
 
-def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None):
+def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None, file_name_override=None):
     """
     Loads a workspace using Mantid and then performs current normalisation on it. Additionally it will either
     load a range of runs individually or summed depending on the user specified behaviour queried from the instrument.
@@ -349,7 +353,10 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
 
     run_information = instrument._get_run_details(run_number_string=run_number_string)
     file_ext = run_information.file_extension
-    raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
+    if file_name_override:
+        raw_ws_list = _load_list_of_files(file_name_list=[file_name_override], instrument=instrument, file_ext=file_ext)
+    else:
+        raw_ws_list = _load_raw_files(run_number_string=run_number_string, instrument=instrument, file_ext=file_ext)
 
     if input_batching == INPUT_BATCHING.Summed and len(raw_ws_list) > 1:
         summed_ws = _sum_ws_range(ws_list=raw_ws_list)
@@ -643,26 +650,27 @@ def _load_raw_files(run_number_string, instrument, file_ext=None):
     """
     run_number_list = generate_run_numbers(run_number_string=run_number_string)
     file_ext = "" if file_ext is None else file_ext
+    run_number_list = [instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext) for run_number in run_number_list]
     load_raw_ws = _load_list_of_files(run_number_list, instrument, file_ext=file_ext)
     return load_raw_ws
 
 
-def _load_list_of_files(run_numbers_list, instrument, file_ext=None):
+def _load_list_of_files(file_name_list, instrument, file_ext=None):
     """
     Loads files based on the list passed to it. If the list is
     greater than the maximum range it will raise an exception
     see _check_load_range for more details
-    :param run_numbers_list: The list of runs to load
+    :param file_name_list: The list of runs to load
     :param instrument: The instrument to generate the prefix for
     :return: The loaded workspaces as a list
     """
     read_ws_list = []
-    _check_load_range(list_of_runs_to_load=run_numbers_list)
+    _check_load_range(list_of_runs_to_load=file_name_list)
 
-    for run_number in run_numbers_list:
-        file_name = instrument._generate_input_file_name(run_number=run_number, file_ext=file_ext)
+    for file_name in file_name_list:
         read_ws = mantid.Load(Filename=file_name)
-        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=file_name))
+        ws_name = os.path.splitext(file_name)[0]
+        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=ws_name))
 
     return read_ws_list
 

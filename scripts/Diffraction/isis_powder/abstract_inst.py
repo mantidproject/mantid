@@ -67,7 +67,8 @@ class AbstractInst(object):
                run_number_string,
                do_van_normalisation,
                do_absorb_corrections,
-               sample_details=None):
+               sample_details=None,
+               file_name_override=None):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -79,7 +80,8 @@ class AbstractInst(object):
                            perform_vanadium_norm=do_van_normalisation,
                            instrument=self,
                            absorb=do_absorb_corrections,
-                           sample_details=sample_details)
+                           sample_details=sample_details,
+                           file_name_override=file_name_override)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """
