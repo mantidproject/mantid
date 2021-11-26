@@ -35,10 +35,10 @@ Before starting the exercises, there are some setup steps:
 
 -  Clone this repository: https://github.com/mantidproject/newstarter
 -  Make a new branch ``git checkout --no-track -b firstname_lastname_exercises origin/master``, where *firstname*, *lastname* should be replaced as appropriate.
--  Make a copy of the *exercises/template* directory and name it *firstname_lastname*. The directory should be in the exercises directory.
+-  Make a copy of the *exercises-cpp/template* directory and name it *firstname_lastname*. The directory should be in the exercises directory.
 -  Make a directory called *builds* in the root of the *newstarter* repository. Git is setup to ignore this directory.
 -  Start the CMake Gui
--  Point the source directory at *exercises/firstname_lastname* and build directory at *builds*
+-  Point the source directory at *exercises-cpp/firstname_lastname* and build directory at *builds*
 -  Click *Configure* and select *Unix Makefiles* on *Linux/OS X or Visual Studio 2019* and click *Finish*
 -  Assuming there are no errors click *Generate*
 
@@ -79,7 +79,7 @@ Reading
 Exercise
 ^^^^^^^^
 
-The code should be placed in *exercises/firstname_lastname/ex01_basics/src"*
+The code should be placed in *exercises-cpp/firstname_lastname/ex01_basics/src"*
 
 The Visual Studio solution is placed in builds/ex01_basics. On Unix you can type make in *builds/ex01_basics*. The executable will be place in *builds/ex01_basics/bin*.
 
@@ -128,7 +128,7 @@ Reading
 Exercise
 ^^^^^^^^
 
-The code should be placed in *exercises/firstname_lastname/ex02_oo_basics/src"*
+The code should be placed in *exercises-cpp/firstname_lastname/ex02_oo_basics/src"*
 
 The Visual Studio solution is place in builds/ex02_oo_basics. On Unix you can type make in *builds/ex02_oo_basics*. The executable will be place in *builds/ex02_oo_basics/bin*.
 
