@@ -11,9 +11,9 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>
 

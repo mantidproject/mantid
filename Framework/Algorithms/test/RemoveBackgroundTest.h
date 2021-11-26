@@ -16,7 +16,7 @@
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAlgorithms/RemoveBackground.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 using namespace Mantid;
 
 void init_workspaces(int nHist, int nBins, API::MatrixWorkspace_sptr &BgWS, API::MatrixWorkspace_sptr &SourceWS) {

@@ -10,10 +10,10 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/RecalculateTrajectoriesExtents.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::MDAlgorithms::RecalculateTrajectoriesExtents;

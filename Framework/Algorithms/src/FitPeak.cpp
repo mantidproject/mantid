@@ -92,7 +92,7 @@ void FitOneSinglePeak::setFitWindow(double leftwindow, double rightwindow) {
   m_minFitX = leftwindow;
   m_maxFitX = rightwindow;
 
-  auto &vecX = m_dataWS->x(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex);
 
   i_minFitX = getIndex(vecX, m_minFitX);
   i_maxFitX = getIndex(vecX, m_maxFitX);
@@ -111,7 +111,7 @@ void FitOneSinglePeak::setPeakRange(double xpeakleft, double xpeakright) {
   m_minPeakX = xpeakleft;
   m_maxPeakX = xpeakright;
 
-  auto &vecX = m_dataWS->x(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex);
 
   i_minPeakX = getIndex(vecX, m_minPeakX);
   i_maxPeakX = getIndex(vecX, m_maxPeakX);
@@ -383,8 +383,8 @@ double FitOneSinglePeak::estimatePeakHeight(const API::IPeakFunction_const_sptr 
   peakfunc->function(svdomain, svvalues);
   double curpeakheight = svvalues[0];
 
-  auto &vecX = dataws->x(wsindex);
-  auto &vecY = dataws->y(wsindex);
+  const auto &vecX = dataws->x(wsindex);
+  const auto &vecY = dataws->y(wsindex);
   double ymax = vecY[ixmin + 1];
   size_t iymax = ixmin + 1;
   for (size_t i = ixmin + 2; i < ixmax; ++i) {
@@ -1404,7 +1404,7 @@ void FitPeak::setupOutput(const std::map<std::string, double> &m_fitErrorPeakFun
                           const std::map<std::string, double> &m_fitErrorBkgdFunc) {
   // TODO - Need to retrieve useful information from FitOneSinglePeak object
   // (think of how)
-  auto &vecX = m_dataWS->x(m_wsIndex);
+  const auto &vecX = m_dataWS->x(m_wsIndex);
   const size_t i_minFitX = getIndex(vecX, m_minFitX);
   const size_t i_maxFitX = getIndex(vecX, m_maxFitX);
 

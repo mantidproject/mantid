@@ -12,14 +12,14 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>

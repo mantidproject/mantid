@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt.
 # std imports
 import unittest
+from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
 # 3rd party imports
@@ -123,7 +124,7 @@ class PixelLinePlotTest(unittest.TestCase):
         mock_image.get_array.return_value = signal
         image_axes.images = [mock_image]
         plotter = MagicMock(image_axes=image_axes, image=mock_image)
-        pixel_plots = PixelLinePlot(plotter)
+        pixel_plots = PixelLinePlot(plotter, mock.Mock())
 
         pixel_plots.on_cursor_at(0.0, 1.0)
 
@@ -134,7 +135,7 @@ class PixelLinePlotTest(unittest.TestCase):
 
     def test_cursor_outside_axes_deletes_plot_lines(self):
         plotter = MagicMock()
-        pixel_plots = PixelLinePlot(plotter)
+        pixel_plots = PixelLinePlot(plotter, mock.Mock())
 
         pixel_plots.on_cursor_outside_axes()
 

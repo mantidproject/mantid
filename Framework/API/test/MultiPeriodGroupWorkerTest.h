@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/MultiPeriodGroupWorker.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "MultiPeriodGroupTestBase.h"
 
 using Mantid::API::MultiPeriodGroupWorker;

@@ -33,6 +33,7 @@ class FitPropertyBrowserPlotInteractionTest(unittest.TestCase):
     def setup_mock_fit_browser(self, workspace_creator, workspace_name, function, function_prefix):
         workspace_creator(workspace_name)
         self.fit_browser.workspaceName = Mock(return_value=workspace_name)
+        self.fit_browser.ignoreInvalidData.return_value = True
         self.fit_browser.currentHandler.return_value = self.create_mock_handler(function, function_prefix)
 
     def create_table_workspace(self, table_name):

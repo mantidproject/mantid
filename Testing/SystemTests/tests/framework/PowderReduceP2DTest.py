@@ -7,6 +7,8 @@
 import systemtesting
 from mantid.simpleapi import PowderReduceP2D
 
+import sys
+
 
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def __init__(self):
@@ -122,11 +124,12 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 4
 
     def _loadReference(self):
-        return 'PowderReduceP2D_reference.p2d'
+        # NOTE: In PR32971, the surface intersection type determination bug is fixed,
+        #       and it affected the all calcuation related to CSGObject.
+        #       The reference file for Linux is updated in the PR, but the windows one
+        #       is not as we do not have a working windwos dev environment here.
+        suffix = "" if sys.platform != 'win32' else "_msvc"
+        return f'PowderReduceP2D_reference{suffix}.p2d'
 
     def _outputFile(self):
         return 'PowderReduceP2D_Test'
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -17,8 +17,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

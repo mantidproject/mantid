@@ -143,7 +143,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
 
   // calculate some covariances to support error propagation
   auto &enew = output.mutableE();
-  auto &eold = input.dataE();
+  const auto &eold = input.dataE();
   // u_ypp_ypp - covariance of y'' vs y''
   std::vector<double> u_ypp_ypp(xs.size());
   // u_ypp_y - covariance of y'' vs y

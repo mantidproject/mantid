@@ -994,6 +994,7 @@ class RunTabPresenter(PresenterCommon):
         self._set_on_view("wavelength_min")
         self._set_on_view("wavelength_max")
         self._set_on_view("wavelength_step")
+        self._set_on_view("wavelength_range")
 
         self._set_on_view("absolute_scale")
         self._set_on_view("z_offset", self.DEFAULT_DECIMAL_PLACES_MM)

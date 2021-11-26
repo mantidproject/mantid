@@ -882,6 +882,35 @@ TMDE(void MDBox)::reserveMemoryForLoad(uint64_t size) { this->data.reserve(size)
  * @param filePosition -- the place in the direct access file, where necessary
  *data are located
  * @param nEvents      -- number of events reqested to load
+ * @param tableDataTemp -- overload allows for passing previously allocated temporary memory
+ */
+TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents,
+                                 std::vector<coord_t> &tableDataTemp) {
+  if (nEvents == 0)
+    return;
+
+  if (!FileSaver)
+    throw(std::invalid_argument(" Needs defined file saver to load data using it"));
+  if (!FileSaver->isOpened())
+    throw(std::invalid_argument(" The data file has to be opened to use box loadAndAddFrom function"));
+
+  std::lock_guard<std::mutex> _lock(this->m_dataMutex);
+
+  tableDataTemp.clear();
+  FileSaver->loadBlock(tableDataTemp, filePosition, nEvents);
+
+  // convert data to events appending new events to existing
+  MDE::dataToEvents(tableDataTemp, data, false);
+}
+
+/**Load the box data of specified size from the disk location provided using the
+ *class, respoinsible for the file IO and append them to exisiting events
+ * Clear events vector first if overwriting the exisitng events is necessary.
+ *
+ * @param FileSaver    -- the pointer to the class, responsible for file IO
+ * @param filePosition -- the place in the direct access file, where necessary
+ *data are located
+ * @param nEvents      -- number of events reqested to load
  */
 TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_t filePosition, size_t nEvents) {
   if (nEvents == 0)
@@ -894,11 +923,11 @@ TMDE(void MDBox)::loadAndAddFrom(API::IBoxControllerIO *const FileSaver, uint64_
 
   std::lock_guard<std::mutex> _lock(this->m_dataMutex);
 
-  std::vector<coord_t> TableData;
-  FileSaver->loadBlock(TableData, filePosition, nEvents);
+  m_tableData.clear();
+  FileSaver->loadBlock(m_tableData, filePosition, nEvents);
 
   // convert data to events appending new events to existing
-  MDE::dataToEvents(TableData, data, false);
+  MDE::dataToEvents(m_tableData, data, false);
 }
 /** clear file-backed information from the box if such information exists
  *

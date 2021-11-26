@@ -73,6 +73,8 @@ namespace SEArgs {
 const std::string NAME("Name");
 /// Static Container string
 const std::string CONTAINER("Container");
+/// Static Path string
+const std::string PATH("Path");
 } // namespace SEArgs
 /// Provate namespace storing geometry args
 namespace GeometryArgs {
@@ -291,8 +293,8 @@ void SetSample::validateGeometry(std::map<std::string, std::string> &errors, con
       } else {
         // check if the value is a valid shape XML
         ShapeFactory shapeFactory;
-        auto shape = shapeFactory.createShape(geomArgs.getPropertyValue(GeometryArgs::VALUE));
-        if (!shape || !shape->hasValidShape()) {
+        auto shapeFromValue = shapeFactory.createShape(geomArgs.getPropertyValue(GeometryArgs::VALUE));
+        if (!shapeFromValue || !shapeFromValue->hasValidShape()) {
           errors[flavour] = "Invalid XML for CSG shape value";
         }
       }
@@ -586,7 +588,13 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   }
   auto finder = std::make_unique<SampleEnvironmentSpecFileFinder>(environDirs);
   SampleEnvironmentFactory factory(std::move(finder));
-  auto sampleEnviron = factory.create(facilityName, instrumentName, envName, canName);
+  Geometry::SampleEnvironment_uptr sampleEnviron;
+  if (args->existsProperty(SEArgs::PATH)) {
+    auto sampleEnvironSpec = factory.parseSpec(envName, args->getPropertyValue(SEArgs::PATH));
+    sampleEnviron = sampleEnvironSpec->buildEnvironment(canName);
+  } else {
+    sampleEnviron = factory.create(facilityName, instrumentName, envName, canName);
+  }
   exptInfo.mutableSample().setEnvironment(std::move(sampleEnviron));
   return &(exptInfo.sample().getEnvironment());
 }
@@ -1001,9 +1009,9 @@ std::string SetSample::createCylinderLikeXML(const Kernel::PropertyManager &args
       XMLString << axisXML(axisId);
       baseCentre = cylBaseCentre(centre, height, axisId);
     } else {
-      const std::vector<double> axis = getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
-      XMLString << axisXML(axis);
-      baseCentre = cylBaseCentre(centre, height, axis);
+      const std::vector<double> axisVector = getPropertyAsVectorDouble(args, ShapeArgs::AXIS);
+      XMLString << axisXML(axisVector);
+      baseCentre = cylBaseCentre(centre, height, axisVector);
     }
   } else {
     const auto axisId = static_cast<unsigned>(refFrame.pointingUp());

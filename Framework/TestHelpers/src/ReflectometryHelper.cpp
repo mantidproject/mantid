@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <utility>
 
-#include "MantidTestHelpers/ReflectometryHelper.h"
+#include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -14,11 +14,11 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 namespace Mantid {
 
@@ -28,7 +28,7 @@ using namespace DataObjects;
 using namespace HistogramData;
 using namespace Kernel;
 
-namespace TestHelpers {
+namespace FrameworkTestHelpers {
 
 MatrixWorkspace_sptr createHistoWS(size_t nBins, double startX, double endX, std::vector<double> const &values,
                                    std::string const &unitX = "TOF") {
@@ -190,5 +190,5 @@ MatrixWorkspace_sptr createWorkspaceSingle(const double startX, const int nBins,
   ws->mutableRun().addProperty<std::string>("run_number", "1234");
   return ws;
 }
-} // namespace TestHelpers
+} // namespace FrameworkTestHelpers
 } // namespace Mantid

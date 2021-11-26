@@ -258,6 +258,8 @@ void BatchPresenter::notifyAnyBatchAutoreductionResumed() { m_runsPresenter->not
 
 void BatchPresenter::notifyAnyBatchAutoreductionPaused() { m_runsPresenter->notifyAnyBatchAutoreductionPaused(); }
 
+void BatchPresenter::notifyBatchLoaded() { m_runsPresenter->notifyBatchLoaded(); }
+
 Mantid::Geometry::Instrument_const_sptr BatchPresenter::instrument() const { return m_mainPresenter->instrument(); }
 
 std::string BatchPresenter::instrumentName() const { return m_mainPresenter->instrumentName(); }
@@ -319,7 +321,7 @@ void BatchPresenter::notifyResetRoundPrecision() { m_runsPresenter->resetRoundPr
  */
 int BatchPresenter::percentComplete() const { return m_jobManager->percentComplete(); }
 
-API::IConfiguredAlgorithm::AlgorithmRuntimeProps BatchPresenter::rowProcessingProperties() const {
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchPresenter::rowProcessingProperties() const {
   return m_jobManager->rowProcessingProperties();
 }
 

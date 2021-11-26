@@ -54,6 +54,7 @@ set(SRC_FILES
     src/FuncMinimizers/TrustRegionMinimizer.cpp
     src/FunctionDomain1DSpectrumCreator.cpp
     src/Functions/Abragam.cpp
+    src/Functions/Activation.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -112,12 +113,15 @@ set(SRC_FILES
     src/Functions/LinearBackground.cpp
     src/Functions/LogNormal.cpp
     src/Functions/Lorentzian.cpp
+    src/Functions/MagneticOrderParameter.cpp
     src/Functions/MultivariateGaussianComptonProfile.cpp
     src/Functions/MuonFInteraction.cpp
+    src/Functions/MuoniumDecouplingCurve.cpp
     src/Functions/NeutronBk2BkExpConvPVoigt.cpp
     src/Functions/PawleyFunction.cpp
     src/Functions/PeakParameterFunction.cpp
     src/Functions/Polynomial.cpp
+    src/Functions/PowerLaw.cpp
     src/Functions/ProcessBackground.cpp
     src/Functions/ProductFunction.cpp
     src/Functions/ProductLinearExp.cpp
@@ -127,6 +131,7 @@ set(SRC_FILES
     src/Functions/ReflectivityMulf.cpp
     src/Functions/Resolution.cpp
     src/Functions/SimpleChebfun.cpp
+    src/Functions/SmoothTransition.cpp
     src/Functions/StaticKuboToyabe.cpp
     src/Functions/StaticKuboToyabeTimesExpDecay.cpp
     src/Functions/StaticKuboToyabeTimesGausDecay.cpp
@@ -227,6 +232,7 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
     inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
     inc/MantidCurveFitting/Functions/Abragam.h
+    inc/MantidCurveFitting/Functions/Activation.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
@@ -280,12 +286,15 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/LinearBackground.h
     inc/MantidCurveFitting/Functions/LogNormal.h
     inc/MantidCurveFitting/Functions/Lorentzian.h
+    inc/MantidCurveFitting/Functions/MagneticOrderParameter.h
     inc/MantidCurveFitting/Functions/MultivariateGaussianComptonProfile.h
     inc/MantidCurveFitting/Functions/MuonFInteraction.h
+    inc/MantidCurveFitting/Functions/MuoniumDecouplingCurve.h
     inc/MantidCurveFitting/Functions/NeutronBk2BkExpConvPVoigt.h
     inc/MantidCurveFitting/Functions/PawleyFunction.h
     inc/MantidCurveFitting/Functions/PeakParameterFunction.h
     inc/MantidCurveFitting/Functions/Polynomial.h
+    inc/MantidCurveFitting/Functions/PowerLaw.h
     inc/MantidCurveFitting/Functions/ProcessBackground.h
     inc/MantidCurveFitting/Functions/ProductFunction.h
     inc/MantidCurveFitting/Functions/ProductLinearExp.h
@@ -295,6 +304,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ReflectivityMulf.h
     inc/MantidCurveFitting/Functions/Resolution.h
     inc/MantidCurveFitting/Functions/SimpleChebfun.h
+    inc/MantidCurveFitting/Functions/SmoothTransition.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabe.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesExpDecay.h
     inc/MantidCurveFitting/Functions/StaticKuboToyabeTimesGausDecay.h
@@ -392,6 +402,7 @@ set(TEST_FILES
     FunctionFactoryConstraintTest.h
     FunctionParameterDecoratorFitTest.h
     Functions/AbragamTest.h
+    Functions/ActivationTest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
@@ -438,12 +449,15 @@ set(TEST_FILES
     Functions/LinearBackgroundTest.h
     Functions/LogNormalTest.h
     Functions/LorentzianTest.h
+    Functions/MagneticOrderParameterTest.h
     Functions/MultivariateGaussianComptonProfileTest.h
     Functions/MuonFInteractionTest.h
+    Functions/MuoniumDecouplingCurveTest.h
     Functions/NeutronBk2BkExpConvPVoigtTest.h
     Functions/PawleyFunctionTest.h
     Functions/PeakParameterFunctionTest.h
     Functions/PolynomialTest.h
+    Functions/PowerLawTest.h
     Functions/ProcessBackgroundTest.h
     Functions/ProductFunctionTest.h
     Functions/ProductLinearExpTest.h
@@ -453,6 +467,7 @@ set(TEST_FILES
     Functions/ReflectivityMulfTest.h
     Functions/ResolutionTest.h
     Functions/SimpleChebfunTest.h
+    Functions/SmoothTransitionTest.h
     Functions/StaticKuboToyabeTest.h
     Functions/StaticKuboToyabeTimesExpDecayTest.h
     Functions/StaticKuboToyabeTimesGausDecayTest.h
@@ -537,7 +552,7 @@ target_include_directories(
 generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS CurveFitting PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS CurveFitting INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

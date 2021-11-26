@@ -7,6 +7,7 @@
 # pylint: disable=too-few-public-methods
 
 """ Finds the beam centre for SANS"""
+import json
 
 from mantid.api import (DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress,
                         IEventWorkspace)
@@ -230,12 +231,12 @@ class SANSBeamCentreFinderMassMethod(DataProcessorAlgorithm):
 
     def _convert_to_wavelength(self, state, workspace):
         wavelength_state = state.wavelength
+        wavelength_pair = wavelength_state.wavelength_interval.wavelength_full_range
 
         wavelength_name = "SANSConvertToWavelengthAndRebin"
         wavelength_options = {"InputWorkspace": workspace,
                               "OutputWorkspace": EMPTY_NAME,
-                              "WavelengthLow": wavelength_state.wavelength_interval.wavelength_min,
-                              "WavelengthHigh": wavelength_state.wavelength_interval.wavelength_max,
+                              "WavelengthPairs": json.dumps([(wavelength_pair[0], wavelength_pair[1])]),
                               "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
                               "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
                               "RebinMode": wavelength_state.rebin_type.value}

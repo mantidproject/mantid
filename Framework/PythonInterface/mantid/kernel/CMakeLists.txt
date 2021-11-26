@@ -38,6 +38,7 @@ set(EXPORT_FILES
     src/Exports/ArrayBoundedValidator.cpp
     src/Exports/ArrayOrderedPairsValidator.cpp
     src/Exports/MandatoryValidator.cpp
+    src/Exports/MantidVersion.cpp
     src/Exports/CompositeValidator.cpp
     src/Exports/LogFilter.cpp
     src/Exports/UnitConversion.cpp

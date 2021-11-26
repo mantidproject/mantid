@@ -62,7 +62,7 @@ void FindFilesWorker::run() {
     return;
   }
 
-  Mantid::API::FileFinderImpl &fileSearcher = Mantid::API::FileFinder::Instance();
+  const Mantid::API::FileFinderImpl &fileSearcher = Mantid::API::FileFinder::Instance();
 
   try {
     // Use the property of the algorithm to find files, if one has been
@@ -74,7 +74,7 @@ void FindFilesWorker::run() {
     }
     // Else if we are loading run files, then use findRuns.
     else if (m_parameters.isForRunFiles) {
-      filenames = fileSearcher.findRuns(m_parameters.searchText);
+      filenames = fileSearcher.findRuns(m_parameters.searchText, m_parameters.extensions);
       valueForProperty = "";
       for (auto &filename : filenames) {
         valueForProperty += QString::fromStdString(filename) + ",";

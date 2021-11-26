@@ -8,8 +8,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/SaveIsawQvector.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>

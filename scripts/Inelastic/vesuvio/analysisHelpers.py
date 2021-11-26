@@ -545,10 +545,11 @@ def prepare_fit_arguments(elements, constraints) :
                                                                               elements[m].width_high),
                     (elements[m].centre_low,
                      elements[m].centre_high) )
+    fit_constraints = []
     for k in range(len(constraints) ):
         # from element position in elements to intensity position in par
         lhs_int, rhs_int = 3*constraints[k].lhs_element_position, 3*constraints[k].rhs_element_position
-        fit_constraints = ({'type': constraints[k].type, 'fun': lambda par:  par[lhs_int] -constraints[k].rhs_factor*par[rhs_int] })
+        fit_constraints.append({'type': constraints[k].type, 'fun': lambda par:  par[lhs_int] -constraints[k].rhs_factor*par[rhs_int] })
     return masses, par, bounds, fit_constraints
 
 

@@ -71,11 +71,22 @@ endif()
 
 set(CPACK_INSTALL_CMAKE_PROJECTS "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
 
-# Conda build variable
+# Conda build variables
+set(CONDA_ENV
+    FALSE
+    CACHE BOOL "If True then we are building in a conda environment.
+          This predominately changes the operation of some the finders FindXXX.cmake
+          On windows it also prevents the use of the 3rdparty dependency directory"
+)
 set(CONDA_BUILD
     FALSE
-    CACHE BOOL
-          "If True, proceed with a Conda build. This setting adds some conda specific configuration to the mantid build"
+    CACHE
+      BOOL
+      "If True then we are using conda-build to build and package mantid.
+          This stops a few things from occuring:
+          - A bundle is no longer generated on OSX
+          - Linux custom handling on the install is ommitted
+          - Prevents site-package manipulation by the installer"
 )
 
 # Ensure that if we are running any sanitizers the compiler options are known in sub targets

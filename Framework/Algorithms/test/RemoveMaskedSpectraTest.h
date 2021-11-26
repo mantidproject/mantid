@@ -13,8 +13,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/RemoveMaskedSpectra.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Algorithms::RemoveMaskedSpectra;
 using namespace Mantid::API;

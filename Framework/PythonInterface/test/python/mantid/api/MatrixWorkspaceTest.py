@@ -40,6 +40,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(self._test_ws.isDirty(), False)
         self.assertGreater(self._test_ws.getMemorySize(), 0.0)
         self.assertEqual(self._test_ws.threadSafe(), True)
+        self.assertEqual(self._test_ws.isGroup(), False)
 
     def test_workspace_data_information(self):
         self.assertEqual(self._test_ws.getNumberHistograms(), 2)

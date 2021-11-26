@@ -11,7 +11,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveGDA.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/TemporaryFile.h>
 #include <boost/algorithm/string/predicate.hpp>

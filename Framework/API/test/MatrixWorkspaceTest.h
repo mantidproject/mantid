@@ -16,6 +16,11 @@
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -30,11 +35,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/make_cow.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 #include "MantidTypes/SpectrumDefinition.h"
 #include "PropertyManagerHelper.h"
 
@@ -61,6 +61,9 @@ using Mantid::Types::Core::DateAndTime;
 DECLARE_WORKSPACE(WorkspaceTester)
 
 namespace {
+static const int INVALID_DET_ID = -1;
+static const int INVALID_DET_ID2 = -2;
+
 /** Create a workspace with numSpectra, with
  * each spectrum having one detector, at id = workspace index.
  * @param numSpectra
@@ -83,6 +86,39 @@ std::shared_ptr<MatrixWorkspace> makeWorkspaceWithDetectors(size_t numSpectra, s
   }
   ws2->setInstrument(inst);
   return ws2;
+}
+
+MatrixWorkspace_sptr makeWorkspaceWithSingleInvalidDetector(size_t invalidWsIdx) {
+  auto ws = makeWorkspaceWithDetectors(5, 1);
+
+  // Set a single, invalid detector ID on one of the spectra
+  auto &spec = ws->getSpectrum(invalidWsIdx);
+  spec.clearDetectorIDs();
+  spec.addDetectorID(INVALID_DET_ID);
+
+  return ws;
+}
+
+MatrixWorkspace_sptr makeWorkspaceWithMultipleInvalidDetectors(size_t invalidWsIdx) {
+  auto ws = makeWorkspaceWithDetectors(5, 1);
+
+  // Add multiple invalid detector IDs to an existing spectrum
+  auto &spec = ws->getSpectrum(invalidWsIdx);
+  spec.clearDetectorIDs();
+  spec.addDetectorID(INVALID_DET_ID);
+  spec.addDetectorID(INVALID_DET_ID2);
+
+  return ws;
+}
+
+MatrixWorkspace_sptr makeWorkspaceWithMixedValidAndInvalidDetectors(size_t invalidWsIdx) {
+  auto ws = makeWorkspaceWithDetectors(5, 1);
+
+  // Add an invalid detector ID to an existing spectrum
+  auto &spec = ws->getSpectrum(invalidWsIdx);
+  spec.addDetectorID(INVALID_DET_ID);
+
+  return ws;
 }
 
 void run_legacy_setting_spectrum_numbers_with_MPI(const Parallel::Communicator &comm) {
@@ -798,6 +834,147 @@ public:
     TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(true), const std::runtime_error &);
     detid2index_map idmap2 = ws->getDetectorIDToWorkspaceIndexMap();
     TS_ASSERT_EQUALS(idmap2.size(), 6);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapIncludesInvalidDetectors() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithSingleInvalidDetector(invalidWsIdx);
+
+    const auto throwIfMultiple = true;
+    const auto ignoreIfNoValidDets = false;
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
+
+    // Check that all detector IDs including the invalid one are still returned
+    const auto numDets = 5;
+    TS_ASSERT_EQUALS(idmap.size(), numDets);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 1);
+    TS_ASSERT_EQUALS(idmap[INVALID_DET_ID], invalidWsIdx);
+
+    // Other than the invalid one, detector IDs all match workspace indices
+    const auto numSpec = 5;
+    checkValidDetIDsMatchWorkspaceIndices(numSpec, invalidWsIdx, idmap);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapIncludesMultipleInvalidDetectors() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithMultipleInvalidDetectors(invalidWsIdx);
+
+    const auto throwIfMultiple = false;
+    const auto ignoreIfNoValidDets = false;
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
+
+    // Check that all detector IDs including the invalid ones are still returned
+    const auto numDets = 6;
+    TS_ASSERT_EQUALS(idmap.size(), numDets);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 1);
+    TS_ASSERT_EQUALS(idmap[INVALID_DET_ID], invalidWsIdx);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID2), 1);
+    TS_ASSERT_EQUALS(idmap[INVALID_DET_ID2], invalidWsIdx);
+
+    // Other than the invalid ones, detector IDs all match workspace indices
+    const auto numSpec = 5;
+    checkValidDetIDsMatchWorkspaceIndices(numSpec, invalidWsIdx, idmap);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapIncludesMixedValidAndInvalidDetectors() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithMixedValidAndInvalidDetectors(invalidWsIdx);
+
+    const auto throwIfMultiple = false;
+    const auto ignoreIfNoValidDets = false;
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
+
+    // We should have all original detector IDs along with the additional invalid one
+    const auto numDets = 6;
+    TS_ASSERT_EQUALS(idmap.size(), numDets);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 1);
+    TS_ASSERT_EQUALS(idmap[INVALID_DET_ID], invalidWsIdx);
+
+    const auto numSpec = 5;
+    for (int i = 0; i < static_cast<int>(numSpec); ++i) {
+      TS_ASSERT_EQUALS(idmap.count(i), 1);
+      TS_ASSERT_EQUALS(idmap[i], i);
+    }
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapThrowsWithMultipleInvalidDetectors() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithMultipleInvalidDetectors(invalidWsIdx);
+
+    const auto throwIfMultiple = true;
+    const auto ignoreIfNoValidDets = false;
+    TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets),
+                     const std::runtime_error &);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapThrowsWithMixedValidAndInvalidDetectors() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithMixedValidAndInvalidDetectors(invalidWsIdx);
+
+    const auto throwIfMultiple = true;
+    const auto ignoreIfNoValidDets = false;
+    TS_ASSERT_THROWS(ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets),
+                     const std::runtime_error &);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapIgnoresInvalidDetectors() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithSingleInvalidDetector(invalidWsIdx);
+
+    const auto throwIfMultiple = true;
+    const auto ignoreIfNoValidDets = true;
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
+
+    // Check that the invalid detector is excluded but all others are still returned
+    const auto numDets = 4;
+    TS_ASSERT_EQUALS(idmap.size(), numDets);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 0);
+
+    // Other than the invalid one, detector IDs all match workspace indices
+    const auto numSpec = 5;
+    checkValidDetIDsMatchWorkspaceIndices(numSpec, invalidWsIdx, idmap);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapIgnoresInvalidDetectorsInCheckForMultiple() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithMultipleInvalidDetectors(invalidWsIdx);
+
+    const auto throwIfMultiple = true;
+    const auto ignoreIfNoValidDets = true;
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
+
+    // Check that the invalid detector is excluded but all others are still returned
+    const auto numDets = 4;
+    TS_ASSERT_EQUALS(idmap.size(), numDets);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 0);
+
+    // Other than the invalid one, detector IDs all match workspace indices
+    const auto numSpec = 5;
+    checkValidDetIDsMatchWorkspaceIndices(numSpec, invalidWsIdx, idmap);
+  }
+
+  void test_getDetectorIDToWorkspaceIndexMapIncludesMixedValidAndInvalidDetectorsWithIgnoreFlagSet() {
+    const size_t invalidWsIdx = 2;
+    auto ws = makeWorkspaceWithMixedValidAndInvalidDetectors(invalidWsIdx);
+
+    const auto throwIfMultiple = false;
+    const auto ignoreIfNoValidDets = true;
+    detid2index_map idmap = ws->getDetectorIDToWorkspaceIndexMap(throwIfMultiple, ignoreIfNoValidDets);
+
+    // Note that currently the ignore-flag only excludes spectra if they have no valid detectors at all, so we
+    // still get all of the original detector IDs along with the additional invalid one. This is not necessarily
+    // desired behaviour (I think it's an unlikely scenario in practice so it's hard to know what to do) but I'm adding
+    // this test to document the behaviour.
+    const auto numDets = 6;
+    TS_ASSERT_EQUALS(idmap.size(), numDets);
+    TS_ASSERT_EQUALS(idmap.count(INVALID_DET_ID), 1);
+    TS_ASSERT_EQUALS(idmap[INVALID_DET_ID], invalidWsIdx);
+
+    const auto numSpec = 5;
+    for (int i = 0; i < static_cast<int>(numSpec); ++i) {
+      TS_ASSERT_EQUALS(idmap.count(i), 1);
+      TS_ASSERT_EQUALS(idmap[i], i);
+    }
   }
 
   void test_getDetectorIDToWorkspaceIndexVector() {
@@ -2105,6 +2282,15 @@ private:
       ws.setCountStandardDeviations(wi, errors(wi));
     }
     return ws;
+  }
+
+  void checkValidDetIDsMatchWorkspaceIndices(const size_t numSpec, const size_t invalidWsIdx, detid2index_map &idmap) {
+    for (int i = 0; i < static_cast<int>(numSpec); ++i) {
+      if (i != static_cast<int>(invalidWsIdx)) {
+        TS_ASSERT_EQUALS(idmap.count(i), 1);
+        TS_ASSERT_EQUALS(idmap[i], i);
+      }
+    }
   }
 
   std::shared_ptr<MatrixWorkspace> ws;

@@ -463,6 +463,7 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
                            CharacterizationRunsFile=charfile,
                            Binning=-0.001,
                            SaveAs="nexus",
+                           NumWavelengthBins=1,
                            OutputDirectory=savedir)
 
         assert not mtd['PG3_46577'].sample().getMaterial().name().strip()
@@ -475,6 +476,7 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
                            SaveAs="nexus",
                            TypeOfCorrection="FullPaalmanPings",
                            SampleFormula="Si",
+                           NumWavelengthBins=1,
                            MeasuredMassDensity=1.165,
                            ContainerShape="",
                            OutputFilePrefix='PP_absorption_',
@@ -487,3 +489,26 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
 
         # Check volume using height value from log - pi*(r^2)*h, r and h in meters
         assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040
+
+        # Try manually setting sample geometry, height to 2cm
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
+                           Binning=-0.001,
+                           SaveAs="nexus",
+                           TypeOfCorrection="FullPaalmanPings",
+                           NumWavelengthBins=1,
+                           SampleFormula="Si",
+                           SampleGeometry={'Height': 2.0},
+                           MeasuredMassDensity=1.165,
+                           ContainerShape="",
+                           OutputFilePrefix='PP_absorption_',
+                           OutputDirectory=savedir)
+
+        # Check name, number density, effective density
+        assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == SI_NUMBER_DENSITY
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == SI_NUMBER_DENSITY_EFFECTIVE
+
+        # Check volume using height value from log - pi*(r^2)*h, r and h in meters
+        assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .020

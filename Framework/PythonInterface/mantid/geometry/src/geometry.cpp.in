@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+@AUTO_GENERATE_WARNING@
 /********** Source = geometry.cpp.in *****************************************************/
 
 #include <boost/python/module.hpp>

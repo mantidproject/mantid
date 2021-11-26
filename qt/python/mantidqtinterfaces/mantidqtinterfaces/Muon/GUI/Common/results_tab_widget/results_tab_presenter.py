@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy.QtCore import QMetaObject, QObject, Slot
-
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
 
 
@@ -32,11 +32,18 @@ class ResultsTabPresenter(QObject):
                                                    setEnabled(True))
 
         self.results_table_created_notifier = GenericObservable()
+        self.view.set_output_results_button_no_warning()
 
     # callbacks
     def on_results_table_name_edited(self):
         """React to the results table name being edited"""
-        self.model.set_results_table_name(self.view.results_table_name())
+        name = self.view.results_table_name()
+        self.model.set_results_table_name(name)
+        # add a check for if it exists
+        if check_if_workspace_exist(name):
+            self.view.set_output_results_button_warning()
+        else:
+            self.view.set_output_results_button_no_warning()
 
     def on_new_fit_performed(self):
         """React to a new fit created in the fitting tab"""
@@ -57,6 +64,8 @@ class ResultsTabPresenter(QObject):
         try:
             self.model.create_results_table(log_selection, results_selection)
             QMetaObject.invokeMethod(self, "_notify_results_table_created")
+            self.view.set_output_results_button_warning()
+
         except Exception as exc:
             self.view.show_warning(str(exc))
 
@@ -107,6 +116,11 @@ class ResultsTabPresenter(QObject):
         """Update the view of results workspaces based on the current model"""
         workspace_list, function_name = self._get_workspace_list()
         self.view.set_selected_fit_function(function_name)
+
+        current_view = self.view.fit_result_workspaces()
+        not_selected = [key for key in current_view.keys() if not current_view[key][1]]
+        workspace_list = [ws for ws in workspace_list if ws not in not_selected]
+
         selection = self.model.fit_selection(workspace_list)
         self.view.set_fit_result_workspaces(selection)
 

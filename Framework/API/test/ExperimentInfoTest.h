@@ -20,8 +20,8 @@
 #include "MantidKernel/SingletonHolder.h"
 
 #include "MantidAPI/FileFinder.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "PropertyManagerHelper.h"
 
 #include <nexus/NeXusException.hpp>

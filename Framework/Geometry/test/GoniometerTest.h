@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/NexusTestHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Quat.h"
-#include "MantidTestHelpers/NexusTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <stdexcept>
 #include <string>

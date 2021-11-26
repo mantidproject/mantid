@@ -8,11 +8,11 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/ImageInfoModelMatrixWS.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

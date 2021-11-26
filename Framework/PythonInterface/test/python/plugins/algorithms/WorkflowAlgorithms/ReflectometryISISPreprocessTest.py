@@ -77,6 +77,13 @@ class ReflectometryISISPreprocessTest(unittest.TestCase):
         self.assertIsInstance(output_ws, IEventWorkspace)
         self.assertIsInstance(monitor_ws, MatrixWorkspace)
 
+    def test_workspace_group(self):
+        args = {'InputRunList': 'POLREF14966',
+                "OutputWorkspace": "ws"}
+        output_ws = self._run_test(args)
+        self.assertIsInstance(output_ws, WorkspaceGroup)
+        self.assertEqual(output_ws.getNumberOfEntries(), 2)
+
     def _run_test_with_monitors(self, args):
         alg = create_algorithm('ReflectometryISISPreprocess', **args)
         alg.setChild(True)

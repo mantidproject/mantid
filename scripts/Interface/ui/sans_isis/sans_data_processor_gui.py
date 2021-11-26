@@ -1335,7 +1335,7 @@ class SANSDataProcessorGui(QMainWindow,
 
     @wavelength_range.setter
     def wavelength_range(self, value):
-        self.wavelength_slices.setText(value)
+        self.wavelength_slices_line_edit.setText(value)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale Group

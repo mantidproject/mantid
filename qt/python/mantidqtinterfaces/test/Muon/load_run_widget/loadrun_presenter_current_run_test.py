@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 from unittest import mock
 from unittest.mock import patch
 
@@ -46,8 +47,10 @@ class LoadRunWidgetLoadCurrentRunTest(unittest.TestCase):
         raise ValueError("Error text")
 
     def wait_for_thread(self, thread_model):
-        if thread_model:
-            thread_model._thread.wait()
+        if thread_model and thread_model.worker:
+            while thread_model.worker.is_alive():
+                QApplication.sendPostedEvents()
+                time.sleep(0.1)
             QApplication.sendPostedEvents()
 
     def create_fake_workspace(self):

@@ -5,26 +5,11 @@ if(CXXTEST_FOUND)
     add_definitions(-DHAVE_STDINT_H)
   endif()
 
-  # Make the tests
-  include_directories(../../TestHelpers/inc)
-
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable. It
   # will go out of scope at the end of this file so doesn't need un-setting
-  set(TESTHELPER_SRCS
-      ../../TestHelpers/src/ComponentCreationHelper.cpp
-      ../../TestHelpers/src/FileComparisonHelper.cpp
-      ../../TestHelpers/src/InstrumentCreationHelper.cpp
-      ../../TestHelpers/src/MDEventsTestHelper.cpp
-      ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
-      ../../TestHelpers/src/ScopedFileHelper.cpp
-      ../../TestHelpers/src/TearDownWorld.cpp
-      ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-      ../../TestHelpers/src/ParallelRunner.cpp
-      ../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
-      ../../TestHelpers/src/MuonGroupingXMLHelper.cpp
-  )
   cxxtest_add_test(MuonTest ${TEST_FILES})
   target_link_libraries(MuonTest PRIVATE Mantid::Algorithms Mantid::DataHandling Mantid::Muon Mantid::DataObjects gmock)
+  add_framework_test_helpers(MuonTest)
   add_dependencies(MuonTest Crystal CurveFitting)
   add_dependencies(FrameworkTests MuonTest)
   # Test data

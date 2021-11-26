@@ -8,10 +8,10 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidMDAlgorithms/AccumulateMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>

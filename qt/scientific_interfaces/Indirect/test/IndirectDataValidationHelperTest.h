@@ -15,10 +15,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;

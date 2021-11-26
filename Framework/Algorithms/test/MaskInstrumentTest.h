@@ -14,7 +14,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
 
 using namespace Mantid;
 using namespace Algorithms;

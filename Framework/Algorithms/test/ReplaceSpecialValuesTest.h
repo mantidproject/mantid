@@ -10,7 +10,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/ReplaceSpecialValues.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <limits>
 

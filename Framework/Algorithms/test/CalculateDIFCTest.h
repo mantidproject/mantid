@@ -12,7 +12,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/CalculateDIFC.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CalculateDIFC;
 using Mantid::DataObjects::OffsetsWorkspace;

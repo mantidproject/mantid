@@ -11,6 +11,7 @@
 
 #include <utility>
 
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -18,7 +19,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using Mantid::Kernel::V3D;

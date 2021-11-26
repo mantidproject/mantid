@@ -15,7 +15,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Functions/CrystalFieldHeatCapacity.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

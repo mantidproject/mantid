@@ -278,16 +278,15 @@ int Cone::side(const Kernel::V3D &R) const {
  since angle calcuation calcuates an angle.
  We need a distance for tolerance!)
  @param R :: Point to check
- @return 1 if on surface and 0 if not not on surface
  */
-int Cone::onSurface(const Kernel::V3D &R) const {
+bool Cone::onSurface(const Kernel::V3D &R) const {
 
   const Kernel::V3D cR = R - Centre;
   double rptAngle = cR.scalar_prod(Normal);
   rptAngle *= rptAngle / cR.scalar_prod(cR);
   const double eqn(sqrt(rptAngle));
 
-  return (std::abs(eqn - cangle) > Tolerance) ? 0 : 1;
+  return (std::abs(eqn - cangle) <= Tolerance);
 }
 
 void Cone::write(std::ostream &OX) const

@@ -7,7 +7,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidKernel/Logger.h"
 
 namespace {

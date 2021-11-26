@@ -35,6 +35,9 @@ QMap<QString, QVariant> InstrumentWidgetEncoder::encode(const InstrumentWidget &
   // there is no reference to the workspace if it is being replaced, so return
   // the empty map
   if (!obj.isWsBeingReplaced()) {
+    // if thread to load instrument actor is still running, wait for it
+    obj.waitForThread();
+
     m_projectPath = projectPath.toStdString();
     m_saveMask = saveMask;
 

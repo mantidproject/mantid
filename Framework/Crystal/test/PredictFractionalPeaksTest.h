@@ -13,11 +13,11 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/FacilityHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::API::Workspace_sptr;

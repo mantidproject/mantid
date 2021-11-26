@@ -12,9 +12,9 @@
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/HasUB.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;

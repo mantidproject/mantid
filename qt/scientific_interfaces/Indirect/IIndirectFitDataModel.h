@@ -56,8 +56,10 @@ public:
   virtual std::vector<double> getExcludeRegionVector(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setStartX(double startX, WorkspaceID workspaceID) = 0;
+  virtual void setStartX(double startX, FitDomainIndex fitDomainIndex) = 0;
   virtual void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setEndX(double endX, WorkspaceID workspaceID) = 0;
+  virtual void setEndX(double startX, FitDomainIndex fitDomainIndex) = 0;
   virtual void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) = 0;
   virtual void setResolution(const std::string &name) = 0;
   virtual void setResolution(const std::string &name, WorkspaceID workspaceID) = 0;

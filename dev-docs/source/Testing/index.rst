@@ -32,3 +32,4 @@ creation is outlined in :ref:`issue_tracking`.
    LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/SANSGUITests
+   MSlice/MSliceTestGuide

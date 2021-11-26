@@ -28,6 +28,7 @@ class ITableWorkspaceTest(unittest.TestCase):
     def test_meta_information_is_correct(self):
         self.assertEqual(self._test_ws.columnCount(), 19)
         self.assertEqual(self._test_ws.rowCount(), 1)
+        self.assertEqual(self._test_ws.isGroup(), False)
 
         column_names = self._test_ws.getColumnNames()
         self.assertEqual(len(column_names), 19)
@@ -267,6 +268,22 @@ class ITableWorkspaceTest(unittest.TestCase):
         AnalysisDataService.add(name, table2)
         self.assertTrue(name in AnalysisDataService)
         AnalysisDataService.remove(name)
+
+    def test_default_table_columns_are_editable(self):
+        test_table = self._create_test_table()
+        self.assertFalse(test_table.isColumnReadOnly(0))
+        self.assertFalse(test_table.isColumnReadOnly(1))
+
+    def test_add_read_only_column_makes_non_editable(self):
+        test_table = self._create_test_table()
+        test_table.addReadOnlyColumn(type='int', name='roCol')
+        self.assertTrue(test_table.isColumnReadOnly(2))
+
+    def test_set_read_only_column(self):
+        test_table = self._create_test_table()
+        self.assertFalse(test_table.isColumnReadOnly(0))
+        test_table.setColumnReadOnly(0, True)
+        self.assertTrue(test_table.isColumnReadOnly(0))
 
 
 if __name__ == '__main__':

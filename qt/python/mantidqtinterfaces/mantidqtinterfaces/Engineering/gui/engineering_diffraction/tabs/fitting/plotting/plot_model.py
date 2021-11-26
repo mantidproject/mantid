@@ -21,6 +21,8 @@ class FittingPlotModel(object):
         if ws in self.plotted_workspaces:
             self._remove_workspace_from_plot(ws, ax)
             self.plotted_workspaces.remove(ws)
+        if not self.plotted_workspaces:
+            ax.cla()
 
     @staticmethod
     def _remove_workspace_from_plot(ws, ax):

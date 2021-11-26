@@ -16,8 +16,6 @@ from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
 
 from .roi import extract_cuts_matrix, extract_roi_matrix
-from .sliceinfo import SliceInfo
-from .transform import NonOrthogonalTransform
 
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
@@ -78,6 +76,9 @@ class SliceViewerModel:
             self.export_roi_to_workspace = self.export_roi_to_workspace_matrix
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_matrix
             self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_matrix
+
+        # calculate angles between viewing axes using lattice if present
+        self._axes_angles = self._calculate_axes_angles()
 
     def can_normalize_workspace(self) -> bool:
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
@@ -252,28 +253,15 @@ class SliceViewerModel:
             "supports_peaks_overlays": self.can_support_peaks_overlays()
         }
 
-    def create_nonorthogonal_transform(self, slice_info: SliceInfo):
+    def get_axes_angles(self, force_orthogonal: bool = False) -> Optional[np.ndarray]:
         """
-        Calculate the transform object for nonorthogonal axes.
-        :param slice_info: SliceInfoType object giving information on the slice
-        :raises: RuntimeError if model does not support nonorthogonal axes
+        :param force_orthogonal: return angles for orthogonal lattice (necessary when non-ortho mode off)
+        :return: if transform can be supported then return matrix of angles between axes (otherwise None)
         """
-        if not self.can_support_nonorthogonal_axes():
-            raise RuntimeError("Workspace cannot support non-orthogonal axes view")
-
-        expt_info = self._get_ws().getExperimentInfo(0)
-        lattice = expt_info.sample().getOrientedLattice()
-        try:
-            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
-            proj_matrix = proj_matrix.reshape(3, 3)
-        except (AttributeError, KeyError):  # run can be None so no .get()
-            # assume orthogonal projection
-            proj_matrix = np.eye(3)
-        display_indices = list(range(0, proj_matrix.shape[0]))
-        display_indices.pop(slice_info.z_index)
-        return NonOrthogonalTransform.from_lattice(lattice,
-                                                   x_proj=proj_matrix[:, display_indices[0]],
-                                                   y_proj=proj_matrix[:, display_indices[1]])
+        if isinstance(self._axes_angles, np.ndarray) and force_orthogonal:
+            return np.full(self._axes_angles.shape, np.radians(90))
+        else:
+            return self._axes_angles
 
     def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
@@ -502,6 +490,42 @@ class SliceViewerModel:
     # private api
     def _get_ws(self):
         return self._ws
+
+    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
+        """
+        Calculate angles between all combination of display axes
+        """
+        if self.can_support_nonorthogonal_axes():
+            expt_info = self._get_ws().getExperimentInfo(0)
+            lattice = expt_info.sample().getOrientedLattice()
+            if self.get_ws_type() == WS_TYPE.MDH:
+                ws = self._get_ws()
+                proj_matrix = np.zeros((3, 3))
+                icol = 0
+                for ivec in range(ws.getNumDims()):
+                    Qvec = list(ws.getBasisVector(ivec))[0:3] # first 3 components of basis vector always Q
+                    if any(Qvec):
+                        proj_matrix[:, icol] = Qvec
+                        icol += 1
+            else:
+                # for event try to find axes from log
+                try:
+                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
+                    proj_matrix = proj_matrix.reshape(3, 3)
+                except (AttributeError, KeyError):  # run can be None so no .get()
+                    # assume orthogonal projection if no log exists
+                    proj_matrix = np.eye(3)
+
+            # calculate angles for all combinations of axes
+            angles_matrix = np.zeros((3, 3))
+            for ix in range(1, 3):
+                for iy in range(0, 2):
+                    if ix != iy:
+                        angles_matrix[ix, iy] = np.radians(lattice.recAngle(*proj_matrix[:, ix], *proj_matrix[:, iy]))
+                        angles_matrix[iy, ix] = angles_matrix[ix, iy]
+            return angles_matrix
+        else:
+            return None
 
     def _cut_names(self, cut: str):
         """

@@ -15,7 +15,9 @@ matplotlib.use("Agg")  # noqa
 import matplotlib.pyplot as plt
 
 from mantidqt.utils.qt.testing import start_qapplication
+from mantidqt.plotting import functions
 from workbench.plotting.figuremanager import MantidFigureCanvas, FigureManagerWorkbench
+from workbench.plotting.toolbar import WorkbenchNavigationToolbar
 from mantid.plots.plotfunctions import plot
 from mantid.simpleapi import CreateSampleWorkspace
 
@@ -127,6 +129,40 @@ class ToolBarTest(unittest.TestCase):
         axes[1][0].grid()
         # Grid button should be OFF because not all subplots have grids.
         self.assertFalse(self._is_grid_button_checked(fig))
+
+    def test_is_colorbar(self):
+        """Verify the functionality of _is_colorbar, which determines whether a set of axes is a colorbar."""
+        ws = CreateSampleWorkspace()
+        fig = plt.figure()
+        fig = functions.plot_surface([ws], fig=fig)
+        axes = fig.get_axes()
+        # First set of axes is the surface plot
+        self.assertFalse(WorkbenchNavigationToolbar._is_colorbar(axes[0]))
+        # Second set of axes is the colorbar
+        self.assertTrue(WorkbenchNavigationToolbar._is_colorbar(axes[1]))
+
+    @patch("workbench.plotting.figuremanager.QAppThreadCall")
+    def test_grid_button_state_for_3d_plots(self, mock_qappthread):
+        """Check that the gris on/off toolbar button is correctly checked or unchecked for different types of 3D plot"""
+        plot_types = ['surface', 'wireframe', 'contour']
+        for plot_type in plot_types:
+            # Check that the button state is correct when the grids are on and off.
+            for is_grid in (True, False):
+                self._test_grid_button_state_for_3d_plot(plot_type, is_grid, mock_qappthread)
+
+    def _test_grid_button_state_for_3d_plot(self, plot_type, is_grid, mock_qappthread):
+        """Check whether grid button check state is correct for a given plot type"""
+        mock_qappthread.return_value = mock_qappthread
+        ws = CreateSampleWorkspace()
+        plot_function = getattr(functions, f'plot_{plot_type}', None)
+        self.assertIsNotNone(plot_function)
+        fig = plot_function([ws])
+        ax = fig.get_axes()
+        # Explicitly set grids on or off. In plots with a colour bar, ax[1] is the colour bar.
+        ax[0].grid(is_grid)
+        # Create a figure manager with a toolbar and check that the grid toggle button has the correct state.
+        self.assertEqual(self._is_grid_button_checked(fig), is_grid,
+                         "Wrong grid button toggle state for " + plot_type + " plot")
 
     @classmethod
     def _is_grid_button_checked(cls, fig):

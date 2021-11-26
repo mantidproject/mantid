@@ -13,8 +13,8 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <random>
 

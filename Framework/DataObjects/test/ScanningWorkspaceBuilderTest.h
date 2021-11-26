@@ -11,12 +11,12 @@
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <cmath>

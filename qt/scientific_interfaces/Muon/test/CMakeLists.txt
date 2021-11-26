@@ -15,13 +15,7 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesMuonTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../../../../Framework/TestHelpers/inc ../
-  TEST_HELPER_SRCS
-    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/ScopedFileHelper.cpp
-    ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
+  INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
@@ -33,3 +27,5 @@ mtd_add_qt_tests(
   MTD_QT_LINK_LIBS MantidScientificInterfacesMuon MantidQtWidgetsCommon MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
+
+add_framework_test_helpers(MantidQtInterfacesMuonTestQt5)

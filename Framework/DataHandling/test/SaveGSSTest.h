@@ -12,8 +12,8 @@
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidGeometry/Instrument.h"
 
-#include "MantidTestHelpers/FileComparisonHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FileComparisonHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "cxxtest/TestSuite.h"
 

@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument_fwd.h"
 
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/cow_ptr.h"
@@ -120,6 +121,10 @@ public:
   void saveExperimentInfoNexus(::NeXus::File *file, bool saveLegacyInstrument = true) const;
   /// Saves this experiment description to the open NeXus file
   void saveExperimentInfoNexus(::NeXus::File *file, bool saveInstrument, bool saveSample, bool saveLogs) const;
+
+  void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr,
+                               const Mantid::Kernel::NexusHDF5Descriptor &fileInfo, const std::string &prefix);
+
   /// Loads an experiment description from the open NeXus file
   void loadExperimentInfoNexus(const std::string &nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
@@ -130,6 +135,16 @@ public:
   /// found there
   void loadInstrumentParametersNexus(::NeXus::File *file, std::string &parameterStr);
 
+  /**
+   * @brief Load the sample and log info from an open NeXus file. Overload that uses NexusHDF5Descriptor for faster
+   * metadata lookup
+   *
+   * @param file currently opened NeXus file
+   * @param fileInfo descriptor with in-memory index with all entries
+   * @param prefix indicates current group location in file (absolute name)
+   */
+  void loadSampleAndLogInfoNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                 const std::string &prefix);
   /// Load the sample and log info from an open NeXus file.
   void loadSampleAndLogInfoNexus(::NeXus::File *file);
   /// Populate the parameter map given a string

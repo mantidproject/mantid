@@ -247,6 +247,9 @@ void InstrumentWidgetRenderTab::setupUnwrappedControls(QHBoxLayout *parentLayout
 void InstrumentWidgetRenderTab::setupGridBankMenu(QVBoxLayout *parentLayout) {
   const auto &actor = m_instrWidget->getInstrumentActor();
 
+  if (!actor.isInitialized())
+    return;
+
   if (!actor.hasGridBank())
     return;
 
@@ -339,6 +342,10 @@ void InstrumentWidgetRenderTab::enable3DSurface(bool on) {
 /// only does this if not already in a forced state.
 void InstrumentWidgetRenderTab::forceLayers(bool on) {
   auto &actor = m_instrWidget->getInstrumentActor();
+
+  if (!actor.isInitialized()) {
+    return;
+  }
 
   if (!actor.hasGridBank())
     return;
@@ -567,6 +574,11 @@ void InstrumentWidgetRenderTab::enableGL(bool on) {
 }
 
 void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
+  // check if the widget is fully initialized before continuing
+  if (!m_instrWidget->isFinished()) {
+    return;
+  }
+
   auto surface = getSurface();
   if (surface) {
     surface->setInteractionMode(ProjectionSurface::MoveMode);
@@ -734,6 +746,9 @@ void InstrumentWidgetRenderTab::surfaceTypeChanged(int index) {
  */
 void InstrumentWidgetRenderTab::colorMapChanged() {
   const auto &instrumentActor = m_instrWidget->getInstrumentActor();
+  if (!instrumentActor.isInitialized()) {
+    return;
+  }
   setupColorBar(instrumentActor.getColorMap(), instrumentActor.minValue(), instrumentActor.maxValue(),
                 instrumentActor.minPositiveValue(), instrumentActor.autoscaling());
 }

@@ -334,9 +334,6 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             ax.make_legend()
 
     def evaluate_function(self, ws_name, fun, out_ws_name):
-        ws_index = self.workspaceIndex()
-        startX = self.startX()
-        endX = self.endX()
         workspace = AnalysisDataService.retrieve(ws_name)
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.setChild(True)
@@ -349,9 +346,10 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
             if self.getErrColumnName():
                 alg.setProperty('ErrColumn', self.getErrColumnName())
         else:
-            alg.setProperty('WorkspaceIndex', ws_index)
-        alg.setProperty('StartX', startX)
-        alg.setProperty('EndX', endX)
+            alg.setProperty('WorkspaceIndex', self.workspaceIndex())
+        alg.setProperty('StartX', self.startX())
+        alg.setProperty('EndX', self.endX())
+        alg.setProperty('IgnoreInvalidData', self.ignoreInvalidData())
         alg.setProperty('OutputWorkspace', out_ws_name)
         alg.execute()
 

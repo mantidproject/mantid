@@ -9,10 +9,9 @@
 from typing import Tuple, Sequence, Optional
 
 # 3rd party
-from mantid.kernel import SpecialCoordinateSystem
 import numpy as np
 
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
+from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform, OrthogonalTransform
 
 # Types
 SlicePointType = Optional[float]
@@ -34,30 +33,27 @@ class SliceInfo:
                or None for a non-slice dimension
         qflags: A list of booleans indicating if a dimension is a Q dimension or not.
                 There can only be a maximum of 3 dimensions flagged.
-        nonortho_transform: An optional transform object defining tr/inv_tr methods
-                            to transform to rectilinear system and back.
+        axes_angles: matrix of angles between Q axes
     """
 
     def __init__(self,
                  *,
-                 frame: SpecialCoordinateSystem,
                  point: SlicePointType,
                  transpose: bool,
                  range: DimensionRangeCollection,
                  qflags: Sequence[bool],
-                 nonortho_transform: Optional[NonOrthogonalTransform] = None):
+                 axes_angles: Optional[np.ndarray] = None):
         assert len(point) == len(qflags)
         assert 3 >= sum(1 for i in filter(
             lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"
-        self.frame = frame
         self.slicepoint = point
         self.range = range
-        self._slicevalue_z, self._slicewidth_z = (None, ) * 2
-        self._display_x, self._display_y, self._display_z = (None, ) * 3
-        self._axes_tr = _unit_transform if nonortho_transform is None else nonortho_transform.tr
-        self._axes_inv_tr = _unit_transform if nonortho_transform is None else nonortho_transform.inv_tr
-        self._qflags = qflags
-        self._init(transpose, qflags)
+        self._slicevalue_z, self._slicewidth_z = (None,) * 2
+        self._display_x, self._display_y, self._display_z = (None,) * 3
+
+        # initialise attributes
+        self._init_display_indices(transpose, qflags)
+        self._init_transform(qflags, axes_angles)
 
     @property
     def z_index(self) -> float:
@@ -80,17 +76,8 @@ class SliceInfo:
         """
         return self._nonorthogonal_axes_supported
 
-    def set_transform(self, nonortho_transform: NonOrthogonalTransform):
-        if isinstance(nonortho_transform, NonOrthogonalTransform):
-            self._axes_tr = nonortho_transform.tr
-            self._axes_inv_tr = nonortho_transform.inv_tr
-            self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
-                                                  and self._qflags[self._display_x] and self._qflags[self._display_y])
-        else:
-            # e.g if None
-            self._axes_tr = _unit_transform
-            self._axes_inv_tr = _unit_transform
-            self._nonorthogonal_axes_supported = False
+    def get_northogonal_transform(self) -> NonOrthogonalTransform:
+        return self._transform
 
     def transform(self, point: Sequence) -> np.ndarray:
         """Transform a point to the slice frame.
@@ -98,7 +85,7 @@ class SliceInfo:
         and Z is the out of place coordinate
         :param point: A 3D point in the slice frame
         """
-        return np.array((*self._axes_tr(point[self._display_x], point[self._display_y]),
+        return np.array((*self._transform.tr(point[self._display_x], point[self._display_y]),
                          point[self._display_z]))
 
     def inverse_transform(self, point: Sequence) -> np.ndarray:
@@ -107,16 +94,16 @@ class SliceInfo:
 
         :param point: A 3D point in the slice frame
         """
-        transform = np.zeros((3,3))
-        transform[0][self._display_x]=1
-        transform[1][self._display_y]=1
-        transform[2][self._display_z]=1
+        transform = np.zeros((3, 3))
+        transform[0][self._display_x] = 1
+        transform[1][self._display_y] = 1
+        transform[2][self._display_z] = 1
         inv_trans = np.linalg.inv(transform)
         point = np.dot(inv_trans, point)
-        return np.array((*self._axes_inv_tr(point[0], point[1]), point[2]))
+        return np.array((*self._transform.inv_tr(point[0], point[1]), point[2]))
 
     # private api
-    def _init(self, transpose: bool, qflags: Sequence[bool]):
+    def _init_display_indices(self, transpose: bool, qflags: Sequence[bool]):
         """
         Set values of the display indexes into a point in data space for coordinates X,Y,Z in display space
         For example,  slicepoint = [None,0.5,None] and transpose=True gives
@@ -126,6 +113,8 @@ class SliceInfo:
         For parameter descriptions see __init__
         :return: A list of 3 indices corresponding to the display mapping
         """
+
+        # find display indices
         x_index, y_index, z_index = None, None, None
         for index, (pt, is_spatial) in enumerate(zip(self.slicepoint, qflags)):
             if pt is None:
@@ -139,21 +128,27 @@ class SliceInfo:
         if transpose:
             x_index, y_index = y_index, x_index
 
-        self._nonorthogonal_axes_supported = (self.frame == SpecialCoordinateSystem.HKL
-                                              and qflags[x_index] and qflags[y_index]
-                                              and not self._axes_tr == _unit_transform)
+        self._display_x, self._display_y, self._display_z = x_index, y_index, z_index
 
+        # get out of plane center and width
         if z_index is not None:
             self._slicevalue_z = self.slicepoint[z_index]
             z_range = self.range[z_index]
             self._slicewidth_z = z_range[1] - z_range[0]
 
-        self._display_x, self._display_y, self._display_z = x_index, y_index, z_index
-
-
-def _unit_transform(x, y) -> tuple:
-    """A transform that leaves the values unchanged.
-    :param x: X coordinate
-    :param y: Y coordindate
-    """
-    return x, y
+    def _init_transform(self, qflags: Sequence[bool], axes_angles: Optional[np.ndarray] = None):
+        # find transform for the chosen display indices
+        if isinstance(axes_angles, np.ndarray) and qflags[self._display_x] and qflags[self._display_y]:
+            # adjust index if non-Q dimension is before a Q the displayed axes
+            # force array to have dtype=bool otherwise ~ operator throws error on empty array when index is zero
+            ix = self._display_x - np.sum(~np.array(qflags[:self._display_x], dtype=bool))
+            iy = self._display_y - np.sum(~np.array(qflags[:self._display_y], dtype=bool))
+            angle = axes_angles[ix, iy]
+            if abs(angle-(np.pi/2)) < 1e-5:
+                self._transform = OrthogonalTransform()  # use OrthogonalTransform for performance
+            else:
+                self._transform = NonOrthogonalTransform(axes_angles[ix, iy])
+            self._nonorthogonal_axes_supported = True
+        else:
+            self._transform = OrthogonalTransform()
+            self._nonorthogonal_axes_supported = False

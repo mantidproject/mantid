@@ -10,9 +10,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/NumericAxis.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 using Mantid::Algorithms::ConvertToPointData;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace;

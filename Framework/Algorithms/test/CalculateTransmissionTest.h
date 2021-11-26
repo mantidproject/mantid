@@ -13,9 +13,9 @@
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::Algorithms;

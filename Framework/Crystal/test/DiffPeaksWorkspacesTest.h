@@ -10,7 +10,7 @@
 
 #include "MantidCrystal/DiffPeaksWorkspaces.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::DiffPeaksWorkspaces;
 

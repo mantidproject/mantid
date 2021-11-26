@@ -8,8 +8,8 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidMDAlgorithms/SmoothMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <vector>

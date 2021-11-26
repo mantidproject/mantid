@@ -96,6 +96,7 @@ public:
   QString getAlgorithmProperty() const;
   void setAlgorithmProperty(const QString &name);
   QStringList getFileExtensions() const;
+  std::vector<std::string> getStringFileExtensions() const;
   void setFileExtensions(const QStringList &extensions);
   bool extsAsSingleOption() const;
   void extsAsSingleOption(bool value);

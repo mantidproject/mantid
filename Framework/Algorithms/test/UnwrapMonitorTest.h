@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Axis.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <string>

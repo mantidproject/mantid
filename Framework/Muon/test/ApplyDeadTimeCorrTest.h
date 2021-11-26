@@ -15,8 +15,8 @@
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMuon/ApplyDeadTimeCorr.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <stdexcept>
 

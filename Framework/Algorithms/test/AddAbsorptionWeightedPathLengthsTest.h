@@ -10,14 +10,14 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/AddAbsorptionWeightedPathLengths.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -91,7 +91,7 @@ public:
     // weighted path length will be less than 2mm because off centre scatter
     // points that are near the detector will have significantly shorter paths
     // than those on the opposite side of the sphere
-    TS_ASSERT_DELTA(0.1502, peak.getAbsorptionWeightedPathLength(), delta);
+    TS_ASSERT_DELTA(0.1508, peak.getAbsorptionWeightedPathLength(), delta);
   }
 
   void test_no_sample() {

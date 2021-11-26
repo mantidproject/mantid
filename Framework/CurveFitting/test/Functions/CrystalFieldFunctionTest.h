@@ -15,7 +15,7 @@
 #include "MantidCurveFitting/Algorithms/EvaluateFunction.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/CrystalFieldFunction.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAlgorithms/AddNote.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 class AddNoteTest : public CxxTest::TestSuite {

@@ -22,8 +22,8 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidIndexing/IndexInfo.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
 using Mantid::DataHandling::UpdateInstrumentFromFile;
 

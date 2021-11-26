@@ -73,7 +73,7 @@ ITableWorkspace_sptr convertRunDataToTable(std::vector<IJournal::RunData> &runs)
  */
 std::vector<std::string> getInstruments() {
   auto instruments = std::vector<std::string>();
-  auto &instrInfo = ConfigService::Instance().getFacility("ISIS").instruments();
+  const auto &instrInfo = ConfigService::Instance().getFacility("ISIS").instruments();
   for (const auto &instrument : instrInfo)
     instruments.emplace_back(instrument.name());
   return instruments;

@@ -206,6 +206,7 @@ set(TEST_FILES
     PredictPeaksTest.h
     PredictSatellitePeaksTest.h
     SCDCalibratePanels2Test.h
+    SCDCalibratePanels2ObjFuncTest.h
     SCDCalibratePanelsTest.h
     SaveHKLTest.h
     SaveIsawPeaksTest.h
@@ -276,7 +277,7 @@ target_include_directories(
 generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS Crystal PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS Crystal INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

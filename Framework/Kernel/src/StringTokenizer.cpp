@@ -49,37 +49,38 @@ void for_each_token(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_
   }
 }
 
-std::vector<std::string> splitKeepingWhitespaceEmptyTokens(const std::string &str, const std::string &delims) {
-  std::vector<std::string> output;
+void splitKeepingWhitespaceEmptyTokens(const std::string &str, const std::string &delims,
+                                       std::vector<std::string> &output) {
+  output.clear();
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    output.emplace_back(first, second);
                  });
-  return output;
 }
 
-std::vector<std::string> splitKeepingWhitespaceIgnoringEmptyTokens(const std::string &str, const std::string &delims) {
-  std::vector<std::string> output;
+void splitKeepingWhitespaceIgnoringEmptyTokens(const std::string &str, const std::string &delims,
+                                               std::vector<std::string> &output) {
+  output.clear();
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    if (first != second)
                      output.emplace_back(first, second);
                  });
-  return output;
 }
 
-std::vector<std::string> splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str, const std::string &delims) {
-  std::vector<std::string> output;
+void splitIgnoringWhitespaceKeepingEmptyTokens(const std::string &str, const std::string &delims,
+                                               std::vector<std::string> &output) {
+  output.clear();
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    output.emplace_back(first, second);
                    trimToken(output.back());
                  });
-  return output;
 }
 
-std::vector<std::string> splitIgnoringWhitespaceEmptyTokens(const std::string &str, const std::string &delims) {
-  std::vector<std::string> output;
+void splitIgnoringWhitespaceEmptyTokens(const std::string &str, const std::string &delims,
+                                        std::vector<std::string> &output) {
+  output.clear();
   for_each_token(str.cbegin(), str.cend(), delims.cbegin(), delims.cend(),
                  [&output](std::string::const_iterator first, std::string::const_iterator second) {
                    if (first != second) {
@@ -89,7 +90,6 @@ std::vector<std::string> splitIgnoringWhitespaceEmptyTokens(const std::string &s
                        output.pop_back();
                    }
                  });
-  return output;
 }
 } // namespace
 
@@ -116,30 +116,30 @@ Mantid::Kernel::StringTokenizer::StringTokenizer(const std::string &str, const s
   // cases 4-7 will not check and ignore a potential empty token at the end.
   switch (options) {
   case 0:
-    m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
+    splitKeepingWhitespaceEmptyTokens(str, separators, m_tokens);
     addEmptyFinalToken(str, separators, m_tokens);
     return;
   case TOK_IGNORE_EMPTY:
-    m_tokens = splitKeepingWhitespaceIgnoringEmptyTokens(str, separators);
+    splitKeepingWhitespaceIgnoringEmptyTokens(str, separators, m_tokens);
     return;
   case TOK_TRIM:
-    m_tokens = splitIgnoringWhitespaceKeepingEmptyTokens(str, separators);
+    splitIgnoringWhitespaceKeepingEmptyTokens(str, separators, m_tokens);
     addEmptyFinalToken(str, separators, m_tokens);
     return;
   case (TOK_TRIM | TOK_IGNORE_EMPTY):
-    m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
+    splitIgnoringWhitespaceEmptyTokens(str, separators, m_tokens);
     return;
   case TOK_IGNORE_FINAL_EMPTY_TOKEN:
-    m_tokens = splitKeepingWhitespaceEmptyTokens(str, separators);
+    splitKeepingWhitespaceEmptyTokens(str, separators, m_tokens);
     return;
   case (TOK_IGNORE_FINAL_EMPTY_TOKEN | TOK_IGNORE_EMPTY):
-    m_tokens = splitKeepingWhitespaceIgnoringEmptyTokens(str, separators);
+    splitKeepingWhitespaceIgnoringEmptyTokens(str, separators, m_tokens);
     return;
   case (TOK_IGNORE_FINAL_EMPTY_TOKEN | TOK_TRIM):
-    m_tokens = splitIgnoringWhitespaceKeepingEmptyTokens(str, separators);
+    splitIgnoringWhitespaceKeepingEmptyTokens(str, separators, m_tokens);
     return;
   case (TOK_IGNORE_FINAL_EMPTY_TOKEN | TOK_TRIM | TOK_IGNORE_EMPTY):
-    m_tokens = splitIgnoringWhitespaceEmptyTokens(str, separators);
+    splitIgnoringWhitespaceEmptyTokens(str, separators, m_tokens);
     return;
   }
 

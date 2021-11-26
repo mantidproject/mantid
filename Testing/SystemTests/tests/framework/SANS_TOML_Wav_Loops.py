@@ -26,6 +26,4 @@ class SANSTomlWavLoops_SANS2D(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.disableChecking.append('Instrument')
-        from mantid.simpleapi import SaveNexusProcessed
-        SaveNexusProcessed("992_rear_1DPhi-45.0_45.0", '/tmp/bad.nxs')
         return "992_rear_1DPhi-45.0_45.0", "SANS_TOML_Wav_Loops_ref.nxs"

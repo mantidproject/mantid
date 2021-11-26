@@ -8,7 +8,9 @@
 
 #include "GUI/Batch/RowProcessingAlgorithm.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include "MantidQtWidgets/Common/IAlgorithmRuntimeProps.h"
 
+#include <memory>
 #include <string>
 
 namespace MantidQt {
@@ -47,6 +49,7 @@ public:
   virtual void notifyAnyBatchAutoreductionResumed() = 0;
   virtual void notifyAnyBatchAutoreductionPaused() = 0;
   virtual void notifyReductionPaused() = 0;
+  virtual void notifyBatchLoaded() = 0;
 
   /// Data processing check for all groups
   virtual bool isProcessing() const = 0;
@@ -57,7 +60,7 @@ public:
   virtual bool discardChanges(std::string const &message) const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
-  virtual API::IConfiguredAlgorithm::AlgorithmRuntimeProps rowProcessingProperties() const = 0;
+  virtual std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const = 0;
 
   virtual bool isBatchUnsaved() const = 0;
   virtual void setBatchUnsaved() = 0;

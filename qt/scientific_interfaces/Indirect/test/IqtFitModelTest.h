@@ -16,7 +16,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;

@@ -460,6 +460,19 @@ void LogManager::saveNexus(::NeXus::File *file, const std::string &group, bool k
 }
 
 //--------------------------------------------------------------------------------------------
+/** Load the object from an open NeXus file. Not used.
+ * @param file :: open NeXus file
+ * @param group :: name of the group to open. Pass an empty string to NOT open a
+ * group
+ * @param keepOpen :: do not close group on exit to allow overloading and child
+ * classes reading from the same group
+ * load any NXlog in the current open group.
+ */
+void LogManager::loadNexus(::NeXus::File * /*file*/, const std::string & /*group*/,
+                           const Mantid::Kernel::NexusHDF5Descriptor & /*fileInfo*/, const std::string & /*prefix*/,
+                           bool /*keepOpen*/) {}
+
+//--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
  * @param group :: name of the group to open. Pass an empty string to NOT open a
@@ -478,6 +491,44 @@ void LogManager::loadNexus(::NeXus::File *file, const std::string &group, bool k
 
   if (!(group.empty() || keepOpen)) {
     file->closeGroup();
+  }
+}
+
+void LogManager::loadNexus(::NeXus::File *file, const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                           const std::string &prefix) {
+
+  // Only load from NXlog entries
+  const auto &allEntries = fileInfo.getAllEntries();
+  auto itNxLogEntries = allEntries.find("NXlog");
+  const std::set<std::string> &nxLogEntries =
+      (itNxLogEntries != allEntries.end()) ? itNxLogEntries->second : std::set<std::string>{};
+
+  const auto levels = std::count(prefix.begin(), prefix.end(), '/');
+
+  auto itLower = nxLogEntries.lower_bound(prefix);
+
+  if (itLower == nxLogEntries.end()) {
+    return;
+  }
+  if (itLower->compare(0, prefix.size(), prefix) != 0) {
+    return;
+  }
+
+  for (auto it = itLower; it != nxLogEntries.end() && it->compare(0, prefix.size(), prefix) == 0; ++it) {
+    // only next level entries
+    const std::string &absoluteEntryName = *it;
+    if (std::count(absoluteEntryName.begin(), absoluteEntryName.end(), '/') != levels + 1) {
+      continue;
+    }
+    const std::string nameClass = absoluteEntryName.substr(absoluteEntryName.find_last_of('/') + 1);
+
+    auto prop = PropertyNexus::loadProperty(file, nameClass, fileInfo, prefix);
+    if (prop) {
+      if (m_manager->existsProperty(prop->name())) {
+        m_manager->removeProperty(prop->name());
+      }
+      m_manager->declareProperty(std::move(prop));
+    }
   }
 }
 

@@ -4,18 +4,36 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from enum import Enum
 from os import path
 from mantid.api import *
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger
 import mantid.simpleapi as mantid
 from mantid.simpleapi import AnalysisDataService as ADS
 from matplotlib import gridspec
+import numpy as np
 from Engineering.common import path_handling
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']
-
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]
+
+
+class GROUP(Enum):
+    """Group Enum with attributes: banks (list of banks required for calibration) and grouping ws name"""
+    def __new__(self, value, banks):
+        obj = object.__new__(self)
+        obj._value_ = value  # overwrite value to be first arg
+        obj.banks = banks  # set attribute bank
+        return obj
+    # value of enum is the file suffix of .prm (for easy creation)
+    #       value,  banks
+    BOTH = "banks", [1, 2]
+    NORTH = "1", [1]
+    SOUTH = "2", [2]
+    CROPPED = "Cropped", []  # pdcal results will be saved with grouping file with same suffix
+    CUSTOM = "Custom", []  # pdcal results will be saved with grouping file with same suffix
+    TEXTURE = "Texture", [1, 2]
 
 
 def determine_roi_from_prm_fname(file_path: str) -> str:
@@ -154,6 +172,64 @@ def get_diffractometer_constants_from_workspace(ws):
     si = ws.spectrumInfo()
     diff_consts = si.diffractometerConstants(0)  # output is a UnitParametersMap
     return diff_consts
+
+
+def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
+    """
+    Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from PDCalibration
+    :param diag_ws: workspace object of group of diagnostic workspaces
+    :param ws_foc: workspace object of focused data (post ApplyDiffCal with calibrated diff_consts)
+    :param calibration: CalibrationInfo object used to determine subplot axes titles
+    :return:
+    """
+    from matplotlib.pyplot import subplots
+
+    fitparam = mtd[diag_ws.name() + "_fitparam"].toDict()
+    fiterror = mtd[diag_ws.name() + "_fiterror"].toDict()
+    d_table = mtd[diag_ws.name() + "_dspacing"].toDict()
+    dspacing = np.array(sorted(dspacing))  # PDCal sorts the dspacing list passed
+    x0 = np.array(fitparam['X0'])
+    x0_er = np.array(fiterror['X0'])
+    ws_index = np.array(fitparam['wsindex'])
+    nspec = len(set(ws_index))
+    si = ws_foc.spectrumInfo()
+
+    ncols_per_fig = 4  # max number of spectra per figure window
+    figs = []
+    for ispec in range(nspec):
+        # extract data from tables
+        detid = ws_foc.getSpectrum(ispec).getDetectorIDs()[0]
+        irow = d_table['detid'].index(detid)
+        valid = [np.isfinite(d_table[key][irow]) for key in d_table if '@' in key]  # nan if fit unsuccessful
+        ipks = ws_index == ispec  # peak centres for this spectrum
+        x, y, e = dspacing[valid], x0[ipks][valid], x0_er[ipks][valid]
+        # get poly fit
+        diff_consts = si.diffractometerConstants(ispec)  # output is a UnitParametersMap
+        yfit = np.array([UnitConversion.run("dSpacing", "TOF", xpt, 0, DeltaEModeType.Elastic, diff_consts)
+                         for xpt in x])
+        # plot polynomial fit to TOF vs dSpacing
+        if ispec + 1 > len(figs)*ncols_per_fig:
+            # create new figure
+            ncols = ncols_per_fig if not nspec-ispec < ncols_per_fig else nspec % ncols_per_fig
+            fig, ax = subplots(2, ncols, sharex=True, sharey='row', subplot_kw={'projection': 'mantid'})
+            ax = np.reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if ncols==1
+            ax[0, 0].set_ylabel('Fitted TOF (\u03BCs)')
+            ax[1, 0].set_ylabel('Residuals (\u03BCs)')
+            figs.append(fig)
+            icol = 0
+        # plot TOF vs d
+        ax[0, icol].set_title(calibration.get_subplot_title(ispec))
+        ax[0, icol].errorbar(x, y, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='Peak centres')
+        ax[0, icol].plot(x, yfit, '-r', label='quadratic fit')
+        # plot residuals
+        ax[1, icol].errorbar(x, y-yfit, yerr=e, marker='o', markersize=3, capsize=2, ls='', color='b', label='resids')
+        ax[1, icol].axhline(color='r', ls='-')
+        ax[1, icol].set_xlabel('d-spacing (Ang)')
+        icol += 1
+    # Format figs and show
+    for fig in figs:
+        fig.tight_layout()
+        fig.show()
 
 
 def generate_tof_fit_dictionary(cal_name=None) -> dict:
@@ -311,10 +387,10 @@ def default_ceria_expected_peaks(final=False):
     @param :: final - if true, returns a list better suited to a secondary fitting
     @Returns :: a list of peaks in d-spacing as a float list
     """
-    _CERIA_EXPECTED_PEAKS = [2.705702376, 1.913220892, 1.631600313, 1.352851554, 1.104598643]
-    _CERIA_EXPECTED_PEAKS_FINAL = [2.705702376, 1.913220892, 1.631600313, 1.562138267, 1.352851554,
-                                   1.241461538, 1.210027059, 1.104598643, 1.04142562, 0.956610446,
-                                   0.914694494, 0.901900955, 0.855618487]
+    _CERIA_EXPECTED_PEAKS = [1.104598643, 1.352851554, 1.631600313, 1.913220892, 2.705702376]
+    _CERIA_EXPECTED_PEAKS_FINAL = [0.855618487, 0.901900955, 0.914694494, 0.956610446, 1.04142562, 1.104598643,
+                                   1.210027059, 1.241461538, 1.352851554, 1.562138267, 1.631600313, 1.913220892,
+                                   2.705702376]
 
     return _CERIA_EXPECTED_PEAKS_FINAL if final else _CERIA_EXPECTED_PEAKS
 
@@ -680,9 +756,8 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     @returns
 
     """
-    if not isinstance(difc, list) or not isinstance(tzero, list):
-        raise ValueError("The parameters difc and tzero must be lists, with as many elements as "
-                         "banks")
+    if not hasattr(difc, '__iter__') or not hasattr(tzero, '__iter__'):
+        raise ValueError("The parameters difc and tzero must be sequences, with as many elements as focused spectra")
 
     if len(difc) != len(tzero) and len(difc) != len(difa):
         raise ValueError("The lengths of the difa, difc and tzero lists must be the same")
@@ -694,7 +769,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bk2bk_params=N
     template_file = os.path.join(os.path.dirname(__file__), template_file)
 
     if not bank_names:
-        bank_names = ["North", "South"]
+        bank_names = ["Custom/Cropped"]
 
     with open(template_file) as tf:
         output_lines = tf.readlines()

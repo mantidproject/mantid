@@ -15,7 +15,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using Mantid::Algorithms::CreateUserDefinedBackground;

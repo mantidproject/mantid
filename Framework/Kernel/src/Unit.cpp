@@ -680,13 +680,21 @@ double dSpacing::singleFromTOF(const double tof) const {
   if (!toDSpacingError.empty())
     throw std::runtime_error(toDSpacingError);
 
+  // this is with the opposite sign from the equation above
+  // as it reduces number of individual flops
+  const double negativeConstantTerm = tof - tzero;
+
+  // don't need to solve a quadratic when difa==0
+  // this allows negative d-spacing to be returned
+  // which was the behavior before v6.2 was released
+  if (difa == 0.)
+    return negativeConstantTerm / difc;
+
   // non-physical result
   if (tzero > tof) {
     if (difa > 0.) {
       throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight and difa is positive. "
                                "Quadratic doesn't have a positive root");
-    } else if (difa == 0.) {
-      throw std::runtime_error("Cannot convert to d spacing because tzero > time-of-flight");
     }
   }
 
@@ -698,14 +706,6 @@ double dSpacing::singleFromTOF(const double tof) const {
     else
       return 0.;
   }
-
-  // this is with the opposite sign from the equation above
-  // as it reduces number of individual flops
-  const double negativeConstantTerm = tof - tzero;
-
-  // don't need to solve a quadratic when difa==0
-  if (difa == 0.)
-    return negativeConstantTerm / difc;
 
   // general citarqauq equation
   const double sqrtTerm = 1 + 4 * difa * negativeConstantTerm / (difc * difc);

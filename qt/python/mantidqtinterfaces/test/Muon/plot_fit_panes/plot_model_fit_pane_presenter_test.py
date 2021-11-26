@@ -68,6 +68,12 @@ class PlotFitPanePresenterTest(unittest.TestCase):
 
         self.figure_presenter.set_plot_range.assert_called_once_with([-1.2, 1.2])
 
+    # this GUI can never have rebin data
+    def test_rebin_does_nothing(self):
+        self.context.gui_context["RebinType"]="Fixed"
+        self.presenter.handle_rebin_options_changed()
+        self.view.set_raw_checkbox_state.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

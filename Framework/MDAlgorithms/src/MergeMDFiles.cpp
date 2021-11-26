@@ -238,14 +238,14 @@ void MergeMDFiles::doExecByCloning(const Mantid::API::IMDEventWorkspace_sptr &ws
   }
 
   this->m_totalLoaded = 0;
-  std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
+  const std::vector<API::IMDNode *> &boxes = m_BoxStruct.getBoxes();
 
   for (size_t ib = 0; ib < numBoxes; ib++) {
     auto box = boxes[ib];
     if (!box->isBox())
       continue;
     // load all contributed events into current box;
-    this->loadEventsFromSubBoxes(boxes[ib]);
+    this->loadEventsFromSubBoxes(box);
 
     if (DiskBuf) {
       if (box->getDataInMemorySize() > 0) { // data position has been already pre-calculated

@@ -7,6 +7,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+
+@AUTO_GENERATE_WARNING@
+/********** Source = MantidVersion.cpp.in *****************************************************/
+
 #include "MantidKernel/MantidVersion.h"
 
 #include <sstream>
@@ -27,6 +31,10 @@ const char* MantidVersion::versionShort()
 {
   // The major and minor version numbers are specified in Build/CMake/VersionNumber.cmake
   return "@VERSION_MAJOR@.@VERSION_MINOR@";
+}
+
+const MantidVersion::VersionInfo MantidVersion::versionInfo() {
+  return {"@VERSION_MAJOR@", "@VERSION_MINOR@", "@VERSION_PATCH@@VERSION_TWEAK@"};
 }
 
 std::string MantidVersion::releaseNotes()

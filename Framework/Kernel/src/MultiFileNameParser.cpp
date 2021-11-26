@@ -182,7 +182,7 @@ Parser::Parser()
       m_extString(),
       // m_zeroPadding(),
       m_validInstNames() {
-  ConfigServiceImpl &config = ConfigService::Instance();
+  const ConfigServiceImpl &config = ConfigService::Instance();
 
   const auto facilities = config.getFacilities();
   for (const auto facility : facilities) {

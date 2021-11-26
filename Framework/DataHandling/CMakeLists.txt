@@ -681,7 +681,7 @@ target_link_libraries(
 # Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.
 if(ENABLE_LIB3MF)
   target_link_libraries(DataHandling PRIVATE ${LIB3MF_LIBRARIES})
-  if(CONDA_BUILD)
+  if(CONDA_ENV)
     target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR})
   else()
     target_include_directories(DataHandling PRIVATE ${LIB3MF_INCLUDE_DIR}/lib3mf)
@@ -692,7 +692,7 @@ endif()
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   mtd_install_framework_lib(TARGETS DataHandling PLUGIN_LIB)
 else()
   mtd_install_targets(TARGETS DataHandling INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})

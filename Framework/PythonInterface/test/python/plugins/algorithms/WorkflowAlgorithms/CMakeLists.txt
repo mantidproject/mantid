@@ -44,6 +44,7 @@ set(TEST_PY_FILES
     D7YIGPositionCalibrationTest.py
     D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
+    MatchAndMergeWorkspacesTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
     MSDFitTest.py
@@ -57,6 +58,7 @@ set(TEST_PY_FILES
     ReflectometryILLConvertToQTest.py
     ReflectometryILLPolarizationCorTest.py
     ReflectometryILLPreprocessTest.py
+    ReflectometryISISSumBanksTest.py
     ReflectometryILLSumForegroundTest.py
     ReflectometryISISLoadAndProcessTest.py
     ReflectometryISISPreprocessTest.py

@@ -130,7 +130,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
   # macro and used to pass in test helper classes
   add_executable(${_cxxtest_testname} EXCLUDE_FROM_ALL ${_cxxtest_cpp_files} ${_cxxtest_h_files} ${TESTHELPER_SRCS})
 
-  if(NOT CONDA_BUILD)
+  if(NOT CONDA_ENV)
     set(_misc_bin ${THIRD_PARTY_DIR}/bin)
     set(_qt5_bin ${THIRD_PARTY_DIR}/lib/qt5/bin ${THIRD_PARTY_DIR}/lib/qt5/lib)
     set(_qt_qpa_platform_plugin ${THIRD_PARTY_DIR}/lib/qt5/plugins)

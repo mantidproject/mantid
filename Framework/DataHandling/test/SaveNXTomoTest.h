@@ -11,7 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveNXTomo.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <nexus/NeXusFile.hpp>
 

@@ -12,6 +12,7 @@
 #include "InstrumentDisplay.h"
 #include "InstrumentWidgetTypes.h"
 #include "QtConnect.h"
+#include "QtMetaObject.h"
 #include "UnwrappedSurface.h"
 
 #include "MantidAPI/AlgorithmObserver.h"
@@ -25,6 +26,8 @@
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 #include <memory>
+
+#include <QThread>
 
 namespace Mantid {
 namespace API {
@@ -47,6 +50,7 @@ class QDragEnterEvent;
 class QDropEvent;
 class QStackedLayout;
 class QSettings;
+class QSplitter;
 class QVBoxLayout;
 
 namespace MantidQt {
@@ -68,6 +72,7 @@ struct Dependencies {
   std::unique_ptr<IQtDisplay> qtDisplay = nullptr;
   std::unique_ptr<IGLDisplay> glDisplay = nullptr;
   std::unique_ptr<QtConnect> qtConnect = std::make_unique<QtConnect>();
+  std::unique_ptr<QtMetaObject> qtMetaObject = std::make_unique<QtMetaObject>();
   std::unique_ptr<IMessageHandler> messageHandler = nullptr;
 };
 
@@ -112,7 +117,7 @@ public:
 
   explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, Dependencies deps = Dependencies());
+                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = true);
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;
@@ -146,6 +151,8 @@ public:
   InstrumentActor &getInstrumentActor() { return *m_instrumentActor; }
   void resetInstrument(bool resetGeometry);
   void resetSurface();
+  void resetInstrumentActor(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax,
+                            bool setDefaultView);
   void selectTab(int tab);
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;
@@ -180,6 +187,12 @@ public:
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; }
   /// Determine if the workspace requires an integration bar
   bool isIntegrable();
+  /// Whether the background instrument actor loading thead is running
+  bool isThreadRunning() const;
+  /// Block until thread is finished
+  void waitForThread() const;
+  /// Whether the window has been fully initialized
+  bool isFinished() const;
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -206,6 +219,7 @@ protected:
   void dragEnterEvent(QDragEnterEvent *e) override;
   void dropEvent(QDropEvent *e) override;
   bool eventFilter(QObject *obj, QEvent *ev) override;
+  void closeEvent(QCloseEvent *e) override;
 
 public slots:
   void tabChanged(int /*unused*/);
@@ -249,12 +263,14 @@ public slots:
   void enableGL(bool on);
   void updateInfoText(const QString &text = QString());
 
+  void initWidget(bool resetGeometry, bool setDefaultView);
+  void threadFinished();
+
 private slots:
   void helpClicked();
 
 protected:
-  void init(bool resetGeometry, bool autoscaling, double scaleMin, double scaleMax, bool setDefaultView,
-            bool resetActor = true);
+  void init(bool resetGeometry, bool setDefaultView);
   /// Set newly created projection surface
   void setSurface(ProjectionSurface *surface);
   QWidget *createInstrumentTreeTab(QTabWidget *ControlsTab);
@@ -352,14 +368,29 @@ private:
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
 
+  void cancelThread();
+
   bool m_wsReplace;
   QPushButton *m_help;
   QVBoxLayout *m_mainLayout;
 
   /// Wrapper around Qt connect function so we can mock it
   std::unique_ptr<QtConnect> m_qtConnect;
+  /// Wrapper around Qt meta object for mocking
+  std::unique_ptr<QtMetaObject> m_qtMetaObject;
 
   std::unique_ptr<IMessageHandler> m_messageHandler;
+
+  mutable QThread m_thread;
+  bool m_finished;
+  bool m_autoscaling;
+  double m_scaleMin;
+  double m_scaleMax;
+  bool m_setDefaultView;
+  bool m_resetGeometry;
+  bool m_useThread;
+
+  QSplitter *m_controlPanelLayout;
 };
 
 } // namespace MantidWidgets

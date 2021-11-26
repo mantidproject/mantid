@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
 
 #include "FitTestHelpers.h"
@@ -23,9 +23,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-#include "MantidTestHelpers/FunctionCreationHelper.h"
-#include "MantidTestHelpers/MultiDomainFunctionHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FunctionCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MultiDomainFunctionHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 
@@ -36,7 +36,7 @@ using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;
 using namespace Mantid::DataObjects;
 
-using Mantid::TestHelpers::MultiDomainFunctionTest_Function;
+using Mantid::FrameworkTestHelpers::MultiDomainFunctionTest_Function;
 
 class TestMinimizer : public API::IFuncMinimizer {
 public:
@@ -1033,15 +1033,15 @@ public:
   }
 
   void test_function_Multidomain_resetting_properties() {
-    auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
+    auto multi = Mantid::FrameworkTestHelpers::makeMultiDomainFunction3();
 
     auto alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
     alg->initialize();
     alg->setProperty("Function", std::dynamic_pointer_cast<IFunction>(multi));
-    auto ws1 = Mantid::TestHelpers::makeMultiDomainWorkspace1();
+    auto ws1 = Mantid::FrameworkTestHelpers::makeMultiDomainWorkspace1();
     alg->setProperty("InputWorkspace", ws1);
     alg->setProperty("WorkspaceIndex", 0);
-    auto ws2 = Mantid::TestHelpers::makeMultiDomainWorkspace2();
+    auto ws2 = Mantid::FrameworkTestHelpers::makeMultiDomainWorkspace2();
     alg->setProperty("InputWorkspace", ws2);
     alg->setProperty("WorkspaceIndex", 1);
     alg->setProperty("InputWorkspace_1", ws2);
@@ -1049,7 +1049,7 @@ public:
   }
 
   void test_function_Multidomain_Fit() {
-    auto multi = Mantid::TestHelpers::makeMultiDomainFunction3();
+    auto multi = Mantid::FrameworkTestHelpers::makeMultiDomainFunction3();
     multi->getFunction(0)->setParameter("A", 1);
     multi->getFunction(0)->setParameter("B", 1);
     multi->getFunction(0)->setAttributeValue("Order", 1);
@@ -1064,13 +1064,13 @@ public:
     fit.initialize();
     fit.setProperty("Function", std::dynamic_pointer_cast<IFunction>(multi));
 
-    auto ws1 = Mantid::TestHelpers::makeMultiDomainWorkspace1();
+    auto ws1 = Mantid::FrameworkTestHelpers::makeMultiDomainWorkspace1();
     fit.setProperty("InputWorkspace", ws1);
     fit.setProperty("WorkspaceIndex", 0);
-    auto ws2 = Mantid::TestHelpers::makeMultiDomainWorkspace2();
+    auto ws2 = Mantid::FrameworkTestHelpers::makeMultiDomainWorkspace2();
     fit.setProperty("InputWorkspace_1", ws2);
     fit.setProperty("WorkspaceIndex_1", 0);
-    auto ws3 = Mantid::TestHelpers::makeMultiDomainWorkspace3();
+    auto ws3 = Mantid::FrameworkTestHelpers::makeMultiDomainWorkspace3();
     fit.setProperty("InputWorkspace_2", ws3);
     fit.setProperty("WorkspaceIndex_2", 0);
 
@@ -1952,7 +1952,7 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction(
         [](double x, int) { return 2 * exp(-(5 * x + x * x - 3 * x * x * x)); }, 1, 0, 1, 0.1);
     {
-      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<FrameworkTestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -1969,7 +1969,7 @@ public:
       TS_ASSERT_DELTA(fun->getParameter(4), 6.3465, 0.1);
     }
     {
-      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<FrameworkTestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -1996,7 +1996,7 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspaceFromFunction([](double x, int) { return 2 + x - 0.1 * x * x; },
                                                                      1, 0, 1, 0.1);
     {
-      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<FrameworkTestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;
@@ -2015,7 +2015,7 @@ public:
       TS_ASSERT_EQUALS(status, "success");
     }
     {
-      API::IFunction_sptr fun = std::make_shared<TestHelpers::FunctionChangesNParams>();
+      API::IFunction_sptr fun = std::make_shared<FrameworkTestHelpers::FunctionChangesNParams>();
       TS_ASSERT_EQUALS(fun->nParams(), 1);
 
       Fit fit;

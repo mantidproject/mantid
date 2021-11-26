@@ -16,11 +16,11 @@
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadNexusProcessed2.h"
 #include "MantidDataHandling/SaveNexusESS.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FileResource.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 using namespace Mantid::DataHandling;
