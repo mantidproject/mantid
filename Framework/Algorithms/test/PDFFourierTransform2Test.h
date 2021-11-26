@@ -29,10 +29,10 @@ using namespace Mantid;
 // allow testing of protected methods
 class PDFFourierTransform2Wrapper : public PDFFourierTransform2 {
 public:
-  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y){
+  size_t determineMinIndex(double min, const std::vector<double> &X, const std::vector<double> &Y) {
     return PDFFourierTransform2::determineMinIndex(min, X, Y);
   };
-  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y){
+  size_t determineMaxIndex(double max, const std::vector<double> &X, const std::vector<double> &Y) {
     return PDFFourierTransform2::determineMaxIndex(max, X, Y);
   };
 };
