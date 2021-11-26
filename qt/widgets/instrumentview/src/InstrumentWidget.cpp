@@ -16,6 +16,7 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"

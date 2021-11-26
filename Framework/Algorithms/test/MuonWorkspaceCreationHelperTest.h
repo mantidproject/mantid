@@ -276,7 +276,7 @@ public:
 
   void test_createWorkspaceGroupConsecutiveDetectorIDs_correct_workspace_names() {
 
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     auto wsGroup = createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
     // group
     TS_ASSERT(ads.doesExist("MuonAnalysis"));
@@ -295,7 +295,7 @@ public:
 
   void test_createWorkspaceGroupConsecutiveDetectorIDs_IDs_are_consequtive() {
 
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     auto wsGroup = createWorkspaceGroupConsecutiveDetectorIDs(3, 3, 10, "MuonAnalysis");
 
     MatrixWorkspace_sptr wsFirst = std::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve("MuonDataPeriod_1"));

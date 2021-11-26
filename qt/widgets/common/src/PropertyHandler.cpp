@@ -9,6 +9,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"

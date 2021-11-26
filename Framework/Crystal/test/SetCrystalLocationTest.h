@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/SetCrystalLocation.h"

@@ -7,6 +7,7 @@
 #include "ConvFitAddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 

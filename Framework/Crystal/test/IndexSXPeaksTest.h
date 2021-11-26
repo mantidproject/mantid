@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCrystal/IndexSXPeaks.h"

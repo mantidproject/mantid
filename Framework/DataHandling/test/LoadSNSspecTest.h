@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadSNSspec.h"
 #include <cxxtest/TestSuite.h>

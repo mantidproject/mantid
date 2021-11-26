@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
@@ -30,13 +31,13 @@ public:
   ~MDGeometryNotificationHelper() {
     if (m_observingDelete) {
       // Stop watching once object is deleted
-      API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_delete_observer);
+      API::AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_delete_observer);
     }
   }
 
   void watchForWorkspaceDeletions() {
     if (!m_observingDelete) {
-      API::AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
+      API::AnalysisDataService::Instance().getNotificationCenter().addObserver(m_delete_observer);
       m_observingDelete = true;
     }
   }

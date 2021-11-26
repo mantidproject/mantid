@@ -7,6 +7,7 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"

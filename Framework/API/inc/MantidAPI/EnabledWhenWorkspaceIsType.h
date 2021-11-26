@@ -9,6 +9,7 @@
 #include <utility>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/Exception.h"

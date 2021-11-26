@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import (AnalysisDataService, AnalysisDataServiceImpl,
+from mantid.api import (AnalysisDataService, AnalysisDataServiceWrapper,
                         FrameworkManagerImpl, MatrixWorkspace)
 from mantid import mtd
 
@@ -24,8 +24,8 @@ class AnalysisDataServiceTest(unittest.TestCase):
         self.assertEqual(len(AnalysisDataService), 0)
 
     def test_mtd_is_same_object_type_as_analysis_data_service(self):
-        self.assertTrue(isinstance(AnalysisDataService, AnalysisDataServiceImpl))
-        self.assertTrue(isinstance(mtd, AnalysisDataServiceImpl))
+        self.assertTrue(isinstance(AnalysisDataService, AnalysisDataServiceWrapper))
+        self.assertTrue(isinstance(mtd, AnalysisDataServiceWrapper))
 
     def test_retrieval_of_non_existent_data_raises_KeyError(self):
         try:

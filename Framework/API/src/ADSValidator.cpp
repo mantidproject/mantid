@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/TypedValidator.h"
+
 #include <memory>
 #include <sstream>
 

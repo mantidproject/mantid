@@ -36,7 +36,7 @@ public:
     // Create a dummy workspace
     const std::string workspaceName("forMasking");
     const std::string resultWorkspaceName("masked");
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     ads.add(workspaceName, WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
     TS_ASSERT_THROWS_NOTHING(masker.setPropertyValue("InputWorkspace", workspaceName));

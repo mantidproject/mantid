@@ -10,6 +10,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/NotebookBuilder.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"

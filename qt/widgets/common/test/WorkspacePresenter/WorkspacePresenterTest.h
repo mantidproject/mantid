@@ -356,7 +356,7 @@ public:
   void testWorkspacesGroupedExternal() {
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
 
-    AnalysisDataService::Instance().notificationCenter.postNotification(
+    AnalysisDataService::Instance().getNotificationCenter().postNotification(
         new WorkspacesGroupedNotification(std::vector<std::string>()));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
@@ -365,7 +365,7 @@ public:
   void testWorkspacesUnGroupedExternal() {
     EXPECT_CALL(*mockView.get(), updateTree(_)).Times(AtLeast(1));
 
-    AnalysisDataService::Instance().notificationCenter.postNotification(
+    AnalysisDataService::Instance().getNotificationCenter().postNotification(
         new Mantid::API::WorkspaceUnGroupingNotification("", nullptr));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));

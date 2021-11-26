@@ -26,7 +26,7 @@ private:
   MatrixWorkspace_sptr create_matrix_workspace(const std::vector<double> &s, const std::vector<double> &e,
                                                const std::vector<double> &x, const std::string &name) {
     // Create and run the algorithm
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceWrapper &ADS = Mantid::API::AnalysisDataService::Instance();
     auto alg = AlgorithmManager::Instance().create("CreateWorkspace");
     alg->initialize();
     alg->setProperty("NSpec", 1);
@@ -44,7 +44,7 @@ private:
   /// and return the result.
   MatrixWorkspace_sptr run_matrix_weighed_mean(const MatrixWorkspace_sptr &a, const MatrixWorkspace_sptr &b,
                                                const std::string &name) {
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    auto &ADS = Mantid::API::AnalysisDataService::Instance();
     auto alg = AlgorithmManager::Instance().create("WeightedMean");
     alg->setRethrows(true);
     alg->initialize();
@@ -126,7 +126,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    auto &ADS = Mantid::API::AnalysisDataService::Instance();
     MDHistoWorkspace_sptr c = std::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
 
     TS_ASSERT(c != nullptr);
@@ -167,7 +167,7 @@ public:
     extents[1] = x.back();
 
     // Create and run the algorithm
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    auto &ADS = Mantid::API::AnalysisDataService::Instance();
     auto alg = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
     alg->initialize();
     alg->setProperty("Dimensionality", 1);
@@ -220,7 +220,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", outName);
     alg.execute();
 
-    AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
+    auto &ADS = Mantid::API::AnalysisDataService::Instance();
     MDHistoWorkspace_sptr weighted_mean_md = std::dynamic_pointer_cast<MDHistoWorkspace>(ADS.retrieve(outName));
 
     // Check the outputs between both weighted mean algorithms.

@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/ExpDecay.h"
 

@@ -40,7 +40,7 @@ public:
     const std::string workspaceName("forMasking");
     const std::string maskedWorkspaceName("forCopyingMasks");
     const std::string resultWorkspaceName("masked");
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     ads.add(workspaceName, WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
     ads.add(maskedWorkspaceName, WorkspaceCreationHelper::create2DWorkspaceBinned(5, 25, 0.0));
 
@@ -68,7 +68,7 @@ public:
   the masked bins are copied over to every spectrum in the output workspace.
   */
   void testMaskedWorkspace() {
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
 
     // Create the input workspace
     const std::string workspaceName("forMasking");

@@ -205,7 +205,7 @@ public:
     ld.setProperty("NumberOfBins", 1);
     ld.execute();
     TS_ASSERT(ld.isExecuted());
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     TS_ASSERT_EQUALS(dataStore.doesExist(outws), true);
 
     TS_ASSERT_THROWS_NOTHING(saver->setPropertyValue("InputWorkspace", outws));

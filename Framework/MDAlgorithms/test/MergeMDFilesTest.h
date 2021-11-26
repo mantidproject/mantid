@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidGeometry/MDGeometry/QSample.h"

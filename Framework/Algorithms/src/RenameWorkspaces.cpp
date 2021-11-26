@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/RenameWorkspaces.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"

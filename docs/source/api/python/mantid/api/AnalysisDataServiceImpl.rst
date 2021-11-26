@@ -1,15 +1,15 @@
-.. _mantid.api.AnalysisDataServiceImpl:
+.. _mantid.api.AnalysisDataServiceWrapper:
 
 =========================
- AnalysisDataServiceImpl
+ AnalysisDataServiceWrapper
 =========================
 
-This is a Python binding to the C++ class Mantid::API::AnalysisDataServiceImpl.
+This is a Python binding to the C++ class Mantid::API::AnalysisDataServiceWrapper.
 
 
 .. module:`mantid.api`
 
-.. autoclass:: mantid.api.AnalysisDataServiceImpl
+.. autoclass:: mantid.api.AnalysisDataServiceWrapper
     :members:
     :undoc-members:
     :inherited-members:

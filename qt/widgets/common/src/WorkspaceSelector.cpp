@@ -15,6 +15,7 @@
 #include <Poco/NotificationCenter.h>
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
@@ -60,11 +61,11 @@ WorkspaceSelector::~WorkspaceSelector() { disconnectObservers(); }
  */
 void WorkspaceSelector::disconnectObservers() {
   if (m_init) {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
+    Mantid::API::AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_addObserver);
+    Mantid::API::AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_remObserver);
+    Mantid::API::AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_clearObserver);
+    Mantid::API::AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_renameObserver);
+    Mantid::API::AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_replaceObserver);
     m_init = false;
     m_connected = false;
   }
@@ -74,12 +75,12 @@ void WorkspaceSelector::disconnectObservers() {
  * Subscribes this object to the Poco NotificationCentre
  */
 void WorkspaceSelector::connectObservers() {
-  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
-  ads.notificationCenter.addObserver(m_addObserver);
-  ads.notificationCenter.addObserver(m_remObserver);
-  ads.notificationCenter.addObserver(m_renameObserver);
-  ads.notificationCenter.addObserver(m_clearObserver);
-  ads.notificationCenter.addObserver(m_replaceObserver);
+  auto &notificationCenter = Mantid::API::AnalysisDataService::Instance().getNotificationCenter();
+  notificationCenter.addObserver(m_addObserver);
+  notificationCenter.addObserver(m_remObserver);
+  notificationCenter.addObserver(m_renameObserver);
+  notificationCenter.addObserver(m_clearObserver);
+  notificationCenter.addObserver(m_replaceObserver);
   refresh();
   m_init = true;
   m_connected = true;

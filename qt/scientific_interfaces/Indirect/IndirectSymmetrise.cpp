@@ -7,6 +7,7 @@
 #include "IndirectSymmetrise.h"
 #include "IndirectDataValidationHelper.h"
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"

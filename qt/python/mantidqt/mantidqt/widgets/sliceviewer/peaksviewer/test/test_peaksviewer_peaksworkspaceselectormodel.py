@@ -11,7 +11,7 @@ import unittest
 from unittest.mock import create_autospec
 
 # 3rdparty imports
-from mantid.api import (AnalysisDataServiceImpl, IPeaksWorkspace, ITableWorkspace, MatrixWorkspace)
+from mantid.api import (AnalysisDataServiceWrapper, IPeaksWorkspace, ITableWorkspace, MatrixWorkspace)
 
 # local imports
 from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import PeaksWorkspaceSelectorModel
@@ -19,7 +19,7 @@ from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import PeaksWor
 
 class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
     def test_empty_workspaces_gives_empty_names_list(self):
-        mock_ads = create_autospec(AnalysisDataServiceImpl)
+        mock_ads = create_autospec(AnalysisDataServiceWrapper)
         mock_ads.getObjectNames.return_value = []
         model = PeaksWorkspaceSelectorModel(mock_ads)
 
@@ -80,7 +80,7 @@ class PeaksWorkspaceSelectorModelTest(unittest.TestCase):
 
     # private
     def _create_mock_ads(self, contents):
-        mock_ads = create_autospec(AnalysisDataServiceImpl)
+        mock_ads = create_autospec(AnalysisDataServiceWrapper)
         mock_ads.__getitem__.side_effect = contents.__getitem__
         mock_ads.getObjectNames.return_value = contents.keys()
         return mock_ads

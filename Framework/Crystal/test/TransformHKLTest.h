@@ -11,6 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/TransformHKL.h"

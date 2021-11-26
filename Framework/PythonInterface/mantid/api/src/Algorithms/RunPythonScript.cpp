@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"

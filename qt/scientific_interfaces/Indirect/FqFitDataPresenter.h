@@ -13,6 +13,8 @@
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "Notifier.h"
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
+
 #include <QComboBox>
 #include <QSpacerItem>
 
@@ -62,7 +64,7 @@ private:
   WorkspaceID m_activeWorkspaceID;
 
   Notifier<IFQFitObserver> m_notifier;
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
+  Mantid::API::AnalysisDataServiceWrapper &m_adsInstance;
 };
 
 } // namespace IDA

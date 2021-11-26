@@ -150,7 +150,7 @@ public:
     alg.setPropertyValue("OutputWorkspace", "clonedgroup");
     TS_ASSERT(alg.execute())
 
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     Workspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(out = ads.retrieve("clonedgroup"))
     WorkspaceGroup_const_sptr outgroup;

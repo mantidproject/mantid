@@ -209,7 +209,7 @@ public:
   }
 
   void TestGroupExec() {
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     WorkspaceGroup_sptr group(new WorkspaceGroup);
     ads.add("oldName", group);
     MatrixWorkspace_sptr member1 = createWorkspace();

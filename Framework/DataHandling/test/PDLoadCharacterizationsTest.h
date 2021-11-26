@@ -10,6 +10,7 @@
 #include <memory>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidDataHandling/PDLoadCharacterizations.h"

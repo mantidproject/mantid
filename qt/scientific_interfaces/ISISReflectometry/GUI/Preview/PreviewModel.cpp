@@ -8,6 +8,7 @@
 #include "PreviewModel.h"
 #include "GUI/Common/IJobManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"

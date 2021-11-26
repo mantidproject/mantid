@@ -14,7 +14,7 @@
 
 import inspect as _inspect
 
-from mantid.api import AnalysisDataServiceImpl, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
+from mantid.api import AnalysisDataServiceWrapper, ITableWorkspace, Workspace, WorkspaceGroup, performBinaryOp
 from mantid.kernel.funcinspect import customise_func, lhs_info, LazyMethodSignature
 
 
@@ -100,7 +100,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
 
     # Do we need to clean up
     if clear_tmps:
-        ads = AnalysisDataServiceImpl.Instance()
+        ads = AnalysisDataServiceWrapper.Instance()
         for name in _workspace_op_tmps:
             if name in ads and output_name != name:
                 del ads[name]
@@ -173,7 +173,7 @@ def _do_unary_operation(op, self, lhs_vars):
         _workspace_op_tmps.append(output_name)
 
     # Do the operation
-    ads = AnalysisDataServiceImpl.Instance()
+    ads = AnalysisDataServiceWrapper.Instance()
 
     # gets the child status correct for PythonAlgorithms
     alg = simpleapi._create_algorithm_object(op)

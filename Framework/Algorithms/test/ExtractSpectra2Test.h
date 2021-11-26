@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAlgorithms/ExtractSpectra2.h"
 #include "MantidDataObjects/Workspace2D.h"

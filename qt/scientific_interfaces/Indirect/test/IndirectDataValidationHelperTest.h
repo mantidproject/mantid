@@ -244,7 +244,7 @@ private:
     TS_ASSERT_EQUALS(m_uiv->generateErrorMessage().toStdString(), errorMessage);
   }
 
-  AnalysisDataServiceImpl &m_ads;
+  AnalysisDataServiceWrapper &m_ads;
   std::unique_ptr<UserInputValidator> m_uiv;
   std::unique_ptr<MockDataSelector> m_dataSelector;
 };

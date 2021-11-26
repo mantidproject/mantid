@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidDataHandling/GenerateGroupingPowder.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"

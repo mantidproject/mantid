@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 #include "MantidMDAlgorithms/EvaluateMDFunction.h"
 

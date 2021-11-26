@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest, os
-from mantid import AnalysisDataServiceImpl, config, simpleapi
+import unittest
+import os
+from mantid import AnalysisDataServiceWrapper, config, simpleapi
 
 
 class DakotaChiSquaredTest(unittest.TestCase):
@@ -24,7 +25,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
         simpleapi.SaveNexus('sim', self.simfile)
         simpleapi.SaveNexus('simwrong', self.simwrongfile)
 
-        ads = AnalysisDataServiceImpl.Instance()
+        ads = AnalysisDataServiceWrapper.Instance()
         ads.remove("data")
         ads.remove("sim")
         ads.remove("simwrong")
@@ -93,7 +94,7 @@ class DakotaChiSquaredTest(unittest.TestCase):
             self.assertEqual(alg[1].blocksize(), 5)
             self.assertEqual(alg[1].getNumberHistograms(), 1)
             self.assertEqual(alg[1].dataY(0)[3], 1.5)
-            ads = AnalysisDataServiceImpl.Instance()
+            ads = AnalysisDataServiceWrapper.Instance()
             ads.remove("alg")
             alg1 = simpleapi.DakotaChiSquared(self.datafile, self.simfile, self.chifile, ResidualsWorkspace="res")
             self.assertEqual(alg1[0], 4.5)

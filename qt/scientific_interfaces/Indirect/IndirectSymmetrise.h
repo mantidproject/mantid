@@ -8,6 +8,7 @@
 
 #include "IndirectDataReductionTab.h"
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "ui_IndirectSymmetrise.h"
@@ -75,7 +76,7 @@ private:
   Ui::IndirectSymmetrise m_uiForm;
   double m_originalMax;
   double m_originalMin;
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
+  Mantid::API::AnalysisDataServiceWrapper &m_adsInstance;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

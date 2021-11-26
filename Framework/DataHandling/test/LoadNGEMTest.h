@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/FileFinder.h>
 #include <MantidAPI/Run.h>

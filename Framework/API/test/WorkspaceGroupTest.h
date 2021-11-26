@@ -35,7 +35,7 @@ public:
   WorkspaceGroupTest_WorkspaceGroupObserver()
       : m_workspaceGroupUpdateObserver(*this, &WorkspaceGroupTest_WorkspaceGroupObserver::handleWorkspaceGroupUpdate),
         received(false) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_workspaceGroupUpdateObserver);
+    AnalysisDataService::Instance().getNotificationCenter().addObserver(m_workspaceGroupUpdateObserver);
   }
   // handles notification send by a WorkspaceGroup instance
   void handleWorkspaceGroupUpdate(Mantid::API::GroupUpdatedNotification_ptr) { received = true; }

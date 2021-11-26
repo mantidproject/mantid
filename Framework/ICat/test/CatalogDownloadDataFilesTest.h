@@ -8,6 +8,7 @@
 
 #include "ICatTestHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidICat/CatalogSearch.h"

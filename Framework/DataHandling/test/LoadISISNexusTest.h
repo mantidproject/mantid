@@ -433,7 +433,7 @@ public:
     loadingAlg.execute();
     TS_ASSERT(loadingAlg.isExecuted());
 
-    AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceWrapper &ADS = AnalysisDataService::Instance();
 
     WorkspaceGroup_sptr grpWs;
     TS_ASSERT_THROWS_NOTHING(grpWs = ADS.retrieveWS<WorkspaceGroup>(wsName));
@@ -478,7 +478,7 @@ public:
     loadingAlg.execute();
     TS_ASSERT(loadingAlg.isExecuted());
 
-    AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
+    auto &ADS = AnalysisDataService::Instance();
     WorkspaceGroup_sptr grpWs;
     TS_ASSERT_THROWS_NOTHING(grpWs = ADS.retrieveWS<WorkspaceGroup>(wsName));
     MatrixWorkspace_sptr ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));

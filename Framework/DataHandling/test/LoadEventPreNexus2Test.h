@@ -11,6 +11,7 @@
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventList.h"

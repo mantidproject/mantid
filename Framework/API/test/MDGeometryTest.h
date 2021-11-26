@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/NullCoordTransform.h"

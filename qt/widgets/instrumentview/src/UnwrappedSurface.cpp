@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/OpenGLError.h"
 #include "MantidQtWidgets/InstrumentView/PeakMarker2D.h"
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"

@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ScriptBuilder.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
@@ -596,6 +597,6 @@ public:
 
 private:
   AlgorithmFactoryImpl &m_algFactory;
-  AnalysisDataServiceImpl &m_ads;
+  AnalysisDataServiceWrapper &m_ads;
   MatrixWorkspace_sptr m_testWS;
 };

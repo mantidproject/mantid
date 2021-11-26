@@ -373,7 +373,7 @@ void MuonSequentialFitDialog::continueFit() {
   const std::string label = m_ui.labelInput->text().toStdString();
   const std::string labelGroupName = SEQUENTIAL_PREFIX + label;
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
 
   if (ads.doesExist(labelGroupName)) {
     QMessageBox::StandardButton answer = QMessageBox::question(this, "Label already exists",

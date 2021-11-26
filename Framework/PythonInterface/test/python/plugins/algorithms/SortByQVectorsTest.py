@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid import AnalysisDataServiceImpl, simpleapi
+from mantid import AnalysisDataServiceWrapper, simpleapi
 
 
 class SortByQVectorsTest(unittest.TestCase):
@@ -18,7 +18,7 @@ class SortByQVectorsTest(unittest.TestCase):
         self.assertAlmostEqual(ws[0].dataY(2)[0], 0.0120120118372)
         self.assertAlmostEqual(ws[0].dataY(3)[0], 0.0180180184543)
         self.assertAlmostEqual(ws[0].dataY(4)[0], 0.0240240236744)
-        AnalysisDataServiceImpl.Instance().remove("ws")
+        AnalysisDataServiceWrapper.Instance().remove("ws")
 
 
 if __name__ == "__main__":

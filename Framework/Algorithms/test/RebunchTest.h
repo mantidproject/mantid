@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/Rebunch.h"
 #include "MantidDataObjects/Workspace2D.h"

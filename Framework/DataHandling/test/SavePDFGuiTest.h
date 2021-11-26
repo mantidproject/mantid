@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/SavePDFGui.h"
 

@@ -54,14 +54,14 @@ const std::string WorkspaceGroup::toString() const {
 void WorkspaceGroup::observeADSNotifications(const bool observeADS) {
   if (observeADS) {
     if (!m_observingADS) {
-      AnalysisDataService::Instance().notificationCenter.addObserver(m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.addObserver(m_beforeReplaceObserver);
+      AnalysisDataService::Instance().getNotificationCenter().addObserver(m_deleteObserver);
+      AnalysisDataService::Instance().getNotificationCenter().addObserver(m_beforeReplaceObserver);
       m_observingADS = true;
     }
   } else {
     if (m_observingADS) {
-      AnalysisDataService::Instance().notificationCenter.removeObserver(m_deleteObserver);
-      AnalysisDataService::Instance().notificationCenter.removeObserver(m_beforeReplaceObserver);
+      AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_deleteObserver);
+      AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_beforeReplaceObserver);
       m_observingADS = false;
     }
   }

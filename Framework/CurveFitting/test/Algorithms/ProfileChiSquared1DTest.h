@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidCurveFitting/Algorithms/ProfileChiSquared1D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 

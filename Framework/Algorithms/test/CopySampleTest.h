@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"

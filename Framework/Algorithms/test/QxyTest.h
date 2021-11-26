@@ -9,6 +9,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/ConvertUnits.h"
 #include "MantidAlgorithms/Qxy.h"

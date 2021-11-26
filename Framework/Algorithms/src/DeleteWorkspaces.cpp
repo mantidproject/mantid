@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/DeleteWorkspaces.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid::Algorithms {

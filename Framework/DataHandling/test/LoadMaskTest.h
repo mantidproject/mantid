@@ -13,6 +13,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadMask.h"

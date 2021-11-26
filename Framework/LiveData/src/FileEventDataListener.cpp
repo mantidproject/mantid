@@ -7,6 +7,7 @@
 #include "MantidLiveData/FileEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileLoaderRegistry.h"
 #include "MantidAPI/LiveListenerFactory.h"

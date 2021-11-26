@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid::API {
@@ -76,7 +77,7 @@ void ITableWorkspace::modified() {
   ITableWorkspace_sptr tws = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   if (!tws)
     return;
-  AnalysisDataService::Instance().notificationCenter.postNotification(
+  AnalysisDataService::Instance().getNotificationCenter().postNotification(
       new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(), tws));
 }
 

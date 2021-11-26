@@ -53,7 +53,7 @@ public:
     // Create workspace with paremeterised instrument and put into data store
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(ndets, 10, true);
     const std::string wsName("ApplyCabrationWs");
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName, ws);
 
     // Create Calibration Table
@@ -122,7 +122,7 @@ public:
                             "1");                // Spectrum number, not workspace index
     loader.setPropertyValue("SpectrumMax", "9"); // std::to_string(nSpectra));
     loader.execute();
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     MatrixWorkspace_sptr workspace = dataStore.retrieveWS<MatrixWorkspace>(wsName);
     const auto &detectorInfo = workspace->detectorInfo();
     const auto &componentInfo = workspace->componentInfo();
@@ -188,7 +188,7 @@ public:
     loader.setPropertyValue("Filename", "unit_testing/MAPS_Definition_Reduced.xml");
     loader.setPropertyValue("OutputWorkspace", wsName);
     loader.execute();
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     MatrixWorkspace_sptr ws = dataStore.retrieveWS<MatrixWorkspace>(wsName);
 
     // Create Calibration Table

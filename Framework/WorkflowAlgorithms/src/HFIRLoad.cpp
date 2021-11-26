@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/BoundedValidator.h"

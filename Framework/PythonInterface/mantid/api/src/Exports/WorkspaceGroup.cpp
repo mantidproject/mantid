@@ -62,7 +62,7 @@ Workspace_sptr makeWorkspaceGroup() {
 }
 
 void addWorkspace(WorkspaceGroup &self, const boost::python::object &pyobj) {
-  self.addWorkspace(DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>::extractCppValue(pyobj));
+  self.addWorkspace(DataServiceExporter<AnalysisDataServiceWrapper, Workspace_sptr>::extractCppValue(pyobj));
 }
 
 PyObject *getItem(WorkspaceGroup &self, const int &index) {

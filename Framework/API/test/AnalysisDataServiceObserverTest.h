@@ -11,6 +11,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -73,7 +74,7 @@ public:
 
 class AnalysisDataServiceObserverTest : public CxxTest::TestSuite {
 private:
-  AnalysisDataServiceImpl &ads;
+  AnalysisDataServiceWrapper &ads;
   std::unique_ptr<FakeAnalysisDataServiceObserver> m_mockInheritingClass;
 
 public:

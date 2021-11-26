@@ -932,7 +932,7 @@ void MuonFitPropertyBrowser::finishHandleNormal(const IAlgorithm *alg) {
 // need own version of this
 void MuonFitPropertyBrowser::finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                                         const int nWorkspaces) const {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   try {
     const std::string paramTableName = fitAlg->getProperty("OutputParameters");
     const auto paramTable = ads.retrieveWS<ITableWorkspace>(paramTableName);
@@ -976,7 +976,7 @@ void MuonFitPropertyBrowser::finishAfterSimultaneousFit(const Mantid::API::IAlgo
  */
 void MuonFitPropertyBrowser::finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg,
                                                           const std::string &baseName) const {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   try {
     std::vector<std::string> wsList = alg->getProperty("UnNormalizedWorkspaceList");
     std::string paramTableName = baseName + "_Parameters";

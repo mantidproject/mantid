@@ -298,7 +298,7 @@ void LoadAndApplyMuonDetectorGrouping::addGroupingInformationToADS(const Mantid:
     newRow << detectorIDs;
   }
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   ads.addOrReplace("MuonGroupings", groupingTable);
 }
 

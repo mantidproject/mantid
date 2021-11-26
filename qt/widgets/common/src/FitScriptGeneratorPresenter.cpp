@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 

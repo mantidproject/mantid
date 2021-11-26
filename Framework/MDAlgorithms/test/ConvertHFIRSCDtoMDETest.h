@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Workspace_fwd.h"

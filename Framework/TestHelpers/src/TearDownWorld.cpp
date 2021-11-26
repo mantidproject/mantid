@@ -10,6 +10,7 @@
 #include "MantidFrameworkTestHelpers/TearDownWorld.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 
 // On MSVC all workspaces must be deleted by the time main() exits as the

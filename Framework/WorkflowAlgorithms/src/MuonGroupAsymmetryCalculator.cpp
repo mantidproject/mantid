@@ -120,7 +120,7 @@ MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::removeExpDecay(const Workspac
 MatrixWorkspace_sptr MuonGroupAsymmetryCalculator::estimateAsymmetry(const Workspace_sptr &inputWS,
                                                                      const int index) const {
   const std::string normTableName = "MuonAnalysisTFNormalizations";
-  API::AnalysisDataServiceImpl &ads = API::AnalysisDataService::Instance();
+  auto &ads = API::AnalysisDataService::Instance();
   if (!ads.doesExist(normTableName)) {
     Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable();
     Mantid::API::AnalysisDataService::Instance().addOrReplace(normTableName, table);

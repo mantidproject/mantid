@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"

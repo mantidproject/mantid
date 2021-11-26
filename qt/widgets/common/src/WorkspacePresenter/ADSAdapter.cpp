@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceProviderNotifiable.h"
 
 using namespace Mantid::API;
@@ -23,7 +24,7 @@ ADSAdapter::ADSAdapter()
       m_ungroupworkspaceObserver(*this, &ADSAdapter::handleUnGroupWorkspace),
       m_workspaceGroupUpdateObserver(*this, &ADSAdapter::handleWorkspaceGroupUpdate) {
   // Register all observers.
-  auto &nc = AnalysisDataService::Instance().notificationCenter;
+  auto &nc = AnalysisDataService::Instance().getNotificationCenter();
   nc.addObserver(m_addObserver);
   nc.addObserver(m_replaceObserver);
   nc.addObserver(m_deleteObserver);
@@ -36,7 +37,7 @@ ADSAdapter::ADSAdapter()
 
 ADSAdapter::~ADSAdapter() {
   // remove all observers
-  auto &nc = AnalysisDataService::Instance().notificationCenter;
+  auto &nc = AnalysisDataService::Instance().getNotificationCenter();
   nc.removeObserver(m_addObserver);
   nc.removeObserver(m_replaceObserver);
   nc.removeObserver(m_deleteObserver);

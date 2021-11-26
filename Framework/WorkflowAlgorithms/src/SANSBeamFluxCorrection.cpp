@@ -7,6 +7,7 @@
 #include "MantidWorkflowAlgorithms/SANSBeamFluxCorrection.h"
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PropertyManager.h"

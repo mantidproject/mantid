@@ -49,7 +49,7 @@ public:
     const std::string scalingFile = createTestScalingFile(testWS);
     // Needs to be in the ADS for this algorithm
     const std::string wsName("PSDTest");
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName, testWS);
 
     // Store the detector positions before the shifts so that we can compare

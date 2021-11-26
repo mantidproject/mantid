@@ -132,7 +132,7 @@ PreviewPlot::~PreviewPlot() { watchADS(!m_init); }
  * @param on If true ADS observers are enabled else they are disabled
  */
 void PreviewPlot::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  auto &notificationCenter = AnalysisDataService::Instance().getNotificationCenter();
   if (on) {
     notificationCenter.addObserver(m_removeObserver);
     notificationCenter.addObserver(m_replaceObserver);

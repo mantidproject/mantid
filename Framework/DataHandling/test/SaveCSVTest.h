@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveCSV.h"
 #include "MantidDataObjects/Workspace2D.h"

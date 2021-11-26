@@ -1071,7 +1071,7 @@ bool Algorithm::trackingHistory() { return (!isChild() || m_recordHistoryForChil
  * finding group workspaces that are never stored on the property
  */
 void Algorithm::findWorkspaces(WorkspaceVector &workspaces, unsigned int direction, bool checkADS) const {
-  auto workspaceFromWSProperty = [](const IWorkspaceProperty &prop, const AnalysisDataServiceImpl &ads,
+  auto workspaceFromWSProperty = [](const IWorkspaceProperty &prop, const AnalysisDataServiceWrapper &ads,
                                     const std::string &strValue, bool checkADS) {
     auto workspace = prop.getWorkspace();
     if (workspace)

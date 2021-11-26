@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include <cxxtest/TestSuite.h>

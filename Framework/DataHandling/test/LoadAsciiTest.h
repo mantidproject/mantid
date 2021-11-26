@@ -10,6 +10,7 @@
 #include "cxxtest/TestSuite.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -249,7 +250,7 @@ private:
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
     // Check the workspace
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));

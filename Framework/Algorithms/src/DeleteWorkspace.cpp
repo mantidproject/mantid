@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DeleteWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 
 namespace Mantid::Algorithms {
 
@@ -20,9 +21,7 @@ void DeleteWorkspace::init() {
 
 /// Execute the algorithm
 void DeleteWorkspace::exec() {
-  using API::AnalysisDataService;
-  using API::AnalysisDataServiceImpl;
-  AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+  auto &dataStore = API::AnalysisDataService::Instance();
   const std::string wsName = getProperty("Workspace");
   dataStore.remove(wsName); // Logs if it doesn't exist
 }

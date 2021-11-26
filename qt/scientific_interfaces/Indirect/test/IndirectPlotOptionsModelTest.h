@@ -350,7 +350,7 @@ public:
   }
 
 private:
-  AnalysisDataServiceImpl &m_ads;
+  AnalysisDataServiceWrapper &m_ads;
 
   std::unique_ptr<IndirectPlotOptionsModel> m_model;
   MockExternalPlotter *m_plotter;

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/SaveIsawPeaks.h"
 #include "MantidDataObjects/Peak.h"

@@ -43,7 +43,7 @@ ScopedWorkspace::operator bool() const { return AnalysisDataService::Instance().
  * under the name.
  */
 Workspace_sptr ScopedWorkspace::retrieve() const {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
 
   if (ads.doesExist(m_name)) {
     return ads.retrieveWS<Workspace>(m_name);
@@ -56,7 +56,7 @@ Workspace_sptr ScopedWorkspace::retrieve() const {
  * Removes the workspace entry from the ADS.
  */
 void ScopedWorkspace::remove() {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
 
   // When destructed, remove workspace from the ADS if was added and still
   // exists
@@ -74,7 +74,7 @@ void ScopedWorkspace::remove() {
  * Make ADS entry to point to the given workspace.
  */
 void ScopedWorkspace::set(const Workspace_sptr &newWS) {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
 
   if (!newWS->getName().empty() && ads.doesExist(newWS->getName()))
     throw std::invalid_argument("Workspace is already in the ADS under the name " + newWS->getName());

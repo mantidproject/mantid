@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"

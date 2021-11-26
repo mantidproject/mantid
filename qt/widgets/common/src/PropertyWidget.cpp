@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/System.h"

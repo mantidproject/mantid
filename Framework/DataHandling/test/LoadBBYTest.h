@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadBBY.h"

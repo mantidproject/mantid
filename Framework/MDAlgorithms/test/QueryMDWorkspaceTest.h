@@ -89,7 +89,7 @@ public:
                        "number of events"); // Normalising by n events
     B.execute();
 
-    AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
+    auto &ADS = AnalysisDataService::Instance();
 
     TableWorkspace_sptr queryA = std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_A"));
     TableWorkspace_sptr queryB = std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_B"));

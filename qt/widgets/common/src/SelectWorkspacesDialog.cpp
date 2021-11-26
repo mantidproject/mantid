@@ -10,7 +10,7 @@
 
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
-#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <QDialogButtonBox>
 #include <QListWidget>
@@ -57,9 +57,8 @@ SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget *parent, const std::strin
   setWindowTitle("Mantid - Select workspace");
   m_wsList = new QListWidget(parent);
 
-  const Mantid::API::AnalysisDataServiceImpl &ADS = Mantid::API::AnalysisDataService::Instance();
   using VecWorkspaces = std::vector<Mantid::API::Workspace_sptr>;
-  VecWorkspaces workspaces = ADS.getObjects();
+  VecWorkspaces workspaces = Mantid::API::getDefaultAnalysisDataService().getObjects();
   WorkspaceIsNotOfType comparitor(typeFilter);
   workspaces.erase(std::remove_if(workspaces.begin(), workspaces.end(), comparitor), workspaces.end());
   QStringList tmp;

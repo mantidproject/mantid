@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -33,7 +34,7 @@ public:
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
     // Check the workspace
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     TS_ASSERT_EQUALS(dataStore.doesExist(outputWSName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWSName));
@@ -73,7 +74,7 @@ public:
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
     // Check the workspace
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     TS_ASSERT_EQUALS(dataStore.doesExist(outputWSName), true);
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputWSName));

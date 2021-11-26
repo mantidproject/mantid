@@ -112,7 +112,7 @@ public:
 
   void testGroup() {
     const std::string groupName = "oldName";
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     WorkspaceGroup_sptr group(new WorkspaceGroup);
     ads.add(groupName, group);
     MatrixWorkspace_sptr member1 = createWorkspace();

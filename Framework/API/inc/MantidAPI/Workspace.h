@@ -19,7 +19,7 @@ class Logger;
 }
 
 namespace API {
-class AnalysisDataServiceImpl;
+class AnalysisDataServiceWrapper;
 class WorkspaceHistory;
 
 /** Base Workspace Abstract Class.

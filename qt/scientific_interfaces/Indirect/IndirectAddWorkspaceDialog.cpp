@@ -7,6 +7,7 @@
 #include "IndirectAddWorkspaceDialog.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include <boost/optional.hpp>

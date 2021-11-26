@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"

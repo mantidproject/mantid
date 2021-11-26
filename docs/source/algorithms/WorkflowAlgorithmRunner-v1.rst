@@ -93,13 +93,13 @@ Usage
         'OutputWorkspace': 'scaled_ws2'
     }
     setupTable.addRow(row)
-    AnalysisDataServiceImpl.Instance().addOrReplace('setupTable', setupTable)
+    AnalysisDataServiceWrapper.Instance().addOrReplace('setupTable', setupTable)
 
     # Map OutputWorkspace to InputWorkspace
     ioMap = WorkspaceFactoryImpl.Instance().createTable()
     ioMap.addColumn('str', 'InputWorkspace')
     ioMap.addRow({'InputWorkspace': 'OutputWorkspace'})
-    AnalysisDataServiceImpl.Instance().addOrReplace('ioMapTable', ioMap)
+    AnalysisDataServiceWrapper.Instance().addOrReplace('ioMapTable', ioMap)
 
     # Execute the algorithm
     WorkflowAlgorithmRunner('Scale', SetupTable=setupTable, InputOutputMap=ioMap)

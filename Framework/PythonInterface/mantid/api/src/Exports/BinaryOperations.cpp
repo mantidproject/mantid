@@ -145,7 +145,7 @@ ResultType performBinaryOpWithDouble(const LHSType inputWS, const double value, 
     ~ScopedADSEntry() { ads.remove(name); }
 
     const std::string &name;
-    API::AnalysisDataServiceImpl &ads = API::AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceWrapper &ads = API::AnalysisDataService::Instance();
   };
 
   // In order to recreate a history record of the final binary operation

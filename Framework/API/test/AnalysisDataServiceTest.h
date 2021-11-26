@@ -32,7 +32,7 @@ using MockWorkspace_sptr = std::shared_ptr<MockWorkspace>;
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite {
 private:
-  AnalysisDataServiceImpl &ads;
+  AnalysisDataServiceWrapper &ads;
 
 public:
   static AnalysisDataServiceTest *createSuite() { return new AnalysisDataServiceTest(); }

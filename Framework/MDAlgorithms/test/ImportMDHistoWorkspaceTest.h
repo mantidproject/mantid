@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/ConfigService.h"
@@ -207,7 +208,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // Check execution
-    AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
+    auto &ADS = AnalysisDataService::Instance();
     TS_ASSERT(ADS.doesExist("test_workspace"));
 
     // Check the workspace
@@ -265,7 +266,7 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     // Check execution
-    AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
+    auto &ADS = AnalysisDataService::Instance();
     TS_ASSERT(ADS.doesExist("test_workspace"));
 
     // Check the workspace

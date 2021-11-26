@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadQKK.h"
 #include "MantidDataObjects/Workspace2D.h"

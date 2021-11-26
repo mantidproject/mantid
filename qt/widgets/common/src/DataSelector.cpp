@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Exception.h"

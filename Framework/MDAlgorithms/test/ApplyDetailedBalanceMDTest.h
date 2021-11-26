@@ -12,6 +12,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataObjects/MDEventWorkspace.h"

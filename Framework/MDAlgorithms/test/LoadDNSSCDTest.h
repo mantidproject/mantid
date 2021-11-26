@@ -8,6 +8,7 @@
 
 #include "LoadDNSSCDTestReference.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace.h"

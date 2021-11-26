@@ -11,6 +11,7 @@
 #include "MantidReflectometry/ReflectometryReductionOneAuto2.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -35,7 +36,7 @@ class ReflectometryReductionOneAuto2Test : public CxxTest::TestSuite {
 private:
   MatrixWorkspace_sptr m_notTOF;
   MatrixWorkspace_sptr m_TOF;
-  AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
+  Mantid::API::AnalysisDataServiceWrapper &ADS = AnalysisDataService::Instance();
 
   MatrixWorkspace_sptr loadRun(const std::string &run) {
 

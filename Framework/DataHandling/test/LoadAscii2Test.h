@@ -366,7 +366,7 @@ public:
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
     // Check the workspace
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     if (dataStore.doesExist(outputName)) {
       TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
       Workspace_sptr output;
@@ -526,7 +526,7 @@ private:
       TS_ASSERT_EQUALS(loader.isExecuted(), true);
 
       // Check the workspace
-      AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+      AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
       if (dataStore.doesExist(outputName)) {
         TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
         Workspace_sptr output;

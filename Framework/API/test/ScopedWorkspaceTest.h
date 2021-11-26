@@ -194,5 +194,5 @@ public:
   }
 
 private:
-  AnalysisDataServiceImpl &m_ads;
+  AnalysisDataServiceWrapper &m_ads;
 };

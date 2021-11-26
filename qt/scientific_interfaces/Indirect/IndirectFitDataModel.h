@@ -10,6 +10,7 @@
 #include "DllConfig.h"
 #include "IIndirectFitDataModel.h"
 #include "IndirectFitData.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -80,7 +81,7 @@ private:
 
   std::unique_ptr<std::vector<IndirectFitData>> m_fittingData;
   std::unique_ptr<std::vector<std::weak_ptr<Mantid::API::MatrixWorkspace>>> m_resolutions;
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
+  Mantid::API::AnalysisDataServiceWrapper &m_adsInstance;
 };
 
 } // namespace IDA

@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataHandling/SaveFullprofResolution.h"
 #include "MantidDataObjects/TableWorkspace.h"

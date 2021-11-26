@@ -18,7 +18,7 @@ using namespace API;
 
 /// Initialisation method
 void UnGroupWorkspace::init() {
-  const AnalysisDataServiceImpl &data_store = AnalysisDataService::Instance();
+  const auto &data_store = AnalysisDataService::Instance();
   // Get the list of workspaces in the ADS
   auto workspaceList = data_store.getObjectNames();
   std::unordered_set<std::string> groupWorkspaceList;
@@ -42,7 +42,7 @@ void UnGroupWorkspace::init() {
  */
 void UnGroupWorkspace::exec() {
   const std::string inputws = getProperty("InputWorkspace");
-  AnalysisDataServiceImpl &data_store = Mantid::API::AnalysisDataService::Instance();
+  auto &data_store = Mantid::API::AnalysisDataService::Instance();
 
   // Retrieve the input workspace
   Workspace_sptr wsSptr = data_store.retrieve(inputws);
@@ -54,7 +54,8 @@ void UnGroupWorkspace::exec() {
     throw std::runtime_error("Selected Workspace is not a WorkspaceGroup");
   }
   // Notify observers that a WorkspaceGroup is about to be unrolled
-  data_store.notificationCenter.postNotification(new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
+  data_store.getNotificationCenter().postNotification(
+      new Mantid::API::WorkspaceUnGroupingNotification(inputws, wsSptr));
   // Now remove the WorkspaceGroup from the ADS
   data_store.remove(inputws);
 }

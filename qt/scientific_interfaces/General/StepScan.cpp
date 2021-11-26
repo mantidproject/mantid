@@ -56,8 +56,8 @@ StepScan::~StepScan() {
   // Stop live data collection, if running
   m_uiForm.mWRunFiles->stopLiveAlgorithm();
   // Disconnect the observers for the mask workspace combobox
-  AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
-  AnalysisDataService::Instance().notificationCenter.removeObserver(m_replObserver);
+  AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_addObserver);
+  AnalysisDataService::Instance().getNotificationCenter().removeObserver(m_replObserver);
   // Clean up any hidden workspaces created
   cleanupWorkspaces();
 }
@@ -352,7 +352,7 @@ void StepScan::launchInstrumentWindow() {
   // Attach the observers so that if a mask workspace is generated over in the
   // instrument view,
   // it is automatically selected by the combobox over here
-  AnalysisDataService::Instance().notificationCenter.addObserver(m_addObserver);
+  AnalysisDataService::Instance().getNotificationCenter().addObserver(m_addObserver);
   addReplaceObserverOnce();
 }
 
@@ -715,7 +715,7 @@ void StepScan::handleReplEvent(Mantid::API::WorkspaceAfterReplaceNotification_pt
 
 void StepScan::addReplaceObserverOnce() {
   if (!m_replaceObserverAdded) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(m_replObserver);
+    AnalysisDataService::Instance().getNotificationCenter().addObserver(m_replObserver);
     m_replaceObserverAdded = true;
   }
 }

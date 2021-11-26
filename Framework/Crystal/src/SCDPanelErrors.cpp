@@ -7,6 +7,7 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Sample.h"

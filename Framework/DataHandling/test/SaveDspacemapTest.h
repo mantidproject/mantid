@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidDataHandling/LoadDspacemap.h"
 #include "MantidDataHandling/SaveDspacemap.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"

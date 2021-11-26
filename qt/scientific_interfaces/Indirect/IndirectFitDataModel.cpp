@@ -10,6 +10,7 @@
 #include "IndirectFitData.h"
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace MantidQt::MantidWidgets;

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/ContourPreviewPlot.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
@@ -47,7 +48,7 @@ void ContourPreviewPlot::createLayout() {
  * @param on If true ADS observers are enabled else they are disabled
  */
 void ContourPreviewPlot::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  auto &notificationCenter = AnalysisDataService::Instance().getNotificationCenter();
   if (on) {
     notificationCenter.addObserver(m_wsRemovedObserver);
     notificationCenter.addObserver(m_wsReplacedObserver);

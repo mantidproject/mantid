@@ -739,7 +739,7 @@ public:
 
     /// ADS should only contain single group with given name as the spectrum
     /// list contains only monitors
-    AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+    auto &ads = AnalysisDataService::Instance();
     TSM_ASSERT("Expected workspace is not in the ADS", ads.doesExist(outputWSName));
     TSM_ASSERT("A separate monitor workspace has been found when it should not be",
                !ads.doesExist(outputWSName + "_monitors"))

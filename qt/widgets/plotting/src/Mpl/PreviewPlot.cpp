@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
@@ -77,7 +78,7 @@ PreviewPlot::~PreviewPlot() { watchADS(false); }
  * @param on If true ADS observers are enabled else they are disabled
  */
 void PreviewPlot::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  auto &notificationCenter = AnalysisDataService::Instance().getNotificationCenter();
   if (on) {
     notificationCenter.addObserver(m_wsRemovedObserver);
     notificationCenter.addObserver(m_wsReplacedObserver);

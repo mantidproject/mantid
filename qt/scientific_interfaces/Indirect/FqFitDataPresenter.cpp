@@ -9,6 +9,7 @@
 #include "MantidAPI/TextAxis.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
 namespace {

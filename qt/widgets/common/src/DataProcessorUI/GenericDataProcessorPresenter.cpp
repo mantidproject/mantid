@@ -251,7 +251,7 @@ void GenericDataProcessorPresenter::acceptViews(DataProcessorView *tableView, Pr
 
   // Populate an initial list of valid tables to open, and subscribe to the ADS
   // to keep it up to date
-  Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
+  auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   auto items = ads.getObjectNames();
   for (auto const &name : items) {

@@ -14,7 +14,7 @@
     The function is also attached to the AnalysisDataService and named importAll.
 
 """
-from mantid.api import AnalysisDataServiceImpl
+from mantid.api import AnalysisDataServiceWrapper
 import inspect as _inspect
 import keyword as _keyword
 import re as _re
@@ -88,4 +88,4 @@ def is_valid_identifier(name):
 
 
 # Attach to ADS as importAll
-setattr(AnalysisDataServiceImpl, "importAll", _importAll)
+setattr(AnalysisDataServiceWrapper, "importAll", _importAll)

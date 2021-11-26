@@ -53,7 +53,7 @@ protected:
 private:
   QPoint m_dragStartPosition;
   MantidDisplayBase *m_mantidUI;
-  Mantid::API::AnalysisDataServiceImpl &m_ads;
+  Mantid::API::AnalysisDataServiceWrapper &m_ads;
   MantidItemSortScheme m_sortScheme;
   Qt::SortOrder m_sortOrder;
 };

@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/ClearCache.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidKernel/UsageService.h"
 #include <Poco/File.h>

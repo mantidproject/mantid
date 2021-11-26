@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/Converters/ToPyList.h"
@@ -21,7 +22,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-GET_POINTER_SPECIALIZATION(AnalysisDataServiceImpl)
+GET_POINTER_SPECIALIZATION(AnalysisDataServiceWrapper)
 
 namespace {
 std::once_flag INIT_FLAG;
@@ -32,7 +33,7 @@ std::once_flag INIT_FLAG;
  *   - register AnalysisDataService.clear as an atexit function
  * @return A reference to the FrameworkManagerImpl instance
  */
-AnalysisDataServiceImpl &instance() {
+AnalysisDataServiceWrapper &instance() {
   // start the framework (if necessary)
   auto &ads = AnalysisDataService::Instance();
   std::call_once(INIT_FLAG, []() {
@@ -44,12 +45,12 @@ AnalysisDataServiceImpl &instance() {
 }
 
 /**
- * @param self A reference to the AnalysisDataServiceImpl
+ * @param self A reference to the AnalysisDataServiceWrapper
  * @param names The list of names to extract
  * @param unrollGroups If true unroll the workspace groups
  * @return a python list of the workspaces in the ADS
  */
-list retrieveWorkspaces(AnalysisDataServiceImpl const *const self, const list &names, bool unrollGroups = false) {
+list retrieveWorkspaces(AnalysisDataServiceWrapper const *const self, const list &names, bool unrollGroups = false) {
   return Converters::ToPyList<Workspace_sptr>()(
       self->retrieveWorkspaces(Converters::PySequenceToVector<std::string>(names)(), unrollGroups));
 }
@@ -64,8 +65,8 @@ GNU_DIAG_ON("unused-local-typedef")
 } // namespace
 
 void export_AnalysisDataService() {
-  using ADSExporter = DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>;
-  auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
+  using ADSExporter = DataServiceExporter<AnalysisDataServiceWrapper, Workspace_sptr>;
+  auto pythonClass = ADSExporter::define("AnalysisDataServiceWrapper");
   pythonClass
       .def("Instance", instance, return_value_policy<reference_existing_object>(),
            "Return a reference to the singleton instance")
@@ -73,8 +74,8 @@ void export_AnalysisDataService() {
       .def("retrieveWorkspaces", retrieveWorkspaces,
            AdsRetrieveWorkspacesOverloads("Retrieve a list of workspaces by name",
                                           (arg("self"), arg("names"), arg("unrollGroups") = false)))
-      .def("addToGroup", &AnalysisDataServiceImpl::addToGroup, (arg("groupName"), arg("wsName")),
+      .def("addToGroup", &AnalysisDataServiceWrapper::addToGroup, (arg("groupName"), arg("wsName")),
            "Add a workspace in the ADS to a group in the ADS")
-      .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup, (arg("groupName"), arg("wsName")),
+      .def("removeFromGroup", &AnalysisDataServiceWrapper::removeFromGroup, (arg("groupName"), arg("wsName")),
            "Remove a workspace from a group in the ADS");
 }

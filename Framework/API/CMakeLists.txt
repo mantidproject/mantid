@@ -1,4 +1,5 @@
 set(SRC_FILES
+    src/AnalysisDataServiceWrapper.cpp
     src/ADSValidator.cpp
     src/Algorithm.cpp
     src/AlgorithmFactory.cpp
@@ -180,6 +181,7 @@ set(INC_FILES
     inc/MantidAPI/AlgorithmObserver.h
     inc/MantidAPI/AlgorithmProperty.h
     inc/MantidAPI/AnalysisDataService.h
+    inc/MantidAPI/AnalysisDataServiceWrapper.h
     inc/MantidAPI/AnalysisDataServiceObserver.h
     inc/MantidAPI/ArchiveSearchFactory.h
     inc/MantidAPI/Axis.h

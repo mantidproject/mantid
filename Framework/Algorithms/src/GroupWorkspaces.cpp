@@ -50,7 +50,7 @@ void GroupWorkspaces::exec() {
   if ((m_group == nullptr) || m_group->isEmpty())
     throw std::invalid_argument("Glob pattern " + globExpression + " does not match any workspace names in the ADS.");
   setProperty("OutputWorkspace", m_group);
-  auto &notifier = API::AnalysisDataService::Instance().notificationCenter;
+  auto &notifier = API::AnalysisDataService::Instance().getNotificationCenter();
   notifier.postNotification(new WorkspacesGroupedNotification(inputWorkspaces));
 }
 
@@ -109,7 +109,7 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 
   Poco::Glob glob(globExpression);
 
-  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const auto &ads = AnalysisDataService::Instance();
   const auto names = ads.topLevelItems();
   for (const auto &name : names) {
     if (glob.match(name.first)) {
@@ -124,7 +124,7 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
  */
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
 
-  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const auto &ads = AnalysisDataService::Instance();
   for (const auto &name : names) {
     auto workspace = ads.retrieve(name);
     addToGroup(workspace);

@@ -930,7 +930,7 @@ public:
     WorkspaceGroup_sptr groupOne = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupOneName);
     const std::string groupTwoName("TestGroupTwo");
     WorkspaceGroup_sptr groupTwo = WorkspaceCreationHelper::createWorkspaceGroup(2, 2, 2, groupTwoName);
-    Mantid::API::AnalysisDataServiceImpl &dataStore = Mantid::API::AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceWrapper &dataStore = Mantid::API::AnalysisDataService::Instance();
     // Extract the zeroth element of groupTwo and add a spurious log
     MatrixWorkspace_sptr zero = std::dynamic_pointer_cast<MatrixWorkspace>(dataStore.retrieve(groupTwo->getNames()[0]));
     TS_ASSERT(zero);

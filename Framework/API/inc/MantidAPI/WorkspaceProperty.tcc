@@ -402,7 +402,7 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(const std::shared_ptr<Workspac
 
 /** Checks whether the entered output workspace is valid.
  *  To be valid the only thing it needs is a name that is allowed by the ADS,
- * @see AnalysisDataServiceImpl
+ * @see AnalysisDataServiceWrapper
  *  @returns A user level description of the problem or "" if it is valid.
  */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {

@@ -42,7 +42,7 @@ public:
     // store
     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(3, 10, true);
     const std::string wsName1("CopyInstParamWs1");
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName1, ws1);
     /// Create output workspace with the same base instrument and put into data
     /// store
@@ -107,7 +107,7 @@ public:
     MatrixWorkspace_sptr ws1 =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(4, 10, true, false, true, "Instr_modified");
     const std::string wsName1("CopyInstParamWs1");
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.add(wsName1, ws1);
 
     Instrument_const_sptr instrument = ws1->getInstrument();
@@ -197,7 +197,7 @@ public:
     // store
     MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
         static_cast<int>(n_detectors + 2), 10, true, false, true, "Instr_calibrated");
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.add(m_SourceWSName, ws1);
 
     Instrument_const_sptr instrument = ws1->getInstrument();
@@ -243,7 +243,7 @@ public:
     TS_ASSERT(copyInstParam.isExecuted());
     TS_ASSERT(copyInstParam.isInstrumentDifferent());
 
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     MatrixWorkspace_sptr ws2 = dataStore.retrieveWS<MatrixWorkspace>(m_TargetWSName);
     auto instr2 = ws2->getInstrument();
 

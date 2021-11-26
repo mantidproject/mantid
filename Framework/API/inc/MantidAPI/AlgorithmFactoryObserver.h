@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include <Poco/NObserver.h>
 
 namespace Mantid {

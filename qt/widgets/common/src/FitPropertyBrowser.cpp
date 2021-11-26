@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/SequentialFitDialog.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"

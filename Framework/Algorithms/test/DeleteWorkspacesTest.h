@@ -23,7 +23,7 @@ public:
 
     // Need a test workspace registered within the ADS
     const int yLength = 20;
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspaces_testWS1";
     const std::string testName2 = "DeleteWorkspaces_testWS2";
@@ -57,7 +57,7 @@ public:
     using namespace Mantid::DataObjects;
 
     // Need a test workspace registered within the ADS
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.clear();
 
     const std::string testName1 = "DeleteWorkspaces_testWS1";
@@ -90,7 +90,7 @@ public:
     using namespace Mantid::DataObjects;
 
     // Need a test workspace registered within the ADS
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspaces_testWS1";
     const std::string testName2 = "DeleteWorkspaces_testWS2";
@@ -120,7 +120,7 @@ public:
 
     // create a test workspace registered within the ADS
     Workspace2D_sptr testWS1 = WorkspaceCreationHelper::create2DWorkspace(ylength, 10);
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.add(name, testWS1);
   }
 };

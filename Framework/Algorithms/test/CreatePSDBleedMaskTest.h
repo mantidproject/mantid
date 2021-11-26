@@ -59,7 +59,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(diagnostic.execute());
 
-    Mantid::API::AnalysisDataServiceImpl &dataStore = Mantid::API::AnalysisDataService::Instance();
+    Mantid::API::AnalysisDataServiceWrapper &dataStore = Mantid::API::AnalysisDataService::Instance();
     bool ws_found = dataStore.doesExist(outputName);
     TS_ASSERT(ws_found);
     if (!ws_found)

@@ -24,6 +24,7 @@ namespace API {
 // Forward declaration
 //----------------------------------------------------------------------
 
+struct AnalysisDataServiceConstructorKey;
 class WorkspaceGroup;
 
 /** The Analysis data service stores instances of the Workspace objects and
@@ -40,8 +41,12 @@ class WorkspaceGroup;
 
     Modified to inherit from DataService
 */
+
 class MANTID_API_DLL AnalysisDataServiceImpl final : public Kernel::DataService<API::Workspace> {
 public:
+  AnalysisDataServiceImpl(Mantid::API::AnalysisDataServiceConstructorKey &&);
+  ~AnalysisDataServiceImpl() override = default;
+
   /** @name Extra notifications only applicable to the ADS */
   //@{
   /// GroupWorkspaces notification is send from GroupWorkspaces algorithm
@@ -136,22 +141,21 @@ public:
 private:
   /// Checks the name is valid, throwing if not
   void verifyName(const std::string &name, const std::shared_ptr<API::WorkspaceGroup> &workspace);
-
-  friend struct Mantid::Kernel::CreateUsingNew<AnalysisDataServiceImpl>;
-  /// Constructor
-  AnalysisDataServiceImpl();
   /// Private, unimplemented copy constructor
   AnalysisDataServiceImpl(const AnalysisDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
   AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &) = delete;
-  /// Private destructor
-  ~AnalysisDataServiceImpl() override = default;
 
   /// The string of illegal characters
   std::string m_illegalChars;
 };
 
-using AnalysisDataService = Mantid::Kernel::SingletonHolder<AnalysisDataServiceImpl>;
+class AnalysisDataServiceWrapper;
+struct MANTID_API_DLL AnalysisDataService {
+  // If you are here for an incomplete type you need to include "MantidAPI/AnalysisDataServiceWrapper.h"
+  // Compatibility shim for phased out singleton
+  static AnalysisDataServiceWrapper &Instance() noexcept;
+};
 
 using WorkspaceAddNotification = Mantid::Kernel::DataService<Mantid::API::Workspace>::AddNotification;
 using WorkspaceAddNotification_ptr =
@@ -194,9 +198,3 @@ using GroupUpdatedNotification_ptr = const Poco::AutoPtr<AnalysisDataServiceImpl
 
 } // Namespace API
 } // Namespace Mantid
-
-namespace Mantid {
-namespace Kernel {
-EXTERN_MANTID_API template class MANTID_API_DLL Mantid::Kernel::SingletonHolder<Mantid::API::AnalysisDataServiceImpl>;
-}
-} // namespace Mantid

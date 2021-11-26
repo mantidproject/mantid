@@ -11,6 +11,7 @@
  *below
  *  the level of MDEvents (e.g. Kernel, Geometry, API, DataObjects).
  *********************************************************************************/
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/ExperimentInfo.h"

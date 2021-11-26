@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest, os
-from mantid import AnalysisDataServiceImpl, config, simpleapi
+import unittest
+import os
+from mantid import AnalysisDataServiceWrapper, config, simpleapi
 try:
     import plotly
     havePlotly = True
@@ -37,7 +38,7 @@ class SavePlot1DTest(unittest.TestCase):
         self.plotfile = os.path.join(config.getString('defaultsave.directory'), 'plot.png')
 
     def cleanup(self):
-        ads = AnalysisDataServiceImpl.Instance()
+        ads = AnalysisDataServiceWrapper.Instance()
         ads.remove("group")
         ads.remove("test1")
         ads.remove("test2")
@@ -64,7 +65,6 @@ class SavePlot1DTest(unittest.TestCase):
         div = simpleapi.SavePlot1D(InputWorkspace='test1', OutputType='plotly')
         self.cleanup()
         self.assertGreater(len(div), 0)  # confirm result is non-empty
-
 
     @unittest.skipIf(not havePlotly, 'Do not have plotly installed')
     def testPlotlyGroup(self):

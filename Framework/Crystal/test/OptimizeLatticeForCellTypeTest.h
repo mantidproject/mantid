@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidKernel/System.h"

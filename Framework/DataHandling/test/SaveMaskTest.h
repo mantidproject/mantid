@@ -9,6 +9,7 @@
 #include "MantidDataHandling/SaveMask.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"

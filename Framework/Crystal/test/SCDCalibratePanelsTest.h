@@ -14,6 +14,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
 #include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>

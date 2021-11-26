@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/SortTableWorkspaceDialog.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Exception.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"

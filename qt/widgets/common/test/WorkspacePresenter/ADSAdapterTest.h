@@ -79,7 +79,7 @@ public:
   void testGroupWorkspaces() {
     EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspacesGrouped)).Times(Exactly(1));
 
-    AnalysisDataService::Instance().notificationCenter.postNotification(
+    AnalysisDataService::Instance().getNotificationCenter().postNotification(
         new WorkspacesGroupedNotification(std::vector<std::string>()));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));
@@ -88,7 +88,7 @@ public:
   void testUngroupWorkspaces() {
     EXPECT_CALL(*mockPresenter.get(), notifyFromWorkspaceProvider(NotifyFlag::WorkspacesUngrouped)).Times(Exactly(1));
 
-    AnalysisDataService::Instance().notificationCenter.postNotification(
+    AnalysisDataService::Instance().getNotificationCenter().postNotification(
         new Mantid::API::WorkspaceUnGroupingNotification("", nullptr));
 
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockPresenter));

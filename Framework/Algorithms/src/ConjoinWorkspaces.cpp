@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"

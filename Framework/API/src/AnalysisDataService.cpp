@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include <iterator>
 #include <sstream>
 
@@ -329,7 +330,7 @@ void AnalysisDataServiceImpl::shutdown() { clear(); }
 /**
  * Constructor
  */
-AnalysisDataServiceImpl::AnalysisDataServiceImpl()
+AnalysisDataServiceImpl::AnalysisDataServiceImpl(Mantid::API::AnalysisDataServiceConstructorKey &&)
     : Mantid::Kernel::DataService<Mantid::API::Workspace>("AnalysisDataService"), m_illegalChars() {}
 
 // The following is commented using /// rather than /** to stop the compiler
@@ -369,6 +370,10 @@ void AnalysisDataServiceImpl::verifyName(const std::string &name, const std::sha
   if (group && group->containsInChildren(name)) {
     throw std::invalid_argument("Unable to add group as name matches its members");
   }
+}
+
+AnalysisDataServiceWrapper& AnalysisDataService::Instance() noexcept {
+    return Mantid::API::getDefaultAnalysisDataService();
 }
 
 } // namespace Mantid::API

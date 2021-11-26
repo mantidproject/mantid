@@ -25,7 +25,7 @@ public:
     Workspace2D_sptr testWS1 = WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
     const int yLength2 = 20;
     Workspace2D_sptr testWS2 = WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspace_testWS1";
     const std::string testName2 = "DeleteWorkspace_testWS2";
@@ -61,7 +61,7 @@ public:
     Workspace2D_sptr testWS1 = WorkspaceCreationHelper::create2DWorkspace(yLength1, 10);
     const int yLength2 = 20;
     Workspace2D_sptr testWS2 = WorkspaceCreationHelper::create2DWorkspace(yLength2, 10);
-    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    AnalysisDataServiceWrapper &dataStore = AnalysisDataService::Instance();
     dataStore.clear();
 
     const std::string testName1 = "DeleteWorkspace_testWS1";

@@ -218,7 +218,7 @@ void ApplyMuonDetectorGrouping::exec() {
     }
   }
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   ads.addOrReplace(wsName, ws);
   ads.addOrReplace(wsRawName, wsRaw);
 
@@ -313,7 +313,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(const Workspac
  * Give the "tmp_unNorm" workspace which is added to the ADS the correct name
  */
 bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(const std::string &newName) {
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", newName);
     return true;

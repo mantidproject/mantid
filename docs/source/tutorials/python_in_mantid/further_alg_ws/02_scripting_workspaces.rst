@@ -137,7 +137,7 @@ Useful links
 ============
 
 * :ref:`WorkingWithWorkspaces`
-* :ref:`More ADS options <mantid.api.AnalysisDataServiceImpl>`
+* :ref:`More ADS options <mantid.api.AnalysisDataServiceWrapper>`
 * :ref:`Analysis Data Service Explained <Analysis Data Service>`
 
 

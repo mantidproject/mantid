@@ -5,13 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataServiceObserver.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 
 namespace {
 template <typename Observer> void modifyObserver(const bool turnOn, bool &isObserving, Observer &observer) {
   if (turnOn && !isObserving) {
-    AnalysisDataService::Instance().notificationCenter.addObserver(observer);
+    AnalysisDataService::Instance().getNotificationCenter().addObserver(observer);
   } else if (!turnOn && isObserving) {
-    AnalysisDataService::Instance().notificationCenter.removeObserver(observer);
+    AnalysisDataService::Instance().getNotificationCenter().removeObserver(observer);
   }
   isObserving = turnOn;
 }

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"

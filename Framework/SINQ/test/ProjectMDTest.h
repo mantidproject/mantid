@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"

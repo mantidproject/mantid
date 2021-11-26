@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotOptionsPresenter.h"
 
+#include "MantidAPI/AnalysisDataServiceWrapper.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::API;
@@ -75,7 +76,7 @@ void IndirectPlotOptionsPresenter::setupPresenter(PlotWidget const &plotType, st
 }
 
 void IndirectPlotOptionsPresenter::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
+  auto &notificationCenter = AnalysisDataService::Instance().getNotificationCenter();
   if (on) {
     notificationCenter.addObserver(m_wsRemovedObserver);
     notificationCenter.addObserver(m_wsReplacedObserver);
