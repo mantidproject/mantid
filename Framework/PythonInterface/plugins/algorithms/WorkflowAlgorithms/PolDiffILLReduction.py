@@ -415,7 +415,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                 numors[key] = list()
             numors[key].append(name)
         to_group = []
-        print("Numors to merge:", numors)
         for key in numors:
             if len(numors[key]) > 1:
                 tmp_ws = "{}_tmp".format(numors[key][0])
@@ -599,16 +598,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if 0 in mtd[mon].readY(0):
                     raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
                 else:
-                    CreateWorkspace(OutputWorkspace=norm,
-                                    DataX=mtd[detectors].readX(0),
-                                    DataY=mtd[mon].readY(0) / lampCompatibilityFactor,
-                                    DataE=np.sqrt(mtd[mon].readE(0) / lampCompatibilityFactor),
-                                    ParentWorkspace=detectors,
-                                    UnitX=mtd[detectors].getAxis(0).getUnit().unitID())
+                    norm_value = float(mtd[mon].getRun().getLogData('monitor1.monsum').value) / lampCompatibilityFactor
             if normaliseBy == 'Time':
-                duration = float(entry.getRun().getLogData('duration').value) * lampCompatibilityFactor
-                CreateSingleValuedWorkspace(DataValue=duration,
-                                            OutputWorkspace=norm)
+                norm_value = float(entry.getRun().getLogData('duration').value) * lampCompatibilityFactor
+            CreateSingleValuedWorkspace(DataValue=norm_value,
+                                        OutputWorkspace=norm)
             if transmissionProcess:
                 Divide(LHSWorkspace=mon, RHSWorkspace=norm, OutputWorkspace=entry)
             else:
