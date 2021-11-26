@@ -57,7 +57,7 @@ protected:
   double interpolateFlat(std::shared_ptr<const Mantid::HistogramData::Histogram> histToInterpolate, double x);
   double interpolateSquareRoot(const HistogramData::Histogram &histToInterpolate, double x);
   void updateTrackDirection(Geometry::Track &track, const double cosT, const double phi);
-  std::shared_ptr<Mantid::HistogramData::Histogram> integrateCumulative(const Mantid::HistogramData::Histogram &h,
+  std::unique_ptr<Mantid::HistogramData::Histogram> integrateCumulative(const Mantid::HistogramData::Histogram &h,
                                                                         double xmax);
 
 private:
@@ -83,7 +83,9 @@ private:
                              const Mantid::Algorithms::InterpolationOption &interpOpt);
   void correctForWorkspaceNameClash(std::string &wsName);
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
-  std::shared_ptr<Mantid::HistogramData::Histogram> prepareCumulativeProbForQ(double kinc);
+  std::unique_ptr<Mantid::HistogramData::Histogram> prepareCumulativeProbForQ(HistogramData::Histogram &QSQ,
+                                                                              double kinc);
+  std::unique_ptr<Mantid::HistogramData::Histogram> prepareQSQ(HistogramData::Histogram &SQ, double kinc);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts;
