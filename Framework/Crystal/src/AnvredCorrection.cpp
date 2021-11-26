@@ -246,7 +246,7 @@ void AnvredCorrection::exec() {
     }
 
     if (muRTooLarge) {
-      g_log.warning("Absorption correction not accurate for muR > 9 cm^-1 which was exceeded in spectrum index " +
+      g_log.warning("Absorption correction not accurate for muR > 8 which was exceeded in spectrum index " +
                     std::to_string(i));
     }
 
@@ -456,8 +456,8 @@ double AnvredCorrection::getEventWeight(const double lamda, const double two_the
  */
 double AnvredCorrection::absor_sphere(const double twoth, const double wl, bool &muRTooLarge) {
   //  For each of the 19 theta values in (theta = 0:5:90 deg)
-  //  fitted ln(1/A*) = sum_{i=1}^{N} pc[i][ith]*(muR)^i
-  //  using A* values in Weber (1969) for 0 < muR < 9.
+  //  fitted ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
+  //  using A* values in Weber (1969) for 0 < muR < 8.
   //  These values are given in the static array pc[][]
 
   double mur = (m_smu + (m_amu / 1.8f) * wl) * m_radius;
@@ -490,8 +490,8 @@ double AnvredCorrection::calc_Astar(const double theta, const double mur) {
   auto ith = static_cast<size_t>(theta / 5.); // floor
   double lnA_1 = 0.0;
   double lnA_2 = 0.0;
-  size_t ndeg = sizeof pc / sizeof pc[0]; // order of poly
-  for (size_t icoef = 0; icoef < ndeg; icoef++) {
+  size_t ncoef = sizeof pc / sizeof pc[0]; // order of poly
+  for (size_t icoef = 0; icoef < ncoef; icoef++) {
     lnA_1 = lnA_1 * mur + pc[icoef][ith];     // previous theta
     lnA_2 = lnA_2 * mur + pc[icoef][ith + 1]; // next theta
   }
@@ -499,7 +499,7 @@ double AnvredCorrection::calc_Astar(const double theta, const double mur) {
   double sin_th1_sq = std::pow(sin((static_cast<double>(ith) * 5.0) / radtodeg), 2);
   double A2 = std::exp(lnA_2);
   double sin_th2_sq = std::pow(sin((static_cast<double>(ith + 1) * 5.0) / radtodeg), 2);
-  // interpolate using the Eq. for A at fixed th
+  // interpolate between theta values using
   // A(th) = L0 + L1*(sin(th)^2)
   double L1 = (A1 - A2) / (sin_th1_sq - sin_th2_sq);
   double L0 = A1 - L1 * sin_th1_sq;

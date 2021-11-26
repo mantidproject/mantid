@@ -17,6 +17,8 @@ namespace Mantid {
 namespace Crystal {
 
 // fit to ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
+// A*(muR=0) = 1 so pc[7][ith] = 0 (fixed not fitted)
+// Fit performed in MATLAB using least-squares minimisation
 // after Dwiggins, jr., acta cryst. A, 31, 146 (1975) - (but for sphere instread of cylinder)
 const double pc[8][19] = {{-6.4910e-07, -6.8938e-07, -7.8149e-07, 8.1682e-08, 1.8008e-06, 3.3916e-06, 4.5095e-06,
                            4.7970e-06, 4.4934e-06, 3.6700e-06, 2.5881e-06, 1.5007e-06, 3.7669e-07, -7.9487e-07,
