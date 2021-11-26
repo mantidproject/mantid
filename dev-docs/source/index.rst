@@ -42,7 +42,7 @@ Guides
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
 
-`C++ Introduction <https://www.mantidproject.org/New_Starter_C%2B%2B_introduction>`_
+:doc:`NewStarterC++`
    Exercises for learning C++.
 
 ===================
