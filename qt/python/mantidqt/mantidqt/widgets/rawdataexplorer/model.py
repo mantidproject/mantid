@@ -9,7 +9,7 @@
 import os.path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import Load, config, mtd, Plus
+from mantid.simpleapi import Load, config, mtd, Plus, RenameWorkspace
 from mantid.kernel import logger
 
 from .PreviewFinder import PreviewFinder, AcquisitionType
@@ -210,10 +210,12 @@ class RawDataExplorerModel(QObject):
         final_ws = RawDataExplorerModel.accumulate_name(target_ws, ws_to_add)
 
         try:
-            Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=final_ws)
+            Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=target_ws)
         except ValueError as e:
             logger.error("Unable to accumulate: {0}".format(e))
-            final_ws = None
+            return None
+
+        RenameWorkspace(InputWorkspace=target_ws, OutputWorkspace=final_ws)
         return final_ws
 
     @staticmethod
