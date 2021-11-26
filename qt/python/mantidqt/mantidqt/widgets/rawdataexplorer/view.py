@@ -7,6 +7,7 @@
 #  This file is part of the mantidqt package
 #
 
+import os.path
 from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel
 from qtpy.QtCore import *
 
@@ -15,8 +16,6 @@ from mantidqt.widgets.instrumentview.api import *
 from mantid.simpleapi import *
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.plotting.functions import pcolormesh
-
-from os import path
 
 
 class PreviewView:
@@ -156,7 +155,7 @@ class RawDataExplorerView(QWidget):
     _previews = None
 
     """
-    Full path of the last file clicked
+    Full path of the last model item clicked. It can be a directory or a file.
     """
     _last_clicked = None
 
@@ -234,12 +233,12 @@ class RawDataExplorerView(QWidget):
 
         for index in selected_indexes:
             file_path = file_model.filePath(index)
-            if not path.isfile(file_path):
+            if index == last_clicked_index:
+                self._last_clicked = file_model.filePath(last_clicked_index)
+            if not os.path.isfile(file_path):
                 continue
             if file_path not in selection:
                 selection.add(file_path)
-            if index == last_clicked_index:
-                self._last_clicked = file_model.filePath(last_clicked_index)
 
         if selection != self._current_selection:
             self._current_selection = selection

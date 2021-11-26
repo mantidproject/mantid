@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-#
-from os import path
+
+import os.path
 from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd, Plus
@@ -105,7 +105,7 @@ class RawDataExplorerModel(QObject):
         @param filename: the full path to the file to show
         """
 
-        ws_name = path.basename(filename)[:-4]
+        ws_name = os.path.basename(filename)[:-4]
         if not mtd.doesExist(ws_name):
             Load(Filename=filename, OutputWorkspace=ws_name)
 
@@ -124,7 +124,7 @@ class RawDataExplorerModel(QObject):
         @param filename: the full path to the file to show
         """
 
-        ws_name = path.basename(filename)[:-4]
+        ws_name = os.path.basename(filename)[:-4]
         if not mtd.doesExist(ws_name):
             Load(Filename=filename, OutputWorkspace=ws_name)
 
