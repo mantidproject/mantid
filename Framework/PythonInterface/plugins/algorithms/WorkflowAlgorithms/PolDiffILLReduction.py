@@ -397,9 +397,34 @@ class PolDiffILLReduction(PythonAlgorithm):
                 to_remove.extend(numors[key])
             CreateSingleValuedWorkspace(DataValue=len(numors[key]), OutputWorkspace='norm')
             Divide(LHSWorkspace=merged_ws, RHSWorkspace='norm', OutputWorkspace=merged_ws)
-        DeleteWorkspaces(WorkspaceList=to_remove)
+        if len(to_remove) > 1:
+            DeleteWorkspaces(WorkspaceList=to_remove)
         GroupWorkspaces(InputWorkspaces=merged_group, OutputWorkspace=ws)
         return ws
+
+    @staticmethod
+    def _merge_twoTheta_scans(ws):
+        """Sums the workspaces belonging to the same polarisation and requested twoTheta value."""
+        numors = dict()
+        for name in mtd[ws].getNames():
+            last_underscore = name.rfind("_")
+            pol_direction = name[last_underscore + 1:]
+            two_theta_orientation = mtd[name].getRun().getLogData('2theta.requested').value
+            key = "{}_{}".format(pol_direction, two_theta_orientation)
+            if key not in numors:
+                numors[key] = list()
+            numors[key].append(name)
+        to_group = []
+        print("Numors to merge:", numors)
+        for key in numors:
+            if len(numors[key]) > 1:
+                tmp_ws = "{}_tmp".format(numors[key][0])
+                MergeRuns(InputWorkspaces=numors[key], OutputWorkspace=tmp_ws)
+                DeleteWorkspaces(WorkspaceList=numors[key])
+                RenameWorkspace(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws[:-4])
+                to_group.append(tmp_ws[:-4])
+        if len(to_group) > 1:
+            GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=ws)
 
     @staticmethod
     def _match_attenuation_workspace(sample_entry, attenuation_ws):
@@ -528,6 +553,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                      LoaderOptions={'PositionCalibration': calibration_setting,
                                     'YIGFileName': self.getPropertyValue('InstrumentCalibration')},
                      OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
+        if self.getPropertyValue("OutputTreatment") not in ['AverageTwoTheta', 'Individual', 'IndividualXY'] \
+                and measurement_technique != 'SingleCrystal':
+            self._merge_twoTheta_scans(ws)
         masked_detectors = self.getProperty('MaskDetectors').value
         if len(masked_detectors) > 0:
             MaskDetectors(Workspace=ws, SpectraList=masked_detectors)
