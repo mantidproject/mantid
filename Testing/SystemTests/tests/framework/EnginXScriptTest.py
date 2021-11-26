@@ -53,7 +53,10 @@ class FocusCropped(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
-        return "engg_focus_output_cropped", "engg_focusing_output_ws_bank_cropped.nxs"
+        if systemtesting.using_gsl_v1():
+            return "engg_focus_output_cropped", "engg_focusing_output_ws_bank_cropped_gsl1.nxs"
+        else:
+            return "engg_focus_output_cropped", "engg_focusing_output_ws_bank_cropped.nxs"
 
     def cleanup(self):
         simple.mtd.clear()
