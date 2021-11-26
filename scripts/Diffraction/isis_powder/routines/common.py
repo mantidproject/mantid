@@ -8,6 +8,7 @@ import collections
 import copy
 import os.path
 import warnings
+import uuid
 
 import mantid.kernel as kernel
 import mantid.simpleapi as mantid
@@ -668,22 +669,26 @@ def _load_list_of_files(file_name_list, instrument, file_ext=None):
     _check_load_range(list_of_runs_to_load=file_name_list)
 
     for file_name in file_name_list:
-        read_ws = mantid.Load(Filename=file_name)
         ws_name = os.path.splitext(file_name)[0]
-        read_ws_list.append(mantid.RenameWorkspace(InputWorkspace=read_ws, OutputWorkspace=ws_name))
+        # create unique name. Hide from user so they don't see the uuid value
+        new_name = '__' + ws_name + '_' + str(uuid.uuid4().hex)
+        if ws_name not in mantid.mtd:
+            read_ws = mantid.Load(Filename=file_name, OutputWorkspace=new_name)
+        else:
+            read_ws = mantid.CloneWorkspace(InputWorkspace=ws_name, OutputWorkspace=new_name)
+        read_ws_list.append(read_ws)
 
     return read_ws_list
 
 
 def _sum_ws_range(ws_list):
     """
-    Sums a list of workspaces into a single workspace. This will take the name
-    of the first and last workspaces in the list and take the form: "summed_<first>_<last>"
+    Sums a list of workspaces into a single workspace.
     :param ws_list: The workspaces as a list to sum into a single workspace
     :return: A single summed workspace
     """
     # Sum all workspaces
-    out_ws_name = "summed_" + ws_list[0].name() + '_' + ws_list[-1].name()
+    out_ws_name = "__summed_" + uuid.uuid4().hex
     summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
     return summed_ws
 
