@@ -218,7 +218,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              defaultValue="None",
                              validator=StringListValidator(["None", "Transmission", "Numerical", "MonteCarlo", "User"]),
                              direction=Direction.Input,
-                             doc="Which approach to calculate (or not) the self-attenuation correction factors to be used.")
+                             doc="Which approach to calculate (or not) the self-attenuation correction factors to be"
+                                 " used.")
         self.setPropertySettings('SelfAttenuationMethod', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(name="SampleGeometry",
@@ -249,7 +250,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                              defaultValue=0.5,
                              validator=FloatBoundedValidator(lower=0),
                              direction=Direction.Input,
-                             doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
+                             doc="Scattering angle bin size in degrees used for expressing scan data on a single"
+                                 " TwoTheta axis.")
 
         self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
                                                                                PropertyCriterion.IsEqualTo, 'Sum'))
