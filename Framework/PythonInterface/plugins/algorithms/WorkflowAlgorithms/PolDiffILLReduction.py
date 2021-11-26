@@ -1232,7 +1232,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             nMeasurements = 6
         elif self._method_data_structure == 'Z':
             nMeasurements = 2
-
         return nMeasurements
 
     def _find_elastic_peak_channels(self, ws):
@@ -1259,11 +1258,13 @@ class PolDiffILLReduction(PythonAlgorithm):
         self._sampleAndEnvironmentProperties['NeutronSpeed'] = float(neutron_speed)
         tof_deltaE_0_odd = 1e6 * (L1 + L2_odd) / neutron_speed  # in us, for consistency with time_axis unit
         tof_deltaE_0_even = 1e6 * (L1 + L2_even) / neutron_speed  # in us
-        if not self._elastic_channels_ws:
-            self._find_elastic_peak_channels(ws)
-        peak_positions = np.array(mtd[self._elastic_channels_ws].column('PeakCentre'))
-        # pad peak positions in case of masked bins:
-        peak_positions[peak_positions == 0] = np.mean(peak_positions[peak_positions != 0])
+        if not self._elastic_channels_ws and 'EPCentre' in self._sampleAndEnvironmentProperties:
+            peak_positions = np.full(mtd[ws][0].getNumberHistograms(),
+                                     self._sampleAndEnvironmentProperties['EPCentre'].value)
+        else:
+            peak_positions = np.array(mtd[self._elastic_channels_ws].column('PeakCentre'))
+            # pad peak positions in case of masked bins:
+            peak_positions[peak_positions == 0] = np.mean(peak_positions[peak_positions != 0])
         for entry in mtd[ws]:
             for pixel_no in range(entry.getNumberHistograms()):
                 tof_deltaE_0 = tof_deltaE_0_odd if pixel_no % 2 == 0 else tof_deltaE_0_even
