@@ -87,7 +87,7 @@ Write a command line program that will:
 
 #. Take a filename of an ascii file as an argument (you can use the example file `here <https://github.com/martyngigg/cpp-examples/raw/master/Holmes.txt>`__)
 #. Load that ascii file.
-#. Count the number of occurrences of unique words (longer than 4 characters and split hyphenated words, treating each part as different words). It should be case and punctuation insensitive. Limit punctuation to following characters appear somewhere in a word = ``.,?'"!():`` (hint: you will need a backslash escape character for the double-quote)
+#. Count the number of occurrences of unique words (longer than 4 characters and split hyphenated words, treating each part as different words). It should be case and punctuation insensitive. You only need to consider the following punctuation characters ``.,?'"!():`` (hint: you will need a backslash escape character for the double-quote)
 #. Consider handling of common error cases, such as the wrong file name specified. Return error and status information to the user of the command line tool.
 #. Write out a results file containing the unique words and the number of uses in descending order of usage, e.g.
 
