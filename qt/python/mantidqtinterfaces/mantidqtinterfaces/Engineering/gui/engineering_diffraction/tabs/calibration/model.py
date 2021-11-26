@@ -47,11 +47,14 @@ class CalibrationModel(object):
                                                      calibration)
 
         # save output
+        calib_dirs = [path.join(output_settings.get_output_path(), "Calibration", "")]
         if rb_num:
-            calib_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Calibration", "")
-        else:
-            calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
-        self.create_output_files(calib_dir, calibration, focused_ceria)
+            calib_dirs.append(path.join(output_settings.get_output_path(), "User", rb_num, "Calibration", ""))
+            if calibration.group == EnggUtils.GROUP.TEXTURE:
+                calib_dirs.pop(0)  # only save to RB directory to limit number files saved
+
+        for calib_dir in calib_dirs:
+            self.create_output_files(calib_dir, calibration, focused_ceria)
 
         DeleteWorkspace(ceria_workspace)
 
