@@ -7,15 +7,15 @@
 #  This file is part of the mantid workbench.
 #
 
-from .model import RawDataExplorerModel
-from .view import RawDataExplorerView, PreviewView
-
+import os.path
 from qtpy.QtWidgets import QAbstractItemView
 from qtpy.QtCore import *
-import os.path
 
 from mantid.simpleapi import mtd
 from mantid.api import PreviewManager, PreviewType
+
+from .model import RawDataExplorerModel
+from .view import RawDataExplorerView, PreviewView
 
 
 class PreviewPresenter:
@@ -160,7 +160,10 @@ class RawDataExplorerPresenter(QObject):
         """
         last_clicked = self.view.get_last_clicked()
 
-        # TODO get preview per instrument
+        if not os.path.isfile(last_clicked):
+            # if the user clicked on a directory, do nothing preview-wise
+            return
+
         self.view.fileTree.setCursor(Qt.BusyCursor)
 
         self.model.modify_preview(last_clicked)
