@@ -10,6 +10,7 @@ import os.path
 from qtpy.QtCore import *
 
 from mantid.simpleapi import Load, config, mtd, Plus
+from mantid.kernel import logger
 
 from .PreviewFinder import PreviewFinder, AcquisitionType
 
@@ -138,6 +139,8 @@ class RawDataExplorerModel(QObject):
             if current_preview.get_preview_type() == preview:
                 if self.presenter.is_accumulate_checked():
                     ws_name = self.accumulate(current_preview.get_workspace_name(), ws_name)
+                    if ws_name is None:
+                        return
                 current_preview.set_workspace_name(ws_name)
                 return
 
@@ -206,8 +209,11 @@ class RawDataExplorerModel(QObject):
 
         final_ws = RawDataExplorerModel.accumulate_name(target_ws, ws_to_add)
 
-        # TODO what to do if sum is not possible ? gracefully handle svp
-        Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=final_ws)
+        try:
+            Plus(LHSWorkspace=target_ws, RHSWorkspace=ws_to_add, OutputWorkspace=final_ws)
+        except ValueError as e:
+            logger.error("Unable to accumulate: {0}".format(e))
+            final_ws = None
         return final_ws
 
     @staticmethod
