@@ -12,7 +12,6 @@ General Notes
 
 - Lengths are given in meters within TOML files, unlike previous legacy formats.
 
-
 Format Changes
 ==============
 
@@ -28,6 +27,50 @@ V0 to V1
 - *detector.configuration.selected_detector* is now mandatory
 - *detector.configuration.selected_detector* accepts *front* and *rear* instead of *HAB* and *LAB* respectively.
 - *detector.configuration.all_centre* has been added to set the front and rear centre at the same time.
+
+New Fields
+==========
+
+toml_file_version
+-----------------
+
+This is always the first line of the file and represents the TOML
+file version. Long-term this allows us to make changes in a backwards compatible way.
+
+Available TOML Versions: 0
+
+..  code-block:: none
+
+  # First line of file
+  toml_file_version = 0
+
+  # Everything else
+
+Metadata
+--------
+
+This is a free-form field, typically at the top of the file
+to enter any user attributes. They are ignored by the TOML parser.
+
+..  code-block:: none
+
+  [metadata]
+    created = "1980-12-31"
+    weather_that_day = "sunny"
+    this_is_toml = true
+
+Instrument
+----------
+
+This is a required entry to specify the instrument name and `instrument.configuration`, documented in the conversion guide below.
+
+..  code-block:: none
+
+  [instrument]
+    name = "LARMOR"  # or LOQ / SANS2D / ZOOM...etc.
+
+  [instrument.configuration]
+    # ...
 
 Conversion From Legacy User Files
 =================================
@@ -173,7 +216,7 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 ..  code-block:: none
 
     [detector]
-      [detector.calibration.position]
+      [detector.correction.position]
         # Note fields can be added or omitted as required
         # This is the complete list of adjustments available
         front_x = a
@@ -214,7 +257,7 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 ..  code-block:: none
 
     [detector]
-      [detector.calibration.position]
+      [detector.correction.position]
         front_x = -0.033
         front_y = -0.020
         front_z = -0.047
@@ -1005,7 +1048,7 @@ MON/DIRECT="filename"
 ..  code-block:: none
 
     [detector]
-      [detector.calibration.direct]
+      [detector.correction.direct]
         rear_file = "filename"
         front_file = "filename"
 
@@ -1021,7 +1064,7 @@ MON/DIRECT="filename"
 ..  code-block:: none
 
     [detector]
-      [detector.calibration.direct]
+      [detector.correction.direct]
         rear_file = "DIRECT_RUN524.dat"
         front_file = "DIRECT_RUN524.dat"
 
@@ -1033,7 +1076,7 @@ MON/FLAT=str
 ..  code-block:: none
 
     [detector]
-      [detector.calibration.flat]
+      [detector.correction.flat]
         rear_file = "str"
 
 
@@ -1048,7 +1091,7 @@ MON/FLAT=str
 ..  code-block:: none
 
     [detector]
-      [detector.calibration.flat]
+      [detector.correction.flat]
         rear_file = "flat_file.091"
 
 
@@ -1420,7 +1463,7 @@ TUBECALIBFILE=str
 
   [detector]
 
-  [detector.calibration.tube]
+  [detector.correction.tube]
     file = "str"
 
 **Existing Example:**
@@ -1435,7 +1478,7 @@ TUBECALIBFILE=str
 
   [detector]
 
-  [detector.calibration.tube]
+  [detector.correction.tube]
     file = "Tube.nxs"
 
 .. categories:: Techniques
