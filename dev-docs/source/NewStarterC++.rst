@@ -96,7 +96,7 @@ Write a command line program that will:
    Word    Usage
 
    which           55
-   holmes          48
+   holmes          49
    there           32
    could           25
    photograph      21
