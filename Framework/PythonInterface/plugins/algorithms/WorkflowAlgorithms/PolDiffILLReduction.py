@@ -591,16 +591,20 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
-        entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
-        if entries_per_numor == 10:
+        pol_directions = set()
+        for name in mtd[ws].getNames():
+            last_underscore = name.rfind("_")
+            pol_directions.add(name[last_underscore + 1:])
+        n_pol_directions = len(pol_directions)
+        if n_pol_directions == 10:
             self._method_data_structure = '10p'
-        elif entries_per_numor == 6:
+        elif n_pol_directions == 6:
             self._method_data_structure = 'XYZ'
-        elif entries_per_numor == 2:
-            self._method_data_structure = 'Uniaxial'
+        elif n_pol_directions == 2:
+            self._method_data_structure = 'Z'
         else:
             if self.getPropertyValue("ProcessAs") not in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
-                raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
+                raise RuntimeError("The analysis options are: Z, XYZ, and 10p. "
                                    + "The provided input does not fit in any of these measurement types.")
 
     def _merge_group_entries(self, ws):
@@ -913,7 +917,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                    OutputWorkspace=pol_eff_name)
             mtd[pol_eff_name].setYUnitLabel("{}".format("Polarizing efficiency"))
             pol_eff_names.append(pol_eff_name)
-            if self._method_data_structure == 'Uniaxial' and entry_no % 2 == 1:
+            if self._method_data_structure == 'Z' and entry_no % 2 == 1:
                 index += 1
             elif self._method_data_structure == 'XYZ' and entry_no % 6 == 5:
                 index += 1
@@ -1203,7 +1207,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             Divide(LHSWorkspace=sample_ws, RHSWorkspace=transmission_ws, OutputWorkspace=sample_ws)
             return sample_ws
         for entry_no, entry in enumerate(mtd[sample_ws]):
-            if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
+            if ( (self._method_data_structure == 'Z' and entry_no % 2 == 0)
                  or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)
                  or (self._method_data_structure == '10p' and entry_no % 10 == 0) ):
                 correction_ws = self._match_attenuation_workspace(entry.name(), attenuation_ws)
@@ -1226,7 +1230,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             nMeasurements = 10
         elif self._method_data_structure == 'XYZ':
             nMeasurements = 6
-        elif self._method_data_structure == 'Uniaxial':
+        elif self._method_data_structure == 'Z':
             nMeasurements = 2
 
         return nMeasurements
