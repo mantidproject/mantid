@@ -61,7 +61,6 @@ class PreviewPresenter:
 
         workspace_name = self._model.get_workspace_name()
         self._view.show_workspace(workspace_name)
-
         self._model.sig_workspace_changed.connect(self.on_workspace_changed)
 
     def close_preview(self):
@@ -176,6 +175,7 @@ class RawDataExplorerPresenter(QObject):
         """
         view = self.view.add_preview()
         PreviewPresenter(self.view, view, self.model, previewModel)
+        self.view.fileTree.grabKeyboard()
 
     def show_ws(self, ws_to_show):
         """
