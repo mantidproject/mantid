@@ -9,10 +9,6 @@
 #include <memory>
 #include <sstream>
 
-namespace Mantid::JsonHelpers {
-
-void replaceAll(std::string &str, const std::string &from, const std::string &to);
-
 /**
  * @brief Useful function for replacing all instances of characters in string.
  *
@@ -30,6 +26,8 @@ void replaceAll(std::string &str, const std::string &from, const std::string &to
     start_pos += to.length();
   }
 }
+
+namespace Mantid::JsonHelpers {
 
 /**
  * @brief Return a string given the json value passed, this function handles errors by throwing instead of returning
