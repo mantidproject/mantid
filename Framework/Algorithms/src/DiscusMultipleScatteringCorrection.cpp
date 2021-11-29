@@ -241,7 +241,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   const auto nhists = useSparseInstrument ? static_cast<int64_t>(sparseWS->getNumberHistograms())
                                           : static_cast<int64_t>(inputWS->getNumberHistograms());
 
-  m_sampleShape = std::shared_ptr<const Geometry::IObject>(inputWS->sample().getShape().clone());
+  m_sampleShape = inputWS->sample().getShapePtr();
   // generate the bounding box before the multithreaded section
   m_sampleShape->getBoundingBox();
 
@@ -536,15 +536,17 @@ double DiscusMultipleScatteringCorrection::interpolateSquareRoot(const Histogram
  */
 double DiscusMultipleScatteringCorrection::interpolateFlat(
     std::shared_ptr<const Mantid::HistogramData::Histogram> histToInterpolate, double x) {
-  if (x > histToInterpolate->x().back()) {
-    return histToInterpolate->y().back();
+  auto &xHisto = histToInterpolate->x();
+  auto &yHisto = histToInterpolate->y();
+  if (x > xHisto.back()) {
+    return yHisto.back();
   }
-  if (x < histToInterpolate->x().front()) {
-    return histToInterpolate->y().front();
+  if (x < xHisto.front()) {
+    return yHisto.front();
   }
-  auto iter = std::upper_bound(histToInterpolate->x().cbegin(), histToInterpolate->x().cend(), x);
-  auto idx = static_cast<size_t>(std::distance(histToInterpolate->x().cbegin(), iter) - 1);
-  return histToInterpolate->dataY()[idx];
+  auto iter = std::upper_bound(xHisto.cbegin(), xHisto.cend(), x);
+  auto idx = static_cast<size_t>(std::distance(xHisto.cbegin(), iter) - 1);
+  return yHisto[idx];
 }
 
 /**

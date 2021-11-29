@@ -92,12 +92,20 @@ const std::string &Sample::getName() const { return m_name; }
 void Sample::setName(const std::string &name) { m_name = name; }
 
 /**
- * Get a pointer to the sample shape object. It is assumed that this is defined
+ * Get a reference to the sample shape object. It is assumed that this is defined
  * within
  * its own coordinate system with its centre at [0,0,0]
  * @return A reference to the object describing the shape
  */
 const IObject &Sample::getShape() const { return *m_shape; }
+
+/**
+ * Get a pointer to the sample shape object. It is assumed that this is defined
+ * within
+ * its own coordinate system with its centre at [0,0,0]
+ * @return A pointer to the object describing the shape
+ */
+const IObject_sptr Sample::getShapePtr() const { return m_shape; }
 
 /** Set the object that describes the sample shape. The object is defined within
  * its own coordinate system
