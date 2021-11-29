@@ -45,6 +45,9 @@ Guides
 :doc:`NewStarterC++`
    Exercises for learning C++.
 
+:doc:`NewStarterPython`
+   Exercises for learning Python.
+
 ===================
 Development Process
 ===================
