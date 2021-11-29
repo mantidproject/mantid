@@ -63,7 +63,12 @@ class CodeCommenter:
 
     def _comment_lines(self, lines):
         for i in range(len(lines)):
-            lines[i] = '# ' + lines[i]
+            str_match = re.match(r"\s+", lines[i])
+            if str_match:
+                i_non_space = str_match.end()
+                lines[i] = lines[i][:i_non_space] + '# ' + lines[i][i_non_space:]
+            else:
+                lines[i] = '# ' + lines[i]
         return lines
 
     def _uncomment_lines(self, lines):
