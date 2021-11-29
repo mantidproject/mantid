@@ -41,8 +41,7 @@ void CriticalPeakRelaxationRate::function1D(double *out, const double *xValues, 
   const double Delta = getAttribute("Delta").asDouble();
 
   for (size_t i = 0; i < nData; i++) {
-    auto expression = abs(xValues[i] - Tc);
-    auto denom = pow(expression, Exp);
+    auto denom = pow(fabs(xValues[i] - Tc), Exp);
     if (xValues[i] + Delta < Tc || xValues[i] - Delta > Tc) {
       if (xValues[i] < Tc) {
         out[i] = Bg1 + Scale / denom;

@@ -55,7 +55,7 @@ public:
     critprr->function1D(yValues.data(), xValues.data(), numPoints);
 
     for (size_t i = 0; i < numPoints; i++) {
-      double expression = abs(xValues[i] - Tc);
+      double expression = fabs(xValues[i] - Tc);
       if (xValues[i] + Delta < Tc || xValues[i] - Delta > Tc) {
         if (xValues[i] < Tc) {
           TS_ASSERT_DELTA(yValues[i], Bg1 + Scale / pow(expression, Exp), 1e-4);
