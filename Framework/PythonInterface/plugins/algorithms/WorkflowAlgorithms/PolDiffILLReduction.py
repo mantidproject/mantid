@@ -737,12 +737,10 @@ class PolDiffILLReduction(PythonAlgorithm):
                 bin_width = (time_channels[-1] - time_channels[0]) / np.size(time_channels)
                 lower_peak_edge = int(ep_index - n_sigmas * peak_widths[pixel_no] / bin_width)
                 upper_peak_edge = int(ep_index + n_sigmas * peak_widths[pixel_no] / bin_width)
-                n_time_channels = upper_peak_edge - lower_peak_edge + 1
                 # first, the time independent contribution (outside elastic peak) to background is calculated
                 time_indep_component = np.mean(np.concatenate((counts[:lower_peak_edge], counts[upper_peak_edge+1:])))
                 # and its error, from error propagation:
-                time_indep_err = np.sum(np.concatenate((np.power(errors[:lower_peak_edge], 2),
-                                                        np.power(errors[upper_peak_edge+1:], 2)))) / n_time_channels
+                time_indep_err = np.sqrt(time_indep_component)
                 counts[:lower_peak_edge] = time_indep_component
                 counts[upper_peak_edge:] = time_indep_component
                 errors[:lower_peak_edge] = time_indep_err
@@ -877,6 +875,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             background = mtd[empty_ws][empty_no].name()
             for pixel_no in range(entry.getNumberHistograms()):
                 counts = entry.dataY(pixel_no)
+                errors = entry.dataE(pixel_no)
                 time_channels = mtd[background].readX(pixel_no)
                 empty_counts = mtd[background].readY(pixel_no)
                 ep_index = np.abs(time_channels - elastic_peaks[pixel_no]).argmin()
@@ -886,6 +885,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 # first, the time independent contribution (outside elastic peak) to background is calculated
                 time_indep_component = np.mean(np.concatenate((empty_counts[:lower_peak_edge],
                                                                empty_counts[upper_peak_edge+1:])))
+                time_indep_err = np.sqrt(time_indep_component)
+                errors[:lower_peak_edge] = time_indep_err
+                errors[upper_peak_edge:] = time_indep_err
                 # and its error, from error propagation:
                 time_dep_component = self._gaussian_elastic_peak_background(
                     epp_centre=elastic_peaks[pixel_no],
