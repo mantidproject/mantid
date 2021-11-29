@@ -62,6 +62,7 @@ class FocusModelTest(unittest.TestCase):
 
         mock_plot.assert_not_called()
 
+    @patch(file_path + '.output_settings.get_output_path')
     @patch(file_path + '.DeleteWorkspace')
     @patch(file_path + '.ConvertUnits')
     @patch(file_path + '.FocusModel._save_output_files')
@@ -72,7 +73,8 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + '.load_full_instrument_calibration')
     def test_save_directories_both_banks_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
                                                     mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
-                                                    mock_del_ws):
+                                                    mock_del_ws, mock_out_path):
+        mock_out_path.return_value = "dir"
         rb_num = "1"
         van_run = "123456"
         mock_proc_van.return_value = ("van_ws_foc", van_run)
@@ -88,10 +90,12 @@ class FocusModelTest(unittest.TestCase):
                              calibration=self.calibration)
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call(['Focus', path.join('User', rb_num, 'Focus')],
-                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        save_calls = 2 * [call([path.join(mock_out_path(), 'Focus'),
+                                path.join(mock_out_path(), 'User', rb_num, 'Focus')],  sample_foc_ws,
+                               self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
+    @patch(file_path + '.output_settings.get_output_path')
     @patch(file_path + '.DeleteWorkspace')
     @patch(file_path + '.ConvertUnits')
     @patch(file_path + '.FocusModel._save_output_files')
@@ -102,7 +106,8 @@ class FocusModelTest(unittest.TestCase):
     @patch(file_path + '.load_full_instrument_calibration')
     def test_save_directories_texture_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
                                                  mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
-                                                 mock_del_ws):
+                                                 mock_del_ws, mock_out_path):
+        mock_out_path.return_value = "dir"
         rb_num = "1"
         van_run = "123456"
         mock_proc_van.return_value = ("van_ws_foc", van_run)
@@ -118,7 +123,7 @@ class FocusModelTest(unittest.TestCase):
                              calibration=self.calibration)
 
         self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
-        save_calls = 2 * [call([path.join('User', rb_num, 'Focus')],
+        save_calls = 2 * [call([path.join(mock_out_path(), 'User', rb_num, 'Focus')],
                                sample_foc_ws, self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
