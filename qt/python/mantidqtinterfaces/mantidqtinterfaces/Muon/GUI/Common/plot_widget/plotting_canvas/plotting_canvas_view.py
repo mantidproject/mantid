@@ -338,7 +338,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     # not used for tiled plots
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
         for plot_info in self.plotted_workspace_information:
-            # update plot info error state -> important for shadeing
+            # update plot info error state -> important for shading
             plot_info.errors= with_errors
             if plot_info.workspace_name == workspace_name:
                 axis = self.fig.axes[plot_info.axis]
