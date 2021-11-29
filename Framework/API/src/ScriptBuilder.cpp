@@ -177,7 +177,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
     Mantid::API::Algorithm_sptr algFresh;
     // create a fresh version of the algorithm - unmanaged
     if (name == "Load") {
-      int version = atoi(algHistory.getPropertyValue("LoaderVersion").c_str());
+      int version = std::stoi(algHistory.getPropertyValue("LoaderVersion").c_str());
       algFresh = AlgorithmManager::Instance().createUnmanaged(algHistory.getPropertyValue("LoaderName"), version);
     } else {
       algFresh = AlgorithmManager::Instance().createUnmanaged(name, algHistory.version());
