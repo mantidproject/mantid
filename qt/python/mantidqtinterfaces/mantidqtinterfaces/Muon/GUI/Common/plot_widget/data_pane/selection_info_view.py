@@ -16,18 +16,6 @@ class SelectionInfoView(QtWidgets.QWidget):
         self.selection_table = SequentialTableWidget(parent)
         self._selection_layout.addWidget(self.selection_table.widget)
 
-        self._button_layout = QtWidgets.QHBoxLayout()
-
-        self._apply = QtWidgets.QPushButton(text="Apply", parent=self)
-        self._apply.clicked.connect(self.apply_pressed)
-        self._button_layout.addWidget(self._apply)
-
-        self._cancel = QtWidgets.QPushButton(text="Cancel", parent=self)
-        self._cancel.clicked.connect(self.cancel_pressed)
-        self._button_layout.addWidget(self._cancel)
-
-        self._selection_layout.addLayout(self._button_layout)
-
         self.setLayout(self._selection_layout)
         self.setWindowFlags(QtCore.Qt.Dialog)
 

@@ -18,18 +18,29 @@ class SelectionInfoPresenter(object):
         self._view.hide()
         self._context = context
 
+    def setup_slot_for_row_selection_changed(self, slot):
+        self._view.selection_table.setup_slot_for_row_selection_changed(slot)
+
     def update_lines(self, ws_list, indicies):
         self._lines = {}
         for name, index in zip(ws_list, indicies):
             self._lines[name]=index
-        print("hi")
-        self.handle_selected_workspaces_changed(ws_list)
+        return self.handle_selected_workspaces_changed(ws_list)
 
     def handle_selected_workspaces_changed(self, workspace_names):
         runs, groups_and_pairs = self.get_runs_groups_and_pairs(workspace_names)
         self._view.selection_table.set_fit_workspaces(workspace_names, runs, groups_and_pairs)
-        #self._view.fit_table.clear_fit_parameters()
-        #self._view.fit_table.reset_fit_quality()
+        if len(self._view.selection_table.get_selected_rows()) == 0:
+            self._view.selection_table.set_selection_to_last_row()
+        return self.get_selection()
+
+    def get_selection(self):
+        rows = self._view.selection_table.get_selected_rows()
+        lines_to_plot = {}
+        for row in rows:
+            name = self._view.selection_table.get_workspace_names_from_row(row)
+            lines_to_plot[name] = self._lines[name]
+        return lines_to_plot
 
     def get_runs_groups_and_pairs(self, ws_names):
         group_pair =[]
@@ -56,6 +67,12 @@ class PlotDataPanePresenter(BasePanePresenter):
         self._view.enable_plot_raw_option()
         self.added_group_or_pair_observer = GenericObserverWithArgPassing(
             self.handle_added_or_removed_group_or_pair_to_plot)
+        self.selection_info.setup_slot_for_row_selection_changed(self.plot_selection_changed)
+
+    def plot_selection_changed(self):
+        lines_to_plot = self.selection_info.get_selection()
+        if lines_to_plot:
+            self.add_list_to_plot(lines_to_plot.keys(), lines_to_plot.values(), hold=False, autoscale=True)
 
     def handle_data_type_changed(self):
         """
@@ -79,8 +96,9 @@ class PlotDataPanePresenter(BasePanePresenter):
     def handle_data_updated(self, autoscale=True, hold_on=False):
         workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                       self._view.get_plot_type())
-        self.selection_info.update_lines(workspace_list, indicies)
-        self.add_list_to_plot(workspace_list, indicies, hold=hold_on, autoscale=autoscale)
+        lines_to_plot = self.selection_info.update_lines(workspace_list, indicies)
+        if lines_to_plot:
+            self.add_list_to_plot(lines_to_plot.keys(), lines_to_plot.values(), hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info):
         """
