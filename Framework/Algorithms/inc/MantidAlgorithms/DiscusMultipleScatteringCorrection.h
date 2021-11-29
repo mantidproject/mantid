@@ -85,7 +85,7 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   std::unique_ptr<Mantid::HistogramData::Histogram> prepareCumulativeProbForQ(HistogramData::Histogram &QSQ,
                                                                               double kinc);
-  std::unique_ptr<Mantid::HistogramData::Histogram> prepareQSQ(HistogramData::Histogram &SQ, double kinc);
+  std::unique_ptr<Mantid::HistogramData::Histogram> prepareQSQ(double kinc);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
   int m_maxScatterPtAttempts;

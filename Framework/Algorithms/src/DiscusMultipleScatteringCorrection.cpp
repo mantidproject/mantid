@@ -203,7 +203,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   double lambdamin, lambdamax;
   inputWS->getXMinMax(lambdamin, lambdamax);
   m_SQHist = std::make_shared<HistogramData::Histogram>(SQWS->histogram(0));
-  auto QSQHist = prepareQSQ(SQHist, 2 * M_PI / lambdamin);
+  auto QSQHist = prepareQSQ(2 * M_PI / lambdamin);
 
   const auto inputNbins = static_cast<int>(inputWS->blocksize());
   int nlambda = getProperty("NumberOfWavelengthPoints");
@@ -233,8 +233,8 @@ void DiscusMultipleScatteringCorrection::exec() {
   for (int i = 0; i < nScatters; i++) {
     auto outputWS = createOutputWorkspace(*inputWS);
     MatrixWorkspace_sptr simulationWS = useSparseInstrument ? sparseWS->clone() : outputWS;
-    simulationWSs.push_back(simulationWS);
-    outputWSs.push_back(outputWS);
+    simulationWSs.emplace_back(simulationWS);
+    outputWSs.emplace_back(outputWS);
   }
   const MatrixWorkspace &instrumentWS = useSparseInstrument ? *sparseWS : *inputWS;
 
@@ -291,7 +291,9 @@ void DiscusMultipleScatteringCorrection::exec() {
 
         const double kinc = 2 * M_PI / lambdas[bin];
 
-        auto invPOfQ = prepareCumulativeProbForQ(*QSQHist, kinc);
+        std::unique_ptr<Mantid::HistogramData::Histogram> invPOfQ;
+        if (m_importanceSampling)
+          invPOfQ = prepareCumulativeProbForQ(*QSQHist, kinc);
 
         double total = simulatePaths(nSingleScatterEvents, 1, rng, *invPOfQ, kinc, detPos, true);
         noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
@@ -390,17 +392,17 @@ void DiscusMultipleScatteringCorrection::exec() {
 }
 
 std::unique_ptr<Mantid::HistogramData::Histogram>
-DiscusMultipleScatteringCorrection::prepareQSQ(HistogramData::Histogram &SQ, double kmax) {
-  std::vector<double> qValues = SQ.readX();
-  std::vector<double> SQValues = SQ.readY();
+DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
+  std::vector<double> qValues = m_SQHist->readX();
+  std::vector<double> SQValues = m_SQHist->readY();
   // add terminating points at 0 and 2k before multiplying by Q so no extrapolation problems
   if (qValues.front() > 0.) {
     qValues.insert(qValues.begin(), 0.);
     SQValues.insert(SQValues.begin(), SQValues.front());
   }
   if (qValues.back() < 2 * kmax) {
-    qValues.push_back(2 * kmax);
-    SQValues.push_back(SQValues.back());
+    qValues.emplace_back(2 * kmax);
+    SQValues.emplace_back(SQValues.back());
   }
   // add some extra points to help the Q.S(Q) integral get the right answer
   qValues.reserve(qValues.size() * 2);
@@ -430,16 +432,21 @@ std::unique_ptr<Mantid::HistogramData::Histogram>
 DiscusMultipleScatteringCorrection::prepareCumulativeProbForQ(HistogramData::Histogram &QSQ, double kinc) {
 
   auto IOfQ = integrateCumulative(QSQ, 2 * kinc);
-  auto IOfQX = IOfQ->dataX();
-  auto IOfQY = IOfQ->dataY();
+  auto& IOfQX = IOfQ->dataX();
+  auto& IOfQY = IOfQ->dataY();
   auto IOfQYAt2K = IOfQY.back();
   if (IOfQYAt2K == 0.)
     throw std::runtime_error("Integral of Q * S(Q) is zero so can't generate probability distribution");
   std::transform(IOfQY.begin(), IOfQY.end(), IOfQY.begin(), [IOfQYAt2K](double d) -> double { return d / IOfQYAt2K; });
-  // return std::make_shared<Mantid::HistogramData::Histogram>(IOfQ->y(), IOfQ->x());
-  return std::make_unique<Mantid::HistogramData::Histogram>(
-      Mantid::HistogramData::Points{std::move(IOfQY)}, Mantid::HistogramData::Counts{std::move(IOfQX)},
-      Mantid::HistogramData::CountStandardDeviations(IOfQY.size(), 0));
+  // don't need the e storage in the histogram so use this constructor for speed
+  auto result = std::make_unique<Mantid::HistogramData::Histogram>(HistogramData::Histogram::XMode::Points,
+                                                                   HistogramData::Histogram::YMode::Counts);
+
+  // make_cow seems to take a copy of the vectors so move them to avoid IOfQ destructor having to clear out the vectors
+  // at end of this function
+  result->setX(Mantid::Kernel::make_cow<HistogramData::HistogramX>(std::move(IOfQY)));
+  result->setY(Mantid::Kernel::make_cow<HistogramData::HistogramY>(std::move(IOfQX)));
+  return result;
 }
 
 /**
@@ -462,8 +469,8 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
   resultX.reserve(xValues.size());
   resultY.reserve(yValues.size());
   // set the integral to zero at x=0
-  resultX.push_back(0.);
-  resultY.push_back(0.);
+  resultX.emplace_back(0.);
+  resultY.emplace_back(0.);
   double sum = 0;
 
   // ensure there's a point at x=0 so xmax is never to the left of all the points
@@ -478,8 +485,8 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
   // integrate the intervals between each pair of points. Do this until right point is at end of vector or > xmax
   for (iRight = 1; iRight < xValues.size() && xValues[iRight] <= xmax; iRight++) {
     sum += 0.5 * (yValues[iRight] + yValues[iRight - 1]) * (xValues[iRight] - xValues[iRight - 1]);
-    resultX.push_back(xValues[iRight]);
-    resultY.push_back(sum);
+    resultX.emplace_back(xValues[iRight]);
+    resultY.emplace_back(sum);
   }
 
   // integrate a partial final interval if xmax is between points
@@ -488,8 +495,8 @@ DiscusMultipleScatteringCorrection::integrateCumulative(const Mantid::HistogramD
     double interpY = (yValues[iRight - 1] * (xValues[iRight] - xmax) + yValues[iRight] * (xmax - xValues[iRight - 1])) /
                      (xValues[iRight] - xValues[iRight - 1]);
     sum += 0.5 * (yValues[iRight - 1] + interpY) * (xmax - xValues[iRight - 1]);
-    resultX.push_back(xmax);
-    resultY.push_back(sum);
+    resultX.emplace_back(xmax);
+    resultY.emplace_back(sum);
   }
   return result;
 }
