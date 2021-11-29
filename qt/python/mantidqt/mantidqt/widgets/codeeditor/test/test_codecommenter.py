@@ -44,6 +44,32 @@ class CodeCommenterTest(unittest.TestCase):
         expected_lines[8] = '# ' + expected_lines[8]
         self.assertEqual(self.editor.text(), '\n'.join(expected_lines))
 
+    def test_uncomment_with_inline_comment(self):
+        """
+        Check that uncommenting works correctly when there is an inline comment on the line of code that is to be
+        uncommented.
+        """
+        commented_lines = [
+            '#do_something() # inline comment',
+            '#do_something() #inline comment',
+            '# do_something() # inline comment',
+            '# do_something() #inline comment',
+            '    #do_something() # inline comment',
+            '    #do_something() #inline comment',
+            '    # do_something() # inline comment',
+            '    # do_something() #inline comment']
+        expected_uncommented_lines = [
+            'do_something() # inline comment',
+            'do_something() #inline comment',
+            'do_something() # inline comment',
+            'do_something() #inline comment',
+            '    do_something() # inline comment',
+            '    do_something() #inline comment',
+            '    do_something() # inline comment',
+            '    do_something() #inline comment']
+        uncommented_lines = self.commenter._uncomment_lines(commented_lines)
+        self.assertEqual(expected_uncommented_lines, uncommented_lines)
+
     def test_multiline_uncomment(self):
         start_line, end_line = 0, 3
         self.editor.setSelection(0, 2, 3, 2)

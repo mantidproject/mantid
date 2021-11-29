@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 
+import re
+
 
 class CodeCommenter:
 
@@ -66,8 +68,10 @@ class CodeCommenter:
 
     def _uncomment_lines(self, lines):
         for i in range(len(lines)):
-            uncommented_line = lines[i].replace('# ', '', 1)
-            if uncommented_line == lines[i]:
-                uncommented_line = lines[i].replace('#', '', 1)
-            lines[i] = uncommented_line
+            # Look for optional whitespace and a hash at the start of a line to determine whether to uncomment it.
+            # Distinguish between the two cases {space, no space} after the hash to preserve indentation.
+            if re.match(r'\s*# ', lines[i]):
+                lines[i] = lines[i].replace('# ', '', 1)
+            elif re.match(r'\s*#', lines[i]):
+                lines[i] = lines[i].replace('#', '', 1)
         return lines
