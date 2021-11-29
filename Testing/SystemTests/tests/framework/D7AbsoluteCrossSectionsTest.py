@@ -33,10 +33,7 @@ class ILL_D7_Powder_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
-        # NOTE: The updated file is added to the standard location as I cannot
-        #       figure out how the ILL standard works.
-        #       Please consider adjusting/moving it to the desired location.
-        return ['normalized_powder_XYZ', 'ILL_D7_Powder_6p.nxs']
+        return ['normalized_powder_XYZ', 'ILL_D7_Powder_XYZ.nxs']
 
     def runTest(self):
         vanadium_mass = 8.535
@@ -45,7 +42,7 @@ class ILL_D7_Powder_Test(systemtesting.MantidSystemTest):
 
         vanadium_dictionary = {'SampleMass': vanadium_mass, 'FormulaUnitMass': 50.9412,
                                'SampleChemicalFormula': 'V', 'SampleDensity': 6.1,
-                               'Height': 1.0, 'ElementSize':0.5,
+                               'Height': 1.0, 'ElementSize': 0.5,
                                'SampleInnerRadius': 0.91, 'SampleOuterRadius': 0.99,
                                'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
                                'ContainerOuterRadius': 1.0, 'ContainerInnerRadius': 0.9}
@@ -86,8 +83,7 @@ class ILL_D7_Powder_Test(systemtesting.MantidSystemTest):
             Transmission='0.89',
             QuartzWorkspace='pol_corrections',
             OutputTreatment='Sum',
-            SampleGeometry='Annulus',
-            SelfAttenuationMethod='Numerical',
+            SampleGeometry='None',
             SampleAndEnvironmentProperties=vanadium_dictionary,
             AbsoluteNormalisation=True,
             InstrumentCalibration=calibration_file,
