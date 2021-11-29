@@ -27,14 +27,14 @@ You will be using the `git <http://git-scm.com/documentation>`__ version control
 
 Before you start the exercises below it is a good idea to read `this <http://git-scm.com/book/en/Git-Basics-Recording-Changes-to-the-Repository>`__ page that discusses the basic operations of working with git.
 
-The idea of version control is that snapshots of the development history can be recorded and these states returned to if necessary. As you go through the exercises and get to a point where something is working it is a good idea to *commit* the changes to your new repository. On Mantid we use what are known as branches within the repository to keep track of a single piece of work. The idea is that each feature/bugfix is developed independently on a separate branch within the repository. When the work is complete, it is tested by another developer and merged within a special branch, called **master**. This branch is reserved code that will form part of that distributed to users. More details on Mantid's workflow with git can be found `here <https://developer.mantidproject.org/GitWorkflow.html>`__.
+The idea of version control is that snapshots of the development history can be recorded and these states returned to if necessary. As you go through the exercises and get to a point where something is working it is a good idea to *commit* the changes to your new repository. On Mantid we use what are known as branches within the repository to keep track of a single piece of work. The idea is that each feature/bugfix is developed independently on a separate branch within the repository. When the work is complete, it is tested by another developer and merged within a special branch, called **main**. This branch is reserved code that will form part of that distributed to users. More details on Mantid's workflow with git can be found `here <https://developer.mantidproject.org/GitWorkflow.html>`__.
 
 While developing the code for your exercises you will work in a separate repository `here <https://github.com/mantidproject/newstarter>`__ but the intention is that you will follow the workflow described in the document above and in particular using the commands described in `this <https://developer.mantidproject.org/GitWorkflow.html#Workflow_Git_Commands>`__ section. Do not use the macros yet, the aim is to understand the process by using the real commands.
 
 Before starting the exercises, there are some setup steps:
 
 -  Clone this repository: https://github.com/mantidproject/newstarter
--  Make a new branch ``git checkout --no-track -b firstname_lastname_exercises origin/master``, where *firstname*, *lastname* should be replaced as appropriate.
+-  Make a new branch ``git checkout --no-track -b firstname_lastname_exercises origin/main``, where *firstname*, *lastname* should be replaced as appropriate.
 -  Make a copy of the *exercises-cpp/template* directory and name it *firstname_lastname*. The directory should be in the exercises directory.
 -  Make a directory called *builds* in the root of the *newstarter* repository. Git is setup to ignore this directory.
 -  Start the CMake Gui
