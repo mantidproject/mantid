@@ -112,18 +112,6 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                                      "",
                                                      direction=Direction.Input),doc="Table for Compton profiles")
-<<<<<<< HEAD
-        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", []), doc="List with LHS and RHS element of constraint on "
-                                              "intensities of element peaks. A constraint can only be set when there are at least two "
-                                              "elements in the ComptonProfile.")
-        self.declareProperty(
-            "ConstraintsProfileScatteringCrossSection",
-            "2.*82.03/5.551",
-            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering "
-            "cross section. Simple arithmetic can be included but the result may be rounded. This setting is ignored when no "
-            "ConstraintsProfileNumbers are set.")
-        self.declareProperty("ConstraintsProfileState", "eq", doc="This setting is ignored when no ConstraintsProfileNumbers are set.",
-                             validator=StringListValidator(["eq","ineq"]))
         self.declareProperty(ITableWorkspaceProperty("ConstraintsProfile",
                                                      "",
                                                      Direction.Input, PropertyMode.Optional),
@@ -223,29 +211,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         elements = generate_elements(self.getProperty("ComptonProfile").value)
 
         # constraint on the intensities of element peaks
-<<<<<<< HEAD
-        #provide LHS element, RHS element, mult. factor, flag
-        # if flag=True inequality; if flag = False equality
-        constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value
-        # check this is valid in the validate inputs
-        constraints = []
-        if len(constraints_profile_num) > 0:
-            cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
-            state = self.getProperty("ConstraintsProfileState").value
-            C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
-            constraints = [C1]
-||||||| parent of 02259267673 (Process constraint table)
-        #provide LHS element, RHS element, mult. factor, flag
-        # if flag=True inequality; if flag = False equality
-        constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value
-        # check this is valid in the validate inputs
-        cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
-        state = self.getProperty("ConstraintsProfileState").value
-        C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
-        constraints = [C1]
-=======
         constraints = generate_constraints(self.getProperty("ConstraintsProfile").value)
->>>>>>> 02259267673 (Process constraint table)
 
         # spectra to be masked
         spectra_to_be_masked = self.getProperty("SpectraToBeMasked").value
