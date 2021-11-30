@@ -18,9 +18,9 @@ New and Improved
 
 Bugfixes
 --------
+- Fixed an issue when save_as a running script leads to crash upon script completion.
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
 - Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
 - Fixed an issue to plot negative values with logarithm scaling in slice view.
-
 
 :ref:`Release 6.3.0 <v6.3.0>`
