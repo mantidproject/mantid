@@ -42,7 +42,7 @@ class FocusBothBanks(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['South'][UnitParams.difa], delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['South'][UnitParams.tzero], delta=2)
         # compare foc data in TOF (conversion to d already tested by assertions on diff consts)
-        self.tolerance = 0.5
+        self.tolerance = 1e-6
         self.disableChecking.extend(['Instrument'])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_bank.nxs"
 
@@ -91,7 +91,7 @@ class FocusTexture(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.5, delta=1)
         self.assertAlmostEqual(diff_consts[UnitParams.tzero], -20.3, delta=2)
         # compare TOF workspaces
-        self.tolerance = 0.5
+        self.tolerance = 1e-6
         self.disableChecking.extend(['Instrument'])  # don't check
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture.nxs"
 
