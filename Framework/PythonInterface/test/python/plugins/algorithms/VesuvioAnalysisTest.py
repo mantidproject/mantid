@@ -42,7 +42,6 @@ class VesuvioAnalysisTest(unittest.TestCase):
 
         return table
 
-<<<<<<< HEAD
     def generate_constraints_table(self):
         constraints = CreateEmptyTableWorkspace()
         constraints.addColumn(type="int", name="LHS element")
@@ -52,18 +51,6 @@ class VesuvioAnalysisTest(unittest.TestCase):
 
         return constraints
 
-||||||| parent of da707f2f33b (Cleaned up unit tests)
-=======
-    def generate_constraints_table(self):
-        constraints = CreateEmptyTableWorkspace()
-        constraints.addColumn(type="int", name="lhs element")
-        constraints.addColumn(type="int", name="RHS element")
-        constraints.addColumn(type="str", name="ScatteringCrossSection")
-        constraints.addColumn(type="str", name="State")
-
-        return constraints
-
->>>>>>> da707f2f33b (Cleaned up unit tests)
     def test_no_elements(self):
         alg = self.set_up_alg()
         alg.setProperty('Spectra', [135, 182])
@@ -96,34 +83,8 @@ class VesuvioAnalysisTest(unittest.TestCase):
 
     def test_bad_column_in_constraints_table(self):
         table = self.generate_table()
-<<<<<<< HEAD
         constraints = self.generate_constraints_table()
         constraints.removeColumn("ScatteringCrossSection")
-        constraints.addRow([0, 1, "eq"])
-
-        alg = self.set_up_alg()
-        alg.setProperty('Spectra', [135, 182])
-        alg.setProperty('ComptonProfile', table)
-        alg.setProperty('ConstraintsProfile', constraints)
-        errors = alg.validateInputs()
-        self.assertTrue("ConstraintsProfile" in errors)
-        self.assertEquals(len(errors),1)
-
-    def test_bad_column_in_constraints_table(self):
-        table = self.generate_table()
-        constraints = CreateEmptyTableWorkspace()
-        constraints.addColumn(type="int", name="LHS element")
-        constraints.addColumn(type="int", name="RHS element")
-        constraints.addColumn(type="str", name="State")
-||||||| parent of da707f2f33b (Cleaned up unit tests)
-        constraints = CreateEmptyTableWorkspace()
-        constraints.addColumn(type="int", name="LHS element")
-        constraints.addColumn(type="int", name="RHS element")
-        constraints.addColumn(type="str", name="State")
-=======
-        constraints = self.generate_constraints_table()
-        constraints.removeColumn("ScatteringCrossSection")
->>>>>>> da707f2f33b (Cleaned up unit tests)
         constraints.addRow([0, 1, "eq"])
 
         alg = self.set_up_alg()
@@ -158,23 +119,12 @@ class VesuvioAnalysisTest(unittest.TestCase):
 
     def test_case_insensitive_constraints_table(self):
         table = self.generate_table()
-<<<<<<< HEAD
         constraints = self.generate_constraints_table()
         constraints.removeColumn("LHS element")
         constraints.addColumn("lhs element")
-||||||| parent of da707f2f33b (Cleaned up unit tests)
-        constraints = CreateEmptyTableWorkspace()
-        constraints.addColumn(type="int", name="lhs element")
-        constraints.addColumn(type="int", name="RHS element")
-        constraints.addColumn(type="str", name="ScatteringCrossSection")
-        constraints.addColumn(type="str", name="State")
-        constraints.addRow([0, 1, "2.*82.03/5.551", "eq"])
-
-=======
         constraints = self.generate_constraints_table()
         constraints.addRow([0, 1, "2.*82.03/5.551", "eq"])
 
->>>>>>> da707f2f33b (Cleaned up unit tests)
         alg = self.set_up_alg()
         alg.setProperty('ConstraintsProfile', constraints)
         alg.setProperty('Spectra', [135, 182])

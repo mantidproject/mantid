@@ -165,16 +165,17 @@ class VesuvioAnalysis(PythonAlgorithm):
                 issues["ConstraintsProfile"] = "The constraints table should be of the form: "
                 for name in constraintCols:
                     issues["ConstraintsProfile"] += name + ", "
-            #check arithmetic is safe
-            cross_section = constraints.column('ScatteringCrossSection')
-            for section in cross_section:
-                for ch in section:
-                    if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                        issues["ConstraintsProfile"]= "ScatteringCrossSection must be a valid mathmatical expression. "+ch
-            state = constraints.column('State')
-            for f in [flag for flag in state]:
-                if f not in ["eq", "ineq"]:
-                    issues["ConstraintsProfile"]= "State can only have the values ['eq','ineq']"+f
+            else:
+                #check arithmetic is safe
+                cross_section = constraints.column('ScatteringCrossSection')
+                for section in cross_section:
+                    for ch in section:
+                        if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
+                            issues["ConstraintsProfile"]= "ScatteringCrossSection must be a valid mathmatical expression. "+ch
+                state = constraints.column('State')
+                for f in [flag for flag in state]:
+                    if f not in ["eq", "ineq"]:
+                        issues["ConstraintsProfile"]= "State can only have the values ['eq','ineq']"+f
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
