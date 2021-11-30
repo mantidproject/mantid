@@ -40,11 +40,8 @@ Bugfixes
 - Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
 - Fixed a bug with autoscaling of colorfill plots from within the figure options.
 - Fixed an issue to plot negative values with logarithm scaling in slice view.
-<<<<<<< HEAD
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Stopped workbench from ignoring GUIs that want to cancel closing
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
-=======
->>>>>>> 0489d2b9fa2 (update release doc)
 
 :ref:`Release 6.3.0 <v6.3.0>`
