@@ -8,6 +8,11 @@ Direct Geometry Changes
 Direct Geometry
 ---------------
 
+New Algorithms
+##############
+
+- :ref:`LoadDNSEvent <algm-LoadDNSEvent>` loads data from DNS PSD detector into EventWorkspace
+
 Improvements
 ############
 
