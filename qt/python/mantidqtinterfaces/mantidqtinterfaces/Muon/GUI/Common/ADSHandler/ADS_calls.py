@@ -35,3 +35,12 @@ def delete_ws(name):
     alg.initialize()
     alg.setProperty("Workspace", name)
     alg.execute()
+
+
+def make_group(ws_list, group_name):
+    alg = mantid.AlgorithmManager.create("GroupWorkspaces")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspaces", ws_list)
+    alg.setProperty("OutputWorkspace", group_name)
+    alg.execute()

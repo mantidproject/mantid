@@ -1,7 +1,6 @@
 {
-  "line_width": 80,
+  "line_width": 120,
   "tab_size": 2,
-  "max_subargs_per_line": 1,
   "separate_ctrl_name_with_space": false,
   "separate_fn_name_with_space": false,
   "dangle_parens": true,
@@ -115,13 +114,6 @@
     }
   },
   "always_wrap": [],
-  "algorithm_order": [
-    0,
-    1,
-    2,
-    3,
-    4
-  ],
   "enable_markup": true,
   "first_comment_is_literal": false,
   "literal_comment_pattern": null,

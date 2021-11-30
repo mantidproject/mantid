@@ -15,7 +15,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>

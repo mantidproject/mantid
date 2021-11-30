@@ -7,12 +7,12 @@
 from qtpy import QtWidgets
 import matplotlib.pyplot as plt
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
 class PlotView(QtWidgets.QWidget):
     def __init__(self, parent=None):
-        super(PlotView, self).__init__(parent)
+        super().__init__(parent)
 
         self.figure = plt.figure()
         grid = QtWidgets.QVBoxLayout(self)

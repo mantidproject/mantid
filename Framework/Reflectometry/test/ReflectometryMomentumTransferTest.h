@@ -14,9 +14,9 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/math/special_functions/pow.hpp>
 
@@ -248,8 +248,10 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitName", slit1))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("SecondSlitSizeSampleLog", slit2))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("TOFChannelWidth", TOF_BIN_WIDTH))
-    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, e.what(),
-                            std::string("Some invalid Properties found: [ FirstSlitName SecondSlitName ]"))
+    std::string err_msg("Some invalid Properties found: \n"
+                        " FirstSlitName: No component called 'non-existent' found in InputWorkspace\n"
+                        " SecondSlitName: No component called 'non-existent' found in InputWorkspace");
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::runtime_error &e, e.what(), err_msg);
     TS_ASSERT(!alg->isExecuted())
   }
 

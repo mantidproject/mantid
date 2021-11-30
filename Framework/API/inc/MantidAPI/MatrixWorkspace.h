@@ -95,7 +95,8 @@ public:
 
   // More mapping
   spec2index_map getSpectrumToWorkspaceIndexMap() const;
-  detid2index_map getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets = false) const;
+  detid2index_map getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets = false,
+                                                   bool ignoreIfNoValidDets = false) const;
   virtual std::vector<size_t> getDetectorIDToWorkspaceIndexVector(detid_t &offset,
                                                                   bool throwIfMultipleDets = false) const;
 

@@ -12,7 +12,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 

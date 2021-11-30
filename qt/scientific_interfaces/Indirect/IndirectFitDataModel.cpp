@@ -244,6 +244,13 @@ void IndirectFitDataModel::setStartX(double startX, WorkspaceID workspaceID) {
   m_fittingData->at(workspaceID.value).setStartX(startX);
 }
 
+void IndirectFitDataModel::setStartX(double startX, FitDomainIndex fitDomainIndex) {
+  auto subIndices = getSubIndices(fitDomainIndex);
+  if (m_fittingData->empty())
+    return;
+  m_fittingData->at(subIndices.first.value).setStartX(startX, subIndices.second);
+}
+
 void IndirectFitDataModel::setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) {
   if (m_fittingData->empty())
     return;
@@ -254,6 +261,13 @@ void IndirectFitDataModel::setEndX(double endX, WorkspaceID workspaceID) {
   if (m_fittingData->empty())
     return;
   m_fittingData->at(workspaceID.value).setEndX(endX);
+}
+
+void IndirectFitDataModel::setEndX(double endX, FitDomainIndex fitDomainIndex) {
+  auto subIndices = getSubIndices(fitDomainIndex);
+  if (m_fittingData->empty())
+    return;
+  m_fittingData->at(subIndices.first.value).setEndX(endX, subIndices.second);
 }
 
 void IndirectFitDataModel::setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID,

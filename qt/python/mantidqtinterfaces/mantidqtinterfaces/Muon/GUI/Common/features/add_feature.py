@@ -36,5 +36,5 @@ class AddFeature(ABC):
         raise NotImplementedError("add observers to feature not implemented")
 
     def set_feature_observables(self, GUI):
-        # S☺ets the observables of the feature from the rest of the GUI
+        # Sets the observables of the feature from the rest of the GUI
         raise NotImplementedError("set features to observer not implemented")

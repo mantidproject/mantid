@@ -1,5 +1,4 @@
-# This file manages building/installation of the mantidqt and mantidqtpython
-# Python wrappers.
+# This file manages building/installation of the mantidqt and mantidqtpython Python wrappers.
 
 include(PythonPackageTargetFunctions)
 
@@ -23,8 +22,7 @@ if(BUILD_MANTIDFRAMEWORK)
   add_dependencies(mantidqt PythonInterface)
 endif()
 
-# Configure resources data in place for ease of development. The output file is
-# added to the toplevel gitignore
+# Configure resources data in place for ease of development. The output file is added to the toplevel gitignore
 set(_qrc_file ${CMAKE_CURRENT_LIST_DIR}/resources.qrc)
 set(_output_res_py ${CMAKE_CURRENT_LIST_DIR}/mantidqt/resources.py)
 configure_file(create_resources.cmake.in create_resources.cmake @ONLY)
@@ -36,10 +34,7 @@ add_custom_command(
 )
 add_custom_target(mantidqt_resources ALL DEPENDS ${_output_res_py})
 
-add_dependencies(
-  mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5
-  mantidqt_iconsqt5
-)
+add_dependencies(mantidqt mantidqt_resources mantidqt_commonqt5 mantidqt_instrumentviewqt5 mantidqt_iconsqt5)
 if(MSVC)
   # Debug builds need libraries that are linked with MSVC debug runtime
   add_custom_command(
@@ -82,6 +77,8 @@ set(PYTHON_TEST_FILES
     mantidqt/utils/qt/test/test_line_edit_double_validator.py
     mantidqt/utils/qt/test/test_qappthreadcall.py
     mantidqt/widgets/test/test_messagedisplay.py
+    mantidqt/widgets/test/test_scriptrepository.py
+    mantidqt/widgets/test/test_fittingmode.py
     mantidqt/widgets/test/test_fitpropertybrowser.py
     mantidqt/widgets/test/test_fitpropertybrowserbase.py
     mantidqt/widgets/test/test_fitpropertybrowserplotinteraction.py
@@ -92,13 +89,15 @@ set(PYTHON_TEST_FILES
     mantidqt/widgets/observers/test/test_observing_presenter.py
     mantidqt/widgets/observers/test/test_observing_view.py
     mantidqt/widgets/embedded_find_replace_dialog/test/test_embedded_find_replace_dialog_presenter.py
+    mantidqt/widgets/waterfallplotfillareadialog/test/test_waterfallplotfillareadialogpresenter.py
+    mantidqt/widgets/waterfallplotoffsetdialog/test/test_waterfallplotoffsetdialogpresenter.py
 )
 
-# ctest target for widgets that only get tested in qt5, because they are only
-# used in the workbench
+# ctest target for widgets that only get tested in qt5, because they are only used in the workbench
 set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/algorithmselector/test/test_algorithm_factory_observer.py
     mantidqt/widgets/algorithmselector/test/test_algorithmselector.py
+    mantidqt/widgets/codeeditor/test/test_codecommenter.py
     mantidqt/widgets/codeeditor/test/test_codeeditor.py
     mantidqt/widgets/codeeditor/test/test_completion.py
     mantidqt/widgets/codeeditor/test/test_execution.py
@@ -107,12 +106,13 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/codeeditor/test/test_interpreter_view.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter.py
     mantidqt/widgets/codeeditor/test/test_multifileinterpreter_view.py
+    mantidqt/widgets/codeeditor/test/test_scriptcompatibility.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
     mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
     mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
     mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
-    mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
+    mantidqt/widgets/instrumentview/test/test_instrumentview_presenter.py
     mantidqt/widgets/memorywidget/test/test_memoryinfo.py
     mantidqt/widgets/memorywidget/test/test_memorypresenter.py
     mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
@@ -126,6 +126,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
+    mantidqt/widgets/sliceviewer/test/test_sliceviewer_lineplots.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
@@ -166,6 +167,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_tableworkspace_item.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_table_model.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_io.py
     mantidqt/widgets/workspacewidget/test/test_workspacetreewidget.py
@@ -174,7 +176,4 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
 
 # Tests
 set(PYUNITTEST_QT_API pyqt5)
-pyunittest_add_test(
-  ${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES}
-  ${PYTHON_WIDGET_QT5_ONLY_TESTS}
-)
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} mantidqt_qt5 ${PYTHON_TEST_FILES} ${PYTHON_WIDGET_QT5_ONLY_TESTS})

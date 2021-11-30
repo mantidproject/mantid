@@ -60,8 +60,10 @@ public:
 
   void setStartX(double startX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setStartX(double startX, WorkspaceID workspaceID) override;
+  void setStartX(double startX, FitDomainIndex fitDomainIndex) override;
   void setEndX(double endX, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setEndX(double endX, WorkspaceID workspaceID) override;
+  void setEndX(double startX, FitDomainIndex fitDomainIndex) override;
   void setExcludeRegion(const std::string &exclude, WorkspaceID workspaceID, WorkspaceIndex spectrum) override;
   void setExcludeRegion(const std::string &exclude, FitDomainIndex index) override;
   void setResolution(const std::string &name) override;

@@ -63,9 +63,6 @@ class FFTWrapper(object):
         if self.FFT is not None:
             self.model.FFTAlg(self.FFT)
 
-    def output(self):
-        return
-
 
 class FFTModel(object):
 

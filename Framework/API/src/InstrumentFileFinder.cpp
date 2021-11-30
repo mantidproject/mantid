@@ -119,8 +119,8 @@ std::string InstrumentFileFinder::getParameterPath(const std::string &instName, 
     }
   }
 
-  Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
-  std::vector<std::string> directoryNames = configService.getInstrumentDirectories();
+  const Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
+  const std::vector<std::string> directoryNames = configService.getInstrumentDirectories();
 
   for (const auto &dirName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and

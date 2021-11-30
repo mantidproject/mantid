@@ -9,11 +9,13 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/ResizeRectangularDetectorHelper.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
@@ -53,6 +55,9 @@ SCDCalibratePanels2ObjFunc::SCDCalibratePanels2ObjFunc() {
   declareParameter("DeltaSampleX", 0.0, "relative shift of sample position along X.");
   declareParameter("DeltaSampleY", 0.0, "relative shift of sample position along Y.");
   declareParameter("DeltaSampleZ", 0.0, "relative shift of sample position along Z.");
+  // Detector size scale factors
+  declareParameter("ScaleX", 1.0, "Scale of detector along X-direction (i.e., width).");
+  declareParameter("ScaleY", 1.0, "Scale of detector along Y-direction (i.e., height).");
 }
 
 void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, const std::string &componentName,
@@ -100,6 +105,9 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   const double dsx = getParameter("DeltaSampleX");
   const double dsy = getParameter("DeltaSampleY");
   const double dsz = getParameter("DeltaSampleZ");
+  //-- scale of the detector size
+  const double scalex = getParameter("ScaleX");
+  const double scaley = getParameter("ScaleY");
 
   //-- NOTE: given that these components are never used as
   //         one vector, there is no need to construct a
@@ -110,15 +118,14 @@ void SCDCalibratePanels2ObjFunc::function1D(double *out, const double *xValues, 
   // -- always working on a copy only
   IPeaksWorkspace_sptr pws = m_pws->clone();
 
-  // Debugging related
-  IPeaksWorkspace_sptr pws_ref = m_pws->clone();
-
   // NOTE: when optimizing T0, a none component will be passed in.
   //       -- For Corelli, this will be none/sixteenpack
   //       -- For others, this will be none
   bool calibrateT0 = (m_cmpt == "none/sixteenpack") || (m_cmpt == "none");
   // we don't need to move the instrument if we are calibrating T0
   if (!calibrateT0) {
+    pws = scaleRectagularDetectorSize(scalex, scaley, m_cmpt, pws);
+
     // translation
     pws = moveInstruentComponentBy(dx, dy, dz, m_cmpt, pws);
 
@@ -261,6 +268,32 @@ IPeaksWorkspace_sptr SCDCalibratePanels2ObjFunc::rotateInstrumentComponentBy(dou
   rot_alg->setProperty("Angle", rotZ);
   rot_alg->setProperty("RelativeRotation", true);
   rot_alg->executeAsChildAlg();
+
+  return pws;
+}
+
+IPeaksWorkspace_sptr
+SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, const double &scaley,
+                                                        const std::string &componentName,
+                                                        Mantid::API::IPeaksWorkspace_sptr &pws) const {
+
+  Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(pws->getInstrument());
+  Geometry::IComponent_const_sptr comp = inst->getComponentByName(componentName);
+  std::shared_ptr<const Geometry::RectangularDetector> rectDet =
+      std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
+  if (rectDet) {
+    // get instrument parameter map and find out whether the
+    Geometry::ParameterMap &pmap = pws->instrumentParameters();
+    auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
+    auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
+    double relscalex{scalex}, relscaley{scaley};
+    if (!oldscalex.empty())
+      relscalex /= oldscalex[0];
+    if (!oldscaley.empty())
+      relscaley /= oldscaley[0];
+    applyRectangularDetectorScaleToComponentInfo(pws->mutableComponentInfo(), rectDet->getComponentID(), relscalex,
+                                                 relscaley);
+  }
 
   return pws;
 }

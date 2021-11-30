@@ -128,10 +128,10 @@ set(SRC_FILES
     src/Surfaces/Sphere.cpp
     src/Surfaces/Surface.cpp
     src/Surfaces/SurfaceFactory.cpp
-    src/Surfaces/Torus.cpp)
+    src/Surfaces/Torus.cpp
+)
 
-set(SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
-    src/Instrument/ObjCompAssembly.cpp)
+set(SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp src/Instrument/ObjCompAssembly.cpp)
 
 set(INC_FILES
     inc/MantidGeometry/ComponentParser.h
@@ -289,7 +289,8 @@ set(INC_FILES
     inc/MantidGeometry/Surfaces/Sphere.h
     inc/MantidGeometry/Surfaces/Surface.h
     inc/MantidGeometry/Surfaces/SurfaceFactory.h
-    inc/MantidGeometry/Surfaces/Torus.h)
+    inc/MantidGeometry/Surfaces/Torus.h
+)
 
 set(TEST_FILES
     AcompTest.h
@@ -422,16 +423,14 @@ set(TEST_FILES
     TripleTest.h
     UnitCellTest.h
     V3RTest.h
-    XMLInstrumentParameterTest.h)
+    XMLInstrumentParameterTest.h
+)
 
-set(GMOCK_TEST_FILES
-    MDGeometryXMLBuilderTest.h)
+set(GMOCK_TEST_FILES MDGeometryXMLBuilderTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -447,16 +446,10 @@ if(APPLE)
 endif()
 
 if(ENABLE_OPENGL)
-  list(APPEND
-    INC_FILES
-    inc/MantidGeometry/Rendering/OpenGL_Headers.h)
-  list(APPEND
-    SRC_FILES
-    src/Rendering/RenderingHelpersOpenGL.cpp)
+  list(APPEND INC_FILES inc/MantidGeometry/Rendering/OpenGL_Headers.h)
+  list(APPEND SRC_FILES src/Rendering/RenderingHelpersOpenGL.cpp)
 else()
-  list(APPEND
-    SRC_FILES
-    src/Rendering/RenderingHelpersThrowing.cpp)
+  list(APPEND SRC_FILES src/Rendering/RenderingHelpersThrowing.cpp)
 endif()
 
 # Add a precompiled header where they are supported
@@ -465,24 +458,17 @@ enable_precompiled_headers(inc/MantidGeometry/PrecompiledHeader.h SRC_FILES)
 add_library(Geometry ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Geometry ALIAS Geometry)
 
-target_include_directories(Geometry PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Set the name of the generated library
-set_target_properties(Geometry
-                      PROPERTIES OUTPUT_NAME
-                                 MantidGeometry
-                                 COMPILE_DEFINITIONS
-                                 IN_MANTID_GEOMETRY)
+set_target_properties(Geometry PROPERTIES OUTPUT_NAME MantidGeometry COMPILE_DEFINITIONS IN_MANTID_GEOMETRY)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Geometry
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Geometry
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(Geometry PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 if(ENABLE_OPENCASCADE)
@@ -492,20 +478,15 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Geometry PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Geometry
-                      PUBLIC
-                      Mantid::Kernel
-                      Mantid::Beamline
-                      MuParser::MuParser
-                      PRIVATE
-                      Mantid::Json)
+target_link_libraries(
+  Geometry
+  PUBLIC Mantid::Kernel Mantid::Beamline MuParser::MuParser
+  PRIVATE Mantid::Json
+)
 
 if(ENABLE_OPENGL)
   target_include_directories(Geometry SYSTEM PRIVATE ${OPENGL_INCLUDE_DIR})
-  target_link_libraries(Geometry
-    PRIVATE
-    ${OPENGL_gl_LIBRARY}
-    ${OPENGL_glu_LIBRARY})
+  target_link_libraries(Geometry PRIVATE ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 endif()
 
 if(ENABLE_OPENCASCADE)
@@ -515,22 +496,15 @@ endif()
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
-# Auto-generate exports header
-target_include_directories(Geometry PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Geometry>
-  $<INSTALL_INTERFACE:include/Mantid>
+# Installation settings Auto-generate exports header
+target_include_directories(
+  Geometry PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Geometry> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Installation settings
-if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidGeometryTargets")
-mtd_install_framework_lib(TARGETS Geometry EXPORT_NAME ${TARGET_EXPORT_NAME})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidGeometryTargets")
+  mtd_install_framework_lib(TARGETS Geometry EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
-mtd_install_targets(TARGETS
-                    Geometry
-                    INSTALL_DIRS
-                    ${LIB_DIR}
-                    ${WORKBENCH_LIB_DIR})
+  mtd_install_targets(TARGETS Geometry INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()
-

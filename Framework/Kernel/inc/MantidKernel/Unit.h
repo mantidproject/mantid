@@ -518,7 +518,7 @@ public:
 };
 
 //=================================================================================================
-/// Energy transfer in units of frequency (GHz)
+/// Energy transfer in units of frequency (MHz)
 class MANTID_KERNEL_DLL DeltaE_inFrequency : public DeltaE {
 public:
   const std::string unitID() const override; ///< "DeltaE_inFrequency"

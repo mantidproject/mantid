@@ -96,6 +96,8 @@ public:
   /// Show/hide alpha explanation
   virtual void showAlphaMessage(const bool alpha) = 0;
 
+  virtual void setFileExtensions(const std::vector<std::string> &extensions) = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;

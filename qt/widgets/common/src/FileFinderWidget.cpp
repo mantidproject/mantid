@@ -8,7 +8,6 @@
 #include "MantidQtWidgets/Common/DropEventHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/MultipleFileProperty.h"
@@ -237,6 +236,15 @@ void FileFinderWidget::setAlgorithmProperty(const QString &text) { m_algorithmPr
  * @return list of file extensions
  */
 QStringList FileFinderWidget::getFileExtensions() const { return m_fileExtensions; }
+
+std::vector<std::string> FileFinderWidget::getStringFileExtensions() const {
+  std::vector<std::string> extensions;
+  std::transform(m_fileExtensions.begin(), m_fileExtensions.end(), std::back_inserter(extensions),
+                 [](const QString &extension) { return extension.toStdString(); });
+
+  return extensions;
+}
+
 /**
  * Sets the list of file extensions the dialog will search for. Only taken
  * notice of if AlgorithmProperty not set.
@@ -495,7 +503,6 @@ void FileFinderWidget::findFiles() { findFiles(m_uiForm.fileEditor->isModified()
  */
 void FileFinderWidget::findFiles(bool isModified) {
   auto searchText = m_uiForm.fileEditor->text();
-
   if (m_isForDirectory) {
     m_foundFiles.clear();
     if (searchText.isEmpty()) {
@@ -771,7 +778,21 @@ QStringList FileFinderWidget::getFileExtensionsFromAlgorithm(const QString &algN
  */
 QString FileFinderWidget::openFileDialog() {
   QStringList filenames;
-  QString dir = m_lastDir;
+  QString dir;
+
+  auto prevFileNames = getText().split(",", QString::SkipEmptyParts);
+  for (auto &prevFileName : prevFileNames)
+    prevFileName = prevFileName.trimmed();
+
+  if (!prevFileNames.empty() && QFileInfo(prevFileNames[0]).isAbsolute()) {
+    if (QFileInfo(prevFileNames[0]).isFile()) {
+      dir = QFileInfo(prevFileNames[0]).absoluteDir().path();
+    } else {
+      dir = prevFileNames[0];
+    }
+  } else {
+    dir = m_lastDir;
+  }
 
   if (m_fileFilter.isEmpty()) {
     m_fileFilter = createFileFilter();
@@ -946,6 +967,7 @@ FindFilesSearchParameters FileFinderWidget::createFindFilesSearchParameters(cons
   parameters.searchText = text;
   parameters.isOptional = isOptional();
   parameters.isForRunFiles = isForRunFiles();
+  parameters.extensions = getStringFileExtensions();
 
   // parse the algorithm - property name string
   QStringList elements = m_algorithmProperty.split("|");

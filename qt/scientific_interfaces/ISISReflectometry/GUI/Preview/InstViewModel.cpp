@@ -6,11 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "InstViewModel.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidQtWidgets/Common/MessageHandler.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
-#include "MantidQtWidgets/InstrumentView/RotationSurface.h"
-#include "MantidQtWidgets/InstrumentView/UnwrappedCylinder.h"
 
 #include <memory>
 
@@ -33,15 +32,24 @@ InstViewModel::createInstrumentViewActor(Mantid::API::MatrixWorkspace_sptr &work
                                                           scaleMax);
 }
 
-void InstViewModel::notifyWorkspaceUpdated(Mantid::API::MatrixWorkspace_sptr &workspace) {
-  // TODO refactor the component info stuff into the surface constructor so we don't need to get it here
+void InstViewModel::updateWorkspace(Mantid::API::MatrixWorkspace_sptr &workspace) {
   m_actor = createInstrumentViewActor(workspace);
-  const auto &componentInfo = m_actor->componentInfo();
-  auto sample_pos = componentInfo.samplePosition();
-  auto axis = Mantid::Kernel::V3D(0, 1, 0); // CYLINDRICAL_Y
-
-  m_surface = std::make_shared<MantidWidgets::UnwrappedCylinder>(m_actor.get(), sample_pos, axis);
+  m_actor->initialize(true, true);
 }
 
-std::shared_ptr<MantidWidgets::RotationSurface> InstViewModel::getInstrumentViewSurface() const { return m_surface; }
+// TODO refactor getting the sample pos and axis into the surface constructor so we don't need to get it here
+Mantid::Kernel::V3D InstViewModel::getSamplePos() const {
+  const auto &componentInfo = m_actor->componentInfo();
+  return componentInfo.samplePosition();
+}
+
+Mantid::Kernel::V3D InstViewModel::getAxis() const {
+  return Mantid::Kernel::V3D(0, 1, 0); // CYLINDRICAL_Y
+}
+
+MantidWidgets::InstrumentActor *InstViewModel::getInstrumentViewActor() const { return m_actor.get(); }
+
+std::vector<Mantid::detid_t> InstViewModel::detIndicesToDetIDs(std::vector<size_t> const &detIndices) const {
+  return m_actor->getDetIDs(detIndices);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

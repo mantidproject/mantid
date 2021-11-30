@@ -54,7 +54,7 @@ public:
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Gaussian"; }
-  const std::string category() const override { return "Peak"; }
+  const std::string category() const override { return "Peak; Muon\\MuonModelling"; }
   void setActiveParameter(size_t i, double value) override;
   double activeParameter(size_t i) const override;
 

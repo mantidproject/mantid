@@ -21,10 +21,10 @@
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/PredictSatellitePeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <iostream>

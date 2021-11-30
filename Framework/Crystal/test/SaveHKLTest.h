@@ -14,6 +14,8 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -22,8 +24,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -69,7 +69,7 @@ public:
     mrun.addProperty<double>("Radius", 0.1, true);
 
     const bool expectEmptyFile{false};
-    const double expectedTbar{0.1591}, expectedTransmission{0.9434};
+    const double expectedTbar{0.1489}, expectedTransmission{0.9469};
 
     assertFileContent(assertSaveExec(ws), expectEmptyFile, expectedTbar, expectedTransmission);
   }
@@ -95,7 +95,7 @@ public:
     const double radius{0.1};
 
     const bool expectEmptyFile{false};
-    const double expectedTbar{0.1591}, expectedTransmission{0.9434};
+    const double expectedTbar{0.1489}, expectedTransmission{0.9469};
     assertFileContent(assertSaveExec(ws, radius, smu, amu), expectEmptyFile, expectedTbar, expectedTransmission);
   }
 

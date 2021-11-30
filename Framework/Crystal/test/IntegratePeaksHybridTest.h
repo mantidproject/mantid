@@ -12,8 +12,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/IntegratePeaksHybrid.h"
 
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/WorkspaceGroup.h"
 

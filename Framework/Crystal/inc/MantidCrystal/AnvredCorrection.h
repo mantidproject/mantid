@@ -15,14 +15,35 @@
 
 namespace Mantid {
 namespace Crystal {
-const double pc[4][19] = {{1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000,
-                           1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000},
-                          {1.9368, 1.8653, 1.6908, 1.4981, 1.3532, 1.2746, 1.2530, 1.2714, 1.3093, 1.3559, 1.4019,
-                           1.4434, 1.4794, 1.5088, 1.5317, 1.5489, 1.5608, 1.5677, 1.5700},
-                          {0.0145, 0.1596, 0.5175, 0.9237, 1.2436, 1.4308, 1.4944, 1.4635, 1.3770, 1.2585, 1.1297,
-                           1.0026, 0.8828, 0.7768, 0.6875, 0.6159, 0.5637, 0.5320, 0.5216},
-                          {1.1386, 1.0604, 0.8598, 0.6111, 0.3798, 0.1962, 0.0652, -0.0198, -0.0716, -0.0993, -0.1176,
-                           -0.1153, -0.1125, -0.1073, -0.1016, -0.0962, -0.0922, -0.0898, -0.0892}};
+
+// fit to ln(1/A*) = sum_{icoef=0}^{N=7} pc[7-icoef][ith]*(muR)^icoef
+// A*(muR=0) = 1 so pc[7][ith] = 0 (fixed not fitted)
+// Fit performed in MATLAB using least-squares minimisation
+// after Dwiggins, jr., acta cryst. A, 31, 146 (1975) - (but for sphere instread of cylinder)
+const double pc[8][19] = {{-6.4910e-07, -6.8938e-07, -7.8149e-07, 8.1682e-08, 1.8008e-06, 3.3916e-06, 4.5095e-06,
+                           4.7970e-06, 4.4934e-06, 3.6700e-06, 2.5881e-06, 1.5007e-06, 3.7669e-07, -7.9487e-07,
+                           -1.7935e-06, -2.5563e-06, -3.1113e-06, -3.3993e-06, -3.5091e-06},
+                          {1.0839e-05, 1.1582e-05, 1.1004e-05, -2.2848e-05, -8.1974e-05, -1.3268e-04, -1.6486e-04,
+                           -1.6839e-04, -1.5242e-04, -1.1949e-04, -7.8682e-05, -3.7973e-05, 2.9117e-06, 4.4823e-05,
+                           8.0464e-05, 1.0769e-04, 1.2753e-04, 1.3800e-04, 1.4190e-04},
+                          {8.7140e-05, 9.0870e-05, 1.6706e-04, 6.9008e-04, 1.4781e-03, 2.0818e-03, 2.3973e-03,
+                           2.3209e-03, 1.9935e-03, 1.4508e-03, 8.1903e-04, 1.9608e-04, -4.1128e-04, -1.0205e-03,
+                           -1.5374e-03, -1.9329e-03, -2.2212e-03, -2.3760e-03, -2.4324e-03},
+                          {-2.9549e-03, -3.1360e-03, -4.2431e-03, -8.1103e-03, -1.2989e-02, -1.6012e-02, -1.6815e-02,
+                           -1.4962e-02, -1.1563e-02, -6.8581e-03, -1.7302e-03, 3.2400e-03, 7.9409e-03, 1.2528e-02,
+                           1.6414e-02, 1.9394e-02, 2.1568e-02, 2.2758e-02, 2.3182e-02},
+                          {1.7934e-02, 1.9304e-02, 2.4706e-02, 3.6759e-02, 4.8351e-02, 5.1049e-02, 4.5368e-02,
+                           3.0864e-02, 1.2086e-02, -1.0254e-02, -3.2992e-02, -5.4495e-02, -7.4205e-02, -9.2818e-02,
+                           -1.0855e-01, -1.2068e-01, -1.2954e-01, -1.3451e-01, -1.3623e-01},
+                          {6.2799e-02, 6.3892e-02, 6.4943e-02, 6.4881e-02, 7.2169e-02, 9.5669e-02, 1.3082e-01,
+                           1.7694e-01, 2.2559e-01, 2.7655e-01, 3.2483e-01, 3.6888e-01, 4.0783e-01, 4.4330e-01,
+                           4.7317e-01, 4.9631e-01, 5.1334e-01, 5.2318e-01, 5.2651e-01},
+                          {-1.4949e+00, -1.4952e+00, -1.4925e+00, -1.4889e+00, -1.4867e+00, -1.4897e+00, -1.4948e+00,
+                           -1.5025e+00, -1.5084e+00, -1.5142e+00, -1.5176e+00, -1.5191e+00, -1.5187e+00, -1.5180e+00,
+                           -1.5169e+00, -1.5153e+00, -1.5138e+00, -1.5125e+00, -1.5120e+00},
+                          {0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+                           0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00,
+                           0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00, 0.0000e+00}};
 
 const double MAX_WAVELENGTH = 50.0; // max in lamda_weight table
 
@@ -30,7 +51,7 @@ const double STEPS_PER_ANGSTROM = 100; // resolution of lamda table
 
 const int NUM_WAVELENGTHS = static_cast<int>(std::ceil(MAX_WAVELENGTH * STEPS_PER_ANGSTROM));
 
-const double radtodeg_half = 180.0 / M_PI / 2.;
+const double radtodeg = 180.0 / M_PI;
 /** Calculates anvred correction factors for attenuation due to absorption and
    scattering in a spherical sample.
 
@@ -71,6 +92,7 @@ public:
   const std::string category() const override {
     return "Crystal\\Corrections;CorrectionFunctions\\AbsorptionCorrections";
   }
+  static double calc_Astar(const double theta, const double mur);
 
 protected:
   /** A virtual function in which additional properties of an algorithm should
@@ -97,16 +119,18 @@ private:
   void execEvent();
   /// Algorithm cleanup
   void cleanup();
+  /// validate inputs
+  std::map<std::string, std::string> validateInputs() override;
 
   void retrieveBaseProperties();
   // void constructSample(API::Sample& sample);
-  double getEventWeight(double lamda, double two_theta);
+  double getEventWeight(const double lamda, const double two_theta, bool &muRTooLarge);
   void BuildLamdaWeights();
-  double absor_sphere(double &twoth, double &wl);
-  void scale_init(const Geometry::IDetector &det, const Geometry::Instrument_const_sptr &inst, double &L2,
-                  double &depth, double &pathlength, std::string &bankName);
-  void scale_exec(std::string &bankName, double &lambda, double &depth, const Geometry::Instrument_const_sptr &inst,
-                  double &pathlength, double &value);
+  double absor_sphere(const double twoth, const double wl, bool &muRTooLarge);
+  void scale_init(const Geometry::Instrument_const_sptr &inst, const double L2, const double depth, double &pathlength,
+                  const std::string &bankName);
+  void scale_exec(std::string &bankName, const double lambda, const double depth,
+                  const Geometry::Instrument_const_sptr &inst, const double pathlength, double value);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm
   double m_amu;                       ///< linear absoprtion coefficient in 1/cm

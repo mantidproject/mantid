@@ -14,8 +14,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockSaveView.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>

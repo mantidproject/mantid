@@ -110,16 +110,6 @@ public:
     }
   }
 
-  // test setData will download file if download selected
-  void test_setData_sets_download() {
-    auto *model = new RepoModel();
-    auto index = getIndex(model, 1, 1);
-    auto isDataSet = model->setData(index, "Download", Qt::EditRole);
-    TS_ASSERT_EQUALS(true, isDataSet);
-    auto row = model->data(index, Qt::DisplayRole).toString();
-    TS_ASSERT_EQUALS("DOWNLOADING", row);
-  }
-
   // test setData will set the file to autoupdate if selected
   void test_setData_sets_autoUpdate() {
     for (const auto &testValue : {true, false}) {

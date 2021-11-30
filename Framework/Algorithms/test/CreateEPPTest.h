@@ -11,8 +11,8 @@
 #include "MantidAlgorithms/CreateEPP.h"
 
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitConversion.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CreateEPP;
 using namespace Mantid;

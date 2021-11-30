@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget import MuonAnalysisPlotWidget
+from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget import MuonAnalysisPlotWidget, FIT, RAW
+#, MODEL, DATA - commented out as they are not used in this file at present
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_widget import PlottingCanvasWidget
 
@@ -25,8 +26,6 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget
 
 # These are just used internally for ID purposes
 # the rest of the code uses the names from the models
-FIT = "fit"
-RAW = "raw"
 MAXENT = "maxent dual"
 
 

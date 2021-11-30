@@ -50,13 +50,13 @@ class ModelFittingView(BasicFittingView):
         """Update the data in the results table combo box."""
         self.model_fitting_data_selector.update_result_table_names(table_names)
 
-    def update_x_parameters(self, x_parameters: list, emit_signal: bool = False) -> None:
+    def update_x_parameters(self, x_parameters: list, x_parameter_types: list, emit_signal: bool = False) -> None:
         """Update the available X parameters."""
-        self.model_fitting_data_selector.update_x_parameters(x_parameters, emit_signal)
+        self.model_fitting_data_selector.update_x_parameters(x_parameters, x_parameter_types, emit_signal)
 
-    def update_y_parameters(self, y_parameters: list, emit_signal: bool = False) -> None:
+    def update_y_parameters(self, y_parameters: list, y_parameter_types: list, emit_signal: bool = False) -> None:
         """Update the available Y parameters."""
-        self.model_fitting_data_selector.update_y_parameters(y_parameters, emit_signal)
+        self.model_fitting_data_selector.update_y_parameters(y_parameters, y_parameter_types, emit_signal)
 
     def update_fit_function(self, fit_function: IFunction) -> None:
         """Updates the fit function shown in the view."""

@@ -58,9 +58,14 @@ inline const V3D getDirection(const V3D &posInitial, const V3D &posFinal) { retu
 
 // make code slightly clearer
 inline double getDistanceInsideObject(const IObject &shape, Track &track) {
-  shape.interceptSurface(track);
-  return track.totalDistInsideObject();
+  if (shape.interceptSurface(track) > 0) {
+    return track.totalDistInsideObject();
+  } else {
+    return 0.0;
+  }
 }
+
+inline double checkzero(const double x) { return std::abs(x) < std::numeric_limits<float>::min() ? 0.0 : x; }
 } // namespace
 
 /**
@@ -87,6 +92,10 @@ void MultipleScatteringCorrection::init() {
   auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero, "The size of one side of an integration element cube in mm");
+
+  declareProperty("ContainerElementSize", EMPTY_DBL(),
+                  "The size of one side of an integration element cube in mm for container."
+                  "Default to be the same as ElementSize.");
 
   std::vector<std::string> methodOptions{"SampleOnly", "SampleAndContainer"};
   declareProperty("Method", "SampleOnly", std::make_shared<StringListValidator>(methodOptions),
@@ -147,7 +156,7 @@ void MultipleScatteringCorrection::exec() {
     ws_sampleOnly->setYUnitLabel("Multiple Scattering Correction factor");
     //-- Fill the workspace with sample only correction factors
     const auto &sampleShape = m_inputWS->sample().getShape();
-    calculateSingleComponent(ws_sampleOnly, sampleShape);
+    calculateSingleComponent(ws_sampleOnly, sampleShape, m_sampleElementSize);
     //-- Package output to workspace group
     const std::string outWSName = getProperty("OutputWorkspace");
     std::vector<std::string> names;
@@ -176,7 +185,7 @@ void MultipleScatteringCorrection::exec() {
     ws_containerOnly->setDistribution(true); // The output of this is a distribution
     ws_containerOnly->setYUnitLabel("Multiple Scattering Correction factor");
     const auto &containerShape = m_inputWS->sample().getEnvironment().getContainer();
-    calculateSingleComponent(ws_containerOnly, containerShape);
+    calculateSingleComponent(ws_containerOnly, containerShape, m_containerElementSize);
     // 2. sample and container
     API::MatrixWorkspace_sptr ws_sampleAndContainer = create<HistoWorkspace>(*m_inputWS);
     ws_sampleAndContainer->setYUnit("");          // Need to explicitly set YUnit to nothing
@@ -226,11 +235,14 @@ void MultipleScatteringCorrection::parseInputs() {
   // -- notify the user of the bin step
   std::ostringstream msg;
   msg << "Numerical integration performed every " << m_xStep << " wavelength points";
+  g_log.information(msg.str());
   g_log.information() << msg.str();
 
   // Get the element size
-  m_elementSize = getProperty("ElementSize"); // in mm
-  m_elementSize = m_elementSize * 1e-3;       // convert to m
+  m_sampleElementSize = getProperty("ElementSize"); // in mm
+  m_sampleElementSize = m_sampleElementSize * 1e-3; // convert to m
+  m_containerElementSize = getProperty("ContainerElementSize");
+  m_containerElementSize = isDefault("ContainerElementSize") ? m_sampleElementSize : m_containerElementSize * 1e-3;
 }
 
 /**
@@ -238,14 +250,15 @@ void MultipleScatteringCorrection::parseInputs() {
  *
  * @param outws
  * @param shape
+ * @param elementSize length of cube size used to rasterize given shape
  */
 void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWorkspace_sptr &outws,
-                                                            const Geometry::IObject &shape) {
+                                                            const Geometry::IObject &shape, const double elementSize) {
   const auto material = shape.material();
   // Cache distances
   // NOTE: cannot use IObject_sprt for sample shape as the getShape() method dereferenced
   //       the shared pointer upon returning.
-  MultipleScatteringCorrectionDistGraber distGraber(shape, m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraber(shape, elementSize);
   distGraber.cacheLS1(m_beamDirection);
 
   const int64_t numVolumeElements = distGraber.m_numVolumeElements;
@@ -315,11 +328,11 @@ void MultipleScatteringCorrection::calculateSingleComponent(const API::MatrixWor
       // debug output
 #ifndef NDEBUG
       std::ostringstream msg_debug;
-      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
-                << "\trho = " << rho << ", sigma_s = " << sigma_s << "\n"
-                << "\tA1 = " << A1 << "\n"
-                << "\tA2 = " << A2 << "\n"
-                << "\tms_factor = " << output[wvBinsIndex] << "\n";
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << '\n'
+                << "\trho = " << rho << ", sigma_s = " << sigma_s << '\n'
+                << "\tA1 = " << A1 << '\n'
+                << "\tA2 = " << A2 << '\n'
+                << "\tms_factor = " << output[wvBinsIndex] << '\n';
       g_log.notice(msg_debug.str());
 #endif
 
@@ -362,9 +375,9 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
   const auto &sampleShape = sample.getShape();
   const auto &containerShape = sample.getEnvironment().getContainer();
 
-  MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraberSample(sampleShape, m_sampleElementSize);
   distGraberSample.cacheLS1(m_beamDirection);
-  MultipleScatteringCorrectionDistGraber distGraberContainer(containerShape, m_elementSize);
+  MultipleScatteringCorrectionDistGraber distGraberContainer(containerShape, m_containerElementSize);
   distGraberContainer.cacheLS1(m_beamDirection);
 
   // useful info to have
@@ -411,8 +424,8 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
       const auto idx = calcLinearIdxFromUpperTriangular(numVolumeElements, i, j);
       const auto l12 = L12_container[idx] + L12_sample[idx];
       if (l12 < 1e-9) {
-        g_log.notice() << "L12_container(" << i << "," << j << ")=" << L12_container[idx] << "\n"
-                       << "L12_sample(" << i << "," << j << ")=" << L12_sample[idx] << "\n";
+        g_log.notice() << "L12_container(" << i << "," << j << ")=" << L12_container[idx] << '\n'
+                       << "L12_sample(" << i << "," << j << ")=" << L12_sample[idx] << '\n';
       }
     }
   }
@@ -426,17 +439,17 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
 #ifndef NDEBUG
   for (size_t i = 0; i < elementVolumes.size(); ++i) {
     if (elementVolumes[i] < 1e-16) {
-      g_log.notice() << "Element_" << i << " has near zero volume: " << elementVolumes[i] << "\n";
+      g_log.notice() << "Element_" << i << " has near zero volume: " << elementVolumes[i] << '\n';
     }
   }
   g_log.notice() << "V_container = "
                  << std::accumulate(distGraberContainer.m_elementVolumes.begin(),
                                     distGraberContainer.m_elementVolumes.end(), 0.0)
-                 << "\n"
+                 << '\n'
                  << "V_sample = "
                  << std::accumulate(distGraberSample.m_elementVolumes.begin(), distGraberSample.m_elementVolumes.end(),
                                     0.0)
-                 << "\n";
+                 << '\n';
 #endif
 
   // NOTE: Unit is important
@@ -499,16 +512,16 @@ void MultipleScatteringCorrection::calculateSampleAndContainer(const API::Matrix
       // debug output
 #ifndef NDEBUG
       std::ostringstream msg_debug;
-      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << ":\n"
-                << "-containerLinearCoefAbs[wvBinsIndex] = " << -containerLinearCoefAbs[wvBinsIndex] << "\n"
-                << "-sampleLinearCoefAbs[wvBinsIndex] = " << -sampleLinearCoefAbs[wvBinsIndex] << "\n"
-                << "numVolumeElementsContainer = " << numVolumeElementsContainer << "\n"
-                << "numVolumeElements = " << numVolumeElements << "\n"
-                << "totScatterCoef_container = " << totScatterCoef_container << "\n"
-                << "totScatterCoef_sample = " << totScatterCoef_sample << "\n"
-                << "\tA1 = " << A1 << "\n"
-                << "\tA2 = " << A2 << "\n"
-                << "\tms_factor = " << output[wvBinsIndex] << "\n";
+      msg_debug << "Det_" << workspaceIndex << "@spectrum_" << wvBinsIndex << '\n'
+                << "-containerLinearCoefAbs[wvBinsIndex] = " << -containerLinearCoefAbs[wvBinsIndex] << '\n'
+                << "-sampleLinearCoefAbs[wvBinsIndex] = " << -sampleLinearCoefAbs[wvBinsIndex] << '\n'
+                << "numVolumeElementsContainer = " << numVolumeElementsContainer << '\n'
+                << "numVolumeElements = " << numVolumeElements << '\n'
+                << "totScatterCoef_container = " << totScatterCoef_container << '\n'
+                << "totScatterCoef_sample = " << totScatterCoef_sample << '\n'
+                << "\tA1 = " << A1 << '\n'
+                << "\tA2 = " << A2 << '\n'
+                << "\tms_factor = " << output[wvBinsIndex] << '\n';
       g_log.notice(msg_debug.str());
 #endif
 
@@ -598,13 +611,13 @@ void MultipleScatteringCorrection::calculateLS1s(const MultipleScatteringCorrect
 #ifndef NDEBUG
     // debug
     std::ostringstream msg_debug;
-    msg_debug << "idx=" << idx << ", pos=" << pos << ", vec=" << vec << "\n";
+    msg_debug << "idx=" << idx << ", pos=" << pos << ", vec=" << vec << '\n';
     if (idx < numVolumeElementsContainer) {
-      msg_debug << "Container element " << idx << "\n";
+      msg_debug << "Container element " << idx << '\n';
     } else {
-      msg_debug << "Sample element " << idx - numVolumeElementsContainer << "\n";
+      msg_debug << "Sample element " << idx - numVolumeElementsContainer << '\n';
     }
-    msg_debug << "LS1_container=" << LS1sContainer[idx] << ", LS1_sample=" << LS1sSample[idx] << "\n";
+    msg_debug << "LS1_container=" << LS1sContainer[idx] << ", LS1_sample=" << LS1sSample[idx] << '\n';
     g_log.notice(msg_debug.str());
 #endif
   }
@@ -654,7 +667,7 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       // getDistanceInsideObject returns the line segment inside the shape from the given ray (defined by track)
       // therefore, the distance between the two point (element) can be found by the difference of the two line
       // segments.
-      L12s[idx] = (rayLengthOne1 - rayLengthOne2);
+      L12s[idx] = checkzero(rayLengthOne1 - rayLengthOne2);
     }
 
     PARALLEL_END_INTERUPT_REGION
@@ -703,21 +716,21 @@ void MultipleScatteringCorrection::calculateL12s(const MultipleScatteringCorrect
       const V3D unitVector = getDirection(posFrom, posTo);
 
       // combined
-      track.reset(posFrom, unitVector);
       track.clearIntersectionResults();
+      track.reset(posFrom, unitVector);
       const auto rayLen1_container = getDistanceInsideObject(shapeContainer, track);
+      track.clearIntersectionResults();
       track.reset(posFrom, unitVector);
-      track.clearIntersectionResults();
       const auto rayLen1_sample = getDistanceInsideObject(shapeSample, track);
-      track.reset(posTo, unitVector);
       track.clearIntersectionResults();
+      track.reset(posTo, unitVector);
       const auto rayLen2_container = getDistanceInsideObject(shapeContainer, track);
-      track.reset(posTo, unitVector);
       track.clearIntersectionResults();
+      track.reset(posTo, unitVector);
       const auto rayLen2_sample = getDistanceInsideObject(shapeSample, track);
       //
-      L12sContainer[idx] = rayLen1_container - rayLen2_container;
-      L12sSample[idx] = rayLen1_sample - rayLen2_sample;
+      L12sContainer[idx] = checkzero(rayLen1_container - rayLen2_container);
+      L12sSample[idx] = checkzero(rayLen1_sample - rayLen2_sample);
     }
     PARALLEL_END_INTERUPT_REGION
   }
@@ -828,8 +841,11 @@ void MultipleScatteringCorrection::pairWiseSum(double &A1, double &A2,          
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(nElements, i, j)
                                : calcLinearIdxFromUpperTriangular(nElements, j, i);
         // compute a2 component
-        exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
-        a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
+        const auto l12 = L12s[idx_l12];
+        if (l12 > 0.0) {
+          exponent = (LS1s[i] + L12s[idx_l12] + L2Ds[j]) * linearCoefAbs;
+          a2 += exp(exponent) * elementVolumes[j] / (L12s[idx_l12] * L12s[idx_l12]);
+        }
       }
       A2 += a2 * elementVolumes[i];
     }
@@ -876,9 +892,11 @@ void MultipleScatteringCorrection::pairWiseSum(
         size_t idx_l12 = i < j ? calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, i, j)
                                : calcLinearIdxFromUpperTriangular(numVolumeElementsTotal, j, i);
         const double l12 = L12sContainer[idx_l12] + L12sSample[idx_l12];
-        exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
-                   (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
-        a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
+        if (l12 > 0.0) {
+          exponent = (LS1sContainer[i] + L12sContainer[idx_l12] + L2DsContainer[j]) * linearCoefAbsContainer + //
+                     (LS1sSample[i] + L12sSample[idx_l12] + L2DsSample[j]) * linearCoefAbsSample;
+          a2 += exp(exponent) * factor_j * elementVolumes[j] / (l12 * l12);
+        }
       }
       A2 += a2 * factor_i * elementVolumes[i];
     }

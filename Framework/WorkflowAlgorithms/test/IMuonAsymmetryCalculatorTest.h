@@ -10,7 +10,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidWorkflowAlgorithms/MuonGroupAsymmetryCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonGroupCountsCalculator.h"
 #include "MantidWorkflowAlgorithms/MuonPairAsymmetryCalculator.h"

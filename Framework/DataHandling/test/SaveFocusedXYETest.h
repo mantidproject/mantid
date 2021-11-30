@@ -14,9 +14,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/SaveGSS.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
@@ -79,10 +79,11 @@ public:
     }
   }
 
-  void testHistogram() {
+  void testHistogramFileNotSplit() {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
-    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(1, 3, 1.0, 1.0);
+    size_t nbins = 3;
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceBinned(2, nbins, 1.0, 1.0);
     workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     TS_ASSERT_DIFFERS(workspace, std::shared_ptr<Workspace2D>());
@@ -112,40 +113,31 @@ public:
                                                   "# Data for spectra :0",
                                                   "# Spectrum 1 ",
                                                   "# Time-of-flight              Y                 E"};
-    int bin_no(1);
     size_t lineNumber = 0;
+    int bin_no(1);
+    bool twoSpectraWritten(false);
     while (getline(filestrm, line)) {
-      lineNumber++;
       std::istringstream is(line);
-      if (lineNumber <= expectedHeader.size()) {
-        TS_ASSERT_EQUALS(is.str(), expectedHeader[lineNumber - 1]);
-        continue;
+      if (lineNumber < expectedHeader.size()) {
+        TS_ASSERT_EQUALS(is.str(), expectedHeader[lineNumber]);
+      } else if (lineNumber < expectedHeader.size() + nbins || lineNumber > expectedHeader.size() + nbins + 2) {
+        // entered the second spectrum block - note blocks are separated by 2 lines of additional header
+        if (static_cast<size_t>(bin_no) > nbins) {
+          bin_no = 1;
+          twoSpectraWritten = true;
+        }
+        double x(0.0), y(0.0), e(0.);
+        is >> x >> y >> e;
+        TS_ASSERT_DELTA(x, static_cast<double>(bin_no) + 0.5, m_tol);
+        TS_ASSERT_DELTA(y, 2.0, m_tol);
+        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
+        ++bin_no;
       }
-      double x(0.0), y(0.0), e(0.);
-      is >> x >> y >> e;
-      switch (bin_no) {
-      case 1:
-        TS_ASSERT_DELTA(x, 1.5, m_tol);
-        TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
-        break;
-      case 2:
-        TS_ASSERT_DELTA(x, 2.5, m_tol);
-        TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
-        break;
-      case 3:
-        TS_ASSERT_DELTA(x, 3.5, m_tol);
-        TS_ASSERT_DELTA(y, 2.0, m_tol);
-        TS_ASSERT_DELTA(e, M_SQRT2, m_tol);
-        break;
-      default:
-        TS_ASSERT(false);
-      }
-      ++bin_no;
+      lineNumber++;
     }
     filestrm.close();
     focusfile.remove();
+    TS_ASSERT(twoSpectraWritten)
     AnalysisDataService::Instance().remove(resultWS);
   }
 

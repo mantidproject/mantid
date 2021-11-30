@@ -12,8 +12,8 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/OrientedLatticeValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 class OrientedLatticeValidatorTest : public CxxTest::TestSuite {
 public:

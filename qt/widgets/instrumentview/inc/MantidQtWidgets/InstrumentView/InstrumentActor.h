@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
 
+#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/IComponent.h"
@@ -106,6 +107,8 @@ public:
   /// Remove the bin masking data.
   void clearMasks();
 
+  bool isInitialized() const { return m_initialized; }
+
   /// Get the color map.
   const ColorMap &getColorMap() const;
   /// Load a new color map from a file
@@ -156,7 +159,7 @@ public:
   size_t getDetectorByDetID(Mantid::detid_t detID) const;
   /// Get a detector ID by a pick ID converted form a color in the pick image.
   Mantid::detid_t getDetID(size_t pickID) const;
-  QList<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
+  std::vector<Mantid::detid_t> getDetIDs(const std::vector<size_t> &dets) const;
   /// Get a component ID for a non-detector.
   Mantid::Geometry::ComponentID getComponentID(size_t pickID) const;
   /// Get position of a detector by a pick ID converted form a color in the pick
@@ -168,6 +171,8 @@ public:
   GLColor getColor(size_t index) const;
   /// Get the workspace index of a detector by its detector Index.
   size_t getWorkspaceIndex(size_t index) const;
+  /// Get the workspace indices of a list of detectors by their detector Index
+  std::vector<size_t> getWorkspaceIndices(const std::vector<size_t> &dets) const;
   /// Get the integrated counts of a detector by its detector Index.
   double getIntegratedCounts(size_t index) const;
   /// Sum the counts in detectors
@@ -216,6 +221,12 @@ public:
 
 signals:
   void colorMapChanged() const;
+  void refreshView() const;
+  void initWidget(bool resetGeometry, bool setDefaultView) const;
+
+public slots:
+  void initialize(bool resetGeometry, bool setDefaultView);
+  void cancel();
 
 private:
   static constexpr double TOLERANCE = 0.00001;
@@ -271,6 +282,10 @@ private:
   /// Stores the number of grid Layers
   size_t m_numGridLayers;
 
+  bool m_initialized;
+  double m_scaleMin;
+  double m_scaleMax;
+
   /// Colors in order of component info
   std::vector<size_t> m_monitors;
   std::vector<size_t> m_components;
@@ -283,8 +298,11 @@ private:
   std::unique_ptr<InstrumentRenderer> m_renderer;
   MantidWidgets::IMessageHandler &m_messageHandler;
 
+  mutable Mantid::API::AlgorithmID m_algID;
+
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
+  friend class InstrumentWidgetRenderTab;
 };
 
 } // namespace MantidWidgets

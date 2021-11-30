@@ -10,8 +10,11 @@
 import unittest
 
 from qtpy.QtWidgets import QStatusBar
+from qtpy.QtCore import QItemSelectionModel
 
 from unittest.mock import Mock, patch
+from mantid.simpleapi import CreateSampleWorkspace
+from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.utils.testing.mocks.mock_matrixworkspacedisplay import MockMatrixWorkspaceDisplayView
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex, MockQTableView
@@ -34,6 +37,7 @@ def with_mock_presenter(func):
     return wrapper
 
 
+@start_qapplication
 class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     show_mouse_toast_package = 'mantidqt.widgets.workspacedisplay.user_notifier.UserNotifier.show_mouse_toast'
     copy_to_clipboard_package = 'mantidqt.widgets.workspacedisplay.data_copier.DataCopier.copy_to_clipboard'
@@ -155,6 +159,33 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
         self.assertEqual(1, mock_copy.call_count)
         self.assertEqual(9, mock_model.createIndex.call_count)
         mock_show_mouse_toast.assert_called_once_with(MatrixWorkspaceDisplay.COPY_SUCCESSFUL_MESSAGE)
+
+    def _mock_clipboard(self, clip):
+        """Used to replace the clipboard call when copying data, but retain the data in mock_clip"""
+        self.mock_clip = clip
+
+    def test_copy_cells(self):
+        """Check that the data copied from cells is correct."""
+        ws = CreateSampleWorkspace()
+        table = MatrixWorkspaceDisplay(ws)
+        # Mock the copy_to_clipboard function with a side_effect that stores the clipboard content in a member variable.
+        table.copy_to_clipboard = Mock(side_effect=self._mock_clipboard)
+        # First tab is y values.
+        current_table = table.view.tabs[0]
+        selection = current_table.selectionModel()
+
+        histogram_index = 0
+        y_index = 0
+
+        model_index = current_table.model().createIndex(histogram_index, y_index)
+        selection.select(model_index, QItemSelectionModel.ClearAndSelect)
+
+        # Call copy_cells top copy the currently selected cell.
+        table.copy_cells(current_table)
+
+        # Value should be the same as that taken from the workspace.
+        y_from_ws = ws.readY(histogram_index)[y_index]
+        self.assertEqual(str(y_from_ws), self.mock_clip)
 
     @patch(show_mouse_toast_package)
     @patch(copy_to_clipboard_package)

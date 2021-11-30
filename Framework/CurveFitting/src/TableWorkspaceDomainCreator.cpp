@@ -334,7 +334,7 @@ std::shared_ptr<API::Workspace> TableWorkspaceDomainCreator::createOutputWorkspa
   }
 
   // Set the difference spectrum
-  auto &Ycal = ws->mutableY(1);
+  const auto &Ycal = ws->y(1);
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {

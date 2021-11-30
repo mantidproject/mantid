@@ -2,10 +2,8 @@
 
 set(MODULE_TEMPLATE src/kernel.cpp.in)
 
-# Files containing export definitions, these are automatically processed -- Do
-# NOT sort this list. The order defines the order in which the export
-# definitions occur and some depend on their base classes being exported first
-# --
+# Files containing export definitions, these are automatically processed -- Do NOT sort this list. The order defines the
+# order in which the export definitions occur and some depend on their base classes being exported first --
 set(EXPORT_FILES
     src/Exports/ConfigService.cpp
     src/Exports/ConfigObserver.cpp
@@ -40,6 +38,7 @@ set(EXPORT_FILES
     src/Exports/ArrayBoundedValidator.cpp
     src/Exports/ArrayOrderedPairsValidator.cpp
     src/Exports/MandatoryValidator.cpp
+    src/Exports/MantidVersion.cpp
     src/Exports/CompositeValidator.cpp
     src/Exports/LogFilter.cpp
     src/Exports/UnitConversion.cpp
@@ -72,8 +71,7 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
 set(SRC_FILES
     src/Registry/MappingTypeHandler.cpp src/Registry/PropertyManagerFactory.cpp
-    src/Registry/PropertyWithValueFactory.cpp
-    src/Registry/SequenceTypeHandler.cpp src/Registry/TypeRegistry.cpp
+    src/Registry/PropertyWithValueFactory.cpp src/Registry/SequenceTypeHandler.cpp src/Registry/TypeRegistry.cpp
 )
 
 set(INC_FILES
@@ -101,15 +99,9 @@ else()
 endif()
 
 # Build version
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py
-)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py)
 
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py
-)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py)
 
 # Package version
 if(WIN32)
@@ -118,47 +110,36 @@ if(WIN32)
   set(NEXUSLIB ../../${NEXUSLIB_FILE})
 endif()
 configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in
-  ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
+  ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
 )
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in
-  ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py
-)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${MPISETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${MPISETUP_PY}.install.py)
 
 # Add a precompiled header where they are supported
-list (APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
+list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/kernel/Registry/PrecompiledHeader.h ALL_FILES)
 
 # Create the target for this directory
-add_library(
-  PythonKernelModule ${ALL_FILES} ${MODULE_DEFINITION}
-                     ${INC_FILES} ${PYTHON_INSTALL_FILES}
-)
+add_library(PythonKernelModule ${ALL_FILES} ${MODULE_DEFINITION} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 add_library(Mantid::PythonKernelModule ALIAS PythonKernelModule)
 
 set_python_properties(PythonKernelModule _kernel)
 
-target_include_directories(PythonKernelModule PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
-
+target_include_directories(
+  PythonKernelModule PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Add the required dependencies
-target_link_libraries(PythonKernelModule
-          PUBLIC Mantid::Kernel
-          PRIVATE
-          Mantid::PythonInterfaceCore
-          ${PYTHON_DEPS}
+target_link_libraries(
+  PythonKernelModule
+  PUBLIC Mantid::Kernel
+  PRIVATE Mantid::PythonInterfaceCore ${PYTHON_DEPS}
 )
 
 # Installation settings
 set_target_properties(PythonKernelModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 
 mtd_install_targets(
-  TARGETS PythonKernelModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/kernel
-  ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
+  TARGETS PythonKernelModule INSTALL_DIRS ${SITE_PACKAGES}/mantid/kernel ${WORKBENCH_SITE_PACKAGES}/mantid/kernel
 )
 
 # packagesetup.py that will overwrite the ones from the built target

@@ -245,6 +245,20 @@ class MainWindowTest(unittest.TestCase):
         mock_project.offer_save.assert_called()
         mock_event.ignore.assert_called()
 
+    @patch('workbench.app.mainwindow.QApplication')
+    def test_main_window_does_not_close_if_gui_ignores_event(self, mock_q_app):
+        mock_event = Mock()
+        mock_window = Mock()
+        mock_window.close = Mock(return_value=False)  # Close event was ignored (user cancelled)
+        mock_app = Mock()
+        mock_q_app.instance = Mock(return_value=mock_app)
+        mock_app.topLevelWindows = Mock(return_value=[mock_window])
+
+        self.main_window.closeEvent(mock_event)
+
+        mock_window.close.assert_called()
+        mock_event.ignore.assert_called()
+
     @patch('workbench.app.mainwindow.ConfigService')
     @patch('workbench.app.mainwindow.QApplication')
     @patch('matplotlib.pyplot.close')

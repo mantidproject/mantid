@@ -12,13 +12,13 @@
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidFrameworkTestHelpers/BoxControllerDummyIO.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidTestHelpers/BoxControllerDummyIO.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <map>

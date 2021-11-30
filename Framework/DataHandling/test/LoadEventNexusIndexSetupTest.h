@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"

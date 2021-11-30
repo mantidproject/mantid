@@ -12,10 +12,10 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <array>
 #include <cxxtest/TestSuite.h>
 

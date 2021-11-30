@@ -8,13 +8,13 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Instrument/InstrumentVisitor.h"
 #include "MantidKernel//EigenConversionHelpers.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <algorithm>
 #include <memory>
 

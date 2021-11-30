@@ -7,8 +7,9 @@
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
 from mantid.simpleapi import CopyLogs, EvaluateFunction
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (check_phasequad_name, create_covariance_matrix_name,
                                                                             create_fitted_workspace_name, create_parameter_table_name,
                                                                             get_diff_asymmetry_name, get_group_asymmetry_name,
@@ -174,6 +175,18 @@ class BasicFittingModel:
         """Sets the value of the currently selected end X."""
         if value > self.current_start_x:
             self.fitting_context.end_xs[self.fitting_context.current_dataset_index] = value
+
+    def set_current_start_and_end_x(self, start_x, end_x):
+        """Need to set these together because of the checks
+        to make sure that start < end"""
+        if start_x > end_x:
+            return
+        elif start_x > self.current_end_x:
+            self.current_end_x = end_x
+            self.current_start_x = start_x
+        else:
+            self.current_start_x = start_x
+            self.current_end_x = end_x
 
     @property
     def exclude_range(self) -> bool:
@@ -686,6 +699,12 @@ class BasicFittingModel:
         second_pulse_weighting = 1 / (1 + decay)
         return first_pulse_weighting, second_pulse_weighting
 
+    def _add_workspaces_to_group(self, ws_names, group_name):
+        if check_if_workspace_exist(group_name):
+            add_list_to_group(ws_names, retrieve_ws(group_name))
+        else:
+            make_group(ws_names, group_name)
+
     def _add_single_fit_results_to_ADS_and_context(self, input_workspace_name: str, parameters_table, output_workspace,
                                                    covariance_matrix) -> None:
         """Adds the results of a single fit to the ADS and context."""
@@ -703,6 +722,7 @@ class BasicFittingModel:
         parameter_workspace_wrap = StaticWorkspaceWrapper(parameter_table_name, retrieve_ws(parameter_table_name))
         covariance_workspace_wrap = StaticWorkspaceWrapper(covariance_matrix_name, retrieve_ws(covariance_matrix_name))
 
+        self._add_workspaces_to_group([output_workspace_name, parameter_table_name, covariance_matrix_name], directory[:-1])
         self._add_fit_to_context([input_workspace_name], [output_workspace_wrap], parameter_workspace_wrap,
                                  covariance_workspace_wrap)
 

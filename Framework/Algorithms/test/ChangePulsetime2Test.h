@@ -12,7 +12,7 @@
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAlgorithms/ChangePulsetime2.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

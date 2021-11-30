@@ -13,7 +13,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractUnmaskedSpectra.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <algorithm>
 

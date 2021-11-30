@@ -8,8 +8,8 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAlgorithms/RadiusSum.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "RingProfileTest.h"
 #include <cxxtest/TestSuite.h>
 #include <memory>

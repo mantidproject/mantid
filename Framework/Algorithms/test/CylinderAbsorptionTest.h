@@ -11,10 +11,10 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidDataHandling/SetSample.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::API::MatrixWorkspace_sptr;
 

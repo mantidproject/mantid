@@ -11,7 +11,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "PropertyManagerHelper.h"
 
 using namespace Mantid::DataObjects;

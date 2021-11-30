@@ -40,6 +40,44 @@ class PlottingCanvasModelTest(unittest.TestCase):
         self.model.create_plot_information.assert_any_call(test_ws_names[0], test_indies[0], axis, False)
         self.model.create_plot_information.assert_any_call(test_ws_names[1], test_indies[1], axis, False)
 
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model.retrieve_ws')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model.run_convert_to_points')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model.run_convert_to_histogram')
+    def test_get_shade_lines_hist_data(self, hist_mock, point_mock,ws_mock):
+        ws = mock.Mock()
+        ws.isHistogramData = mock.Mock(return_value=True)
+        ws_mock.return_value = ws
+        name = "unit"
+        axis = 2
+        point_mock.return_value = "test"
+        self.model._plot_model.get_shade_lines = mock.Mock(return_value=(1,2,3))
+
+        self.assertEqual(self.model.get_shade_lines(name, axis), (1,2,3))
+        point_mock.assert_called_once_with(name)
+        ws_mock.assert_any_call("test")
+        self.assertEqual(ws_mock.call_count, 2)
+        self.model._plot_model.get_shade_lines.assert_called_once_with(ws, axis)
+        hist_mock.assert_called_once_with("unit")
+
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model.retrieve_ws')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model.run_convert_to_points')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_model.run_convert_to_histogram')
+    def test_get_shade_lines_points_data(self, hist_mock, point_mock,ws_mock):
+        ws = mock.Mock()
+        ws.isHistogramData = mock.Mock(return_value=False)
+        ws_mock.return_value = ws
+        name = "unit"
+        axis = 2
+        point_mock.return_value = "test"
+        self.model._plot_model.get_shade_lines = mock.Mock(return_value=(1,2,3))
+
+        self.assertEqual(self.model.get_shade_lines(name, axis), (1,2,3))
+        point_mock.assert_not_called()
+        ws_mock.assert_any_call("unit")
+        self.assertEqual(ws_mock.call_count, 1)
+        self.model._plot_model.get_shade_lines.assert_called_once_with(ws, axis)
+        hist_mock.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -2,9 +2,7 @@ set(TEST_PY_FILES PyChopTest.py)
 
 if(ENABLE_WORKBENCH)
   set(PYUNITTEST_QT_API pyqt5) # force to use qt5
-  pyunittest_add_test(
-    ${CMAKE_CURRENT_SOURCE_DIR} python.scripts ${TEST_PY_FILES}
-  )
+  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.scripts ${TEST_PY_FILES})
   unset(PYUNITTEST_QT_API)
 endif()
 

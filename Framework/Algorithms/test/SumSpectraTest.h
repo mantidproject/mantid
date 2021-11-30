@@ -10,8 +10,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>

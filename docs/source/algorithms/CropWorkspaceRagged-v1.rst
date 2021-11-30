@@ -76,9 +76,9 @@ Output:
 
 .. testoutput:: RaggedWorkFlow
 
-    y values: 0.6285
-    y values: 0.6237
-    y values: 0.6486
+    y values: 0.6287
+    y values: 0.6235
+    y values: 0.6487
 
 .. categories::
 

@@ -4,108 +4,244 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string
+from Engineering.common import path_handling
+from mantid.api import AnalysisDataService as ADS
+from os import path
+from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
+from mantid.kernel import logger
+
+GROUP_XML_DIR = path.join(path.abspath(path.join(__file__, path.sep.join(5*['..']))), "calib")
+
+GROUP_FILES = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
+               GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
+GROUP_BANK_ARGS = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
+GROUP_DESCRIPTIONS = {GROUP.BOTH: "North and South Banks", GROUP.NORTH: "North Bank",
+                      GROUP.SOUTH: "South Bank", GROUP.CROPPED: "Custom spectrum numbers",
+                      GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE: "Texture"}
+GROUP_WS_NAMES = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthBank_grouping",
+                  GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
+                  GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture_grouping"}
+GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
+                GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}  # prm suffix
+GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
+                       GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
 
 
-class CalibrationInfo(object):
-    """
-    Keeps track of the parameters that went into a calibration created by the engineering diffraction GUI.
-    """
-    def __init__(self, sample_path=None, instrument=None, grouping_ws=None, roi_text: str = ""):
-        self.sample_path = sample_path
+class CalibrationInfo:
+    def __init__(self, group=None, instrument=None, ceria_path=None):
+        self.group = group
         self.instrument = instrument
-        self.grouping_ws_name = grouping_ws
-        self.roi_text = roi_text
-        self.bank = None
+        self.ceria_path = ceria_path
+        self.group_ws = None
+        self.prm_filepath = None
+        self.cal_filepath = None
+        self.spectra_list = None
+        self.calibration_table = None
 
-    def set_calibration(self, sample_path, instrument):
-        """
-        Set the values of the calibration
-        :param sample_path: Path to the sample data file used.
-        :param instrument: String defining the instrument the data came from.
-        """
-        self.sample_path = sample_path
-        self.instrument = instrument
+    def clear(self):
+        self.group = None
+        self.group_ws = None
+        self.prm_filepath = None
+        self.cal_filepath = None
+        self.spectra_list = None
+        self.ceria_path = None
+        self.instrument = None
+        self.calibration_table = None
 
-    def set_roi_info_load(self, banks: list, grp_ws: str, roi_text: str) -> None:
-        """
-        Set the region of interest fields, used in the event that a calibration is being loaded rather than created
-        :param banks: list of banks defining chosen roi, None if Custom or Cropped region
-        :param grp_ws: Name of the grouping workspace
-        :param roi_text: Text to signify this region of interest to be displayed on the Focus tab
-        """
-        self.grouping_ws_name = grp_ws
-        self.roi_text = roi_text
-        self.bank = banks
+    # getters
+    def get_foc_ws_suffix(self):
+        if self.group:
+            return GROUP_FOC_WS_SUFFIX[self.group]
 
-    def set_roi_info(self, bank: str = None, calfile: str = None, spec_nos=None) -> None:
-        """
-        Set the region of interest fields using the inputs to the calibration that has just been run
-        :param bank: Single string bank to identify North (1) or South (2) bank. If None & all other params are None,
-        signifies that both banks are to be treated as a region of interest
-        :param calfile: Custom calfile that can be used to define a region of interest. Can be None
-        :param spec_nos: Custom spectrum number list that can be used to define a region of interest. Can be None
-        """
-        if bank == '1':
-            self.grouping_ws_name = "NorthBank_grouping"
-            self.bank = ['1']
-            self.roi_text = "North Bank"
-        elif bank == '2':
-            self.grouping_ws_name = "SouthBank_grouping"
-            self.roi_text = "South Bank"
-            self.bank = ['2']
-        elif calfile:
-            self.grouping_ws_name = "Custom_calfile_grouping"
-            self.roi_text = "Custom CalFile"
-            self.bank = None
-        elif spec_nos:
-            self.grouping_ws_name = "Custom_spectra_grouping"
-            self.roi_text = "Custom spectra cropping"
-            self.bank = None
-        elif bank is None:
-            self.grouping_ws_name = None
-            self.roi_text = "North and South Banks"
-            self.bank = ['1', '2']
+    def get_group_suffix(self):
+        if self.group:
+            return GROUP_SUFFIX[self.group]
 
-    def create_focus_roi_dictionary(self) -> dict:
-        """
-        With the stored region of interest data, create a dictionary for use in the focussing workflow to define the
-        regions to focus and their corresponding grouping workspace
-        :return: dict mapping region_name -> grp_ws_name
-        """
-        regions = dict()
-        if self.bank:
-            # focus over one or both banks
-            for bank in self.bank:
-                if bank == '1':
-                    roi = "bank_1"
-                    grp_ws = "NorthBank_grouping"
-                elif bank == '2':
-                    roi = "bank_2"
-                    grp_ws = "SouthBank_grouping"
-                else:
-                    raise ValueError
-                regions[roi] = grp_ws
-        elif self.grouping_ws_name:
-            if "calfile" in self.grouping_ws_name:
-                regions["Custom"] = self.grouping_ws_name
-            elif "spectra" in self.grouping_ws_name:
-                regions["Cropped"] = self.grouping_ws_name
-        else:
-            raise ValueError("CalibrationInfo object contains no region-of-interest data")
-        return regions
+    def get_group_description(self):
+        if self.group:
+            return GROUP_DESCRIPTIONS[self.group]
 
-    def get_roi_text(self):
-        return self.roi_text
+    def get_group_file(self):
+        if self.group:
+            return GROUP_FILES[self.group]
 
-    def get_sample(self):
-        return self.sample_path
+    def get_calibration_table(self):
+        return self.calibration_table
+
+    def get_ceria_path(self):
+        return self.ceria_path
+
+    def get_ceria_runno(self):
+        if self.ceria_path and self.instrument:
+            return path_handling.get_run_number_from_path(self.ceria_path, self.instrument)
 
     def get_instrument(self):
         return self.instrument
 
-    def clear(self):
-        self.sample_path = None
-        self.instrument = None
+    def get_prm_filepath(self):
+        return self.prm_filepath
+
+    # setters
+    def set_prm_filepath(self, prm_filepath):
+        self.prm_filepath = prm_filepath
+
+    def set_calibration_table(self, cal_table):
+        self.calibration_table = cal_table
+
+    def set_calibration_paths(self, instrument, ceria_path):
+        self.ceria_path = ceria_path
+        self.instrument = instrument
+
+    def set_calibration_from_prm_fname(self, file_path):
+        """
+        Determine the ROI, instrument and ceria run from the .prm calibration file that is being loaded
+        :param file_path: Path of the .prm file being loaded
+        """
+        basepath, fname = path.split(file_path)
+        # fname has form INSTRUMENT_ceriaRunNo_BANKS
+        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture"
+        fname_words = fname.split('_')
+        suffix = fname_words[-1].split('.')[0]  # take last element and remove extension
+        if any(grp.value == suffix for grp in GROUP):
+            self.group = GROUP(suffix)
+            self.prm_filepath = file_path
+        else:
+            raise ValueError("Group not set: region of interest not recognised from .prm file name")
+        self.set_calibration_paths(*fname_words[0:2])
+
+    def set_spectra_list(self, spectra_list_str):
+        self.spectra_list = create_spectrum_list_from_string(spectra_list_str)
+
+    def set_cal_file(self, cal_filepath):
+        self.cal_filepath = cal_filepath
+
+    def set_group(self, group):
+        self.group = group
+
+    # functional
+    def load_relevant_calibration_files(self, output_prefix="engggui"):
+        """
+        Load calibration table ws output from second step of calibration (PDCalibration of ROI focused spectra)
+        :param output_prefix: prefix for workspace
+        """
+        filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
+        self.calibration_table = output_prefix + "_calibration_" + self.get_group_suffix()
+
+        try:
+            Load(Filename=filepath, OutputWorkspace=self.calibration_table)
+        except Exception as e:
+            logger.error("Unable to load calibration file " + filepath + ". Error: " + str(e))
+
+        # load in custom grouping - checks if applicable inside method
+        if not self.group.banks:
+            self.load_custom_grouping_workspace()
+        else:
+            self.get_group_ws()  # creates group workspace
+
+    def load_custom_grouping_workspace(self) -> None:
+        """
+        Load a custom grouping workspace saved post calibration (e.g. when user supplied custom spectra numbers or .cal)
+        """
+        if not self.group.banks:
+            # no need to load grp ws for bank grouping
+            ws_name = GROUP_WS_NAMES[self.group]
+            grouping_filepath = path.splitext(self.prm_filepath)[0] + ".xml"
+            self.group_ws = LoadDetectorsGroupingFile(InputFile=grouping_filepath, OutputWorkspace=ws_name)
+
+    def save_grouping_workspace(self, directory: str) -> None:
+        """
+        Save grouping workspace created for custom spectra or .cal cropping.
+        :param directory: directory in which to save grouping workspace
+        """
+        if self.group and not self.group.banks:
+            filename = self.generate_output_file_name(ext='.xml')
+            SaveDetectorsGrouping(InputWorkspace=self.group_ws, OutputFile=path.join(directory, filename))
+        else:
+            logger.warning("Only save grouping workspace for custom or cropped groupings.")
+        return
+
+    def generate_output_file_name(self, group=None, ext='.prm'):
+        """
+        Generate an output filename in the form INSTRUMENT_ceriaRunNo_BANKS
+        :param ext: Extension to be used on the saved file
+        :param group: group to use instead of that stored in self.group (e.g. North and South bank only)
+        :return: filename
+        """
+        if not group:
+            suffix = self.get_group_suffix()
+        else:
+            suffix = GROUP_SUFFIX[group]
+        return "_".join([self.instrument, self.get_ceria_runno(), suffix]) + ext
+
+    def get_subplot_title(self, ispec):
+        """
+        :param ispec: spectrum index for which the calibration results (TOF vs d) are being plotted
+        :return: string to use as subplot title in plot generated in calibration tab
+        """
+        if self.group in [GROUP.NORTH, GROUP.SOUTH, GROUP.CUSTOM, GROUP.CROPPED]:
+            return self.get_group_description()
+        elif self.group == GROUP.BOTH:
+            return GROUP_DESCRIPTIONS[GROUP.NORTH] if ispec == 0 else GROUP_DESCRIPTIONS[GROUP.SOUTH]
+        else:
+            return f"{self.get_group_description()} spec: {ispec}"  # texture
+
+    def get_group_ws(self):
+        """
+        Returns grouping workspace for ROI (creates if not present)
+        :return: group workspace
+        """
+        if not self.group_ws or not ADS.doesExist(self.group_ws.name()):
+            if self.group.banks:
+                self.create_bank_grouping_workspace()
+            elif self.group == GROUP.CROPPED:
+                self.create_grouping_workspace_from_spectra_list()
+            elif self.group == GROUP.CUSTOM:
+                self.create_grouping_workspace_from_calfile()
+        return self.group_ws
+
+    def create_bank_grouping_workspace(self):
+        """
+        Create grouping workspace for ROI corresponding to one or more banks
+        """
+        ws_name = GROUP_WS_NAMES[self.group]
+        grp_ws = None
+        try:
+            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(GROUP_XML_DIR, GROUP_FILES[self.group]),
+                                               OutputWorkspace=ws_name)
+        except ValueError:
+            logger.notice("Grouping file not found in user directories - creating one")
+            if self.group.banks and self.group != GROUP.TEXTURE:
+                grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=ws_name,
+                                                       GroupNames=GROUP_BANK_ARGS[self.group])
+        if grp_ws:
+            self.group_ws = grp_ws
+        else:
+            raise ValueError("Could not find or create grouping requested - make sure the directory of the grouping.xml"
+                             " files is on the path")
+
+    def create_grouping_workspace_from_calfile(self):
+        """
+        Create grouping workspace for ROI defined in .cal file
+        """
+        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OldCalFilename=self.cal_filepath,
+                                               OutputWorkspace=GROUP_WS_NAMES[self.group])
+        self.group_ws = grp_ws
+
+    def create_grouping_workspace_from_spectra_list(self):
+        """
+        Create grouping workspace for ROI defined as a list of spectrum numbers
+        """
+        grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument,
+                                               OutputWorkspace=GROUP_WS_NAMES[self.group])
+        for spec in self.spectra_list:
+            det_ids = grp_ws.getDetectorIDs(spec - 1)
+            grp_ws.setValue(det_ids[0], 1)
+        self.group_ws = grp_ws
 
     def is_valid(self):
-        return True if self.sample_path and self.instrument else False
+        """
+        :return: bool for if CalibrationInfo object can be used for focusing
+        """
+        return self.ceria_path is not None and self.instrument is not None and self.calibration_table is not None \
+               and self.group_ws is not None and self.calibration_table in ADS and self.group_ws in ADS

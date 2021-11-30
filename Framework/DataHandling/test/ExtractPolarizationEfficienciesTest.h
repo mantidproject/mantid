@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidHistogramData/Counts.h"
@@ -20,7 +21,6 @@
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;

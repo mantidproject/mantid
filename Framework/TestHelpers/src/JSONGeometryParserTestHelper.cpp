@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/JSONGeometryParserTestHelper.h"
+#include "MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h"
 #include "json/json.h"
 #include <iostream>
 #include <numeric>
@@ -170,7 +170,7 @@ void addStream(Json::Value &parent, const std::string &name, const std::string &
 }
 } // namespace
 
-namespace Mantid::TestHelpers {
+namespace Mantid::FrameworkTestHelpers {
 namespace JSONTestInstrumentBuilder {
 
 void initialiseRoot(Json::Value &root, const std::string &name) { root[name]; }
@@ -855,4 +855,4 @@ std::string getFullJSONInstrumentSimpleWithZPixelOffset() {
   return JSONTestInstrumentBuilder::convertToString(root);
 }
 
-} // namespace Mantid::TestHelpers
+} // namespace Mantid::FrameworkTestHelpers

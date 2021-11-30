@@ -60,18 +60,19 @@ single workspace. To use the examples below, make sure to add ``TrainingCourseDa
 :ref:`ManageUserDirectories <getting_started>`. Next, click "Load" at the top of the Workspaces Toolbox and in the new Load Dialog
 use these example inputs with symbols for the ``File`` input:
 
-+-----------+--------------------------------------------------------+--------------------+
-| Usage     | Description                                            | Example            |
-+===========+========================================================+====================+
-| Input     | Result                                                 |                    |
-+-----------+--------------------------------------------------------+--------------------+
-| \ ``,``\  | Load a list of runs into a Group of Workspaces         | ``MAR11060,11015`` |
-+-----------+--------------------------------------------------------+--------------------+
-| \ ``+``\  | Sum a list of runs into one Workspace.                 | ``LOQ74014+74020`` |
-+-----------+--------------------------------------------------------+--------------------+
-| \ ``:``\  | Load a range of runs into a Group of Workspaces        | ``LOQ74019:74020`` |
-+-----------+--------------------------------------------------------+--------------------+
-| \ ``-``\  | Sum a range of runs into one Workspace.                | ``LOQ74019-74020`` |
-+-----------+--------------------------------------------------------+--------------------+
++-----------+--------------------------------------------------------+----------------------+
+| Usage     | Description                                            | Example              |
++===========+========================================================+======================+
+| Input     | Result                                                 |                      |
++-----------+--------------------------------------------------------+----------------------+
+| \ ``,``\  | Load a list of runs into a Group of Workspaces         |  ``MAR11060,11015``  |
++-----------+--------------------------------------------------------+----------------------+
+| \ ``+``\  | Sum a list of runs into one Workspace.                 |  ``LOQ74014+74020``  |
++-----------+--------------------------------------------------------+----------------------+
+| \ ``:``\  | Load a range of runs into a Group of Workspaces        |  ``LOQ74019:74020``  |
++-----------+--------------------------------------------------------+----------------------+
+| \ ``-``\  | Sum a range of runs into one Workspace.                | ``LOQ74019-74020`` * |
++-----------+--------------------------------------------------------+----------------------+
 
-For the last example, you may see an error, which correctly mentions that only data files with the same structure (number of spectra), should be summed.
+\* As these files have different numbers of spectra, you will see the error ``Left and right sides should contain the same amount of spectra....``
+For this example please load ``LOQ74019-74020`` with the parameter ``SpectrumMax = 8``.

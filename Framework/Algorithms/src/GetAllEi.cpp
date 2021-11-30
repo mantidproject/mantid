@@ -680,8 +680,8 @@ namespace { // for lambda extracted from findBinRanges
 void getBinRange(const HistogramData::HistogramX &eBins, double eMin, double eMax, size_t &index_min,
                  size_t &index_max) {
 
-  auto &bins = eBins.rawData();
-  size_t nBins = bins.size();
+  const auto &bins = eBins.rawData();
+  const size_t nBins = bins.size();
   if (eMin <= bins[0]) {
     index_min = 0;
   } else {

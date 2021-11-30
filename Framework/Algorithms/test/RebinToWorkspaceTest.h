@@ -10,7 +10,7 @@
 // Includes
 //--------------------
 #include "MantidAlgorithms/RebinToWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include <numeric>

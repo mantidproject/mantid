@@ -8,14 +8,14 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/XrayAbsorptionCorrection.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <math.h>
 #include <string>

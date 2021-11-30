@@ -11,7 +11,11 @@ Description
 
 Calculates the multiple scattering contribution for deep inelastic neutron scattering on
 the `Vesuvio <http://www.isis.stfc.ac.uk/instruments/vesuvio/vesuvio4837.html>`__ instrument at
-ISIS. The algorithm follows the procedures defined by J. Mayers et al. [1]_.
+ISIS. The algorithm follows the procedures defined by J. Mayers et al. [1]_. To improve the
+speed of the calculation, OpenMP was used for the calculation of scattering contributions per
+spectrum. Users are recommended to use the user properties file :ref:`properties file <Properties File>`,
+``Mantid.user.properties``, to set the parameter ``MultiThreaded.MaxCores`` to 0 for a better utilisation of
+available cores.
 
 
 Usage

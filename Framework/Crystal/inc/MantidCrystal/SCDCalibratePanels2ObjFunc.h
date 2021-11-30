@@ -54,6 +54,10 @@ private:
   Mantid::API::IPeaksWorkspace_sptr rotateInstrumentComponentBy(double rotX, double rotY, double rotZ,
                                                                 const std::string &componentName,
                                                                 Mantid::API::IPeaksWorkspace_sptr &pws) const;
+
+  Mantid::API::IPeaksWorkspace_sptr scaleRectagularDetectorSize(const double &scalex, const double &scaley,
+                                                                const std::string &componentName,
+                                                                Mantid::API::IPeaksWorkspace_sptr &pws) const;
 };
 
 } // namespace Crystal

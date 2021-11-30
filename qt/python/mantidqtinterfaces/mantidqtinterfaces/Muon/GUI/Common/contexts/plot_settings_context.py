@@ -21,6 +21,7 @@ class PlotSettingsContext(object):
         self._wrap_width = 30# determines the width of text on axis ticks
         self._font_size = "xx-small"
         self._rotation = 45 # degrees
+        self._sci_notation = False
 
     def set_condensed(self, state):
         self._is_condensed = state
@@ -68,6 +69,10 @@ class PlotSettingsContext(object):
     def x_axis_margin(self):
         # stored as a percentage, but return decimal
         return self._x_axis_margin/100.
+
+    @property
+    def sci_notation(self):
+        return self._sci_notation
 
     def set_linestyle(self, name, linestyle):
         self._linestyle[name] = linestyle

@@ -93,19 +93,72 @@ For the data types above:
 ##############
 
 - Change the axes that are displayed by selecting the relevant ``X`` and ``Y`` axes in the top left. This is more interesting for higher dimension data.
-- For the ``SXD_MD_nonortho`` workspace, the non-orthogonal view button (see below) should be enabled - clicking this should also turn on grid lines. When viewing the H and K axes you should see the gridlines are no longer perpendicular to each other.
+
+4. Non-orthogonal view
+######################
+
+A. For the ``SXD_MD_nonortho`` workspace, the non-orthogonal view button (see below) should be enabled - clicking this should also turn on grid lines. When viewing the H and K axes you should see the gridlines are no longer perpendicular to each other.
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-nonorthobutton.png
    :class: screenshot
    :align: center
 
-4. Cursor Tracking
+B. This tests that the sliceviewer gets the correct basis vectors for an ``MDHisto`` object from a non-axis aligned cut.
+
+.. code-block:: python
+
+    ws = CreateMDWorkspace(Dimensions='3', Extents='-3,3,-3,3,-3,3',
+                       Names='H,K,L', Units='r.l.u.,r.l.u.,r.l.u.',
+                       Frames='HKL,HKL,HKL',
+                       SplitInto='2', SplitThreshold='10')
+    expt_info = CreateSampleWorkspace()
+    ws.addExperimentInfo(expt_info)
+    SetUB(ws, 1,1,2,90,90,120)
+    BinMD(InputWorkspace=ws, AxisAligned=False,
+        BasisVector0='[00L],r.l.u.,0,0,1',
+        BasisVector1='[HH0],r.l.u.,1,1,0',
+        BasisVector2='[-HH0],r.l.u.,-1,1,0',
+        OutputExtents='-4,4,-4,4,-0.25,0.25',
+        OutputBins='101,101,1', OutputWorkspace='ws_slice', NormalizeBasisVectors=False)
+
+- Run the above code and open ``ws_slice`` in the sliceviewer.
+- Check that non-orthogonal view is enabled on opening - however when clicked the gridlines are orthogonal  (in this case 110 is orthogonal to 001).
+
+C. Check that changing the properties of the workspace that governs the support for the non-orthogonal transform closes the sliceviewer window.
+
+- Open ``ws`` from the above test script in the sliceviewer
+
+- Run ``ClearUB(ws)`` (it should close sliceviewer with warning ``property supports_nonorthogonal_axes is different...``)
+
+- Instead of clearing the UB you can also replace the workspace with a workspace of a different frame that doesn't support the non-orthogonal view (e.g. QLab)
+
+.. code-block:: python
+
+	ws = CreateMDWorkspace(Dimensions='3', Extents='-6,6,-4,4,-0.5,0.5',
+                Names='Q1,Q2,Q3', Units='Ang-1,Ang-1,Ang-1',
+                Frames='QLab,QLab,QLab',
+                SplitInto='2', SplitThreshold='50')
+
+D. Check that the non-orthogonal view is disabled for non-Q axes such as energy
+
+.. code-block:: python
+
+    ws_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1, 1, -1, 1, -1, 1, -1, 1], Names="E,H,K,L",
+                                  Frames='General Frame,HKL,HKL,HKL', Units='meV,r.l.u.,r.l.u.,r.l.u.')
+    expt_info_4D = CreateSampleWorkspace()
+    ws_4D.addExperimentInfo(expt_info_4D)
+    SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
+
+- When the Energy axis is viewed (as X or Y) the non-orthogonal view is disabled. The button should be re-enabled when you view two Q-axes e.g. H and K.
+
+
+5. Cursor Tracking
 ##################
 
 - Toggle "Track Cursor" on/off and check the cursor data makes sense
 - For a MatrixWorkspace (e.g. ``SXD23767``) there is much more information than for an MD object. See :ref:`Cursor Information Widget<mantid:sliceviewer_cursor>` for more details.
 
-5. Peak Overlay
+6. Peak Overlay
 ###############
 
 This functionality only applies only to 3D MD workspaces - specifically you should test this on the ``SXD_MD_nonortho`` workspace.
@@ -130,7 +183,7 @@ This functionality only applies only to 3D MD workspaces - specifically you shou
    :width: 75%
    :align: center
 
-6. Toolbar buttons for changing axis limits
+7. Toolbar buttons for changing axis limits
 ###########################################
 
 - Home
@@ -138,7 +191,7 @@ This functionality only applies only to 3D MD workspaces - specifically you shou
 - Zoom (dynamic rebinning to ``_svrebinned`` workspace for MD workspace) - both by selecting region with mouse and scrolling
 
 
-7. Line subplots and Region of Interest integration
+8. Line subplots and Region of Interest integration
 ###################################################
 
 **(this functionality is disabled when non-orthogonal view is enabled)**
@@ -161,24 +214,25 @@ This functionality only applies only to 3D MD workspaces - specifically you shou
    :width: 75%
    :align: center
 
-8. Save image
+9. Save image
 #############
 
 - Use the Save image toolbar button, in many instances, such as with peaks overlaid
 - In future there will also be a toolbar button to copy the image to clipboard
 
-9. Resizing
+10. Resizing
 ###########
 
 - Play around with resizing the window and adjusting the size of the peak table**
 
-10. Alter the underlying workspace
+11. Alter the underlying workspace
 ##################################
 
 - Delete the workspace and Sliceviewer should close
 - Rename the workspace and Sliceviewer should stay open and continue to work
 - Change the data in the workspace by cropping or running some algorithm (e.g. double the data ``SXD_MD_nonortho *= 2``)
 - Delete rows or re-integrate a PeaksWorkspace that is overlaid.
+
 
 .. |PickTabAddPeakButton.png| image:: ../../../../docs/source/images/PickTabAddPeakButton.png
 

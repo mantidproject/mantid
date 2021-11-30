@@ -320,6 +320,13 @@ void SNSLiveEventDataListener::run() {
     std::string newMsg("Invalid argument exception thrown from the background thread: ");
     newMsg += e.what();
     m_backgroundException = std::make_shared<std::runtime_error>(newMsg);
+  } catch (std::exception &e) { // exception handler for generic exceptions
+    g_log.fatal() << "Caught an exception.\n"
+                  << "Exception message: " << e.what() << ".\n"
+                  << "Thread will exit.\n";
+    m_isConnected = false;
+
+    m_backgroundException = std::make_shared<std::runtime_error>(e.what());
   } catch (...) { // Default exception handler
     g_log.fatal("Uncaught exception in SNSLiveEventDataListener network read thread."
                 " Thread is exiting.");
@@ -453,6 +460,9 @@ bool SNSLiveEventDataListener::rxPacket(const ADARA::BeamMonitorPkt &pkt) {
   // We'll likely be modifying m_eventBuffer (specifically,
   // m_eventBuffer->m_monitorWorkspace), so lock the mutex
   std::lock_guard<std::mutex> scopedLock(m_mutex);
+
+  if (!m_eventBuffer->monitorWorkspace())
+    return false;
 
   auto monitorBuffer = std::static_pointer_cast<DataObjects::EventWorkspace>(m_eventBuffer->monitorWorkspace());
   const auto pktTime = timeFromPacket(pkt);
@@ -1307,6 +1317,11 @@ void SNSLiveEventDataListener::initWorkspacePart2() {
 /// monitor IDs set
 void SNSLiveEventDataListener::initMonitorWorkspace() {
   auto monitors = m_eventBuffer->getInstrument()->getMonitors();
+
+  // don't create monitor workspace if there are no monitors
+  if (monitors.size() == 0)
+    return;
+
   auto monitorsBuffer = WorkspaceFactory::Instance().create("EventWorkspace", monitors.size(), 1, 1);
   WorkspaceFactory::Instance().initializeFromParent(*m_eventBuffer, *monitorsBuffer, true);
   // Set the id numbers
@@ -1326,7 +1341,7 @@ void SNSLiveEventDataListener::initMonitorWorkspace() {
 // workspace has been initialized...)
 bool SNSLiveEventDataListener::haveRequiredLogs() {
   bool allFound = true;
-  Run &run = m_eventBuffer->mutableRun();
+  const Run &run = m_eventBuffer->run();
   auto it = m_requiredLogs.begin();
   while (it != m_requiredLogs.end() && allFound) {
     if (!run.hasProperty(*it)) {
@@ -1413,10 +1428,12 @@ std::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
 
   // Create a fresh monitor workspace and insert into the new 'main' workspace
   auto monitorBuffer = m_eventBuffer->monitorWorkspace();
-  auto newMonitorBuffer =
-      WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
-  WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
-  temp->setMonitorWorkspace(newMonitorBuffer);
+  if (monitorBuffer) {
+    auto newMonitorBuffer =
+        WorkspaceFactory::Instance().create("EventWorkspace", monitorBuffer->getNumberHistograms(), 1, 1);
+    WorkspaceFactory::Instance().initializeFromParent(*monitorBuffer, *newMonitorBuffer, false);
+    temp->setMonitorWorkspace(newMonitorBuffer);
+  }
 
   // Lock the mutex and swap the workspaces
   {

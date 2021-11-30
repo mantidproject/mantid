@@ -31,7 +31,7 @@ void CalculatePlaczekSelfScattering2::init() {
       "calculated for. Workspace must have instrument and sample data.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
-      "Workspace of fitted incident spectrum with it's first derivative.");
+      "Workspace of fitted incident spectrum with it's first derivative. Must be in units of Wavelength.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
       "Workspace with the Self scattering correction");

@@ -39,6 +39,14 @@ class ResultsTabView(QtWidgets.QWidget, ui_fitting_tab):
         """
         self.output_results_table_btn.setEnabled(on)
 
+    def set_output_results_button_warning(self):
+        self.output_results_table_btn.setToolTip('A table with this name already exists')
+        self.output_results_table_btn.setStyleSheet('QPushButton {color:red;}')
+
+    def set_output_results_button_no_warning(self):
+        self.output_results_table_btn.setToolTip('')
+        self.output_results_table_btn.setStyleSheet('QPushButton {color:black;}')
+
     def results_table_name(self):
         """Return the name of the output table."""
         return self.results_name_editor.text()
