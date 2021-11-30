@@ -33,7 +33,7 @@ public:
 
   virtual void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
     std::string foundFile =
-        Kernel::ConfigService::Instance().getFullPath("DNS-PSD03880f4077f70955e27452d25f5225b2327af287.vtp", true, 0);
+        Kernel::ConfigService::Instance().getFullPath("DNS-PSDbfbdb95375d9e6c728c1b2439e7c9c443060349c.vtp", true, 0);
     hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
     origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
     ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
