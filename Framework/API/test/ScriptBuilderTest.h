@@ -579,6 +579,7 @@ public:
     alg->setRethrows(true);
     alg->setProperty("Filename", "IRS21360.raw");
     alg->setProperty("OutputWorkspace", "IRS21360");
+    alg->execute();
 
     auto ws = m_ads.retrieveWS<MatrixWorkspace>("IRS21360");
     auto wsHist = ws->getHistory();
