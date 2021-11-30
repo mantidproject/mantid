@@ -6,14 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
+from enum import Enum
+
 from mantid.api import PreviewType
 
 
-class AcquisitionType:
-    DEFAULT = "default"
-    MONO = "mono"
-    TOF = "TOF"
-    SCAN = "scan"
+class AcquisitionType(Enum):
+    DEFAULT = 0
+    MONO = 1
+    TOF = 2
+    SCAN = 3
 
 
 class PreviewFinder:
@@ -42,11 +44,11 @@ class PreviewFinder:
     D19 = "D19"
 
     prev = {D11:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D11lr:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D11B:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+            D11lr:   {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+            D11B:    {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             D16:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             D22:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
-            D22B:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
+            D22B:    {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             D33:     {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             PANTHER: {AcquisitionType.DEFAULT: PreviewType.IVIEW},
             SHARP:   {AcquisitionType.DEFAULT: PreviewType.IVIEW},
