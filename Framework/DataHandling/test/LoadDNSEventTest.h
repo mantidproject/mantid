@@ -111,7 +111,7 @@ public:
   void test_Executes_2() {
     std::string outWSName("LoadDNSEventTest_OutputWS");
 
-    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
+    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
     TS_ASSERT_THROWS_NOTHING(alg->execute(););
     TS_ASSERT(alg->isExecuted());
   }
