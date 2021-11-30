@@ -121,7 +121,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         table = self.generate_table()
         constraints = self.generate_constraints_table()
         constraints.removeColumn("LHS element")
-        constraints.addColumn("lhs element")
+        constraints.addColumn(type="int", name="lhs element")
         constraints = self.generate_constraints_table()
         constraints.addRow([0, 1, "2.*82.03/5.551", "eq"])
 
