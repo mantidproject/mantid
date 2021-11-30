@@ -62,7 +62,7 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
         self.assertEqual(plot_dict["label"], "MUSR00062261-1")
         self.assertEqual(axes_dict[0]["title"], "MUSR00062261")
         self.assertEqual(axes_dict[0]["xAxisTitle"], "Time (μs)")
-        self.assertEqual(axes_dict[0]["yAxisTitle"], "Counts (μs)⁻¹")
+        self.assertEqual(axes_dict[0]["yAxisTitle"], "Counts (μs)")
         self.assertEqual(axes_dict[0]["title"], "MUSR00062261")
         self.assertEqual(axes_properties["xLim"], [-5, 35])
         self.assertEqual(axes_properties["yLim"], [0, 300000.0])
