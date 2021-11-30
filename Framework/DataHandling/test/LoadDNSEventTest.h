@@ -11,7 +11,6 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "Poco/Path.h"
 #include <boost/range/irange.hpp>
 #include <cxxtest/TestSuite.h>
 
@@ -27,24 +26,6 @@ public:
   // This means the constructor isn't called when running other tests
   static LoadDNSEventTest *createSuite() { return new LoadDNSEventTest(); }
   static void destroySuite(LoadDNSEventTest *suite) { delete suite; }
-  bool hasVTPDirectory;
-  std::string origVTPDirectory;
-  const std::string vtpDirectoryKey = "instrumentDefinition.vtp.directory";
-
-  virtual void setUp() override { // DNS file slow to create geometry cache so use a pregenerated vtp file.
-    std::string foundFile =
-        Kernel::ConfigService::Instance().getFullPath("DNS-PSDbfbdb95375d9e6c728c1b2439e7c9c443060349c.vtp", true, 0);
-    hasVTPDirectory = ConfigService::Instance().hasProperty(vtpDirectoryKey);
-    origVTPDirectory = ConfigService::Instance().getString(vtpDirectoryKey);
-    ConfigService::Instance().setString(vtpDirectoryKey, Poco::Path(foundFile).parent().toString());
-  }
-
-  virtual void tearDown() override {
-    if (hasVTPDirectory)
-      ConfigService::Instance().setString(vtpDirectoryKey, origVTPDirectory);
-    else
-      ConfigService::Instance().remove(vtpDirectoryKey);
-  }
 
   LoadDNSEventTest() {}
 
