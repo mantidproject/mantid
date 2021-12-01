@@ -86,6 +86,7 @@ set(SRC_FILES
     src/Functions/CrystalFieldSusceptibility.cpp
     src/Functions/CubicSpline.cpp
     src/Functions/DecoupAsymPowderMagLong.cpp
+    src/Functions/DecoupAsymPowderMagRot.cpp
     src/Functions/DeltaFunction.cpp
     src/Functions/DiffRotDiscreteCircle.cpp
     src/Functions/DiffSphere.cpp
@@ -262,6 +263,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
     inc/MantidCurveFitting/Functions/CubicSpline.h
     inc/MantidCurveFitting/Functions/DecoupAsymPowderMagLong.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagRot.h
     inc/MantidCurveFitting/Functions/DeltaFunction.h
     inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/DiffSphere.h
