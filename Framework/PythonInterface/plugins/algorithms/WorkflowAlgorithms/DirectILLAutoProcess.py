@@ -265,8 +265,11 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty(name='MaskedTubes', values=[], direction=Direction.Input),
                              doc='List of tubes to be masked.')
 
-        self.declareProperty('MaskThreshold', 0.0, doc='Create a mask with threshold from the ELPReference'
-                                                       ' to remove empty / background pixels.')
+        self.declareProperty('MaskThresholdMin', 0.0, doc='Threshold level below which bins will be masked'
+                                                          ' to remove empty / background pixels.')
+
+        self.declareProperty('MaskThresholdMax', 0.0, doc='Threshold level above which bins will be masked'
+                                                          ' to remove noisy pixels.')
 
         self.declareProperty(FloatArrayProperty(name='MaskedAngles', values=[], validator=orderedPairsValidator),
                              doc='Mask detectors in the given angular range.')
@@ -277,7 +280,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         masking_group_name = 'Masking'
         self.setPropertyGroup('MaskWorkspace', masking_group_name)
         self.setPropertyGroup('MaskedTubes', masking_group_name)
-        self.setPropertyGroup('MaskThreshold', masking_group_name)
+        self.setPropertyGroup('MaskThresholdMin', masking_group_name)
+        self.setPropertyGroup('MaskThresholdMax', masking_group_name)
         self.setPropertyGroup('MaskedAngles', masking_group_name)
         self.setPropertyGroup('MaskWithVanadium', masking_group_name)
 
@@ -501,9 +505,20 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         """Applies selected masks."""
         MaskDetectors(Workspace=ws, MaskedWorkspace=self.mask_ws)
         # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
-        if not self.getProperty('MaskThreshold').isDefault:
+        min_threshold_defined = not self.getProperty('MaskThresholdMin').isDefault
+        max_threshold_defined = not self.getProperty('MaskThresholdMax').isDefault
+        if not min_threshold_defined or not max_threshold_defined:
+            masking_criterion = '{} < y < {}'
+            if min_threshold_defined and max_threshold_defined:
+                masking_criterion = masking_criterion.format(self.getPropertyValue('MaskThresholdMax'),
+                                                             self.getPropertyValue('MaskThresholdMin'))
+            elif min_threshold_defined:
+                masking_criterion = 'y < {}'.format(self.getPropertyValue('MaskThresholdMin'))
+            else:  # only max threshold defined
+                masking_criterion = 'y > {}'.format(self.getPropertyValue('MaskThresholdMax'))
+
             MaskBinsIf(InputWorkspace=ws, OutputWorkspace=ws,
-                       Criterion='y < {}'.format(self.getPropertyValue('MaskThreshold')))
+                       Criterion=masking_criterion)
         return ws
 
     def _subtract_empty_container(self, ws):
