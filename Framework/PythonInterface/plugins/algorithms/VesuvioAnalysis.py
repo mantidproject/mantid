@@ -120,7 +120,7 @@ class VesuvioAnalysis(PythonAlgorithm):
                                               "elements in the ComptonProfile. For each constraint the ratio of the first to second "
                                               "intensities, each equal to atom stoichiometry times bound scattering "
                                               "cross section is defined in the column ScatteringCrossSection. Simple arithmetic can be "
-                                              "included but the result may be rounded. The column State allows the values ['eq','ineq'].")
+                                              "included but the result may be rounded. The column State allows the values 'eq' and 'ineq'.")
         self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
