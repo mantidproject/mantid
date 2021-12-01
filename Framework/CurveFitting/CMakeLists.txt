@@ -163,6 +163,7 @@ set(SRC_FILES
     src/LatticeFunction.cpp
     src/MSVesuvioHelpers.cpp
     src/MultiDomainCreator.cpp
+    src/MuonHelpers.cpp
     src/ParDomain.cpp
     src/ParameterEstimator.cpp
     src/RalNlls/TrustRegion.cpp
@@ -341,6 +342,7 @@ set(INC_FILES
     inc/MantidCurveFitting/LatticeFunction.h
     inc/MantidCurveFitting/MSVesuvioHelpers.h
     inc/MantidCurveFitting/MultiDomainCreator.h
+    inc/MantidCurveFitting/MuonHelpers.h
     inc/MantidCurveFitting/ParDomain.h
     inc/MantidCurveFitting/ParameterEstimator.h
     inc/MantidCurveFitting/RalNlls/TrustRegion.h
