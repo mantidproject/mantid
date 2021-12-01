@@ -7,7 +7,8 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/Functions/DecouplingAsymPowderMag.h"
+#include "MantidCurveFitting/MuonHelpers.h"
+#include "MantidCurveFitting/Functions/DecoupAsymPowderMagLong.h"
 #include "MantidAPI/FunctionFactory.h"
 
 #include <cmath>
@@ -20,14 +21,16 @@ using namespace Kernel;
 
 using namespace API;
 
-DECLARE_FUNCTION(DecouplingAsymPowderMag)
+using namespace CurveFitting::MuonHelper;
 
-void DecouplingAsymPowderMag::init() {
+DECLARE_FUNCTION(DecoupAsymPowderMagLong)
+
+void DecoupAsymPowderMagLong::init() {
   declareParameter("Asymmetry", 1.0, "a scaling parameter for the overall asymmetry");
   declareParameter("CharField", 1.0, "the characteristic field");
 }
 
-void DecouplingAsymPowderMag::function1D(double *out, const double *xValues, const size_t nData) const {
+void DecoupAsymPowderMagLong::function1D(double *out, const double *xValues, const size_t nData) const {
   const double asym = getParameter("Asymmetry");
   const double charField = getParameter("CharField");
 
@@ -38,7 +41,7 @@ void DecouplingAsymPowderMag::function1D(double *out, const double *xValues, con
   }
 }
 
-void DecouplingAsymPowderMag::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
+void DecoupAsymPowderMagLong::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
   const double asym = getParameter("Asymmetry");
   const double charField = getParameter("CharField");
 
@@ -50,12 +53,4 @@ void DecouplingAsymPowderMag::functionDeriv1D(Jacobian *out, const double *xValu
     out->set(i, 1, diffAz);
   }
 }
-
-const double DecouplingAsymPowderMag::getAz(double xValue, const double charField) const {
-  const double b = xValue / charField;
-  const double bSq = pow(b, 2);
-  const double A_z = (3/4)-(1/(4*bSq))+(pow(bSq-1,2)/(8*pow(b,3)))*log(fabs((b+1)/(b-1)));
-  return A_z;
-}
-
 } // namespace Mantid::CurveFitting::Functions

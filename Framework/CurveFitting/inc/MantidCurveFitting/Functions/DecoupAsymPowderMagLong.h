@@ -27,10 +27,10 @@ DecouplingAsymPowderMag parameters:
 </UL>
 */
 
-class MANTID_CURVEFITTING_DLL DecouplingAsymPowderMag : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL DecoupAsymPowderMagLong : public BackgroundFunction {
 public:
   /// overwrite IFunction base class methods
-  std::string name() const override { return "DecouplingAsymPowderMag"; }
+  std::string name() const override { return "DecoupAsymPowderMagLong"; }
   void function1D(double *out, const double *xValues, const size_t nData) const override;
   void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
   const std::string category() const override { return "Muon\\MuonModelling\\Magnetism"; }
@@ -38,7 +38,6 @@ public:
 protected:
   /// overwrite IFunction base class method, which declare function parameters
   void init() override;
-  const double getAz(double xValue, const double charField) const;
 };
 
 } // namespace Functions
