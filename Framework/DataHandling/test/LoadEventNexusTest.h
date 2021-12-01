@@ -1000,6 +1000,26 @@ public:
     runner.runParallel(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
+  void test_load_CG3_bad_event_id() {
+    // The test file CG3_13118.nxs.h5 being loaded has:
+    // bank1: all correct data, only events in this file should end up loaded (6052 events)
+    // bank2: all event_id are out of range and should be ignored (91 events)
+    // bank_error: all correct data but should be skipped because this bank is junk output (6052 events)
+    // bank_unmapped: all junk data and shouldn't be loaded (91 events)
+
+    LoadEventNexus load;
+    TS_ASSERT_THROWS_NOTHING(load.initialize());
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("Filename", "CG3_13118.nxs.h5"));
+    const std::string outws("CG3_bad_id_test");
+    TS_ASSERT_THROWS_NOTHING(load.setPropertyValue("OutputWorkspace", outws));
+    TS_ASSERT(load.execute());
+
+    auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
+
+    // only events from bank1 should be loaded
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 6052);
+  }
+
   void test_load_fails_on_corrupted_run() {
     // Some ISIS runs can be corrupted by instrument noise,
     // resulting in incorrect period numbers.
