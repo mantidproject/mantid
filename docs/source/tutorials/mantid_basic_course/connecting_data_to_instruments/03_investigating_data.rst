@@ -1,7 +1,7 @@
 .. _03_investigating_data:
 
 ==================
-Investigating Data 
+Investigating Data
 ==================
 
 The Pick tab on the controls panel allows you to see the data in the
@@ -48,7 +48,7 @@ Picking a Tube
 The Tube selection tool |PickTube.png| is useful for tube instruments.
 When it's on the mini-plot displays the integrated data in the whole
 tube. The integration is done either over the detectors in the tube (Sum
-option) or over time (Integrate). To switch between the options, right-click on the mini-plot 
+option) or over time (Integrate). To switch between the options, right-click on the mini-plot
 to display the following menu:
 
 .. figure:: /images/SumIntegrateMenu.png
