@@ -110,6 +110,10 @@ class QSelectionTableModel(QAbstractTableModel):
         index = self.index(row, GROUP_COLUMN)
         return self.data(index, Qt.DisplayRole)
 
+    def get_names_and_rows(self):
+        names_and_rows = {data[0]:row for row, data in enumerate(self._defaultData)}
+        return names_and_rows
+
 
 class QSequentialTableModel(QSelectionTableModel):
     """Implements a QAbstractTableModel which holds the data for the Sequential table view.
@@ -121,6 +125,9 @@ class QSequentialTableModel(QSelectionTableModel):
         self._parameterData = []  # holds the parameter data
         self._defaultHeaders = default_table_columns.copy()  # default table columns
         self._parameterHeaders = []  # header of parameters
+
+    def columnCount(self, parent=None):
+        return len(self._defaultHeaders) + len(self._parameterHeaders)
 
     def data(self, index, role):
         if role in (Qt.DisplayRole, Qt.EditRole):

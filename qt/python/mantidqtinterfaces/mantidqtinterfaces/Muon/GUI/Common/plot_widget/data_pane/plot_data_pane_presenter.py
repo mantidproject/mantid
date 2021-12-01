@@ -21,6 +21,11 @@ class SelectionInfoPresenter(object):
     def setup_slot_for_row_selection_changed(self, slot):
         self._view.selection_table.setup_slot_for_row_selection_changed(slot)
 
+    def set_selected_rows_from_name(self, names):
+        names_and_rows = self._view.selection_table.get_names_and_rows()
+        rows = [ names_and_rows[name] for name in names]
+        self._view.selection_table.set_selected_rows(rows)
+
     def update_lines(self, ws_list, indicies):
         self._lines = {}
         for name, index in zip(ws_list, indicies):
@@ -80,7 +85,18 @@ class PlotDataPanePresenter(BasePanePresenter):
         """
         if self._check_if_counts_and_pairs_selected():
             return
+        # these will be the wrong type (asym vs. counts)
+        lines_to_plot = self.selection_info.get_selection()
+        new_lines_to_plot =  {}
+        # this needs to be custom to handle the name conversion
+        if  self._view.get_plot_type() == "Counts":
+            new_lines_to_plot = {self._model.convert_ws_name_to_counts(key): value for key, value in lines_to_plot.items()}
+        else:
+            new_lines_to_plot = {self._model.convert_ws_name_to_asymmetry(key): value for key, value in lines_to_plot.items()}
+
         self.handle_data_updated(autoscale=True, hold_on=False)
+        self.selection_info.set_selected_rows_from_name(new_lines_to_plot.keys())
+        self.plot_lines(new_lines_to_plot, autoscale=True, hold_on=False)
         # the data change probably means its the wrong scale
         self._figure_presenter.force_autoscale()
 
@@ -93,10 +109,14 @@ class PlotDataPanePresenter(BasePanePresenter):
             return True
         return False
 
+    # want to handle extending the loaded data without unselecting stuff
     def handle_data_updated(self, autoscale=True, hold_on=False):
         workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                       self._view.get_plot_type())
         lines_to_plot = self.selection_info.update_lines(workspace_list, indicies)
+        self.plot_lines(lines_to_plot, autoscale, hold_on)
+
+    def plot_lines(self, lines_to_plot, autoscale, hold_on):
         if lines_to_plot:
             self.add_list_to_plot(lines_to_plot.keys(), lines_to_plot.values(), hold=hold_on, autoscale=autoscale)
 

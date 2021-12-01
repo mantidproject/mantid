@@ -30,12 +30,20 @@ class PlotDataPaneModel(PlotGroupPairModel):
                     self.context.data_context.current_runs)
 
             if plot_type == "Counts":
-                workspace_list = [item.replace("Asymmetry", "Counts")
-                                  for item in workspace_list if "Asymmetry" in item]
+                workspace_list = [self.convert_ws_name_to_counts(item)
+                                  for item in workspace_list]
 
             return workspace_list
         except AttributeError:
             return []
+
+    @staticmethod
+    def convert_ws_name_to_asymmetry(name):
+        return name.replace("Counts", "Asymmetry") if "Counts" in name else name
+
+    @staticmethod
+    def convert_ws_name_to_counts(name):
+        return name.replace("Asymmetry", "Counts") if "Asymmetry" in name else name
 
     def get_workspaces_to_remove(self, group_pair_names, is_raw, plot_type):
         """

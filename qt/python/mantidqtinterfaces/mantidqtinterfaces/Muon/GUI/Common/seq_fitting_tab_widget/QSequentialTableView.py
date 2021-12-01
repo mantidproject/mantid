@@ -49,6 +49,16 @@ class QSelectionTableView(QtWidgets.QTableView):
         if event.key() in (Qt.Key_Up, Qt.Key_Down):
             self.keyUpDownPressed.emit()
 
+    def select_rows(self, rows):
+        self.clearSelection()
+        # need to enable multiple selections
+        self.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
+
+        for row in rows:
+            self.selectRow(row)
+        # revert behaviour
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+
 
 class QSequentialTableView(QSelectionTableView):
     keyUpDownPressed = Signal()

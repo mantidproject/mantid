@@ -82,6 +82,12 @@ class SelectionTableWidget(object):
     def set_slot_for_key_up_down_pressed(self, slot):
         self._view.keyUpDownPressed.connect(slot)
 
+    def get_names_and_rows(self):
+        return self._model.get_names_and_rows()
+
+    def set_selected_rows(self, rows):
+        self._view.select_rows(rows)
+
 
 class SequentialTableWidget(SelectionTableWidget):
     """ Sequential table widget implemented using a QTableView and QAbstractTableModel
