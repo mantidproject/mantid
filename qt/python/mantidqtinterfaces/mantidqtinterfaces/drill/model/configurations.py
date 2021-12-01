@@ -399,6 +399,8 @@ class RundexSettings(object):
                 ],
             DIRECT_TOF: [
                 "ReductionType",
+                "FlatBkg",
+                "FlatBkgAveragingWindow",
                 "FlatBkgScaling",
                 "EmptyContainerScaling",
                 "IncidentEnergyCalibration",

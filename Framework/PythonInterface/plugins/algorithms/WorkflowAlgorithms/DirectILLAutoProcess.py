@@ -158,7 +158,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.masking = False
         else:
             self.masking = True
-        self.flat_bkg_scaling = self.getProperty('FlatBkgScaling').value
+        self.flat_bkg_scaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
         self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
@@ -211,11 +211,12 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='Cadmium absorber workspace.')
 
-        self.declareProperty('FlatBackground', "",
+        self.copyProperties('DirectILLCollectData', [common.PROP_FLAT_BKG, common.PROP_FLAT_BKG_WINDOW])
+
+        self.declareProperty('FlatBackgroundSource', "",
                              doc='File(s) or workspaces containing the source to calculate flat background.')
 
-        self.declareProperty('FlatBkgScaling', 1.0,
-                             doc='Scaling parameter for the flat background.')
+        self.copyProperties('DirectILLCollectData', common.PROP_FLAT_BKG_SCALING)
 
         self.declareProperty(common.PROP_ABSOLUTE_UNITS, False,
                              doc='Enable or disable normalisation to absolute units.')
@@ -231,8 +232,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('EmptyContainerWorkspace', additional_inputs_group)
         self.setPropertyGroup('EmptyContainerScaling', additional_inputs_group)
         self.setPropertyGroup('CadmiumWorkspace', additional_inputs_group)
-        self.setPropertyGroup('FlatBackground', additional_inputs_group)
-        self.setPropertyGroup('FlatBkgScaling', additional_inputs_group)
+        self.setPropertyGroup(common.PROP_FLAT_BKG, additional_inputs_group)
+        self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, additional_inputs_group)
+        self.setPropertyGroup('FlatBackgroundSource', additional_inputs_group)
+        self.setPropertyGroup(common.PROP_FLAT_BKG, additional_inputs_group)
         self.setPropertyGroup('IncidentEnergyCalibration', additional_inputs_group)
         self.setPropertyGroup('ElasticChannelCalibration', additional_inputs_group)
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
@@ -386,9 +389,12 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         """Loads data if the corresponding workspace does not exist in the ADS."""
         ws = "{}_{}".format(get_run_number(sample), 'raw')
         kwargs = dict()
-        if not self.getProperty('FlatBackground').isDefault:
-            kwargs['FlatBkgWorkspace'] = self.getPropertyValue('FlatBackground')
-            kwargs['FlatBkgScaling'] = self.flat_bkg_scaling
+        if not self.getProperty('FlatBackgroundSource').isDefault:
+            kwargs['FlatBkgWorkspace'] = self.getPropertyValue('FlatBackgroundSource')
+            kwargs[common.PROP_FLAT_BKG_SCALING] = self.flat_bkg_scaling
+        elif not self.getProperty(common.PROP_FLAT_BKG).isDefault:
+            kwargs[common.PROP_FLAT_BKG] = self.getPropertyValue(common.PROP_FLAT_BKG)
+            kwargs[common.PROP_FLAT_BKG_WINDOW] = self.getPropertyValue(common.PROP_FLAT_BKG_WINDOW)
         if vanadium:
             kwargs['EPPCreationMethod'] = 'Calculate EPP'
             kwargs['ElasticChannel'] = 'Elastic Channel AUTO'
