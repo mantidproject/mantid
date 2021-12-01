@@ -87,12 +87,17 @@ Fitting Functions
 -----------------
 New Features
 ############
-- Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
-- Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to MuonModelling\Magnetism Fit Functions.
-- Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to MuonModelling\Magentism Fit Functions.
-- Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
-- Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.
-- Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
+* Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
+* Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to MuonModelling\Magnetism Fit Functions.
+* Added two fitting functions for the decoupling of asymmetry in the ordered state of a powedered magnet for fitting.
+
+  * `DecoupAsymPowderMagLong <func-DecoupAsymPowderMagLong>` can be used for longitudinal polarization.
+  * `DecoupAsymPowderMagRot <func-DecoupAsymPowderMagRot>`can be used for rotational asymmetry.
+
+* Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to MuonModelling\Magentism Fit Functions.
+* Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
+* Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.
+* Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
 
 
 Improvements
