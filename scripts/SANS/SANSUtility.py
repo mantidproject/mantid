@@ -1027,17 +1027,17 @@ def _clean_logs(ws, estimate_logs):
     """
     run = ws.getRun()
     if run.hasProperty("proton_charge"):
-        epoch_start_time = DateAndTime(0, 0)
+        start_time = run.startTime() #DateAndTime(0, 0)
         pc = run.getProperty("proton_charge")
-        np_epoch_datetime = np.datetime64(str(epoch_start_time))
-        first_valid_index = next((index for index, time in enumerate(pc.times) if time > np_epoch_datetime), None)
+        start_datetime = np.datetime64(str(start_time))
+        first_valid_index = next((index for index, time in enumerate(pc.times) if time > start_datetime), None)
 
         if first_valid_index != 0:
-            # Bug caused bad proton charges in 1700s. 1990 is start of epoch.
+            # Bug caused bad proton charges before the run start time.
             start = pc.nthTime(first_valid_index)
             end = pc.lastTime()
             pc.filterByTime(start, end)
-            sanslog.notice("{} Invalid pulsetimes from before {} removed.".format(first_valid_index, epoch_start_time))
+            sanslog.notice("{} Invalid pulsetimes from before the run start {} removed.".format(first_valid_index, start_time))
             if estimate_logs:
                 # Estimate what the data should have been
                 _estimate_good_log(pc, first_valid_index)
