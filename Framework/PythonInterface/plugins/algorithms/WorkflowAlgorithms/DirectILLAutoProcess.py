@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import DirectILL_common as common
-from mantid.api import AlgorithmFactory, FileAction, MultipleFileProperty, PropertyMode, \
-    PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
+    MultipleFileProperty, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
     FloatBoundedValidator, IntBoundedValidator, IntArrayProperty, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
@@ -46,7 +46,7 @@ def get_vanadium_corrections(vanadium_ws):
     return diagnostics, integrals
 
 
-class DirectILLAutoProcess(PythonAlgorithm):
+class DirectILLAutoProcess(DataProcessorAlgorithm):
 
     instrument = None
     sample = None
