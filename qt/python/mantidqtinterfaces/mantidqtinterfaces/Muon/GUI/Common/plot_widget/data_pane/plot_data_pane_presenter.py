@@ -29,7 +29,7 @@ class SelectionInfoPresenter(object):
 
     def handle_selected_workspaces_changed(self, workspace_names):
         runs, groups_and_pairs = self.get_runs_groups_and_pairs(workspace_names)
-        self._view.selection_table.set_fit_workspaces(workspace_names, runs, groups_and_pairs)
+        self._view.selection_table.set_workspaces(workspace_names, runs, groups_and_pairs)
         if len(self._view.selection_table.get_selected_rows()) == 0:
             self._view.selection_table.set_selection_to_last_row()
         return self.get_selection()

@@ -10,16 +10,15 @@ from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableM
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate
 
 
-class QSequentialTableView(QtWidgets.QTableView):
+class QSelectionTableView(QtWidgets.QTableView):
     keyUpDownPressed = Signal()
 
     def __init__(self, parent):
-        super(QSequentialTableView, self).__init__(parent)
+        super(QSelectionTableView, self).__init__(parent)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.setItemDelegateForColumn(FIT_STATUS_COLUMN, FitQualityDelegate(self))
         self.setAlternatingRowColors(True)
 
     def resizeColumnsToContents(self):
@@ -31,7 +30,7 @@ class QSequentialTableView(QtWidgets.QTableView):
             else:
                 self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
 
-        super(QSequentialTableView, self).resizeColumnsToContents()
+        super(QSelectionTableView, self).resizeColumnsToContents()
 
     def set_selection_to_last_row(self):
         index = self.model().index(self.model().rowCount() - 1, 0)
@@ -40,7 +39,7 @@ class QSequentialTableView(QtWidgets.QTableView):
 
     def keyPressEvent(self, event):
         if not self.signalsBlocked():
-            super(QSequentialTableView, self).keyPressEvent(event)
+            super(QSelectionTableView, self).keyPressEvent(event)
 
     def keyReleaseEvent(self, event):
         if self.signalsBlocked():
@@ -49,3 +48,16 @@ class QSequentialTableView(QtWidgets.QTableView):
             return
         if event.key() in (Qt.Key_Up, Qt.Key_Down):
             self.keyUpDownPressed.emit()
+
+
+class QSequentialTableView(QSelectionTableView):
+    keyUpDownPressed = Signal()
+
+    def __init__(self, parent):
+        super(QSequentialTableView, self).__init__(parent)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        self.setItemDelegateForColumn(FIT_STATUS_COLUMN, FitQualityDelegate(self))
+        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setAlternatingRowColors(True)

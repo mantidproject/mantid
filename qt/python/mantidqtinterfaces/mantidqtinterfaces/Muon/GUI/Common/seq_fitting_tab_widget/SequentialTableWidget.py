@@ -4,22 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableView import QSequentialTableView
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, GROUP_COLUMN,
-                                                                                             RUN_COLUMN, WORKSPACE_COLUMN)
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableView import QSequentialTableView, QSelectionTableView
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, QSelectionTableModel,
+                                                                                             GROUP_COLUMN, RUN_COLUMN, WORKSPACE_COLUMN)
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
 
 WorkspaceInfo = namedtuple('Workspace', 'runs groups')
 
 
-class SequentialTableWidget(object):
-    """ Sequential table widget implemented using a QTableView and QAbstractTableModel
+class SelectionTableWidget(object):
+    """ Selection table widget implemented using a QTableView and QAbstractTableModel
     Based on the model-view pattern https://doc.qt.io/qt-5/model-view-programming.html"""
 
     def __init__(self, parent, view=None, model=None):
-        self._view = view if view else QSequentialTableView(parent)
-        self._model = model if model else QSequentialTableModel()
+        self._view = view if view else QSelectionTableView(parent)
+        self._model = model if model else QSelectionTableModel()
         self._view.setModel(self._model)
 
     @property
@@ -37,6 +37,60 @@ class SequentialTableWidget(object):
 
     def hide_group_column(self):
         self._view.hideColumn(GROUP_COLUMN)
+
+    def set_workspaces(self, workspace_names, runs, group_and_pairs):
+        self.block_signals(True)
+        self._model.set_workspaces(workspace_names, runs, group_and_pairs)
+        self.block_signals(False)
+
+    def set_selection_to_last_row(self):
+        self._view.set_selection_to_last_row()
+
+    def clear_workspaces(self):
+        self._model.clear_workspaces()
+
+    def clear_selection(self):
+        self._view.clearSelection()
+
+    def get_selected_rows(self):
+        rowSelectionModels = self._view.selectionModel().selectedRows()
+        rows = []
+        for model in rowSelectionModels:
+            rows += [model.row()]
+        return rows
+
+    def get_workspace_names_from_row(self, row):
+        return self._model.get_workspace_name_information(row)
+
+    def get_workspace_info_from_row(self, row):
+        if row > self._model.rowCount():
+            return WorkspaceInfo([], [])
+
+        run_numbers = self.get_runs_from_row(row)
+        group_and_pairs = self.get_groups_and_pairs_from_row(row)
+        return WorkspaceInfo(run_numbers, group_and_pairs)
+
+    def get_runs_from_row(self, row):
+        return self._model.get_run_information(row)
+
+    def get_groups_and_pairs_from_row(self, row):
+        return self._model.get_group_information(row)
+
+    def setup_slot_for_row_selection_changed(self, slot):
+        self._view.clicked.connect(slot)
+
+    def set_slot_for_key_up_down_pressed(self, slot):
+        self._view.keyUpDownPressed.connect(slot)
+
+
+class SequentialTableWidget(SelectionTableWidget):
+    """ Sequential table widget implemented using a QTableView and QAbstractTableModel
+    Based on the model-view pattern https://doc.qt.io/qt-5/model-view-programming.html"""
+
+    def __init__(self, parent, view=None, model=None):
+        self._view = view if view else QSequentialTableView(parent)
+        self._model = model if model else QSequentialTableModel()
+        self._view.setModel(self._model)
 
     def get_number_of_fits(self):
         return self._model.number_of_fits
@@ -68,12 +122,7 @@ class SequentialTableWidget(object):
         self.block_signals(False)
 
     def set_fit_workspaces(self, workspace_names, runs, group_and_pairs):
-        self.block_signals(True)
         self._model.set_fit_workspaces(workspace_names, runs, group_and_pairs)
-        self.block_signals(False)
-
-    def set_selection_to_last_row(self):
-        self._view.set_selection_to_last_row()
 
     def reset_fit_quality(self):
         self._model.reset_fit_quality()
@@ -87,44 +136,14 @@ class SequentialTableWidget(object):
     def clear_fit_selection(self):
         self._view.clearSelection()
 
-    def get_selected_rows(self):
-        rowSelectionModels = self._view.selectionModel().selectedRows()
-        rows = []
-        for model in rowSelectionModels:
-            rows += [model.row()]
-        return rows
-
-    def get_workspace_names_from_row(self, row):
-        return self._model.get_workspace_name_information(row)
-
-    def get_workspace_info_from_row(self, row):
-        if row > self._model.rowCount():
-            return WorkspaceInfo([], [])
-
-        run_numbers = self.get_runs_from_row(row)
-        group_and_pairs = self.get_groups_and_pairs_from_row(row)
-        return WorkspaceInfo(run_numbers, group_and_pairs)
-
-    def get_runs_from_row(self, row):
-        return self._model.get_run_information(row)
-
-    def get_groups_and_pairs_from_row(self, row):
-        return self._model.get_group_information(row)
-
     def get_fit_quality_from_row(self, row):
         return self._model.get_fit_quality(row)
 
     def get_fit_parameter_values_from_row(self, row):
         return self._model.get_fit_parameters(row)
 
-    def setup_slot_for_row_selection_changed(self, slot):
-        self._view.clicked.connect(slot)
-
     def set_slot_for_parameter_changed(self, slot):
         self._model.parameterChanged.connect(slot)
-
-    def set_slot_for_key_up_down_pressed(self, slot):
-        self._view.keyUpDownPressed.connect(slot)
 
     @staticmethod
     def get_shortened_fit_status(fit_status):
