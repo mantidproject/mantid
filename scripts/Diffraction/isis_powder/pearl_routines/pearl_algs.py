@@ -157,7 +157,6 @@ def normalise_ws_current(ws_to_correct, monitor_ws, spline_coeff, lambda_values,
 
     common.remove_intermediate_workspace(processed_monitor_ws)
     common.remove_intermediate_workspace(splined_monitor_ws)
-
     return normalised_ws
 
 

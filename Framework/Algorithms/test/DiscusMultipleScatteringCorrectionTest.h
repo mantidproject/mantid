@@ -34,9 +34,9 @@ public:
   void updateTrackDirection(Mantid::Geometry::Track &track, const double cosT, const double phi) {
     DiscusMultipleScatteringCorrection::updateTrackDirection(track, cosT, phi);
   }
-  std::shared_ptr<Mantid::HistogramData::Histogram> integrateCumulative(const Mantid::HistogramData::Histogram &h,
-                                                                        double xmax) {
-    return DiscusMultipleScatteringCorrection::integrateCumulative(h, xmax);
+  void integrateCumulative(const Mantid::HistogramData::Histogram &h, double xmax, std::vector<double> &resultX,
+                           std::vector<double> &resultY) {
+    DiscusMultipleScatteringCorrection::integrateCumulative(h, xmax, resultX, resultY);
   }
 };
 
@@ -348,13 +348,14 @@ public:
     DiscusMultipleScatteringCorrectionHelper alg;
     Mantid::HistogramData::Histogram test(Mantid::HistogramData::Points({0., 1., 2., 3.}),
                                           Mantid::HistogramData::Frequencies({1., 1., 1., 1.}));
-    auto testResult = alg.integrateCumulative(test, 2.2);
-    TS_ASSERT_EQUALS(testResult->dataY()[3], 2.2);
-    TS_ASSERT_THROWS(testResult = alg.integrateCumulative(test, 3.2), std::runtime_error &);
-    testResult = alg.integrateCumulative(test, 2.0);
-    TS_ASSERT_EQUALS(testResult->dataY()[2], 2.0);
-    testResult = alg.integrateCumulative(test, 0.);
-    TS_ASSERT_EQUALS(testResult->dataY()[0], 0.);
+    std::vector<double> testResultX, testResultY;
+    alg.integrateCumulative(test, 2.2, testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[3], 2.2);
+    TS_ASSERT_THROWS(alg.integrateCumulative(test, 3.2, testResultX, testResultY), std::runtime_error &);
+    alg.integrateCumulative(test, 2.0, testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[2], 2.0);
+    alg.integrateCumulative(test, 0., testResultX, testResultY);
+    TS_ASSERT_EQUALS(testResultY[0], 0.);
   }
 
   //---------------------------------------------------------------------------
@@ -405,6 +406,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberScatterings", NSCATTERINGS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsSingle", 1));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NeutronPathsMultiple", 1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ImportanceSampling", true));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "MuscatResults"));
     alg.execute();
     TS_ASSERT(!alg.isExecuted());

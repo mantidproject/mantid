@@ -337,7 +337,7 @@ def keep_single_ws_unit(d_spacing_group, tof_group, unit_to_keep):
         raise ValueError("The user specified unit to keep is unknown")
 
 
-def load_current_normalised_ws_list(run_number_string, instrument, input_batching=None, file_name_override=None):
+def load_current_normalised_ws_list(run_number_string, instrument, perform_inc_norm, input_batching=None, file_name_override=None):
     """
     Loads a workspace using Mantid and then performs current normalisation on it. Additionally it will either
     load a range of runs individually or summed depending on the user specified behaviour queried from the instrument.
@@ -367,7 +367,7 @@ def load_current_normalised_ws_list(run_number_string, instrument, input_batchin
     instrument.mask_prompt_pulses_if_necessary(raw_ws_list)
 
     normalised_ws_list = _normalise_workspaces(ws_list=raw_ws_list, run_details=run_information,
-                                               instrument=instrument)
+                                               instrument=instrument, perform_inc_norm=perform_inc_norm)
 
     return normalised_ws_list
 
@@ -609,7 +609,7 @@ def _crop_single_ws_in_tof(ws_to_rebin, x_max, x_min):
     return cropped_ws
 
 
-def _normalise_workspaces(ws_list, instrument, run_details):
+def _normalise_workspaces(ws_list, instrument, run_details, perform_inc_norm):
     """
     Normalises the workspace list by current by calling the instrument implementation
     :param ws_list: A list of workspace to perform normalisation on
@@ -619,7 +619,7 @@ def _normalise_workspaces(ws_list, instrument, run_details):
     """
     output_list = []
     for ws in ws_list:
-        if not ws.isDistribution():
+        if perform_inc_norm:
             output_list.append(instrument._normalise_ws_current(ws_to_correct=ws))
         else:
             output_list.append(ws)
@@ -688,7 +688,8 @@ def _sum_ws_range(ws_list):
     :return: A single summed workspace
     """
     # Sum all workspaces
-    out_ws_name = "__summed_" + uuid.uuid4().hex
+    # Strip off the __ prefix and the uuid postfix if present
+    out_ws_name = "summed_" + ws_list[0].name().rsplit("_",1)[0].lstrip("__") + '_' + ws_list[-1].name().rsplit("_",1)[0].lstrip("__")
     summed_ws = mantid.MergeRuns(InputWorkspaces=ws_list, OutputWorkspace=out_ws_name)
     return summed_ws
 

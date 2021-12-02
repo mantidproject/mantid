@@ -66,9 +66,11 @@ class AbstractInst(object):
     def _focus(self,
                run_number_string,
                do_van_normalisation,
+               do_inc_normalisation,
                do_absorb_corrections,
                sample_details=None,
-               file_name_override=None):
+               file_name_override=None,
+               debug=False):
         """
         Focuses the user specified run - should be called by the concrete instrument
         :param run_number_string: The run number(s) to be processed
@@ -78,10 +80,12 @@ class AbstractInst(object):
         self._is_vanadium = False
         return focus.focus(run_number_string=run_number_string,
                            perform_vanadium_norm=do_van_normalisation,
+                           perform_inc_norm=do_inc_normalisation,
                            instrument=self,
                            absorb=do_absorb_corrections,
                            sample_details=sample_details,
-                           file_name_override=file_name_override)
+                           file_name_override=file_name_override,
+                           debug=debug)
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         """

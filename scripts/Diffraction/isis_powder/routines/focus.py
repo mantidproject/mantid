@@ -14,21 +14,22 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, absorb, sample_details=None, file_name_override=None):
+def focus(run_number_string, instrument, perform_vanadium_norm, perform_inc_norm, absorb, sample_details=None,
+          file_name_override=None, debug=False):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
                                         run_number=run_number_string, absorb=absorb, sample_details=sample_details,
                                         file_name_override=file_name_override)
     elif input_batching == INPUT_BATCHING.Summed:
-        return _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb=absorb,
-                                     sample_details=sample_details, file_name_override=file_name_override)
+        return _batched_run_focusing(instrument, perform_vanadium_norm, perform_inc_norm, run_number_string, absorb=absorb,
+                                     sample_details=sample_details, file_name_override=file_name_override, debug=debug)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
 def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details,
-                  vanadium_path):
+                  vanadium_path, debug=False):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
         _test_splined_vanadium_exists(instrument, run_details)
@@ -58,17 +59,18 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
 
     # Correct for absorption / multiple scattering if required
     if absorb:
-        input_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
+        abs_corr_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
     else:
         # Set sample material if specified by the user
         if sample_details is not None:
             mantid.SetSample(InputWorkspace=input_workspace,
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
+        abs_corr_workspace = mantid.CloneWorkspace(inputWorkspace=input_workspace)
     # Align
-    mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
+    mantid.ApplyDiffCal(InstrumentWorkspace=abs_corr_workspace,
                         CalibrationFile=run_details.offset_file_path)
-    aligned_ws = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="dSpacing")
+    aligned_ws = mantid.ConvertUnits(InputWorkspace=abs_corr_workspace, Target="dSpacing")
 
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
     if solid_angle:
@@ -100,6 +102,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                   IgnoreBinErrors=True)
         focused_ws = mantid.GroupDetectors(InputWorkspace=aligned_ws,
                                            CopyGroupingFromWorkspace='cal_workspace_group')
+        mantid.DeleteWorkspace('cal_workspace_group')
     else:
         focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                  GroupingFileName=run_details.grouping_file_path)
@@ -126,9 +129,11 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                unit_to_keep=instrument._get_unit_to_keep())
 
     # Tidy workspaces from Mantid
-    common.remove_intermediate_workspace(input_workspace)
-    common.remove_intermediate_workspace(aligned_ws)
-    common.remove_intermediate_workspace(focused_ws)
+    if not debug:
+        common.remove_intermediate_workspace(input_workspace)
+        common.remove_intermediate_workspace(abs_corr_workspace)
+        common.remove_intermediate_workspace(aligned_ws)
+        common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(output_spectra)
 
     return d_spacing_group
@@ -148,9 +153,11 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, absorb, sample_details, file_name_override):
+def _batched_run_focusing(instrument, perform_vanadium_norm, perform_inc_norm, run_number_string, absorb, sample_details,
+                          file_name_override, debug):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument,
+                                                          perform_inc_norm = perform_inc_norm,
                                                           file_name_override=file_name_override)
     run_details = instrument._get_run_details(run_number_string=run_number_string)
     vanadium_splines = None
@@ -165,7 +172,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
-                               sample_details=sample_details, vanadium_path=vanadium_splines)
+                               sample_details=sample_details, vanadium_path=vanadium_splines, debug=debug)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         if hasattr(vanadium_splines, "OutputWorkspace"):
             vanadium_splines = vanadium_splines.OutputWorkspace

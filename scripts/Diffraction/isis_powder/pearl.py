@@ -41,7 +41,9 @@ class Pearl(AbstractInst):
             return self._focus(run_number_string=self._inst_settings.run_number,
                                file_name_override=self._inst_settings.filename_override,
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
-                               do_van_normalisation=self._inst_settings.van_norm)
+                               do_van_normalisation=self._inst_settings.van_norm,
+                               do_inc_normalisation=self._inst_settings.inc_norm,
+                               debug=self._inst_settings.debug)
 
     def create_vanadium(self, **kwargs):
         kwargs[
