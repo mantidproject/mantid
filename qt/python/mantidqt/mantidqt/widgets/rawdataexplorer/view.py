@@ -7,7 +7,6 @@
 #  This file is part of the mantidqt package
 #
 
-import os.path
 from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel
 from qtpy.QtCore import *
 
@@ -182,6 +181,7 @@ class RawDataExplorerView(QWidget):
         file_model.setRootPath("/")
         self.fileTree.setModel(file_model)
         self.fileTree.header().hideSection(2)
+        self.fileTree.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.fileTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.fileTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
@@ -235,7 +235,8 @@ class RawDataExplorerView(QWidget):
             file_path = file_model.filePath(index)
             if index == last_clicked_index:
                 self._last_clicked = file_model.filePath(last_clicked_index)
-            if not os.path.isfile(file_path):
+            if file_model.isDir(index):
+                selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
                 continue
             if file_path not in selection:
                 selection.add(file_path)
