@@ -857,9 +857,6 @@ foreach(_header ${OLD_UI_HEADERS})
   file(REMOVE ${_header})
 endforeach()
 
-# Python unit tests
-set(TEST_PY_FILES test/FileFinderWidgetTest.py)
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -1034,3 +1031,4 @@ mtd_add_qt_tests(
 )
 
 add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
