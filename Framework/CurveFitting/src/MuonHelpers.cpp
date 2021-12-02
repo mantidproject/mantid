@@ -8,18 +8,16 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidCurveFitting/MuonHelpers.h"
-
-#include <algorithm>
-#include <numeric>
+#include <cmath>
 
 namespace Mantid::CurveFitting::MuonHelper {
 
-double getAz(double xValue, const double charField){
+double getAz(double xValue, const double charField) {
   const double b = xValue / charField;
   const double bSq = pow(b, 2);
-  const double A_z = (3 / 4) - (1 / (4 * bSq)) + (pow(bSq - 1, 2) / (8 * pow(b, 3))) * log(fabs((b + 1) / (b - 1)));
+  const double A_z = (3.0 / 4.0) - (1.0 / (4.0 * bSq)) +
+                     (pow(bSq - 1.0, 2.0) / (8.0 * pow(b, 3.0))) * log10(fabs((b + 1.0) / (b - 1.0)));
   return A_z;
 }
-
 
 } // namespace Mantid::CurveFitting::MuonHelper

@@ -434,6 +434,8 @@ set(TEST_FILES
     Functions/CrystalFieldSusceptibilityTest.h
     Functions/CrystalFieldTest.h
     Functions/CubicSplineTest.h
+    Functions/DecoupAsymPowderMagLongTest.h
+    Functions/DecoupAsymPowderMagRotTest.h
     Functions/DeltaFunctionTest.h
     Functions/DiffRotDiscreteCircleTest.h
     Functions/DiffSphereTest.h
@@ -506,6 +508,7 @@ set(TEST_FILES
     LatticeFunctionTest.h
     MultiDomainCreatorTest.h
     MultiDomainFunctionTest.h
+    MuonHelperTest.h
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
     SpecialFunctionSupportTest.h
