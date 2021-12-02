@@ -26,15 +26,17 @@ class SelectionInfoPresenter(object):
         rows = [ names_and_rows[name] for name in names]
         self._view.selection_table.set_selected_rows(rows)
 
-    def update_lines(self, ws_list, indicies):
+    def update_lines(self, ws_list, indicies, to_plot=[]):
         self._lines = {}
         for name, index in zip(ws_list, indicies):
             self._lines[name]=index
-        return self.handle_selected_workspaces_changed(ws_list)
+        return self.handle_selected_workspaces_changed(ws_list, to_plot)
 
-    def handle_selected_workspaces_changed(self, workspace_names):
+    def handle_selected_workspaces_changed(self, workspace_names, to_plot=[]):
         runs, groups_and_pairs = self.get_runs_groups_and_pairs(workspace_names)
         self._view.selection_table.set_workspaces(workspace_names, runs, groups_and_pairs)
+        if to_plot:
+            self.set_selected_rows_from_name(to_plot)
         if len(self._view.selection_table.get_selected_rows()) == 0:
             self._view.selection_table.set_selection_to_last_row()
         return self.get_selection()
@@ -94,7 +96,9 @@ class PlotDataPanePresenter(BasePanePresenter):
         else:
             new_lines_to_plot = {self._model.convert_ws_name_to_asymmetry(key): value for key, value in lines_to_plot.items()}
 
-        self.handle_data_updated(autoscale=True, hold_on=False)
+        workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
+                                                                                      self._view.get_plot_type())
+        lines_to_plot = self.selection_info.update_lines(workspace_list, indicies)
         self.selection_info.set_selected_rows_from_name(new_lines_to_plot.keys())
         self.plot_lines(new_lines_to_plot, autoscale=True, hold_on=False)
         # the data change probably means its the wrong scale
@@ -111,9 +115,12 @@ class PlotDataPanePresenter(BasePanePresenter):
 
     # want to handle extending the loaded data without unselecting stuff
     def handle_data_updated(self, autoscale=True, hold_on=False):
+        previous_lines_to_plot = self.selection_info.get_selection()
+
         workspace_list, indicies = self._model.get_workspace_list_and_indices_to_plot(self._view.is_raw_plot(),
                                                                                       self._view.get_plot_type())
-        lines_to_plot = self.selection_info.update_lines(workspace_list, indicies)
+        to_plot = [name for name in workspace_list if name in previous_lines_to_plot]
+        lines_to_plot = self.selection_info.update_lines(workspace_list, indicies, to_plot)
         self.plot_lines(lines_to_plot, autoscale, hold_on)
 
     def plot_lines(self, lines_to_plot, autoscale, hold_on):
