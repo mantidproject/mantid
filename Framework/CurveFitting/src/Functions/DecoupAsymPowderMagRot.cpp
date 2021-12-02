@@ -7,9 +7,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/MuonHelpers.h"
 #include "MantidCurveFitting/Functions/DecoupAsymPowderMagRot.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/MuonHelpers.h"
 
 #include <cmath>
 
@@ -36,7 +36,7 @@ void DecoupAsymPowderMagRot::function1D(double *out, const double *xValues, cons
 
   for (size_t i = 0; i < nData; i++) {
     auto A_z = getAz(xValues[i], charField);
-    out[i] = asym * (1-A_z);
+    out[i] = asym * (1 - A_z);
   }
 }
 

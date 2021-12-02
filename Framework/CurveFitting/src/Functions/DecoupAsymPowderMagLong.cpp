@@ -7,9 +7,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCurveFitting/MuonHelpers.h"
 #include "MantidCurveFitting/Functions/DecoupAsymPowderMagLong.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidCurveFitting/MuonHelpers.h"
 
 #include <cmath>
 
@@ -33,7 +33,6 @@ void DecoupAsymPowderMagLong::init() {
 void DecoupAsymPowderMagLong::function1D(double *out, const double *xValues, const size_t nData) const {
   const double asym = getParameter("Asymmetry");
   const double charField = getParameter("CharField");
-
 
   for (size_t i = 0; i < nData; i++) {
     auto A_z = getAz(xValues[i], charField);

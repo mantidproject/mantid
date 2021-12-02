@@ -50,7 +50,7 @@ public:
 
     for (size_t i = 0; i < numPoints; i++) {
       auto A_z = getAz(xValues[i], charField);
-      TS_ASSERT_DELTA(yValues[i], asymm * (1-A_z), 1e-12);
+      TS_ASSERT_DELTA(yValues[i], asymm * (1 - A_z), 1e-12);
     }
   }
 
@@ -68,7 +68,6 @@ public:
 
     TS_ASSERT_DELTA(dfdasym, 0.5644761055, 1e-8);
     TS_ASSERT_DELTA(dfdcharField, -2.3, 0.01);
-
   }
 
 private:
@@ -89,5 +88,4 @@ private:
     func->setParameter("CharField", 4.0);
     return func;
   }
-
 };
