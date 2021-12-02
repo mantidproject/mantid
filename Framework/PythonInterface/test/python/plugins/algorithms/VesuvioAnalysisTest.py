@@ -161,7 +161,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
     def test_maths_is_safe_fails(self):
         table = self.generate_table()
         constraints = self.generate_constraints_table()
-        bad_expressions = [ "2*r", "2,3", "4£", "rm -r *"]
+        bad_expressions = [ "2*r", "2,3", "4@", "rm -r *"]
         for expression in bad_expressions:
             alg = self.set_up_alg()
             constraints.addRow([0, 1, expression, "eq"])
