@@ -14,6 +14,7 @@ Getting Started
    GettingStartedCondaLinux
    GettingStartedCondaOSX
    GettingStartedNoneConda
+   GettingStartedCondaIDEs
 
 The Choice
 ##########
@@ -26,6 +27,8 @@ method eventually).
 * Conda on Linux: :ref:`GettingStartedCondaLinux`
 * Conda on MacOS: :ref:`GettingStartedCondaOSX`
 * None Conda: :ref:`GettingStartedNoneConda`
+
+* Setting up IDEs in Conda: :ref:`GettingStartedCondaIDEs`
 
 Custom git setup for inside the ORNL firewall:
 ----------------------------------------------
