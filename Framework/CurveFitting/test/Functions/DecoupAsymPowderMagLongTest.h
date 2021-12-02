@@ -68,7 +68,6 @@ public:
 
     TS_ASSERT_DELTA(dfdasym, 0.4355238945, 1e-8);
     TS_ASSERT_DELTA(dfdcharField, 2.3, 0.01);
-
   }
 
 private:
@@ -89,5 +88,4 @@ private:
     func->setParameter("CharField", 4.0);
     return func;
   }
-
 };
