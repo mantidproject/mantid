@@ -114,9 +114,10 @@ class SaveReflections(PythonAlgorithm):
         output_format = ReflectionFormat[self.getPropertyValue("Format")]
         file_name = self.getPropertyValue("Filename")
         split_files = self.getProperty("SplitFiles").value
-        # find the max intensity so fits in column with format 12.2f
+        # find the max intensity so fits in column with format 12.2f in Fullprof and Jana, 8.2f in SaveHKL (SHELX, GSAS)
         max_intens = max(workspace.column('Intens'))
-        scale = 1 if max_intens < 1E8 else 10**(-(int(np.log10(max_intens))-7))
+        max_exponent = 8 if output_format in [ReflectionFormat.Fullprof, ReflectionFormat.Jana] else 4
+        scale = 1 if max_intens < 10**max_exponent else 10**(-(int(np.log10(max_intens))-max_exponent+1))
         FORMAT_MAP[output_format]()(file_name, workspace, split_files, scale)
 
 
