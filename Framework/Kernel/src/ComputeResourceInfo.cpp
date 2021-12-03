@@ -13,6 +13,7 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
 
+#include <assert.h>
 #include <ostream>
 #include <stdexcept>
 
@@ -32,14 +33,11 @@ Logger g_log("ComputeResourceInfo");
  * @throw std::runtime_error if name or required attributes are not
  * found
  */
-ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac, const Poco::XML::Element *elem) : m_facility(fac) {
-
-  m_name = elem->getAttribute("name");
+ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac, const Poco::XML::Element *elem)
+    : m_facility(fac), m_name(elem->getAttribute("name")) {
+  assert(elem);
   if (m_name.empty()) {
-    std::string elemStr;
-    if (elem)
-      elemStr = elem->innerText();
-    throw std::runtime_error("The compute resource name is not defined, at element: " + elemStr);
+    throw std::runtime_error("The compute resource name is not defined, at element: " + elem->innerText());
   }
 
   // default: Mantid web service API:
