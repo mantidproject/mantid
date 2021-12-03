@@ -14,7 +14,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 
-#include "MantidTestHelpers/ONCatHelper.h"
+#include "MantidFrameworkTestHelpers/ONCatHelper.h"
 
 #include <map>
 #include <memory>
@@ -33,10 +33,10 @@ using Mantid::Catalog::OAuth::OAuthFlow;
 using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::ONCat::ONCat;
 using Mantid::Catalog::ONCat::QueryParameter;
+using Mantid::FrameworkTestHelpers::make_mock_oncat_api;
+using Mantid::FrameworkTestHelpers::make_mock_token_store;
+using Mantid::FrameworkTestHelpers::make_mock_token_store_already_logged_in;
 using Mantid::Kernel::Exception::InternetError;
-using Mantid::TestHelpers::make_mock_oncat_api;
-using Mantid::TestHelpers::make_mock_token_store;
-using Mantid::TestHelpers::make_mock_token_store_already_logged_in;
 using Mantid::Types::Core::DateAndTime;
 
 //----------------------------------------------------------------------

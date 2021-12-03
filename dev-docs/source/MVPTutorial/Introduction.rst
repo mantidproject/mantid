@@ -24,3 +24,6 @@ open to interpretation if some files are classed as a view or a model
 
 A more thorough explanation of MVP can be found at
 :ref:`MVPDesignIntro`.
+
+This tutorial requires the packages ``qtpy``, ``pyqt5``, ``numpy`` and
+``matplotlib`` to be installed in your python environment.

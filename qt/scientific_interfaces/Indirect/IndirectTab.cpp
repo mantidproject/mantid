@@ -15,6 +15,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
@@ -291,8 +292,8 @@ void IndirectTab::addSaveWorkspaceToQueue(const QString &wsName, const QString &
 
 void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::string &filename) {
   // Setup the input workspace property
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
-  saveProps["InputWorkspace"] = wsName;
+  auto saveProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  saveProps->setPropertyValue("InputWorkspace", wsName);
 
   // Setup the algorithm
   auto saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
@@ -304,7 +305,7 @@ void IndirectTab::addSaveWorkspaceToQueue(const std::string &wsName, const std::
     saveAlgo->setProperty("Filename", filename);
 
   // Add the save algorithm to the batch
-  m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
+  m_batchAlgoRunner->addAlgorithm(saveAlgo, std::move(saveProps));
 }
 
 /**
@@ -600,9 +601,8 @@ QVector<QString> IndirectTab::convertStdStringVector(const std::vector<std::stri
   QVector<QString> resultVec;
   resultVec.reserve(boost::numeric_cast<int>(stringVec.size()));
 
-  for (auto &str : stringVec) {
-    resultVec.push_back(QString::fromStdString(str));
-  }
+  std::transform(stringVec.cbegin(), stringVec.cend(), std::back_inserter(resultVec),
+                 [](const auto &str) { return QString::fromStdString(str); });
   return resultVec;
 }
 

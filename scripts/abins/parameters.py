@@ -70,6 +70,8 @@ sampling = {
     's_relative_threshold': 0.01,  # low cutoff for S intensity (fraction of maximum S)
     's_absolute_threshold': 1e-7,  # low cutoff for S intensity (absolute value)
     'broadening_scheme': 'auto',
+    'force_constants': {  # Parameters related to imported Force Constants data (e.g. Phonopy .yaml)
+        'qpt_cutoff': 15.},  # Distance in Angstrom determining q-point sampling mesh
     }
 
 # Parameters related to estimated of spectra of high quantum orders by repeated convolution with fundamentals

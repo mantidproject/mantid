@@ -133,6 +133,7 @@ class DrillView(QMainWindow):
 
     def __init__(self, parent=None, window_flags=None):
         super(DrillView, self).__init__(parent)
+        self.setAttribute(Qt.WA_DeleteOnClose)
         if window_flags:
             self.setWindowFlags(window_flags)
         self.here = os.path.dirname(os.path.realpath(__file__))

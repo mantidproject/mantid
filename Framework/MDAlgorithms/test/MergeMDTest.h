@@ -8,9 +8,9 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

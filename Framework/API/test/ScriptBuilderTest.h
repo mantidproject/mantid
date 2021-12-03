@@ -11,9 +11,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/ScriptBuilder.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -531,6 +531,67 @@ public:
     TS_ASSERT_EQUALS(scriptText, result);
 
     m_ads.remove("test_output_workspace");
+  }
+
+  void test_Build_Load_Uses_Args_From_Correct_Load() {
+    std::string dead_time_string = "DeadTimeTable='dead_time_table'";
+    std::string grouping_string = "GroupingTable='grouping_table'";
+
+    auto alg = m_algFactory.create("Load", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("Filename", "MUSR00022725.nxs");
+    alg->setProperty("OutputWorkspace", "MUSR00022725");
+    // muon specific properties
+    alg->setProperty("DeadTimeTable", "dead_time_table");
+    alg->setProperty("DetectorGroupingTable", "grouping_table");
+    alg->execute();
+
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("MUSR00022725");
+    auto wsHist = ws->getHistory();
+
+    // check the muon specific properties are in the history records
+    const auto &hist_props = wsHist.getAlgorithmHistory(0)->getProperties();
+    bool foundDeadTimeTable = false;
+    bool foundGroupingTable = false;
+    for (const auto &hist_prop : hist_props) {
+      if (hist_prop->name() == "dead_time_table") {
+        foundDeadTimeTable = true;
+      } else if (hist_prop->name() == "grouping_table") {
+        foundGroupingTable = true;
+      }
+    }
+    TSM_ASSERT("Could not find the dead time table in the algorithm history.", !foundDeadTimeTable);
+    TSM_ASSERT("Could not find the grouping table in the algorithm history.", !foundGroupingTable);
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+
+    TS_ASSERT(scriptText.find(dead_time_string) != std::string::npos);
+    TS_ASSERT(scriptText.find(grouping_string) != std::string::npos);
+
+    m_ads.remove("MUSR00022725");
+  }
+
+  void test_Build_Load_Uses_Correct_version() {
+    auto alg = m_algFactory.create("Load", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("Filename", "IRS21360.raw");
+    alg->setProperty("OutputWorkspace", "IRS21360");
+    alg->execute();
+
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("IRS21360");
+    auto wsHist = ws->getHistory();
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+    const std::string input_string = "IRS21360.raw";
+    const std::string output_string = "IRS21360";
+    TS_ASSERT(scriptText.find(input_string) != std::string::npos);
+    TS_ASSERT(scriptText.find(output_string) != std::string::npos);
+
+    m_ads.remove("IRS21360");
   }
 
 private:

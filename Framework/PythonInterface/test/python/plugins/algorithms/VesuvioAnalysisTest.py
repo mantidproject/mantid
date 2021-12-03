@@ -143,6 +143,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         bad_expressions = [ "2*r", "2,3", "4£", "rm -r *"]
         for expression in bad_expressions:
             alg = self.set_up_alg()
+            alg.setProperty('ConstraintsProfileNumbers', [0,1])
             alg.setProperty('ConstraintsProfileScatteringCrossSection',expression )
             alg.setProperty('ComptonProfile', table)
             alg.setProperty('Spectra', [135, 182])
@@ -155,6 +156,7 @@ class VesuvioAnalysisTest(unittest.TestCase):
         good_expressions = [ "2*3", "2+3", "4-1", "5/2", "(3+2)", "2.3+4.5"]
         for expression in good_expressions:
             alg = self.set_up_alg()
+            alg.setProperty('ConstraintsProfileNumbers', [0,1])
             alg.setProperty('ConstraintsProfileScatteringCrossSection',expression )
             alg.setProperty('ComptonProfile', table)
             alg.setProperty('Spectra', [135, 182])

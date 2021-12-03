@@ -10,7 +10,7 @@
 
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidCurveFitting/Algorithms/SplineSmoothing.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::SplineSmoothing;
 

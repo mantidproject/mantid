@@ -15,6 +15,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
 #include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
@@ -30,6 +31,7 @@ using namespace MantidQt::CustomInterfaces::ISISReflectometry::ModelCreationHelp
 using namespace MantidQt::API;
 using testing::_;
 using testing::AtLeast;
+using testing::ByMove;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
@@ -682,27 +684,30 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
     auto expected = defaultLiveMonitorAlgorithmOptions(instrument, updateInterval);
-    assertAlgorithmPropertiesContainOptions(expected, algRunner);
+    assertAlgorithmPropertiesContainOptions(*expected, algRunner);
     verifyAndClear();
   }
 
   void testStartMonitorSetsDefaultPostProcessingProperties() {
     auto presenter = makePresenter();
-    auto options = defaultLiveMonitorReductionOptions();
-    expectGetLiveDataOptions(options);
+    expectGetLiveDataOptions(defaultLiveMonitorReductionOptions());
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    assertPostProcessingPropertiesContainOptions(options, algRunner);
+    auto expected = defaultLiveMonitorReductionOptions();
+    assertPostProcessingPropertiesContainOptions(*expected, algRunner);
     verifyAndClear();
   }
 
   void testStartMonitorSetsUserSpecifiedPostProcessingProperties() {
     auto presenter = makePresenter();
-    auto options = IConfiguredAlgorithm::AlgorithmRuntimeProps{{"Prop1", "val1"}, {"Prop2", "val2"}};
-    expectGetLiveDataOptions(options);
+    auto options = defaultLiveMonitorReductionOptions();
+    options->setPropertyValue("Prop1", "val1");
+    options->setPropertyValue("Prop2", "val2");
+    expectGetLiveDataOptions(std::make_unique<MantidQt::API::AlgorithmRuntimeProps>(
+        dynamic_cast<const MantidQt::API::AlgorithmRuntimeProps &>(*options)));
     auto algRunner = expectGetAlgorithmRunner();
     presenter.notifyStartMonitor();
-    assertPostProcessingPropertiesContainOptions(options, algRunner);
+    assertPostProcessingPropertiesContainOptions(*options, algRunner);
     verifyAndClear();
   }
 
@@ -807,26 +812,29 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_jobs));
   }
 
-  IConfiguredAlgorithm::AlgorithmRuntimeProps
+  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
   defaultLiveMonitorAlgorithmOptions(const std::string &instrument = std::string("OFFSPEC"),
                                      const int &updateInterval = 15) {
     const std::string updateIntervalString = std::to_string(updateInterval);
-    return IConfiguredAlgorithm::AlgorithmRuntimeProps{
-        {"Instrument", instrument},
-        {"OutputWorkspace", "IvsQ_binned_live"},
-        {"AccumulationWorkspace", "TOF_live"},
-        {"AccumulationMethod", "Replace"},
-        {"UpdateEvery", updateIntervalString},
-        {"PostProcessingAlgorithm", "ReflectometryReductionOneLiveData"},
-        {"RunTransitionBehavior", "Restart"},
-    };
+    auto props = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+
+    props->setPropertyValue("Instrument", instrument);
+    props->setPropertyValue("OutputWorkspace", "IvsQ_binned_live");
+    props->setPropertyValue("AccumulationWorkspace", "TOF_live");
+    props->setPropertyValue("AccumulationMethod", "Replace");
+    props->setPropertyValue("UpdateEvery", updateIntervalString);
+    props->setPropertyValue("PostProcessingAlgorithm", "ReflectometryReductionOneLiveData");
+    props->setPropertyValue("RunTransitionBehavior", "Restart");
+    return props;
   }
 
-  IConfiguredAlgorithm::AlgorithmRuntimeProps
+  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps>
   defaultLiveMonitorReductionOptions(const std::string &instrument = std::string("OFFSPEC")) {
-    return IConfiguredAlgorithm::AlgorithmRuntimeProps{{"GetLiveValueAlgorithm", "GetLiveInstrumentValue"},
-                                                       {"InputWorkspace", "TOF_live"},
-                                                       {"Instrument", instrument}};
+    auto props = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+    props->setPropertyValue("GetLiveValueAlgorithm", "GetLiveInstrumentValue");
+    props->setPropertyValue("InputWorkspace", "TOF_live");
+    props->setPropertyValue("Instrument", instrument);
+    return props;
   }
 
   void expectRunsTableWithContent(RunsTable &runsTable) {
@@ -1081,16 +1089,16 @@ private:
     EXPECT_CALL(m_view, getLiveDataUpdateInterval()).Times(AtLeast(1)).WillRepeatedly(Return(updateInterval));
   }
 
-  void expectGetLiveDataOptions(
-      IConfiguredAlgorithm::AlgorithmRuntimeProps options = IConfiguredAlgorithm::AlgorithmRuntimeProps(),
-      std::string const &instrument = std::string("OFFSPEC"), int const &updateInterval = 15) {
+  void
+  expectGetLiveDataOptions(std::unique_ptr<IAlgorithmRuntimeProps> options = std::make_unique<AlgorithmRuntimeProps>(),
+                           std::string const &instrument = std::string("OFFSPEC"), int const &updateInterval = 15) {
     expectSearchInstrument(instrument);
     expectGetUpdateInterval(updateInterval);
-    EXPECT_CALL(m_mainPresenter, rowProcessingProperties()).Times(1).WillOnce(Return(std::move(options)));
+    EXPECT_CALL(m_mainPresenter, rowProcessingProperties()).Times(1).WillOnce(Return(ByMove(std::move(options))));
   }
 
   void expectGetLiveDataOptions(std::string const &instrument, const int &updateInterval) {
-    expectGetLiveDataOptions(IConfiguredAlgorithm::AlgorithmRuntimeProps(), instrument, updateInterval);
+    expectGetLiveDataOptions(std::make_unique<AlgorithmRuntimeProps>(), instrument, updateInterval);
   }
 
   std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
@@ -1112,23 +1120,24 @@ private:
     EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(AtLeast(1)).WillRepeatedly(Return(false));
   }
 
-  void assertAlgorithmPropertiesContainOptions(IConfiguredAlgorithm::AlgorithmRuntimeProps const &expected,
+  void assertAlgorithmPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
                                                std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    for (auto const &kvp : expected) {
-      TS_ASSERT_EQUALS(alg->getPropertyValue(kvp.first), kvp.second);
+    const auto &expectedAlgProps = expected.getProperties();
+    const auto &resultAlgProps = alg->getProperties();
+    for (const auto &expectedProp : expectedAlgProps) {
+      const auto foundItem =
+          std::find_if(resultAlgProps.cbegin(), resultAlgProps.cend(), [&expectedProp](const auto &prop) {
+            return expectedProp->value() == prop->value() && expectedProp->name() == prop->name();
+          });
+      TS_ASSERT_DIFFERS(foundItem, resultAlgProps.cend());
     }
   }
 
-  void assertPostProcessingPropertiesContainOptions(IConfiguredAlgorithm::AlgorithmRuntimeProps &expected,
+  void assertPostProcessingPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
                                                     std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
-    auto resultString = alg->getPropertyValue("PostProcessingProperties");
-    auto result = parseKeyValueString(resultString, ";");
-    for (auto const &kvp : expected) {
-      TS_ASSERT(result.find(kvp.first) != result.end());
-      TS_ASSERT_EQUALS(result[kvp.first], expected[kvp.first]);
-    }
+    TS_ASSERT_EQUALS(convertAlgPropsToString(expected), alg->getPropertyValue("PostProcessingProperties"))
   }
 
   double m_thetaTolerance;

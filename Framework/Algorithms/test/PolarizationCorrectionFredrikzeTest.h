@@ -16,8 +16,8 @@
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <memory>
 

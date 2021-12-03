@@ -19,7 +19,7 @@
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MockObjects.h"
 
 using namespace Mantid::Crystal;

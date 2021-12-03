@@ -8,8 +8,8 @@
 
 #include "InstViewModel.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/IMessageHandler.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "test/ReflMockObjects.h"
 
 #include <cxxtest/TestSuite.h>
@@ -41,6 +41,15 @@ public:
     TS_ASSERT_EQUALS(result->getWorkspace(), ws)
   }
 
+  void test_update_workspace_initializes_actor() {
+    auto model = makeInstViewModel();
+    auto ws = createWorkspace();
+    model.updateWorkspace(ws);
+
+    const auto result = model.getInstrumentViewActor();
+    TS_ASSERT(result->isInitialized());
+  }
+
   void test_get_sample_pos() {
     auto model = makeInstViewModel();
     auto ws = createWorkspace();
@@ -64,8 +73,8 @@ public:
     model.updateWorkspace(ws);
 
     auto const detIndices = std::vector<size_t>{1, 2, 3};
-    auto const expected = std::vector<size_t>{1, 2, 3};
-    auto const workspaceIndices = model.detIndicesToWsIndices(detIndices);
+    auto const expected = std::vector<Mantid::detid_t>{2, 3, 4};
+    auto const workspaceIndices = model.detIndicesToDetIDs(detIndices);
     TS_ASSERT_EQUALS(workspaceIndices, expected);
   }
 

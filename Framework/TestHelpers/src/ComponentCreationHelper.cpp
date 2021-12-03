@@ -16,7 +16,7 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -837,7 +837,7 @@ Instrument_sptr createSimpleInstrumentWithRotation(const Mantid::Kernel::V3D &so
                                                    const Mantid::Kernel::V3D &detectorPos,
                                                    const Mantid::Kernel::Quat &relativeBankRotation,
                                                    const Mantid::Kernel::Quat &relativeDetRotation,
-                                                   const Mantid::Kernel::V3D detOffset) {
+                                                   const Mantid::Kernel::V3D &detOffset) {
   Instrument_sptr instrument = std::make_shared<Instrument>();
   instrument->setReferenceFrame(
       std::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Left, "0,0,0"));

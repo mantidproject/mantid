@@ -9,10 +9,10 @@
 #include "MantidAPI/BoxControllerSettingsAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/HistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <utility>
 

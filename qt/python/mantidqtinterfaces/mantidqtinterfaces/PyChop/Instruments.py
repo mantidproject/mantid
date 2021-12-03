@@ -165,7 +165,7 @@ class ChopperSystem(object):
                 self.numDisk.append(2 if ('isDouble' in chopper and chopper['isDouble']) else 1)
                 self.isPhaseIndependent.append(
                     True if ('isPhaseIndependent' in chopper and chopper['isPhaseIndependent']) else False)
-                self.defaultPhase.append(chopper['defaultPhase'] if 'defaultPhase' in chopper else None)
+                self.defaultPhase.append(chopper['defaultPhase'] if 'defaultPhase' in chopper else 0)
                 self.phaseNames.append(chopper['phaseName'] if 'phaseName' in chopper else 'Chopper %d phase delay time' % (idx))
         if not any(self.slot_ang_pos):
             self.slot_ang_pos = None

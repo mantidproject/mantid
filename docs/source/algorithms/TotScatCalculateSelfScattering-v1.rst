@@ -18,12 +18,12 @@ sub-algorithms as listed below.
 #. :ref:`algm-ConvertUnits` Converts incident spectrum to wavelength.
 #. :ref:`algm-FitIncidentSpectrum` Fit a curve to the incident spectrum.
 #. :ref:`algm-CalculatePlaczekSelfScattering` Calculate the Placzek self scattering factor for each pixel.
+#. :ref:`algm-ConvertUnits` Convert the Placzek correction into MomentumTransfer
+#. :ref:`algm-Rebin` Rebin correction before GroupDetectors.
 #. :ref:`algm-LoadCalFile` Loads the detector calibration.
-#. :ref:`algm-DiffractionFocussing` Focus the Placzek self scattering factor into detector banks.
+#. :ref:`algm-GroupDetectors` Group the Placzek self scattering factor into detector banks.
 #. :ref:`algm-CreateWorkspace` Create a workspace containing the number of pixels in each detector bank.
 #. :ref:`algm-Divide` Normalize the Placzek correction by pixel number in bank
-#. :ref:`algm-ConvertToDistribution` Change the workspace into a format that can be subtracted.
-#. :ref:`algm-ConvertUnits` Converts correction into MomentumTransfer.
 
 Workflow
 ########

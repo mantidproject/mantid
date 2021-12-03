@@ -12,11 +12,10 @@ import json
 import copy
 
 from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import (RebinType, RangeStepType, SANSInstrument)
-from sans.state.StateObjects.wavelength_interval import WavelengthInterval
+from sans.common.enums import SANSInstrument, RebinType
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import (is_pure_none_or_not_none, is_not_none_and_first_larger_than_second,
-                                        one_is_none, validation_message)
+                                        validation_message)
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
@@ -27,9 +26,7 @@ class StateNormalizeToMonitor(metaclass=JsonSerializable):
         self.prompt_peak_correction_max = None  # : Float (Optional)
         self.prompt_peak_correction_enabled = False  # : Bool
 
-        self.rebin_type = RebinType.REBIN
-        self.wavelength_interval: WavelengthInterval = WavelengthInterval()
-        self.wavelength_step_type = RangeStepType.NOT_SET
+        self.rebin_type: RebinType = RebinType.REBIN
 
         self.background_TOF_general_start = None  # : Float
         self.background_TOF_general_stop = None  # : Float
@@ -37,17 +34,6 @@ class StateNormalizeToMonitor(metaclass=JsonSerializable):
         self.background_TOF_monitor_stop = {}  # : Dict
 
         self.incident_monitor = None  # : Int (Positive)
-
-    @property
-    def wavelength_step_type_lin_log(self):
-        # Return the wavelength step type, converting RANGE_LIN/RANGE_LOG to
-        # LIN/LOG. This is not ideal but is required for workflow algorithms
-        # which only accept a subset of the values in the enum
-        value = self.wavelength_step_type
-        result = RangeStepType.LIN if value in [RangeStepType.LIN, RangeStepType.RANGE_LIN] else \
-            RangeStepType.LOG if value in [RangeStepType.LOG, RangeStepType.RANGE_LOG] else \
-            RangeStepType.NOT_SET
-        return result
 
     def validate(self):
         is_invalid = {}
@@ -73,17 +59,6 @@ class StateNormalizeToMonitor(metaclass=JsonSerializable):
                                        {"prompt_peak_correction_min": self.prompt_peak_correction_min,
                                         "prompt_peak_correction_max": self.prompt_peak_correction_max})
             is_invalid.update(entry)
-
-        # -----------------
-        # Wavelength rebin
-        # -----------------
-        if one_is_none([self.wavelength_interval, self.wavelength_step_type]):
-            entry = validation_message("A wavelength entry has not been set.",
-                                       "Make sure that all entries are set.",
-                                       {"wavelength_interval": self.wavelength_interval,
-                                        "wavelength_step_type": self.wavelength_step_type})
-            is_invalid.update(entry)
-
         # ----------------------
         # Background correction
         # ----------------------

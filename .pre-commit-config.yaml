@@ -19,10 +19,14 @@ repos:
         args: [--allow-multiple-documents]
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: cc65979936c51496abced4205c264de492b2c779
+    rev: 511456a60b0c6cbb079e64a7cd8e3302f04859a6
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
+      - id: cmake-missing-pytest-files
+        # Exclude sphinx / template file
+        exclude: test_doctest.py|python_export_maker.py
+
 
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13

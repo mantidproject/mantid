@@ -13,8 +13,8 @@
 #include <QDir>
 #include <QFileInfo>
 
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/ProjectSavePresenter.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "ProjectSaveMockObjects.h"
 
 using namespace MantidQt::API;

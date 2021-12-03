@@ -214,7 +214,9 @@ void BatchJobManager::addAlgorithmForProcessingRow(Row &row, std::deque<IConfigu
   algorithms.emplace_back(std::move(algorithm));
 }
 
-AlgorithmRuntimeProps BatchJobManager::rowProcessingProperties() const { return createAlgorithmRuntimeProps(m_batch); }
+std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> BatchJobManager::rowProcessingProperties() const {
+  return createAlgorithmRuntimeProps(m_batch);
+}
 
 void BatchJobManager::algorithmStarted(IConfiguredAlgorithm_sptr algorithm) {
   auto item = getRunsTableItem(algorithm);

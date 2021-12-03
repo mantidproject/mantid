@@ -8,7 +8,7 @@
 
 Description
 -----------
-This algorithm allows the loading, reduction, and analysis of data obtained using Deep Inelastic Neutron Scattering (DINS), also referred to as Neutron Compton Scattering (NCS), at the VESUVIO spectrometer.
+This algorithm allows the loading, reduction, and analysis of forward scattering data obtained using Deep Inelastic Neutron Scattering (DINS), also referred to as Neutron Compton Scattering (NCS), at the VESUVIO spectrometer.
 The algorithm has been developed by the VESUVIO Instrument Scientists, Giovanni Romanelli and Matthew Krzystyniak.
 A previous version of the algorithm was described in: G. Romanelli et al.; Journal of Physics: Conf. Series 1055 (2018) 012016.
 
@@ -80,14 +80,15 @@ Usage:
 Output:
 
 .. testoutput:: ExVesuvioAnalysis
+   :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
    variable value
-   f1.sigma1 4.961
+   f1.sigma1 4.939
    f1.c4 0.000
    f1.c6 0.000
    f1.A 0.080
    f1.B0 0.000
-   Cost function value 0.212
+   Cost function value ...
 
 .. categories::
 

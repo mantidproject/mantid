@@ -30,10 +30,15 @@ Improvements
 - Based on existing options for AnalysisMode in the VesuvioAnalysis algorithm two new
   options were introduced to allow reduction and analysis of spectra in the TOF domain
   without automatically carrying out a Y space analysis afterwards.
+- Updated documentation for VesuvioAnalysis
 
 Bugfixes
 --------
 
 - Fixed a bug which prevented workspaces being loaded into Elwin.
+- Fixed a bug which caused VesuvioAnalysis to crash when run with a single element.
+
+- The Abins algorithm can also import force constants data from CASTEP
+  or Phonopy calculations, using the Euphonic library. (See above.)
 
 :ref:`Release 6.3.0 <v6.3.0>`

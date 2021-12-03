@@ -28,6 +28,7 @@ Improvements
 - :ref:`GenerateLogbook <algm-GenerateLogbook>` now allows to perform binary operations even when certain entries do not exist, e.g. to create a string with all polarisation orientations contained in a collection of data files.
 - Event nexuses produced at ILL can now be loaded using :ref:`LoadEventNexus <algm-LoadEventNexus>`.
 - :ref:`Rebin <algm-Rebin>` now has an option for binning with reverse logarithmic and inverse power bins.
+- :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` will now fail if the resulting sample shape has a volume of 0.
 - :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
 - An importance sampling option has been added to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` so that it handles spikes in the structure factor S(Q) better
 - Added parameter to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` to control number of attempts to generate initial scatter point
@@ -36,6 +37,7 @@ Bugfixes
 ########
 
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
+- The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 
 Fit Functions
 -------------
@@ -49,6 +51,7 @@ Data Objects
 Geometry
 ----------
 - add additional unit test for Rasterize class.
+- fix an issue in CSGObject such that the intercept type is no longer tied to an arbitrary value that make Track returns unstable results.
 
 Python
 ------
@@ -80,5 +83,6 @@ Bugfixes
 
 
 - Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
 
 :ref:`Release 6.3.0 <v6.3.0>`

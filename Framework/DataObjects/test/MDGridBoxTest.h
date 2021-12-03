@@ -12,6 +12,7 @@
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/CPUTimer.h"
@@ -23,7 +24,6 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <Poco/File.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>

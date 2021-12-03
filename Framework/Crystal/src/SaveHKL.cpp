@@ -559,58 +559,33 @@ p *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
  *       a. j. schultz, june, 2008
  */
 double SaveHKL::absorbSphere(double radius, double twoth, double wl, double &tbar) {
-  int i;
-  double mu, mur; // mu is the linear absorption coefficient,
-  // r is the radius of the spherical sample.
-  double theta, astar1, astar2, frac, astar;
-  double trans;
 
-  //  For each of the 19 theta values in dwiggins (theta = 0.0 to 90.0
-  //  in steps of 5.0 deg.), the astar values vs.mur were fit to a third
-  //  order polynomial in excel. these values are given in the static array
-  //  pc[][]
+  const double mu = m_smu + (m_amu / 1.8f) * wl; // linear absorption coef
+  const double mur = mu * radius;
 
-  mu = m_smu + (m_amu / 1.8f) * wl;
-
-  mur = mu * radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;
     throw std::runtime_error("muR is not in range of Dwiggins' table :" + s.str());
   }
 
-  theta = twoth * radtodeg_half;
+  const double theta = twoth * radtodeg * 0.5;
   if (theta < 0. || theta > 90.) {
     std::ostringstream s;
     s << theta;
-    throw std::runtime_error("theta is not in range of Dwiggins' table :" + s.str());
+    throw std::runtime_error("theta is not valid it must be in range [0, 90]");
   }
 
-  //  using the polymial coefficients, calulate astar (= 1/transmission) at
-  //  theta values below and above the actual theta value.
+  const double transmission = 1.f / AnvredCorrection::calc_Astar(theta, mur);
 
-  i = static_cast<int>(theta / 5.);
-  astar1 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  i = i + 1;
-  astar2 = pc[0][i] + mur * (pc[1][i] + mur * (pc[2][i] + pc[3][i] * mur));
-
-  //  do a linear interpolation between theta values.
-
-  frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
-  frac = frac / 5.;
-
-  astar = astar1 * (1 - frac) + astar2 * frac; // astar is the correction
-  trans = 1.f / astar;                         // trans is the transmission
-                                               // trans = exp(-mu*tbar)
-
-  //  calculate tbar as defined by coppens.
+  // calculate tbar as defined by coppens.
+  // transmission = exp(-mu*tbar)
   if (std::fabs(mu) < 1e-300)
     tbar = 0.0;
   else
-    tbar = -std::log(trans) / mu;
+    tbar = -std::log(transmission) / mu;
 
-  return trans;
+  return transmission;
 }
 
 double SaveHKL::spectrumCalc(double TOF, int iSpec, std::vector<std::vector<double>> time,

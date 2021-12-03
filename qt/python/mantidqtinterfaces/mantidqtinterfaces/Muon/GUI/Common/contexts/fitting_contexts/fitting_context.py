@@ -286,38 +286,46 @@ class FitInformation(object):
 
         return True
 
-    def log_value(self, log_name):
+    def log_value_and_error(self, log_name):
         """
-        Compute and return the log value for the named log.
+        Returns the log value and error for the named log.
         If the log is a string then the value is converted to a float
         if possible. If the log is a time series then the time-average
-        value is computed. If multiple workspaces are part of the fit
+        value is given and the error. If multiple workspaces are part of the fit
         then the values computed above are averaged over each workspace.
         It is assumed that all logs have been checked for existence.
         :param log_name: The name of an existing log
-        :return: A single double value
+        :return: A pair of double values (mean, error)
         """
 
         def value_from_workspace(output_workspace):
             run = output_workspace.run()
             prop = run.getProperty(log_name)
-            if hasattr(prop, 'timeAverageValue'):
-                return prop.timeAverageValue()
+            if hasattr(prop, 'getStatistics'):
+                stats = prop.getStatistics()
+                return stats.time_mean, stats.time_standard_deviation
             else:
                 try:
-                    return float(prop.value)
+                    return float(prop.value), 0
                 except ValueError:
-                    return prop.valueAsStr
+                    return prop.valueAsStr, ""
 
-        values = [value_from_workspace(output_workspace) for output_workspace in self.output_workspaces_objects()]
+        values, errors = [], []
+        for output_workspace in self.output_workspaces_objects():
+            stats = value_from_workspace(output_workspace)
+            values.append(stats[0])
+            errors.append(stats[1])
         try:
-            return np.mean(values)
+            return np.mean(values), np.mean(errors)
         except TypeError:
-            # This will be a string
+            # This will be a string -> so no error
             if len(values) == 1:
-                return values[0]
+                return str(values[0]), ""
             elif len(values) > 1:
-                return str(values[0]) + " to " + str(values[-1])
+                return str(values[0]) + " to " + str(values[-1]), ""
+
+    def log_value(self, log_name):
+        return self.log_value_and_error(log_name)[0]
 
 
 class FittingContext(object):

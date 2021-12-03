@@ -7,9 +7,9 @@
 #pragma once
 
 #include "../ReflMockObjects.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidQtWidgets/Common/BatchAlgorithmRunner.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MockInstViewModel.h"
 #include "MockPreviewModel.h"
 #include "MockPreviewView.h"
@@ -35,10 +35,11 @@ using ::testing::NotNull;
 using ::testing::Ref;
 using ::testing::Return;
 using ::testing::ReturnRef;
+using ::testing::Throw;
 
 class PreviewPresenterTest : public CxxTest::TestSuite {
   using MockInstViewModelT = std::unique_ptr<MockInstViewModel>;
-  using MockJobManagerT = std::unique_ptr<IJobManager>;
+  using MockJobManagerT = std::unique_ptr<MockJobManager>;
   using MockModelT = std::unique_ptr<MockPreviewModel>;
   using MockViewT = std::unique_ptr<MockPreviewView>;
 
@@ -74,6 +75,35 @@ public:
     presenter.notifyLoadWorkspaceRequested();
   }
 
+  void test_notify_load_workspace_catches_runtime_error() {
+    auto mockModel = makeModel();
+    auto mockView = makeView();
+    auto const workspaceName = std::string("test workspace");
+    auto error = std::runtime_error("Test error");
+
+    EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
+    EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    EXPECT_CALL(*mockView, plotInstView(_, _, _)).Times(0);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    TS_ASSERT_THROWS_NOTHING(presenter.notifyLoadWorkspaceRequested());
+  }
+
+  void test_notify_load_workspace_does_not_catch_unexpected_error() {
+    auto mockModel = makeModel();
+    auto mockView = makeView();
+    auto const workspaceName = std::string("test workspace");
+    auto error = std::invalid_argument("Test error");
+
+    EXPECT_CALL(*mockView, getWorkspaceName()).Times(1).WillOnce(Return(workspaceName));
+    EXPECT_CALL(*mockModel, loadWorkspaceFromAds(workspaceName)).Times(1).WillOnce(Throw(error));
+    EXPECT_CALL(*mockModel, loadAndPreprocessWorkspaceAsync(_, _)).Times(0);
+    EXPECT_CALL(*mockView, plotInstView(_, _, _)).Times(0);
+
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+    TS_ASSERT_THROWS(presenter.notifyLoadWorkspaceRequested(), std::invalid_argument const &);
+  }
   void test_notify_load_workspace_complete_reloads_inst_view() {
     auto mockModel = makeModel();
     auto mockView = makeView();
@@ -112,13 +142,23 @@ public:
     auto mockView = makeView();
     auto mockModel = makeModel();
     auto mockInstViewModel = makeInstViewModel();
+    auto mockJobManager = makeJobManager();
     expectInstViewSetToEditMode(*mockView);
-    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel);
+    expectSumBanksCalledOnSelectedDetectors(*mockView, *mockModel, *mockInstViewModel, *mockJobManager);
     // TODO check that the model is called to sum banks
-    auto presenter =
-        PreviewPresenter(packDeps(mockView.get(), std::move(mockModel), std::make_unique<NiceMock<MockJobManager>>(),
-                                  std::move(mockInstViewModel)));
+    auto presenter = PreviewPresenter(
+        packDeps(mockView.get(), std::move(mockModel), std::move(mockJobManager), std::move(mockInstViewModel)));
     presenter.notifyInstViewShapeChanged();
+  }
+
+  void test_notify_contour_export_to_ads_requested() {
+    auto mockView = makeView();
+    auto mockModel = makeModel();
+
+    EXPECT_CALL(*mockModel, exportSummedWsToAds()).Times(1);
+    auto presenter = PreviewPresenter(packDeps(mockView.get(), std::move(mockModel)));
+
+    presenter.notifyContourExportAdsRequested();
   }
 
 private:
@@ -131,7 +171,7 @@ private:
 
   MockModelT makeModel() { return std::make_unique<MockPreviewModel>(); }
 
-  std::unique_ptr<IJobManager> makeJobManager() {
+  MockJobManagerT makeJobManager() {
     auto mockJobManager = std::make_unique<MockJobManager>();
     EXPECT_CALL(*mockJobManager, subscribe(NotNull())).Times(1);
     return mockJobManager;
@@ -162,15 +202,15 @@ private:
   }
 
   void expectSumBanksCalledOnSelectedDetectors(MockPreviewView &mockView, MockPreviewModel &mockModel,
-                                               MockInstViewModel &mockInstViewModel) {
+                                               MockInstViewModel &mockInstViewModel, MockJobManager &mockJobManager) {
     auto detIndices = std::vector<size_t>{44, 45, 46};
-    auto wsIndices = std::vector<size_t>{2, 3, 4};
-    auto wsIndicesStr = std::string{"2, 3, 4"};
+    auto detIDs = std::vector<Mantid::detid_t>{2, 3, 4};
+    auto detIDsStr = std::string{"2, 3, 4"};
     EXPECT_CALL(mockView, getSelectedDetectors()).Times(1).WillOnce(Return(detIndices));
-    EXPECT_CALL(mockInstViewModel, detIndicesToWsIndices(Eq(detIndices))).Times(1).WillOnce(Return(wsIndices));
-    EXPECT_CALL(mockModel, indicesToString(wsIndices)).Times(1).WillOnce(Return(wsIndicesStr));
-    // TODO uncomment test when sum banks is implemented
-    // EXPECT_CALL(mockModel, sumBanksAsync(wsIndicesStr)).Times(1);
+    EXPECT_CALL(mockInstViewModel, detIndicesToDetIDs(Eq(detIndices))).Times(1).WillOnce(Return(detIDs));
+    EXPECT_CALL(mockModel, detIDsToString(detIDs)).Times(1).WillOnce(Return(detIDsStr));
+    EXPECT_CALL(mockModel, setSelectedBanks(detIDs)).Times(1);
+    EXPECT_CALL(mockModel, sumBanksAsync(Ref(mockJobManager))).Times(1);
   }
 
   void expectPlotInstView(MockPreviewView &mockView, MockInstViewModel &mockInstViewModel) {
@@ -179,7 +219,7 @@ private:
     EXPECT_CALL(mockInstViewModel, getInstrumentViewActor()).Times(1).WillOnce(Return(nullptr));
     EXPECT_CALL(mockInstViewModel, getSamplePos()).Times(1).WillOnce(Return(samplePos));
     EXPECT_CALL(mockInstViewModel, getAxis()).Times(1).WillOnce(Return(axes));
-    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes)));
+    EXPECT_CALL(mockView, plotInstView(Eq(nullptr), Eq(samplePos), Eq(axes))).Times(1);
   }
 
   void expectInstViewToolbarEnabled(MockPreviewView &mockView) {

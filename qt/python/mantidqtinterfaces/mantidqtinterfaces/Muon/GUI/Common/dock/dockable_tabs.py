@@ -151,7 +151,8 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         self.attached_tab_names.insert(insert_at, name)
         # Make the content widget a child of this widget
         content_widget.setParent(self)
-
+        # Remove the signal
+        self.detachedTabs[name].onCloseSignal.disconnect()
         # Remove the reference
         del self.detachedTabs[name]
 
@@ -265,11 +266,11 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
         Close all tabs that are currently detached.
         """
         list_of_detached_tabs = []
-
         for key in self.detachedTabs:
             list_of_detached_tabs.append(self.detachedTabs[key])
 
         for detachedTab in list_of_detached_tabs:
+            detachedTab.onCloseSignal.disconnect()
             detachedTab.close()
 
     class DetachedTab(QtWidgets.QMainWindow):

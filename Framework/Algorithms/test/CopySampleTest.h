@@ -23,7 +23,7 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Algorithms;

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
@@ -13,7 +14,6 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidKernel/VMD.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;

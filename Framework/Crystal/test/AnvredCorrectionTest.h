@@ -6,17 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidCrystal/AnvredCorrection.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FacilityHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <math.h>
 
@@ -93,9 +94,9 @@ void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev, bool perform
       return;
     // do the final comparison
     const auto &y_actual = ws->y(0);
-    TS_ASSERT_DELTA(y_actual[0], 8.2052, 0.0001);
-    TS_ASSERT_DELTA(y_actual[1], 0.3040, 0.0001);
-    TS_ASSERT_DELTA(y_actual[2], 0.0656, 0.0001);
+    TS_ASSERT_DELTA(y_actual[0], 8.2278, 0.0001);
+    TS_ASSERT_DELTA(y_actual[1], 0.3049, 0.0001);
+    TS_ASSERT_DELTA(y_actual[2], 0.0659, 0.0001);
   }
 }
 } // namespace
@@ -135,6 +136,29 @@ public:
     alg.setProperty("Radius", 0.1);               // large
     TS_ASSERT_THROWS_NOTHING(alg.execute();)
     TS_ASSERT(alg.isExecuted())
+  }
+
+  void test_throws_when_no_radius_and_not_spherical_shape() {
+    workspace->getAxis(0)->setUnit("Wavelength");
+    // set sample to be cylinder
+    auto setSampleAlg = AlgorithmManager::Instance().createUnmanaged("SetSample");
+    setSampleAlg->initialize();
+    setSampleAlg->setProperty("InputWorkspace", workspace);
+    setSampleAlg->setPropertyValue("Geometry",
+                                   R"({"Shape": "Cylinder", "Height": 1.0, "Radius": 0.2, "Center": [0., 0., 0.]})");
+    setSampleAlg->execute();
+
+    AnvredCorrection alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    alg.setProperty("InputWorkspace", workspace);
+    alg.setProperty("OutputWorkspace", "TOPAZ");
+    alg.setProperty("PreserveEvents", false);
+    alg.setProperty("OnlySphericalAbsorption", true);
+    alg.setProperty("LinearScatteringCoef", 0.1);
+    alg.setProperty("LinearAbsorptionCoef", 0.1); // large
+    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    TS_ASSERT(!alg.isExecuted());
   }
 
 private:

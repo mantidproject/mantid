@@ -11,13 +11,15 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/DiscusMultipleScatteringCorrection.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <cmath>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::DataObjects;
@@ -206,7 +208,7 @@ public:
       const double delta(1e-05);
       TS_ASSERT_DELTA(singleScatterResult->y(SPECTRUMINDEXTOTEST)[0], analyticResult, delta);
       // no analytical result for double scatter so just check against current result that we assume is correct
-      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[0], 0.001977, delta);
+      TS_ASSERT_DELTA(doubleScatterResult->y(SPECTRUMINDEXTOTEST)[0], 0.0019967315, delta);
       Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
     }
   }
@@ -259,8 +261,8 @@ public:
       TS_ASSERT(singleScatterY[1] > analyticResult1 || singleScatterY[1] > analyticResult2);
       // no analytical result for double scatter so just check against current result that we assume is correct
       auto doubleScatterY = doubleScatterResult->y(SPECTRUMINDEXTOTEST);
-      constexpr double expResult0 = 0.001977;
-      constexpr double expResult2 = 0.001810;
+      constexpr double expResult0 = 0.001997;
+      constexpr double expResult2 = 0.001819;
       TS_ASSERT_DELTA(doubleScatterY[0], expResult0, delta);
       TS_ASSERT_DELTA(doubleScatterY[2], expResult2, delta);
       TS_ASSERT(doubleScatterY[1] < expResult0 || doubleScatterY[1] < expResult2);

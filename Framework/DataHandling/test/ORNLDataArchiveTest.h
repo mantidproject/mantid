@@ -15,7 +15,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 
-#include "MantidTestHelpers/ONCatHelper.h"
+#include "MantidFrameworkTestHelpers/ONCatHelper.h"
 
 #include <map>
 #include <memory>
@@ -30,8 +30,8 @@ using namespace Mantid::API;
 using Mantid::Catalog::ONCat::ONCat;
 using Mantid::Kernel::Exception::InternetError;
 
-using Mantid::TestHelpers::make_mock_oncat_api;
-using Mantid::TestHelpers::make_oncat_with_mock_api;
+using Mantid::FrameworkTestHelpers::make_mock_oncat_api;
+using Mantid::FrameworkTestHelpers::make_oncat_with_mock_api;
 
 class ORNLDataArchiveTest : public CxxTest::TestSuite {
 public:

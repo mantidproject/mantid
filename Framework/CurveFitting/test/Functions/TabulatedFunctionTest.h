@@ -17,7 +17,7 @@
 #include "MantidCurveFitting/Functions/UserFunction.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 

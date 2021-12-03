@@ -8,7 +8,7 @@
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidCrystal/Cluster.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Crystal::Cluster;

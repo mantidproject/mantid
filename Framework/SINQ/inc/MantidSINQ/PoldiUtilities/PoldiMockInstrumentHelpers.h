@@ -25,7 +25,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidGeometry/Crystal/BraggScattererFactory.h"
 #include "MantidGeometry/Crystal/CompositeBraggScatterer.h"

@@ -9,9 +9,11 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
@@ -26,7 +28,7 @@ namespace { // anonymous namespace
 double calculateSummationTerm(const Kernel::Material &material) {
   // add together the weighted sum
   const auto &formula = material.chemicalFormula();
-  auto sumLambda = [](double sum, auto &formula_unit) {
+  auto sumLambda = [](double sum, const auto &formula_unit) {
     return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / formula_unit.atom->mass;
   };
   const double unnormalizedTerm = std::accumulate(formula.begin(), formula.end(), 0.0, sumLambda);
@@ -48,12 +50,14 @@ void CalculatePlaczekSelfScattering::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("InputWorkspace", "", Kernel::Direction::Input),
       "Raw diffraction data workspace for associated correction to be "
       "calculated for. Workspace must have instrument and sample data.");
-  declareProperty(
-      std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("IncidentSpecta", "", Kernel::Direction::Input),
-      "Workspace of fitted incident spectrum with it's first derivative.");
+  auto inspValidator = std::make_shared<Mantid::Kernel::CompositeValidator>();
+  inspValidator->add<Mantid::API::WorkspaceUnitValidator>("Wavelength");
+  declareProperty(std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                      "IncidentSpectra", "", Kernel::Direction::Input, inspValidator),
+                  "Workspace of fitted incident spectrum with it's first derivative. Must be in units of Wavelength.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>("OutputWorkspace", "", Kernel::Direction::Output),
-      "Workspace with the Self scattering correction");
+      "Workspace with the Self scattering correction, in the same unit as the InputWorkspace.");
   declareProperty("CrystalDensity", EMPTY_DBL(), "The crystalographic density of the sample material.");
 }
 //----------------------------------------------------------------------------------------------
@@ -96,7 +100,8 @@ double CalculatePlaczekSelfScattering::getPackingFraction(const API::MatrixWorks
  */
 void CalculatePlaczekSelfScattering::exec() {
   const API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
-  const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpecta");
+  const API::MatrixWorkspace_sptr incidentWS = getProperty("IncidentSpectra");
+  auto inputUnit = inWS->getAxis(0)->unit();
 
   // calculate summation term w/ neutron mass over molecular mass ratio
   const double summationTerm = calculateSummationTerm(inWS->sample().getMaterial());
@@ -130,52 +135,47 @@ void CalculatePlaczekSelfScattering::exec() {
   */
 
   const auto &specInfo = inWS->spectrumInfo();
-  API::MatrixWorkspace_sptr outputWS = DataObjects::create<API::HistoWorkspace>(*inWS);
+  // prep the output workspace
+  // - use instrument information from InputWorkspace
+  // - use the bin Edges from the incident flux
+  API::MatrixWorkspace_sptr outputWS =
+      DataObjects::create<API::HistoWorkspace>(*inWS, incidentWS->getSpectrum(0).binEdges());
+  // Set outputWS unit to Wavelength
+  outputWS->getAxis(0)->unit() = incidentWS->getAxis(0)->unit();
   // The algorithm computes the signal values at bin centres so they should
   // be treated as a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
-  outputWS->setYUnitLabel("Counts");
   for (size_t specIndex = 0; specIndex < specInfo.size(); specIndex++) {
     auto &y = outputWS->mutableY(specIndex);
-    auto &x = outputWS->mutableX(specIndex);
-    if (!specInfo.isMonitor(specIndex) && !(specInfo.l2(specIndex) == 0.0)) {
-      Kernel::Units::Wavelength wavelength;
-      Kernel::Units::TOF tof;
-      Kernel::UnitParametersMap pmap{};
-      double l1 = specInfo.l1();
-      specInfo.getDetectorValues(wavelength, tof, Kernel::DeltaEMode::Elastic, false, specIndex, pmap);
-      double l2 = 0., twoTheta = 0.;
-      if (pmap.find(Kernel::UnitParams::l2) != pmap.end()) {
-        l2 = pmap[Kernel::UnitParams::l2];
-      }
-      if (pmap.find(Kernel::UnitParams::twoTheta) != pmap.end()) {
-        twoTheta = pmap[Kernel::UnitParams::twoTheta];
-      }
+    double l1 = specInfo.l1();
+    double l2 = specInfo.l2(specIndex);
 
+    if (!specInfo.isMonitor(specIndex) && !(specInfo.l2(specIndex) == 0.0)) {
+      double twoTheta = specInfo.twoTheta(specIndex);
       const double sinThetaBy2 = sin(twoTheta / 2.0);
       const double f = l1 / (l1 + l2);
-      wavelength.initialize(specInfo.l1(), 0, pmap);
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
         const double inelasticPlaczekSelfCorrection =
             2.0 * (term1 + term2 - 3) * sinThetaBy2 * sinThetaBy2 * summationTerm;
-        x[xIndex] = wavelength.singleToTOF(xLambda[xIndex]);
-        y[xIndex] = (1 + inelasticPlaczekSelfCorrection) * packingFraction;
+        y[xIndex] = inelasticPlaczekSelfCorrection * packingFraction;
       }
-      x.back() = wavelength.singleToTOF(xLambda.back());
     } else {
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
-        x[xIndex] = xLambda[xIndex];
         y[xIndex] = 0;
       }
-      x.back() = xLambda.back();
     }
   }
-  auto incidentUnit = inWS->getAxis(0)->unit();
-  outputWS->getAxis(0)->unit() = incidentUnit;
-  outputWS->setDistribution(false);
+
+  auto cvtalg = createChildAlgorithm("ConvertUnits");
+  cvtalg->setProperty("InputWorkspace", outputWS);
+  cvtalg->setProperty("OutputWorkspace", outputWS);
+  cvtalg->setProperty("Target", inputUnit->unitID());
+  cvtalg->execute();
+  outputWS = cvtalg->getProperty("OutputWorkspace");
+
   setProperty("OutputWorkspace", outputWS);
 }
 

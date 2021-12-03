@@ -197,7 +197,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cp
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:400
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:1411
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1342
 accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:1343
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
@@ -229,7 +228,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FileProperty.cpp:6
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/FileLoaderRegistry.cpp:33
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:136
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:171
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:840
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:334
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/GridDomain1D.cpp:18
 constParameter:${CMAKE_SOURCE_DIR}/Framework/API/src/GridDomain1D.cpp:18
@@ -348,10 +346,10 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cp
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:519
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDHistoWorkspace.cpp:520
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:191
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:674
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:37
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:49
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:75
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/Peak.cpp:673
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:36
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:48
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/BasePeak.cpp:74
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:345
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/ScanningWorkspaceBuilder.h:52
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SpecialWorkspace2D.cpp:203
@@ -369,7 +367,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DataBlockComposite
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DefaultEventLoader.cpp:49
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEventNexus.h:347
-nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:281
+nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:284
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/EventWorkspaceCollection.cpp:191
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:780
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FilterEventsByLogValuePreNexus.cpp:1988
@@ -516,7 +514,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/UpdateInstrumentF
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
 funcArgOrderDifferent:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateEfficiency.cpp:308
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculatePlaczekSelfScattering.cpp:29
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculatePlaczek.cpp:45
 redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:133
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertAxisByFormula.cpp:238
@@ -554,11 +551,6 @@ useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GravitySANSHe
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/He3TubeEfficiency.cpp:289
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/IntegrateByComponent.cpp:192
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDCalibration.cpp:1293
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:234
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:267
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:268
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:296
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDFFourierTransform2.cpp:319
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PeakParameterHelper.cpp:102
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:96
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:101
@@ -654,8 +646,6 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegio
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/RalNlls/TrustRegion.cpp:288
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/SeqDomainSpectrumCreator.cpp:38
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/FilterPeaks.h:85
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindUBUsingIndexedPeaks.cpp:208
-constParameter:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindUBUsingIndexedPeaks.cpp:208
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/IndexSXPeaks.h:104
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:210
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:218
@@ -743,9 +733,7 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertToMD.cpp:3
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ConvertToMDMinMaxLocal.cpp:138
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/ImportMDHistoWorkspace.cpp:98
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/Integrate3DEvents.cpp:1148
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateQLabEvents.cpp:356
 constParameter:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegrateMDHistoWorkspace.cpp:217
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/IntegrateQLabEvents.h:274
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/Integrate3DEvents.h:152
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/IntegratePeaksMD.cpp:578
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/inc/MantidMDAlgorithms/MDBoxMaskFunction.h:24
@@ -861,7 +849,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingV
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCInterface.cpp:232
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/OptionDefaults.cpp:18
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:91
-passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/PreviewRow.h:18
+passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/PreviewRow.h:19
 constParameter:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:58
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Batch/BatchJobManager.cpp:152
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Experiment/QtExperimentView.cpp:542
@@ -886,7 +874,7 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GU
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:284
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:311
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.cpp:61
-passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/PreviewRow.cpp:14
+passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/PreviewRow.cpp:15
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:153
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:161
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:121
@@ -929,9 +917,8 @@ stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlot
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:107
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:113
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataValidationHelper.cpp:33
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectTab.cpp:604
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectSymmetrise.cpp:173
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Stretch.cpp:220
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
 ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:281
+ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:284

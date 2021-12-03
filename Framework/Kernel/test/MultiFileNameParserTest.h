@@ -8,9 +8,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiFileNameParser.h"
-#include "MantidTestHelpers/FacilityHelper.h"
 
 #include <Poco/Path.h>
 #include <vector>

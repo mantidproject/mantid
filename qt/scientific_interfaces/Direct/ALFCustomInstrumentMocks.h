@@ -13,11 +13,11 @@
 #include "ALFCustomInstrumentPresenter.h"
 #include "ALFCustomInstrumentView.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidQtWidgets/Common/ObserverPattern.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneModel.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h"
 #include "MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"

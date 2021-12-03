@@ -14,6 +14,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
@@ -23,8 +25,6 @@
 #include "MantidNexusGeometry/Hdf5Version.h"
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
 #include "Poco/Path.h"
 #include <cxxtest/TestSuite.h>
@@ -1019,7 +1019,8 @@ public:
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+    runner.runSerial(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
+    runner.runParallel(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
   }
 
   void test_MPI_load_ISIS() {
@@ -1028,7 +1029,8 @@ public:
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
     auto hdf5Mutex = std::make_shared<std::mutex>();
-    runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+    runner.runSerial(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
+    runner.runParallel(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
   void test_load_fails_on_corrupted_run() {

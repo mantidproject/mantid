@@ -230,7 +230,7 @@ double Quadratic::distance(const Kernel::V3D &Pt) const
   return Out;
 }
 
-int Quadratic::onSurface(const Kernel::V3D &Pt) const
+bool Quadratic::onSurface(const Kernel::V3D &Pt) const
 /**
   Test to see if a point is on the surface
   @param Pt :: Point to test
@@ -238,7 +238,7 @@ int Quadratic::onSurface(const Kernel::V3D &Pt) const
 */
 {
   const double res = eqnValue(Pt);
-  return (std::abs(res) > Tolerance) ? 0 : 1;
+  return (std::abs(res) <= Tolerance);
 }
 
 void Quadratic::displace(const Kernel::V3D &Pt)

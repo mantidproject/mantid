@@ -12,7 +12,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include <memory>
 
 using Mantid::DataHandling::SampleEnvironmentFactory;

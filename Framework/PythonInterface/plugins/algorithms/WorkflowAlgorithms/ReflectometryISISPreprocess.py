@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, MatrixWorkspace,
-                        PropertyMode, WorkspaceGroup)
+                        PropertyMode, WorkspaceGroup, WorkspaceProperty)
 from mantid.kernel import (CompositeValidator, StringArrayLengthValidator, StringArrayMandatoryValidator,
                            StringArrayProperty, Direction)
 
@@ -45,7 +45,7 @@ class ReflectometryISISPreprocess(DataProcessorAlgorithm):
         self.declareProperty(self._EVENT_MODE, False, direction=Direction.Input,
                              doc='If true, load the input workspaces as event data')
         self.declareProperty(
-            MatrixWorkspaceProperty(self._OUTPUT_WS, '', direction=Direction.Output),
+            WorkspaceProperty(self._OUTPUT_WS, '', direction=Direction.Output),
             doc='The preprocessed output workspace. If multiple input runs are specified '
                 'they will be summed into a single output workspace.')
         self.declareProperty(

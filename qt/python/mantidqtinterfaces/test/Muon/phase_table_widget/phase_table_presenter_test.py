@@ -369,6 +369,19 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.assert_any_call(phasequad.Im.name)
         self.assertEqual(self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.call_count, 2)
 
+    def test_handle_phase_table_changed_to_new_table(self):
+        self.context.phase_context.options_dict['phase_table_for_phase_quad'] = 'MUSR22222_raw_data_period_1'
+        self.view.get_phase_table = mock.Mock(return_value='MUSR33333_raw_data_period_2')
+        self.context.group_pair_context.update_phase_tables = mock.Mock()
+        self.context.update_phasequads = mock.Mock()
+
+        self.presenter.handle_phase_table_changed()
+
+        self.assertEqual(self.context.phase_context.options_dict['phase_table_for_phase_quad'],
+                         'MUSR33333_raw_data_period_2')
+        self.context.group_pair_context.update_phase_tables.assert_called_once_with('MUSR33333_raw_data_period_2')
+        self.assertEqual(1, self.context.update_phasequads.call_count)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)
