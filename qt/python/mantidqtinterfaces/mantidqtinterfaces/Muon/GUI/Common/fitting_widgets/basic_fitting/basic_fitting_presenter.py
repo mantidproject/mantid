@@ -77,6 +77,10 @@ class BasicFittingPresenter:
         self.view.set_slot_for_exclude_end_x_updated(self.handle_exclude_end_x_updated)
         self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
+        self.view.set_slot_for_guess_type_changed(self.handle_guess_type_changed)
+        self.view.set_slot_for_guess_points_updated(self.handle_guess_points_changed)
+        self.view.set_slot_for_guess_start_x_updated(self.handle_guess_start_x_changed)
+        self.view.set_slot_for_guess_end_x_updated(self.handle_guess_end_x_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
 
     def initialize_model_options(self) -> None:
@@ -232,6 +236,22 @@ class BasicFittingPresenter:
     def handle_evaluation_type_changed(self) -> None:
         """Handle when the evaluation type is changed."""
         self.model.evaluation_type = self.view.evaluation_type
+
+    def handle_guess_type_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_type = self.view.guess_type
+
+    def handle_guess_points_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_points = self.view.guess_points
+
+    def handle_guess_start_x_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_start_x = self.view.guess_start_x
+
+    def handle_guess_end_x_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_end_x = self.view.guess_end_x
 
     def handle_function_structure_changed(self) -> None:
         """Handle when the function structure is changed."""

@@ -27,6 +27,10 @@ EXCLUDE_END_X_TABLE_ROW = 4
 RAW_DATA_TABLE_ROW = 5
 MINIMIZER_TABLE_ROW = 6
 EVALUATE_AS_TABLE_ROW = 7
+PLOT_GUESS_TYPE = 8
+PLOT_GUESS_POINTS = 9
+PLOT_GUESS_START_X = 10
+PLOT_GUESS_END_X = 11
 
 
 class FitFunctionOptionsView(ui_form, base_widget):
@@ -52,6 +56,12 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.minimizer_combo = None
         self.fit_to_raw_data_checkbox = None
         self.evaluation_combo = None
+        self.guess_type_combo = None
+        self.guess_points_spin_box = None
+        self.guess_start_x_line_edit = None
+        self.guess_start_x_validator = None
+        self.guess_end_x_line_edit = None
+        self.guess_end_x_validator = None
 
         self._setup_fit_options_table()
         self.set_exclude_start_and_end_x_visible(self.exclude_range)
@@ -109,6 +119,22 @@ class FitFunctionOptionsView(ui_form, base_widget):
     def set_slot_for_evaluation_type_changed(self, slot) -> None:
         """Connect the slot for changing the Evaluation type."""
         self.evaluation_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_guess_type_changed(self, slot) -> None:
+        """Connect the slot for changing the guess type."""
+        self.guess_type_combo.currentIndexChanged.connect(slot)
+
+    def set_slot_for_guess_points_updated(self, slot) -> None:
+        """Connect the slot for the start x option."""
+        self.guess_points_spin_box.valueChanged.connect(slot)
+
+    def set_slot_for_guess_start_x_updated(self, slot) -> None:
+        """Connect the slot for the start x option."""
+        self.guess_start_x_line_edit.editingFinished.connect(slot)
+
+    def set_slot_for_guess_end_x_updated(self, slot) -> None:
+        """Connect the slot for the end x option."""
+        self.guess_end_x_line_edit.editingFinished.connect(slot)
 
     def set_slot_for_use_raw_changed(self, slot) -> None:
         """Connect the slot for the Use raw option."""
@@ -235,6 +261,26 @@ class FitFunctionOptionsView(ui_form, base_widget):
         self.exclude_end_x_line_edit.setText(f"{value:.3f}")
 
     @property
+    def guess_type(self) -> str:
+        """Returns the guess range type."""
+        return str(self.guess_type_combo.currentText())
+
+    @property
+    def guess_points(self) -> int:
+        """Returns the points for the guess fit."""
+        return int(self.guess_points_spin_box.value())
+
+    @property
+    def guess_start_x(self) -> float:
+        """Returns the guess start X."""
+        return float(self.guess_start_x_line_edit.text())
+
+    @property
+    def guess_end_x(self) -> float:
+        """Returns the guess end X."""
+        return float(self.guess_end_x_line_edit.text())
+
+    @property
     def evaluation_type(self) -> str:
         """Returns the selected evaluation type."""
         return str(self.evaluation_combo.currentText())
@@ -332,7 +378,7 @@ class FitFunctionOptionsView(ui_form, base_widget):
 
     def _setup_fit_options_table(self) -> None:
         """Setup the fit options table with the appropriate options."""
-        self.fit_options_table.setRowCount(8)
+        self.fit_options_table.setRowCount(12)
         self.fit_options_table.setColumnCount(2)
         self.fit_options_table.setColumnWidth(0, 150)
         self.fit_options_table.verticalHeader().setVisible(False)
@@ -370,3 +416,19 @@ class FitFunctionOptionsView(ui_form, base_widget):
         table_utils.setRowName(self.fit_options_table, EVALUATE_AS_TABLE_ROW, "Evaluate Function As")
         self.evaluation_combo = table_utils.addComboToTable(self.fit_options_table, EVALUATE_AS_TABLE_ROW,
                                                             ['CentrePoint', 'Histogram'])
+
+        table_utils.setRowName(self.fit_options_table, PLOT_GUESS_TYPE, "Plot guess using")
+        self.guess_type_combo = table_utils.addComboToTable(self.fit_options_table, PLOT_GUESS_TYPE,
+                                                            ['x from plot range', 'x at data points', 'Custom x range'])
+
+        table_utils.setRowName(self.fit_options_table, PLOT_GUESS_POINTS, "Points")
+        self.guess_points_spin_box = table_utils.addSpinBoxToTable(self.fit_options_table, 1000,
+                                                                   PLOT_GUESS_POINTS)
+
+        table_utils.setRowName(self.fit_options_table, PLOT_GUESS_START_X, "Start X")
+        self.guess_start_x_line_edit, self.guess_start_x_validator = table_utils.addDoubleToTable(
+            self.fit_options_table, 0.0, PLOT_GUESS_START_X, 1)
+
+        table_utils.setRowName(self.fit_options_table, PLOT_GUESS_END_X, "End X")
+        self.guess_end_x_line_edit, self.guess_end_x_validator = table_utils.addDoubleToTable(
+            self.fit_options_table, 15.0, PLOT_GUESS_END_X, 1)

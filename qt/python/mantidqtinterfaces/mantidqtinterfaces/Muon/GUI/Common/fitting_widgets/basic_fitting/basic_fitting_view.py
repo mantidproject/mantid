@@ -109,6 +109,22 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for changing the Evaluation type."""
         self.fit_function_options.set_slot_for_evaluation_type_changed(slot)
 
+    def set_slot_for_guess_type_changed(self, slot) -> None:
+        """Connect the slot for changing the Evaluation type."""
+        self.fit_function_options.set_slot_for_guess_type_changed(slot)
+
+    def set_slot_for_guess_points_updated(self, slot) -> None:
+        """Connect the slot for the start x option."""
+        self.fit_function_options.set_slot_for_guess_points_updated(slot)
+
+    def set_slot_for_guess_start_x_updated(self, slot) -> None:
+        """Connect the slot for the start x option."""
+        self.fit_function_options.set_slot_for_guess_start_x_updated(slot)
+
+    def set_slot_for_guess_end_x_updated(self, slot) -> None:
+        """Connect the slot for the end x option."""
+        self.fit_function_options.set_slot_for_guess_end_x_updated(slot)
+
     def set_slot_for_use_raw_changed(self, slot) -> None:
         """Connect the slot for the Use raw option."""
         self.fit_function_options.set_slot_for_use_raw_changed(slot)
@@ -201,6 +217,26 @@ class BasicFittingView(ui_form, base_widget):
     def end_x(self, value: float) -> None:
         """Sets the selected end X."""
         self.fit_function_options.end_x = value
+
+    @property
+    def guess_type(self) -> str:
+        """Returns the selected start X."""
+        return self.fit_function_options.guess_type
+
+    @property
+    def guess_points(self) -> int:
+        """Returns the selected start X."""
+        return self.fit_function_options.guess_points
+
+    @property
+    def guess_start_x(self) -> float:
+        """Returns the selected start X."""
+        return self.fit_function_options.guess_start_x
+
+    @property
+    def guess_end_x(self) -> float:
+        """Returns the selected start X."""
+        return self.fit_function_options.guess_end_x
 
     @property
     def exclude_range(self) -> bool:

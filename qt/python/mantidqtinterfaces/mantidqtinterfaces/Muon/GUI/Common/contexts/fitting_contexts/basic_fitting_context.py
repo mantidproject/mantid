@@ -37,6 +37,10 @@ class BasicFittingContext(FittingContext):
         self._chi_squared_for_undo: list = []
 
         self._plot_guess: bool = False
+        self._plot_guess_type: str = None
+        self._plot_guess_points: int = None
+        self._plot_guess_start_x: float = None
+        self._plot_guess_end_x: float = None
         self._guess_workspace_name: str = None
 
         self._function_name: str = ""
@@ -205,6 +209,46 @@ class BasicFittingContext(FittingContext):
     def plot_guess(self, plot_guess: bool) -> None:
         """Sets that the plot guess should or should not be plotted."""
         self._plot_guess = plot_guess
+
+    @property
+    def plot_guess_type(self) -> str:
+        """Returns the guess plot range type."""
+        return self._plot_guess_type
+
+    @plot_guess_type.setter
+    def plot_guess_type(self, plot_guess_type: str) -> None:
+        """Sets the guess plot range type."""
+        self._plot_guess_type = plot_guess_type
+
+    @property
+    def plot_guess_points(self) -> int:
+        """Returns the number of points to use in the guess plot."""
+        return self._plot_guess_points
+
+    @plot_guess_points.setter
+    def plot_guess_points(self, plot_guess_type: int) -> None:
+        """Sets the number of points to use in the guess plot."""
+        self._plot_guess_points = plot_guess_type
+
+    @property
+    def plot_guess_start_x(self) -> float:
+        """Returns the start x to use in the guess plot."""
+        return self._plot_guess_start_x
+
+    @plot_guess_start_x.setter
+    def plot_guess_start_x(self, plot_guess_start_x: float) -> None:
+        """Sets the start x to use in the guess plot."""
+        self._plot_guess_start_x = plot_guess_start_x
+
+    @property
+    def plot_guess_end_x(self) -> float:
+        """Returns the end x to use in the guess plot."""
+        return self._plot_guess_end_x
+
+    @plot_guess_end_x.setter
+    def plot_guess_end_x(self, plot_guess_end_x: float) -> None:
+        """Sets the end x to use in the guess plot."""
+        self._plot_guess_end_x = plot_guess_end_x
 
     @property
     def guess_workspace_name(self) -> str:

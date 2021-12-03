@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, EvaluateFunction
+from mantid.simpleapi import CopyLogs, CreateWorkspace, EvaluateFunction
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
@@ -26,6 +26,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import ch
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
 import math
+import numpy as np
 import re
 from typing import List, NamedTuple
 
@@ -368,14 +369,44 @@ class BasicFittingModel:
         self.fitting_context.plot_guess = plot_guess
 
     @property
-    def plot_guess(self) -> bool:
-        """Returns true if plot guess is turned on."""
-        return self.fitting_context.plot_guess
+    def plot_guess_type(self) -> str:
+        """Returns the guess plot range type."""
+        return self.fitting_context.plot_guess_type
 
-    @plot_guess.setter
-    def plot_guess(self, plot_guess: bool) -> None:
-        """Sets that the plot guess should or should not be plotted."""
-        self.fitting_context.plot_guess = plot_guess
+    @plot_guess_type.setter
+    def plot_guess_type(self, plot_guess_type: str) -> None:
+        """Sets the guess plot range type."""
+        self.fitting_context.plot_guess_type = plot_guess_type
+
+    @property
+    def plot_guess_points(self) -> int:
+        """Returns the number of points to use in the guess plot."""
+        return self.fitting_context.plot_guess_points
+
+    @plot_guess_points.setter
+    def plot_guess_points(self, plot_guess_points: int) -> None:
+        """Sets the number of points to use in the guess plot."""
+        self.fitting_context.plot_guess_points = plot_guess_points
+
+    @property
+    def plot_guess_start_x(self) -> float:
+        """Returns the start x to use in the guess plot."""
+        return self.fitting_context.plot_guess_start_x
+
+    @plot_guess_start_x.setter
+    def plot_guess_start_x(self, plot_guess_start_x: float) -> None:
+        """Sets the start x to use in the guess plot."""
+        self.fitting_context.plot_guess_start_x = plot_guess_start_x
+
+    @property
+    def plot_guess_end_x(self) -> float:
+        """Returns the end x to use in the guess plot."""
+        return self.fitting_context.plot_guess_start_x
+
+    @plot_guess_end_x.setter
+    def plot_guess_end_x(self, plot_guess_end_x: float) -> None:
+        """Sets the end x to use in the guess plot."""
+        self.fitting_context.plot_guess_end_x = plot_guess_end_x
 
     @property
     def function_name(self) -> str:
@@ -783,14 +814,31 @@ class BasicFittingModel:
 
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
+        if self.fitting_context.plot_guess_type == 'x from plot range':
+            start_x = self.current_start_x
+            end_x = self.current_end_x
+            points = 250
+        elif self.fitting_context.plot_guess_type == 'x at data points':
+            start_x = self.current_start_x
+            end_x = self.current_end_x
+            points = self.fitting_context.plot_guess_points
+        elif self.fitting_context.plot_guess_type == 'Custom x range':
+            start_x = self.fitting_context.plot_guess_start_x
+            end_x = self.fitting_context.plot_guess_end_x
+            points = self.fitting_context.plot_guess_points
+        else:
+            raise ValueError('Plot guess type: ' + self.fitting_context.plot_guess_type + ' is not recognised')
+
+        data = np.linspace(start_x, end_x, points)
+        CreateWorkspace(OutputWorkspace="__tmp_guess_workspace",
+                        DataX=data,
+                        DataY=data)
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace=self.current_dataset_name,
+                EvaluateFunction(InputWorkspace="__tmp_guess_workspace",
                                  Function=fit_function,
-                                 StartX=self.current_start_x,
-                                 EndX=self.current_end_x,
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
             logger.error("Failed to plot guess.")
