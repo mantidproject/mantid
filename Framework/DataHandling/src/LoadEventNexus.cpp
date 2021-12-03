@@ -967,6 +967,11 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
 
       if (std::regex_match(classEntry, groups, classRegex)) {
         const std::string entry_name(groups[2].str());
+
+        // skip entries with junk data
+        if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
+          continue;
+
         m_file->openGroup(entry_name, classType);
 
         if (takeTimesFromEvents) {
