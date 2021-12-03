@@ -573,6 +573,27 @@ public:
     m_ads.remove("MUSR00022725");
   }
 
+  void test_Build_Load_Uses_Correct_version() {
+    auto alg = m_algFactory.create("Load", 1);
+    alg->initialize();
+    alg->setRethrows(true);
+    alg->setProperty("Filename", "IRS21360.raw");
+    alg->setProperty("OutputWorkspace", "IRS21360");
+    alg->execute();
+
+    auto ws = m_ads.retrieveWS<MatrixWorkspace>("IRS21360");
+    auto wsHist = ws->getHistory();
+
+    ScriptBuilder builder(wsHist.createView());
+    std::string scriptText = builder.build();
+    const std::string input_string = "IRS21360.raw";
+    const std::string output_string = "IRS21360";
+    TS_ASSERT(scriptText.find(input_string) != std::string::npos);
+    TS_ASSERT(scriptText.find(output_string) != std::string::npos);
+
+    m_ads.remove("IRS21360");
+  }
+
 private:
   AlgorithmFactoryImpl &m_algFactory;
   AnalysisDataServiceImpl &m_ads;

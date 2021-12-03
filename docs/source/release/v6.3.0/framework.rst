@@ -83,5 +83,6 @@ Bugfixes
 
 
 - Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
 
 :ref:`Release 6.3.0 <v6.3.0>`

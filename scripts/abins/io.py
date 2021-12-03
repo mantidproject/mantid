@@ -453,14 +453,12 @@ class IO(object):
         return results
 
     @staticmethod
-    def _calculate_hash(filename=None, coding='utf-8'):
+    def _calculate_hash(filename=None):
         """
         Calculates hash  of a file defined by filename according to sha512 algorithm.
 
         :param filename: name of a file to calculate hash
         :type filename: str
-        :param coding: Text encoding
-        :type encoding: str
 
         :returns: string representation of hash
 
@@ -468,12 +466,13 @@ class IO(object):
         hash_calculator = hashlib.sha512()
 
         # chop content of a file into chunks to minimize memory consumption for hash creation
-        with io.open(file=filename, mode="rt", encoding=coding, buffering=BUF, newline=None) as f:
+        with io.open(file=filename, mode="rb",
+                     buffering=BUF, newline=None) as file_handle:
             while True:
-                data = f.read(BUF)
+                data = file_handle.read(BUF)
                 if not data:
                     break
-                hash_calculator.update(data.encode(coding))
+                hash_calculator.update(data)
 
         return hash_calculator.hexdigest()
 

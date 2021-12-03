@@ -1,15 +1,15 @@
 .. _02_displaying_and_navigating:
 
 =========================
-Displaying And Navigating 
+Displaying And Navigating
 =========================
 
 .. raw:: html
 
     <style> .red {color:#FF0000; font-weight:bold} </style>
-    <style> .green {color:#008000; font-weight:bold} </style>    
-    <style> .blue {color:#0000FF; font-weight:bold} </style> 
-    <style> .orange {color:#FF8C00; font-weight:bold} </style> 
+    <style> .green {color:#008000; font-weight:bold} </style>
+    <style> .blue {color:#0000FF; font-weight:bold} </style>
+    <style> .orange {color:#FF8C00; font-weight:bold} </style>
 
 .. role:: red
 .. role:: blue
@@ -20,7 +20,7 @@ Opening the Instrument View
 
 To see the Instrument View
 
-#. Load a data set, such as MUSR00015189 
+#. Load a data set, such as MUSR00015189
 #. As this is a WorkspaceGroup, reveal the contained workspaces by clicking on the small triangle
 #. Right-click on the workspace named MUSR0001589_1 in the Workspaces Toolbox and select "Show Instrument"
 

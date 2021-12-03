@@ -80,6 +80,7 @@ Usage:
 Output:
 
 .. testoutput:: ExVesuvioAnalysis
+   :options: +ELLIPSIS,+NORMALIZE_WHITESPACE
 
    variable value
    f1.sigma1 4.939
@@ -87,7 +88,7 @@ Output:
    f1.c6 0.000
    f1.A 0.080
    f1.B0 0.000
-   Cost function value 0.267
+   Cost function value ...
 
 .. categories::
 

@@ -14,6 +14,7 @@ set(TEST_PY_FILES
     AbinsLoadCRYSTALTest.py
     AbinsLoadDMOL3Test.py
     AbinsLoadGAUSSIANTest.py
+    AbinsLoadPhonopyTest.py
     AbinsLoadVASPTest.py
     AbinsPowderDataTest.py
     AbinsSDataTest.py

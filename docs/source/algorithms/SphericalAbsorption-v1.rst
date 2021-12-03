@@ -35,7 +35,7 @@ Output:
 
 .. testoutput:: ExSphericalAbsorption
 
-    The created workspace has spectra: [ 0.8451289   0.79101809  0.74254761  0.69867599  0.65861079  0.63477521]
+    The created workspace has spectra: [ 0.8693233   0.81842536  0.77068608  0.72590446  0.68389228  0.65847929]
 
 .. categories::
 
