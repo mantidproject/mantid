@@ -199,7 +199,7 @@ FitPeaks::FitPeaks()
       m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
-/** initialize the properties
+/** initialise the properties
  */
 void FitPeaks::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(PropertyNames::INPUT_WKSP, "", Direction::Input),
