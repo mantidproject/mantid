@@ -1617,9 +1617,8 @@ double FitPeaks::fitFunctionHighBackground(const IAlgorithm_sptr &fit, const std
                                            bool observe_peak_shape, const API::IPeakFunction_sptr &peakfunction,
                                            const API::IBackgroundFunction_sptr &bkgdfunc) {
   // high background to reduce
-  API::IBackgroundFunction_sptr high_bkgd_function(nullptr);
-  if (m_linearBackgroundFunction)
-    high_bkgd_function = std::dynamic_pointer_cast<API::IBackgroundFunction>(m_linearBackgroundFunction->clone());
+  API::IBackgroundFunction_sptr high_bkgd_function =
+      std::dynamic_pointer_cast<API::IBackgroundFunction>(m_linearBackgroundFunction->clone());
 
   // Fit the background first if there is enough data points
   fitBackground(ws_index, fit_window, expected_peak_center, high_bkgd_function);
