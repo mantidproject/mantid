@@ -70,6 +70,7 @@ class AdvancedSetupScript(BaseScriptElement):
     sampleformula = ""
     samplenumberdensity = ""
     measuredmassdensity = ""
+    samplegeometry = {}
     containershape = ""
     typeofcorrection = ""
     parnamelist = None
@@ -120,6 +121,7 @@ class AdvancedSetupScript(BaseScriptElement):
             'TypeOfCorrection',
             'SampleFormula',
             'MeasuredMassDensity',
+            'SampleGeometry',
             'SampleNumberDensity',
             'ContainerShape',
             # Caching options
@@ -146,7 +148,10 @@ class AdvancedSetupScript(BaseScriptElement):
                     parvalue = "1"
                 elif str(parvalue) == "False":
                     parvalue = "0"
-                script += "%-10s = \"%s\",\n" % (parname, parvalue)
+                if not isinstance(parvalue, dict):
+                    script += "%-10s = \"%s\",\n" % (parname, parvalue)
+                else:
+                    script += "%-10s = %s,\n" % (parname, parvalue)
         #ENDFOR
 
         return script
@@ -176,6 +181,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["TypeOfCorrection"] = self.typeofcorrection
         pardict["SampleFormula"] = self.sampleformula
         pardict["MeasuredMassDensity"] = self.measuredmassdensity
+        pardict["SampleGeometry"] = self.samplegeometry
         pardict["SampleNumberDensity"] = self.samplenumberdensity
         pardict["ContainerShape"] = self.containershape
         #Caching options
@@ -278,6 +284,16 @@ class AdvancedSetupScript(BaseScriptElement):
 
             self.measuredmassdensity = getFloatElement(instrument_dom, "measuredmassdensity",
                                                        AdvancedSetupScript.measuredmassdensity)
+
+            string_tmp = BaseScriptElement.getStringElement(instrument_dom, "samplegeometry",
+                                                            default=AdvancedSetupScript.samplegeometry)
+            self.samplegeometry = {}
+            if string_tmp:
+                items = string_tmp.replace("{", "").replace("}", "").split(",")
+                keys_tmp = [item.split(":")[0].replace("'", "") for item in items]
+                vals_tmp = [float(item.split(":")[1].replace("'", "")) for item in items]
+                for count, value in enumerate(keys_tmp):
+                    self.samplegeometry[value] = vals_tmp[count]
 
             self.containershape = BaseScriptElement.getStringElement(instrument_dom, "containershape",
                                                                      default=AdvancedSetupScript.containershape)
