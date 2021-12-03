@@ -12,6 +12,8 @@
 namespace Mantid {
 namespace Instrumentation {
 
+using Kernel::time_point_ns;
+
 AlgoTimeRegister::Dump::Dump(AlgoTimeRegister &atr, const std::string &nm)
     : m_algoTimeRegister(atr), m_regStart_chrono(std::chrono::high_resolution_clock::now()), m_name(nm) {
   clock_gettime(CLOCK_MONOTONIC, &m_regStart);
