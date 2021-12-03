@@ -10,7 +10,10 @@ SANS TOML Files
 General Notes
 =============
 
-- Lengths are given in meters within TOML files, unlike previous legacy formats.
+- Lengths are *always* specified in meters within TOML files, unlike previous legacy formats.
+- Angles are specified in degrees.
+# David is this correct?
+
 
 Format Changes
 ==============
@@ -27,6 +30,7 @@ V0 to V1
 - *detector.configuration.selected_detector* is now mandatory
 - *detector.configuration.selected_detector* accepts *front* and *rear* instead of *HAB* and *LAB* respectively.
 - *detector.configuration.all_centre* has been added to set the front and rear centre at the same time.
+
 
 New Fields
 ==========
@@ -67,10 +71,11 @@ This is a required entry to specify the instrument name and `instrument.configur
 ..  code-block:: none
 
   [instrument]
-    name = "LARMOR"  # or LOQ / SANS2D / ZOOM...etc.
+    name = "LARMOR"  # or "LOQ" / "SANS2D" / "ZOOM"...etc.
 
   [instrument.configuration]
     # ...
+
 
 Conversion From Legacy User Files
 =================================
@@ -79,7 +84,8 @@ Layout
 ------
 
 This section is designed like a reference that users can paste straight into
-existing TOML files.
+existing TOML files, but means that the sections are listed alphabetically
+by the *old* command name!
 
 *Note: TOML files use SI units rather than a mix of unit prefixes. For example,
 you will need to convert any measurements in millimetres to meters.*
@@ -127,25 +133,59 @@ Are combined into the following when writing the TOML file:
 Tips for converting
 -------------------
 
-For converting existing files I recommend the following process:
+For converting existing files the following process is recommended:
 
-- Copy your existing user file
-- Remove any commented out lines (starting with ``!``)
-- Go line by line with this guide adding to a **blank** TOML file
-- Delete each line from the copied user file as it's converted
+- Make a copy of the existing (old-format) user file to work with
+- Create a **blank** TOML file (file.toml instead of file.txt)
+- Add the following to the start of the TOML file in the order shown:
 
-BACK/MON/TIMES
---------------
+..  code_block:: none
 
-Note: This command subtracts the *same* background level from *all* monitors.
-The continued use of this method of monitor correction is now deprecated.
-See BACK/M[n]/TIMES.
+    toml_file_version = 1
+
+    [metadata]
+
+    [instrument]
+
+    [instrument.configuration]
+  
+- Copy any comments from the old user file that need to be preserved
+  to ``[``metadata``]`` in the TOML user file and replace any leading
+  ``!`` with ``#``
+- Remove any commented out lines in the old user file (lines starting
+  with ``!``)
+- Work down the old user file line-by-line using this guide to find
+  the new replacement TOML commands
+- Add the replacement TOML commands to the TOML user file
+- Delete each line from the old user file as conversion proceeds
+- When done, **save** the new TOML user file and delete the edited copy
+  of the old user file; **do not delete the reference copy of the old
+  user file!!!**
+- Try the TOML user file in Mantid!
+
+
+Command Set
+===========
+
+BACK/MON/TIMES t1 t2
+--------------------
+
+BACK was used to specify a time window over which to estimate the
+(time-independent) background on monitor spectra. This background
+is then subtracted from the specified monitor spectra before the
+data are rebinned into wavelength.
+
+This particular command subtracts the *same* background level from
+*all* monitors. The continued use of this method of monitor correction
+is now deprecated. See BACK/M[n]/TIMES.
+
+Times were specified in microseconds.
 
 ..  code-block:: none
 
     [normalisation]
       [normalisation.all_monitors]
-        background = [x, y]
+        background = [t1, t2]
         enabled = true
 
 **Existing Example**
@@ -154,7 +194,7 @@ See BACK/M[n]/TIMES.
 
     BACK/MON/TIMES 30000 40000
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -163,11 +203,15 @@ See BACK/M[n]/TIMES.
         background = [30000, 40000]
         enabled = true
 
+Note: if using this, set any instances of use_own_background to false.
 
-BACK/M[n]/TIMES x y
--------------------
+BACK/M[n]/TIMES t1 t2
+---------------------
 
-Note: This command subtracts the specified background level from the specified monitor.
+This command was used to estimate and subtract the (time-independent)
+background level on a specified monitor. See also BACK/MON/TIMES.
+
+Times were specified in microseconds.
 
 ..  code-block:: none
 
@@ -175,7 +219,8 @@ Note: This command subtracts the specified background level from the specified m
     [normalisation]
       [normalisation.monitor.Mn]
         spectrum_number = n
-        background = [x, y]
+  	    use_own_background = true
+        background = [t1, t2]
 
 *OR*
 
@@ -185,8 +230,7 @@ Note: This command subtracts the specified background level from the specified m
       [transmission.monitor.Mn]
         spectrum_number = n
   	    use_own_background = true
-        background = [x, y]
-
+        background = [t1, t2]
 
 **Existing Example**
 
@@ -194,24 +238,48 @@ Note: This command subtracts the specified background level from the specified m
 
     BACK/M1/TIMES 30000 40000
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
     [normalisation]
       [normalisation.monitor.M1]
         spectrum_number = 1
+  	    use_own_background = true
         background = [30000.0, 40000.0]
 
 COMPATIBILITY ON
 ----------------
 
-**Replacement**
+This command was used to allow event data to be reduced in
+a manner that, so far as was possible, emulated the reduction
+of histogram data. The primary use of this command was as a
+diagnostic. Omitting this command was equivalent to
+COMPATIBILITY OFF.
+
+**Existing Example**
+
+..  code-block:: none
+
+    COMPATIBILITY ON
+
+**Replacement Example**
 Unsupported
 
+DET/CORR [FRONT][REAR] [X][Y][Z] [XTILT][YTILT][ZTILT] [ROT] [SIDE] [RADIUS] n
+------------------------------------------------------------------------------
 
-DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
----------------------------------------
+This command was used to fine tune the position of a specified
+detector by applying a relative correction to the logged encoder
+value. The parameter n could be a distance or an angle depending
+on the specified context as shown below.
+
+If specified, SIDE *applies a translation to the rotation axis of
+the detector perpendicular to the plane of the detector*. RADIUS
+*increases the apparent radius from the rotation axis of the detector
+to the active plane*.
+
+# David how are the X/Y/ZTILT commands defined? What values are they modifying?
 
 ..  code-block:: none
 
@@ -245,14 +313,18 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
 
 ..  code-block:: none
 
-    DET/CORR REAR X 0.0
-    DET/CORR REAR Z 58
     DET/CORR FRONT X -33
     DET/CORR FRONT Y -20
     DET/CORR FRONT Z -47
+    DET/CORR FRONT XTILT -0.0850
+    DET/CORR FRONT YTILT 0.1419
     DET/CORR FRONT ROT 0.0
+    DET/CORR FRONT SIDE 0.19
+    DET/CORR FRONT RADIUS 75.7
+    DET/CORR REAR X 0.0
+    DET/CORR REAR Z 58
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -261,15 +333,28 @@ DET/CORR [FRONT][REAR] [X][Y][Z][ROT] a
         front_x = -0.033
         front_y = -0.020
         front_z = -0.047
+        front_x_tilt = -0.000085
+        front_y_tilt = 0.0001419
         front_rot = 0.0
+        front_side = 0.00019
         rear_x = 0.0
         rear_z = 0.058
 
-DET/[LAB][HAB][MERGED][ALL]
----------------------------
+# David how is DET/CORR FRONT RADIUS represented now?
 
-Note: The group now refers to *LAB* and *HAB* as *rear* and *front* respectively.
-All reduction types are lower case.
+DET/[REAR][FRONT][MERGED][BOTH]
+-------------------------------
+
+This command was used to specify which detector(s) were to be
+processed during data reduction. On the LOQ instrument the
+qualifier /FRONT could be equivalently replaced by /HAB (for
+high-angle bank). Similarly, /MERGED and /MERGE were equivalent.
+
+If an instrument only has one detector it is assumed to be
+equivalent to the *rear* detector.
+
+In TOML the detectors must be specified in lower case, and /BOTH
+has been replaced by "all".
 
 ..  code-block:: none
 
@@ -282,7 +367,7 @@ All reduction types are lower case.
 
     DET/HAB
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -290,16 +375,55 @@ All reduction types are lower case.
       # Accepts "front", "rear", "merged", or "all".
       selected_detector = "front"
 
-DET/RESCALE[/FIT] x y
----------------------
+DET/RESCALE n
+-------------
+
+This command specified the factor by which the reduced *front*
+detector data should be multiplied to allow it to overlap the
+reduced rear detector data. If omitted n was assumed to be 1.0
+(no rescaling). See also DET/RESCALE/FIT [q1 q2] and DET/SHIFT n.
 
 ..  code-block:: none
 
   [reduction]
     [reduction.merged.rescale]
-        min = x
-        max = y
-        use_fit = true  # or false
+        factor = n
+        use_fit = false  # Must be false for single value
+
+**Existing Example**
+
+..  code-block:: none
+
+    DET/RESCALE 0.123
+
+**Replacement Example**
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        factor = 0.123
+        use_fit = false
+
+DET/RESCALE/FIT [q1 q2]
+-----------------------
+
+This command was used to automatically estimate the factor by
+which the reduced *front* detector data should be multiplied to
+allow it to overlap the reduced rear detector data. A specific
+Q-range over which to compare intensities could be optionally
+specified. If omitted, all overlapping Q values were used. See
+also DET/RESCALE n.
+
+Scattering vectors were specified in inverse Angstroms.
+
+..  code-block:: none
+
+  [reduction]
+    [reduction.merged.rescale]
+        min = q1
+        max = q2
+        use_fit = true  # Must be true for fitting
 
 **Existing Example**
 
@@ -308,7 +432,7 @@ DET/RESCALE[/FIT] x y
     DET/RESCALE/FIT 0.14 0.24
 
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -318,69 +442,19 @@ DET/RESCALE[/FIT] x y
       max = 0.24
       use_fit = true
 
-DET/SCALE x
+DET/SHIFT n
 -----------
 
-..  code-block:: none
-
-  [reduction]
-    [reduction.merged.rescale]
-        factor = x
-        use_fit = false  # Must be false for single value
-
-**Existing Example**
-
-..  code-block:: none
-
-    DET/SCALE 0.123
-
-
-**Existing Replacement**
-
-..  code-block:: none
-
-  [reduction]
-    [reduction.merged.rescale]
-        factor = 0.123
-        use_fit = false
-
-DET/SCALE x y /FIT
-------------------
-
-..  code-block:: none
-
-  [reduction]
-    [reduction.merged.rescale]
-        min = x
-        max = y
-        use_fit = true  # Must be true for fitting
-
-**Existing Example**
-
-..  code-block:: none
-
-    DET/SCALE 0.1 0.2 /FIT
-
-
-**Existing Replacement**
-
-..  code-block:: none
-
-  [reduction]
-    [reduction.merged.rescale]
-        min = 0.1
-        max = 0.2
-        use_fit = true  # Must be true for fitting
-
-
-DET/SHIFT x
------------
+This command specified the relative amount (a constant) by which the
+reduced *front* detector data should be shifted in intensity to allow
+it to overlap the reduced rear detector data. If omitted n was assumed
+to be 0.0 (no shift). See also DET/RESCALE n and DET/SHIFT/FIT [q1 q2].
 
 ..  code-block:: none
 
   [reduction]
     [reduction.merged.shift]
-        distance = x
+        factor = y
         use_fit = false  # Must be false for single value
 
 **Existing Example**
@@ -389,34 +463,46 @@ DET/SHIFT x
 
     DET/SHIFT 0.123
 
-
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
   [reduction]
     [reduction.merged.shift]
-        distance = 0.123
+        factor = 0.123
         use_fit = false
 
-DET/SHIFT x y /FIT
-------------------
+# David your existing doc says that the shift is a distance; that is
+# inaccurate so I suggest it be changed to factor as for rescale.
+# I've changed this doc accordingly.
+
+DET/SHIFT/FIT [q1 q2]
+---------------------
+
+This command was used to automatically estimate the relative amount
+(a constant) by which the reduced *front* detector data should be
+shifted to allow it to overlap the reduced rear detector data. A
+specific Q-range over which to compare intensities could be optionally
+specified. If omitted, all overlapping Q values were used. See also
+DET/SHIFT y.
+
+Scattering vectors were specified in inverse Angstroms.
 
 ..  code-block:: none
 
   [reduction]
     [reduction.merged.shift]
-        min = x
-        max = y
+        min = q1
+        max = q2
         use_fit = true  # Must be true for fitting
 
 **Existing Example**
 
 ..  code-block:: none
 
-    DET/SHIFT 0.1 0.2 /FIT
+    DET/SHIFT/FIT 0.1 0.2
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -426,16 +512,21 @@ DET/SHIFT x y /FIT
         max = 0.2
         use_fit = true
 
+DET/OVERLAP q1 q2
+-----------------
 
-DET/OVERLAP x y
----------------
+This command was used to specify the Q-range over which
+merging of the rear and front detectors was to be done. If
+omitted, all overlapping Q values were used.
+
+Scattering vectors were specified in inverse Angstroms.
 
 ..  code-block:: none
 
   [reduction]
     [reduction.merged.merge_range]
-      min = x
-      max = y
+      min = q1
+      max = q2
       use_fit = true
 
 **Existing Example**
@@ -445,7 +536,7 @@ DET/OVERLAP x y
     DET/OVERLAP 0.14 0.24
 
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -455,32 +546,70 @@ DET/OVERLAP x y
         max = 0.24
         use_fit = true
 
+FIT/CENTRE t1 t2
+----------------
 
-FIT/CENTRE x y
----------------
+This command was used to specify a time window within which
+the 'prompt spike' could be found in *detector* spectra. This
+information was used to remove the spike by interpolating
+along the time-of-flight distribution. Also see
+FIT/MONITOR t1 t2. 
 
-**Replacement**
+Times were specified in microseconds.
+
+# David this command used to be used on LOQ. Does the note on
+# FIT/MONITOR apply here too?
+
+**Existing Example**
+
+..  code-block:: none
+
+    FIT/CENTRE 19900 20500
+
+**Replacement Example**
 Unsupported
 
-FIT/MID
--------
+FIT/MID[/HAB]/FILE=script.txt
+-----------------------------
 
-**Replacement**
+This command was used to drive automatic determination of the
+coordinates of the centre of the scattering pattern on the
+specified detector using a script file. It has been superseded
+by the Beam Centre Finder tool in Mantid.
+
+If /HAB (equivalent to the "front" detector) was omitted the
+command applied to the "rear" detector. 
+
+**Existing Example**
+
+..  code-block:: none
+
+    FIT/MID/FILE=FIND_CENTRE128SC.COM
+    FIT/MID/HAB/FILE=FIND_CENTRE_HAB2.COM
+
+**Replacement Example**
 Unsupported
 
-FIT/MONITOR x y
----------------
+FIT/MONITOR t1 t2
+-----------------
 
-*Note:* This was only enabled for LOQ in source code, so
-if you are not converting a LOQ file this should not be copied
-as it will produce different results
+This command was used to specify a time window within which
+the 'prompt spike' could be found in *monitor* spectra. This
+information was used to remove the spike by interpolating
+along the time-of-flight distribution. Also see
+FIT/CENTRE t1 t2. 
+
+Times were specified in microseconds.
+
+Note: This command was only ever enabled in the data reduction
+source code for the LOQ instrument.
 
 **Replacement**
 
 ..  code-block:: none
 
   [mask]
-    prompt_peak = {start = x, stop = y}
+    prompt_peak = {start = t1, stop = t2}
 
 **Existing Example**
 
@@ -488,16 +617,73 @@ as it will produce different results
 
     FIT/MONITOR 19900 20500
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
   [mask]
     prompt_peak = {start = 19900.0, stop = 20500.0}
 
+FIT/TRANS[/CLEAR][/OFF]
+-----------------------
 
-FIT/TRANS/LIN x y
------------------
+This command was used to disable fitting of the calculated
+transmission data. Also see FIT/TRANS[[/SAMPLE][/CAN]][/LINEAR][/YLOG][/POLYNOMIALn] [w1 w2].
+
+**Replacement**
+
+..  code-block:: none
+
+    [transmission]
+      [transmission.fitting]
+        enabled = false
+        parameters = {lambda_min = w1, lambda_max = w2}
+        # Can be: "Linear" / "Logarithmic" / "Polynomial"
+        function = "Linear"
+        # Only used when set to "Polynomial"
+        polynomial_order = 3
+
+**Existing Example**
+
+..  code-block:: none
+
+    FIT/TRANS/OFF
+
+**Replacement Example**
+
+..  code-block:: none
+
+    [transmission]
+      [transmission.fitting]
+        enabled = false
+        parameters = {lambda_min = 3.0, lambda_max = 11.0}
+        function = "Linear"
+
+FIT/TRANS[[/SAMPLE][/CAN]][/LINEAR][/YLOG][/POLYNOMIALn] [w1 w2]
+----------------------------------------------------------------
+
+This command was used to specify how the calculated transmission data
+should be fitted. Subsequent data processing would then use transmission
+values interpolated using the fit function. In some instances doing this
+could improve the statistical quality of the transmission data. Also see
+FIT/TRANS[/CLEAR][/OFF].
+
+Wavelengths were specified in Angstroms. If w1 and w2 were omitted then the
+fit was applied to the full wavelength range.
+
+The \SAMPLE qualifier only applied the specified fit to the sample transmission
+data. Similarly, the \CAN qualifier only applied the specified fit to the can
+transmission data. If neither of these qualifiers was present then the same fit
+function was applied to both sets of transmission data.
+
+The \LINEAR (which could be abbreviated to \LIN) qualifier implemented a fit
+function of the form Y=mX+C.
+
+The \YLOG (which could be abbreviated to \LOG) qualifier implemented a fit
+function of the form Y=exp(aX)+C.
+
+The \POLYNOMIALn qualifier implemented a fit function of the form
+Y=C0+C1X+C2X^2+...CnX^n where n>2.
 
 **Replacement**
 
@@ -506,11 +692,11 @@ FIT/TRANS/LIN x y
     [transmission]
       [transmission.fitting]
         enabled = true
-        parameters = {lambda_min = x, lambda_max = x}
-        # Can be: Linear / Logarithmic / Polynomial
+        parameters = {lambda_min = w1, lambda_max = w2}
+        # Can be: "Linear" / "Logarithmic" / "Polynomial"
         function = "Linear"
-        # Only used when set to Polynomial
-        polynomial_order = 2
+        # Only used when set to "Polynomial"
+        polynomial_order = 3
 
 **Existing Example**
 
@@ -518,7 +704,7 @@ FIT/TRANS/LIN x y
 
     FIT/TRANS/LIN 3.0 11.0
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -528,8 +714,13 @@ FIT/TRANS/LIN x y
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
 
-GRAVITY/ON
-----------
+GRAVITY[/ON/OFF]
+----------------
+
+This command was used to specify whether the detector data should be
+corrected for the ballistic effects of gravity on the neutrons. This
+correction is particularly important at long sample-detector distances
+and/or when using long wavelengths. Also see GRAVITY/LEXTRA x.
 
 **Replacement**
 
@@ -544,7 +735,7 @@ GRAVITY/ON
 
     GRAVITY/ON
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -554,6 +745,11 @@ GRAVITY/ON
 
 GRAVITY/LEXTRA x
 ----------------
+
+This command was used to specify an extra length that can be added
+to the gravity correction. The extra length is only taken into account
+when the gravity correction is enabled and the default value is x=0.0.
+Also see GRAVITY[/ON/OFF].
 
 **Replacement**
 
@@ -568,16 +764,28 @@ GRAVITY/LEXTRA x
 
     GRAVITY/LEXTRA 2.0
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
     [instrument.configuration]
       gravity_extra_length = 2.0
 
+L/EVENTSTIME binning_string
+---------------------------
 
-L/EVENTSTIME str
-----------------
+This command was used to specify a binning scheme to be applied to
+event mode data. The scheme comprised a comma-separated string of the
+form t1,step1,t2,step2,t3... where t1, t2, t3, etc specified event
+times and step1, step2, etc specified the binning interval between
+those event times.
+
+A positive step would result in linear (ie, equally-spaced) bins, whilst
+a negative step would result in logarithmic (ie, geometrically-expanding)
+bins.
+
+All times and linear steps were specified in microseconds. Logarithmic
+steps were specified as %/100.
 
 **Replacement**
 
@@ -592,7 +800,7 @@ L/EVENTSTIME str
 
     L/EVENTSTIME 7000.0,500.0,60000.0
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -600,10 +808,18 @@ L/EVENTSTIME str
     # A negative step (middle val) indicates Log
     binning = "7000.0,500.0,60000.0"
 
-
-L/PHI [/NOMIRROR] x y
+L/PHI[/NOMIRROR] a b
 ---------------------
 
+This command specified the azimuthal range of 2D detector data to be
+included in data reduction. Viewed along the direction of travel of
+the neutrons 0 (or 360) degrees was at 3 O'clock, 90 degrees was at
+12 O'clock, 180 (or -180) degrees was at 9 O'clock, and 270 (or -90)
+degrees was at 6 O'clock. By default the mirror sector was always
+included (ie, selecting a=-30 & b=+30 would *also* include the sector
+150-210), but this could be overridden with the /NOMIRROR qualifier.
+
+Angles were specified in degrees.
 
 **Replacement**
 
@@ -612,8 +828,8 @@ L/PHI [/NOMIRROR] x y
     [mask]
       [mask.phi]
         mirror = bool
-        start = x
-        stop = y
+        start = a
+        stop = b
 
 **Existing Example**
 
@@ -621,19 +837,41 @@ L/PHI [/NOMIRROR] x y
 
     L/PHI/NOMIRROR -45 45
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
     [mask]
       [mask.phi]
         mirror = false
-        start = x
-        stop = y
+        start = -45
+        stop = 45
 
+L/Q binning_string
+------------------
 
-L/Q rebin_string
-----------------
+This command was used to specify a Q-binning scheme to be applied
+during 1D data reduction. Also see L/QXY binning_string.
+
+For historical reasons, several variants of this command were
+implemented but they can be summarised thus:
+
+..  code-block:: none
+
+    L/Q q1 q2 qstep/LIN   same as   L/Q/LIN q1 q2 qstep
+    L/Q q1 q2 qstep/LOG   same as   L/Q/LOG q1 q2 qstep
+	L/Q q1,step1,q2,step2,q3...
+	
+In the first two cases the type of Q-binning is fixed by the choice of
+the \LIN or \LOG qualifier. But in the last case *variable* Q-binning
+is permitted if required.
+
+A positive step would result in linear (ie, equally-spaced) bins, whilst
+a negative step would result in logarithmic (ie, geometrically-expanding)
+bins.
+
+All Q-values and linear steps were specified in inverse Angstroms. Logarithmic
+steps were specified as %/100.
 
 **Replacement**
 
@@ -649,7 +887,7 @@ L/Q rebin_string
 
     L/Q .02,0.05,0.5,-0.1,10
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -658,15 +896,23 @@ L/Q rebin_string
         # Negative indicates log
         binning = "0.02,0.05,0.5,-0.1,10.0"
 
-L/Q/RCUT x
+L/Q/RCUT r
 ----------
+
+This command was used to specify the 'radius cut' value, a construct
+which could be used to improve the statistical uncertainty on Q bins
+suffering from poor instrumental resolution. This command would typically,
+but not exclusively, be used in conjunction with L/Q/WCUT w.
+
+For more information, see the [Q1D](https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html)
+algorithm description.
 
 **Replacement**
 
 ..  code-block:: none
 
     [binning.1d_reduction]
-        radius_cut = x
+        radius_cut = r
 
 **Existing Example**
 
@@ -674,7 +920,7 @@ L/Q/RCUT x
 
     L/Q/RCUT 100
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -682,16 +928,25 @@ L/Q/RCUT x
       [binning.1d_reduction]
         radius_cut = 0.1
 
-
-L/Q/WCUT x
+L/Q/WCUT w
 ----------
+
+This command was used to specify the 'wavelength cut' value, a construct
+which could be used to improve the statistical uncertainty on Q bins
+suffering from poor instrumental resolution. This command would typically,
+but not exclusively, be used in conjunction with L/Q/RCUT r.
+
+For more information, see the [Q1D](https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html)
+algorithm description.
+
+The cut-off wavelength was specified in Angstroms.
 
 **Replacement**
 
 ..  code-block:: none
 
     [binning.1d_reduction]
-        wavelength_cut = x
+        wavelength_cut = w
 
 **Existing Example**
 
@@ -699,7 +954,7 @@ L/Q/WCUT x
 
     L/Q/WCUT 8
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -707,8 +962,26 @@ L/Q/WCUT x
       [binning.1d_reduction]
         wavelength_cut = 8.0
 
-L/QXY start stop step [/LIN]
-----------------------------
+L/QXY binning_string
+--------------------
+
+This command was used to specify a Q-binning scheme to be applied
+during 2D data reduction. Also see L/Q binning_string.
+
+For historical reasons, several variants of this command were
+implemented but they can be summarised thus:
+
+..  code-block:: none
+
+    L/QXY 0 q2 qstep/LIN   same as   L/QXY/LIN 0 q2 qstep
+    L/QXY 0 q2 qstep/LOG   same as   L/QXY/LOG 0 q2 qstep
+	
+The type of Q-binning is fixed by the choice of the \LIN or \LOG
+qualifier but variable binning is **not** permitted during 2D reductions.
+Also note that the Q-range *must* start at zero.
+
+All Q-values and linear steps were specified in inverse Angstroms. Logarithmic
+steps were specified as %/100.
 
 **Replacement**
 
@@ -728,7 +1001,7 @@ L/QXY start stop step [/LIN]
 
     L/QXY 0 0.1 .002/lin
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -737,6 +1010,8 @@ L/QXY start stop step [/LIN]
         step = 0.002
         stop = 0.1
         type = "Lin"
+
+# Steve pick up here
 
 L/R x y [step]
 --------------
@@ -754,7 +1029,7 @@ Note step was ignored previously.
 
     L/R 38 -1
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -785,7 +1060,7 @@ L/WAV min max step [/LIN]
 
     L/WAV 2.0 14.0 0.125/LIN
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -811,7 +1086,7 @@ MASKFILE str
 
     MASKFILE=a.xml,b.xml,c.xml
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -837,7 +1112,7 @@ MASK h
     mask/rear h100
     mask/rear h200
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -863,7 +1138,7 @@ MASK hx>hy
 
     mask h126>h127
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -892,7 +1167,7 @@ MASK v
     mask/rear v100
     mask/rear v200
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -918,7 +1193,7 @@ MASK vx>vy
 
     mask v126>v127
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -945,7 +1220,7 @@ MASK Sn
     MASK S123
     MASK S456
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -975,7 +1250,7 @@ MASK/T x y
     MASK/T 19711.5 21228.5
     MASK/T 39354.5 41348.5
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1008,7 +1283,7 @@ MASK/LINE x y
 
     MASK/LINE 30 170
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1033,7 +1308,7 @@ legacy files.
 
     MASK/LINE 30 170 0.3 0.1
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1059,7 +1334,7 @@ MON/DIRECT="filename"
 
     MON/DIRECT=DIRECT_RUN524.dat
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1086,7 +1361,7 @@ MON/FLAT=str
 
     MON/FLAT="flat_file.091"
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1123,7 +1398,7 @@ MON [/TRANS] /SPECTRUM=n [/INTERPOLATE]
 
     MON/SPECTRUM=1
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1153,7 +1428,7 @@ QRESOL/A1=x
 
     QRESOL/A1=30
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1176,7 +1451,7 @@ QRESOL/A2=x
 
     QRESOL/A2=20
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1203,7 +1478,7 @@ in :ref:`algm-TOFSANSResolutionByPixel`.
 
   QRESOL/DELTAR=10  # mm
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1226,7 +1501,7 @@ QRESOL/MODERATOR=filename.txt
 
     QRESOL/MODERATOR=moderator_rkh_file.txt
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1250,7 +1525,7 @@ QRESOL[/ON][/OFF]
 
     QRESOL/ON
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1280,7 +1555,7 @@ QRESOL[/H1=x][/H2=wx][/W1=x][/W2=x]
     QRESOL/W1=16.0
     QRESOL/W2=8.0
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1306,7 +1581,7 @@ SAMPLE/OFFSET x
 
     SAMPLE/OFFSET -60
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1329,7 +1604,7 @@ set centre a b
 
     set centre 84.2 -196.5
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1356,7 +1631,7 @@ set centre a b c d [/MAIN] [/HAB]
     set centre 84.2 -196.5 5.1 5.1 /MAIN
     set centre 84.2 -196.5 /HAB
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1384,7 +1659,7 @@ set scales a b c d
 
     set scales 1.497 1.0 1.0 1.0 1.0
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1413,7 +1688,7 @@ TRANS/TRANSSPEC=n
 
     TRANS/TRANSPEC=3
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1443,7 +1718,7 @@ TRANS/TRANSPEC=n/SHIFT=a
 
     TRANS/TRANSPEC=3/SHIFT=-58
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
@@ -1472,7 +1747,7 @@ TUBECALIBFILE=str
 
   TUBECALIBFILE=Tube.nxs
 
-**Existing Replacement**
+**Replacement Example**
 
 ..  code-block:: none
 
