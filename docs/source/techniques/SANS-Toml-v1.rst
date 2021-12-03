@@ -904,7 +904,7 @@ which could be used to improve the statistical uncertainty on Q bins
 suffering from poor instrumental resolution. This command would typically,
 but not exclusively, be used in conjunction with L/Q/WCUT w.
 
-For more information, see the [Q1D](https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html)
+For more information, see the `Q1D <https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html>`_
 algorithm description.
 
 **Replacement**
@@ -936,7 +936,7 @@ which could be used to improve the statistical uncertainty on Q bins
 suffering from poor instrumental resolution. This command would typically,
 but not exclusively, be used in conjunction with L/Q/RCUT r.
 
-For more information, see the [Q1D](https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html)
+For more information, see the `Q1D <https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html>`_
 algorithm description.
 
 The cut-off wavelength was specified in Angstroms.
