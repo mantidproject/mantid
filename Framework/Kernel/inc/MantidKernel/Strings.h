@@ -361,10 +361,8 @@ template <typename Integer> std::vector<std::vector<Integer>> parseGroups(const 
         str, "+", Kernel::StringTokenizer::TOK_TRIM | Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
     std::vector<Integer> group;
     group.reserve(tokens.count());
-    for (const auto &t : tokens) {
-      // add this number to the group we're about to add
-      group.emplace_back(boost::lexical_cast<Integer>(t));
-    }
+    std::transform(tokens.cbegin(), tokens.cend(), std::back_inserter(group),
+                   [](const auto &token) { return boost::lexical_cast<Integer>(token); });
     groups.emplace_back(std::move(group));
   };
 

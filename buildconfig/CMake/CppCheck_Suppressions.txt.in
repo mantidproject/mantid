@@ -67,8 +67,6 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 // ----------- New list of supressions after updating to cppcheck 2.5 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
 
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Strings.h:366
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/CompositeValidator.h:57
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ComputeResourceInfo.cpp:37
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ComputeResourceInfo.cpp:37
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:129
