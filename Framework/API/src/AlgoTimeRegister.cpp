@@ -39,12 +39,13 @@ AlgoTimeRegister::Dump::~Dump() {
   }
 }
 
-void AlgoTimeRegister::addTime(const std::string &name, const std::thread::id thread_id, const time_point_ns &begin,
-                               const time_point_ns &end) {
+void AlgoTimeRegister::addTime(const std::string &name, const std::thread::id thread_id,
+                               const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end) {
   m_info.emplace_back(name, thread_id, begin, end);
 }
 
-void AlgoTimeRegister::addTime(const std::string &name, const time_point_ns &begin, const time_point_ns &end) {
+void AlgoTimeRegister::addTime(const std::string &name, const Kernel::time_point_ns &begin,
+                               const Kernel::time_point_ns &end) {
   this->addTime(name, std::this_thread::get_id(), begin, end);
 }
 
