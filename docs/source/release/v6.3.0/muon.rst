@@ -49,6 +49,7 @@ Improvements
 - The results tab will now dispay a warning (red text and a tooltip) if the results table already exists.
 - The plots no longer use scientific notation for the axis values.
 - On resizing priority is given to plotting.
+- The Sequentially Fit all button is now visible for 4K displays
 
 Bugfixes
 ########
