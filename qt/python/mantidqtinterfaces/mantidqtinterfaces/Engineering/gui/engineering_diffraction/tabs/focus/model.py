@@ -7,10 +7,9 @@
 from os import path, makedirs
 from typing import Optional
 import matplotlib.pyplot as plt
+import Engineering.EnggUtils as EnggUtils
 
 from Engineering.common import path_handling
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import \
-    load_full_instrument_calibration
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantid.simpleapi import logger, AnalysisDataService as Ads, SaveNexus, SaveGSS, SaveFocusedXYE, \
@@ -48,7 +47,7 @@ class FocusModel(object):
             return
 
         # check if full instrument calibration exists, if not load it
-        full_calib = load_full_instrument_calibration()
+        full_calib = EnggUtils.load_full_instrument_calibration()
         # load, focus and process vanadium (retrieve from ADS if exists)
         ws_van_foc, van_run = self.process_vanadium(vanadium_path, calibration, full_calib)
 
