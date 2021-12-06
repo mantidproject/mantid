@@ -75,4 +75,5 @@ Bugfixes
 ########
 - :ref:`ConvertWANDSCDtoQ<algm-ConvertWANDSCDtoQ>` and :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` units now display correctly in terms of 'in X.XXX A^-1'
 - :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` output orientation fixed
+- :ref:`SaveReflections <algm-SaveReflections>` now scales intensities and errors to ensure the width of the columns in the output file are not exceeded.
 :ref:`Release 6.3.0 <v6.3.0>`
