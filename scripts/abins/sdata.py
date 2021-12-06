@@ -29,13 +29,27 @@ class SData(collections.abc.Sequence):
 
     Indexing will return dict(s) of S by quantum order for atom(s)
     corresponding to index/slice.
+
+    Args:
+        data:
+            Scattering data as 1-D or 2-D arrays, arranged by atom and quantum order
+
+                    {'atom_0': {'s': {'order_1': array([[s11, s12, s13, ...]
+                                                  [s21, s22, s23, ...], ...])
+                                                  'order_2': ...}},
+                     'atom_1': ...}
+
+                where array rows correspond to q-points and columns correspond
+                to frequencies. If q-points and energies are not independent
+                (e.g. indirect-geometry spectrum at a given angle) 1-D arrays are used.
+
     """
 
     def __init__(self, *,
                  data: dict,
                  frequencies: np.ndarray,
                  temperature: Optional[float] = None,
-                 sample_form: str = '',
+                 sample_form: str = ''
                  ) -> None:
         super().__init__()
 
@@ -114,6 +128,7 @@ class SData(collections.abc.Sequence):
                   frequencies: np.ndarray,
                   atom_keys: Sequence[str],
                   order_keys: Sequence[str],
+                  n_rows: Optional[int] = None,
                   **kwargs) -> SD:
         """Construct data container with zeroed arrays of appropriate dimensions
 
@@ -133,6 +148,10 @@ class SData(collections.abc.Sequence):
             order_keys:
                 keys for quantum order
 
+            n_rows:
+                If provided, SData is filled with 2-D arrays of dimensions
+                (n_rows, len(frequencies)).
+
             **kwargs:
                 remaining keyword arguments will be passed to class constructor
                 (Usually these would be ``temperature=`` and ``sample_form=``.)
@@ -142,8 +161,12 @@ class SData(collections.abc.Sequence):
         """
 
         n_frequencies = len(frequencies)
+        if n_rows is None:
+            shape = n_frequencies
+        else:
+            shape = (n_rows, n_frequencies)
 
-        data = {atom_key: {'s': {order_key: np.zeros(n_frequencies)
+        data = {atom_key: {'s': {order_key: np.zeros(shape)
                                  for order_key in order_keys}}
                 for atom_key in atom_keys}
 
@@ -174,7 +197,13 @@ class SData(collections.abc.Sequence):
     def get_total_intensity(self) -> np.ndarray:
         """Sum over all atoms and quantum orders to a single spectrum"""
 
-        total = np.zeros_like(self._frequencies)
+        # Find a spectrum to get initial shape
+        for atom_data in self:
+            for order_key, data in atom_data.items():
+                total = np.zeros_like(data)
+                break
+            break
+
         for atom_data in self:
             for order_key, data in atom_data.items():
                 total += data
@@ -385,7 +414,7 @@ class SData(collections.abc.Sequence):
 
         if isinstance(other, np.ndarray) and len(other.shape) == 1:
             other = other[np.newaxis, :]
-        elif isinstance(other, np.ndarray) and len(other.shape) == 2:
+        elif isinstance(other, np.ndarray) and len(other.shape) in (2, 3):
             pass
         else:
             raise IndexError(

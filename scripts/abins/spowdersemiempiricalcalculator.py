@@ -73,6 +73,8 @@ class SPowderSemiEmpiricalCalculator:
             approximate spectra up to abins.parameters.autoconvolution['max_order'] using auto-convolution
         :param bin_width: bin width in wavenumber for re-binned spectrum
         """
+        from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
+
         self._check_parameters(**locals())
 
         # Expose input parameters
@@ -126,6 +128,16 @@ class SPowderSemiEmpiricalCalculator:
         else:
             self._fine_bins = None
             self._fine_bin_centres = None
+
+        # If operating in 2-D mode, there is also an explicit set of q bins
+        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+            params = abins.parameters.instruments[self._instrument.get_name()]
+            q_min, q_max = params.get('q_range')
+            self._q_bins = np.linspace(q_min, q_max, params.get('q_size') + 1)
+            self._q_bin_centres = (self._q_bins[:-1] + self._q_bins[1:]) / 2
+        else:
+            self._q_bins = None
+            self._q_bin_centres = None
 
     def get_formatted_data(self) -> SData:
         """
@@ -250,18 +262,29 @@ class SPowderSemiEmpiricalCalculator:
         self._powder_data = powder_calculator.get_formatted_data()
 
         # Dispatch to appropriate routine
+        isotropic_fundamentals = abins.parameters.development.get('isotropic_fundamentals', False)
+
         if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
             return self._calculate_s_powder_1d(
-                isotropic_fundamentals=abins.parameters.development.get('isotropic_fundamentals', False))
+                isotropic_fundamentals=isotropic_fundamentals)
         elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-            return self._calculate_s_powder_2d()
+            return self._calculate_s_powder_2d(
+                isotropic_fundamentals=isotropic_fundamentals)
         else:
             raise ValueError('Instrument "{}" is not recognised, cannot perform semi-empirical '
                              'powder averaging.'.format(self._instrument.get_name()))
 
-    @staticmethod
-    def _calculate_s_powder_2d() -> SData:
-        raise NotImplementedError('2D instruments not supported in this version.')
+    def _calculate_s_powder_2d(self, isotropic_fundamentals: bool = False) -> SData:
+        if self._instrument.get_name() == 'TwoDMap':
+            #params = abins.parameters.instruments[self._instrument.get_name()]
+            # q_min, q_max = params.get('q_range')
+            # q = np.linspace(q_min, q_max, params.get('q_size'))
+
+            return self._calculate_s_powder_over_k_and_q(
+                isotropic_fundamentals=isotropic_fundamentals)
+
+        else:
+            raise NotImplementedError('2D instruments not supported in this version.')
 
     def _calculate_s_powder_1d(self, isotropic_fundamentals=False) -> SData:
         """
@@ -302,6 +325,66 @@ class SPowderSemiEmpiricalCalculator:
         s_data = self._broaden_sdata(s_data,
                                      broadening_scheme=broadening_scheme)
         return s_data
+
+    def _calculate_s_powder_over_k_and_q(self, isotropic_fundamentals: bool = False):
+        """Calculate S along a set of q-points in semi-analytic powder-averaging approximation
+
+        This data is averaged over the phonon k-points and Debye-Waller factors
+        are included.
+
+        In the resulting SData, spectra have the shape (n_qpts, n_ebins)
+
+        Returns:
+            SData
+        """
+        # Initialize the main data container
+        sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
+                                      max_order=self._quantum_order_num)
+
+        q2 = (self._q_bin_centres**2)[:, np.newaxis]
+
+        # Calculate fundamentals and order-2 in isotropic powder-averaging approximation
+        if self._quantum_order_num == 1 or self._autoconvolution:
+            min_order = 1  # Need fundamentals without DW
+        else:
+            min_order = 2  # Skip fundamentals to be calculated separately
+
+        # Collect SData at q = 1/Å without DW factors
+        sdata_1d = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
+                                         max_order=self._quantum_order_num,
+                                         shape='1d')
+
+        if isotropic_fundamentals or self._quantum_order_num > 1 or self._autoconvolution:
+            for k_index in range(self._num_k):
+                _ = self._calculate_s_powder_over_atoms(k_index=k_index, q2=1.,
+                                                        bins=(self._fine_bins if self._autoconvolution else self._bins),
+                                                        sdata=sdata_1d, min_order=min_order)
+
+        # (order, q, energy)
+        q2_order_corrections = q2**np.arange(self._quantum_order_num)[:, np.newaxis, np.newaxis]
+
+        sdata_1d *= q2_order_corrections
+        raise Exception(sdata_1d[0])
+
+        # Calculate fundamentals with DW corrections explicitly
+        fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
+        sdata.update(fundamentals_sdata_with_dw)
+
+        import matplotlib.pyplot as plt
+        from matplotlib.image import NonUniformImage
+        fig, ax = plt.subplots()
+        image = NonUniformImage(ax,
+                                extent=(min(self._q_bins), max(self._q_bins),
+                                        min(self._bins), max(self._bins)))
+        image.set_data(self._q_bin_centres, self._bin_centres,
+                       sdata.get_total_intensity().T)
+        ax.images.append(image)
+        ax.set_xlim(min(self._q_bins), max(self._q_bins))
+        ax.set_ylim(min(self._bins), max(self._bins))
+        plt.show(fig)
+        raise Exception(np.sum(fundamentals_sdata_with_dw.get_total_intensity()))
+
+        return sdata
 
     def _calculate_s_powder_over_k(self, *, angle: float,
                                    isotropic_fundamentals: bool = False,
@@ -406,18 +489,34 @@ class SPowderSemiEmpiricalCalculator:
         return np.exp(-q2 * a_trace / 3.0 * coth * coth)
 
     def _get_empty_sdata(self, use_fine_bins: bool = False,
-                         max_order: Optional[int] = None) -> SData:
+                         max_order: Optional[int] = None,
+                         shape = None) -> SData:
         """
         Initialise an appropriate SData object for this calculation
+
+        Args:
+            shape:
+                '1d', '2d' or None. If '1d', spectra are 1-D (corresponding to
+                energy). If '2d', spectra have rows corresponding to q bin centres.
+                If None, detect dimensions based on presence of self._q_bin_centres.
+
         """
         bin_centres = self._fine_bin_centres if use_fine_bins else self._bin_centres
 
         if max_order is None:
             max_order = self._quantum_order_num
 
+        if (shape and shape.lower() == '1d') or (shape is None and self._q_bin_centres is None):
+            n_rows = None
+        elif shape == '2d_onerow':
+            n_rows = 1
+        else:
+            n_rows = len(self._q_bin_centres)
+
         return SData.get_empty(frequencies=bin_centres,
                                atom_keys=list(self._abins_data.get_atoms_data().extract().keys()),
                                order_keys=[f'order_{n}' for n in range(1, max_order + 1)],
+                               n_rows=n_rows,
                                temperature=self._temperature, sample_form=self._sample_form)
 
     def _broaden_sdata(self, sdata: SData,
@@ -466,7 +565,7 @@ class SPowderSemiEmpiricalCalculator:
             SData for fundamentals including mode-dependent Debye-Waller factor
 
         """
-        if not (angle is None) ^ (q2 is None):  # XNOR
+        if (angle is None) == (q2 is None):  # XNOR
             raise ValueError("Exactly one should be set: angle or q2")
 
         fundamentals_sdata_with_dw = self._get_empty_sdata(use_fine_bins=False, max_order=1)
@@ -495,9 +594,13 @@ class SPowderSemiEmpiricalCalculator:
                                                   a_trace=a_traces[atom_index],
                                                   b_tensor=b_tensors[atom_index],
                                                   b_trace=b_traces[atom_index])
+                weights = s * dw * kpoint.weight
+                if len(weights.shape) == 1:
+                    weights = weights[np.newaxis, :]
 
-                rebinned_s_with_dw, _ = np.histogram(frequencies, bins=self._bins,
-                                                     weights=(s * dw * kpoint.weight), density=False)
+                rebinned_s_with_dw = np.array([np.histogram(frequencies, bins=self._bins,
+                                                            weights=row, density=False)[0]
+                                               for row in weights])
 
                 fundamentals_sdata_with_dw.add_dict({atom_label: {'s': {'order_1': rebinned_s_with_dw}}})
 

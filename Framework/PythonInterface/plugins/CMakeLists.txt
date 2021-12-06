@@ -4,6 +4,7 @@
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
     algorithms/Abins.py
+    algorithms/Abins2D.py
     algorithms/AlignAndFocusPowderFromFiles.py
     algorithms/AlignComponents.py
     algorithms/AngularAutoCorrelationsSingleAxis.py

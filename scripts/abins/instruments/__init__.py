@@ -6,12 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # flake8: noqa
 from abins.constants import ALL_INSTRUMENTS
-from .lagrangeinstrument import LagrangeInstrument
-from .toscainstrument import ToscaInstrument
 from .instrument import Instrument
+from .lagrangeinstrument import LagrangeInstrument
+from .pychop import PyChopInstrument
+from .toscainstrument import ToscaInstrument
+from .twodmap import TwoDMap
+
 
 instruments = {"lagrange": LagrangeInstrument,
-               "tosca": ToscaInstrument}
+               "tosca": ToscaInstrument,
+               "twodmap": TwoDMap,
+               "maps": (PyChopInstrument, {'name': 'MAPS'}),
+               "mari": (PyChopInstrument, {'name': 'MARI'})}
 
 def get_instrument(name: str, **kwargs) -> Instrument:
     """Instantiate a named Instrument

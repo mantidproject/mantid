@@ -17,11 +17,48 @@ value dictionaries through the Python API if possible. e.g.::
 """
 
 import math
+import numpy as np
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 
 # Instruments constants  #############################
 instruments = {
     'fwhm': 3.0,  # approximate value for the full width at half maximum for Gaussian experimental resolutions
+    'TwoDMap': {
+        'resolution': 0.01,  # Width of broadening function as a fraction of incident energy
+        'q_size': 200,  # Number of q slices in output plot
+        'q_range': (0, 20),  # Lower and upper limits of measurement q sampling
+        'e_init': [4100.0],  # Incident energies in cm-1
+        'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
+        'settings_default': 'A',
+        'settings': {'A': {'chopper': 'A'}},
+        'chopper_frequency_default': 400,
+        'chopper_allowed_frequencies': list(range(50, 601, 50))
+        },
+    'MAPS': {
+        'resolution': 'pychop',
+        'q_size': 100,
+        'e_init': 400,
+        'angles_per_detector': 20,
+        'settings_default': 'A',
+        'settings': {'A': {'chopper': 'A'},
+                     'S': {'chopper': 'S'},
+                     },
+        #'chopper_frequency_default': 400,
+        'chopper_allowed_frequencies': list(range(50, 601, 50))
+        },
+    'MARI': {
+        'resolution': 'pychop',
+        'q_size': 100,
+        'e_init': 400,
+        'angles_per_detector': 10,
+        'settings_default': 'A',
+        'settings': {'A': {'chopper': 'A'},
+                     'R': {'chopper': 'A'},
+                     'G': {'chopper': 'S'},
+                     'S': {'chopper': 'S'},},
+        'chopper_frequency_default': 400,
+        'chopper_allowed_frequencies': list(range(50, 601, 50))
+        },
     'TOSCA': {
         # TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
