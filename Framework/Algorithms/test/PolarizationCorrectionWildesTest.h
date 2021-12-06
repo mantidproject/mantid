@@ -18,12 +18,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 
-#include "MantidKernel/WarningSuppressions.h"
-
-// https://gitlab.com/libeigen/eigen/-/issues/1217
-GNU_DIAG_OFF("conversion")
 #include <Eigen/Dense>
-GNU_DIAG_ON("conversion")
 
 using Mantid::Algorithms::PolarizationCorrectionWildes;
 

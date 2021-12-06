@@ -7,15 +7,8 @@
 #pragma once
 
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/DllConfig.h"
-
-// https://gitlab.com/libeigen/eigen/-/issues/1217
-GNU_DIAG_OFF("conversion")
-GNU_DIAG_OFF("maybe-uninitialized")
 #include <Eigen/Geometry>
-GNU_DIAG_ON("conversion")
-GNU_DIAG_ON("maybe-uninitialized")
 #include <memory>
 #include <vector>
 

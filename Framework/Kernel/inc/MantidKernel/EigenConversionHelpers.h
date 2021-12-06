@@ -9,12 +9,8 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
-#include "MantidKernel/WarningSuppressions.h"
 
-// https://gitlab.com/libeigen/eigen/-/issues/1217
-GNU_DIAG_OFF("conversion")
 #include <Eigen/Geometry>
-GNU_DIAG_ON("conversion")
 
 namespace Mantid {
 namespace Kernel {
