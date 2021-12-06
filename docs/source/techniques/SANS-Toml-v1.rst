@@ -148,7 +148,7 @@ For converting existing files the following process is recommended:
     [instrument]
 
     [instrument.configuration]
-  
+
 - Copy any comments from the old user file that need to be preserved
   to ``[``metadata``]`` in the TOML user file and replace any leading
   ``!`` with ``#``
@@ -553,7 +553,7 @@ This command was used to specify a time window within which
 the 'prompt spike' could be found in *detector* spectra. This
 information was used to remove the spike by interpolating
 along the time-of-flight distribution. Also see
-FIT/MONITOR t1 t2. 
+FIT/MONITOR t1 t2.
 
 Times were specified in microseconds.
 
@@ -578,7 +578,7 @@ specified detector using a script file. It has been superseded
 by the Beam Centre Finder tool in Mantid.
 
 If /HAB (equivalent to the "front" detector) was omitted the
-command applied to the "rear" detector. 
+command applied to the "rear" detector.
 
 **Existing Example**
 
@@ -597,7 +597,7 @@ This command was used to specify a time window within which
 the 'prompt spike' could be found in *monitor* spectra. This
 information was used to remove the spike by interpolating
 along the time-of-flight distribution. Also see
-FIT/CENTRE t1 t2. 
+FIT/CENTRE t1 t2.
 
 Times were specified in microseconds.
 
@@ -861,7 +861,7 @@ implemented but they can be summarised thus:
     L/Q q1 q2 qstep/LIN   same as   L/Q/LIN q1 q2 qstep
     L/Q q1 q2 qstep/LOG   same as   L/Q/LOG q1 q2 qstep
 	L/Q q1,step1,q2,step2,q3...
-	
+
 In the first two cases the type of Q-binning is fixed by the choice of
 the \LIN or \LOG qualifier. But in the last case *variable* Q-binning
 is permitted if required.
@@ -975,7 +975,7 @@ implemented but they can be summarised thus:
 
     L/QXY 0 q2 qstep/LIN   same as   L/QXY/LIN 0 q2 qstep
     L/QXY 0 q2 qstep/LOG   same as   L/QXY/LOG 0 q2 qstep
-	
+
 The type of Q-binning is fixed by the choice of the \LIN or \LOG
 qualifier but variable binning is **not** permitted during 2D reductions.
 Also note that the Q-range *must* start at zero.
