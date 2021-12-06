@@ -12,8 +12,6 @@ General Notes
 
 - Lengths are *always* specified in meters within TOML files, unlike previous legacy formats.
 - Angles are specified in degrees.
-# David is this correct?
-
 
 Format Changes
 ==============
@@ -30,7 +28,7 @@ V0 to V1
 - *detector.configuration.selected_detector* is now mandatory
 - *detector.configuration.selected_detector* accepts *front* and *rear* instead of *HAB* and *LAB* respectively.
 - *detector.configuration.all_centre* has been added to set the front and rear centre at the same time.
-
+- *reduction.merged.shift.distance* was renamed from `distance` to `factor`
 
 New Fields
 ==========
@@ -91,7 +89,7 @@ by the *old* command name!
 you will need to convert any measurements in millimetres to meters.*
 
 The following is used to note optional qualifiers which were available in
-the existing user file format: ``[`` ``]``.
+the existing user file format: `[ ]`.
 
 Examples are given in a way that they can be merged together where headers
 match, for example these three examples:
@@ -139,7 +137,7 @@ For converting existing files the following process is recommended:
 - Create a **blank** TOML file (file.toml instead of file.txt)
 - Add the following to the start of the TOML file in the order shown:
 
-..  code_block:: none
+..  code-block:: none
 
     toml_file_version = 1
 
@@ -150,10 +148,10 @@ For converting existing files the following process is recommended:
     [instrument.configuration]
 
 - Copy any comments from the old user file that need to be preserved
-  to ``[``metadata``]`` in the TOML user file and replace any leading
-  ``!`` with ``#``
+  to `[metadata]` in the TOML user file and replace any leading
+  `!` with `#`
 - Remove any commented out lines in the old user file (lines starting
-  with ``!``)
+  with `!`)
 - Work down the old user file line-by-line using this guide to find
   the new replacement TOML commands
 - Add the replacement TOML commands to the TOML user file
@@ -167,6 +165,8 @@ For converting existing files the following process is recommended:
 Command Set
 ===========
 
+.. _back_mon_times-ref:
+
 BACK/MON/TIMES t1 t2
 --------------------
 
@@ -177,7 +177,7 @@ data are rebinned into wavelength.
 
 This particular command subtracts the *same* background level from
 *all* monitors. The continued use of this method of monitor correction
-is now deprecated. See BACK/M[n]/TIMES.
+is now deprecated. See :ref:`back_mn_times-ref`
 
 Times were specified in microseconds.
 
@@ -205,11 +205,13 @@ Times were specified in microseconds.
 
 Note: if using this, set any instances of use_own_background to false.
 
+.. _back_mn_times-ref:
+
 BACK/M[n]/TIMES t1 t2
 ---------------------
 
 This command was used to estimate and subtract the (time-independent)
-background level on a specified monitor. See also BACK/MON/TIMES.
+background level on a specified monitor. See also :ref:`back_mon_times-ref`.
 
 Times were specified in microseconds.
 
@@ -274,12 +276,13 @@ detector by applying a relative correction to the logged encoder
 value. The parameter n could be a distance or an angle depending
 on the specified context as shown below.
 
-If specified, SIDE *applies a translation to the rotation axis of
-the detector perpendicular to the plane of the detector*. RADIUS
-*increases the apparent radius from the rotation axis of the detector
+If specified:
+- SIDE *applies a translation to the rotation axis of
+the detector perpendicular to the plane of the detector*.
+- RADIUS *increases the apparent radius from the rotation axis of the detector
 to the active plane*.
 
-# David how are the X/Y/ZTILT commands defined? What values are they modifying?
+# (TODO) David how are the X/Y/ZTILT commands defined? What values are they modifying?
 
 ..  code-block:: none
 
@@ -335,20 +338,21 @@ to the active plane*.
         front_z = -0.047
         front_x_tilt = -0.000085
         front_y_tilt = 0.0001419
+        front_radius = 0.0757
         front_rot = 0.0
         front_side = 0.00019
         rear_x = 0.0
         rear_z = 0.058
 
-# David how is DET/CORR FRONT RADIUS represented now?
 
 DET/[REAR][FRONT][MERGED][BOTH]
 -------------------------------
 
 This command was used to specify which detector(s) were to be
-processed during data reduction. On the LOQ instrument the
-qualifier /FRONT could be equivalently replaced by /HAB (for
-high-angle bank). Similarly, /MERGED and /MERGE were equivalent.
+processed during data reduction.
+
+On the LOQ instrument the qualifier `/FRONT` could be  equivalently replaced by `/HAB` (for
+high-angle bank) in existing user files. Similarly, /MERGED and /MERGE were equivalent.
 
 If an instrument only has one detector it is assumed to be
 equivalent to the *rear* detector.
@@ -381,7 +385,7 @@ DET/RESCALE n
 This command specified the factor by which the reduced *front*
 detector data should be multiplied to allow it to overlap the
 reduced rear detector data. If omitted n was assumed to be 1.0
-(no rescaling). See also DET/RESCALE/FIT [q1 q2] and DET/SHIFT n.
+(no rescaling). See also :ref:`det_rescale_fit-ref` and :ref:`det_shift_n-ref`.
 
 ..  code-block:: none
 
@@ -405,6 +409,8 @@ reduced rear detector data. If omitted n was assumed to be 1.0
         factor = 0.123
         use_fit = false
 
+.. _det_rescale_fit-ref:
+
 DET/RESCALE/FIT [q1 q2]
 -----------------------
 
@@ -413,7 +419,7 @@ which the reduced *front* detector data should be multiplied to
 allow it to overlap the reduced rear detector data. A specific
 Q-range over which to compare intensities could be optionally
 specified. If omitted, all overlapping Q values were used. See
-also DET/RESCALE n.
+also :ref:`det_rescale_fit-ref`.
 
 Scattering vectors were specified in inverse Angstroms.
 
@@ -442,13 +448,15 @@ Scattering vectors were specified in inverse Angstroms.
       max = 0.24
       use_fit = true
 
+.. _det_shift_n-ref:
+
 DET/SHIFT n
 -----------
 
 This command specified the relative amount (a constant) by which the
 reduced *front* detector data should be shifted in intensity to allow
 it to overlap the reduced rear detector data. If omitted n was assumed
-to be 0.0 (no shift). See also DET/RESCALE n and DET/SHIFT/FIT [q1 q2].
+to be 0.0 (no shift). See also :ref:`det_rescale_fit-ref` and :ref:`det_shift_n-ref`.
 
 ..  code-block:: none
 
@@ -471,10 +479,6 @@ to be 0.0 (no shift). See also DET/RESCALE n and DET/SHIFT/FIT [q1 q2].
     [reduction.merged.shift]
         factor = 0.123
         use_fit = false
-
-# David your existing doc says that the shift is a distance; that is
-# inaccurate so I suggest it be changed to factor as for rescale.
-# I've changed this doc accordingly.
 
 DET/SHIFT/FIT [q1 q2]
 ---------------------
@@ -546,6 +550,8 @@ Scattering vectors were specified in inverse Angstroms.
         max = 0.24
         use_fit = true
 
+.. _fit_centre-ref:
+
 FIT/CENTRE t1 t2
 ----------------
 
@@ -556,9 +562,6 @@ along the time-of-flight distribution. Also see
 FIT/MONITOR t1 t2.
 
 Times were specified in microseconds.
-
-# David this command used to be used on LOQ. Does the note on
-# FIT/MONITOR apply here too?
 
 **Existing Example**
 
@@ -596,13 +599,9 @@ FIT/MONITOR t1 t2
 This command was used to specify a time window within which
 the 'prompt spike' could be found in *monitor* spectra. This
 information was used to remove the spike by interpolating
-along the time-of-flight distribution. Also see
-FIT/CENTRE t1 t2.
+along the time-of-flight distribution. Also see :ref:`fit_centre-ref`.
 
 Times were specified in microseconds.
-
-Note: This command was only ever enabled in the data reduction
-source code for the LOQ instrument.
 
 **Replacement**
 
@@ -624,11 +623,13 @@ source code for the LOQ instrument.
   [mask]
     prompt_peak = {start = 19900.0, stop = 20500.0}
 
+.. _trans_fitting_off-ref:
+
 FIT/TRANS[/CLEAR][/OFF]
 -----------------------
 
 This command was used to disable fitting of the calculated
-transmission data. Also see FIT/TRANS[[/SAMPLE][/CAN]][/LINEAR][/YLOG][/POLYNOMIALn] [w1 w2].
+transmission data. Also see :ref:`fitting_on-ref`.
 
 **Replacement**
 
@@ -659,6 +660,8 @@ transmission data. Also see FIT/TRANS[[/SAMPLE][/CAN]][/LINEAR][/YLOG][/POLYNOMI
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
 
+.. _fitting_on-ref:
+
 FIT/TRANS[[/SAMPLE][/CAN]][/LINEAR][/YLOG][/POLYNOMIALn] [w1 w2]
 ----------------------------------------------------------------
 
@@ -666,7 +669,7 @@ This command was used to specify how the calculated transmission data
 should be fitted. Subsequent data processing would then use transmission
 values interpolated using the fit function. In some instances doing this
 could improve the statistical quality of the transmission data. Also see
-FIT/TRANS[/CLEAR][/OFF].
+:ref:`trans_fitting_off-ref`.
 
 Wavelengths were specified in Angstroms. If w1 and w2 were omitted then the
 fit was applied to the full wavelength range.
@@ -714,13 +717,15 @@ Y=C0+C1X+C2X^2+...CnX^n where n>2.
         parameters = {lambda_min = 3.0, lambda_max = 11.0}
         function = "Linear"
 
+.. _gravity_on-ref:
+
 GRAVITY[/ON/OFF]
 ----------------
 
 This command was used to specify whether the detector data should be
 corrected for the ballistic effects of gravity on the neutrons. This
 correction is particularly important at long sample-detector distances
-and/or when using long wavelengths. Also see GRAVITY/LEXTRA x.
+and/or when using long wavelengths. Also see :ref:`gravity_extra_len-ref`.
 
 **Replacement**
 
@@ -742,6 +747,7 @@ and/or when using long wavelengths. Also see GRAVITY/LEXTRA x.
     [instrument.configuration]
       gravity_enabled = true
 
+.. _gravity_extra_len-ref:
 
 GRAVITY/LEXTRA x
 ----------------
@@ -749,7 +755,7 @@ GRAVITY/LEXTRA x
 This command was used to specify an extra length that can be added
 to the gravity correction. The extra length is only taken into account
 when the gravity correction is enabled and the default value is x=0.0.
-Also see GRAVITY[/ON/OFF].
+Also see :ref:`gravity_on-ref`.
 
 **Replacement**
 
@@ -806,13 +812,16 @@ steps were specified as %/100.
 
   [reduction.events]
     # A negative step (middle val) indicates Log
+    # Therefore this is linear binning
     binning = "7000.0,500.0,60000.0"
 
 L/PHI[/NOMIRROR] a b
 ---------------------
 
 This command specified the azimuthal range of 2D detector data to be
-included in data reduction. Viewed along the direction of travel of
+included in data reduction.
+
+Viewed along the direction of travel of
 the neutrons 0 (or 360) degrees was at 3 O'clock, 90 degrees was at
 12 O'clock, 180 (or -180) degrees was at 9 O'clock, and 270 (or -90)
 degrees was at 6 O'clock. By default the mirror sector was always
@@ -896,13 +905,15 @@ steps were specified as %/100.
         # Negative indicates log
         binning = "0.02,0.05,0.5,-0.1,10.0"
 
+.. _q_rcut-ref:
+
 L/Q/RCUT r
 ----------
 
 This command was used to specify the 'radius cut' value, a construct
 which could be used to improve the statistical uncertainty on Q bins
 suffering from poor instrumental resolution. This command would typically,
-but not exclusively, be used in conjunction with L/Q/WCUT w.
+but not exclusively, be used in conjunction with :ref:`q_wcut-ref`.
 
 For more information, see the `Q1D <https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html>`_
 algorithm description.
@@ -928,13 +939,15 @@ algorithm description.
       [binning.1d_reduction]
         radius_cut = 0.1
 
+.. _q_wcut-ref:
+
 L/Q/WCUT w
 ----------
 
 This command was used to specify the 'wavelength cut' value, a construct
 which could be used to improve the statistical uncertainty on Q bins
 suffering from poor instrumental resolution. This command would typically,
-but not exclusively, be used in conjunction with L/Q/RCUT r.
+but not exclusively, be used in conjunction with :ref:`q_rcut-ref`.
 
 For more information, see the `Q1D <https://docs.mantidproject.org/nightly/algorithms/Q1D-v2.html>`_
 algorithm description.
