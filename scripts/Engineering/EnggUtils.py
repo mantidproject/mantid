@@ -127,9 +127,13 @@ def default_ceria_expected_peak_windows(final=False):
 
     return _CERIA_EXPECTED_WINDOW_FINAL if final else _CERIA_EXPECTED_WINDOW
 
+# DEPRECATED FUNCTIONS BELOW
+
 
 def read_in_expected_peaks(filename, expected_peaks):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrateFull, EnggCalibrate and EnggFitPeaks)
+
     Reads in expected peaks from the .csv file if requested. Otherwise fall back to the list of
     peaks given (and check that it is not empty).
 
@@ -178,6 +182,8 @@ def read_in_expected_peaks(filename, expected_peaks):
 
 def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrateFull, EnggCalibrate and EnggFitPeaks)
+
     Get the detector indices that the user requests, either through the input property 'Bank' or
     'DetectorIndices'
 
@@ -213,6 +219,9 @@ def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
 
 def parse_spectrum_indices(workspace, spectrum_numbers):
     """
+    DEPRECATED: not used in UI, only in get_ws_indices_from_input_properties which is used in
+    deprecated functions (EnggCalibrateFull, EnggCalibrate and EnggFitPeaks)
+
     Get a usable list of workspace indices from a user provided list of spectra that can look like:
     '8-10, 20-40, 100-110'. For that example this method will produce: [7,8,9,19, 20,... , 109]
 
@@ -236,6 +245,9 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
 
 def get_ws_indices_for_bank(workspace, bank):
     """
+    DEPRECATED: not used in UI, only in deprecated function EnggVanadiumCorrections
+
+    get_ws_indices_from_input_properties
     Finds the workspace indices of all the pixels/detectors/spectra corresponding to a bank.
 
     ws :: workspace with instrument definition
@@ -257,6 +269,9 @@ def get_ws_indices_for_bank(workspace, bank):
 
 def get_detector_ids_for_bank(bank):
     """
+    DEPRECATED: not used in UI, only in get_ws_indices_for_bank which is used in
+    deprecated functions EnggVanadiumCorrections
+
     Find the detector IDs for an instrument bank. Note this is at this point specific to
     the ENGINX instrument.
 
@@ -309,6 +324,8 @@ def get_detector_ids_for_bank(bank):
 
 def generate_output_param_table(name, difa, difc, tzero):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrate, EnggFitTOFFromPeaks)
+
     Produces a table workspace with the two fitted calibration parameters
 
     @param name :: the name to use for the table workspace that is created here
@@ -326,6 +343,8 @@ def generate_output_param_table(name, difa, difc, tzero):
 def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration_ws, van_curves_ws,
                                progress_range=None):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggCalibrateFull, EnggVanadiumCorrections and EnggFocus)
+
     Apply the EnggVanadiumCorrections algorithm on the workspace given, by using the algorithm
     EnggVanadiumCorrections
 
@@ -370,6 +389,8 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
 
 def convert_to_d_spacing(parent, ws):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggVanadiumCorrections and EnggFocus)
+
     Converts a workspace to dSpacing using 'ConvertUnits' as a child algorithm.
 
     @param parent :: parent (Mantid) algorithm that wants to run this
@@ -395,6 +416,8 @@ def convert_to_d_spacing(parent, ws):
 
 def convert_to_TOF(parent, ws):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggVanadiumCorrections and EnggFocus)
+
     Converts workspace to Time-of-Flight using 'ConvertUnits' as a child algorithm.
 
     @param parent :: parent (Mantid) algorithm that wants to run this
@@ -411,6 +434,8 @@ def convert_to_TOF(parent, ws):
 
 def crop_data(parent, ws, indices):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggVanadiumCorrections and EnggFocus)
+
     Produces a cropped workspace from the input workspace so that only
     data for the specified bank (given as a list of indices) is left.
 
@@ -433,6 +458,8 @@ def crop_data(parent, ws, indices):
 
 def sum_spectra(parent, ws):
     """
+    DEPRECATED: not used in UI, only in deprecated functions (EnggVanadiumCorrections and EnggFocus)
+
     Focuses/sums up all the spectra into a single one (calls the SumSpectra algorithm)
 
     @param parent :: parent (Mantid) algorithm that wants to run this
