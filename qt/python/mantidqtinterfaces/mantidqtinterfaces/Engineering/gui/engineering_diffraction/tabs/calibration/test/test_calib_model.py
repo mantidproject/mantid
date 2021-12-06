@@ -10,7 +10,7 @@ from unittest.mock import call, patch, create_autospec
 from numpy import array
 from os import path
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 from testhelpers import assert_any_call_partial
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model"

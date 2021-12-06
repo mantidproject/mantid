@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus"
 

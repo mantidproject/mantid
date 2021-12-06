@@ -10,7 +10,7 @@ from mantid.simpleapi import Load
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 
 class EnginX:

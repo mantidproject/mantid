@@ -10,7 +10,7 @@ import shutil
 
 from unittest.mock import patch, MagicMock, call, create_autospec
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model"
 

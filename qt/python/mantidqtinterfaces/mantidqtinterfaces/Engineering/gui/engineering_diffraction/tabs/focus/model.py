@@ -8,7 +8,7 @@ from typing import Optional
 
 import Engineering.EnggUtils as EnggUtils
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 
 class FocusModel(object):
