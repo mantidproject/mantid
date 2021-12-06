@@ -63,8 +63,6 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 
 // All ANN files as they are upstream anyway
 *:*${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ANN/*
-// Everything in the build directory
-*:*${CMAKE_BINARY_DIR}/*
 
 // ----------- New list of supressions after updating to cppcheck 2.5 -------------
 // - If the line number changes then update it here, or resolve the defect and remove from list
