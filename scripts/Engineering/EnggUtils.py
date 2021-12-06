@@ -5,15 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
+from matplotlib.pyplot import subplots
 from numpy import array, degrees, isfinite, reshape
 from os import path, makedirs
 from shutil import copy2
 
 from mantid.api import *
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
-from mantid.simpleapi import PDCalibration, DeleteWorkspace, DiffractionFocussing, CreateDetectorTable,\
-    CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, SaveNexus, ApplyDiffCal, config
-from mantid.simpleapi import AnalysisDataService as ADS
+from mantid.simpleapi import (PDCalibration, DeleteWorkspace, DiffractionFocussing, CreateDetectorTable,
+                              CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, ApplyDiffCal, config,
+                              SaveNexus, SaveGSS, SaveFocusedXYE, Divide, RebinToWorkspace, ReplaceSpecialValues,
+                              EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace, AnalysisDataService as ADS)
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import CALIB_FOLDER
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -22,7 +24,14 @@ from Engineering.common import path_handling
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]  # used in EnggFocus
-DIFF_CONSTS_TABLE_NAME = "diffractometer_consts_table"  # used in calibration model code in this file
+# calibration tab variables
+DIFF_CONSTS_TABLE_NAME = "diffractometer_consts_table"
+# focus tab variables
+FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
+CALIB_PARAMS_WORKSPACE_NAME = "engggui_calibration_banks_parameters"
+CURVES_PREFIX = "engggui_curves_"
+VAN_CURVE_REBINNED_NAME = "van_ws_foc_rb"
+XUNIT_SUFFIXES = {'d-Spacing': 'dSpacing', 'Time-of-flight': 'TOF'}  # to put in saved focused data filename
 
 
 class GROUP(Enum):
@@ -52,8 +61,6 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     :param calibration: CalibrationInfo object used to determine subplot axes titles
     :return:
     """
-    from matplotlib.pyplot import subplots
-
     fitparam = mtd[diag_ws.name() + "_fitparam"].toDict()
     fiterror = mtd[diag_ws.name() + "_fiterror"].toDict()
     d_table = mtd[diag_ws.name() + "_dspacing"].toDict()
@@ -76,7 +83,7 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
         # get poly fit
         diff_consts = si.diffractometerConstants(ispec)  # output is a UnitParametersMap
         yfit = array([UnitConversion.run("dSpacing", "TOF", xpt, 0, DeltaEModeType.Elastic, diff_consts)
-                         for xpt in x])
+                      for xpt in x])
         # plot polynomial fit to TOF vs dSpacing
         if ispec + 1 > len(figs) * ncols_per_fig:
             # create new figure
@@ -129,12 +136,13 @@ def default_ceria_expected_peak_windows(final=False):
     @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
     @Returns :: a list of peak windows in d-spacing as a float list
     """
-    _CERIA_EXPECTED_WINDOW = [1.06515, 1.15210,  1.30425, 1.41292, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
+    _CERIA_EXPECTED_WINDOW = [1.06515, 1.15210, 1.30425, 1.41292, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
     _CERIA_EXPECTED_WINDOW_FINAL = [0.77, 0.805, 0.83702, 0.88041, 0.88041, 0.90893, 0.90893, 0.93474, 0.93474, 0.98908,
                                     1.01625, 1.06515, 1.06515, 1.15210, 1.16297, 1.22817, 1.22817, 1.29338, 1.30425,
                                     1.41292, 1.53242, 1.59224, 1.59224, 1.68462, 1.84763, 1.98891, 2.64097, 2.77186]
 
     return _CERIA_EXPECTED_WINDOW_FINAL if final else _CERIA_EXPECTED_WINDOW
+
 
 # Functions in calibration model
 
@@ -173,7 +181,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir):
     DeleteWorkspace(ceria_workspace)
 
 
-def write_prm_file(ws_foc, prm_savepath, spec_nums = None):
+def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
     """
     Save GSAS prm file for ENGINX data - for specification see manual
     https://subversion.xray.aps.anl.gov/EXPGUI/gsas/all/GSAS%20Manual.pdf
@@ -199,17 +207,17 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums = None):
         phi, tth = degrees(si.geographicalAngles(ispec))
         dc = si.diffractometerConstants(ispec)
         difa, difc, tzero = [dc[param] for param in [UnitParams.difa, UnitParams.difc, UnitParams.tzero]]
-        block = [f'INS  {iblock+1}I ITYP\t0\t1.0000\t80.0000\t0{endl}']
-        block.extend(f'INS  {iblock+1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{endl}')
-        block.extend(f'INS  {iblock+1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{endl}')
+        block = [f'INS  {iblock + 1}I ITYP\t0\t1.0000\t80.0000\t0{endl}']
+        block.extend(f'INS  {iblock + 1}BNKPAR\t{l2:.3f}\t{abs(tth):.3f}\t{phi:.3f}\t0.000\t0.000\t0\t0{endl}')
+        block.extend(f'INS  {iblock + 1} ICONS\t{difc:.2f}\t{difa:.2f}\t{tzero:.2f}{endl}')
         # TOF peak profile parameters
         alpha0, beta0, beta1, sig0_sq, sig1_sq, sig2_sq = getParametersFromDetector(inst, ws_foc.getDetector(ispec))
-        block.extend(f'INS  {iblock+1}PRCF1 \t3\t21\t0.00050{endl}')
-        block.extend(f'INS  {iblock+1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{endl}')
-        block.extend(f'INS  {iblock+1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
+        block.extend(f'INS  {iblock + 1}PRCF1 \t3\t21\t0.00050{endl}')
+        block.extend(f'INS  {iblock + 1}PRCF11\t{alpha0:.6E}\t{beta0:.6E}\t{beta1:.6E}\t{sig0_sq:.6E}{endl}')
+        block.extend(f'INS  {iblock + 1}PRCF12\t{sig1_sq:.6E}\t{sig2_sq:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
         for iblank in [3, 4, 5]:
-            block.extend(f'INS  {iblock+1}PRCF1{iblank}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
-        block.extend(f'INS  {iblock+1}PRCF16\t{0.0:.6E}{endl}')
+            block.extend(f'INS  {iblock + 1}PRCF1{iblank}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}\t{0.0:.6E}{endl}')
+        block.extend(f'INS  {iblock + 1}PRCF16\t{0.0:.6E}{endl}')
         # append to lines
         lines.extend(block)
     # write lines to prm file
@@ -403,6 +411,164 @@ def load_full_instrument_calibration():
     return full_calib
 
 
+# Focus model functions
+
+
+def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir):
+    """
+    Focus some data using the current calibration.
+    :param sample_paths: The paths to the data to be focused.
+    :param vanadium_path: Path to the vanadium file from the current calibration
+    :param plot_output: True if the output should be plotted.
+    :param rb_num: Number to signify the user who is running this focus
+    :param calibration: CalibrationInfo object that holds all info needed about ROI and instrument
+    :param save_dir: top level directory in which to save output
+    :return focused_files_list: list of paths to focused nxs files
+    """
+    # check correct region calibration(s) and grouping workspace(s) exists
+    if not calibration.is_valid():
+        return
+
+    # check if full instrument calibration exists, if not load it
+    full_calib = load_full_instrument_calibration()
+    # load, focus and process vanadium (retrieve from ADS if exists)
+    ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
+
+    # Loop over runs and focus
+    focused_files_list = []
+    output_workspaces = []  # List of focused workspaces to plot.
+    for sample_path in sample_paths:
+        ws_sample = _load_run_and_convert_to_dSpacing(sample_path, calibration.get_instrument(), full_calib)
+        if ws_sample:
+            # None returned if no proton charge
+            ws_foc = _focus_run_and_apply_roi_calibration(ws_sample, calibration)
+            ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
+            _save_output_files(ws_foc, calibration, van_run, save_dir, rb_num)
+            # convert units to TOF and save again
+            ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+            nxs_path = _save_output_files(ws_foc, calibration, van_run, save_dir, rb_num)
+            focused_files_list.append(nxs_path)
+            output_workspaces.append(ws_foc.name())
+
+    # Plot the output
+    if output_workspaces:
+        DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
+        if plot_output:
+            _plot_focused_workspaces(output_workspaces)
+
+    return focused_files_list
+
+
+def process_vanadium(vanadium_path, calibration, full_calib):
+    van_run = path_handling.get_run_number_from_path(vanadium_path, calibration.get_instrument())
+    van_foc_name = CURVES_PREFIX + calibration.get_group_suffix()
+    if ADS.doesExist(van_foc_name):
+        ws_van_foc = ADS.retrieve(van_foc_name)
+    else:
+        if ADS.doesExist(van_run):
+            ws_van = ADS.retrieve(van_run)  # will exist if have only changed the ROI
+        else:
+            ws_van = _load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
+            if not ws_van:
+                raise RuntimeError(f"vanadium run {van_run} has no proton_charge - "
+                                   f"please supply a valid vanadium run to focus.")
+        ws_van_foc = _focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
+        ws_van_foc = _smooth_vanadium(ws_van_foc)
+    return ws_van_foc, van_run
+
+
+def _plot_focused_workspaces(ws_names):
+    for ws_name in ws_names:
+        ws_foc = ADS.retrieve(ws_name)
+        ws_label = '_'.join([ws_foc.getInstrument().getName(), ws_foc.run().get('run_number').value])
+        fig, ax = subplots(subplot_kw={'projection': 'mantid'})
+        for ispec in range(ws_foc.getNumberHistograms()):
+            ax.plot(ws_foc, label=f'{ws_label} focused: spec {ispec + 1}', marker='.', wkspIndex=ispec)
+        ax.legend()
+        fig.show()
+
+
+def _load_run_and_convert_to_dSpacing(filepath, instrument, full_calib):
+    runno = path_handling.get_run_number_from_path(filepath, instrument)
+    ws = Load(Filename=filepath, OutputWorkspace=str(runno))
+    if ws.getRun().getProtonCharge() > 0:
+        ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws.name())
+    else:
+        logger.warning(f"Run {ws.name()} has invalid proton charge.")
+        DeleteWorkspace(ws)
+        return None
+    ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
+    ws = ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target='dSpacing')
+    return ws
+
+
+def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None):
+    if not ws_foc_name:
+        ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
+    ws_foc = DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name,
+                                  GroupingWorkspace=calibration.get_group_ws())
+    ApplyDiffCal(InstrumentWorkspace=ws_foc, ClearCalibration=True)
+    ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+    ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
+    ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='dSpacing')
+    return ws_foc
+
+
+def _smooth_vanadium(van_ws_foc):
+    return EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc,
+                                          NIterations=1, XWindow=0.08)
+
+
+def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
+    # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
+    sample_ws_foc = CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
+    van_ws_foc_rb = RebinToWorkspace(WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc,
+                                     OutputWorkspace=VAN_CURVE_REBINNED_NAME)  # copy so as not to lose data
+    sample_ws_foc = Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,
+                           OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False)
+    sample_ws_foc = ReplaceSpecialValues(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(),
+                                         NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
+    return sample_ws_foc
+
+
+def _save_output_files(sample_ws_foc, calibration, van_run, save_dir, rb_num=None):
+    if rb_num:
+        focus_dir = path.join(save_dir, "User", rb_num, "Focus")
+    else:
+        focus_dir = path.join(save_dir, "Focus")
+    if not path.exists(focus_dir):
+        makedirs(focus_dir)
+
+    # set bankid for use in fit tab
+    foc_suffix = calibration.get_foc_ws_suffix()
+    xunit = sample_ws_foc.getDimension(0).name
+    xunit_suffix = XUNIT_SUFFIXES[xunit]
+    sample_run_no = sample_ws_foc.run().get('run_number').value
+    # save all spectra to single ASCII files
+    ascii_fname = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run,
+                                             calibration.get_group_suffix(), xunit_suffix, ext='')
+    SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'), SplitFiles=False,
+            UseSpectrumNumberAsBankID=True)
+    SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
+                   SplitFiles=False, Format="TOPAS")
+    # Save nxs per spectrum
+    AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
+    for ispec in range(sample_ws_foc.getNumberHistograms()):
+        # add a bankid and vanadium to log that is read by fitting model
+        bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec + 1}'
+        AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid.replace('_', ' '))  # overwrites
+        # save spectrum as nexus
+        filename = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
+                                              xunit_suffix, ext=".nxs")
+        nxs_path = path.join(focus_dir, filename)
+        SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
+    return nxs_path
+
+
+def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):
+    return "_".join([inst, sample_run_no, van_run_no, suffix, xunit]) + ext
+
+
 # DEPRECATED FUNCTIONS BELOW
 
 
@@ -440,7 +606,7 @@ def read_in_expected_peaks(filename, expected_peaks):
             if not expected_peaks:
                 raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '"
                                  + filename + "', and no expected peaks were given in the property "
-                                 "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
+                                              "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
             expected_peaks_d = sorted(expected_peaks)
 
         else:
