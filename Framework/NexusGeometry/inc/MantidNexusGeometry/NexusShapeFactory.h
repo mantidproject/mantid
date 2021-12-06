@@ -6,14 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/DllConfig.h"
 
-// https://gitlab.com/libeigen/eigen/-/issues/1217
-GNU_DIAG_OFF("conversion")
 #include "Eigen/Core"
-#include <Eigen/Geometry>
-GNU_DIAG_ON("conversion")
+#include "Eigen/Geometry"
 #include <map>
 #include <memory>
 #include <vector>
