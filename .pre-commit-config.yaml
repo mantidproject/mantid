@@ -19,7 +19,7 @@ repos:
         args: [--allow-multiple-documents]
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 511456a60b0c6cbb079e64a7cd8e3302f04859a6
+    rev: 82e4b72a17c058d99f510771e3f531fb98c3fe73
     hooks:
       - id: clang-format
         exclude: Testing/Tools/cxxtest|tools
