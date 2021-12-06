@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path, makedirs
+from typing import Optional
 import matplotlib.pyplot as plt
 
 from Engineering.common import path_handling
@@ -33,7 +34,7 @@ class FocusModel(object):
         return self._last_focused_files
 
     def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, rb_num: str,
-                  calibration: CalibrationInfo) -> None:
+                  calibration: CalibrationInfo, save_dir: Optional[str] = output_settings.get_output_path()) -> None:
         """
         Focus some data using the current calibration.
         :param sample_paths: The paths to the data to be focused.
@@ -42,7 +43,6 @@ class FocusModel(object):
         :param rb_num: Number to signify the user who is running this focus
         :param calibration: CalibrationInfo object that holds all info needed about ROI and instrument
         """
-
         # check correct region calibration(s) and grouping workspace(s) exists
         if not calibration.is_valid():
             return
@@ -60,10 +60,10 @@ class FocusModel(object):
                 # None returned if no proton charge
                 ws_foc = self._focus_run_and_apply_roi_calibration(ws_sample, calibration)
                 ws_foc = self._apply_vanadium_norm(ws_foc, ws_van_foc)
-                self._save_output_files(ws_foc, calibration, van_run, rb_num)
+                self._save_output_files(ws_foc, calibration, van_run, save_dir, rb_num)
                 # convert units to TOF and save again
                 ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
-                self._save_output_files(ws_foc, calibration, van_run, rb_num)
+                self._save_output_files(ws_foc, calibration, van_run, save_dir,  rb_num)
                 output_workspaces.append(ws_foc.name())
 
         # Plot the output
@@ -143,11 +143,11 @@ class FocusModel(object):
                                              NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
         return sample_ws_foc
 
-    def _save_output_files(self, sample_ws_foc, calibration, van_run, rb_num=None):
+    def _save_output_files(self, sample_ws_foc, calibration, van_run, save_dir, rb_num=None):
         if rb_num:
-            focus_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Focus")
+            focus_dir = path.join(save_dir, "User", rb_num, "Focus")
         else:
-            focus_dir = path.join(output_settings.get_output_path(), "Focus")
+            focus_dir = path.join(save_dir, "Focus")
         if not path.exists(focus_dir):
             makedirs(focus_dir)
 

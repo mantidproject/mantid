@@ -43,7 +43,7 @@ private:
   void createCalTableNew();
   void createInformationWorkspaces();
   std::tuple<double, double, double> getDSpacingToTof(const std::set<detid_t> &detIds);
-  std::vector<double> dSpacingWindows(const std::vector<double> &centres, const double widthMax);
+  std::vector<double> dSpacingWindows(const std::vector<double> &centres, const std::vector<double> &widthMax);
   std::vector<double> getTOFminmax(const double difc, const double difa, const double tzero);
   void setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero);
   void fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std::vector<double> &tof,
@@ -52,7 +52,8 @@ private:
 
   /// NEW: convert peak positions in dSpacing to peak centers workspace
   std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
-  createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws, const double peakWindowMaxInDSpacing);
+  createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws,
+                                         const std::vector<double> &peakWindowMaxInDSpacing);
 
   API::ITableWorkspace_sptr sortTableWorkspace(API::ITableWorkspace_sptr &table);
 
