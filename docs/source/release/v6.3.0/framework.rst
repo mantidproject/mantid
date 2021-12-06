@@ -39,6 +39,7 @@ Bugfixes
 - Fix bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
+- Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
 
 Fit Functions
 -------------
