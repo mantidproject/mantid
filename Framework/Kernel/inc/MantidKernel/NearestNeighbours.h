@@ -8,12 +8,8 @@
 
 #include "MantidKernel/ANN/ANN.h"
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/WarningSuppressions.h"
 
-// https://gitlab.com/libeigen/eigen/-/issues/1217
-GNU_DIAG_OFF("conversion")
 #include <Eigen/Core>
-GNU_DIAG_ON("conversion")
 #include <memory>
 #include <vector>
 

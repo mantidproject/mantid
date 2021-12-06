@@ -7,14 +7,10 @@
 #pragma once
 
 #include "MantidBeamline/DllConfig.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include "MantidKernel/cow_ptr.h"
 
-// https://gitlab.com/libeigen/eigen/-/issues/1217
-GNU_DIAG_OFF("conversion")
-#include <Eigen/Geometry>
-GNU_DIAG_ON("conversion")
-#include <Eigen/StdVector>
+#include "Eigen/Geometry"
+#include "Eigen/StdVector"
 
 namespace Mantid {
 namespace Beamline {
