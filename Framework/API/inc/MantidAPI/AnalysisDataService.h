@@ -136,7 +136,6 @@ public:
 
   /// Return a lookup of the top level items
   std::map<std::string, Workspace_sptr> topLevelItems() const;
-  void shutdown() override;
 
 private:
   /// Checks the name is valid, throwing if not
@@ -150,6 +149,7 @@ private:
   std::string m_illegalChars;
 };
 
+// Forward declare to avoid circular ref.
 class AnalysisDataServiceWrapper;
 struct MANTID_API_DLL AnalysisDataService {
   // If you are here for an incomplete type you need to include "MantidAPI/AnalysisDataServiceWrapper.h"

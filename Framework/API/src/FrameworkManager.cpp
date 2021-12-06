@@ -212,7 +212,6 @@ int FrameworkManagerImpl::getNumOMPThreads() const { return PARALLEL_GET_MAX_THR
 void FrameworkManagerImpl::clear() {
   clearAlgorithms();
   clearInstruments();
-  clearData();
   clearPropertyManagers();
 }
 

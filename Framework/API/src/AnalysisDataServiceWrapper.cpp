@@ -27,7 +27,8 @@ struct Service {
 namespace Mantid::API {
 AnalysisDataServiceWrapper &getDefaultAnalysisDataService() noexcept {
   // Lazy init to replace singleton
-  // TODO move Service into a scoped block (e.g. main) to explicitly control lifetime
+  // Long-term we can manually scope this out and inject it by-pointer, see
+  // https://youtu.be/4DfvSixpdCw?t=4040
   static Service serv;
   return serv.ads;
 }

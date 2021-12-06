@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataServiceWrapper.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include <iterator>
 #include <sstream>
 
@@ -321,8 +321,6 @@ std::map<std::string, Workspace_sptr> AnalysisDataServiceImpl::topLevelItems() c
   return topLevel;
 }
 
-void AnalysisDataServiceImpl::shutdown() { clear(); }
-
 //-------------------------------------------------------------------------
 // Private methods
 //-------------------------------------------------------------------------
@@ -372,8 +370,8 @@ void AnalysisDataServiceImpl::verifyName(const std::string &name, const std::sha
   }
 }
 
-AnalysisDataServiceWrapper& AnalysisDataService::Instance() noexcept {
-    return Mantid::API::getDefaultAnalysisDataService();
+AnalysisDataServiceWrapper &AnalysisDataService::Instance() noexcept {
+  return Mantid::API::getDefaultAnalysisDataService();
 }
 
 } // namespace Mantid::API
