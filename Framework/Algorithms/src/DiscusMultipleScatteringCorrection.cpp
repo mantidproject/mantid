@@ -150,7 +150,7 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
     issues["SofqWorkspace"] = "S(Q) workspace must contain a single spectrum";
   }
   auto y = SQWS->y(0);
-  if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return yval < 0 || std::is_nan(yval); })) {
+  if (std::any_of(y.cbegin(), y.cend(), [](const auto yval) { return yval < 0 || std::isnan(yval); })) {
     issues["SofqWorkspace"] = "S(Q) workspace must have all y >= 0";
   }
 
