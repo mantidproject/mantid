@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel
+from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel, QAbstractItemView
 from qtpy.QtCore import *
 
 from mantidqt.utils.qt import load_ui
@@ -187,6 +187,7 @@ class RawDataExplorerView(QWidget):
         self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.fileTree.header().setStretchLastSection(False)
         self.fileTree.clicked.connect(self.on_file_clicked)
+        self.fileTree.sig_new_current.connect(self.on_file_clicked)
         self.fileTree.activated.connect(self.on_file_clicked)
 
     def closeEvent(self, event):
