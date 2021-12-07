@@ -16,9 +16,6 @@ class PlotDataPaneView(BasePaneView):
 
         self._selection = QtWidgets.QPushButton("select plot data", self)
         self._selection_layout.addWidget(self._selection)
-
-        #self._selection_layout.setSpacing(100)
-
         self.verticalLayout.insertItem(1, self._selection_layout)
 
     def set_select_plot_slot(self, slot):

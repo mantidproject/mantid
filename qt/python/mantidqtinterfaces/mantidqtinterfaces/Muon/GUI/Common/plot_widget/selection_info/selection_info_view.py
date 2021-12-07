@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SelectionTableWidget
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.selection_table_widget import SelectionTableWidget
 
 
 class SelectionInfoView(QtWidgets.QWidget):

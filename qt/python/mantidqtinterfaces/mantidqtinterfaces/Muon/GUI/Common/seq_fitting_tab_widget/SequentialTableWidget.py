@@ -8,7 +8,7 @@ from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableV
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel)
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FIT_STATUSES
 from collections import namedtuple
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.SelectionTableWidget import SelectionTableWidget
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.selection_table_widget import SelectionTableWidget
 
 
 WorkspaceInfo = namedtuple('Workspace', 'runs groups')
