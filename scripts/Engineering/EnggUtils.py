@@ -18,8 +18,7 @@ from mantid.simpleapi import (PDCalibration, DeleteWorkspace, DiffractionFocussi
                               EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace, AnalysisDataService as ADS)
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import CALIB_FOLDER
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
-from Engineering.common import path_handling
+from Engineering.common import path_handling, output_settings
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus

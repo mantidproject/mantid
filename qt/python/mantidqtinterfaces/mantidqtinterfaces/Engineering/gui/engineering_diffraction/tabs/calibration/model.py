@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import Engineering.EnggUtils as EnggUtils
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from Engineering.common import output_settings
 
 
 class CalibrationModel(object):
