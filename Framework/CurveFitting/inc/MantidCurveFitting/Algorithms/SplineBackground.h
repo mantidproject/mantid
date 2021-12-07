@@ -56,11 +56,12 @@ private:
   void freeBSplinePointers();
 
   /// Calculates the number on unmasked bins to process
-  size_t calculateNumBinsToProcess(const API::MatrixWorkspace *ws);
+  size_t calculateNumBinsToProcess(const API::MatrixWorkspace *ws, const size_t currentWSIndex);
 
   /// Gets the values from the fitted GSL, and creates a clone of input
   /// workspace with new values
-  API::MatrixWorkspace_sptr saveSplineOutput(const API::MatrixWorkspace_sptr &ws, const size_t spec);
+  void updateSplineOutput(const API::MatrixWorkspace_sptr &inputWS, API::MatrixWorkspace_sptr &outputWS,
+                          const size_t spec, const size_t wsIndex);
 
   /// Sets up the splines for later fitting
   void setupSpline(double xMin, double xMax, int numBins, int ncoeff);
