@@ -233,10 +233,20 @@ class BasicFittingView(ui_form, base_widget):
         """Returns the selected start X."""
         return self.fit_function_options.guess_start_x
 
+    @guess_start_x.setter
+    def guess_start_x(self, value: float) -> None:
+        """Sets the selected start X."""
+        self.fit_function_options.guess_start_x = value
+
     @property
     def guess_end_x(self) -> float:
         """Returns the selected start X."""
         return self.fit_function_options.guess_end_x
+
+    @guess_end_x.setter
+    def guess_end_x(self, value: float) -> None:
+        """Sets the selected start X."""
+        self.fit_function_options.guess_end_x = value
 
     @property
     def exclude_range(self) -> bool:
@@ -350,6 +360,15 @@ class BasicFittingView(ui_form, base_widget):
     def show_normalised_covariance_matrix(self, covariance_ws: ITableWorkspace, workspace_name: str) -> None:
         """Shows the normalised covariance matrix in a separate table display window."""
         self.fit_function_options.show_normalised_covariance_matrix(covariance_ws, workspace_name)
+
+    def show_plot_guess_points(self, show: bool = True) -> None:
+        self.fit_function_options.show_plot_guess_points(show)
+
+    def show_plot_guess_start_x(self, show: bool = True) -> None:
+        self.fit_function_options.show_plot_guess_start_x(show)
+
+    def show_plot_guess_end_x(self, show: bool = True) -> None:
+        self.fit_function_options.show_plot_guess_end_x(show)
 
     def disable_view(self) -> None:
         """Disable all widgets in this fitting widget."""

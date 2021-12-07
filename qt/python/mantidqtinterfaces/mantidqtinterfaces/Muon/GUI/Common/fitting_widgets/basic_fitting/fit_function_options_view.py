@@ -275,10 +275,22 @@ class FitFunctionOptionsView(ui_form, base_widget):
         """Returns the guess start X."""
         return float(self.guess_start_x_line_edit.text())
 
+    @guess_start_x.setter
+    def guess_start_x(self, value: float) -> None:
+        """Sets the selected start X."""
+        self.guess_start_x_validator.last_valid_value = f"{value:.3f}"
+        self.guess_start_x_line_edit.setText(f"{value:.3f}")
+
     @property
     def guess_end_x(self) -> float:
         """Returns the guess end X."""
         return float(self.guess_end_x_line_edit.text())
+
+    @guess_end_x.setter
+    def guess_end_x(self, value: float) -> None:
+        """Sets the selected start X."""
+        self.guess_end_x_validator.last_valid_value = f"{value:.3f}"
+        self.guess_end_x_line_edit.setText(f"{value:.3f}")
 
     @property
     def evaluation_type(self) -> str:
@@ -424,11 +436,33 @@ class FitFunctionOptionsView(ui_form, base_widget):
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_POINTS, "Points")
         self.guess_points_spin_box = table_utils.addSpinBoxToTable(self.fit_options_table, 1000,
                                                                    PLOT_GUESS_POINTS)
+        self.guess_points_spin_box.setMinimum(1)
+        self.show_plot_guess_points(False)
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_START_X, "Start X")
         self.guess_start_x_line_edit, self.guess_start_x_validator = table_utils.addDoubleToTable(
             self.fit_options_table, 0.0, PLOT_GUESS_START_X, 1)
+        self.show_plot_guess_start_x(False)
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_END_X, "End X")
         self.guess_end_x_line_edit, self.guess_end_x_validator = table_utils.addDoubleToTable(
             self.fit_options_table, 15.0, PLOT_GUESS_END_X, 1)
+        self.show_plot_guess_end_x(False)
+
+    def show_plot_guess_points(self, show: bool = True) -> None:
+        if show:
+            self.fit_options_table.showRow(PLOT_GUESS_POINTS)
+        else:
+            self.fit_options_table.hideRow(PLOT_GUESS_POINTS)
+
+    def show_plot_guess_start_x(self, show: bool = True) -> None:
+        if show:
+            self.fit_options_table.showRow(PLOT_GUESS_START_X)
+        else:
+            self.fit_options_table.hideRow(PLOT_GUESS_START_X)
+
+    def show_plot_guess_end_x(self, show: bool = True) -> None:
+        if show:
+            self.fit_options_table.showRow(PLOT_GUESS_END_X)
+        else:
+            self.fit_options_table.hideRow(PLOT_GUESS_END_X)
