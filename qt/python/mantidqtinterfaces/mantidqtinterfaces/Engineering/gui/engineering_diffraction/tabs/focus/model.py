@@ -8,7 +8,7 @@ from typing import Optional
 
 import Engineering.EnggUtils as EnggUtils
 from Engineering.common import output_settings
-from Engineering.common.calibration_info  import CalibrationInfo
+from Engineering.common.calibration_info import CalibrationInfo
 
 
 class FocusModel(object):

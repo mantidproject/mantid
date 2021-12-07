@@ -7,9 +7,7 @@
 from typing import Sequence, Optional
 
 from mantid.simpleapi import Load
-from Engineering.EnggUtils import GROUP
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
+from Engineering.EnggUtils import GROUP, focus_run, create_new_calibration
 from Engineering.common.calibration_info import CalibrationInfo
 
 
@@ -27,8 +25,6 @@ class EnginX:
 
         # init attributes
         self.calibration = CalibrationInfo()
-        self.calib_model = CalibrationModel()
-        self.focus_model = FocusModel()
         self.van_run = vanadium_run
         self.focus_runs = focus_runs
         self.save_dir = save_dir
@@ -53,13 +49,12 @@ class EnginX:
         if self.calibration.get_prm_filepath():
             self.calibration.load_relevant_calibration_files()  # loading existing calibration files
         else:
-            self.calib_model.create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output,
-                                                    save_dir=self.save_dir)
+            create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir)
 
     def focus(self, plot_output: bool) -> None:
         if self.calibration.is_valid() and self.van_run:
-            self.focus_model.focus_run(self.focus_runs, self.van_run, plot_output, rb_num=None,
-                                       calibration=self.calibration, save_dir=self.save_dir)
+            focus_run(self.focus_runs, self.van_run, plot_output, rb_num=None, calibration=self.calibration,
+                      save_dir=self.save_dir)
 
     def main(self, plot_cal: bool = False, plot_foc: bool = False):
         self.calibrate(plot_cal)
