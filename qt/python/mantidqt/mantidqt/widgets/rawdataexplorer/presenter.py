@@ -163,6 +163,10 @@ class RawDataExplorerPresenter(QObject):
             # if the user clicked on a directory, do nothing preview-wise
             return
 
+        for selected_path in self.view.get_selection():
+            if not os.path.isfile(selected_path):
+                continue
+
         self.view.fileTree.setCursor(Qt.BusyCursor)
 
         self.model.modify_preview(last_clicked)
