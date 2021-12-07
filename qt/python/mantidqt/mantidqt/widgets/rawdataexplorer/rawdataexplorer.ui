@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="2" column="0" colspan="3">
-    <widget class="QTreeView" name="fileTree">
+    <widget class="RawDataExplorerFileTree" name="fileTree">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -68,6 +68,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RawDataExplorerFileTree</class>
+   <extends>QTreeView</extends>
+   <header>mantidqt.widgets.rawdataexplorer.RawDataExplorerFileTree</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
