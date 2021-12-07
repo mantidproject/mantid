@@ -474,9 +474,9 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
     def test_that_update_start_and_end_x_in_view_from_model_will_update_the_start_and_end_x_in_the_view(self):
         self.presenter.update_start_and_end_x_in_view_from_model()
 
-        self.mock_model_current_start_x.assert_called_once_with()
+        self.mock_model_current_start_x.assert_called()
         self.mock_view_start_x.assert_called_once_with(self.start_x)
-        self.mock_model_current_end_x.assert_called_once_with()
+        self.mock_model_current_end_x.assert_called()
         self.mock_view_end_x.assert_called_once_with(self.end_x)
 
 

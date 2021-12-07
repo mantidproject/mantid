@@ -452,10 +452,10 @@ class BasicFittingPresenter:
         self.update_plot_guess_notifier.notify_subscribers()
 
     def update_guess_parameters(self) -> None:
-        self.handle_guess_type_changed()
-        self.handle_guess_points_changed()
-        self.handle_guess_start_x_changed()
-        self.handle_guess_end_x_changed()
+        self.model.plot_guess_type = self.view.guess_type
+        self.model.plot_guess_points = self.view.guess_points
+        self.model.plot_guess_start_x = self.view.guess_start_x
+        self.model.plot_guess_end_x = self.view.guess_end_x
 
     def update_plot_fit(self) -> None:
         """Updates the fit results on the plot using the currently active fit results."""

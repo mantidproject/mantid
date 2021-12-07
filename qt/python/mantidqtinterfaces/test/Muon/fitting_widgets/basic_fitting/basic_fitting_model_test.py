@@ -497,6 +497,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
+        self.model.plot_guess_type = 'x from plot range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -505,10 +506,8 @@ class BasicFittingModelTest(unittest.TestCase):
                         'basic_fitting_model.EvaluateFunction') as mock_evaluate:
             self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
             self.model.update_plot_guess()
-            mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
+            mock_evaluate.assert_called_with(InputWorkspace='__tmp_guess_workspace',
                                              Function=self.model.current_single_fit_function,
-                                             StartX=self.model.current_start_x,
-                                             EndX=self.model.current_end_x,
                                              OutputWorkspace=guess_workspace_name)
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model.EvaluateFunction')
@@ -520,6 +519,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
+        self.model.plot_guess_type = 'x from plot range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -528,10 +528,8 @@ class BasicFittingModelTest(unittest.TestCase):
         type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
         self.model.update_plot_guess()
 
-        mock_evaluate.assert_called_with(InputWorkspace=self.model.current_dataset_name,
+        mock_evaluate.assert_called_with(InputWorkspace='__tmp_guess_workspace',
                                          Function=self.model.current_single_fit_function,
-                                         StartX=self.model.current_start_x,
-                                         EndX=self.model.current_end_x,
                                          OutputWorkspace=guess_workspace_name)
 
         self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
@@ -561,6 +559,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
+        self.model.plot_guess_type = 'x from plot range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
