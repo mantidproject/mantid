@@ -96,6 +96,7 @@ void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorksp
   InstrumentCreationHelper::addSource(instrument, sourcePosition, "source");
   InstrumentCreationHelper::addSample(instrument, samplePosition, "sample");
 
+  auto compAss = new ObjCompAssembly("detector-stage");
   // set up detectors with even spacing in latitude and longitude (to match geographical angles
   // approach used in the spatial interpolation\sparse instrument functionality)
   int i = 0;
@@ -114,12 +115,13 @@ void addInstrumentWithGeographicalDetectorsToWorkspace(Mantid::API::MatrixWorksp
       detPos[2] = ct * cos(longrad);
       detPos[0] = ct * sin(longrad);
 
-      InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str());
+      InstrumentCreationHelper::addDetector(instrument, detPos, i, buffer.str(), compAss);
       // Link it to the workspace
       workspace.getSpectrum(i).addDetectorID(i);
       i++;
     }
   }
+  instrument->add(compAss);
   workspace.setInstrument(instrument);
 }
 
@@ -183,13 +185,18 @@ void addMonitor(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Ker
  * @param position :: position of the detector
  * @param ID :: identification number of the detector
  * @param name :: name of the detector
+ * @param compAss :: optional component assembly (to help with saving geometry with SaveNexusESS)
  */
 void addDetector(Mantid::Geometry::Instrument_sptr &instrument, const Mantid::Kernel::V3D &position, const int ID,
-                 const std::string &name) {
+                 const std::string &name, ObjCompAssembly* compAss) {
   // Where 0.01 is half detector width etc.
   Detector *detector = new Detector(name, ID, ComponentCreationHelper::createCuboid(0.01, 0.02, 0.03), nullptr);
   detector->setPos(position);
-  instrument->add(detector);
   instrument->markAsDetector(detector);
+  if (compAss) {
+    compAss->add(detector);
+  } else {
+    instrument->add(detector);
+  }
 }
 } // namespace InstrumentCreationHelper
