@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -181,7 +181,7 @@ class RawDataExplorerView(QWidget):
         file_model.setRootPath("/")
         self.fileTree.setModel(file_model)
         self.fileTree.header().hideSection(2)
-        self.fileTree.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
         self.fileTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
         self.fileTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
@@ -221,6 +221,14 @@ class RawDataExplorerView(QWidget):
         """
         return self._last_clicked
 
+    def get_selection(self):
+        """
+        Get the selected files. The set contains the full path of the files and
+        the files match the tree widget name filter.
+        @return (set(str)): selected filenames
+        """
+        return self._current_selection
+
     def on_file_clicked(self, last_clicked_index):
         """
         Triggered when a file is clicked in the tree widget. This method check
@@ -228,6 +236,10 @@ class RawDataExplorerView(QWidget):
         """
         selection_model = self.fileTree.selectionModel()
         file_model = self.fileTree.model()
+
+        # forbid deselecting anything
+        selection_model.select(last_clicked_index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+
         selected_indexes = selection_model.selectedRows()
         selection = set()
 
@@ -236,10 +248,11 @@ class RawDataExplorerView(QWidget):
             if index == last_clicked_index:
                 self._last_clicked = file_model.filePath(last_clicked_index)
             if file_model.isDir(index):
+                # we don't select directories
                 selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
                 continue
-            if file_path not in selection:
-                selection.add(file_path)
+
+            selection.add(file_path)
 
         if selection != self._current_selection:
             self._current_selection = selection
