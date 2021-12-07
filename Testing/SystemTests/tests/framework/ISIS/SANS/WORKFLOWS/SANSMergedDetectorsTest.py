@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import DeleteWorkspace, mtd
+from mantid.simpleapi import mtd
 import ISISCommandInterface as i
 import systemtesting
 from sans.common.enums import SANSInstrument
@@ -49,5 +49,4 @@ class SANSMergedDetectorsTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         # Delete all workspaces
-        for ws in mtd.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
+        mtd.clear()

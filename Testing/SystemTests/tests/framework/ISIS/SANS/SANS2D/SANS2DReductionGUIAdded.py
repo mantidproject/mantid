@@ -98,8 +98,7 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
 
     def cleanup(self):
         # Delete all workspaces
-        for ws in mtd.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
+        mtd.clear()
         # Delete the stored files
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
@@ -144,8 +143,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
 
     def cleanup(self):
         # Delete all workspaces
-        for ws in mtd.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
+        mtd.clear()
         # Delete the stored files
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
@@ -189,8 +187,7 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 
     def cleanup(self):
         # Delete all workspaces
-        for ws in mtd.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
+        mtd.clear()
         # Delete the stored files
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))
@@ -231,8 +228,7 @@ class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2D
 
     def cleanup(self):
         # Delete all workspaces
-        for ws in mtd.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
+        mtd.clear()
         # Delete the stored files
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028793-add.nxs'))
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028797-add.nxs'))

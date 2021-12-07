@@ -8,7 +8,7 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import DeleteWorkspace, mtd
+from mantid.simpleapi import mtd
 from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          SetFrontDetRescaleShift, WavRangeReduction, AssignSample,
                                                          AssignCan, TransmissionSample, TransmissionCan,
@@ -54,5 +54,4 @@ class SANSMergedDetectorsTest_V2(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         # Delete all workspaces
-        for ws in mtd.getObjectNames():
-            DeleteWorkspace(Workspace=ws)
+        mtd.clear()
