@@ -53,6 +53,8 @@ Actually, the silicon calibration measurement consists of more than one run, so 
     print("Number of data files loaded: {}".format(len(workspaceNames)))
     print("Names of data workspaces: {}".format(workspaceNames))
 
+    DeleteWorkspace('calibration_data_6904')
+
 Now all files from the specified range are in the `calibration` WorkspaceGroup:
 
 .. testoutput:: ExLoadMultipleFiles
