@@ -8,7 +8,7 @@
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from Engineering.common.settings_helper import get_setting, set_setting
 from Engineering.common.calibration_info import CalibrationInfo
 from Engineering.common import output_settings
 from Engineering.EnggUtils import GROUP

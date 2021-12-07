@@ -18,7 +18,7 @@ from .tabs.fitting.presenter import FittingPresenter
 from .settings.settings_model import SettingsModel
 from .settings.settings_view import SettingsView
 from .settings.settings_presenter import SettingsPresenter
-from .settings.settings_helper import get_setting, set_setting
+from Engineering.common.settings_helper import get_setting, set_setting
 
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.observer_pattern import GenericObservable
