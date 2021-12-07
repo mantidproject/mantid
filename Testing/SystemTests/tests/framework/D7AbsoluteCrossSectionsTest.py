@@ -144,7 +144,7 @@ class ILL_D7_SingleCrystal_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument']
-        return ['normalized_single_crystal_XYZ', 'ILL_D7_SingleCrystal_6p.nxs']
+        return ['normalized_single_crystal_XYZ', 'ILL_D7_SingleCrystal_XYZ.nxs']
 
     def runTest(self):
         vanadium_mass = 8.535
