@@ -58,7 +58,7 @@ public:
     auto dapml = createTestDecoupAsymPowderMagLong();
 
     const size_t nData(1);
-    std::vector<double> xValues(nData, 3.5);
+    std::vector<double> xValues(nData, 1100.0);
 
     Mantid::CurveFitting::Jacobian jacobian(nData, 2);
     dapml->functionDeriv1D(&jacobian, xValues.data(), nData);
@@ -66,8 +66,8 @@ public:
     double dfdasym = jacobian.get(0, 0);
     double dfdcharField = jacobian.get(0, 1);
 
-    TS_ASSERT_DELTA(dfdasym, 0.4355238945, 1e-8);
-    TS_ASSERT_DELTA(dfdcharField, 2.3, 0.01);
+    TS_ASSERT_DELTA(dfdasym, 0.6210883227, 1e-8);
+    TS_ASSERT_DELTA(dfdcharField, -0.0002968811, 1e-8);
   }
 
 private:
@@ -85,7 +85,7 @@ private:
     auto func = std::make_shared<TestableDecoupAsymPowderMagLong>();
     func->initialize();
     func->setParameter("Asymmetry", 2.3);
-    func->setParameter("CharField", 4.0);
+    func->setParameter("CharField", 900.0);
     return func;
   }
 };

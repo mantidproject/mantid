@@ -18,11 +18,11 @@ public:
     double xValue1 = 2.0;
     const double charField1 = 5.0;
     double Az1 = getAz(xValue1, charField1);
-    TS_ASSERT_DELTA(Az1, -0.3053819927, 1e-8);
+    TS_ASSERT_DELTA(Az1, 0.3551823638, 1e-8);
 
     double xValue2 = 2.4;
     double charField2 = 1.5;
     double Az2 = getAz(xValue2, charField2);
-    TS_ASSERT_DELTA(Az2, 0.6996389848, 1e-8);
+    TS_ASSERT_DELTA(Az2, 0.7612450528, 1e-8);
   }
 };
