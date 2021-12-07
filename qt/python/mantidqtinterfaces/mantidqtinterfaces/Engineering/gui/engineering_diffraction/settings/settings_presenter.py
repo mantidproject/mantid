@@ -129,9 +129,12 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("default_peak")
         if not self.settings["default_peak"] in ALL_PEAKS:
             self.settings["default_peak"] = DEFAULT_SETTINGS["default_peak"]
+        self.check_and_populate_with_default("full_calibration")
+        if not path.isfile(self.settings["full_calibration"]):
+            self.settings["full_calibration"] = DEFAULT_SETTINGS["full_calibration"]
         self.check_and_populate_with_default("save_location")
         self.check_and_populate_with_default("logs")
-        self.check_and_populate_with_default("full_calibration")
+
         self.check_and_populate_with_default("primary_log")
         # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")

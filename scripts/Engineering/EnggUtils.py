@@ -23,7 +23,7 @@ ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]  # used in EnggFocus
 # calibration tab variables
-CALIB_DIR = path.join(__file__, "calib")  # directory of default full instrument calibration and grouping .xml files
+CALIB_DIR = path.join(path.dirname(path.realpath(__file__)), "calib")  # dirof default full instrument cal and .xml
 DIFF_CONSTS_TABLE_NAME = "diffractometer_consts_table"
 # focus tab variables
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
