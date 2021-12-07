@@ -16,7 +16,6 @@ from mantid.simpleapi import (PDCalibration, DeleteWorkspace, DiffractionFocussi
                               CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, ApplyDiffCal, config,
                               SaveNexus, SaveGSS, SaveFocusedXYE, Divide, RebinToWorkspace, ReplaceSpecialValues,
                               EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace, AnalysisDataService as ADS)
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter import CALIB_FOLDER
 from Engineering.common import path_handling, output_settings
 from Engineering.common.settings_helper import get_setting
 
@@ -24,6 +23,7 @@ ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
 ENGINX_MASK_BIN_MAXS = [5300, 20400, 40450, 62000, 82670]  # used in EnggFocus
 # calibration tab variables
+CALIB_DIR = path.join(__file__, "calib")  # directory of default full instrument calibration and grouping .xml files
 DIFF_CONSTS_TABLE_NAME = "diffractometer_consts_table"
 # focus tab variables
 FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_"
@@ -192,7 +192,7 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
         spec_nums = range(ws_foc.getNumberHistograms())  # one block per spectrum in ws
     nspec = len(spec_nums)
     # read header
-    with open(path.join(CALIB_FOLDER, "template_ENGINX_prm_header.prm")) as fheader:
+    with open(path.join(CALIB_DIR, "template_ENGINX_prm_header.prm")) as fheader:
         lines = fheader.readlines()
     lines[1] = lines[1].replace('2', f'{nspec}')  # replace with nspectra in header
     lines[13] = lines[13].replace('241391', f'{ws_foc.run().get("run_number").value}')  # replace run num
