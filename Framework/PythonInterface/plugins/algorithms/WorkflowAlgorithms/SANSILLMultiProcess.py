@@ -89,7 +89,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                                                       action=FileAction.OptionalLoad,
                                                       extensions=['nxs'],
                                                       allow_empty=True),
-                                 doc=f'Sample run(s) at the wavelength #{l+1}.')
+                                 doc=f'Sample transmission run(s) at the wavelength #{l+1}.')
             self.setPropertyGroup(p_name, 'Transmission Numors')
 
         self.declareProperty(MultipleFileProperty(name='TrDarkCurrentRuns',
