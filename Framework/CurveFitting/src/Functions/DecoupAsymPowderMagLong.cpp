@@ -41,7 +41,6 @@ void DecoupAsymPowderMagLong::function1D(double *out, const double *xValues, con
 }
 
 void DecoupAsymPowderMagLong::functionDeriv1D(Jacobian *out, const double *xValues, const size_t nData) {
-  const double asym = getParameter("Asymmetry");
   const double charField = getParameter("CharField");
 
   for (size_t i = 0; i < nData; i++) {
