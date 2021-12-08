@@ -77,10 +77,10 @@ class BasicFittingPresenter:
         self.view.set_slot_for_exclude_end_x_updated(self.handle_exclude_end_x_updated)
         self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
-        self.view.set_slot_for_guess_type_changed(self.handle_guess_type_changed)
-        self.view.set_slot_for_guess_points_updated(self.handle_guess_points_changed)
-        self.view.set_slot_for_guess_start_x_updated(self.handle_guess_start_x_changed)
-        self.view.set_slot_for_guess_end_x_updated(self.handle_guess_end_x_changed)
+        self.view.set_slot_for_plot_guess_type_changed(self.handle_plot_guess_type_changed)
+        self.view.set_slot_for_plot_guess_points_updated(self.handle_plot_guess_points_changed)
+        self.view.set_slot_for_plot_guess_start_x_updated(self.handle_plot_guess_start_x_changed)
+        self.view.set_slot_for_plot_guess_end_x_updated(self.handle_plot_guess_end_x_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
 
     def initialize_model_options(self) -> None:
@@ -238,37 +238,37 @@ class BasicFittingPresenter:
         """Handle when the evaluation type is changed."""
         self.model.evaluation_type = self.view.evaluation_type
 
-    def handle_guess_type_changed(self) -> None:
+    def handle_plot_guess_type_changed(self) -> None:
         """Handle when the evaluation type is changed."""
-        self.model.plot_guess_type = self.view.guess_type
+        self.model.plot_guess_type = self.view.plot_guess_type
         if self.model.plot_guess_type == 'x from plot range':
             self.view.show_plot_guess_points(False)
             self.view.show_plot_guess_start_x(False)
             self.view.show_plot_guess_end_x(False)
-        if self.model.plot_guess_type == 'x at data points':
+        elif self.model.plot_guess_type == 'x at data points':
             self.view.show_plot_guess_points(True)
             self.view.show_plot_guess_start_x(False)
             self.view.show_plot_guess_end_x(False)
-        if self.model.plot_guess_type == 'Custom x range':
+        elif self.model.plot_guess_type == 'Custom x range':
             self.view.show_plot_guess_points(True)
             self.view.show_plot_guess_start_x(True)
             self.view.show_plot_guess_end_x(True)
 
         self.update_plot_guess()
 
-    def handle_guess_points_changed(self) -> None:
+    def handle_plot_guess_points_changed(self) -> None:
         """Handle when the evaluation type is changed."""
-        self.model.plot_guess_points = self.view.guess_points
+        self.model.plot_guess_points = self.view.plot_guess_points
         self.update_plot_guess()
 
-    def handle_guess_start_x_changed(self) -> None:
+    def handle_plot_guess_start_x_changed(self) -> None:
         """Handle when the evaluation type is changed."""
-        self.model.plot_guess_start_x = self.view.guess_start_x
+        self.model.plot_guess_start_x = self.view.plot_guess_start_x
         self.update_plot_guess()
 
-    def handle_guess_end_x_changed(self) -> None:
+    def handle_plot_guess_end_x_changed(self) -> None:
         """Handle when the evaluation type is changed."""
-        self.model.plot_guess_end_x = self.view.guess_end_x
+        self.model.plot_guess_end_x = self.view.plot_guess_end_x
         self.update_plot_guess()
 
     def handle_function_structure_changed(self) -> None:
@@ -428,8 +428,8 @@ class BasicFittingPresenter:
         """Updates the start and end x in the view using the current values in the model."""
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
-        self.view.guess_start_x = self.model.current_start_x
-        self.view.guess_end_x = self.model.current_end_x
+        self.view.plot_guess_start_x = self.model.current_start_x
+        self.view.plot_guess_end_x = self.model.current_end_x
         self.view.exclude_start_x = self.model.current_exclude_start_x
         self.view.exclude_end_x = self.model.current_exclude_end_x
 
@@ -452,10 +452,10 @@ class BasicFittingPresenter:
         self.update_plot_guess_notifier.notify_subscribers()
 
     def update_guess_parameters(self) -> None:
-        self.model.plot_guess_type = self.view.guess_type
-        self.model.plot_guess_points = self.view.guess_points
-        self.model.plot_guess_start_x = self.view.guess_start_x
-        self.model.plot_guess_end_x = self.view.guess_end_x
+        self.model.plot_guess_type = self.view.plot_guess_type
+        self.model.plot_guess_points = self.view.plot_guess_points
+        self.model.plot_guess_start_x = self.view.plot_guess_start_x
+        self.model.plot_guess_end_x = self.view.plot_guess_end_x
 
     def update_plot_fit(self) -> None:
         """Updates the fit results on the plot using the currently active fit results."""

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import AnalysisDataService, CopyLogs, CreateWorkspace, EvaluateFunction
+from mantid.simpleapi import CopyLogs, CreateWorkspace, EvaluateFunction
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
@@ -843,7 +843,6 @@ class BasicFittingModel:
         except RuntimeError:
             logger.error("Failed to plot guess.")
             return ""
-        AnalysisDataService.remove('__tmp_guess_workspace')
         return output_workspace
 
     def _evaluate_double_pulse_function(self, fit_function: IFunction, output_workspace: str) -> None:

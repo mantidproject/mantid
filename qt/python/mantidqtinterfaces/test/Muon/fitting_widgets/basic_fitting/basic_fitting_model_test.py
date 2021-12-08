@@ -542,6 +542,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = False
+        self.model.plot_guess_type = 'x from plot range'
 
         self.model.context = mock.Mock()
         self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=None)
@@ -571,6 +572,73 @@ class BasicFittingModelTest(unittest.TestCase):
 
         self.model._evaluate_double_pulse_function.assert_called_once_with(
             self.model.current_single_fit_function, guess_workspace_name)
+
+    def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_plot_range_type_is_selected(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [10.0, 11.0]
+        self.model.current_dataset_index = 0
+        self.model.plot_guess = True
+        self.model.plot_guess_type = 'x from plot range'
+
+        self.model.context = mock.Mock()
+        self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model.update_plot_guess()
+
+        guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        self.assertEquals(guess_workspace.dataX(0).min(), 0.0)
+        self.assertEquals(guess_workspace.dataX(0).max(), 10.0)
+        self.assertEquals(guess_workspace.dataX(0).size, 250)
+
+    def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_data_points_type_is_selected(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [10.0, 11.0]
+        self.model.current_dataset_index = 0
+        self.model.plot_guess = True
+        self.model.plot_guess_type = 'x at data points'
+        self.model.plot_guess_points = 1000
+
+        self.model.context = mock.Mock()
+        self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model.update_plot_guess()
+
+        guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        self.assertEquals(guess_workspace.dataX(0).min(), 0.0)
+        self.assertEquals(guess_workspace.dataX(0).max(), 10.0)
+        self.assertEquals(guess_workspace.dataX(0).size, 1000)
+
+    def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_custom_type_is_selected(self):
+        guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
+        self.model.dataset_names = self.dataset_names
+        self.model.single_fit_functions = self.single_fit_functions
+        self.model.start_xs = [0.0, 1.0]
+        self.model.end_xs = [10.0, 11.0]
+        self.model.current_dataset_index = 0
+        self.model.plot_guess = True
+        self.model.plot_guess_type = 'Custom x range'
+        self.model.plot_guess_points = 1000
+        self.model.plot_guess_start_x = 2.0
+        self.model.plot_guess_end_x = 12.0
+
+        self.model.context = mock.Mock()
+        self.model._double_pulse_enabled = mock.Mock(return_value=False)
+        self.model._get_plot_guess_name = mock.Mock(return_value=guess_workspace_name)
+        self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
+        self.model.update_plot_guess()
+
+        guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        self.assertEquals(guess_workspace.dataX(0).min(), 2.0)
+        self.assertEquals(guess_workspace.dataX(0).max(), 12.0)
+        self.assertEquals(guess_workspace.dataX(0).size, 1000)
 
     def test_perform_fit_will_call_the_correct_function_for_a_single_fit(self):
         self.model.dataset_names = self.dataset_names

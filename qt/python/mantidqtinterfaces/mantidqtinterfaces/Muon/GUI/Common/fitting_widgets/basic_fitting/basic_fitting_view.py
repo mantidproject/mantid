@@ -109,21 +109,21 @@ class BasicFittingView(ui_form, base_widget):
         """Connect the slot for changing the Evaluation type."""
         self.fit_function_options.set_slot_for_evaluation_type_changed(slot)
 
-    def set_slot_for_guess_type_changed(self, slot) -> None:
+    def set_slot_for_plot_guess_type_changed(self, slot) -> None:
         """Connect the slot for changing the Evaluation type."""
-        self.fit_function_options.set_slot_for_guess_type_changed(slot)
+        self.fit_function_options.set_slot_for_plot_guess_type_changed(slot)
 
-    def set_slot_for_guess_points_updated(self, slot) -> None:
+    def set_slot_for_plot_guess_points_updated(self, slot) -> None:
         """Connect the slot for the start x option."""
-        self.fit_function_options.set_slot_for_guess_points_updated(slot)
+        self.fit_function_options.set_slot_for_plot_guess_points_updated(slot)
 
-    def set_slot_for_guess_start_x_updated(self, slot) -> None:
+    def set_slot_for_plot_guess_start_x_updated(self, slot) -> None:
         """Connect the slot for the start x option."""
-        self.fit_function_options.set_slot_for_guess_start_x_updated(slot)
+        self.fit_function_options.set_slot_for_plot_guess_start_x_updated(slot)
 
-    def set_slot_for_guess_end_x_updated(self, slot) -> None:
+    def set_slot_for_plot_guess_end_x_updated(self, slot) -> None:
         """Connect the slot for the end x option."""
-        self.fit_function_options.set_slot_for_guess_end_x_updated(slot)
+        self.fit_function_options.set_slot_for_plot_guess_end_x_updated(slot)
 
     def set_slot_for_use_raw_changed(self, slot) -> None:
         """Connect the slot for the Use raw option."""
@@ -219,34 +219,34 @@ class BasicFittingView(ui_form, base_widget):
         self.fit_function_options.end_x = value
 
     @property
-    def guess_type(self) -> str:
+    def plot_guess_type(self) -> str:
         """Returns the selected start X."""
-        return self.fit_function_options.guess_type
+        return self.fit_function_options.plot_guess_type
 
     @property
-    def guess_points(self) -> int:
+    def plot_guess_points(self) -> int:
         """Returns the selected start X."""
-        return self.fit_function_options.guess_points
+        return self.fit_function_options.plot_guess_points
 
     @property
-    def guess_start_x(self) -> float:
+    def plot_guess_start_x(self) -> float:
         """Returns the selected start X."""
-        return self.fit_function_options.guess_start_x
+        return self.fit_function_options.plot_guess_start_x
 
-    @guess_start_x.setter
-    def guess_start_x(self, value: float) -> None:
+    @plot_guess_start_x.setter
+    def plot_guess_start_x(self, value: float) -> None:
         """Sets the selected start X."""
-        self.fit_function_options.guess_start_x = value
+        self.fit_function_options.plot_guess_start_x = value
 
     @property
-    def guess_end_x(self) -> float:
+    def plot_guess_end_x(self) -> float:
         """Returns the selected start X."""
-        return self.fit_function_options.guess_end_x
+        return self.fit_function_options.plot_guess_end_x
 
-    @guess_end_x.setter
-    def guess_end_x(self, value: float) -> None:
+    @plot_guess_end_x.setter
+    def plot_guess_end_x(self, value: float) -> None:
         """Sets the selected start X."""
-        self.fit_function_options.guess_end_x = value
+        self.fit_function_options.plot_guess_end_x = value
 
     @property
     def exclude_range(self) -> bool:

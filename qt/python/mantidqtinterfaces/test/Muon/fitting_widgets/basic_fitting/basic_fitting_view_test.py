@@ -15,7 +15,10 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_functi
                                                                                                         EXCLUDE_RANGE_TABLE_ROW,
                                                                                                         EXCLUDE_START_X_TABLE_ROW,
                                                                                                         EXCLUDE_END_X_TABLE_ROW,
-                                                                                                        RAW_DATA_TABLE_ROW)
+                                                                                                        RAW_DATA_TABLE_ROW,
+                                                                                                        PLOT_GUESS_POINTS,
+                                                                                                        PLOT_GUESS_START_X,
+                                                                                                        PLOT_GUESS_END_X)
 
 from qtpy.QtWidgets import QApplication
 
@@ -197,6 +200,33 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.function_name = new_function_name
 
         self.assertEqual(self.view.function_name, new_function_name)
+
+    def test_that_show_plot_guess_points_will_show_plot_guess_points_row(self):
+        self.view = BasicFittingView()
+
+        self.view.show_plot_guess_points(True)
+        self.assertFalse(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_POINTS))
+
+        self.view.show_plot_guess_points(False)
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_POINTS))
+
+    def test_that_show_plot_guess_start_x_will_show_plot_guess_start_x_row(self):
+        self.view = BasicFittingView()
+
+        self.view.show_plot_guess_start_x(True)
+        self.assertFalse(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_START_X))
+
+        self.view.show_plot_guess_start_x(False)
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_START_X))
+
+    def test_that_show_plot_guess_end_x_will_show_plot_guess_end_x_row(self):
+        self.view = BasicFittingView()
+
+        self.view.show_plot_guess_end_x(True)
+        self.assertFalse(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_END_X))
+
+        self.view.show_plot_guess_end_x(False)
+        self.assertTrue(self.view.fit_function_options.fit_options_table.isRowHidden(PLOT_GUESS_END_X))
 
 
 if __name__ == '__main__':

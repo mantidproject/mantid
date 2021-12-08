@@ -283,6 +283,39 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
+    def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_plot_range(self):
+        self.presenter.view.plot_guess_type = 'x from plot range'
+        self.presenter.handle_plot_guess_type_changed()
+        self.view.show_plot_guess_points.assert_called_with(False)
+        self.view.show_plot_guess_start_x.assert_called_with(False)
+        self.view.show_plot_guess_end_x.assert_called_with(False)
+
+    def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_data_points(self):
+        self.presenter.view.plot_guess_type = 'x at data points'
+        self.presenter.handle_plot_guess_type_changed()
+        self.view.show_plot_guess_points.assert_called_with(True)
+        self.view.show_plot_guess_start_x.assert_called_with(False)
+        self.view.show_plot_guess_end_x.assert_called_with(False)
+
+    def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_custom_range(self):
+        self.presenter.view.plot_guess_type = 'Custom x range'
+        self.presenter.handle_plot_guess_type_changed()
+        self.view.show_plot_guess_points.assert_called_with(True)
+        self.view.show_plot_guess_start_x.assert_called_with(True)
+        self.view.show_plot_guess_end_x.assert_called_with(True)
+
+    def test_that_handle_plot_guess_points_changed_will_update_the_guess(self):
+        self.presenter.handle_plot_guess_points_changed()
+        self.model.update_plot_guess.assert_called_once_with()
+
+    def test_that_handle_plot_guess_start_x_changed_will_update_the_guess(self):
+        self.presenter.handle_plot_guess_start_x_changed()
+        self.model.update_plot_guess.assert_called_once_with()
+
+    def test_that_handle_plot_guess_end_x_changed_will_update_the_guess(self):
+        self.presenter.handle_plot_guess_end_x_changed()
+        self.model.update_plot_guess.assert_called_once_with()
+
     def test_that_handle_function_parameter_changed_will_update_the_fit_functions_and_notify_they_are_updated(self):
         function_index = ""
         parameter = "A0"
