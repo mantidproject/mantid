@@ -7,7 +7,6 @@
 #include "MantidDataObjects/LeanElasticPeak.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"

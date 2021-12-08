@@ -222,7 +222,11 @@ endfunction()
 # install_prefix
 function(mtd_install_qt_library qt_version target install_target_type install_dir)
   if(qt_version EQUAL 5 AND (ENABLE_WORKBENCH OR BUILD_MANTIDQT))
-    install(TARGETS ${target} ${install_target_type} DESTINATION ${install_dir})
+    install(
+      TARGETS ${target} ${install_target_type}
+      DESTINATION ${install_dir}
+      COMPONENT Runtime
+    )
   endif()
 endfunction()
 

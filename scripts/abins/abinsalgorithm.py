@@ -65,7 +65,8 @@ class AbinsAlgorithm:
         self.declareProperty(name="AbInitioProgram",
                              direction=Direction.Input,
                              defaultValue="CASTEP",
-                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3", "GAUSSIAN", "VASP"]),
+                             validator=StringListValidator(["CASTEP", "CRYSTAL", "DMOL3",
+                                                            "FORCECONSTANTS", "GAUSSIAN", "VASP"]),
                              doc="An ab initio program which was used for vibrational or phonon calculation.")
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", '', Direction.Output),
@@ -175,6 +176,7 @@ class AbinsAlgorithm:
         input_file_validators = {"CASTEP": self._validate_castep_input_file,
                                  "CRYSTAL": self._validate_crystal_input_file,
                                  "DMOL3": self._validate_dmol3_input_file,
+                                 "FORCECONSTANTS": self._validate_euphonic_input_file,
                                  "GAUSSIAN": self._validate_gaussian_input_file,
                                  "VASP": self._validate_vasp_input_file}
         ab_initio_program = self.getProperty("AbInitioProgram").value
@@ -720,6 +722,27 @@ class AbinsAlgorithm:
                     return dict(Invalid=True, Comment=msg_err + "The fifth line should be 'Frequencies in'.")
 
                 return dict(Invalid=False, Comment="")
+
+    @classmethod
+    def _validate_euphonic_input_file(cls, filename_full_path: str) -> dict:
+        logger.information("Validate force constants file for interpolation.")
+        from dos.load_euphonic import euphonic_available
+        if euphonic_available():
+            try:
+                from euphonic.cli.utils import force_constants_from_file
+                force_constants_from_file(filename_full_path)
+                return dict(Invalid=False, Comment="")
+            except Exception as error:
+                if hasattr(error, 'message'):
+                    message = error.message
+                else:
+                    message = str(error)
+                return dict(Invalid=True,
+                            Comment=f"Problem opening force constants file with Euphonic.: {message}")
+        else:
+            return dict(Invalid=True,
+                        Comment=("Could not import Euphonic module. "
+                                 "Try running user/AdamJackson/install_euphonic.py from the Script Repository."))
 
     @classmethod
     def _validate_vasp_input_file(cls, filename_full_path: str) -> dict:

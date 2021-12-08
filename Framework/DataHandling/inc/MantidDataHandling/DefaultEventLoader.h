@@ -114,7 +114,7 @@ template <class T> void DefaultEventLoader::makeMapToEventLists(std::vector<std:
   } else {
     // To avoid going out of range in the vector, this is the MAX INDEX that can
     // go into it
-    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size());
+    eventid_max = static_cast<int32_t>(pixelID_to_wi_vector.size() - 1 - pixelID_to_wi_offset);
 
     // Make an array where index = pixel ID
     // Set the value to NULL by default

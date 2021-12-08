@@ -14,9 +14,17 @@ set(CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set(CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set(CPACK_PACKAGE_VERSION_PATCH ${VERSION_PATCH}${VERSION_TWEAK})
 
-# Sets install for the /opt/mantid* directory
-if(NOT ${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-  set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+if(NOT CONDA_ENV)
+  # Legacy whole bundle
+  set(CPACK_MONOLITHIC_INSTALL ON)
+  # Sets install for the /opt/mantid* directory
+  if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
+  else()
+    set(CPACK_PACKAGING_INSTALL_PREFIX "")
+  endif()
+  set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY OFF)
+  set(CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY OFF)
 endif()
 
 # RPM information - only used if generating a rpm the release number is an option set in LinuxPackageScripts.cmake

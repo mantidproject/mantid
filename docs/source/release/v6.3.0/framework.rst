@@ -36,8 +36,10 @@ Improvements
 Bugfixes
 ########
 
+- Fix bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
+- Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
 
 Fit Functions
 -------------
@@ -51,6 +53,7 @@ Data Objects
 Geometry
 ----------
 - add additional unit test for Rasterize class.
+- fix an issue in CSGObject such that the intercept type is no longer tied to an arbitrary value that make Track returns unstable results.
 
 Python
 ------
@@ -82,5 +85,6 @@ Bugfixes
 
 
 - Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
 
 :ref:`Release 6.3.0 <v6.3.0>`

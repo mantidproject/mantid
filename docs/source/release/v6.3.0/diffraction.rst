@@ -20,6 +20,7 @@ Powder Diffraction
 - Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
 - PEARL powder diffraction scripts now cope if absorption correction workspace is different size to the Vanadium workspace without generating NaN values
 - :ref:`AnvredCorrection <algm-AnvredCorrection>` (and :ref:`SphericalAbsorption <algm-SphericalAbsorption>` which calls it) will now take the radius of a spherical sample from the workspace if the radius isn't specified (if the sample is not a sphere this will produce an error).
+- :ref:`AnvredCorrection <algm-AnvredCorrection>` (and :ref:`SphericalAbsorption <algm-SphericalAbsorption>` which calls it) have been extended to evaluate the attenuation by more absorbing spherical samples (with muR < 9).
 - :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` now groups the correction by detector bank in MomentumTransfer (rather than TOF)
   and includes the following update.
 - :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` now validates that the IncidentSpectra
@@ -37,6 +38,8 @@ Bugfixes
 - Restored behavior in :ref:`ConvertUnits <algm-ConvertUnits>` where negative time-of-flight converts to negative d-spacing when ``DIFA==0``
 - Identification in :ref:`AlignComponents <algm-AlignComponents>` of the first and last detector-ID for an instrument component with unsorted detector-ID's.
 - Fix issue in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` where in some cases you end up with zeros as output.
+- Fix bug such that attenuation calculated in :ref:`AnvredCorrection <algm-AnvredCorrection>` is now accurate to within 0.5% for typical muR.
+- The integration range has been corrected inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
 
 Engineering Diffraction
 -----------------------
@@ -53,12 +56,14 @@ Improvements
 - :ref:`FilterEvents <algm-FilterEvents>` execution speed improved by 35% in some cases.
 - Updated the default values for :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` and in the fitting tab table to Niter = 50 and XWindow = { 600 for TOF, 0.02 for dSpacing }.
 - The file filter in the Focus tab for calibration Region includes "No Region Filter", North, South and now also Cropped, Custom, Texture and Both Banks. The text for "No Unit/Region Filter" are colored grey.
+- The fitting tab has been made more tolerant to users deleting or renaming the workspaces in the workbench Workspaces widget.
 
 Bugfixes
 ########
 - Save .prm file from :ref:`Calibration tab <ui engineering calibration>` with correct L2 and two-theta for each group in arbitrary groupings (previously only correct for the two ENGIN-X banks).
 - The last calibration file (.prm) populated in the :ref:`Calibration tab <ui engineering calibration>` is now correct when both banks are focused (previously was populated with just the South bank .prm)
 - Fix crash on :ref:`Fitting tab <ui engineering fitting>` when trying to output fit results. The problem was caused by a unit conversion from TOF to dSpacing not being possible eg when peak centre at a negative TOF value
+- The Serial and Sequential fit features on the Fitting tab now respect the "Subtract BG" checkbox in the table and use the background subtracted workspace where this is checked
 
 Single Crystal Diffraction
 --------------------------

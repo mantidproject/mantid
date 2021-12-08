@@ -94,9 +94,9 @@ void do_test_events(const MatrixWorkspace_sptr &workspace, bool ev, bool perform
       return;
     // do the final comparison
     const auto &y_actual = ws->y(0);
-    TS_ASSERT_DELTA(y_actual[0], 8.2052, 0.0001);
-    TS_ASSERT_DELTA(y_actual[1], 0.3040, 0.0001);
-    TS_ASSERT_DELTA(y_actual[2], 0.0656, 0.0001);
+    TS_ASSERT_DELTA(y_actual[0], 8.2278, 0.0001);
+    TS_ASSERT_DELTA(y_actual[1], 0.3049, 0.0001);
+    TS_ASSERT_DELTA(y_actual[2], 0.0659, 0.0001);
   }
 }
 } // namespace

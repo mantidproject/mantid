@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt, Signal
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import FIT_STATUS_COLUMN
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import FIT_STATUS_COLUMN, NUM_DEFAULT_COLUMNS
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.QSelectionTableView import QSelectionTableView
 

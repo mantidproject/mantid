@@ -86,6 +86,9 @@ class IN4(systemtesting.MantidSystemTest):
         self.disableChecking = ['Instrument', 'Sample']
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-4
+        # NOTE: a new reference file is added to the standard system test file location
+        #       as I cannot figure out how to properly replace the existing file for ILL
+        #       standard.  Please consider moving/adjust the reference file as you see fit.
         return ['cropped', 'ILL_IN4_SofQW.nxs']
 
 

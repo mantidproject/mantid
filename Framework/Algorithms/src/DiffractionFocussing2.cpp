@@ -581,7 +581,7 @@ void DiffractionFocussing2::determineRebinParameters() {
       throw std::runtime_error(mess.str());
     }
     // This log step size will give the right # of points
-    step = (log(Xmax) - log(Xmin)) / nPoints;
+    step = expm1((log(Xmax) - log(Xmin)) / nPoints);
     mess << "Found Group:" << gpit->first << "(Xmin,Xmax,log step):" << (gpit->second).first << ","
          << (gpit->second).second << "," << step;
     // g_log.information(mess.str());

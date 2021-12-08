@@ -266,11 +266,11 @@ The workflow follows these step:
 
     DetID DIFC
         1 2208.7
-        2 2319.1
-        3 2098.2
+        2 2319.2
+        3 2098.3
         4 2365.5
-        5 2318.2
-        6 2272.7
+        5 2318.3
+        6 2272.8
 
 The evolution in the calibration can be seen with
 
@@ -356,7 +356,7 @@ The same complete calibration can just be run with just
         3 2098.4
         4 2367.7
         5 2318.2
-        6 2270.6
+        6 2270.7
 
 The resulting :ref:`diffcal <DiffractionCalibrationWorkspace>` can be
 saved with :ref:`SaveDiffCal <algm-SaveDiffCal>`.

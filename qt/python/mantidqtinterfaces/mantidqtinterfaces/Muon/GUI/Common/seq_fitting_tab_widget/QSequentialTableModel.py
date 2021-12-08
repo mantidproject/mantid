@@ -154,7 +154,7 @@ class QSequentialTableModel(QSelectionTableModel):
         return self.data(index, Qt.DisplayRole)
 
     def get_fit_parameters(self, row):
-        return self._parameterData[row]
+        return [float(value) for value in self._parameterData[row]]
 
     @property
     def number_of_parameters(self):

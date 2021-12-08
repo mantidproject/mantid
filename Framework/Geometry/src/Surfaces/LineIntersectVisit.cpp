@@ -18,14 +18,14 @@
 
 namespace Mantid::Geometry {
 
-LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt, const Kernel::V3D &uVec)
-    : ATrack(Pt, uVec)
+LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &point, const Kernel::V3D &unitVector)
+    : m_line(point, unitVector)
 /**
   Constructor
 */
 {
-  PtOut.reserve(2);
-  DOut.reserve(2);
+  m_intersectionPointsOut.reserve(2);
+  m_distancesOut.reserve(2);
 }
 
 void LineIntersectVisit::Accept(const Surface &Surf)
@@ -44,8 +44,7 @@ void LineIntersectVisit::Accept(const Quadratic &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
-  procTrack();
+  m_line.intersect(m_intersectionPointsOut, Surf);
 }
 
 void LineIntersectVisit::Accept(const Plane &Surf)
@@ -54,8 +53,7 @@ void LineIntersectVisit::Accept(const Plane &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
-  procTrack();
+  m_line.intersect(m_intersectionPointsOut, Surf);
 }
 
 void LineIntersectVisit::Accept(const Cone &Surf)
@@ -64,8 +62,7 @@ void LineIntersectVisit::Accept(const Cone &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
-  procTrack();
+  m_line.intersect(m_intersectionPointsOut, Surf);
 }
 
 void LineIntersectVisit::Accept(const Cylinder &Surf)
@@ -74,8 +71,7 @@ void LineIntersectVisit::Accept(const Cylinder &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
-  procTrack();
+  m_line.intersect(m_intersectionPointsOut, Surf);
 }
 
 void LineIntersectVisit::Accept(const Sphere &Surf)
@@ -84,8 +80,7 @@ void LineIntersectVisit::Accept(const Sphere &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
-  procTrack();
+  m_line.intersect(m_intersectionPointsOut, Surf);
 }
 
 void LineIntersectVisit::Accept(const General &Surf)
@@ -94,20 +89,35 @@ void LineIntersectVisit::Accept(const General &Surf)
   @param Surf :: Surface to use int line Interesect
 */
 {
-  ATrack.intersect(PtOut, Surf);
-  procTrack();
+  m_line.intersect(m_intersectionPointsOut, Surf);
 }
 
-void LineIntersectVisit::procTrack()
 /**
-  Sorts the PtOut and distances
-  with a closes first order.
-*/
-{
-  // Calculate the distances to the points
-  DOut.resize(PtOut.size());
-  using std::placeholders::_1;
-  std::transform(PtOut.begin(), PtOut.end(), DOut.begin(), std::bind(&Kernel::V3D::distance, ATrack.getOrigin(), _1));
+ * @brief Prune duplicated interception points in the point list
+ *
+ */
+void LineIntersectVisit::sortAndRemoveDuplicates() {
+  const auto &u_vec = m_line.getDirect();
+  const auto &origin = m_line.getOrigin();
+  if (m_intersectionPointsOut.size() > 1) {
+    // sort the points by its distance to the track origin
+    std::sort(
+        m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(),
+        [&u_vec](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) { return u_vec.scalar_prod(Pt_a - Pt_b) < 0; });
+    // remove consecutive duplicated points
+    const auto last = std::unique(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(),
+                                  [](const Kernel::V3D &Pt_a, const Kernel::V3D &Pt_b) { return Pt_a == Pt_b; });
+    // erase the tail
+    if (last != m_intersectionPointsOut.cend())
+      m_intersectionPointsOut.erase(last, m_intersectionPointsOut.cend());
+  }
+
+  // update the distance list
+  const auto origin_scaler = u_vec.scalar_prod(origin);
+  m_distancesOut.clear();
+  m_distancesOut.resize(m_intersectionPointsOut.size());
+  std::transform(m_intersectionPointsOut.begin(), m_intersectionPointsOut.end(), m_distancesOut.begin(),
+                 [&u_vec, &origin_scaler](const Kernel::V3D &Pt) { return u_vec.scalar_prod(Pt) - origin_scaler; });
 }
 
 } // namespace Mantid::Geometry
