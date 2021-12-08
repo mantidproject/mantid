@@ -69,7 +69,6 @@ public:
     }
   }
 
-
 private:
   class TestableCriticalPeakRelaxationRate : public CriticalPeakRelaxationRate {
   public:
