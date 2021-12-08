@@ -815,29 +815,24 @@ class BasicFittingModel:
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         if self.fitting_context.plot_guess_type == 'x from plot range':
-            start_x = self.current_start_x
-            end_x = self.current_end_x
-            points = 250
+            evaluate_workspace = self.current_dataset_name
         elif self.fitting_context.plot_guess_type == 'x at data points':
-            start_x = self.current_start_x
-            end_x = self.current_end_x
-            points = self.fitting_context.plot_guess_points
+            data = np.linspace(self.current_start_x, self.current_end_x, self.fitting_context.plot_guess_points)
+            CreateWorkspace(OutputWorkspace='__tmp_guess_workspace', DataX=data, DataY=data)
+            evaluate_workspace = '__tmp_guess_workspace'
         elif self.fitting_context.plot_guess_type == 'Custom x range':
-            start_x = self.fitting_context.plot_guess_start_x
-            end_x = self.fitting_context.plot_guess_end_x
-            points = self.fitting_context.plot_guess_points
+            data = np.linspace(self.fitting_context.plot_guess_start_x, self.fitting_context.plot_guess_end_x,
+                               self.fitting_context.plot_guess_points)
+            CreateWorkspace(OutputWorkspace='__tmp_guess_workspace', DataX=data, DataY=data)
+            evaluate_workspace = '__tmp_guess_workspace'
         else:
             raise ValueError('Plot guess type: ' + self.fitting_context.plot_guess_type + ' is not recognised')
 
-        data = np.linspace(start_x, end_x, points)
-        CreateWorkspace(OutputWorkspace='__tmp_guess_workspace',
-                        DataX=data,
-                        DataY=data)
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace="__tmp_guess_workspace",
+                EvaluateFunction(InputWorkspace=evaluate_workspace,
                                  Function=fit_function,
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
