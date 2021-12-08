@@ -142,6 +142,7 @@ set(TEST_PY_FILES
     results_context_test.py
     results_tab_widget/results_tab_model_test.py
     results_tab_widget/results_tab_presenter_test.py
+    selection_info/selection_info_presenter_test.py
     seq_fitting_tab_widget/seq_fitting_tab_presenter_test.py
     seq_fitting_tab_widget/sequential_table_test.py
     tf_asymmetry_fitting_context_test.py
