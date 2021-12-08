@@ -13,14 +13,14 @@ from mantid.kernel import Logger, SpecialCoordinateSystem
 
 # local imports
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
-from .model import SliceViewerModel, WS_TYPE
-from .sliceinfo import SliceInfo
+from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
+from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
-from .adsobsever import SliceViewerADSObserver
-from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
-from ..observers.observing_presenter import ObservingPresenter
-from ...interfacemanager import InterfaceManager
+from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserver
+from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
+from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
+from mantidqt.interfacemanager import InterfaceManager
 
 
 class SliceViewer(ObservingPresenter):

@@ -17,6 +17,7 @@ from mantid.geometry import IMDDimension, OrientedLattice
 from numpy.testing import assert_equal
 import numpy as np
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE, MIN_WIDTH
+from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE, MIN_WIDTH
 
 
 # Mock helpers

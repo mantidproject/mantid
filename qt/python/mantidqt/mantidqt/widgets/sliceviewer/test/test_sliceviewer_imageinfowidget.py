@@ -11,8 +11,8 @@ from sys import float_info
 import unittest
 from unittest.mock import MagicMock, patch
 
-from mantidqt.widgets.sliceviewer.imageinfowidget import ImageInfoWidget, ImageInfoTracker
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 
 
 class ImageInfoTrackerTest(unittest.TestCase):
