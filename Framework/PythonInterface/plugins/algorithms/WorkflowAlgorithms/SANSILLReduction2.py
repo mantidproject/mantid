@@ -38,7 +38,7 @@ class SANSILLReduction(PythonAlgorithm):
         return 'Performs SANS data reduction of a given process type.'
 
     def seeAlso(self):
-        return ['SANSILLIntegration']
+        return ['SANSILLMultiProcess', 'SANSILLIntegration']
 
     def name(self):
         return 'SANSILLReduction'

@@ -9,6 +9,11 @@ SANS Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New
+---
+
+- SANS reduction suite has been refactored, providing up to 2 orders of magnitude of speed-up for monochromatic and kinetic modes. The new algorithm :ref:`SANSILLMultiProcess <algm-SANSILLMultiProcess>` steers the reduction of the whole experiments, using the new version of the :ref:`SANSILLReduction <algm-SANSILLReduction-v2>`.
+
 Improvements
 ------------
 
