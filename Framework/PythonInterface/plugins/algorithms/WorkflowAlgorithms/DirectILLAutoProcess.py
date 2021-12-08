@@ -96,17 +96,22 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 issues['BeamRuns'] = run_no_err.format('EmptyContainerWorkspace', runs_container, runs_sample)
 
         grouping_err_msg = 'Only one grouping method can be specified.'
-        if self.getProperty('DetectorGrouping').isDefault:
-            if not self.getProperty('GroupPixelsBy').isDefault \
+        if self.getProperty(common.PROP_DET_GROUPING).isDefault:
+            if self.getProperty('ApplyGroupingBy').value \
                     and not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
-                issues['GroupPixelsBy'] = grouping_err_msg
+                issues['ApplyGroupingBy'] = grouping_err_msg
                 issues[common.PROP_GROUPING_ANGLE_STEP] = grouping_err_msg
         else:
-            if not self.getProperty('GroupPixelsBy').isDefault:
-                issues['DetectorGrouping'] = grouping_err_msg
-                issues['GroupPixelsBy'] = grouping_err_msg
+            if not self.getProperty(common.PROP_DET_GROUPING_BY).isDefault:
+                issues[common.PROP_DET_GROUPING] = grouping_err_msg
+                issues[common.PROP_DET_GROUPING_BY] = grouping_err_msg
+            if not self.getProperty('ApplyGroupingBy').isDefault:
+                issues[common.PROP_DET_GROUPING] = grouping_err_msg
+                issues[common.PROP_DET_HOR_GROUPING] = grouping_err_msg
+                issues[common.PROP_DET_VER_GROUPING] = grouping_err_msg
+                issues['ApplyGroupingBy'] = grouping_err_msg
             if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
-                issues['DetectorGrouping'] = grouping_err_msg
+                issues[common.PROP_DET_GROUPING] = grouping_err_msg
                 issues[common.PROP_GROUPING_ANGLE_STEP] = grouping_err_msg
 
         if not self.getProperty('VanadiumWorkspace').isDefault \
@@ -327,13 +332,20 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('ContainerMaterial', attenuation_group)
         self.setPropertyGroup('ContainerGeometry', attenuation_group)
 
-        self.declareProperty(name='DetectorGrouping',
+        self.declareProperty(name=common.PROP_DET_GROUPING,
                              defaultValue="",
                              doc='Grouping pattern to reduce the granularity of the output.')
 
-        self.declareProperty(name='GroupPixelsBy',
+        self.declareProperty(name=common.PROP_DET_GROUPING_BY,
                              defaultValue=1,
                              doc='Step to use when grouping detectors to reduce the granularity of the output.')
+
+        self.copyProperties('DirectILLCollectData', [common.PROP_DET_HOR_GROUPING, common.PROP_DET_VER_GROUPING])
+
+        self.declareProperty(name="ApplyGroupingBy",
+                             defaultValue=False,
+                             doc='Whether to apply the pixel grouping horizontally or vertically to the data, and not'
+                                 ' only to increase the statistics of the flat background calculation.')
 
         self.declareProperty(name=common.PROP_GROUPING_ANGLE_STEP,
                              defaultValue=0.0,
@@ -346,8 +358,11 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                              doc='Defines which behaviour should be used when grouping pixels.')
 
         grouping_options_group = 'Grouping options'
-        self.setPropertyGroup('DetectorGrouping', grouping_options_group)
-        self.setPropertyGroup('GroupPixelsBy', grouping_options_group)
+        self.setPropertyGroup(common.PROP_DET_GROUPING, grouping_options_group)
+        self.setPropertyGroup(common.PROP_DET_GROUPING_BY, grouping_options_group)
+        self.setPropertyGroup(common.PROP_DET_HOR_GROUPING, grouping_options_group)
+        self.setPropertyGroup(common.PROP_DET_VER_GROUPING, grouping_options_group)
+        self.setPropertyGroup('ApplyGroupingBy', grouping_options_group)
         self.setPropertyGroup(common.PROP_GROUPING_ANGLE_STEP, grouping_options_group)
         self.setPropertyGroup('GroupingBehaviour', grouping_options_group)
 
@@ -399,6 +414,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         elif not self.getProperty(common.PROP_FLAT_BKG).isDefault:
             kwargs[common.PROP_FLAT_BKG] = self.getPropertyValue(common.PROP_FLAT_BKG)
             kwargs[common.PROP_FLAT_BKG_WINDOW] = self.getPropertyValue(common.PROP_FLAT_BKG_WINDOW)
+        if not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault:
+            kwargs[common.PROP_DET_HOR_GROUPING] = self.getProperty(common.PROP_DET_HOR_GROUPING).value
+        if not self.getProperty(common.PROP_DET_VER_GROUPING).isDefault:
+            kwargs[common.PROP_DET_VER_GROUPING] = self.getProperty(common.PROP_DET_VER_GROUPING).value
         if vanadium:
             kwargs['EPPCreationMethod'] = 'Calculate EPP'
             kwargs['ElasticChannel'] = 'Elastic Channel AUTO'
@@ -450,17 +469,51 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                     Filename='{}.nxs'.format(ws_name)
                 )
 
+    def _get_grouping_pattern(self, ws):
+        """Returns a grouping pattern taking into account the requested grouping, either inside the tube, as defined
+         by grouping-by property, or horizontally (between tubes) and vertically (inside a tube).
+         The latter method can be applied only to PANTHER, SHARP, and IN5 instruments' structure."""
+        n_pixels = mtd[ws].getNumberHistograms()
+        if not self.getProperty(common.PROP_DET_GROUPING_BY).isDefault:
+            group_by = self.getProperty(common.PROP_DET_GROUPING_BY).value
+            grouping_pattern = \
+                ["{}-{}".format(pixel_id, pixel_id + group_by - 1) for pixel_id in range(0, n_pixels, group_by)]
+        else:
+            group_by_x = self.getProperty(common.PROP_DET_HOR_GROUPING).value
+            group_by_y = self.getProperty(common.PROP_DET_VER_GROUPING).value
+            n_tubes = 0
+            n_monitors = {'IN5': 1, 'PANTHER': 1, 'SHARP': 1}
+            for comp in mtd[ws].componentInfo():
+                if len(comp.detectorsInSubtree) > 1 and comp.hasParent:
+                    n_tubes += 1
+            n_tubes -= n_monitors[self.instrument]
+            if self.instrument == 'IN5':  # there is an extra bank that contains all of the tubes
+                n_tubes -= 1
+            n_pixels_per_tube = int(n_pixels / n_tubes)
+            print("N tubes:", n_tubes, 'npix/tube:', n_pixels_per_tube)
+            grouping_pattern = []
+            pixel_id = 0
+            while pixel_id < n_pixels - (group_by_x - 1) * n_pixels_per_tube:
+                pattern = []
+                for tube_shift in range(0, group_by_x):
+                    numeric_pattern = list(range(pixel_id + tube_shift * n_pixels_per_tube,
+                                                 pixel_id + tube_shift * n_pixels_per_tube + group_by_y))
+                    pattern.append('+'.join(map(str, numeric_pattern)))
+                pattern = "+".join(pattern)
+                grouping_pattern.append(pattern)
+                pixel_id += group_by_y
+                if pixel_id % n_pixels_per_tube == 0:
+                    pixel_id += n_pixels_per_tube * (group_by_x - 1)
+
+        return ",".join(grouping_pattern)
+
     def _group_detectors(self, ws_list):
         """Groups detectors for workspaces in the provided list according to the defined grouping pattern."""
         grouping_pattern = None
-        if not self.getProperty('DetectorGrouping').isDefault:
-            grouping_pattern = self.getProperty('DetectorGrouping').value
-        elif not self.getProperty('GroupPixelsBy').isDefault:
-            group_by = self.getProperty('GroupPixelsBy').value
-            if group_by > 1:
-                n_pixels = mtd[ws_list[0]].getNumberHistograms()
-                grouping_pattern = ",".join(
-                    ["{}-{}".format(pixel_id, pixel_id + group_by - 1) for pixel_id in range(0, n_pixels, group_by)])
+        if not self.getProperty(common.PROP_DET_GROUPING).isDefault:
+            grouping_pattern = self.getProperty(common.PROP_DET_GROUPING).value
+        elif not self.getProperty(common.PROP_DET_GROUPING_BY).isDefault or self.getProperty('ApplyGroupingBy').value:
+            grouping_pattern = self._get_grouping_pattern(ws_list[0])
         if grouping_pattern is not None:
             for ws in ws_list:
                 GroupDetectors(InputWorkspace=ws, OutputWorkspace=ws,
