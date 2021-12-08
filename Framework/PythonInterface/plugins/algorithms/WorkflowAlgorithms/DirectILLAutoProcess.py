@@ -153,8 +153,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                                         OutputWorkspace=self.elastic_channel_ws)
             self.to_clean.append(self.elastic_channel_ws)
         if (self.getProperty('MaskWorkspace').isDefault and self.getProperty('MaskedTubes').isDefault
-                and self.getProperty('MaskThreshold').isDefault and self.getProperty('MaskedAngles').isDefault
-                and self.getProperty('MaskWithVanadium').isDefault):
+                and self.getProperty('MaskThresholdMin').isDefault and self.getProperty('MaskThresholdMax').isDefault
+                and self.getProperty('MaskedAngles').isDefault and self.getProperty('MaskWithVanadium').isDefault):
             self.masking = False
         else:
             self.masking = True
