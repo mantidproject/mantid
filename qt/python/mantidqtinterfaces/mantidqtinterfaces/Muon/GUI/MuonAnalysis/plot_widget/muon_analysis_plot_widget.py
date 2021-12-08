@@ -11,6 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_model import PlotDataPaneModel
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_view import PlotDataPaneView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_presenter import PlotDataPanePresenter
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.selection_info_presenter import SelectionInfoPresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view import BasePaneView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.model_fit_pane.plot_model_fit_pane_presenter import PlotModelFitPanePresenter
@@ -108,6 +109,7 @@ class MuonAnalysisPlotWidget(object):
         self.data_model = PlotDataPaneModel(self._context)
         # names need to match the model for the use outside of this file
         name = self.data_model.name
+        selection_info = SelectionInfoPresenter(context=self._context, parent=self._parent)
         self.plotting_canvas_widgets[name] = PlottingCanvasWidget(self._parent, context=
                                                                         self._context.plot_panes_context[name],
                                                                         plot_model=self.data_model)
@@ -115,7 +117,8 @@ class MuonAnalysisPlotWidget(object):
         self._views[name].add_canvas_widget(self.plotting_canvas_widgets[name].widget)
 
         self.modes[DATA] = PlotDataPanePresenter(self._views[name], self.data_model,
-                                                 self._context,self.plotting_canvas_widgets[name].presenter)
+                                                 self._context,self.plotting_canvas_widgets[name].presenter,
+                                                 selection_info)
         self._panes.append(self.modes[DATA])
 
     @property

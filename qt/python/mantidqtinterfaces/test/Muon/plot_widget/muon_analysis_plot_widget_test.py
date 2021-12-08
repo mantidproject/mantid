@@ -13,7 +13,8 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.raw_pane.raw_pane_view impor
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_presenter import MainPlotWidgetPresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_widget import PlottingCanvasWidget
-
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_view import PlotDataPaneView
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.selection_info_presenter import SelectionInfoPresenter
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
@@ -42,17 +43,23 @@ class MuonAnalysisPlotWidgetTest(unittest.TestCase):
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.MainPlotWidgetView')
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlottingCanvasWidget')
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.BasePaneView')
-    def setUp(self, mock_base_view, mock_plot_canvas, mock_main_view):
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.SelectionInfoPresenter')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlotDataPaneView')
+    def setUp(self, mock_data_view, mock_selection, mock_base_view, mock_plot_canvas, mock_main_view):
         self.mock_main_view = mock_main_view
         self.mock_base_view = mock_base_view
         self.mock_plot_canvas = mock_plot_canvas
+        self.mock_selection = mock_selection
+        self.mock_data_view = mock_data_view
         self.canvas ={}
         self._num_count=0
         self._letter_count=0
 
         self.mock_main_view.return_value = mock.MagicMock(autospec=MainPlotWidgetView)
         self.mock_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
+        self.mock_data_view.return_value = mock.MagicMock(autospec=PlotDataPaneView)
         self.mock_plot_canvas.side_effect = self.canvas_mocks
+        self.mock_selection.return_value = mock.Mock()
 
         self.context = setup_context(False)
         self.widget = MuonAnalysisPlotWidget(self.context)
@@ -62,7 +69,9 @@ class MuonAnalysisPlotWidgetTest(unittest.TestCase):
 
         # check we have correct number of canvases, views etc.
         self.assertEqual(self.mock_plot_canvas.call_count,2)
-        self.assertEqual(self.mock_base_view.call_count,2)
+        self.assertEqual(self.mock_base_view.call_count,1)
+        self.assertEqual(self.mock_data_view.call_count,1)
+        self.assertEqual(self.mock_selection.call_count,1)
 
         # check panes have been added, its just a list
         self.assertEqual(len(self.widget._panes),2)
@@ -106,15 +115,21 @@ class MuonAnalysisPlotWidgetTest(unittest.TestCase):
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlottingCanvasWidget')
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.BasePaneView')
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.RawPaneView')
-    def add_all_panes(self, mock_raw_view, mock_base_view, mock_plot_canvas, mock_main_view):
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.SelectionInfoPresenter')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlotDataPaneView')
+    def add_all_panes(self,mock_data_view, mock_selection, mock_raw_view, mock_base_view, mock_plot_canvas, mock_main_view):
         self.mock_main_view = mock_main_view
         self.mock_base_view = mock_base_view
         self.mock_raw_view = mock_raw_view
         self.mock_plot_canvas = mock_plot_canvas
+        self.mock_selection = mock_selection
+        self.mock_data_view = mock_data_view
 
         self.mock_main_view.return_value = mock.MagicMock(autospec=MainPlotWidgetView)
         self.mock_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
         self.mock_raw_view.return_value = mock.MagicMock(autospec=RawPaneView)
+        self.mock_data_view.return_value = mock.MagicMock(autospec=PlotDataPaneView)
+        self.mock_selection.return_value = mock.MagicMock(autospec=SelectionInfoPresenter)
         self.mock_plot_canvas.side_effect = self.canvas_mocks
 
         # can exclude the defaults (data and fit)

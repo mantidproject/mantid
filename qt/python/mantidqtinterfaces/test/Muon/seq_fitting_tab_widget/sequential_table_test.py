@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import (QSequentialTableModel, default_table_columns,
-                                                                                             FIT_STATUS_COLUMN, FIT_QUALITY_COLUMN,
-                                                                                             GROUP_COLUMN, RUN_COLUMN, WORKSPACE_COLUMN)
+                                                                                             FIT_STATUS_COLUMN, FIT_QUALITY_COLUMN)
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.QSelectionTableModel import (GROUP_COLUMN, RUN_COLUMN, WORKSPACE_COLUMN)
 from mantidqt.utils.testing.mocks.mock_sequentialtable import MockSequentialTableModel, MockSequentialTableView
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableWidget import SequentialTableWidget
 from mantidqt.utils.testing.mocks.mock_qt import MockQModelIndex

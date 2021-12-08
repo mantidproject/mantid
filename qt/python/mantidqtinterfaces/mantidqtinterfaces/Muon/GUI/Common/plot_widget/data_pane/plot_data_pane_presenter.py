@@ -11,12 +11,12 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.selection_inf
 
 class PlotDataPanePresenter(BasePanePresenter):
 
-    def __init__(self, view, model, context,figure_presenter):
+    def __init__(self, view, model, context, figure_presenter, selection_info=None):
         super().__init__(view, model, context,figure_presenter)
         self._data_type = ["Asymmetry", "Counts"]
         self._sort_by = ["Group/Pair", "Run"]
         # the model has a full context and the presenter does not
-        self.selection_info = SelectionInfoPresenter(context=self._model.context,parent=self._view)
+        self.selection_info = selection_info if selection_info else SelectionInfoPresenter(context=self._model.context,parent=self._view)
         self.update_view()
         self._view.set_select_plot_slot(self.selection_popup)
         self._view.enable_plot_type_combo()
@@ -30,7 +30,7 @@ class PlotDataPanePresenter(BasePanePresenter):
     def plot_selection_changed(self):
         lines_to_plot = self.selection_info.get_selection()
         if lines_to_plot:
-            self.add_list_to_plot(lines_to_plot.keys(), lines_to_plot.values(), hold=False, autoscale=True)
+            self.add_list_to_plot(list(lines_to_plot.keys()), list(lines_to_plot.values()), hold=False, autoscale=True)
 
     def handle_data_type_changed(self):
         """
@@ -75,7 +75,7 @@ class PlotDataPanePresenter(BasePanePresenter):
 
     def plot_lines(self, lines_to_plot, autoscale, hold_on):
         if lines_to_plot:
-            self.add_list_to_plot(lines_to_plot.keys(), lines_to_plot.values(), hold=hold_on, autoscale=autoscale)
+            self.add_list_to_plot(list(lines_to_plot.keys()), list(lines_to_plot.values()), hold=hold_on, autoscale=autoscale)
 
     def handle_added_or_removed_group_or_pair_to_plot(self, group_pair_info):
         """
