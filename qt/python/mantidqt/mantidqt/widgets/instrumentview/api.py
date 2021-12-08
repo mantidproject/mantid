@@ -8,6 +8,8 @@
 #
 
 import functools
+from qtpy.QtCore import Qt
+
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.utils.qt.qappthreadcall import force_method_calls_to_qapp_thread
@@ -22,11 +24,12 @@ def safe_qthread(func):
     return _wrapped
 
 
-def get_instrumentview(workspace, wait=True, window_flags=None):
+def get_instrumentview(workspace, wait=True, window_flags=Qt.Window):
     """Return a handle to the instrument view of given workspace
-    :param ws: input workspace
+    :param workspace: input workspace
+    :param window_flags: the flags defining the behavior of the window
     """
-    def _wrappper(ws, window_flags=None):
+    def _wrappper(ws, window_flags=Qt.Window):
         return force_method_calls_to_qapp_thread(InstrumentViewPresenter(ws, None, window_flags))
 
     # need to do some duck-typing here
