@@ -562,10 +562,11 @@ FIT/CENTRE t1 t2
 This command was used to specify a time window within which
 the 'prompt spike' could be found in *detector* spectra. This
 information was used to remove the spike by interpolating
-along the time-of-flight distribution. Also see
-FIT/MONITOR t1 t2.
+along the time-of-flight distribution. Also see :ref:`fit_monitor-ref`.
 
 Times were specified in microseconds.
+
+**This command was never implemented in Mantid (but was in COLETTE)!**
 
 **Existing Example**
 
@@ -599,6 +600,8 @@ command applied to the "rear" detector.
 
 Unsupported
 
+.. _fit_monitor-ref:
+
 FIT/MONITOR t1 t2
 -----------------
 
@@ -608,9 +611,6 @@ information was used to remove the spike by interpolating
 along the time-of-flight distribution. Also see :ref:`fit_centre-ref`.
 
 Times were specified in microseconds.
-
-Note: This command was only ever enabled in the data reduction
-source code for the LOQ instrument.
 
 **Replacement**
 
