@@ -85,6 +85,7 @@ private:
   void setWorkspaceName(const API::MatrixWorkspace_sptr &ws, std::string wsName);
   std::unique_ptr<Mantid::HistogramData::Histogram> createInvPOfQHistogram(int expectedSize);
   void prepareCumulativeProbForQ(HistogramData::Histogram &QSQ, double kinc, HistogramData::Histogram &PInvOfQ);
+  void getXMinMax(Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   std::unique_ptr<Mantid::HistogramData::Histogram> prepareQSQ(double kinc);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;

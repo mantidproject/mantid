@@ -174,6 +174,30 @@ std::map<std::string, std::string> DiscusMultipleScatteringCorrection::validateI
   return issues;
 }
 
+void DiscusMultipleScatteringCorrection::getXMinMax(Mantid::API::MatrixWorkspace &ws, double &xmin,
+                                                    double &xmax) const {
+  // set to crazy values to start
+  xmin = std::numeric_limits<double>::max();
+  xmax = -1.0 * xmin;
+  size_t numberOfSpectra = ws.getNumberHistograms();
+
+  // determine the data range - only return min > 0. Bins with x=0 will be skipped later on
+  for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++) {
+    const auto &dataX = ws.x(workspaceIndex);
+    const double xfront = dataX.front();
+    const double xback = dataX.back();
+    if (std::isnormal(xfront) && std::isnormal(xback)) {
+      if (xfront < xmin)
+        xmin = xfront;
+      if (xback > xmax)
+        xmax = xback;
+    }
+  }
+  // workspace not partitioned at this point so don't replicate code using m_indexInfo->communicator
+  if (xmin > xmax)
+    throw std::runtime_error("Unable to determine min and max x values for workspace");
+}
+
 /**
  * Execution code
  */
@@ -201,7 +225,7 @@ void DiscusMultipleScatteringCorrection::exec() {
     m_sigmaSS = std::make_shared<HistogramData::Histogram>(sigmaSSWS->histogram(0));
 
   double lambdamin, lambdamax;
-  inputWS->getXMinMax(lambdamin, lambdamax);
+  getXMinMax(*inputWS, lambdamin, lambdamax);
   m_SQHist = std::make_shared<HistogramData::Histogram>(SQWS->histogram(0));
   auto QSQHist = prepareQSQ(2 * M_PI / lambdamin);
 
@@ -293,6 +317,11 @@ void DiscusMultipleScatteringCorrection::exec() {
         invPOfQ = createInvPOfQHistogram(QSQHist->size());
 
       for (size_t bin = 0; bin < nbins; bin += lambdaStepSize) {
+        if (lambdas[bin] <= 0) {
+          g_log.warning("Skipping calculation for bin with lambda<=0, workspace index=" + std::to_string(i) +
+                        " bin index=" + std::to_string(bin));
+          continue;
+        }
         const double kinc = 2 * M_PI / lambdas[bin];
 
         if (m_importanceSampling)
