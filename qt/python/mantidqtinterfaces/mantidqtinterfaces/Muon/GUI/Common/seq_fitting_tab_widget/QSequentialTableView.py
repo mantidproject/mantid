@@ -9,6 +9,7 @@ from qtpy.QtCore import Qt, Signal
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import FIT_STATUS_COLUMN, NUM_DEFAULT_COLUMNS
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.selection_info.QSelectionTableView import QSelectionTableView
+from mantidqtinterfaces.Muon.GUI.Common.utilities.table_utils import DoubleItemDelegate
 
 
 class QSequentialTableView(QSelectionTableView):
@@ -22,3 +23,17 @@ class QSequentialTableView(QSelectionTableView):
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setAlternatingRowColors(True)
+
+    def resizeColumnsToContents(self):
+        if self.model() is None:
+            return
+        for col in range(self.model().columnCount()):
+            if col == 0:
+                self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.Stretch)
+            elif col > NUM_DEFAULT_COLUMNS-1:
+                self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
+                self.setItemDelegateForColumn(col, DoubleItemDelegate(self))
+
+            else:
+                self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
+            super(QSequentialTableView, self).resizeColumnsToContents()
