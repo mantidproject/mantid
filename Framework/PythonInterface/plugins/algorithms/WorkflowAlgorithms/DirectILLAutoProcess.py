@@ -162,7 +162,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
-        if self.vanadium:
+        if self.vanadium != str():
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
         self.save_output = self.getProperty('SaveOutput').value
         self.clear_cache = self.getProperty('ClearCache').value
@@ -590,7 +590,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         :return: Either normalised sample or the input, if vanadium is not provided
         """
         normalised_ws = '{}_norm'.format(numor)
-        if self.vanadium_integral != list():
+        if self.vanadium_integral and self.vanadium_integral != list():
             nintegrals = len(self.vanadium_integral)
             vanadium_no = sample_no
             if nintegrals == 1:
@@ -604,7 +604,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             )
         else:
             normalised_ws = sample_ws
-            self.log().warning("Vanadium integral workspace not found.")
+            self.log().warning("Vanadium integral workspace not found.\nData will not be normalised to vanadium.")
 
         return normalised_ws
 
