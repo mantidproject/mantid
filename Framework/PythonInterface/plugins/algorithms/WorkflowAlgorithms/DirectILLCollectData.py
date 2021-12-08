@@ -14,7 +14,8 @@ from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedVa
                            IntMandatoryValidator, Property, StringListValidator, UnitConversion)
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
-                              FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale, SetInstrumentParameter)
+                              FindEPP, GetEiMonDet, GroupDetectors, LoadAndMerge, LoadEmptyInstrument, Minus, mtd,
+                              NormaliseToMonitor, Scale, SetInstrumentParameter)
 import numpy
 
 _MONSUM_LIMIT = 100
@@ -167,6 +168,32 @@ def _monitorCounts(ws):
         return logs.getProperty('monitor1.monsum').value
     else:
         return logs.getProperty('monitor.monsum').value
+
+
+def _get_instrument_structure(ws):
+    """Returns the number of detectors and the number of detectors per tube in the currently processed
+    instrument."""
+    instrument = ws.getInstrument().getName()
+    if instrument in ['IN4', 'IN6']:
+        self.log.warning("Grouping pattern cannot be provided for IN4 and IN6.")
+        return ""
+    tmp_inst = '{}_tmp'.format(instrument)
+    LoadEmptyInstrument(InstrumentName=instrument, OutputWorkspace=tmp_inst)
+    tmp_mon_inst = 'mon_{}'.format(tmp_inst)
+    ExtractMonitors(InputWorkspace=tmp_inst, DetectorWorkspace=tmp_inst, MonitorWorkspace=tmp_mon_inst)
+    n_monitors = mtd[tmp_mon_inst].getNumberHistograms()
+    n_tubes = 0
+    for comp in mtd[tmp_inst].componentInfo():
+        if len(comp.detectorsInSubtree) > 1 and comp.hasParent:
+            n_tubes += 1
+    n_tubes -= n_monitors
+    if instrument == 'IN5':  # there is an extra bank that contains all of the tubes
+        n_tubes -= 1
+    n_pixels = mtd[tmp_inst].getNumberHistograms()
+    n_pixels_per_tube = int(n_pixels / n_tubes)
+    DeleteWorkspace(Workspace=tmp_inst)
+    DeleteWorkspace(Workspace=tmp_mon_inst)
+    return n_pixels, n_pixels_per_tube
 
 
 def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd,
@@ -466,6 +493,16 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             optional=PropertyMode.Optional),
             doc='Workspace with previously determined flat background data.')
         self.setPropertyGroup(common.PROP_FLAT_BKG_WS, PROPGROUP_FLAT_BKG)
+        self.declareProperty(name=common.PROP_DET_HOR_GROUPING,
+                             defaultValue=1,
+                             doc='Step to use when grouping detectors horizontally (between tubes) to increase'
+                                 ' the statistics for flat background calculation.')
+        self.setPropertyGroup(common.PROP_DET_HOR_GROUPING, PROPGROUP_FLAT_BKG)
+        self.declareProperty(name=common.PROP_DET_VER_GROUPING,
+                             defaultValue=1,
+                             doc='Step to use when grouping detectors vertically (inside the same tube)'
+                                 ' to increase the statistics for flat background calculation.')
+        self.setPropertyGroup(common.PROP_DET_VER_GROUPING, PROPGROUP_FLAT_BKG)
         self.declareProperty(name=common.PROP_NORMALISATION,
                              defaultValue=common.NORM_METHOD_MON,
                              validator=StringListValidator([
@@ -703,7 +740,18 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             self._cleanup.protect(bkgWS)
         else:
             windowWidth = self.getProperty(common.PROP_FLAT_BKG_WINDOW).value
-            bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, self._names, self._subalgLogging)
+            if not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault \
+                    or not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault:
+                grouping_pattern = self._get_grouping_pattern(mainWS)
+                flatInputWS = self._group_detectors(mainWS, grouping_pattern)
+                flatOutputWS = _createFlatBkg(flatInputWS, common.WS_CONTENT_DETS, windowWidth,
+                                              self._names, self._subalgLogging)
+                bkgWS = self._ungroup_detectors(input_ws=flatOutputWS, ws_to_match=mainWS,
+                                                grouping_pattern=grouping_pattern)
+                self._cleanup.cleanup(flatInputWS)
+                self._cleanup.cleanup(flatOutputWS)
+            else:
+                bkgWS = _createFlatBkg(mainWS, common.WS_CONTENT_DETS, windowWidth, self._names, self._subalgLogging)
         if not self.getProperty(common.PROP_OUTPUT_FLAT_BKG_WS).isDefault:
             self.setProperty(common.PROP_OUTPUT_FLAT_BKG_WS, bkgWS)
         bkgScaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
@@ -737,6 +785,58 @@ class DirectILLCollectData(DataProcessorAlgorithm):
         self._cleanup.cleanup(monBkgWS)
         self._cleanup.cleanup(monWS)
         return bkgSubtractedMonWS
+
+    def _get_grouping_pattern(self, ws):
+        """Returns a grouping pattern taking into account requested grouping horizontally (between tubes) and vertically
+        (inside a tube). This method can be applied to PANTHER, SHARP, and IN5 instrument structure."""
+
+        group_by_x = self.getProperty(common.PROP_DET_HOR_GROUPING).value
+        group_by_y = self.getProperty(common.PROP_DET_VER_GROUPING).value
+        n_pixels, n_pixels_per_tube = _get_instrument_structure(ws)
+        grouping_pattern = []
+        pixel_id = 0
+        while pixel_id < n_pixels - (group_by_x - 1) * n_pixels_per_tube:
+            pattern = []
+            for tube_shift in range(0, group_by_x):
+                numeric_pattern = list(range(pixel_id + tube_shift * n_pixels_per_tube,
+                                             pixel_id + tube_shift * n_pixels_per_tube + group_by_y))
+                pattern.append('+'.join(map(str, numeric_pattern)))
+            pattern = "+".join(pattern)
+            grouping_pattern.append(pattern)
+            pixel_id += group_by_y
+            if pixel_id % n_pixels_per_tube == 0:
+                pixel_id += n_pixels_per_tube * (group_by_x - 1)
+
+        return ",".join(grouping_pattern)
+
+    @staticmethod
+    def _group_detectors(input_ws, grouping_pattern):
+        """Groups detectors of the input workspace according to the provided pattern and returns
+        the name of the grouped workspace."""
+        output_ws = f'{input_ws}_grouped'
+        GroupDetectors(InputWorkspace=input_ws, OutputWorkspace=output_ws,
+                       GroupingPattern=grouping_pattern, Behaviour='Average')
+        return output_ws
+
+    @staticmethod
+    def _ungroup_detectors(input_ws, ws_to_match, grouping_pattern):
+        """Assigns Y-axis values of grouped detectors back to the original (ungrouped) detectors."""
+        output_ws = f'{input_ws}_ungrouped'
+        CreateWorkspace(
+            DataX=ws_to_match.readX(0)[0]*ws_to_match.getNumberHistograms(),
+            DataY=numpy.full(shape=(ws_to_match.getNumberHistograms()), fill_value=0.0, dtype='float64'),
+            Nspec=ws_to_match.getNumberHistograms(),
+            ParentWorkspace=ws_to_match,
+            UnitX=ws_to_match.getAxis(0).getUnit().unitID(),
+            OutputWorkspace=output_ws
+        )
+        for group_no, grouped_detectors in enumerate(grouping_pattern.split(',')):
+            det_list = list(map(int, grouped_detectors.split('+')))
+            det_grouped_val = input_ws.readY(group_no)
+            for det_no in det_list:
+                mtd[output_ws].setY(det_no, det_grouped_val)
+
+        return output_ws
 
     def _inputWS(self):
         """Return the raw input workspace."""
