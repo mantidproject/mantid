@@ -19,10 +19,10 @@ matplotlib.use('Agg')
 # Mock out simpleapi to import expensive import of something we don't use anyway
 sys.modules['mantid.simpleapi'] = mock.MagicMock()
 
-from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE  # noqa: E402
-from mantidqt.widgets.sliceviewer.presenter import (  # noqa: E402
+from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import (  # noqa: E402
     PeaksViewerCollectionPresenter, SliceViewer)
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform  # noqa: E402
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView  # noqa: E402

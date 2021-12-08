@@ -11,7 +11,7 @@ from unittest import mock
 from unittest.mock import MagicMock, call, patch
 
 # 3rd party imports
-from mantidqt.widgets.sliceviewer.lineplots import LinePlots, PixelLinePlot
+from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots, PixelLinePlot
 from mantidqt.utils.testing.compare import ArraysEqual
 
 from matplotlib.figure import SubplotParams

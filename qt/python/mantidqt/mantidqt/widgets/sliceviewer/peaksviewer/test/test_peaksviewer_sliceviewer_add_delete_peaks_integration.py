@@ -12,7 +12,7 @@ from unittest.mock import Mock
 import matplotlib
 matplotlib.use("agg")
 
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer  # noqa: E402
 from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
 from mantid.simpleapi import CreatePeaksWorkspace, CreateMDWorkspace, SetUB, mtd  # noqa: E402
 import numpy as np  # noqa: E402

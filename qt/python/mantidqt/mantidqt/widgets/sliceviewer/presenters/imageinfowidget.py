@@ -16,7 +16,7 @@ from matplotlib.image import AxesImage
 from matplotlib.transforms import Bbox
 
 from .lineplots import CursorTracker, cursor_info
-from .transform import NonOrthogonalTransform
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 
 # Constants
 DBLMAX = sys.float_info.max

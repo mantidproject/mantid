@@ -17,11 +17,11 @@ from mantid.plots import get_normalize_by_bin_width
 from mantid.plots.axesfunctions import _pcolormesh_nonortho as pcolormesh_nonorthogonal
 from mantid.plots.resampling_image import samplingimage
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from mantidqt.widgets.sliceviewer.imageinfowidget import ImageInfoWidget, ImageInfoTracker
-from mantidqt.widgets.sliceviewer.lineplots import LinePlots
+from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
+from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots
 from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
 from mantidqt.widgets.sliceviewer.views.toolbar import SliceViewerNavigationToolbar, ToolItemText
-from mantidqt.widgets.sliceviewer.zoom import ScrollZoomMixin
+from mantidqt.widgets.sliceviewer.presenters.zoom import ScrollZoomMixin
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 
 DBLMAX = sys.float_info.max
