@@ -44,32 +44,6 @@ def split_into_tof_d_spacing_groups(run_details, processed_spectra):
     return d_spacing_group, tof_group
 
 
-# def convert_to_tof_d_spacing(run_details, processed_spectrum):
-#     """
-#     Splits a processed list containing all focused banks into TOF and
-#     d-spacing groups. It also sets the names of the output workspaces
-#     to the run number(s) - Result<Unit>-<Bank Number> e.g.
-#     123-130-ResultTOF-3
-#     :param run_details: The run details associated with this run
-#     :param processed_spectrum: A list containing workspaces, one entry per focused bank.
-#     :return: A workspace group for dSpacing and TOF in that order
-#     """
-#
-#     if processed_spectrum.getNumberHistograms() > 1:
-#         return
-#
-#     run_number = str(run_details.output_run_string)
-#     ext = run_details.file_extension if run_details.file_extension else ""
-#     d_spacing_out_name = run_number + ext + "-ResultD"
-#     tof_out_name = run_number + ext + "-ResultTOF"
-#
-#     d_spacing_output = mantid.ConvertUnits(InputWorkspace=processed_spectrum,
-#                                            OutputWorkspace=d_spacing_out_name, Target="dSpacing")
-#     tof_output = mantid.ConvertUnits(InputWorkspace=processed_spectrum,
-#                                      OutputWorkspace=tof_out_name, Target="TOF")
-#     return d_spacing_output, tof_output
-
-
 def save_focused_data(d_spacing_group, tof_group, output_paths):
     """
     Saves out focused data into nxs, GSAS and .dat formats. Requires the grouped workspace

@@ -37,13 +37,12 @@ class Polaris(AbstractInst):
                            do_absorb_corrections=self._inst_settings.do_absorb_corrections,
                            sample_details=self._sample_details, placzek_run_number=self._inst_settings.run_number)
 
-    def create_vanadium(self, **kwargs):
+    def create_vanadium(self, do_placzek=False, **kwargs):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
-        # import pydevd_pycharm
-        # pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
         vanadium_d = self._create_vanadium(run_number_string=self._inst_settings.run_in_range,
-                                           do_absorb_corrections=self._inst_settings.do_absorb_corrections)
+                                           do_absorb_corrections=self._inst_settings.do_absorb_corrections,
+                                           do_placzek=do_placzek)
 
         run_details = self._get_run_details(run_number_string=self._inst_settings.run_in_range)
         polaris_algs.save_unsplined_vanadium(vanadium_ws=vanadium_d,
@@ -102,11 +101,8 @@ class Polaris(AbstractInst):
         return cropped_ws
 
     def _crop_van_to_expected_tof_range(self, van_ws_to_crop):
-        # import pydevd_pycharm
-        # pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
         cropped_ws = common.crop_banks_using_crop_list(bank_list=van_ws_to_crop,
                                                        crop_values_list=self._inst_settings.van_crop_values)
-        # This is my current problem: self._inst_settings.van_crop_values has only 5 spectra
         return cropped_ws
 
     @staticmethod

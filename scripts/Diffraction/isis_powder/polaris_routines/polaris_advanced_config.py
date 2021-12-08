@@ -29,7 +29,7 @@ file_names = {
 
 script_params = {
     "raw_data_cropping_values": (750, 20000),
-    "spline_coefficient": 100,
+    "spline_coefficient": 10,
 }
 
 pdf_focused_cropping_values = [
@@ -58,7 +58,6 @@ focused_bin_widths = [
     -0.0005,  # Bank 5
 ]
 
-# vanadium cropping values are here!
 vanadium_cropping_values = [
     (600, 31000),  # Bank 1
     (1000, 24950),  # Bank 2

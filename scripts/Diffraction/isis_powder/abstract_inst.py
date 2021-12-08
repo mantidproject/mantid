@@ -49,7 +49,7 @@ class AbstractInst(object):
     def user_name(self):
         return self._user_name
 
-    def _create_vanadium(self, run_number_string, do_absorb_corrections):
+    def _create_vanadium(self, run_number_string, do_absorb_corrections, do_placzek):
         """
         Creates a vanadium calibration - should be called by the concrete instrument
         :param run_number_string : The user input string for any run within the cycle
@@ -59,11 +59,14 @@ class AbstractInst(object):
         """
         self._is_vanadium = True
         run_details = self._get_run_details(run_number_string)
-        # Daniel is hard coding his function here but there should be an if statement based on the
-        # placzek_run_number bool in focus.py
-        return calibrate.create_van_per_detector(instrument=self,
-                                                 run_details=run_details,
-                                                 absorb=do_absorb_corrections)
+        if do_placzek:
+            return calibrate.create_van_per_detector(instrument=self,
+                                                     run_details=run_details,
+                                                     absorb=do_absorb_corrections)
+        else:
+            return calibrate.create_van(instrument=self,
+                                        run_details=run_details,
+                                        absorb=do_absorb_corrections)
 
     def _focus(self,
                run_number_string,

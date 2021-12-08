@@ -113,52 +113,30 @@ def create_van_per_detector(instrument, run_details, absorb):
     if solid_angle:
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
-    # focused_vanadium = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
-    #                                                GroupingFileName=run_details.grouping_file_path)
+
     # convert back to TOF based on engineered detector positions
     mantid.ApplyDiffCal(InstrumentWorkspace=aligned_ws,
                         ClearCalibration=True)
-    ### focused_spectra = common.extract_ws_spectra(aligned_ws)
-    # focused_spectra = common.crop_in_tof(ws_to_crop=focused_spectra, x_min=600, x_max=31000)
-    # focused_spectra = instrument._crop_van_to_expected_tof_range(focused_spectra)
+    run_number = str(run_details.output_run_string)
+    ext = run_details.file_extension if run_details.file_extension else ""
+    d_spacing_out_name = run_number + ext + "-ResultD"
+    tof_out_name = run_number + ext + "-ResultTOF"
 
-    from mantid.api import MatrixWorkspace
-    if isinstance(aligned_ws, MatrixWorkspace):
-
-        run_number = str(run_details.output_run_string)
-        ext = run_details.file_extension if run_details.file_extension else ""
-        d_spacing_out_name = run_number + ext + "-ResultD"
-        tof_out_name = run_number + ext + "-ResultTOF"
-
-        d_spacing_group = mantid.ConvertUnits(InputWorkspace=aligned_ws,
-                                              OutputWorkspace=d_spacing_out_name, Target="dSpacing")
-        tof_group = mantid.ConvertUnits(InputWorkspace=aligned_ws,
-                                        OutputWorkspace=tof_out_name, Target="TOF")
-        _create_vanadium_splines_one_ws(aligned_ws, instrument, run_details)
-
-    else:
-        d_spacing_group, tof_group = instrument._output_focused_ws(processed_spectra=aligned_ws,
-                                                                   run_details=run_details)
-        _create_vanadium_splines(aligned_ws, instrument, run_details)
+    d_spacing_group = mantid.ConvertUnits(InputWorkspace=aligned_ws,
+                                          OutputWorkspace=d_spacing_out_name, Target="dSpacing")
+    tof_group = mantid.ConvertUnits(InputWorkspace=aligned_ws,
+                                    OutputWorkspace=tof_out_name, Target="TOF")
+    _create_vanadium_splines_one_ws(aligned_ws, instrument, run_details)
 
     common.keep_single_ws_unit(d_spacing_group=d_spacing_group, tof_group=tof_group,
                                unit_to_keep=instrument._get_unit_to_keep())
-
     common.remove_intermediate_workspace(corrected_van_ws)
-    common.remove_intermediate_workspace(aligned_ws)
-    # common.remove_intermediate_workspace(focused_vanadium)
-    # common.remove_intermediate_workspace(focused_spectra)
 
     return d_spacing_group
 
 
 def _create_vanadium_splines(focused_spectra, instrument, run_details):
     splined_ws_list = instrument._spline_vanadium_ws(focused_spectra)
-
-    # mantid.MaskBins(InputWorkspace=output_workspaces[ws_index],
-    #                 OutputWorkspace=output_name,
-    #                 XMin=mask_params[0], XMax=mask_params[1])
-
     out_spline_van_file_path = run_details.splined_vanadium_file_path
     append = False
     for ws in splined_ws_list:
@@ -173,7 +151,10 @@ def _create_vanadium_splines(focused_spectra, instrument, run_details):
     mantid.GroupWorkspaces(InputWorkspaces=splined_ws_list, OutputWorkspace=group_name)
 
 
-def _create_vanadium_splines_one_ws(ws, instrument, run_details):
+def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
+    mantid.ExtractMonitors(InputWorkspace=vanadium_splines,
+                           DetectorWorkspace="vanadium_splines",
+                           MonitorWorkspace="vanadium_monitors")
 
     if instrument._inst_settings.masking_file_name is not None:
         import os
@@ -182,18 +163,12 @@ def _create_vanadium_splines_one_ws(ws, instrument, run_details):
         bragg_mask_list = common.read_masking_file(masking_file_path)
         for bank in bragg_mask_list:
             for mask_params in bank:
-                ws = mantid.MaskBins(InputWorkspace=ws, XMin=mask_params[0], XMax=mask_params[1])
-    out_name = "spline_full"
-    out_name = mantid.ConvertUnits(InputWorkspace=ws, Target="TOF", OutputWorkspace=out_name)
-    # out_name = mantid.ReplaceSpecialValues(InputWorkspace=out_name, NaNValue=0, InfinityValue=0)
-    out_name = mantid.RemoveMaskedSpectra(InputWorkspace=out_name)
-    out_name = mantid.ExtractMonitors(InputWorkspace=out_name,
-                                      DetectorWorkspace=out_name,
-                                      MonitorWorkspace="out_name_monitors")
-    mantid.SaveNexus(Filename='/home/danielmurphy/Desktop/input_to_SplineBackground.nxs', InputWorkspace=out_name)
-    for ws_index in range(out_name.getNumberHistograms()):
-        mantid.SplineBackground(InputWorkspace=out_name, OutputWorkspace=out_name,
-                                WorkspaceIndex=ws_index, NCoeff=instrument._inst_settings.spline_coeff)
+                vanadium_splines = mantid.MaskBins(InputWorkspace="vanadium_splines", XMin=mask_params[0], XMax=mask_params[1])
+    vanadium_splines.clearMonitorWorkspace()
+    out_name = "van_{}".format(run_details.vanadium_run_numbers)
+    out_name = mantid.ConvertUnits(InputWorkspace=vanadium_splines, Target="TOF", OutputWorkspace=out_name)
+    out_name = mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,
+                                       EndWorkspaceIndex=out_name.getNumberHistograms()-1,
+                                       NCoeff=instrument._inst_settings.spline_coeff)
     out_spline_van_file_path = run_details.splined_vanadium_file_path
-    out_spline_van_file_path = '/home/danielmurphy/Desktop/Splined.nxs'
-    mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=ws)
+    mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=out_name)
