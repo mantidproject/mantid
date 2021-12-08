@@ -32,6 +32,7 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
 - An importance sampling option has been added to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` so that it handles spikes in the structure factor S(Q) better
 - Added parameter to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` to control number of attempts to generate initial scatter point
+- Relative error option now enabled for peak table workspaces in :ref:`CompareWorkspaces <algm-CompareWorkspaces>`.
 
 Bugfixes
 ########
