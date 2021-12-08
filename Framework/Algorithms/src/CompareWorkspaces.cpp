@@ -1068,8 +1068,10 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
         g_log.information() << "Column " << name << " is not compared\n";
       }
       bool mismatch = false;
-      if (isRelErr && relErr(s1, s2, tolerance)) {
-        mismatch = true;
+      if (isRelErr) {
+        if (relErr(s1, s2, tolerance)) {
+          mismatch = true;
+        }
       } else if (std::fabs(s1 - s2) > tolerance) {
         mismatch = true;
       }
@@ -1177,8 +1179,10 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
         g_log.information() << "Column " << name << " is not compared\n";
       }
       bool mismatch = false;
-      if (isRelErr && relErr(s1, s2, tolerance) && name != "QLab" && name != "QSample") {
-        mismatch = true;
+      if (isRelErr && name != "QLab" && name != "QSample") {
+        if (relErr(s1, s2, tolerance)) {
+          mismatch = true;
+        }
       } else if (std::fabs(s1 - s2) > tolerance) {
         mismatch = true;
       }
