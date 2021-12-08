@@ -59,7 +59,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.SelectionInfoPresenter')
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlotDataPaneView')
     def setUp(self,mock_data_view, mock_selection, mock_dual_view, mock_quick_edit, mock_base_view, mock_plot_canvas, mock_main_view,
-              mock_muon_canvas):
+              mock_muon_base_view, mock_muon_canvas):
         self.mock_dual_view = mock_dual_view
         self.mock_quick_edit = mock_quick_edit
         self.mock_main_view = mock_main_view
