@@ -15,6 +15,7 @@ from mantidqt.widgets.instrumentview.api import *
 from mantid.simpleapi import *
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer
 from mantidqt.plotting.functions import pcolormesh
+from workbench.config import get_window_config
 
 
 class PreviewView:
@@ -87,7 +88,7 @@ class PreviewView:
         @param workspace_name (str): name of the workspace
         """
         if self._type == self.IVIEW:
-            self._widget = get_instrumentview(workspace_name)
+            self._widget = get_instrumentview(workspace_name, get_window_config()[1])
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
         if self._type == self.SVIEW:
