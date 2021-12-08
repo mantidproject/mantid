@@ -139,32 +139,44 @@ void LoadHKL::exec() {
   // solve 2 linear equations to find amu and smu
   double amu = (mu2 - 1.0 * mu1) / (-1.0 * wl1 + wl2);
   double smu = mu1 - wl1 * amu;
-  double theta = sc1 * radtodeg_half;
-  auto i = static_cast<int>(theta / 5.);
-  double x0, x1, x2;
-  gsl_poly_solve_cubic(pc[2][i] / pc[3][i], pc[1][i] / pc[3][i], (pc[0][i] - astar1) / pc[3][i], &x0, &x1, &x2);
+  double theta = sc1 * radtodeg * 0.5;
+
+  // find roots of polynomial that describes
   double radius = 0.0;
-  if (x0 > 0)
-    radius = x0;
-  else if (x1 > 0)
-    radius = x1;
-  else if (x2 > 0)
-    radius = x2;
-  gsl_poly_solve_cubic(pc[2][i + 1] / pc[3][i + 1], pc[1][i + 1] / pc[3][i + 1], (pc[0][i + 1] - astar1) / pc[3][i + 1],
-                       &x0, &x1, &x2);
-  double radius1 = 0.0;
-  if (x0 > 0)
-    radius1 = x0;
-  else if (x1 > 0)
-    radius1 = x1;
-  else if (x2 > 0)
-    radius1 = x2;
-  double frac = theta - static_cast<double>(static_cast<int>(theta / 5.)) * 5.; // theta%5.
-  frac = frac / 5.;
-  radius = radius * (1 - frac) + radius1 * frac;
-  radius /= mu1;
-  g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
-                 << " calculated from tbar and transmission of 2 peaks\n";
+  if (std::isfinite(astar1) && astar1 >= 1) {
+    const size_t ndeg = sizeof pc / sizeof pc[0]; // order of poly
+    double coefs[ndeg];
+    std::vector<double> murs;
+    murs.reserve(2);
+    auto ith_lo = static_cast<size_t>(theta / 5.);
+    for (size_t ith = ith_lo; ith < ith_lo + 2; ith++) {
+      for (size_t ideg = 0; ideg < ndeg; ideg++) {
+        coefs[ideg] = pc[ndeg - 1 - ideg][ith];
+      }
+      coefs[0] = coefs[0] - std::log(1.0 / astar1);
+      double roots[2 * (ndeg - 1)];
+      gsl_poly_complex_workspace *w = gsl_poly_complex_workspace_alloc(ndeg);
+      gsl_poly_complex_solve(coefs, ndeg, w, roots);
+      gsl_poly_complex_workspace_free(w);
+
+      for (size_t irt = 0; irt < ndeg - 1; irt++) {
+        if (roots[2 * irt] > 0 && roots[2 * irt] < 9 && std::abs(roots[2 * irt + 1]) < 1e-15) {
+          murs.emplace_back(roots[2 * irt]); // real root in range 0 < muR < 9 cm^-1 (fitted in AnvredCorrection)
+        }
+      }
+    }
+    if (murs.size() == 2) {
+      double frac = (theta - static_cast<double>(ith_lo) * 5.0) / 5.0;
+      radius = (murs[0] * (1 - frac) + murs[1] * frac) / mu1;
+      g_log.notice() << "LinearScatteringCoef = " << smu << " LinearAbsorptionCoef = " << amu << " Radius = " << radius
+                     << " calculated from tbar and transmission of 2 peaks\n";
+    } else {
+      g_log.warning() << "Radius set to 0.0 cm - failed to find physical root to polynomial in AnvredCorrections\n";
+    }
+  } else {
+    g_log.warning() << "Radius set to 0.0 cm - non-physical transmission supplied.\n";
+  }
+
   API::Run &mrun = ws->mutableRun();
   mrun.addProperty<double>("Radius", radius, true);
   NeutronAtom neutron(0, 0, 0.0, 0.0, smu, 0.0, smu, amu);

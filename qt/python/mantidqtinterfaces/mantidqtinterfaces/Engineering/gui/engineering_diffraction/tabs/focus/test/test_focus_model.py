@@ -213,15 +213,13 @@ class FocusModelTest(unittest.TestCase):
         mock_norm.assert_not_called()  # throws error if zero charge
         mock_del.assert_called_once()
 
-    @patch(file_path + '.output_settings')
     @patch(file_path + '.path.exists')
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
     @patch(file_path + ".AddSampleLog")
     def test_save_output_files_both_banks_no_RB_number_path_exists(self, mock_add_log, mock_save_nxs, mock_save_gss,
-                                                                   mock_save_xye, mock_path, mock_out_setting):
-        mock_out_setting.get_output_path.return_value = "dir"
+                                                                   mock_save_xye, mock_path):
         mock_path.return_value = True  # directory exists
         ws_foc = MagicMock()
         ws_foc.getNumberHistograms.return_value = 2
@@ -232,7 +230,7 @@ class FocusModelTest(unittest.TestCase):
         ws_foc.run().get().value = '193749'  # runno
         van_run = '123456'
 
-        self.model._save_output_files([mock_out_setting.get_output_path()], ws_foc, self.calibration, van_run,
+        self.model._save_output_files(["save_dir"], ws_foc, self.calibration, van_run,
                                       rb_num=None)
 
         mock_save_gss.assert_called_once()
@@ -248,18 +246,15 @@ class FocusModelTest(unittest.TestCase):
         mock_save_nxs.assert_has_calls(save_nxs_calls)
 
     @patch(file_path + '.makedirs')
-    @patch(file_path + '.output_settings')
     @patch(file_path + '.path.exists')
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
     @patch(file_path + ".AddSampleLog")
     def test_save_output_files_North_Bank_RB_number_path_not_exists(self, mock_add_log, mock_save_nxs, mock_save_gss,
-                                                                    mock_save_xye, mock_path, mock_out_setting,
-                                                                    mock_mkdir):
+                                                                    mock_save_xye, mock_path, mock_mkdir):
         self.calibration.get_group_suffix.return_value = "bank_1"
         self.calibration.get_foc_ws_suffix.return_value = "bank_1"
-        mock_out_setting.get_output_path.return_value = "dir"
         mock_path.return_value = False  # directory exists
         ws_foc = MagicMock()
         ws_foc.getNumberHistograms.return_value = 1
@@ -271,7 +266,7 @@ class FocusModelTest(unittest.TestCase):
         van_run = '123456'
         rb_num = '1'
 
-        self.model._save_output_files([mock_out_setting.get_output_path()], ws_foc, self.calibration, van_run,
+        self.model._save_output_files(["save_dir"], ws_foc, self.calibration, van_run,
                                       rb_num=rb_num)
 
         mock_mkdir.assert_called_once()

@@ -8,11 +8,11 @@ from mantid.api import ITableWorkspace
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqtinterfaces.Muon.GUI.Common.utilities.table_utils import (create_checkbox_table_item, create_double_table_item,
-                                                                      create_string_table_item)
+                                                                      create_string_table_item, DoubleItemDelegate)
 
 from qtpy.QtCore import Qt
-from qtpy.QtGui import QDoubleValidator, QPalette
-from qtpy.QtWidgets import QLineEdit, QPushButton, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
+from qtpy.QtGui import QPalette
+from qtpy.QtWidgets import QPushButton, QStyledItemDelegate, QStyleOptionViewItem, QTableWidgetItem, QWidget
 
 ui_form, widget = load_ui(__file__, "background_corrections_view.ui")
 
@@ -27,17 +27,6 @@ STATUS_COLUMN_INDEX = 7
 SHOW_MATRIX_COLUMN_INDEX = 8
 
 USE_RAW_TOOLTIP = "Calculate the background using the raw data or the rebinned data."
-
-
-class DoubleItemDelegate(QStyledItemDelegate):
-    """
-    An item delegate that has a QDoubleValidator. The __init__ is the default QStyledItemDelegate __init__.
-    """
-
-    def createEditor(self, parent, option, index):
-        line_edit = QLineEdit(parent)
-        line_edit.setValidator(QDoubleValidator())
-        return line_edit
 
 
 class StatusItemDelegate(QStyledItemDelegate):

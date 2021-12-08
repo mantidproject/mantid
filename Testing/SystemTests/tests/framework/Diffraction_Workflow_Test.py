@@ -128,7 +128,7 @@ class Diffraction_Workflow_Test(systemtesting.MantidSystemTest):
         # Now check the integrated bin and the peaks
         w = mtd["TOPAZ_3132_HKL_line"]
         self.assertLessThan( w.signalAt(1), 1e4, "Limited background signal" )
-        self.assertDelta( w.signalAt(10), 140.824, 1, "Peak 1") #self.assertDelta( w.signalAt(10), 1110.86, 10, "Peak 1")
+        self.assertDelta( w.signalAt(10),  143.2, 1, "Peak 1") #self.assertDelta( w.signalAt(10), 1110.86, 10, "Peak 1")
         self.assertDelta( w.signalAt(20),  36.25, 1, "Peak 2") #self.assertDelta( w.signalAt(20),  337.71, 10, "Peak 2")
         self.assertDelta( w.signalAt(30),  26.53, 1, "Peak 3") #self.assertDelta( w.signalAt(30),  195.548, 10, "Peak 3")
 

@@ -392,7 +392,7 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:230
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEMU.cpp:729
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexusIndexSetup.cpp:59
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexusIndexSetup.cpp:175
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexus.cpp:1059
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventNexus.cpp:1064
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEventPreNexus2.cpp:668
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
 constParameter:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:951
@@ -550,7 +550,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetAllEi.cpp:758
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GravitySANSHelper.cpp:25
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/He3TubeEfficiency.cpp:289
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/IntegrateByComponent.cpp:192
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDCalibration.cpp:1293
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PDCalibration.cpp:1299
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PeakParameterHelper.cpp:102
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:96
 constStatement:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionWildes.cpp:101
@@ -919,6 +919,3 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlo
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataValidationHelper.cpp:33
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectSymmetrise.cpp:173
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Stretch.cpp:220
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:284

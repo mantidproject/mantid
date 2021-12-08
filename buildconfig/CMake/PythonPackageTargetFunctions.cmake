@@ -79,6 +79,7 @@ function(add_python_package pkg_name)
   if(CONDA_BUILD)
     install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E env MANTID_VERSION_STR=${_version_str} \
     ${Python_EXECUTABLE} -m pip install ${CMAKE_CURRENT_SOURCE_DIR} --no-deps --ignore-installed --no-cache-dir -vvv)"
+            COMPONENT Runtime
     )
   else()
     install(
@@ -86,6 +87,7 @@ function(add_python_package pkg_name)
     ${Python_EXECUTABLE} ${_setup_py} install -O1 --single-version-externally-managed \
     --root=${_setup_py_build_root}/install --install-scripts=bin --install-lib=lib \
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})"
+      COMPONENT Runtime
     )
   endif()
 
@@ -96,6 +98,7 @@ function(add_python_package pkg_name)
         install(
           DIRECTORY ${_setup_py_build_root}/install/lib/
           DESTINATION ${_dest}
+          COMPONENT Runtime
           PATTERN "test" EXCLUDE
           REGEX "${_parsed_arg_EXCLUDE_FROM_INSTALL}" EXCLUDE
         )
@@ -105,13 +108,18 @@ function(add_python_package pkg_name)
         install(
           DIRECTORY ${_setup_py_build_root}/install/lib/
           DESTINATION ${_dest}
+          COMPONENT Runtime
           PATTERN "test" EXCLUDE
         )
       endforeach()
     endif()
     # install the generated executable
     if(_parsed_arg_EXECUTABLE AND _parsed_arg_INSTALL_BIN_DIR)
-      install(PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name} DESTINATION ${_parsed_arg_INSTALL_BIN_DIR})
+      install(
+        PROGRAMS ${_setup_py_build_root}/install/bin/${pkg_name}
+        DESTINATION ${_parsed_arg_INSTALL_BIN_DIR}
+        COMPONENT Runtime
+      )
     endif()
   endif()
 endfunction()

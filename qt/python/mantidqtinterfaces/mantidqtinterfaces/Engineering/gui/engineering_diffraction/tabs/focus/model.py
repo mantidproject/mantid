@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from os import path, makedirs
+from typing import Optional
 import matplotlib.pyplot as plt
 
 from Engineering.common import path_handling
@@ -34,7 +35,7 @@ class FocusModel(object):
         return self._last_focused_files
 
     def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, rb_num: str,
-                  calibration: CalibrationInfo) -> None:
+                  calibration: CalibrationInfo, save_dir: Optional[str] = output_settings.get_output_path()) -> None:
         """
         Focus some data using the current calibration.
         :param sample_paths: The paths to the data to be focused.
@@ -43,7 +44,6 @@ class FocusModel(object):
         :param rb_num: Number to signify the user who is running this focus
         :param calibration: CalibrationInfo object that holds all info needed about ROI and instrument
         """
-
         # check correct region calibration(s) and grouping workspace(s) exists
         if not calibration.is_valid():
             return
@@ -54,9 +54,9 @@ class FocusModel(object):
         ws_van_foc, van_run = self.process_vanadium(vanadium_path, calibration, full_calib)
 
         # directories for saved focused data
-        focus_dirs = [path.join(output_settings.get_output_path(), "Focus")]
+        focus_dirs = [path.join(save_dir, "Focus")]
         if rb_num:
-            focus_dirs.append(path.join(output_settings.get_output_path(), "User", rb_num, "Focus"))
+            focus_dirs.append(path.join(save_dir, "User", rb_num, "Focus"))
             if calibration.group == GROUP.TEXTURE:
                 focus_dirs.pop(0)  # only save to RB directory to limit number files saved
 
@@ -152,7 +152,6 @@ class FocusModel(object):
         return sample_ws_foc
 
     def _save_output_files(self, focus_dirs, sample_ws_foc, calibration, van_run, rb_num=None):
-
         # set bankid for use in fit tab
         foc_suffix = calibration.get_foc_ws_suffix()
         xunit = sample_ws_foc.getDimension(0).name
