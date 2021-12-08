@@ -99,7 +99,6 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_copy.assert_not_called()
 
     @patch(file_path + '.DeleteWorkspace')
-    @patch(file_path + '.output_settings.get_output_path')
     @patch(file_path + '.CalibrationModel.create_output_files')
     @patch(file_path + '.CalibrationModel.make_diff_consts_table')
     @patch(file_path + '.CalibrationModel.run_calibration')
@@ -107,14 +106,12 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     @patch(file_path + ".path_handling.load_workspace")
     def test_non_texture_output_files_saved_to_two_directories_when_rb_num(self, mock_load_ws, mock_load_cal,
                                                                            mock_run_cal, mock_make_diff_table,
-                                                                           mock_create_out, mock_out_settings,
-                                                                           mock_del):
+                                                                           mock_create_out, mock_del):
         rb_num = "1"
         self.calibration_info.group = GROUP.BOTH
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
-        mock_out_settings.return_value = "dir"
 
-        self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False)
+        self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir='dir')
 
         create_out_calls = [call(path.join('dir', 'Calibration',''), self.calibration_info, 'foc_ceria_ws'),
                             call(path.join('dir', 'User', '1', 'Calibration', ''),
@@ -123,7 +120,6 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_create_out.assert_has_calls(create_out_calls)
 
     @patch(file_path + '.DeleteWorkspace')
-    @patch(file_path + '.output_settings.get_output_path')
     @patch(file_path + '.CalibrationModel.create_output_files')
     @patch(file_path + '.CalibrationModel.make_diff_consts_table')
     @patch(file_path + '.CalibrationModel.run_calibration')
@@ -131,14 +127,12 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     @patch(file_path + ".path_handling.load_workspace")
     def test_texture_output_files_saved_to_one_directories_when_rb_num(self, mock_load_ws, mock_load_cal,
                                                                        mock_run_cal, mock_make_diff_table,
-                                                                       mock_create_out, mock_out_settings,
-                                                                       mock_del):
+                                                                       mock_create_out, mock_del):
         rb_num = "1"
         self.calibration_info.group = GROUP.TEXTURE
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
-        mock_out_settings.return_value = "dir"
 
-        self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False)
+        self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir='dir')
 
         mock_create_out.assert_called_once_with(path.join('dir', 'User', '1', 'Calibration', ''),
                                                 self.calibration_info, 'foc_ceria_ws')
