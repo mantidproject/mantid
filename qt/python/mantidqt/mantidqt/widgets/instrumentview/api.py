@@ -22,15 +22,15 @@ def safe_qthread(func):
     return _wrapped
 
 
-def get_instrumentview(workspace):
+def get_instrumentview(workspace, window_flags=None):
     """Return a handle to the instrument view of given workspace
     :param ws: input workspace
     """
-    def _wrappper(ws):
-        return force_method_calls_to_qapp_thread(InstrumentViewPresenter(ws))
+    def _wrappper(ws, window_flags=None):
+        return force_method_calls_to_qapp_thread(InstrumentViewPresenter(ws, None, window_flags))
 
     # need to do some duck-typing here
-    ivp = QAppThreadCall(_wrappper)(workspace)
+    ivp = QAppThreadCall(_wrappper)(workspace, window_flags)
     # link nested method to top level
     # NOTE: setMin and setMax still leads to segfault, need to force
     #       wrapped in QAppThreadCall again
