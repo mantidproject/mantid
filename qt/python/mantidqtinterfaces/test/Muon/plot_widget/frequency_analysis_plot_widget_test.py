@@ -16,6 +16,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_presenter import MainPlotWidgetPresenter
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_widget import PlottingCanvasWidget
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.data_pane.plot_data_pane_view import PlotDataPaneView
+
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.\
@@ -49,6 +50,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
 
     # since some functions are only called as part of the inherited class, we need to patch them there
     @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.PlottingCanvasWidget')
+    @mock.patch('mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget.BasePaneView')
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.frequency_analysis_plot_widget.MainPlotWidgetView')
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.frequency_analysis_plot_widget.PlottingCanvasWidget')
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.frequency_analysis_plot_widget.BasePaneView')
@@ -63,9 +65,10 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
         self.mock_main_view = mock_main_view
         self.mock_base_view = mock_base_view
         self.mock_plot_canvas = mock_plot_canvas
+        self.mock_muon_base_view = mock_muon_base_view
+        self.mock_muon_canvas = mock_muon_canvas
         self.mock_data_view = mock_data_view
         self.mock_selection = mock_selection
-        self.mock_muon_canvas = mock_muon_canvas
 
         self.canvas ={}
         self._num_count=0
@@ -76,6 +79,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
         self.mock_main_view.return_value = mock.MagicMock(autospec=MainPlotWidgetView)
         self.mock_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
         self.mock_plot_canvas.side_effect = self.canvas_mocks
+        self.mock_muon_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
         self.mock_data_view.return_value = mock.MagicMock(autospec=PlotDataPaneView)
         self.mock_selection = mock.MagicMock()
         self.mock_muon_canvas.side_effect = self.canvas_mocks
@@ -148,12 +152,14 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
         self.mock_plot_canvas = mock_plot_canvas
         self.mock_data_view = mock_data_view
         self.mock_selection = mock_selection
+
         self.mock_main_view.return_value = mock.MagicMock(autospec=MainPlotWidgetView)
         self.mock_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
         self.mock_raw_view.return_value = mock.MagicMock(autospec=RawPaneView)
         self.mock_plot_canvas.side_effect = self.canvas_mocks
         self.mock_data_view.return_value = mock.MagicMock(autospec=PlotDataPaneView)
         self.mock_selection = mock.MagicMock()
+
         # can exclude the defaults (data and fit)
         self.widget.create_model_fit_pane()
         self.widget.create_raw_pane()
