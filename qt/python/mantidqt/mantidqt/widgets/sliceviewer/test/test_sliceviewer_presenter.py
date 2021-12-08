@@ -24,7 +24,8 @@ from mantidqt.widgets.sliceviewer.presenter import (  # noqa: E402
     PeaksViewerCollectionPresenter, SliceViewer)
 from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform  # noqa: E402
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
-from mantidqt.widgets.sliceviewer.views.view import SliceViewerView, SliceViewerDataView  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView  # noqa: E402
 
 
 def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):

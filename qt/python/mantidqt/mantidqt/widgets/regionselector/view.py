@@ -8,6 +8,8 @@
 from qtpy.QtWidgets import (QWidget)
 from qtpy.QtCore import Qt
 
+from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
+
 
 class RegionSelectorView(QWidget):
     """The view for the data portion of the sliceviewer"""
@@ -15,3 +17,4 @@ class RegionSelectorView(QWidget):
     def __init__(self, presenter, parent=None):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window)
+        self._data_view = SliceViewerDataView(presenter, None, None, self, None)
