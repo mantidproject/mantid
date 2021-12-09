@@ -11,7 +11,7 @@ Description
 
 The Critical Peak Relexation Rate is defined as:
 
-.. math:: y = \frac{B_1}{(|x - T_c|)^a} + \frac{B_1}{Theta(x < T_c)} + \frac{B_2}{Theta(x >= T_c)}
+.. math:: y = \frac{B_1}{(|x - T_c|)^a} + B_1\Theta(x < T_c) + B_2\Theta(x >= T_c)
 
 where:
 - :math:`S_c` - Scaling
