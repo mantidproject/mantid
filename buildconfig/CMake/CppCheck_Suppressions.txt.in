@@ -919,6 +919,3 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlo
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataValidationHelper.cpp:33
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectSymmetrise.cpp:173
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Stretch.cpp:220
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:139
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:163
-ctunullpointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/IPropertyManager.h:284

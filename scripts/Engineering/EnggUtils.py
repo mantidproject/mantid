@@ -171,11 +171,14 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir):
         plot_tof_vs_d_from_calibration(diag_ws, focused_ceria, default_ceria_expected_peaks(final=True), calibration)
 
     # save output
+    calib_dirs = [path.join(save_dir, "Calibration", "")]
     if rb_num:
-        calib_dir = path.join(save_dir, "User", rb_num, "Calibration", "")
-    else:
-        calib_dir = path.join(save_dir, "Calibration", "")
-    create_output_files(calib_dir, calibration, focused_ceria)
+        calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
+        if calibration.group == GROUP.TEXTURE:
+            calib_dirs.pop(0)  # only save to RB directory to limit number files saved
+
+    for calib_dir in calib_dirs:
+        create_output_files(calib_dir, calibration, focused_ceria)
 
     DeleteWorkspace(ceria_workspace)
 
@@ -433,6 +436,13 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     # load, focus and process vanadium (retrieve from ADS if exists)
     ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
 
+    # directories for saved focused data
+    focus_dirs = [path.join(save_dir, "Focus")]
+    if rb_num:
+        focus_dirs.append(path.join(save_dir, "User", rb_num, "Focus"))
+        if calibration.group == GROUP.TEXTURE:
+            focus_dirs.pop(0)  # only save to RB directory to limit number files saved
+
     # Loop over runs and focus
     focused_files_list = []
     output_workspaces = []  # List of focused workspaces to plot.
@@ -442,10 +452,10 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             # None returned if no proton charge
             ws_foc = _focus_run_and_apply_roi_calibration(ws_sample, calibration)
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
-            _save_output_files(ws_foc, calibration, van_run, save_dir, rb_num)
+            _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
             ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
-            nxs_path = _save_output_files(ws_foc, calibration, van_run, save_dir, rb_num)
+            nxs_path = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             focused_files_list.append(nxs_path)
             output_workspaces.append(ws_foc.name())
 
@@ -530,14 +540,7 @@ def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     return sample_ws_foc
 
 
-def _save_output_files(sample_ws_foc, calibration, van_run, save_dir, rb_num=None):
-    if rb_num:
-        focus_dir = path.join(save_dir, "User", rb_num, "Focus")
-    else:
-        focus_dir = path.join(save_dir, "Focus")
-    if not path.exists(focus_dir):
-        makedirs(focus_dir)
-
+def _save_output_files(self, focus_dirs, sample_ws_foc, calibration, van_run, rb_num=None):
     # set bankid for use in fit tab
     foc_suffix = calibration.get_foc_ws_suffix()
     xunit = sample_ws_foc.getDimension(0).name
@@ -545,23 +548,29 @@ def _save_output_files(sample_ws_foc, calibration, van_run, save_dir, rb_num=Non
     sample_run_no = sample_ws_foc.run().get('run_number').value
     # save all spectra to single ASCII files
     ascii_fname = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run,
-                                             calibration.get_group_suffix(), xunit_suffix, ext='')
-    SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'), SplitFiles=False,
-            UseSpectrumNumberAsBankID=True)
-    SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
-                   SplitFiles=False, Format="TOPAS")
-    # Save nxs per spectrum
-    AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
-    for ispec in range(sample_ws_foc.getNumberHistograms()):
-        # add a bankid and vanadium to log that is read by fitting model
-        bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec + 1}'
-        AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid.replace('_', ' '))  # overwrites
-        # save spectrum as nexus
-        filename = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
-                                              xunit_suffix, ext=".nxs")
-        nxs_path = path.join(focus_dir, filename)
-        SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
-    return nxs_path
+                                                  calibration.get_group_suffix(), xunit_suffix, ext='')
+
+    for focus_dir in focus_dirs:
+        if not path.exists(focus_dir):
+            makedirs(focus_dir)
+        SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'), SplitFiles=False,
+                UseSpectrumNumberAsBankID=True)
+        SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
+                       SplitFiles=False, Format="TOPAS")
+        # Save nxs per spectrum
+        nxs_paths = []
+        AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
+        for ispec in range(sample_ws_foc.getNumberHistograms()):
+            # add a bankid and vanadium to log that is read by fitting model
+            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec+1}'
+            AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid.replace('_', ' '))  # overwrites
+            # save spectrum as nexus
+            filename = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
+                                                       xunit_suffix, ext=".nxs")
+            nxs_path = path.join(focus_dir, filename)
+            SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
+            nxs_paths.append(nxs_path)
+    return nxs_paths  # from last focus_dir only
 
 
 def _generate_output_file_name(inst, sample_run_no, van_run_no, suffix, xunit, ext=""):

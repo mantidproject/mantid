@@ -38,7 +38,10 @@ Bugfixes
 
 - Fix bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
+- Fix bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where calculation aborts with exception due to floating point rounding error when track segment close to vertical
+  Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
+- Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
 
 Fit Functions
 -------------
