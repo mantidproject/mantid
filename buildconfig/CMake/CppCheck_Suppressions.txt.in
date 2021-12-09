@@ -195,9 +195,6 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MCI
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MCInteractionStatistics.cpp:72
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MCInteractionStatistics.cpp:77
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MayersSampleCorrectionStrategy.cpp:80
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:141
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:152
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:321
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:532
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:256
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:241
