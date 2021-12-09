@@ -599,11 +599,11 @@ class SliceViewerTest(unittest.TestCase):
         event.xdata = 1.0
         event.ydata = 2.0
 
-        presenter.add_delete_peak(event)
+        presenter.mpl_button_clicked(event)
 
         mock_sliceinfo_cls.get_sliceinfo.assert_not_called()
 
-        mock_peaks_presenter.add_delete_peak.assert_called_once_with([3, 2, 1])
+        mock_peaks_presenter.mpl_button_clicked.assert_called_once_with([3, 2, 1])
         self.view.data_view.canvas.draw_idle.assert_called_once()
 
 

@@ -19,6 +19,7 @@ from mantid.plots.resampling_image import samplingimage
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from mantidqt.widgets.sliceviewer.presenters.imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from mantidqt.widgets.sliceviewer.presenters.lineplots import LinePlots
+from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
 from mantidqt.widgets.sliceviewer.views.toolbar import SliceViewerNavigationToolbar, ToolItemText
 from mantidqt.widgets.sliceviewer.presenters.zoom import ScrollZoomMixin
@@ -36,7 +37,7 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
+    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -92,7 +93,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
-        self.canvas.mpl_connect('button_press_event', self.presenter.add_delete_peak)
+        self.canvas.mpl_connect('button_press_event', self.presenter.mpl_button_clicked)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
@@ -119,7 +120,7 @@ class SliceViewerDataView(QWidget):
         self.mpl_toolbar.regionSelectionClicked.connect(self.on_region_selection_toggle)
         self.mpl_toolbar.homeClicked.connect(self.on_home_clicked)
         self.mpl_toolbar.nonOrthogonalClicked.connect(self.on_non_orthogonal_axes_toggle)
-        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.deactivate_peak_adding)
+        self.mpl_toolbar.zoomPanClicked.connect(self.presenter.zoom_pan_clicked)
         self.mpl_toolbar.zoomPanFinished.connect(self.on_data_limits_changed)
         self.toolbar_layout.addWidget(self.mpl_toolbar)
 
