@@ -422,6 +422,26 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self._print_report()
         self.setProperty('OutputWorkspace', mtd[self.output])
 
+    def _apply_mask(self, ws):
+        """Applies selected masks."""
+        MaskDetectors(Workspace=ws, MaskedWorkspace=self.mask_ws)
+        # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
+        min_threshold_defined = not self.getProperty('MaskThresholdMin').isDefault
+        max_threshold_defined = not self.getProperty('MaskThresholdMax').isDefault
+        if not min_threshold_defined or not max_threshold_defined:
+            masking_criterion = '{} < y < {}'
+            if min_threshold_defined and max_threshold_defined:
+                masking_criterion = masking_criterion.format(self.getPropertyValue('MaskThresholdMax'),
+                                                             self.getPropertyValue('MaskThresholdMin'))
+            elif min_threshold_defined:
+                masking_criterion = 'y < {}'.format(self.getPropertyValue('MaskThresholdMin'))
+            else:  # only max threshold defined
+                masking_criterion = 'y > {}'.format(self.getPropertyValue('MaskThresholdMax'))
+
+            MaskBinsIf(InputWorkspace=ws, OutputWorkspace=ws,
+                       Criterion=masking_criterion)
+        return ws
+
     def _collect_data(self, sample, vanadium=False):
         """Loads data if the corresponding workspace does not exist in the ADS."""
         ws = "{}_{}".format(get_run_number(sample), 'raw')
@@ -456,36 +476,23 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.instrument = instrument
         return ws
 
+    def _correct_self_attenuation(self, ws, sample_no):
+        """Creates, if necessary, a self-attenuation workspace and uses it to correct the provided sample workspace."""
+        if sample_no == 0:
+            self._prepare_self_attenuation_ws(ws)
+
+        if self.absorption_corr:
+            ApplyPaalmanPingsCorrection(
+                    SampleWorkspace=ws,
+                    OutputWorkspace=ws,
+                    CorrectionsWorkspace=self.absorption_corr
+            )
+
     @staticmethod
     def _clean_up(to_clean):
         """Performs the clean up of intermediate workspaces that are created and used throughout the code."""
         if len(to_clean) > 0:
             DeleteWorkspaces(WorkspaceList=to_clean)
-
-    def _save_output(self, ws_to_save):
-        """Saves the output workspaces to an external file."""
-        for ws_name in ws_to_save:
-            if self.reduction_type == 'SingleCrystal':
-                omega_log = 'SRot.value'  # IN5, IN6
-                if self.instrument == 'PANTHER':
-                    omega_log = 'a3.value'
-                elif self.instrument == 'SHARP':
-                    omega_log = 'srotation.value'
-                elif self.instrument == 'IN4':
-                    omega_log = 'SampleRotation.value'
-                psi = mtd[ws_name].run().getProperty(omega_log).value
-                psi_offset = self.getProperty('SampleAngleOffset').value
-                offset = psi - psi_offset
-                SaveNXSPE(
-                    InputWorkspace=ws_name,
-                    Filename='{}.nxspe'.format(ws_name),
-                    Psi=offset
-                )
-            else:  # powder reduction
-                SaveNexus(
-                    InputWorkspace=ws_name,
-                    Filename='{}.nxs'.format(ws_name)
-                )
 
     def _get_grouping_pattern(self, ws):
         """Returns a grouping pattern taking into account the requested grouping, either inside the tube, as defined
@@ -538,6 +545,31 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                                GroupingPattern=grouping_pattern,
                                Behaviour=self.getPropertyValue('GroupingBehaviour'))
 
+    def _normalise_sample(self, sample_ws, sample_no, numor):
+        """
+        Normalises sample using vanadium integral, if it has been provided.
+        :param sample_ws: sample being processed
+        :return: Either normalised sample or the input, if vanadium is not provided
+        """
+        normalised_ws = '{}_norm'.format(numor)
+        if self.vanadium_integral and self.vanadium_integral != list():
+            nintegrals = len(self.vanadium_integral)
+            vanadium_no = sample_no
+            if nintegrals == 1:
+                vanadium_no = 0
+            elif sample_no > nintegrals:
+                vanadium_no = sample_no % nintegrals
+            Divide(
+                LHSWorkspace=sample_ws,
+                RHSWorkspace=self.vanadium_integral[vanadium_no],
+                OutputWorkspace=normalised_ws
+            )
+        else:
+            normalised_ws = sample_ws
+            self.log().warning("Vanadium integral workspace not found.\nData will not be normalised to vanadium.")
+
+        return normalised_ws
+
     def _prepare_masks(self):
         """Builds a masking workspace from the provided inputs. Masking using threshold cannot be prepared ahead."""
         existing_masks = []
@@ -571,132 +603,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             RenameWorkspace(InputWorkspace=existing_masks[0], OutputWorkspace=mask_ws)
         self.to_clean.append(mask_ws)
         return mask_ws
-
-    def _rename_workspaces(self, ws_list):
-        """Renames workspaces in the provided list by appending a custom suffix containing the user-defined output
-        group name, incident energy, and sample temperature (for powder reduction only)."""
-        output_group_name = self.output
-        new_ws_list = []
-        temp_log_name = 'sample.temperature'
-        for name in ws_list:
-            run = mtd[name].getRun()
-            ei = run.getLogData('Ei').value
-            new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, name, ei)
-            temp = run.getLogData(temp_log_name).value
-            self.temperatures.add(temp)
-            if self.reduction_type == 'Powder':
-                new_name = '{}_T_{:.1f}'.format(new_name, temp)
-            RenameWorkspace(InputWorkspace=name, OutputWorkspace=new_name)
-            new_ws_list.append(new_name)
-
-        return new_ws_list
-
-    def _apply_mask(self, ws):
-        """Applies selected masks."""
-        MaskDetectors(Workspace=ws, MaskedWorkspace=self.mask_ws)
-        # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
-        min_threshold_defined = not self.getProperty('MaskThresholdMin').isDefault
-        max_threshold_defined = not self.getProperty('MaskThresholdMax').isDefault
-        if not min_threshold_defined or not max_threshold_defined:
-            masking_criterion = '{} < y < {}'
-            if min_threshold_defined and max_threshold_defined:
-                masking_criterion = masking_criterion.format(self.getPropertyValue('MaskThresholdMax'),
-                                                             self.getPropertyValue('MaskThresholdMin'))
-            elif min_threshold_defined:
-                masking_criterion = 'y < {}'.format(self.getPropertyValue('MaskThresholdMin'))
-            else:  # only max threshold defined
-                masking_criterion = 'y > {}'.format(self.getPropertyValue('MaskThresholdMax'))
-
-            MaskBinsIf(InputWorkspace=ws, OutputWorkspace=ws,
-                       Criterion=masking_criterion)
-        return ws
-
-    def _subtract_empty_container(self, ws):
-        """Subtracts empty container counts from the sample workspace."""
-        empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
-        empty_correction_ws = "{}_correction".format(empty_ws)
-        empty_scaling = self.getProperty('EmptyContainerScaling').value
-        Scale(InputWorkspace=empty_ws,
-              OutputWorkspace=empty_correction_ws,
-              Factor=empty_scaling)
-        Minus(LHSWorkspace=ws,
-              RHSWorkspace=mtd[empty_correction_ws][0],
-              OutputWorkspace=ws)
-        if self.clear_cache:
-            DeleteWorkspace(Workspace=empty_correction_ws)
-
-    def _process_vanadium(self, ws):
-        """Processes vanadium and creates workspaces with diagnostics, integrated vanadium, and reduced vanadium."""
-        to_remove = [ws]
-        numor = ws[:ws.rfind('_')]
-        vanadium_diagnostics = '{}_diag'.format(numor)
-        DirectILLDiagnostics(InputWorkspace=ws,
-                             OutputWorkspace=vanadium_diagnostics,
-                             BeamStopDiagnostics="Beam Stop Diagnostics OFF")
-
-        if self.instrument == 'IN5':
-            van_flat_ws = "{}_flat".format(numor)
-            to_remove.append(van_flat_ws)
-            DirectILLTubeBackground(InputWorkspace=ws,
-                                    DiagnosticsWorkspace=vanadium_diagnostics,
-                                    EPPWorkspace=self.vanadium_epp,
-                                    OutputWorkspace=van_flat_ws)
-            Minus(LHSWorkspace=ws, RHSWorkspace=van_flat_ws,
-                  OutputWorkspace=ws, EnableLogging=False)
-
-        if self.empty:
-            self._subtract_empty_container(ws)
-
-        vanadium_integral = '{}_integral'.format(numor)
-        DirectILLIntegrateVanadium(InputWorkspace=ws,
-                                   OutputWorkspace=vanadium_integral,
-                                   EPPWorkspace=self.vanadium_epp)
-
-        sofq_output = '{}_SofQ'.format(numor)
-        softw_output = '{}_SofTW'.format(numor)
-        optional_parameters = dict()
-        if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
-            optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
-        if not self.getProperty('EnergyExchangeBinning').isDefault:
-            optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
-        if not self.getProperty('MomentumTransferBinning').isDefault:
-            optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
-        DirectILLReduction(InputWorkspace=ws,
-                           OutputWorkspace=sofq_output,
-                           OutputSofThetaEnergyWorkspace=softw_output,
-                           IntegratedVanadiumWorkspace=vanadium_integral,
-                           DiagnosticsWorkspace=vanadium_diagnostics,
-                           **optional_parameters
-                           )
-
-        if len(to_remove) > 0 and self.clear_cache:
-            self._clean_up(to_remove)
-        return sofq_output, softw_output, vanadium_diagnostics, vanadium_integral
-
-    def _normalise_sample(self, sample_ws, sample_no, numor):
-        """
-        Normalises sample using vanadium integral, if it has been provided.
-        :param sample_ws: sample being processed
-        :return: Either normalised sample or the input, if vanadium is not provided
-        """
-        normalised_ws = '{}_norm'.format(numor)
-        if self.vanadium_integral and self.vanadium_integral != list():
-            nintegrals = len(self.vanadium_integral)
-            vanadium_no = sample_no
-            if nintegrals == 1:
-                vanadium_no = 0
-            elif sample_no > nintegrals:
-                vanadium_no = sample_no % nintegrals
-            Divide(
-                LHSWorkspace=sample_ws,
-                RHSWorkspace=self.vanadium_integral[vanadium_no],
-                OutputWorkspace=normalised_ws
-            )
-        else:
-            normalised_ws = sample_ws
-            self.log().warning("Vanadium integral workspace not found.\nData will not be normalised to vanadium.")
-
-        return normalised_ws
 
     def _prepare_self_attenuation_ws(self, ws):
         """Creates a self-attenuation workspace using either a MonteCarlo approach or numerical integration."""
@@ -735,17 +641,44 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 OutputWorkspace=self.absorption_corr
             )
 
-    def _correct_self_attenuation(self, ws, sample_no):
-        """Creates, if necessary, a self-attenuation workspace and uses it to correct the provided sample workspace."""
-        if sample_no == 0:
-            self._prepare_self_attenuation_ws(ws)
+    def _print_report(self):
+        """Prints a summary report containing the most relevant information about the performed data reduction."""
+        # removes the full path of the data source and also the .nxs extension:
+        first_sample_numor = self.sample[0][self.sample[0].rfind('/')+1:-4]
+        used_samples = "Sample runs: {}".format(first_sample_numor)
+        if len(self.sample) > 1:
+            last_sample_numor = self.sample[-1][self.sample[-1].rfind('/')+1:-4]
+            used_samples = "{} to {}".format(used_samples, last_sample_numor)
 
-        if self.absorption_corr:
-            ApplyPaalmanPingsCorrection(
-                    SampleWorkspace=ws,
-                    OutputWorkspace=ws,
-                    CorrectionsWorkspace=self.absorption_corr
-            )
+        used_inputs = ["Used inputs:"]
+        if self.cadmium:
+            used_inputs.append("Cadmium: {}".format(self.cadmium))
+        if self.empty:
+            used_inputs.append("Empty container: {}".format(self.empty))
+            if not self.getProperty('EmptyContainerScaling').isDefault:
+                used_inputs.append("Scaled by: {}".format(self.getProperty('EmptyContainerScaling').value))
+        if self.vanadium:
+            used_inputs.append("Vanadium: {}".format(self.vanadium))
+        if self.flat_background:
+            used_inputs.append("Flat background source: {}".format(self.flat_background))
+            if not self.getProperty(common.PROP_FLAT_BKG_SCALING).isDefault:
+                used_inputs.append("Scaled by: {}".format(self.getProperty(common.PROP_FLAT_BKG_SCALING).value))
+        if not self.getProperty('MaskWorkspace').isDefault:
+            used_inputs.append("Mask workspace: {}".format(self.getPropertyValue('MaskWorkspace')))
+        used_inputs = '\n'.join(used_inputs) if len(used_inputs) > 1 else None
+
+        incident_energy = mtd[self.output][0].getRun().getLogData('Ei').value
+        sample_temperatures = ', '.join(['{:.2f}'.format(value) for value in sorted(self.temperatures)])
+        experimental_conditions = ["Processed as: {}".format(self.process),
+                                   "Reduction technique: {}".format(self.reduction_type),
+                                   "Incident energy: {:.1f} meV.".format(incident_energy),
+                                   "Sample temperature(s): {} K".format(sample_temperatures)]
+        experimental_conditions = '\n'.join(experimental_conditions)
+        self.log().notice("Summary report")
+        self.log().notice(used_samples)
+        if used_inputs is not None:
+            self.log().notice(used_inputs)
+        self.log().notice(experimental_conditions)
 
     def _process_sample(self, ws, sample_no):
         """Does the sample data reduction for single crystal."""
@@ -808,44 +741,111 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
 
         return processed_sample, processed_sample_tw
 
-    def _print_report(self):
-        """Prints a summary report containing the most relevant information about the performed data reduction."""
-        # removes the full path of the data source and also the .nxs extension:
-        first_sample_numor = self.sample[0][self.sample[0].rfind('/')+1:-4]
-        used_samples = "Sample runs: {}".format(first_sample_numor)
-        if len(self.sample) > 1:
-            last_sample_numor = self.sample[-1][self.sample[-1].rfind('/')+1:-4]
-            used_samples = "{} to {}".format(used_samples, last_sample_numor)
+    def _process_vanadium(self, ws):
+        """Processes vanadium and creates workspaces with diagnostics, integrated vanadium, and reduced vanadium."""
+        to_remove = [ws]
+        numor = ws[:ws.rfind('_')]
+        vanadium_diagnostics = '{}_diag'.format(numor)
+        DirectILLDiagnostics(InputWorkspace=ws,
+                             OutputWorkspace=vanadium_diagnostics,
+                             BeamStopDiagnostics="Beam Stop Diagnostics OFF")
 
-        used_inputs = ["Used inputs:"]
-        if self.cadmium:
-            used_inputs.append("Cadmium: {}".format(self.cadmium))
+        if self.instrument == 'IN5':
+            van_flat_ws = "{}_flat".format(numor)
+            to_remove.append(van_flat_ws)
+            DirectILLTubeBackground(InputWorkspace=ws,
+                                    DiagnosticsWorkspace=vanadium_diagnostics,
+                                    EPPWorkspace=self.vanadium_epp,
+                                    OutputWorkspace=van_flat_ws)
+            Minus(LHSWorkspace=ws, RHSWorkspace=van_flat_ws,
+                  OutputWorkspace=ws, EnableLogging=False)
+
         if self.empty:
-            used_inputs.append("Empty container: {}".format(self.empty))
-            if not self.getProperty('EmptyContainerScaling').isDefault:
-                used_inputs.append("Scaled by: {}".format(self.getProperty('EmptyContainerScaling').value))
-        if self.vanadium:
-            used_inputs.append("Vanadium: {}".format(self.vanadium))
-        if self.flat_background:
-            used_inputs.append("Flat background source: {}".format(self.flat_background))
-            if not self.getProperty(common.PROP_FLAT_BKG_SCALING).isDefault:
-                used_inputs.append("Scaled by: {}".format(self.getProperty(common.PROP_FLAT_BKG_SCALING).value))
-        if not self.getProperty('MaskWorkspace').isDefault:
-            used_inputs.append("Mask workspace: {}".format(self.getPropertyValue('MaskWorkspace')))
-        used_inputs = '\n'.join(used_inputs) if len(used_inputs) > 1 else None
+            self._subtract_empty_container(ws)
 
-        incident_energy = mtd[self.output][0].getRun().getLogData('Ei').value
-        sample_temperatures = ', '.join(['{:.2f}'.format(value) for value in sorted(self.temperatures)])
-        experimental_conditions = ["Processed as: {}".format(self.process),
-                                   "Reduction technique: {}".format(self.reduction_type),
-                                   "Incident energy: {:.1f} meV.".format(incident_energy),
-                                   "Sample temperature(s): {} K".format(sample_temperatures)]
-        experimental_conditions = '\n'.join(experimental_conditions)
-        self.log().notice("Summary report")
-        self.log().notice(used_samples)
-        if used_inputs is not None:
-            self.log().notice(used_inputs)
-        self.log().notice(experimental_conditions)
+        vanadium_integral = '{}_integral'.format(numor)
+        DirectILLIntegrateVanadium(InputWorkspace=ws,
+                                   OutputWorkspace=vanadium_integral,
+                                   EPPWorkspace=self.vanadium_epp)
+
+        sofq_output = '{}_SofQ'.format(numor)
+        softw_output = '{}_SofTW'.format(numor)
+        optional_parameters = dict()
+        if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
+            optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+        if not self.getProperty('EnergyExchangeBinning').isDefault:
+            optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+        if not self.getProperty('MomentumTransferBinning').isDefault:
+            optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
+        DirectILLReduction(InputWorkspace=ws,
+                           OutputWorkspace=sofq_output,
+                           OutputSofThetaEnergyWorkspace=softw_output,
+                           IntegratedVanadiumWorkspace=vanadium_integral,
+                           DiagnosticsWorkspace=vanadium_diagnostics,
+                           **optional_parameters
+                           )
+
+        if len(to_remove) > 0 and self.clear_cache:
+            self._clean_up(to_remove)
+        return sofq_output, softw_output, vanadium_diagnostics, vanadium_integral
+
+    def _rename_workspaces(self, ws_list):
+        """Renames workspaces in the provided list by appending a custom suffix containing the user-defined output
+        group name, incident energy, and sample temperature (for powder reduction only)."""
+        output_group_name = self.output
+        new_ws_list = []
+        temp_log_name = 'sample.temperature'
+        for name in ws_list:
+            run = mtd[name].getRun()
+            ei = run.getLogData('Ei').value
+            new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, name, ei)
+            temp = run.getLogData(temp_log_name).value
+            self.temperatures.add(temp)
+            if self.reduction_type == 'Powder':
+                new_name = '{}_T_{:.1f}'.format(new_name, temp)
+            RenameWorkspace(InputWorkspace=name, OutputWorkspace=new_name)
+            new_ws_list.append(new_name)
+
+        return new_ws_list
+
+    def _save_output(self, ws_to_save):
+        """Saves the output workspaces to an external file."""
+        for ws_name in ws_to_save:
+            if self.reduction_type == 'SingleCrystal':
+                omega_log = 'SRot.value'  # IN5, IN6
+                if self.instrument == 'PANTHER':
+                    omega_log = 'a3.value'
+                elif self.instrument == 'SHARP':
+                    omega_log = 'srotation.value'
+                elif self.instrument == 'IN4':
+                    omega_log = 'SampleRotation.value'
+                psi = mtd[ws_name].run().getProperty(omega_log).value
+                psi_offset = self.getProperty('SampleAngleOffset').value
+                offset = psi - psi_offset
+                SaveNXSPE(
+                    InputWorkspace=ws_name,
+                    Filename='{}.nxspe'.format(ws_name),
+                    Psi=offset
+                )
+            else:  # powder reduction
+                SaveNexus(
+                    InputWorkspace=ws_name,
+                    Filename='{}.nxs'.format(ws_name)
+                )
+
+    def _subtract_empty_container(self, ws):
+        """Subtracts empty container counts from the sample workspace."""
+        empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
+        empty_correction_ws = "{}_correction".format(empty_ws)
+        empty_scaling = self.getProperty('EmptyContainerScaling').value
+        Scale(InputWorkspace=empty_ws,
+              OutputWorkspace=empty_correction_ws,
+              Factor=empty_scaling)
+        Minus(LHSWorkspace=ws,
+              RHSWorkspace=mtd[empty_correction_ws][0],
+              OutputWorkspace=ws)
+        if self.clear_cache:
+            DeleteWorkspace(Workspace=empty_correction_ws)
 
 
 AlgorithmFactory.subscribe(DirectILLAutoProcess)
