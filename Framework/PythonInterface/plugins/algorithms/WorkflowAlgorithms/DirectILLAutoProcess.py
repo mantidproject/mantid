@@ -130,6 +130,17 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.getProperty('MaskWithVanadium').value and self.getProperty('VanadiumWorkspace').isDefault:
             issues['VanadiumWorkspace'] = 'Please provide a vanadium input for a masking reference.'
 
+        if not self.getProperty('FlatBackgroundSource').isDefault \
+                and self.getPropertyValue('FlatBackgroundSource') not in mtd:
+            # attempts to load the file, raises a runtime error if the desired file does not exist
+            flat_bkg_ws = self.getPropertyValue('FlatBackgroundSource')
+            try:
+                Load(Filename=flat_bkg_ws,
+                     OutputWorkspace=flat_bkg_ws)
+            except ValueError:
+                issues['FlatBackgroundSource'] = "Desired flat background workspace:" \
+                                                 " {} cannot be found.".format(flat_bkg_ws)
+
         if self.getPropertyValue('AbsorptionCorrection') != 'None':
             if self.getProperty('SampleMaterial').isDefault:
                 issues['SampleMaterial'] = 'Please define sample material.'
@@ -169,6 +180,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
         if self.vanadium != str():
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
+        self.flat_background = self.getPropertyValue('FlatBackgroundSource')
         self.save_output = self.getProperty('SaveOutput').value
         self.clear_cache = self.getProperty('ClearCache').value
 
@@ -412,9 +424,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         ws = "{}_{}".format(get_run_number(sample), 'raw')
         kwargs = dict()
         if not self.getProperty('FlatBackgroundSource').isDefault:
-            kwargs['FlatBkgWorkspace'] = self.getPropertyValue('FlatBackgroundSource')
+            kwargs['FlatBkgWorkspace'] = self.flat_background
             kwargs[common.PROP_FLAT_BKG_SCALING] = self.flat_bkg_scaling
-        elif not self.getProperty(common.PROP_FLAT_BKG).isDefault:
+        if not self.getProperty(common.PROP_FLAT_BKG).isDefault:
             kwargs[common.PROP_FLAT_BKG] = self.getPropertyValue(common.PROP_FLAT_BKG)
             kwargs[common.PROP_FLAT_BKG_WINDOW] = self.getPropertyValue(common.PROP_FLAT_BKG_WINDOW)
         if not self.getProperty(common.PROP_DET_HOR_GROUPING).isDefault:
