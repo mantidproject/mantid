@@ -815,24 +815,22 @@ class BasicFittingModel:
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
         if self.fitting_context.plot_guess_type == 'x from plot range':
-            evaluate_workspace = self.current_dataset_name
+            data_ws = retrieve_ws(self.current_dataset_name)
+            data = np.linspace(self.current_start_x, self.current_end_x, data_ws.getNumberBins())
         elif self.fitting_context.plot_guess_type == 'x at data points':
             data = np.linspace(self.current_start_x, self.current_end_x, self.fitting_context.plot_guess_points)
-            CreateWorkspace(OutputWorkspace='__tmp_guess_workspace', DataX=data, DataY=data)
-            evaluate_workspace = '__tmp_guess_workspace'
         elif self.fitting_context.plot_guess_type == 'Custom x range':
             data = np.linspace(self.fitting_context.plot_guess_start_x, self.fitting_context.plot_guess_end_x,
                                self.fitting_context.plot_guess_points)
-            CreateWorkspace(OutputWorkspace='__tmp_guess_workspace', DataX=data, DataY=data)
-            evaluate_workspace = '__tmp_guess_workspace'
         else:
             raise ValueError('Plot guess type: ' + self.fitting_context.plot_guess_type + ' is not recognised')
 
+        tmp_guess_workspace = CreateWorkspace(DataX=data, DataY=data, StoreInADS=False)
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace=evaluate_workspace,
+                EvaluateFunction(InputWorkspace=tmp_guess_workspace,
                                  Function=fit_function,
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
