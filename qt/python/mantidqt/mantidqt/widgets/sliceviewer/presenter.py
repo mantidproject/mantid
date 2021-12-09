@@ -402,6 +402,8 @@ class SliceViewer(ObservingPresenter):
         @param workspace: the workspace that has changed
         """
         if not self.model.workspace_equals(workspace_name):
+            # TODO this is a dead branch, since the ADS observer will call this if the
+            # names are the same, but the model "workspace_equals" simply checks for the same name
             return
         try:
             candidate_model = SliceViewerModel(workspace)
@@ -426,7 +428,7 @@ class SliceViewer(ObservingPresenter):
         # The view currently introduces a delay before calling this function, which
         # causes a race condition where it's possible the view could be closed in
         # the meantime, so check it still exists. See github issue #30406 for detail.
-        if sip.isdeleted(self.view):
+        if isinstance(self.view, sip.simplewrapper) and sip.isdeleted(self.view):
             return
 
         # we don't want to use model.get_ws for the image info widget as this needs

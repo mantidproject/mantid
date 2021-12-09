@@ -101,6 +101,12 @@ class SliceViewerTest(unittest.TestCase):
             "supports_peaks_overlays": True
         }
 
+    def test_on_close(self):
+        pres = SliceViewer(mock.Mock(), model=mock.MagicMock(), view=mock.MagicMock())
+        self.assertIsNotNone(pres.ads_observer)
+        pres.clear_observer()
+        self.assertEqual(pres.ads_observer, None)
+
     @patch("sip.isdeleted", return_value=False)
     def test_sliceviewer_MDH(self, _):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
@@ -504,6 +510,68 @@ class SliceViewerTest(unittest.TestCase):
 
         # Will raise exception if misbehaving.
         presenter.clear_observer()
+
+    def test_delete_workspace(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model._ws = "test_name"
+        pres.delete_workspace(mock_model._ws)
+        mock_view.emit_close.assert_called_once()
+
+    def test_workspace_not_deleted_with_different_name(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model._ws = "test_name"
+        pres.delete_workspace("different_name")
+        mock_view.emit_close.assert_not_called()
+
+    def test_replace_workspace_does_nothing_if_workspace_is_unchanged(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        # TODO The return value here should be True but there is a bug in the
+        # presenter where the condition is always incorrect (see the TODO on
+        # replace_workspace in the presenter)
+        mock_model.workspace_equals.return_value = False
+        pres._close_view_with_message = mock.Mock()
+
+        pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
+
+        pres._close_view_with_message.assert_not_called()
+        self.assertEquals(mock_model, pres.model)
+
+    def test_replace_workspace_replaces_model(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model.workspace_equals.return_value = True
+        with mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceViewerModel") as mock_model_class:
+            pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
+            self.assertEquals(mock_model_class.return_value, pres.model)
+
+    def test_rename_workspace(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model._get_ws.return_value = "old_name"
+        pres.rename_workspace("old_name", "new_name")
+        mock_view.emit_rename.assert_called_once_with(mock_model.get_title.return_value)
+
+    def test_rename_workspace_not_renamed_with_different_name(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model._get_ws.return_value = "different_name"
+        pres.rename_workspace("old_name", "new_name")
+        mock_view.emit_rename.assert_not_called()
+
+    def test_clear_ADS(self):
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock.MagicMock(), view=mock_view)
+        pres.ADS_cleared()
+        mock_view.emit_close.assert_called_once()
 
     @patch("sip.isdeleted", return_value=False)
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")

@@ -24,7 +24,7 @@ from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayo
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from .dimensionwidget import DimensionWidget
+from mantidqt.widgets.sliceviewer.dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from .lineplots import LinePlots
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
@@ -177,9 +177,12 @@ class SliceViewerDataView(QWidget):
         self.nonortho_transform = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
-        if self.grid_on:
-            self.ax.grid(self.grid_on)
+        self.ax.grid(self.grid_on)
         if self.line_plots_active:
+            # Force lineplots to redraw now we have refreshed the canvas. The underlying
+            # method will skip setting this on MPL if line_plots_active is true, so coerce
+            # back to False
+            self.line_plots_active = False
             self.add_line_plots()
 
         self.plot_MDH = self.plot_MDH_orthogonal
@@ -495,9 +498,8 @@ class SliceViewerDataView(QWidget):
         """
         If not visible sets the grid visibility
         """
-        if not self._grid_on:
-            self._grid_on = True
-            self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
+        self._grid_on = True
+        self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
 
     def set_nonorthogonal_transform(self, transform):
         """
