@@ -66,6 +66,7 @@ set(SRC_FILES
     src/Functions/ComptonProfile.cpp
     src/Functions/ComptonScatteringCountRate.cpp
     src/Functions/Convolution.cpp
+    src/Functions/CriticalPeakRelaxationRate.cpp
     src/Functions/CrystalElectricField.cpp
     src/Functions/CrystalFieldControl.cpp
     src/Functions/CrystalFieldFunction.cpp
@@ -244,6 +245,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ComptonProfile.h
     inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
     inc/MantidCurveFitting/Functions/Convolution.h
+    inc/MantidCurveFitting/Functions/CriticalPeakRelaxationRate.h
     inc/MantidCurveFitting/Functions/CrystalElectricField.h
     inc/MantidCurveFitting/Functions/CrystalFieldControl.h
     inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
@@ -413,6 +415,7 @@ set(TEST_FILES
     Functions/ComptonProfileTest.h
     Functions/ComptonScatteringCountRateTest.h
     Functions/ConvolutionTest.h
+    Functions/CriticalPeakRelaxationRateTest.h
     Functions/CrystalFieldControlTest.h
     Functions/CrystalFieldEnergiesTest.h
     Functions/CrystalFieldFunctionTest.h
