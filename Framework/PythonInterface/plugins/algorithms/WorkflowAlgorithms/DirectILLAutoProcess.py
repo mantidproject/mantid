@@ -386,14 +386,17 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             if self.process == 'Vanadium':
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
                 current_output = [ws_sofq, ws_softw, ws_diag, ws_integral]
+                current_output = self._rename_workspaces(current_output)
                 output_samples.extend(current_output)
             elif self.process == 'Sample':
                 sample_sofq, sample_softw = self._process_sample(ws, sample_no)
                 current_output = np.array([sample_sofq, sample_softw])
                 current_output = current_output[[isinstance(elem, str) for elem in current_output]]
+                current_output = self._rename_workspaces(current_output)
                 output_samples.extend(current_output)
             else:  # Empty or Cadmium
                 current_output = ws
+                current_output = self._rename_workspaces(current_output)
                 output_samples.append(current_output)
             self._group_detectors(current_output)
             if self.save_output:
@@ -553,6 +556,25 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             RenameWorkspace(InputWorkspace=existing_masks[0], OutputWorkspace=mask_ws)
         self.to_clean.append(mask_ws)
         return mask_ws
+
+    def _rename_workspaces(self, ws_list):
+        """Renames workspaces in the provided list by appending a custom suffix containing the user-defined output
+        group name, incident energy, and sample temperature (for powder reduction only)."""
+        output_group_name = self.output
+        new_ws_list = []
+        temp_log_name = 'sample.temperature'
+        for name in ws_list:
+            run = mtd[name].getRun()
+            ei = run.getLogData('Ei').value
+            new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, name, ei)
+            temp = run.getLogData(temp_log_name).value
+            self.temperatures.add(temp)
+            if self.reduction_type == 'Powder':
+                new_name = '{}_T_{:.1f}'.format(new_name, temp)
+            RenameWorkspace(InputWorkspace=name, OutputWorkspace=new_name)
+            new_ws_list.append(new_name)
+
+        return new_ws_list
 
     def _apply_mask(self, ws):
         """Applies selected masks."""
