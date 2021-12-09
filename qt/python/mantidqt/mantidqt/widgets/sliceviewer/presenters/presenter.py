@@ -21,9 +21,12 @@ from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserve
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.interfacemanager import InterfaceManager
+from ..models.dimensions import Dimensions
+from ..models.workspaceinfo import WorkspaceInfo
+from ..views.dataviewsubscriber import IDataViewSubscriber
 
 
-class SliceViewer(ObservingPresenter):
+class SliceViewer(ObservingPresenter, IDataViewSubscriber):
     TEMPORARY_STATUS_TIMEOUT = 2000
 
     def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None, conf=None):
@@ -48,12 +51,13 @@ class SliceViewer(ObservingPresenter):
         self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
         self.normalization = False
 
-        self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
+        self._dimensions = Dimensions(ws)
+        self.view = view if view else SliceViewerView(self, self._dimensions.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent,
                                                       window_flags, conf)
         self.view.setWindowTitle(self.model.get_title())
         self.view.data_view.create_axes_orthogonal(
-            redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
+            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(self.model._get_ws()))
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -93,7 +97,7 @@ class SliceViewer(ObservingPresenter):
         data_view = self.view.data_view
         limits = data_view.get_axes_limits()
 
-        if limits is None or not self.model.can_support_dynamic_rebinning():
+        if limits is None or not WorkspaceInfo.can_support_dynamic_rebinning(self.model._get_ws()):
             data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
@@ -222,7 +226,7 @@ class SliceViewer(ObservingPresenter):
     def data_limits_changed(self):
         """Notify data limits on image axes have changed"""
         data_view = self.view.data_view
-        if self.model.can_support_dynamic_rebinning():
+        if WorkspaceInfo.can_support_dynamic_rebinning(self.model._get_ws()):
             self.new_plot()  # automatically uses current display limits
         else:
             data_view.draw_plot()
@@ -456,20 +460,20 @@ class SliceViewer(ObservingPresenter):
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
-    def add_delete_peak(self, event):
+    def mpl_button_clicked(self, event):
         if self._peaks_presenter is not None:
             if event.inaxes:
                 sliceinfo = self.get_sliceinfo()
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
-                self._peaks_presenter.add_delete_peak(pos)
+                self._peaks_presenter.mpl_button_clicked(pos)
                 self.view.data_view.canvas.draw_idle()
 
     def deactivate_zoom_pan(self):
         self.view.data_view.deactivate_zoom_pan()
 
-    def deactivate_peak_adding(self, active):
+    def zoom_pan_clicked(self, active):
         if active and self._peaks_presenter is not None:
             self._peaks_presenter.deactivate_peak_add_delete()
 
@@ -511,9 +515,11 @@ class SliceViewer(ObservingPresenter):
         new_plot and update_plot_data methods to use
         :return: the new_plot method to use
         """
-        if self.model.get_ws_type() == WS_TYPE.MDH:
+        # TODO get rid of private access here
+        ws_type = WorkspaceInfo.get_ws_type(self.model._get_ws())
+        if ws_type == WS_TYPE.MDH:
             return self.new_plot_MDH, self.update_plot_data_MDH
-        elif self.model.get_ws_type() == WS_TYPE.MDE:
+        elif ws_type == WS_TYPE.MDE:
             return self.new_plot_MDE, self.update_plot_data_MDE
         else:
             return self.new_plot_matrix, self.update_plot_data_matrix
