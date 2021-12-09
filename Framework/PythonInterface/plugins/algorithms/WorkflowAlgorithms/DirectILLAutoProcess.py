@@ -7,7 +7,7 @@
 
 import DirectILL_common as common
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
-    MultipleFileProperty, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
+    MultipleFileProperty, Progress, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
     FloatBoundedValidator, IntBoundedValidator, IntArrayProperty, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
@@ -391,30 +391,45 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     def PyExec(self):
         self.setUp()
         sample_runs = self.getPropertyValue('Runs').split(',')
+        processes = ['Cadmium', 'Empty', 'Vanadium', 'Sample']
+        nReports = np.array([3, 3, 3, 3])
+        nReports *= len(sample_runs)
+        nReports += 1  # for the wrapping up report
+        if self.masking:
+            nReports += 1
+        progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(self.process)]))
         output_samples = []
         for sample_no, sample in enumerate(sample_runs):
-            current_output = []  # output of the current iteration of reduction
+            progress.report("Collecting data")
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
             if self.masking and sample_no == 0:  # prepares masks once, and when the instrument is known
+                progress.report("Preparing masks")
                 self.mask_ws = self._prepare_masks()
             if self.process == 'Vanadium':
+                progress.report("Processing vanadium")
                 ws_sofq, ws_softw, ws_diag, ws_integral = self._process_vanadium(ws)
                 current_output = [ws_sofq, ws_softw, ws_diag, ws_integral]
+                progress.report("Renaming output")
                 current_output = self._rename_workspaces(current_output)
                 output_samples.extend(current_output)
             elif self.process == 'Sample':
+                progress.report("Processing sample")
                 sample_sofq, sample_softw = self._process_sample(ws, sample_no)
                 current_output = np.array([sample_sofq, sample_softw])
                 current_output = current_output[[isinstance(elem, str) for elem in current_output]]
+                progress.report("Renaming output")
                 current_output = self._rename_workspaces(current_output)
                 output_samples.extend(current_output)
             else:  # Empty or Cadmium
+                progress.report("Renaming output")
                 current_output = ws
                 current_output = self._rename_workspaces(current_output)
                 output_samples.append(current_output)
             self._group_detectors(current_output)
             if self.save_output:
                 self._save_output(current_output)
+
+        progress.report("Wrapping up")
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
         if self.clear_cache:  # final clean up
