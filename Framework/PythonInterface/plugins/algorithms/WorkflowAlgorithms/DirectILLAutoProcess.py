@@ -71,6 +71,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     absorption_corr = None
     save_output = None
     clear_cache = None
+    temperatures = None
 
     def category(self):
         return "{};{}".format(common.CATEGORIES, "ILL\\Auto")
@@ -183,6 +184,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.flat_background = self.getPropertyValue('FlatBackgroundSource')
         self.save_output = self.getProperty('SaveOutput').value
         self.clear_cache = self.getProperty('ClearCache').value
+        self.temperatures = set()
 
     def PyInit(self):
 
@@ -417,6 +419,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                         OutputWorkspace=self.output)
         if self.clear_cache:  # final clean up
             self._clean_up(self.to_clean)
+        self._print_report()
         self.setProperty('OutputWorkspace', mtd[self.output])
 
     def _collect_data(self, sample, vanadium=False):
@@ -805,6 +808,45 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self._clean_up(to_remove)
 
         return processed_sample, processed_sample_tw
+
+    def _print_report(self):
+        """Prints a summary report containing the most relevant information about the performed data reduction."""
+        # removes the full path of the data source and also the .nxs extension:
+        first_sample_numor = self.sample[0][self.sample[0].rfind('/')+1:-4]
+        used_samples = "Sample runs: {}".format(first_sample_numor)
+        if len(self.sample) > 1:
+            last_sample_numor = self.sample[-1][self.sample[-1].rfind('/')+1:-4]
+            used_samples = "{} to {}".format(used_samples, last_sample_numor)
+
+        used_inputs = ["Used inputs:"]
+        if self.cadmium:
+            used_inputs.append("Cadmium: {}".format(self.cadmium))
+        if self.empty:
+            used_inputs.append("Empty container: {}".format(self.empty))
+            if not self.getProperty('EmptyContainerScaling').isDefault:
+                used_inputs.append("Scaled by: {}".format(self.getProperty('EmptyContainerScaling').value))
+        if self.vanadium:
+            used_inputs.append("Vanadium: {}".format(self.vanadium))
+        if self.flat_background:
+            used_inputs.append("Flat background source: {}".format(self.flat_background))
+            if not self.getProperty(common.PROP_FLAT_BKG_SCALING).isDefault:
+                used_inputs.append("Scaled by: {}".format(self.getProperty(common.PROP_FLAT_BKG_SCALING).value))
+        if not self.getProperty('MaskWorkspace').isDefault:
+            used_inputs.append("Mask workspace: {}".format(self.getPropertyValue('MaskWorkspace')))
+        used_inputs = '\n'.join(used_inputs) if len(used_inputs) > 1 else None
+
+        incident_energy = mtd[self.output][0].getRun().getLogData('Ei').value
+        sample_temperatures = ', '.join(['{:.2f}'.format(value) for value in sorted(self.temperatures)])
+        experimental_conditions = ["Processed as: {}".format(self.process),
+                                   "Reduction technique: {}".format(self.reduction_type),
+                                   "Incident energy: {:.1f} meV.".format(incident_energy),
+                                   "Sample temperature(s): {} K".format(sample_temperatures)]
+        experimental_conditions = '\n'.join(experimental_conditions)
+        self.log().notice("Summary report")
+        self.log().notice(used_samples)
+        if used_inputs is not None:
+            self.log().notice(used_inputs)
+        self.log().notice(experimental_conditions)
 
 
 AlgorithmFactory.subscribe(DirectILLAutoProcess)
