@@ -322,3 +322,6 @@ class BasicFittingView(ui_form, base_widget):
     def enable_view(self) -> None:
         """Enable all widgets in this fitting widget."""
         self.setEnabled(self.workspace_selector.number_of_datasets() != 0)
+
+    def show_fit_script_generator(self) ->None:
+        self.fit_controls.show_fit_script_generator()

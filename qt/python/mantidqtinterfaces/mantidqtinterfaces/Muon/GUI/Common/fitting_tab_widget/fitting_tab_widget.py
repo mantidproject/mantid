@@ -36,3 +36,6 @@ class FittingTabWidget(object):
 
         context.update_view_from_model_notifier.add_subscriber(
             self.fitting_tab_presenter.update_view_from_model_observer)
+
+    def show_fit_script_generator(self)->None:
+        self.fitting_tab_view.show_fit_script_generator()
