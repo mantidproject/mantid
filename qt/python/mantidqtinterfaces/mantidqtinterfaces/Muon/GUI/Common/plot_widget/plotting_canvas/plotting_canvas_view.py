@@ -23,7 +23,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 from textwrap import wrap
-
+from matplotlib.ticker import StrMethodFormatter, NullFormatter
 from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
@@ -235,7 +235,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _set_text_tick_labels(self, axis_number):
         ax = self.fig.axes[axis_number]
         # set the axes to not "simplify" the values
-        ax.ticklabel_format(useOffset=self._settings.sci_notation)
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+        ax.xaxis.set_minor_formatter(NullFormatter())
+        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+        ax.yaxis.set_minor_formatter(NullFormatter())
         if self._x_tick_labels:
             ax.set_xticks(range(len(self._x_tick_labels)))
             labels = self._wrap_labels(self._x_tick_labels)
