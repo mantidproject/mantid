@@ -781,7 +781,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             else:
                 RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
                 to_remove.pop()
-            # saving of the output is omitted at this point: it is handled by Drill interface
         else:
             processed_sample = 'SofQW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofQW and numor
             processed_sample_tw = 'SofTW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofTW and numor
