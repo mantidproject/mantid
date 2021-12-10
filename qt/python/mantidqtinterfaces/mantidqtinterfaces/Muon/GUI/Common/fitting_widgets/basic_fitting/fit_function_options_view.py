@@ -431,7 +431,8 @@ class FitFunctionOptionsView(ui_form, base_widget):
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_TYPE, "Plot guess using")
         self.plot_guess_type_combo = table_utils.addComboToTable(self.fit_options_table, PLOT_GUESS_TYPE,
-                                                                 ['x from plot range', 'x at data points',
+                                                                 ['x from fit range',
+                                                                  'Uniform points across data range',
                                                                   'Custom x range'])
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_POINTS, "Points")

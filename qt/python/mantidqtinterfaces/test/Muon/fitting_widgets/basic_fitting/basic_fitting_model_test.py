@@ -497,7 +497,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from plot range'
+        self.model.plot_guess_type = 'x from fit range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -506,7 +506,7 @@ class BasicFittingModelTest(unittest.TestCase):
                         'basic_fitting_model.EvaluateFunction') as mock_evaluate:
             self.model._get_guess_parameters = mock.Mock(return_value=['func', 'ws'])
             self.model.update_plot_guess()
-            mock_evaluate.assert_called_with(InputWorkspace='__tmp_guess_workspace',
+            mock_evaluate.assert_called_with(InputWorkspace=mock.ANY,
                                              Function=self.model.current_single_fit_function,
                                              OutputWorkspace=guess_workspace_name)
 
@@ -519,7 +519,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from plot range'
+        self.model.plot_guess_type = 'x from fit range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -528,7 +528,7 @@ class BasicFittingModelTest(unittest.TestCase):
         type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
         self.model.update_plot_guess()
 
-        mock_evaluate.assert_called_with(InputWorkspace='__tmp_guess_workspace',
+        mock_evaluate.assert_called_with(InputWorkspace=mock.ANY,
                                          Function=self.model.current_single_fit_function,
                                          OutputWorkspace=guess_workspace_name)
 
@@ -542,7 +542,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = False
-        self.model.plot_guess_type = 'x from plot range'
+        self.model.plot_guess_type = 'x from fit range'
 
         self.model.context = mock.Mock()
         self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=None)
@@ -560,7 +560,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from plot range'
+        self.model.plot_guess_type = 'x from fit range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
@@ -581,7 +581,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from plot range'
+        self.model.plot_guess_type = 'x from fit range'
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -590,9 +590,10 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.update_plot_guess()
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
+        data_workspace = AnalysisDataService.retrieve(self.dataset_names[0])
         self.assertEquals(guess_workspace.dataX(0).min(), 0.0)
         self.assertEquals(guess_workspace.dataX(0).max(), 10.0)
-        self.assertEquals(guess_workspace.dataX(0).size, 250)
+        self.assertEquals(guess_workspace.dataX(0).size, data_workspace.blocksize())
 
     def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_data_points_type_is_selected(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
@@ -602,7 +603,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x at data points'
+        self.model.plot_guess_type = 'Uniform points across data range'
         self.model.plot_guess_points = 1000
 
         self.model.context = mock.Mock()
@@ -612,8 +613,9 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.update_plot_guess()
 
         guess_workspace = AnalysisDataService.retrieve(guess_workspace_name)
-        self.assertEquals(guess_workspace.dataX(0).min(), 0.0)
-        self.assertEquals(guess_workspace.dataX(0).max(), 10.0)
+        data_workspace = AnalysisDataService.retrieve(self.dataset_names[0])
+        self.assertEquals(guess_workspace.dataX(0).min(), data_workspace.dataX(0).min())
+        self.assertEquals(guess_workspace.dataX(0).max(), data_workspace.dataX(0).max())
         self.assertEquals(guess_workspace.dataX(0).size, 1000)
 
     def test_update_plot_guess_will_use_tmp_workspace_with_data_range_if_custom_type_is_selected(self):

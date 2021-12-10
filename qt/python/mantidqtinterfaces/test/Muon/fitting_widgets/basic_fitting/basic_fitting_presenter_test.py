@@ -284,14 +284,14 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_plot_range(self):
-        self.presenter.view.plot_guess_type = 'x from plot range'
+        self.presenter.view.plot_guess_type = 'x from fit range'
         self.presenter.handle_plot_guess_type_changed()
         self.view.show_plot_guess_points.assert_called_with(False)
         self.view.show_plot_guess_start_x.assert_called_with(False)
         self.view.show_plot_guess_end_x.assert_called_with(False)
 
     def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_data_points(self):
-        self.presenter.view.plot_guess_type = 'x at data points'
+        self.presenter.view.plot_guess_type = 'Uniform points across data range'
         self.presenter.handle_plot_guess_type_changed()
         self.view.show_plot_guess_points.assert_called_with(True)
         self.view.show_plot_guess_start_x.assert_called_with(False)

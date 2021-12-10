@@ -241,11 +241,11 @@ class BasicFittingPresenter:
     def handle_plot_guess_type_changed(self) -> None:
         """Handle when the evaluation type is changed."""
         self.model.plot_guess_type = self.view.plot_guess_type
-        if self.model.plot_guess_type == 'x from plot range':
+        if self.model.plot_guess_type == 'x from fit range':
             self.view.show_plot_guess_points(False)
             self.view.show_plot_guess_start_x(False)
             self.view.show_plot_guess_end_x(False)
-        elif self.model.plot_guess_type == 'x at data points':
+        elif self.model.plot_guess_type == 'Uniform points across data range':
             self.view.show_plot_guess_points(True)
             self.view.show_plot_guess_start_x(False)
             self.view.show_plot_guess_end_x(False)
