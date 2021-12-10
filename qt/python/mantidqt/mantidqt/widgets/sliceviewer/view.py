@@ -178,13 +178,6 @@ class SliceViewerDataView(QWidget):
         self.ax = self.fig.add_subplot(111, projection='mantid')
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
         self.ax.grid(self.grid_on)
-        if self.line_plots_active:
-            # Force lineplots to redraw now we have refreshed the canvas. The underlying
-            # method will skip setting this on MPL if line_plots_active is true, so coerce
-            # back to False
-            self.line_plots_active = False
-            self.add_line_plots()
-
         self.plot_MDH = self.plot_MDH_orthogonal
 
         self.canvas.draw_idle()
@@ -345,6 +338,7 @@ class SliceViewerDataView(QWidget):
         """Removes everything from the figure"""
         if self.line_plots_active:
             self._line_plots.plotter.close()
+            self.line_plots_active = False
         self.image = None
         self.canvas.disable_zoom_on_scroll()
         self.fig.clf()
