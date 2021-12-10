@@ -248,7 +248,7 @@ def run_Plus(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
-def convert_to_field(workspace_name):
+def convert_to_field(workspace_name, output_name):
     """
     Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
     """
@@ -256,10 +256,26 @@ def convert_to_field(workspace_name):
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setProperty("InputWorkspace", workspace_name)
-    alg.setProperty("OutputWorkspace", workspace_name)
+    alg.setProperty("OutputWorkspace", output_name)
     alg.setProperty("Formula", 'x * 1. / '+str(const.MuonGyromagneticRatio))
     alg.setProperty("AxisTitle", 'Field')
     alg.setProperty('AxisUnits', 'Gauss')
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def convert_to_freq(workspace_name, output_name):
+    """
+    Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
+    """
+    alg = mantid.AlgorithmManager.create("ConvertAxisByFormula")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", workspace_name)
+    alg.setProperty("OutputWorkspace", output_name)
+    alg.setProperty("Formula", 'x * '+str(const.MuonGyromagneticRatio))
+    alg.setProperty("AxisTitle", 'Frequency')
+    alg.setProperty('AxisUnits', 'MHz')
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 
