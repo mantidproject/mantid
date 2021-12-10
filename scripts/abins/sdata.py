@@ -422,7 +422,11 @@ class SData(collections.abc.Sequence):
 
         for order_index, order_multiplier in enumerate(other):
             for atom_data in self:
-                atom_data[f'order_{order_index + 1}'] *= order_multiplier
+                if (len(atom_data[f'order_{order_index + 1}'].shape) == 1
+                        and len(other.shape) == 3):
+                    atom_data[f'order_{order_index + 1}'] = atom_data[f'order_{order_index + 1}'][np.newaxis, :] * order_multiplier
+                else:
+                    atom_data[f'order_{order_index + 1}'] *= order_multiplier
 
         return self
 

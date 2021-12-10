@@ -338,8 +338,8 @@ class SPowderSemiEmpiricalCalculator:
             SData
         """
         # Initialize the main data container
-        sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
-                                      max_order=self._quantum_order_num)
+        # sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution,
+        #                               max_order=self._quantum_order_num)
 
         q2 = (self._q_bin_centres**2)[:, np.newaxis]
 
@@ -360,11 +360,33 @@ class SPowderSemiEmpiricalCalculator:
                                                         bins=(self._fine_bins if self._autoconvolution else self._bins),
                                                         sdata=sdata_1d, min_order=min_order)
 
-        # (order, q, energy)
-        q2_order_corrections = q2**np.arange(self._quantum_order_num)[:, np.newaxis, np.newaxis]
+        if self._autoconvolution:
+            max_dw_order = abins.parameters.autoconvolution['max_order']
+            self._report_progress(f"Finished calculating SData to order {self._quantum_order_num} by "
+                                  f"analytic powder-averaging. "
+                                  f"Adding autoconvolution data up to order {max_dw_order}.",
+                                  reporter=self.progress_reporter)
 
-        sdata_1d *= q2_order_corrections
-        raise Exception(sdata_1d[0])
+            sdata_1d.add_autoconvolution_spectra(normalise=False)
+            sdata_1d = sdata_1d.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
+
+            # Apply appropriate q-dependence to each order, along with 1/(n!) term
+            factorials = factorial(range(1, max_dw_order + 1))[:, np.newaxis, np.newaxis]
+            factorials[:min_order + 1] = 1.  # Remove 1/n! for orders that were explicitly calculated
+
+            q2n_over_n_factorial = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis, np.newaxis] / factorials
+            sdata = sdata_1d * q2n_over_n_factorial
+        else:
+            # (order, q, energy)
+            q2_order_corrections = q2**np.arange(self._quantum_order_num)[:, np.newaxis, np.newaxis]
+
+            sdata = sdata_1d * q2_order_corrections
+
+        if isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
+            self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
+                                  reporter=self.progress_reporter)
+            iso_dw = self.calculate_isotropic_dw(q2=q2[:,np.newaxis])
+            sdata.apply_dw(np.swapaxes(iso_dw, 0, 1), min_order=min_order, max_order=max_dw_order)
 
         # Calculate fundamentals with DW corrections explicitly
         fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
@@ -372,10 +394,12 @@ class SPowderSemiEmpiricalCalculator:
 
         import matplotlib.pyplot as plt
         from matplotlib.image import NonUniformImage
+        from matplotlib.colors import Normalize
         fig, ax = plt.subplots()
         image = NonUniformImage(ax,
                                 extent=(min(self._q_bins), max(self._q_bins),
                                         min(self._bins), max(self._bins)))
+        image.set_norm(Normalize(0, 0.1))
         image.set_data(self._q_bin_centres, self._bin_centres,
                        sdata.get_total_intensity().T)
         ax.images.append(image)
@@ -496,9 +520,10 @@ class SPowderSemiEmpiricalCalculator:
 
         Args:
             shape:
-                '1d', '2d' or None. If '1d', spectra are 1-D (corresponding to
-                energy). If '2d', spectra have rows corresponding to q bin centres.
-                If None, detect dimensions based on presence of self._q_bin_centres.
+                '1d', '2d', or None. If '1d', spectra are 1-D (corresponding to
+                energy). If '2d', spectra have rows corresponding to q bin
+                centres. If None, detect dimensions based on presence of
+                self._q_bin_centres.
 
         """
         bin_centres = self._fine_bin_centres if use_fine_bins else self._bin_centres
@@ -508,8 +533,6 @@ class SPowderSemiEmpiricalCalculator:
 
         if (shape and shape.lower() == '1d') or (shape is None and self._q_bin_centres is None):
             n_rows = None
-        elif shape == '2d_onerow':
-            n_rows = 1
         else:
             n_rows = len(self._q_bin_centres)
 
