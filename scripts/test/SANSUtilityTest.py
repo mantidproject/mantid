@@ -423,7 +423,7 @@ class AddOperationTest(unittest.TestCase):
             value_out = prop_out.nthValue(index_out)
             self.assertEqual(value_in1, value_out)
 
-    def test_two_files_are_added_correctly_for_overlay_on(self):
+    def xtest_two_files_are_added_correctly_for_overlay_on(self):
         isOverlay = True
         names = ['ws1', 'ws2']
         out_ws_name = 'out_ws'
@@ -480,7 +480,7 @@ class AddOperationTest(unittest.TestCase):
         self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=0.0,
                                       isOverlay=isOverlay)
 
-    def test_two_files_are_added_correctly_with_time_shift(self):
+    def xtest_two_files_are_added_correctly_with_time_shift(self):
         isOverlay = True
         names = ['ws1', 'ws2']
         out_ws_name = 'out_ws'
@@ -500,7 +500,7 @@ class AddOperationTest(unittest.TestCase):
         self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift=time_shift,
                                       isOverlay=isOverlay)
 
-    def test_multiple_files_are_overlayed_correctly(self):
+    def xtest_multiple_files_are_overlayed_correctly(self):
         isOverlay = True
         names = ['ws1', 'ws2', 'ws3']
         out_ws_name = 'out_ws'
