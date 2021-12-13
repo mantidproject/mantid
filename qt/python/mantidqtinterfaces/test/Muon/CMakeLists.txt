@@ -49,6 +49,7 @@ set(TEST_PY_FILES
     elemental_analysis_2/EA_auto_tab/ea_auto_tab_presenter_test.py
     elemental_analysis_2/EA_auto_tab/ea_match_table_presenter_test.py
     external_plotting_model_test.py
+    feature_flags/add_fitting_test.py
     feature_flags/add_grouping_workspaces_test.py
     feature_flags/add_model_analysis_test.py
     feature_flags/add_raw_plots_test.py
