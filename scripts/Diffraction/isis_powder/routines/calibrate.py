@@ -114,9 +114,13 @@ def create_van_per_detector(instrument, run_details, absorb):
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
 
-    # convert back to TOF based on engineered detector positions
+    # Do not clear the calibration using ApplyDiffCal()
+    # convert back to TOF based on calibrated detector positions
+    # this is unfocused data so the calibration is still valid
+
     mantid.ApplyDiffCal(InstrumentWorkspace=aligned_ws,
                         ClearCalibration=True)
+
     run_number = str(run_details.output_run_string)
     ext = run_details.file_extension if run_details.file_extension else ""
     d_spacing_out_name = run_number + ext + "-ResultD"

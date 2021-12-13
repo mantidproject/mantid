@@ -68,7 +68,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Material=common.generate_sample_material(sample_details))
 
     if placzek_run_number:
-        # apply per detector vanadium correction
+        # apply per detector vanadium correction on uncalibrated data
         input_workspace = _apply_vanadium_corrections_per_detector(instrument=instrument,
                                                                    input_workspace=input_workspace,
                                                                    perform_vanadium_norm=perform_vanadium_norm,
@@ -89,6 +89,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
         aligned_ws = mantid.Divide(LHSWorkspace=aligned_ws, RHSWorkspace=solid_angle)
         mantid.DeleteWorkspace(solid_angle)
 
+    mantid.ConvertFromDistribution(aligned_ws)
     # Focus the spectra into banks
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
@@ -143,9 +144,29 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
 
 def _apply_vanadium_corrections_per_detector(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):
 
-    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
-    processed_spectra = _subtract_correction(data_workspace=input_workspace,
-                                             correction_workspace=vanadium_splines)
+    data_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
+    # processed_spectra = _subtract_correction(data_workspace=input_workspace,
+    #                                          correction_workspace=vanadium_splines)
+    # Remove Masked and Monitor spectra
+    mantid.ExtractMonitors(InputWorkspace=vanadium_splines,
+                           DetectorWorkspace="correction_workspace",
+                           MonitorWorkspace="correction_workspace_monitors")
+    correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="correction_workspace")
+    correction_workspace.clearMonitorWorkspace()
+
+    mantid.ExtractMonitors(InputWorkspace=data_workspace,
+                           DetectorWorkspace="data_workspace",
+                           MonitorWorkspace="data_workspace_monitors")
+    data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
+    data_workspace.clearMonitorWorkspace()
+
+    # Match and Subtract workspaces
+    correction_workspace = mantid.RebinToWorkspace(WorkspaceToRebin="correction_workspace",
+                                                   WorkspaceToMatch="data_workspace")
+    processed_spectra = mantid.Divide(LHSWorkspace=data_workspace,
+                                                      RHSWorkspace=correction_workspace,
+                                                      AllowDifferentNumberSpectra=True)
+
     return processed_spectra
 
 
