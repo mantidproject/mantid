@@ -13,6 +13,7 @@ Improvements
 
 - The default value of monitor peak width multiplier (MonitorPeakWidthInSigmas) has been changed from 3 to 7 in :ref:`DirectILLCollectData <algm-DirectILLCollectData>`
 - The :ref:`PyChop <PyChop>` GUI now has the ability to handle multiple independently phased choppers
+- The Crystal Field Python interface has two new fitting functions alternating optimization over field parameters and peak parameters. One function is based on the Mantid fitting for both parts, the other uses scipy.optimize.minimize for the field parameters.
 
 Bugfixes
 ########
