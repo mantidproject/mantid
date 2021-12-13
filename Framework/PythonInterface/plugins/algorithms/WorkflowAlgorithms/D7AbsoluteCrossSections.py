@@ -555,6 +555,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                                  cr_section=cross_sections)
                     to_clean = output_data[-1]
                     RenameWorkspace(InputWorkspace=output_data[0], OutputWorkspace=total_cs)
+                    separated_cs.append(total_cs)
                     RenameWorkspace(InputWorkspace=output_data[1], OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
                     RenameWorkspace(InputWorkspace=output_data[2], OutputWorkspace=incoherent_cs)
