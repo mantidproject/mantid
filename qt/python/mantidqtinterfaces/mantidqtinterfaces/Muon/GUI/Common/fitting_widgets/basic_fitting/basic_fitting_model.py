@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, CreateWorkspace, EvaluateFunction
+from mantid.simpleapi import CopyLogs, EvaluateFunction, Workspace
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
@@ -826,7 +826,9 @@ class BasicFittingModel:
         else:
             raise ValueError('Plot guess type: ' + self.fitting_context.plot_guess_type + ' is not recognised')
 
-        tmp_guess_workspace = CreateWorkspace(DataX=data, DataY=data, StoreInADS=False)
+        tmp_guess_workspace = self._create_guess_range_workspace(x_range=data, output_workspace='guess_range',
+                                                                 store_in_ads=False)
+
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
@@ -853,6 +855,17 @@ class BasicFittingModel:
         alg.setProperty("MaxIterations", 0)
         alg.setProperty("Output", output_workspace)
         alg.execute()
+
+    def _create_guess_range_workspace(self, x_range: np.array, output_workspace: str, store_in_ads: bool = True) -> Workspace:
+        """Create a workspace with the requested fit range."""
+        alg = AlgorithmManager.create("CreateWorkspace")
+        alg.initialize()
+        alg.setAlwaysStoreInADS(store_in_ads)
+        alg.setProperty("DataX", x_range)
+        alg.setProperty("DataY", x_range)
+        alg.setProperty("OutputWorkspace", output_workspace)
+        alg.execute()
+        return alg.getProperty('OutputWorkspace').value
 
     def _get_plot_guess_name(self) -> str:
         """Returns the name to use for the plot guess workspace."""
