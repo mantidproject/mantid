@@ -848,10 +848,16 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                     Psi=offset
                 )
             else:  # powder reduction
-                SaveNexus(
-                    InputWorkspace=ws_name,
-                    Filename='{}.nxs'.format(ws_name)
-                )
+                if 'SofTW' in ws_name:
+                    SaveNXSPE(
+                        InputWorkspace=ws_name,
+                        Filename='{}.nxspe'.format(ws_name)
+                    )
+                else:
+                    SaveNexus(
+                        InputWorkspace=ws_name,
+                        Filename='{}.nxs'.format(ws_name)
+                    )
 
     def _subtract_empty_container(self, ws):
         """Subtracts empty container counts from the sample workspace."""
