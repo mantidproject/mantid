@@ -129,7 +129,7 @@ void LoadDNSEvent::exec() {
 
   auto finalEventAccumulator = parse_File(file, fileName);
   populate_EventWorkspace(outputWS, finalEventAccumulator);
-  if (setBinBoundary & outputWS->getNumberEvents() > 0) {
+  if (setBinBoundary && (outputWS->getNumberEvents() > 0)) {
     outputWS->setAllX({0, outputWS->getEventXMax()});
   }
   setProperty("OutputWorkspace", outputWS);
