@@ -25,6 +25,9 @@ double getDiffAz(double xValue, const double charField) {
   double b = xValue / charField;
   double diffb = ((pow(b, 2) - 1) * ((pow(b, 2) + 3) * log((b + 1.0) / (b - 1.0)) - (2 * b))) / (8 * pow(b, 4));
   double diffAz = diffcharfield * diffb;
+  if (!std::isfinite(diffAz)) {
+    diffAz = 0.0;
+  }
   return diffAz;
 }
 

@@ -25,4 +25,16 @@ public:
     double Az2 = getAz(xValue2, charField2);
     TS_ASSERT_DELTA(Az2, 0.7612450528, 1e-8);
   }
+
+  void testgetDiffAz() {
+    double xValue1 = 100.0;
+    const double charField1 = 5.0;
+    double DiffAz1 = getDiffAz(xValue1, charField1);
+    TS_ASSERT_DELTA(DiffAz1, -0.0004159996, 1e-8);
+
+    double xValue2 = 0.1;
+    double charField2 = 100.0;
+    double DiffAz2 = getDiffAz(xValue2, charField2);
+    TS_ASSERT_DELTA(DiffAz2, 0.0, 1e-8);
+  }
 };

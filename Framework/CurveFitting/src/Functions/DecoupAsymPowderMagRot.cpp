@@ -46,6 +46,9 @@ void DecoupAsymPowderMagRot::functionDeriv1D(Jacobian *out, const double *xValue
   for (size_t i = 0; i < nData; i++) {
     double diffasym = 1 - getAz(xValues[i], charField);
     double diffAz = getDiffAz(xValues[i], charField);
+    if (!std::isfinite(diffasym)) {
+      diffasym = 0.0;
+    }
     out->set(i, 0, diffasym);
     out->set(i, 1, diffAz);
   }

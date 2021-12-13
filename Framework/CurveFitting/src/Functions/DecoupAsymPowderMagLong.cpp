@@ -47,10 +47,7 @@ void DecoupAsymPowderMagLong::functionDeriv1D(Jacobian *out, const double *xValu
     double diffasym = getAz(xValues[i], charField);
     double diffAz = getDiffAz(xValues[i], charField);
     if (!std::isfinite(diffasym)) {
-      diffasym = 0;
-    }
-    if (!std::isfinite(diffAz)) {
-      diffAz = 0;
+      diffasym = 0.0;
     }
     out->set(i, 0, diffasym);
     out->set(i, 1, diffAz);
