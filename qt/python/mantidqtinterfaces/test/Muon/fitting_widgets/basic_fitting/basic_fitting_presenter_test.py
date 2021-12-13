@@ -273,11 +273,13 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.update_fit_functions_in_model_from_view = mock.Mock()
         self.presenter.automatically_update_function_name = mock.Mock()
         self.presenter.reset_fit_status_and_chi_squared_information = mock.Mock()
+        self.presenter.clear_undo_data = mock.Mock()
 
         self.presenter.handle_function_structure_changed()
 
         self.presenter.update_fit_functions_in_model_from_view.assert_called_once_with()
         self.presenter.automatically_update_function_name.assert_called_once_with()
+        self.presenter.clear_undo_data.assert_called_once_with()
         self.model.get_active_fit_function.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
         self.model.update_plot_guess.assert_called_once_with()

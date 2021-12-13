@@ -237,9 +237,9 @@ class BasicFittingPresenter:
         """Handle when the function structure is changed."""
         self.update_fit_functions_in_model_from_view()
         self.automatically_update_function_name()
+        self.clear_undo_data()
 
         if self.model.get_active_fit_function() is None:
-            self.clear_undo_data()
             self.update_plot_fit()
 
         self.reset_fit_status_and_chi_squared_information()
