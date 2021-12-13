@@ -104,10 +104,6 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/DataServic
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerOwner.cpp:27
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
 unassignedVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Quat.cpp:687
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SimpleJSON.cpp:31
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SimpleJSON.cpp:33
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SimpleJSON.cpp:35
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/SimpleJSON.cpp:611
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/StringContainsValidator.cpp:14
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/StringContainsValidator.cpp:19
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Task.h:78

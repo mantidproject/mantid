@@ -14,7 +14,6 @@ set(SRC_FILES
     src/CatalogInfo.cpp
     src/ChecksumHelper.cpp
     src/CompositeValidator.cpp
-    src/ComputeResourceInfo.cpp
     src/ConfigObserver.cpp
     src/ConfigPropertyObserver.cpp
     src/ConfigService.cpp
@@ -96,8 +95,6 @@ set(SRC_FILES
     src/ReadLock.cpp
     src/RebinParamsValidator.cpp
     src/RegexStrings.cpp
-    src/RemoteJobManager.cpp
-    src/SimpleJSON.cpp
     src/SingletonHolder.cpp
     src/SobolSequence.cpp
     src/StartsWithValidator.cpp
@@ -165,7 +162,6 @@ set(INC_FILES
     inc/MantidKernel/ChainableFactory.h
     inc/MantidKernel/ChecksumHelper.h
     inc/MantidKernel/CompositeValidator.h
-    inc/MantidKernel/ComputeResourceInfo.h
     inc/MantidKernel/ConfigObserver.h
     inc/MantidKernel/ConfigPropertyObserver.h
     inc/MantidKernel/ConfigService.h
@@ -270,8 +266,6 @@ set(INC_FILES
     inc/MantidKernel/RebinParamsValidator.h
     inc/MantidKernel/RegexStrings.h
     inc/MantidKernel/RegistrationHelper.h
-    inc/MantidKernel/RemoteJobManager.h
-    inc/MantidKernel/SimpleJSON.h
     inc/MantidKernel/SingletonHolder.h
     inc/MantidKernel/SobolSequence.h
     inc/MantidKernel/SpecialCoordinateSystem.h
@@ -336,7 +330,6 @@ set(TEST_FILES
     ChebyshevSeriesTest.h
     ChecksumHelperTest.h
     CompositeValidatorTest.h
-    ComputeResourceInfoTest.h
     ConfigObserverTest.h
     ConfigPropertyObserverTest.h
     ConfigServiceTest.h
@@ -420,7 +413,6 @@ set(TEST_FILES
     RegexStringsTest.h
     SLSQPMinimizerTest.h
     ShrinkToFitTest.h
-    SimpleJSONTest.h
     SobolSequenceTest.h
     SpecialCoordinateSystemTest.h
     StartsWithValidatorTest.h
