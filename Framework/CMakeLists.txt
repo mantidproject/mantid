@@ -48,7 +48,6 @@ add_subdirectory(Nexus)
 add_subdirectory(NexusGeometry)
 add_subdirectory(PythonInterface)
 add_subdirectory(Reflectometry)
-add_subdirectory(RemoteAlgorithms)
 add_subdirectory(RemoteJobManagers)
 add_subdirectory(SINQ)
 add_subdirectory(TestHelpers)
@@ -86,8 +85,6 @@ set(FRAMEWORK_LIBS
     MDAlgorithms
     WorkflowAlgorithms
     LiveData
-    RemoteAlgorithms
-    RemoteJobManagers
     SINQ
     Muon
     Reflectometry
