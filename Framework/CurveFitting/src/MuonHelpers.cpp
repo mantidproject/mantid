@@ -19,4 +19,13 @@ double getAz(double xValue, const double charField) {
                      (pow(bSq - 1.0, 2.0) / (8.0 * pow(b, 3.0))) * log(fabs((b + 1.0) / (b - 1.0)));
   return A_z;
 }
+
+double getDiffAz(double xValue, const double charField) {
+  double diffcharfield = -xValue / pow(charField, 2);
+  double b = xValue / charField;
+  double diffb = ((pow(b, 2) - 1) * ((pow(b, 2) + 3) * log((b + 1.0) / (b - 1.0)) - (2 * b))) / (8 * pow(b, 4));
+  double diffAz = diffcharfield * diffb;
+  return diffAz;
+}
+
 } // namespace Mantid::CurveFitting::MuonHelper

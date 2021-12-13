@@ -45,10 +45,13 @@ void DecoupAsymPowderMagLong::functionDeriv1D(Jacobian *out, const double *xValu
 
   for (size_t i = 0; i < nData; i++) {
     double diffasym = getAz(xValues[i], charField);
-    double diffcharfield = -xValues[i] / pow(charField, 2);
-    double b = xValues[i] / charField;
-    double diffb = ((pow(b, 2) - 1) * ((pow(b, 2) + 3) * log((b + 1.0) / (b - 1.0)) - (2 * b))) / (8 * pow(b, 4));
-    double diffAz = diffcharfield * diffb;
+    double diffAz = getDiffAz(xValues[i], charField);
+    if (!std::isfinite(diffasym)) {
+      diffasym = 0;
+    }
+    if (!std::isfinite(diffAz)) {
+      diffAz = 0;
+    }
     out->set(i, 0, diffasym);
     out->set(i, 1, diffAz);
   }

@@ -15,6 +15,9 @@ namespace MuonHelper {
 // Computes A_z formula for fitting functions for decoupling of asymmetry in the ordered state of a powdered magnet
 double MANTID_CURVEFITTING_DLL getAz(double xValue, const double charField);
 
+// Computes differential of the A_z formula for fitting functions for decoupling of asymmetry in the ordered state of a
+// powdered magnet
+double MANTID_CURVEFITTING_DLL getDiffAz(double xValue, const double charField);
 } // namespace MuonHelper
 } // namespace CurveFitting
 } // namespace Mantid
