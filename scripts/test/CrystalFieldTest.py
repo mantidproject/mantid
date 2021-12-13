@@ -1800,6 +1800,104 @@ class CrystalFieldFitTest(unittest.TestCase):
         self.assertAlmostEqual(cf.peaks.param[2]['FWHM'], 1.0, 4)
         self.assertAlmostEqual(cf.peaks.param[2]['Amplitude'], 0.425228971518 * c_mbsr, 2)
 
+    def test_two_step_fit_multi_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[44.0, 50.0], FWHM=[1.1, 0.9])
+        origin.PeakShape = 'Lorentzian'
+        origin.peaks[0].param[1]['FWHM'] = 1.22
+        origin.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                                       background=Function('FlatBackground', A0=1.0))
+        origin.background[1].peak.param['Sigma'] = 0.8
+        origin.background[1].background.param['A0'] = 1.1
+
+        origin.peaks[0].param[0]['FWHM'] = 1.11
+        origin.peaks[1].param[1]['FWHM'] = 1.12
+
+        fun = origin.function
+
+        self.assertEqual(fun.getParameterValue('f0.f0.f0.Sigma'), 0.3)
+        self.assertEqual(fun.getParameterValue('f0.f0.f1.A0'), 1.0)
+        self.assertEqual(fun.getParameterValue('f1.f0.f0.Sigma'), 0.8)
+        self.assertEqual(fun.getParameterValue('f1.f0.f1.A0'), 1.1)
+
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[44.0, 50.0], FWHM=[1.1, 0.9])
+        cf.PeakShape = 'Lorentzian'
+        cf.peaks[0].param[0]['FWHM'] = 1.11
+        cf.peaks[1].param[1]['FWHM'] = 1.12
+        cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                                   background=Function('FlatBackground', A0=1.0))
+        cf.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
+
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1)[1]
+
+        fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1], MaxIterations=10)
+        fit.two_step_fit(OverwriteMaxIterations=[2,2], Iterations=2)
+
+        self.assertLess(cf.chi2, chi2)
+
+    def test_two_step_fit_sc_multi_spectrum(self):
+        from CrystalField.fitting import makeWorkspace
+        from CrystalField import CrystalField, CrystalFieldFit, Background, Function
+        origin = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                              Temperature=[44.0, 50.0], FWHM=[1.1, 0.9])
+        origin.PeakShape = 'Lorentzian'
+        origin.peaks[0].param[1]['FWHM'] = 1.22
+        origin.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                                       background=Function('FlatBackground', A0=1.0))
+        origin.background[1].peak.param['Sigma'] = 0.8
+        origin.background[1].background.param['A0'] = 1.1
+
+        origin.peaks[0].param[0]['FWHM'] = 1.11
+        origin.peaks[1].param[1]['FWHM'] = 1.12
+
+        fun = origin.function
+
+        self.assertEqual(fun.getParameterValue('f0.f0.f0.Sigma'), 0.3)
+        self.assertEqual(fun.getParameterValue('f0.f0.f1.A0'), 1.0)
+        self.assertEqual(fun.getParameterValue('f1.f0.f0.Sigma'), 0.8)
+        self.assertEqual(fun.getParameterValue('f1.f0.f1.A0'), 1.1)
+
+        self.assertEqual(fun.getParameterValue('f0.f1.FWHM'), 1.11)
+        self.assertEqual(fun.getParameterValue('f0.f2.FWHM'), 1.1)
+        self.assertEqual(fun.getParameterValue('f0.f3.FWHM'), 1.1)
+
+        self.assertEqual(fun.getParameterValue('f1.f1.FWHM'), 0.9)
+        self.assertEqual(fun.getParameterValue('f1.f2.FWHM'), 1.12)
+        self.assertEqual(fun.getParameterValue('f1.f3.FWHM'), 0.9)
+
+        cf = CrystalField('Ce', 'C2v', B20=0.37737, B22=3.9770, B40=-0.031787, B42=-0.11611, B44=-0.12544,
+                          Temperature=[44.0, 50.0], FWHM=[1.1, 0.9])
+        cf.PeakShape = 'Lorentzian'
+        cf.peaks[0].param[0]['FWHM'] = 1.11
+        cf.peaks[1].param[1]['FWHM'] = 1.12
+        cf.background = Background(peak=Function('Gaussian', Height=10, Sigma=0.3),
+                                   background=Function('FlatBackground', A0=1.0))
+        cf.ties(IntensityScaling0=1.0, IntensityScaling1=1.0)
+
+        ws0 = makeWorkspace(*origin.getSpectrum(0))
+        ws1 = makeWorkspace(*origin.getSpectrum(1))
+
+        chi2 = CalculateChiSquared(cf.makeMultiSpectrumFunction(), InputWorkspace=ws0, InputWorkspace_1=ws1)[1]
+
+        fit = CrystalFieldFit(cf, InputWorkspace=[ws0, ws1], MaxIterations=10)
+        fit.two_step_fit_sc(OverwriteMaxIterations=[2,2], Iterations=2)
+
+        self.assertLess(cf.chi2, chi2)
+
 
 if __name__ == "__main__":
     unittest.main()
