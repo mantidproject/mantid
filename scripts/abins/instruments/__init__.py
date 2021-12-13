@@ -22,7 +22,7 @@ def get_instrument(name: str, **kwargs) -> Instrument:
 
     Args:
         name: Instrument name as defined in abins.constants.ALL_INSTRUMENTS
-        kwargs: remaining arguments are instrument parameters passed to 
+        kwargs: remaining arguments are instrument parameters passed to
             instrument class
 
     Returns:

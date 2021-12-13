@@ -11,7 +11,7 @@ certain quantities over time, e.g. SampleTemp.
 
 To access these:
 
-- Load data with logs attached (e.g. ``CNCS_7860_event.nxs``) 
+- Load data with logs attached (e.g. ``CNCS_7860_event.nxs``)
 - Right-click on the workspace in the Workspace Toolbox and select "Show Sample Logs".
 
 .. figure:: /images/SampleLogs.png

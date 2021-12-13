@@ -359,13 +359,11 @@ template <typename Integer> std::vector<std::vector<Integer>> parseGroups(const 
   auto translateAdd = [&groups](const std::string &str) {
     const auto tokens = Kernel::StringTokenizer(
         str, "+", Kernel::StringTokenizer::TOK_TRIM | Kernel::StringTokenizer::TOK_IGNORE_EMPTY);
-    std::vector<Integer> group;
-    group.reserve(tokens.count());
-    for (const auto &t : tokens) {
-      // add this number to the group we're about to add
-      group.emplace_back(boost::lexical_cast<Integer>(t));
-    }
-    groups.emplace_back(std::move(group));
+    std::vector<Integer> currentGroup;
+    currentGroup.reserve(tokens.count());
+    std::transform(tokens.cbegin(), tokens.cend(), std::back_inserter(currentGroup),
+                   [](const auto &t) { return boost::lexical_cast<Integer>(t); });
+    groups.emplace_back(std::move(currentGroup));
   };
 
   auto translateSumRange = [&groups](const std::string &str) {

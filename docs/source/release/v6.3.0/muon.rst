@@ -49,12 +49,14 @@ Improvements
 - The results tab will now dispay a warning (red text and a tooltip) if the results table already exists.
 - The plots no longer use scientific notation for the axis values.
 - On resizing priority is given to plotting.
+- The Sequentially Fit all button is now visible for 4K displays
 
 Bugfixes
 ########
 
 - Fixed a bug that prevented the model analysis plot showing when data was binned.
 - When a new results table is created the Model Analysis tab selects the default parameters to plot based on log values or parameters in the results table.
+- Undo fit now resets when the function structure changes. This prevents a bug caused by trying to revert the current function to the state of a previous one.
 - Fixed a bug that prevented the GUI working with workspace history and project recovery.
 - Detaching tabs, then closing Mantid no longer causes a crash.
 - When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
@@ -87,6 +89,7 @@ Fitting Functions
 New Features
 ############
 - Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
+- Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to MuonModelling\Magnetism Fit Functions.
 - Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to MuonModelling\Magentism Fit Functions.
 - Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
 - Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.

@@ -214,12 +214,13 @@ void Stretch::saveWorkspaces() {
   IndirectTab::checkADSForPlotSaveWorkspace(m_fitWorkspaceName, false);
   IndirectTab::checkADSForPlotSaveWorkspace(m_contourWorkspaceName, false);
 
-  auto saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
+  const auto saveDir =
+      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
   // Check validity of save path
-  const auto fitFullPath = saveDir.append(fitWorkspace).append(".nxs");
-  const auto contourFullPath = saveDir.append(contourWorkspace).append(".nxs");
+  const auto fitFullPath = saveDir + fitWorkspace + QString::fromStdString(".nxs");
+  const auto contourFullPath = saveDir + contourWorkspace + QString::fromStdString(".nxs");
   addSaveWorkspaceToQueue(fitWorkspace, fitFullPath);
-  addSaveWorkspaceToQueue(contourWorkspace, fitFullPath);
+  addSaveWorkspaceToQueue(contourWorkspace, contourFullPath);
   m_batchAlgoRunner->executeBatchAsync();
 }
 

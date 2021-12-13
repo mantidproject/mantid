@@ -7,8 +7,10 @@
 import unittest
 import tempfile
 import shutil
+from os import path
 
 from unittest.mock import patch, MagicMock, call, create_autospec
+from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
 
@@ -61,6 +63,67 @@ class FocusModelTest(unittest.TestCase):
         mock_plot.assert_not_called()
 
     @patch(file_path + '.DeleteWorkspace')
+    @patch(file_path + '.ConvertUnits')
+    @patch(file_path + '.FocusModel._save_output_files')
+    @patch(file_path + '.FocusModel._apply_vanadium_norm')
+    @patch(file_path + '.FocusModel._focus_run_and_apply_roi_calibration')
+    @patch(file_path + '.FocusModel._load_run_and_convert_to_dSpacing')
+    @patch(file_path + '.FocusModel.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_save_directories_both_banks_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
+                                                    mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                    mock_del_ws):
+        rb_num = "1"
+        van_run = "123456"
+        mock_proc_van.return_value = ("van_ws_foc", van_run)
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
+        mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
+        self.calibration.group = GROUP.BOTH
+
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
+                             calibration=self.calibration, save_dir='dir')
+
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        save_calls = 2 * [call([path.join('dir', 'Focus'),
+                                path.join('dir', 'User', rb_num, 'Focus')],  sample_foc_ws,
+                               self.calibration, van_run, rb_num)]
+        mock_save_out.assert_has_calls(save_calls)
+
+    @patch(file_path + '.DeleteWorkspace')
+    @patch(file_path + '.ConvertUnits')
+    @patch(file_path + '.FocusModel._save_output_files')
+    @patch(file_path + '.FocusModel._apply_vanadium_norm')
+    @patch(file_path + '.FocusModel._focus_run_and_apply_roi_calibration')
+    @patch(file_path + '.FocusModel._load_run_and_convert_to_dSpacing')
+    @patch(file_path + '.FocusModel.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_save_directories_texture_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
+                                                 mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                 mock_del_ws):
+        rb_num = "1"
+        van_run = "123456"
+        mock_proc_van.return_value = ("van_ws_foc", van_run)
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
+        mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
+        self.calibration.group = GROUP.TEXTURE
+
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
+                             calibration=self.calibration, save_dir='dir')
+
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        save_calls = 2 * [call([path.join('dir', 'User', rb_num, 'Focus')],
+                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        mock_save_out.assert_has_calls(save_calls)
+
+    @patch(file_path + '.DeleteWorkspace')
     @patch(file_path + '.FocusModel._save_output_files')
     @patch(file_path + '.FocusModel._load_run_and_convert_to_dSpacing')
     @patch(file_path + '.FocusModel._plot_focused_workspaces')
@@ -71,7 +134,8 @@ class FocusModelTest(unittest.TestCase):
         mock_proc_van.return_value = ("van_ws_foc", "123456")
         mock_load_run.return_value = None  # expected return when no proton charge
 
-        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration)
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=True, rb_num=None, calibration=self.calibration,
+                             save_dir='dir')
 
         mock_plot.assert_not_called()
         mock_save_out.assert_not_called()
@@ -146,15 +210,13 @@ class FocusModelTest(unittest.TestCase):
         mock_norm.assert_not_called()  # throws error if zero charge
         mock_del.assert_called_once()
 
-    @patch(file_path + '.output_settings')
     @patch(file_path + '.path.exists')
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
     @patch(file_path + ".AddSampleLog")
     def test_save_output_files_both_banks_no_RB_number_path_exists(self, mock_add_log, mock_save_nxs, mock_save_gss,
-                                                                   mock_save_xye, mock_path, mock_out_setting):
-        mock_out_setting.get_output_path.return_value = "dir"
+                                                                   mock_save_xye, mock_path):
         mock_path.return_value = True  # directory exists
         ws_foc = MagicMock()
         ws_foc.getNumberHistograms.return_value = 2
@@ -165,7 +227,8 @@ class FocusModelTest(unittest.TestCase):
         ws_foc.run().get().value = '193749'  # runno
         van_run = '123456'
 
-        self.model._save_output_files(ws_foc, self.calibration, van_run, rb_num=None)
+        self.model._save_output_files(["save_dir"], ws_foc, self.calibration, van_run,
+                                      rb_num=None)
 
         mock_save_gss.assert_called_once()
         mock_save_xye.assert_called_once()
@@ -180,18 +243,15 @@ class FocusModelTest(unittest.TestCase):
         mock_save_nxs.assert_has_calls(save_nxs_calls)
 
     @patch(file_path + '.makedirs')
-    @patch(file_path + '.output_settings')
     @patch(file_path + '.path.exists')
     @patch(file_path + ".SaveFocusedXYE")
     @patch(file_path + ".SaveGSS")
     @patch(file_path + ".SaveNexus")
     @patch(file_path + ".AddSampleLog")
     def test_save_output_files_North_Bank_RB_number_path_not_exists(self, mock_add_log, mock_save_nxs, mock_save_gss,
-                                                                    mock_save_xye, mock_path, mock_out_setting,
-                                                                    mock_mkdir):
+                                                                    mock_save_xye, mock_path, mock_mkdir):
         self.calibration.get_group_suffix.return_value = "bank_1"
         self.calibration.get_foc_ws_suffix.return_value = "bank_1"
-        mock_out_setting.get_output_path.return_value = "dir"
         mock_path.return_value = False  # directory exists
         ws_foc = MagicMock()
         ws_foc.getNumberHistograms.return_value = 1
@@ -203,7 +263,8 @@ class FocusModelTest(unittest.TestCase):
         van_run = '123456'
         rb_num = '1'
 
-        self.model._save_output_files(ws_foc, self.calibration, van_run, rb_num=rb_num)
+        self.model._save_output_files(["save_dir"], ws_foc, self.calibration, van_run,
+                                      rb_num=rb_num)
 
         mock_mkdir.assert_called_once()
         mock_save_gss.assert_called_once()

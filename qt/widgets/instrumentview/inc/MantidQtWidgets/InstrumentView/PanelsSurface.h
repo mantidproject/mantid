@@ -48,18 +48,15 @@ private:
  */
 class PanelsSurface : public UnwrappedSurface {
 public:
-  PanelsSurface(const InstrumentActor *rootActor,
-                const Mantid::Kernel::V3D &origin,
-                const Mantid::Kernel::V3D &axis);
+  PanelsSurface(const InstrumentActor *rootActor, const Mantid::Kernel::V3D &origin, const Mantid::Kernel::V3D &axis);
   ~PanelsSurface() override;
   void init() override;
-  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/,
-               double & /*v*/, double & /*uscale*/,
+  void project(const Mantid::Kernel::V3D & /*pos*/, double & /*u*/, double & /*v*/, double & /*uscale*/,
                double & /*vscale*/) const override;
 
 protected:
-  boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>>
-  findFlatPanels(size_t rootIndex, std::vector<bool> &visited);
+  boost::optional<std::pair<std::vector<size_t>, Mantid::Kernel::V3D>> findFlatPanels(size_t rootIndex,
+                                                                                      std::vector<bool> &visited);
 
   void processStructured(size_t rootIndex);
 
@@ -67,22 +64,18 @@ protected:
 
   void processGrid(size_t rootIndex);
 
-  std::pair<std::vector<size_t>, Mantid::Kernel::V3D>
-  processUnstructured(size_t rootIndex, std::vector<bool> &visited);
+  std::pair<std::vector<size_t>, Mantid::Kernel::V3D> processUnstructured(size_t rootIndex, std::vector<bool> &visited);
 
-  void rotate(const UnwrappedDetector &udet,
-              Mantid::Kernel::Quat &R) const override;
+  void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const override;
   // Setup the projection axes
   void setupAxes();
   // Add a flat bank
-  void addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal,
-                              const std::vector<size_t> &detectors);
+  void addFlatBankOfDetectors(const Mantid::Kernel::V3D &normal, const std::vector<size_t> &detectors);
   void constructFromComponentInfo();
-  Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos,
-                                        Mantid::Kernel::V3D normal) const;
+  Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) const;
   // Add a detector from an assembly
-  void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos,
-                   int bankIndex, const Mantid::Kernel::Quat &rotation);
+  void addDetector(size_t detIndex, const Mantid::Kernel::V3D &refPos, int bankIndex,
+                   const Mantid::Kernel::Quat &rotation);
   // Spread the banks over the projection plane
   void spreadBanks();
   // Find index of the largest bank

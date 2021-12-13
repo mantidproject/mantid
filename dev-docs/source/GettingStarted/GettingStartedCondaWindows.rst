@@ -28,11 +28,11 @@ Turn off Python association in Windows
 
 Clone the mantid source code
 ----------------------------
-
-* There are 2 common ways developers have been doing this.
+* **Important**: If you have any existing non-conda mantid development environments, do not re-use the source and build directories for your conda environment. We recommend that you clone a new instance of the source and keep separate build directories to avoid any cmake configuration problems.
+* Clone the mantid source code by either:
 
     * Using git bash and cloning the codebase by calling ``git clone git@github.com:mantidproject/mantid.git`` in the directory you want the code to clone to. This sets you up with accessing the remote repository via SSH so make sure to setup git properly using this `startup guide <https://git-scm.com/book/en/v2/Getting-Started-First-Time-Git-Setup>`_ and ensure your ssh key is setup using this `guide to Github with SSH <https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh>`_.
-    * Or by using `GitKraken <https://www.gitkraken.com/>`_.
+    * Or using `GitKraken <https://www.gitkraken.com/>`_.
 
 Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 -------------------------------------------------------------------------
@@ -55,10 +55,10 @@ Configure CMake and generate build files
 
 * Still using the terminal or powershell prompt from the last step and in your mantid source directory.
 * Run ``conda activate mantid-developer`` to activate your conda environment.
-* Inside of your mantid source directory run ``cmake --preset=win``
+* Inside of your mantid source directory run either:
 
-    * Alternatively if you don't want to have your build folder in your mantid source then pass the ``-B`` argument, overriding the preset, to cmake: ``cmake {PATH_TO_SOURCE} --preset=win -B {BUILD_DIR}``
-
+    * ``cmake --preset=win`` if you want your build directory inside your source directory, or
+    * ``cmake --preset=win -B {BUILD_DIR}`` to specify a different build directory.
 
 Compile and Build using Visual Studio
 ----------------------------------------------------------

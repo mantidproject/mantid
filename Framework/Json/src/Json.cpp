@@ -9,6 +9,24 @@
 #include <memory>
 #include <sstream>
 
+/**
+ * @brief Useful function for replacing all instances of characters in string.
+ *
+ * @param str the input string.
+ * @param from the substring to replace.
+ * @param to the string to replace with.
+ * @return std::string
+ */
+void replaceAll(std::string &str, const std::string &from, const std::string &to) {
+  if (from.empty())
+    return;
+  size_t start_pos = 0;
+  while ((start_pos = str.find(from, start_pos)) != std::string::npos) {
+    str.replace(start_pos, from.length(), to);
+    start_pos += to.length();
+  }
+}
+
 namespace Mantid::JsonHelpers {
 
 /**
@@ -28,6 +46,9 @@ std::string jsonToString(const Json::Value &json, const std::string &indentation
   Json::StreamWriterBuilder builder;
   builder.settings_["indentation"] = indentation;
   auto string = Json::writeString(builder, json);
+  replaceAll(string, "\"{", "{");
+  replaceAll(string, "}\"", "}");
+  replaceAll(string, "\\\"", "\"");
   return string;
 }
 

@@ -8,7 +8,7 @@ dependencies:
   - cmake>=3.20.*
   - conda-wrappers
   - doxygen>=1.9.*
-  - eigen=3.3.*
+  - eigen=3.4.*
   - euphonic=0.6.*
   - graphviz>=2.47.0
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
