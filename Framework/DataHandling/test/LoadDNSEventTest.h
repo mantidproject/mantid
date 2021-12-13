@@ -26,90 +26,48 @@ public:
   // This means the constructor isn't called when running other tests
   static LoadDNSEventTest *createSuite() { return new LoadDNSEventTest(); }
   static void destroySuite(LoadDNSEventTest *suite) { delete suite; }
-
   LoadDNSEventTest() {}
 
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(bool doesThrow = true) {
-    std::shared_ptr<LoadDNSEvent> alg(new LoadDNSEvent());
-    alg->setRethrows(doesThrow);
-    alg->initialize();
-    TS_ASSERT(alg->isInitialized());
-    return alg;
-  }
-
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, const std::string &outputWorkspace,
-                                              bool doesThrow = true) {
-    auto alg = makeAlgorithm(doesThrow);
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputFile", inputFile));
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputWorkspace));
-    return alg;
-  }
-
-  std::shared_ptr<LoadDNSEvent> makeAlgorithm(const std::string &inputFile, uint32_t chopperChannel,
-                                              bool SetBinBoundary, const std::string &outputWorkspace,
-                                              bool doesThrow = true) {
-    auto alg = makeAlgorithm(inputFile, outputWorkspace, doesThrow);
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("chopperChannel", chopperChannel));
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("SetBinBoundary", SetBinBoundary));
-    return alg;
-  }
-
-  void test_Confidence() {
-    LoadDNSEvent alg;
-    alg.initialize();
-    alg.setPropertyValue("InputFile", m_fileName);
-    FileDescriptor descriptor(alg.getPropertyValue("InputFile"));
-    TS_ASSERT_EQUALS(80, alg.confidence(descriptor));
-    alg.setPropertyValue("InputFile", m_badFileName);
-    TS_ASSERT_EQUALS(0, alg.confidence(descriptor));
-  }
-
-  void test_Init() {
-    LoadDNSEvent alg;
-    alg.setRethrows(true);
+  void test_initialization() {
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
   }
 
-  void test_Name() {
-    LoadDNSEvent alg;
+  void test_confidence() {
+    alg.initialize();
+    alg.setPropertyValue("InputFile", m_badFileName);
+    FileDescriptor baddescriptor(alg.getPropertyValue("InputFile"));
+    TS_ASSERT_EQUALS(0, alg.confidence(baddescriptor));
+    alg.setPropertyValue("InputFile", m_fileName);
+    FileDescriptor descriptor(alg.getPropertyValue("InputFile"));
+    TS_ASSERT_EQUALS(80, alg.confidence(descriptor));
+  }
+
+  void test_properties() {
+    alg.initialize();
+    std::string outWSName("LoadDNSEventTest_OutputWS");
     TS_ASSERT_EQUALS(alg.name(), "LoadDNSEvent");
+    TS_ASSERT_THROWS(alg.setProperty("chopperChannel", 5), std::invalid_argument);
+    TS_ASSERT_EQUALS(alg.getPropertyValue("chopperChannel"), "2");
+    TS_ASSERT_EQUALS(alg.getPropertyValue("NumberOfDetectorPixels"), "131072");
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfDetectorPixels", "70"));
+
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("chopperChannel", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetBinBoundary", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFile", m_fileName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
   }
 
-  void test_Properties() {
-    auto alg = makeAlgorithm();
-    TS_ASSERT_EQUALS(alg->getPropertyValue("chopperChannel"), "2");
-    TS_ASSERT_THROWS(alg->setProperty("chopperChannel", 5), std::invalid_argument);
-  }
-
-  void test_Executes_1() {
+  void test_excecutes() {
+    alg.initialize();
     std::string outWSName("LoadDNSEventTest_OutputWS");
-    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
-    TS_ASSERT_THROWS_NOTHING(alg->execute(););
-    TS_ASSERT(alg->isExecuted());
-  }
-
-  void test_Executes_2() {
-    std::string outWSName("LoadDNSEventTest_OutputWS");
-
-    auto alg = makeAlgorithm(m_fileName, 0, false, outWSName);
-    TS_ASSERT_THROWS_NOTHING(alg->execute(););
-    TS_ASSERT(alg->isExecuted());
-  }
-
-  void test_ThrowsOnBadFile() {
-    std::string outWSName("LoadDNSEventTest_OutputWS");
-
-    auto alg = makeAlgorithm(m_badFileName, 2, false, outWSName);
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-    TS_ASSERT(!alg->isExecuted());
-  }
-
-  void test_DataWSStructure() {
-    std::string outWSName("LoadDNSEventTest_OutputWS");
-
-    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
-    alg->execute();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("chopperChannel", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfDetectorPixels", "70"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetBinBoundary", true));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFile", m_fileName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
 
     // Retrieve the workspace from data service.
     EventWorkspace_sptr iws;
@@ -117,12 +75,12 @@ public:
     TS_ASSERT(iws);
 
     TS_ASSERT_EQUALS(iws->getEventType(), EventType::TOF);
-    TS_ASSERT_EQUALS(iws->size(), 1024 * 128); // number of detector cells
+    TS_ASSERT_EQUALS(iws->size(), 70); // number of detector cells for testing reduced real 1024*128
 
     TS_ASSERT_EQUALS(iws->getNumDims(), 2);
     TS_ASSERT_EQUALS(iws->id(), "EventWorkspace");
 
-    // test dimensions
+    //// test dimensions
     const auto tofDim = iws->getDimension(0);
     TS_ASSERT(tofDim);
     TS_ASSERT_EQUALS(tofDim->getName(), "Time-of-flight");
@@ -131,46 +89,37 @@ public:
     const auto specDim = iws->getDimension(1);
     TS_ASSERT(specDim);
     TS_ASSERT_EQUALS(specDim->getName(), "Spectrum");
-    TS_ASSERT_EQUALS(specDim->getNBins(),
-                     1024 * 128); // number of detector cells
+    TS_ASSERT_EQUALS(specDim->getNBins(), 70); // number of detector cells for testing reduced real 1024*128
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMinimum(), 0);
     TS_ASSERT_RELATION(std::greater<double>, specDim->getMaximum(), 0);
 
-    // test event count:
-    const auto rng = boost::irange(static_cast<size_t>(0), iws->size());
-    const size_t eventCount = std::accumulate(rng.begin(), rng.end(), static_cast<size_t>(0), [&](auto a, auto b) {
-      return a + iws->getSpectrum(b).getEvents().size();
-    });
-    TS_ASSERT_EQUALS(eventCount, 9998)
-    TS_ASSERT_EQUALS(iws->getNumberEvents(), 9998);
-    TS_ASSERT_EQUALS(iws->getTofMax(), 99471.3);
-    TS_ASSERT_EQUALS(iws->getSpectrum(32217).getNumberEvents(), 808);
+    TS_ASSERT_EQUALS(iws->getNumberEvents(), 184);
+    TS_ASSERT_EQUALS(iws->getTofMax(), 6641.4000);
+    TS_ASSERT_EQUALS(iws->getSpectrum(52).getNumberEvents(), 8);
+    TS_ASSERT_DELTA(iws->getDimension(0)->getMaximum(), 6641.40000, 0.001);
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+  void test_use_pre_chopper_no_bin() {
+    alg.initialize();
+    std::string outWSName("LoadDNSEventTest_OutputWS");
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("chopperChannel", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfDetectorPixels", "70"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFile", m_fileName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetBinBoundary", false));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DiscardPreChopperEvents", false));
+    alg.execute();
+    EventWorkspace_sptr iws;
+    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
+    TS_ASSERT_EQUALS(iws->getNumberEvents(), 231);
     TS_ASSERT_EQUALS(iws->getDimension(0)->getMaximum(), 0.00); // histogram bins not set
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_DiscardPreChopperEvents() {
-    std::string outWSName("LoadDNSEventTest_OutputWS");
-    auto alg = makeAlgorithm(m_fileName, 2, false, outWSName);
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("DiscardPreChopperEvents", false));
-    alg->execute();
-    EventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
-    TS_ASSERT_EQUALS(iws->getNumberEvents(), 10520);
-  }
-
-  void test_SetBinBoundary() {
-    std::string outWSName("LoadDNSEventTest_OutputWS");
-    auto alg = makeAlgorithm(m_fileName, 2, true, outWSName);
-    alg->execute();
-    EventWorkspace_sptr iws;
-    TS_ASSERT_THROWS_NOTHING(iws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
-    TS_ASSERT_DELTA(iws->getDimension(0)->getMaximum(), 99471.296, 0.001);
-  }
-
 private:
-  const std::string m_fileName = "DNS_psd_pulser_ON473_31.mdat";
-
+  LoadDNSEvent alg;
+  const std::string m_fileName = "DNS_psd_150c_first_tube.mdat";
   const std::string m_badFileName = "dnstof.d_dat"; // some random file
 };
 #endif /* MANTID_MDALGORITHMS_LOADDNSSCDEWEST_H_ */

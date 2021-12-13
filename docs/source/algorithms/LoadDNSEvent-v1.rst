@@ -18,7 +18,11 @@ This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspac
 
 **ChopperChannel**
 is the input channel to wich the chopper was connected, must also be set in mesydaq gui.
-It can be set to integers between 0 and 4. If the value is not set or is set to 0, the default value in the instrument definition file is used which is 2.
+It can be set to integers between 1 and 4. At DNS default is 2.
+
+
+**NumberOfDetectorPixels**
+The number of pixels of the total detector. For the full detector at DNS with 128 tubes with 1024 pixels it is 131072. 
 
 
 **DiscardPreChopperEvents**:

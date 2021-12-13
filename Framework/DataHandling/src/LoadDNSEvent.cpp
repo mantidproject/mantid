@@ -20,7 +20,7 @@
 #include <chrono>
 #include <iostream>
 
-#define USE_PARALLELISM false
+#define USE_PARALLELISM true
 
 namespace {
 
@@ -78,8 +78,7 @@ int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
 }
 
 const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
-const unsigned MAX_BUFFER_BYTES_SIZE = 1500;      // maximum buffer size in data file
-const unsigned DETECTOR_PIXEL_COUNT = 1024 * 128; // number of pixels in detector
+const unsigned MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
 
 void LoadDNSEvent::init() {
   /// Initialise the properties
@@ -88,13 +87,11 @@ void LoadDNSEvent::init() {
   declareProperty(std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
                   "A DNS mesydaq listmode event datafile.");
 
-  declareProperty<uint32_t>("ChopperChannel", 2u, std::make_shared<BoundedValidator<uint32_t>>(0, 4),
-                            "The Chopper Channel (0 to 4)", Kernel::Direction::Input);
+  declareProperty<uint32_t>("ChopperChannel", 2u, std::make_shared<BoundedValidator<uint32_t>>(1, 4),
+                            "The Chopper Channel (1 to 4)", Kernel::Direction::Input);
 
-  // declareProperty<uint32_t>(
-  // "MonitorChannel", 1u,
-  // std::make_shared<BoundedValidator<uint32_t>>(0, 4),
-  // "The Monitor Channel (0 to 4)", Kernel::Direction::Input);
+  declareProperty<uint32_t>("NumberOfDetectorPixels", 131072, std::make_shared<BoundedValidator<uint32_t>>(1, 131072),
+                            "The number of detector pixels (1 to 131072 = 1024*128)", Kernel::Direction::Input);
 
   declareProperty<bool>("DiscardPreChopperEvents", true, std::make_shared<BoundedValidator<bool>>(0, 1),
                         "Discards events before first chopper trigger (turn off for elastic)",
@@ -111,57 +108,28 @@ void LoadDNSEvent::init() {
 
 /// Run the algorithm
 void LoadDNSEvent::exec() {
-  const size_t DUMMY_SIZE = 42;
+  // loadProperties:
+  const std::string fileName = getPropertyValue("InputFile");
+  chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
+  discardPreChopperEvents = static_cast<bool>(getProperty("DiscardPreChopperEvents"));
+  setBinBoundary = static_cast<bool>(getProperty("SetBinBoundary"));
+  detectorPixelCount = static_cast<uint32_t>(getProperty("NumberOfDetectorPixels"));
+
+  // create workspace
   EventWorkspace_sptr outputWS = std::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", DETECTOR_PIXEL_COUNT, DUMMY_SIZE, DUMMY_SIZE));
+      WorkspaceFactory::Instance().create("EventWorkspace", detectorPixelCount, 1, 1));
   outputWS->switchEventType(Mantid::API::EventType::TOF);
   outputWS->getAxis(0)->setUnit("TOF");
   outputWS->setYUnit("Counts");
   runLoadInstrument(INSTRUMENT_NAME, outputWS);
 
-  // loadProperties:
-  const std::string fileName = getPropertyValue("InputFile");
-  chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
-  // monitorChannel = static_cast<uint32_t>(getProperty("MonitorChannel"));
-  discardPreChopperEvents = static_cast<bool>(getProperty("DiscardPreChopperEvents"));
-  setBinBoundary = static_cast<bool>(getProperty("SetBinBoundary"));
-
-  // const auto instrParamMonitorChannels =
-  //    outputWS->instrumentParameters().getType<int>("monitor", "channel");
-
-  if (chopperChannel == 0) {
-    const auto instrumentParametersChopperChannels =
-        outputWS->instrumentParameters().getType<int>("DNS", "chopperchannel");
-    if (!instrumentParametersChopperChannels.empty()) {
-      chopperChannel = static_cast<uint32_t>(instrumentParametersChopperChannels.at(0));
-    } else {
-      g_log.error() << "The instrument definition is missing a chopper channel."
-                       " You must specify it manually."
-                    << std::endl;
-    }
-  }
-
-  // if (monitorChannel == 0) {
-  // const auto instrumentParametersMonitorChannels =
-  // outputWS->instrumentParameters().getType<int>("monitor", "channel");
-  // if (!instrumentParametersMonitorChannels.empty()) {
-  // monitorChannel =
-  // static_cast<uint32_t>(instrumentParametersMonitorChannels.at(0));
-  // } else {
-  // g_log.error() << "The instrument definition is missing a monitor channel."
-  // " You must specify it manually."
-  // << std::endl;
-  // }
-  // }
-
-  // g_log.notice() << "ChopperChannel: " << chopperChannel
-  // << " MonitorChannel: " << monitorChannel << std::endl;
+  // g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
 
   FileByteStream file(static_cast<std::string>(fileName), endian::big);
 
   auto finalEventAccumulator = parse_File(file, fileName);
   populate_EventWorkspace(outputWS, finalEventAccumulator);
-  if (setBinBoundary) {
+  if (setBinBoundary & outputWS->getNumberEvents() > 0) {
     outputWS->setAllX({0, outputWS->getEventXMax()});
   }
   setProperty("OutputWorkspace", outputWS);
@@ -400,7 +368,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
 
   std::vector<EventAccumulator> eventAccumulators(filechuncks.size());
   for (auto &evtAcc : eventAccumulators) {
-    evtAcc.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
+    evtAcc.neutronEvents.resize(detectorPixelCount);
   }
 
   // parse individual file chuncks:
@@ -413,7 +381,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
   }
 
   EventAccumulator finalEventAccumulator;
-  finalEventAccumulator.neutronEvents.resize(DETECTOR_PIXEL_COUNT);
+  finalEventAccumulator.neutronEvents.resize(detectorPixelCount);
 
   // combine eventAccumulators:
 
@@ -538,17 +506,21 @@ void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent:
   } break;
   case event_id_e::NEUTRON: {
     uint16_t position;
-    uint8_t channel;
-    channel = (data >> 39) & 0b11111111; // 5bit
-    position = (data >> 19) & 0x3ff;     // 10bit
-    event.timestamp = (data & 0x7ffff);  // 19bit
+    uint8_t modid;
+    uint8_t slotid;
+    modid = (data >> 44) & 0b111;       // 3bit
+    slotid = (data >> 39) & 0b11111;    // 5bit
+    position = (data >> 19) & 0x3ff;    // 10bit
+    event.timestamp = (data & 0x7ffff); // 19bit
     event.timestamp += bufferHeader.timestamp;
-    channel |= static_cast<uint8_t>(bufferHeader.mcpdId << 6u);
-    // g_log.debug() << "channel " << int(channel)
+    const size_t wsIndex = (bufferHeader.mcpdId << 6u | modid << 3u | slotid) << 10u | position;
+    // g_log.notice() << "channel " << int(modid * 8 + slotid)
+    //    << " slot " << int(slotid) << " mod " << int(modid)
     //              << " position " << position
-    //              << " timestamp " << event.timestamp
+    //              << " mcpd " << int(bufferHeader.mcpdId)
+    //               << " ws " << wsIndex
+    //                << " channelindex" << channelIndex
     //              << std::endl;
-    const size_t wsIndex = getWsIndex(channel, position);
     eventAccumulator.neutronEvents[wsIndex].push_back(event);
   } break;
   default:

@@ -98,6 +98,8 @@ private:
   };
 
   uint32_t chopperChannel;
+  uint32_t detectorPixelCount;
+
   // uint32_t monitorChannel;
   bool discardPreChopperEvents;
   bool setBinBoundary;
@@ -117,11 +119,6 @@ private:
   void parse_BlockSeparator(VectorByteStream &file);
   void parse_DataBuffer(VectorByteStream &file, EventAccumulator &eventAccumulator);
   BufferHeader parse_DataBufferHeader(VectorByteStream &file);
-
-  inline size_t getWsIndex(const uint8_t &channel, const uint16_t &position) {
-    const uint32_t channelIndex = ((channel & 0b11100000u) >> 2u) | (channel & 0b00000111u);
-    return channelIndex * 1024 + position;
-  }
 
   inline void parse_andAddEvent(VectorByteStream &file, const BufferHeader &bufferHeader,
                                 EventAccumulator &eventAccumulator);
