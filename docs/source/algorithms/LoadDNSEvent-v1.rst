@@ -22,7 +22,7 @@ It can be set to integers between 1 and 4. At DNS default is 2.
 
 
 **NumberOfDetectorPixels**
-The number of pixels of the total detector. For the full detector at DNS with 128 tubes with 1024 pixels it is 131072. 
+The number of pixels of the total detector. For the full detector at DNS with 128 tubes with 1024 pixels it is 131072.
 
 
 **DiscardPreChopperEvents**:
