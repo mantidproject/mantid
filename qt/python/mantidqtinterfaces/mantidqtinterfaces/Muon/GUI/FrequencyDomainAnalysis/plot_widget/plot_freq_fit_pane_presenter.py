@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
 
 
 class PlotFreqFitPanePresenter(PlotFitPanePresenter):
@@ -18,6 +18,7 @@ class PlotFreqFitPanePresenter(PlotFitPanePresenter):
         self._view.hide_plot_raw()
         self._view.hide_tiled_by()
         self.update_freq_units = GenericObservable()
+        self.update_fit_pane_observer = GenericObserver(self._update_fit_pane)
 
     def handle_data_type_changed(self):
         """
@@ -32,3 +33,10 @@ class PlotFreqFitPanePresenter(PlotFitPanePresenter):
     def handle_rebin_options_changed(self):
         # there is no way to rebin the data -> do nothing
         return
+
+    def _update_fit_pane(self):
+        if self.context.frequency_context.unit() == "Gauss":
+            self._view.set_plot_type("Field")
+        else:
+            self._view.set_plot_type("Frequency")
+        self.handle_data_type_changed()

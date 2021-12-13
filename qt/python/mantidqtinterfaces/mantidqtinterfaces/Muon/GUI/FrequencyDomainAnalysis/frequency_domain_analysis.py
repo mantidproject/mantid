@@ -221,7 +221,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.plot_widget.maxent_mode.instrument_observer)
         self.update_fits_observer = GenericObserver(self.handle_units_changed)
-        self.plot_widget.fit_mode.update_freq_units.add_subscriber(
+        self.plot_widget.update_freq_units_add_subscriber(
             self.update_fits_observer)
 
     def setup_tabs(self):
@@ -264,6 +264,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def handle_units_changed(self):
         old_name = self.fitting_tab.fitting_tab_presenter.current_dataset()
+        if old_name =="":
+            return
         self.update_fit_ws_list()
         new_name = self.frequency_context.switch_units_in_name(old_name)
         self.fitting_tab.fitting_tab_presenter.set_selected_dataset(new_name)
