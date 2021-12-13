@@ -604,8 +604,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         mask_angles = self.getProperty('MaskedAngles').value
         if mask_angles != list():
             masked_angles_ws = '{}_masked_angles'.format(self.instrument)
-            LoadEmptyInstrument(Filename=self.instrument, OutputWorkspace=masked_angles_ws)
-            MaskAngles(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])
+            LoadEmptyInstrument(InstrumentName=self.instrument, OutputWorkspace=masked_angles_ws)
+            MaskAngle(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])
             existing_masks.append(masked_angles_ws)
         mask_with_vanadium = self.getProperty('MaskWithVanadium').value
         if mask_with_vanadium:
