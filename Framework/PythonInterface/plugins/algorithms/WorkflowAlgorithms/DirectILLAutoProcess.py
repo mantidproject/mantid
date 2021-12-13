@@ -815,7 +815,12 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             ei = run.getLogData('Ei').value
             new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, name, ei)
             temp = run.getLogData(temp_log_name).value
-            self.temperatures.add(temp)
+            if isinstance(temp, np.ndarray):
+                for t in temp:
+                    self.temperatures.add(t)
+                temp = temp[0]
+            else:
+                self.temperatures.add(temp)
             if self.reduction_type == 'Powder':
                 new_name = '{}_T_{:.1f}'.format(new_name, temp)
             RenameWorkspace(InputWorkspace=name, OutputWorkspace=new_name)
