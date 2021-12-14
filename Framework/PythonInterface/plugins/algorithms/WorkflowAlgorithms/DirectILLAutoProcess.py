@@ -470,9 +470,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.elastic_channel_ws is not None:
             kwargs['ElasticChannelWorkspace'] = self.elastic_channel_ws
         if vanadium:
-            kwargs['EPPCreationMethod'] = 'Calculate EPP'
-            kwargs['ElasticChannel'] = 'Elastic Channel AUTO'
-            kwargs['FlatBkg'] = 'Flat Bkg ON'
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             self.to_clean.append(self.vanadium_epp)
