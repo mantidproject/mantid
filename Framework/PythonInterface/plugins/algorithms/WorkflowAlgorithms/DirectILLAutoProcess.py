@@ -443,18 +443,14 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
         min_threshold_defined = not self.getProperty('MaskThresholdMin').isDefault
         max_threshold_defined = not self.getProperty('MaskThresholdMax').isDefault
-        if not min_threshold_defined or not max_threshold_defined:
-            masking_criterion = '{} < y < {}'
-            if min_threshold_defined and max_threshold_defined:
-                masking_criterion = masking_criterion.format(self.getPropertyValue('MaskThresholdMax'),
-                                                             self.getPropertyValue('MaskThresholdMin'))
-            elif min_threshold_defined:
-                masking_criterion = 'y < {}'.format(self.getPropertyValue('MaskThresholdMin'))
-            else:  # only max threshold defined
-                masking_criterion = 'y > {}'.format(self.getPropertyValue('MaskThresholdMax'))
-
+        if min_threshold_defined or max_threshold_defined:
+            masking_criterion = []
+            if min_threshold_defined:
+                masking_criterion.append('y < {}'.format(self.getPropertyValue('MaskThresholdMin')))
+            if max_threshold_defined:
+                masking_criterion.append('y > {}'.format(self.getPropertyValue('MaskThresholdMax')))
             MaskBinsIf(InputWorkspace=ws, OutputWorkspace=ws,
-                       Criterion=masking_criterion)
+                       Criterion=' || '.join(masking_criterion))
         return ws
 
     def _collect_data(self, sample, vanadium=False):
