@@ -185,7 +185,7 @@ class RawDataExplorerPresenter(QObject):
         """
         view = self.view.add_preview()
         PreviewPresenter(self.view, view, self.model, previewModel)
-        self.view.fileTree.grabKeyboard()
+        # self.view.fileTree.grabKeyboard()
 
     def show_ws(self, ws_to_show):
         """
