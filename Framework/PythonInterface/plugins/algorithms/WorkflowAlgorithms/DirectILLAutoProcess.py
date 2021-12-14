@@ -767,16 +767,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                              OutputWorkspace=vanadium_diagnostics,
                              BeamStopDiagnostics="Beam Stop Diagnostics OFF")
 
-        if self.instrument == 'IN5':
-            van_flat_ws = "{}_flat".format(numor)
-            to_remove.append(van_flat_ws)
-            DirectILLTubeBackground(InputWorkspace=ws,
-                                    DiagnosticsWorkspace=vanadium_diagnostics,
-                                    EPPWorkspace=self.vanadium_epp,
-                                    OutputWorkspace=van_flat_ws)
-            Minus(LHSWorkspace=ws, RHSWorkspace=van_flat_ws,
-                  OutputWorkspace=ws, EnableLogging=False)
-
         if self.empty:
             self._subtract_empty_container(ws)
 
