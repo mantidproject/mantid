@@ -41,7 +41,7 @@ private:
                                   Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int SpecNum,
                                   bool isAProperHistogram);
 
-  void copyXandDxToOutputWorkspace(std::vector<std::size_t> &workspaceIndecies,
+  void copyXandDxToOutputWorkspace(const std::vector<std::size_t> &workspaceIndecies,
                                    const Mantid::API::MatrixWorkspace &inputWorkspace,
                                    Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum);
 
