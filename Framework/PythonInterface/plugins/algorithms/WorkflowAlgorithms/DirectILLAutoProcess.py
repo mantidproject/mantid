@@ -422,9 +422,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 output_samples.extend(current_output)
             else:  # Empty or Cadmium
                 progress.report("Renaming output")
-                current_output = ws
+                current_output = [ws]
                 current_output = self._rename_workspaces(current_output)
-                output_samples.append(current_output)
+                output_samples.extend(current_output)
             self._group_detectors(current_output)
             if self.save_output:
                 self._save_output(current_output)
