@@ -77,8 +77,8 @@ int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
     return 0;
 }
 
-const std::string LoadDNSEvent::INSTRUMENT_NAME = "DNS-PSD";
 const unsigned MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
+const unsigned PIXEL_PER_TUBE = 1024;        // maximum buffer size in data file
 
 void LoadDNSEvent::init() {
   /// Initialise the properties
@@ -90,8 +90,8 @@ void LoadDNSEvent::init() {
   declareProperty<uint32_t>("ChopperChannel", 2u, std::make_shared<BoundedValidator<uint32_t>>(1, 4),
                             "The Chopper Channel (1 to 4)", Kernel::Direction::Input);
 
-  declareProperty<uint32_t>("NumberOfDetectorPixels", 131072, std::make_shared<BoundedValidator<uint32_t>>(1, 131072),
-                            "The number of detector pixels (1 to 131072 = 1024*128)", Kernel::Direction::Input);
+  declareProperty<uint32_t>("NumberOfTubes", 128, std::make_shared<BoundedValidator<uint32_t>>(1, 128),
+                            "The number of tubes, each tube has 1024 pixels (1 to 128)", Kernel::Direction::Input);
 
   declareProperty<bool>("DiscardPreChopperEvents", true, std::make_shared<BoundedValidator<bool>>(0, 1),
                         "Discards events before first chopper trigger (turn off for elastic)",
@@ -113,7 +113,7 @@ void LoadDNSEvent::exec() {
   chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
   discardPreChopperEvents = static_cast<bool>(getProperty("DiscardPreChopperEvents"));
   setBinBoundary = static_cast<bool>(getProperty("SetBinBoundary"));
-  detectorPixelCount = static_cast<uint32_t>(getProperty("NumberOfDetectorPixels"));
+  detectorPixelCount = static_cast<uint32_t>(getProperty("NumberOfTubes")) * PIXEL_PER_TUBE;
 
   // create workspace
   EventWorkspace_sptr outputWS = std::dynamic_pointer_cast<EventWorkspace>(
@@ -121,7 +121,6 @@ void LoadDNSEvent::exec() {
   outputWS->switchEventType(Mantid::API::EventType::TOF);
   outputWS->getAxis(0)->setUnit("TOF");
   outputWS->setYUnit("Counts");
-  runLoadInstrument(INSTRUMENT_NAME, outputWS);
 
   // g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
 
@@ -200,21 +199,6 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS, EventAcc
   }
   if (oversizedPosCounterA > 0) {
     g_log.warning() << "Bad position values: " << oversizedPosCounterA << std::endl;
-  }
-}
-
-void LoadDNSEvent::runLoadInstrument(std::string instrumentName, EventWorkspace_sptr &eventWS) {
-  IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
-  // Now execute the Child Algorithm. Catch and log any error, but don't stop.
-  try {
-    loadInst->setPropertyValue("InstrumentName", instrumentName);
-    g_log.debug() << "InstrumentName" << instrumentName << '\n';
-    loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", eventWS);
-    loadInst->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
-
-    loadInst->execute();
-  } catch (...) {
-    g_log.information("Cannot load the instrument definition.");
   }
 }
 

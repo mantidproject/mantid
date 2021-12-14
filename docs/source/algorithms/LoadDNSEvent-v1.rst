@@ -10,7 +10,7 @@ Description
 -----------
 
 
-This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspace <EventWorkspace>`.
+This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspace <EventWorkspace>`, it does not load the instrument definition.
 
 **Output**
 
@@ -21,8 +21,8 @@ is the input channel to wich the chopper was connected, must also be set in mesy
 It can be set to integers between 1 and 4. At DNS default is 2.
 
 
-**NumberOfDetectorPixels**
-The number of pixels of the total detector. For the full detector at DNS with 128 tubes with 1024 pixels it is 131072.
+**NumberOfTubes*
+The number of tubes of the detector, each tube has 1024 pixels. The full detector at DNS has 128 tubes. It can be set to integers between 1 and 128.
 
 
 **DiscardPreChopperEvents**:
@@ -51,7 +51,7 @@ Usage
 
 .. testcode:: ExLoadDNSEvent
 
-    eventWS = LoadDNSEvent(InputFile="DNS_psd_pulser_ON473_31.mdat", ChopperChannel='2')
+    eventWS = LoadDNSEvent(InputFile="DNS_psd_150c_first_tube.mdat", ChopperChannel='2', NumberOfTubes='1')
     print("Number of events: {}".format(eventWS.getNumberEvents()))
     print("Maximum time of flight: {}".format(eventWS.getTofMax()))
     print("Number of detector pixels: {}".format(eventWS.getNumberHistograms()))
@@ -67,11 +67,11 @@ Usage
 .. testoutput:: ExLoadDNSEvent
    :options: +NORMALIZE_WHITESPACE
 
-    Number of events: 9998
-    Maximum time of flight: 99471.3
-    Number of detector pixels: 131072
+    Number of events: 184
+    Maximum time of flight: 6641.4
+    Number of detector pixels: 1024
     Number of bins: 1
-    Number of bins after rebinning: 995
+    Number of bins after rebinning: 67
 
 .. categories::
 

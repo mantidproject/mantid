@@ -66,7 +66,6 @@ public:
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  static const std::string INSTRUMENT_NAME;
   /// Initialise the properties
   void init() override;
   /// Run the algorithm
@@ -103,8 +102,6 @@ private:
   // uint32_t monitorChannel;
   bool discardPreChopperEvents;
   bool setBinBoundary;
-
-  void runLoadInstrument(std::string instrumentName, DataObjects::EventWorkspace_sptr &eventWS);
 
   void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
                                EventAccumulator &finalEventAccumulator);
