@@ -20,3 +20,4 @@ class RawDataExplorerFileTree(QTreeView):
 
     def currentChanged(self, current_index, previous_index):
         self.sig_new_current.emit(current_index)
+        super(RawDataExplorerFileTree, self).currentChanged(current_index, previous_index)

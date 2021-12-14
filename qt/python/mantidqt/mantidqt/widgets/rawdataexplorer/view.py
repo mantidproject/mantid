@@ -187,9 +187,10 @@ class RawDataExplorerView(QWidget):
         self.fileTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
         self.fileTree.header().setStretchLastSection(False)
-        self.fileTree.clicked.connect(self.on_file_clicked)
-        self.fileTree.sig_new_current.connect(self.on_file_clicked)
-        self.fileTree.activated.connect(self.on_file_clicked)
+        # self.fileTree.clicked.connect(self.on_file_clicked)
+        self.fileTree.sig_new_current.connect(self.on_file_clicked, Qt.QueuedConnection)
+        #self.fileTree.activated.connect(self.on_file_clicked)
+        self.is_busy = False
 
     def closeEvent(self, event):
         self.deleteLater()
