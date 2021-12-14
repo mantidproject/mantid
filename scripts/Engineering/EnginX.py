@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence, Optional
+from os.path import isfile
 
 from mantid.simpleapi import Load
 from Engineering.EnggUtils import GROUP, focus_run, create_new_calibration
@@ -16,7 +17,7 @@ class EnginX:
                  vanadium_run: str,
                  focus_runs: Sequence[str],
                  save_dir: str,
-                 full_inst_calib_path: Optional[str] = None,
+                 full_inst_calib_path: str,
                  prm_path: Optional[str] = None,
                  ceria_run: Optional[str] = None,
                  group: Optional[GROUP] = None,
@@ -29,6 +30,12 @@ class EnginX:
         self.focus_runs = focus_runs
         self.save_dir = save_dir
 
+        # Load custom full inst calib if supplied (needs to be in ADS)
+        if isfile(full_inst_calib_path):
+            Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
+        else:
+            ValueError("Path to full instrument calibration not valid.")
+
         # setup CalibrationInfo object
         if prm_path:
             self.calibration.set_calibration_from_prm_fname(prm_path)  # to load existing calibration
@@ -40,10 +47,6 @@ class EnginX:
                 self.calibration.set_cal_file(calfile_path)
             elif group == GROUP.CROPPED and spectrum_num:
                 self.calibration.set_spectra_list(spectrum_num)
-
-        if full_inst_calib_path:
-            # Load custom full inst calib if supplied (needs to be in ADS otherwise default used)
-            Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
 
     def calibrate(self, plot_output: bool) -> None:
         if self.calibration.get_prm_filepath():
