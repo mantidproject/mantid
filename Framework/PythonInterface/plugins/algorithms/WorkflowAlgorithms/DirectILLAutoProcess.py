@@ -811,7 +811,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         group name, incident energy, and sample temperature (for powder reduction only)."""
         output_group_name = self.output
         new_ws_list = []
-        temp_log_name = 'sample.temperature'
+        temp_log_name = 'sample.setpoint_temperature'
         for name in ws_list:
             run = mtd[name].getRun()
             ei = run.getLogData('Ei').value
