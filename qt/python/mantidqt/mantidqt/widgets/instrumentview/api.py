@@ -46,4 +46,6 @@ def get_instrumentview(workspace, window_flags=None):
     ivp.set_color_scale = ivp.get_render_tab().setLegendScaleType
     ivp.is_thread_running = ivp.container.widget.isThreadRunning
     ivp.wait = ivp.container.widget.waitForThread
+    ivp.replace_workspace = safe_qthread(ivp.replace_workspace)
+    ivp.save_image = safe_qthread(ivp.save_image)
     return ivp
