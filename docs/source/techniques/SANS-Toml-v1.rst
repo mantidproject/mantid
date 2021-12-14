@@ -1358,23 +1358,25 @@ could be used to replicate some of the same functionality.
 
 Unsupported
 
+.. _mask_line_two_params:
+
 MASK/LINE a b
 -------------
 
 This command was used to specify a **diagonal line** of detector pixels
 to be omitted from the calculation during data reduction. Also see
-MASK/LINE a b c d.
+:ref:`mask_line_four_params-ref`.
 
 The line started at the centre of the scattering pattern (see SET CENTRE a b)
 and extended to the edge of the pattern at the specified angle b with the
 specified width a in mm. Only pixels wholly within the line were excluded. The
 angle was defined in the same way as for L/PHI.
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David the line started from the centre of the pattern, or the centre of the
-.. detector? Only pixels wholly within were excluded, or partially too? And
-.. what determined the length of the line (I'm assuming the edge of the pattern)?
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+An effectively infinite cylinder (length 100m) with the angle and width set
+by the user is created at x=0, y=0, and z equal to the detector depth.
+:ref:`algm-MaskDetectorsInShape` is subsequently used the apply the generated shape.
+The central point of each detector must lie within the shape to be masked, partially
+overlapping detectors (whose centre does not sit in the masked region) will not be masked.
 
 The primary use of this command was to mask out the beamstop support arm on some
 instruments.
@@ -1398,21 +1400,16 @@ instruments.
     [mask]
       beamstop_shadow = {width = 0.03, angle = 170.0}
 
+.. _mask_line_four_params-ref:
+
 MASK/LINE a b c d
 -----------------
 
 This command was used to specify a **diagonal line** of detector pixels
-to be omitted from the calculation during data reduction. Also see
-MASK/LINE a b.
+to be omitted from the calculation during data reduction. Also see :ref:`mask_line_two_params`.
 
-The line started at the coordinates (c,d) and extended to the edge of the
-pattern at the specified angle b with the specified width a in mm. Only
-pixels wholly within the line were excluded. The angle was defined in the
-same way as for L/PHI.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David is this definition correct? (I didn't know this command existed!)
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+This command works identically to :ref:`mask_line_two_params`. Instead of starting at (0, 0)
+the coordinates for x and y (represented by c and d) are given by the user.
 
 Note that whilst parameter a was given in mm, c and d were specified in metres
 even in legacy files!
@@ -1654,12 +1651,6 @@ rebin of the specified monitor spectrum. This could be useful as a means of
 'smoothing' noisy monitor spectra where the normal rebin command generated
 'stepped' histograms.
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David is the equivalent of MON/TRANS actually implemented in TOML; your example
-.. does not show as much.
-.. Also, is there an equivalent of /INTERPOLATE in TOML?
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
 ..  code-block:: none
 
   [normalisation]
@@ -1677,6 +1668,9 @@ rebin of the specified monitor spectrum. This could be useful as a means of
 ..  code-block:: none
 
     MON/SPECTRUM=1
+    MON/TRANS/SPECTRUM=2
+
+    MON/SPECTRUM=1/INTERPOLATE
 
 **Replacement Example**
 
@@ -1691,6 +1685,18 @@ rebin of the specified monitor spectrum. This could be useful as a means of
 
     [normalisation.monitor.M1]
       spectrum_number = 1
+
+  [transmission]
+    selected_monitor = "M2"
+
+    [transmission.monitor.M2]
+      spectrum_number = 2
+
+  # If interpolation is also required:
+  [binning]
+    [binning.2d_reduction]
+      interpolate = true
+
 
 PRINT string
 ------------
@@ -1910,7 +1916,7 @@ block at the top of TOML User Files instead of the [q_resolution] block.
     sample_aperture_diameter = 0.02
 
 QRESOL[/H1=x1][/W1=y1][/H2=x2][/W2=y2]
------------------------------------
+--------------------------------------
 
 This command was used to specify the **source and sample** slit sizes to be
 used in the estimation of the Q-resolution. Also see QRESOL/A1=x and
@@ -1954,10 +1960,6 @@ the heights and widths of a slit do not have to be the same.
     w1 = 0.016
     h2 = 0.008
     w2 = 0.008
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David you had these as mm even in TOML; I assume that was a mistake?
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 QRESOL/LCOLLIM=z
 ----------------
@@ -2043,12 +2045,7 @@ algorithm description.
 
 **Replacement Example**
 
-Unsupported
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David so does SANS data reduction automatically invoke SANSWideAngleCorrection
-.. and we are using it by default, or is some action required here?
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+Unsupported, pending future discussion.
 
 SET CENTRE a b
 --------------
@@ -2106,17 +2103,6 @@ be optimised using the beam centre finder tool!) are:
     SANS2D: ( 0.100, -0.080)
     ZOOM:   (-0.170, -0.050)
 
-**Note: In 2020 it was discovered that due to a forever bug in the legacy
-User File command parser the parameters c and d have never been implemented
-in Mantid.**
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David we DO need to get to the bottom of the consequences of this; is it
-.. just that the way Mantid does its reduction obviates the need for the
-.. pixel sizes, or are some values hard-coded (what?), or are values read
-.. from the IDF? Or something else?
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-
 ..  code-block:: none
 
     [detector]
@@ -2159,22 +2145,18 @@ four parameters should be set to unity.
 User File command parser the parameters b, c, d & e have never been implemented
 in Mantid.** See this `issue <https://github.com/mantidproject/mantid/issues/27948>`_.
 
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David we DO need to get to the bottom of the consequences of this also.
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+All workspaces are currently scaled by the value represented by `a` for all values,
+rather than on a per-bank basis.
 
 The TOML replacement command allows separate but single scaling factors for
-both rear and front detectors to be specified.
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David but does it actually do anything with the front_scale value?
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+both rear and front detectors to be specified. To maintain compatibility
+`front_scale` is ignored by the parser and will not do anything.
 
 ..  code-block:: none
 
     [detector]
       [detector.configuration]
-        front_scale = a'
+        front_scale = a
         rear_scale = a
 
 **Existing Example:**
@@ -2343,14 +2325,6 @@ transmission monitors.
       [transmission.monitor.M4]
         spectrum_number = 17788
         shift = -0.012
-
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-.. David I note that the old User File command list includes several
-.. other options for the TRANS command, some of which are relevant
-.. to Rob's point about transmission monitors not being a single spectrum
-.. but an ROI, etc. So is this functionality still in the code?
-.. https://web.archive.org/web/20171007173907/http:/www.mantidproject.org/SANS_User_File_Commands#TRANS
-.. ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 TUBECALIBFILE=filename
 ----------------------
