@@ -103,7 +103,7 @@ public:
   }
 
   void CalcVariancesFromData(double background, double meanx, double meany, double &Varxx, double &Varxy, double &Varyy,
-                             std::vector<double> &StatBase);
+                             const std::vector<double> &StatBase);
 
   bool IsEnoughData(const double *ParameterValues, Kernel::Logger &);
 
@@ -320,7 +320,7 @@ private:
   int findTimeChannel(const Mantid::HistogramData::HistogramX &X, const double time);
 
   // returns true if Neighborhood list is changed
-  bool updateNeighbors(std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D CentPos, Kernel::V3D oldCenter,
+  bool updateNeighbors(const std::shared_ptr<Geometry::IComponent> &comp, Kernel::V3D CentPos, Kernel::V3D oldCenter,
                        double NewRadius, double &neighborRadius);
   bool m_debug;
 };
