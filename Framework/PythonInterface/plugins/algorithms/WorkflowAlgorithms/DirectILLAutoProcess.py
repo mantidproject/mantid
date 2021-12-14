@@ -707,6 +707,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         numor = ws[:ws.rfind('_')]
         processed_sample_tw = None
         if self.reduction_type == 'SingleCrystal':
+            if self.getPropertyValue('AbsorptionCorrection') != 'None':
+                self._correct_self_attenuation(ws, sample_no)
             # normalises to vanadium integral
             normalised_ws = self._normalise_sample(ws, sample_no, numor)
             to_remove.append(normalised_ws)
@@ -763,17 +765,23 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         to_remove = [ws]
         numor = ws[:ws.rfind('_')]
         vanadium_diagnostics = '{}_diag'.format(numor)
-        DirectILLDiagnostics(InputWorkspace=ws,
-                             OutputWorkspace=vanadium_diagnostics,
-                             BeamStopDiagnostics="Beam Stop Diagnostics OFF")
+        DirectILLDiagnostics(
+            InputWorkspace=ws,
+            OutputWorkspace=vanadium_diagnostics,
+            BeamStopDiagnostics="Beam Stop Diagnostics OFF"
+        )
 
         if self.empty:
             self._subtract_empty_container(ws)
 
         vanadium_integral = '{}_integral'.format(numor)
-        DirectILLIntegrateVanadium(InputWorkspace=ws,
-                                   OutputWorkspace=vanadium_integral,
-                                   EPPWorkspace=self.vanadium_epp)
+        DirectILLIntegrateVanadium(
+            InputWorkspace=ws,
+            OutputWorkspace=vanadium_integral,
+            EPPWorkspace=self.vanadium_epp
+        )
+        if self.getPropertyValue('AbsorptionCorrection') != 'None':
+            self._correct_self_attenuation(ws, sample_no)
 
         sofq_output = '{}_SofQ'.format(numor)
         softw_output = '{}_SofTW'.format(numor)
@@ -784,13 +792,14 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
         if not self.getProperty('MomentumTransferBinning').isDefault:
             optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
-        DirectILLReduction(InputWorkspace=ws,
-                           OutputWorkspace=sofq_output,
-                           OutputSofThetaEnergyWorkspace=softw_output,
-                           IntegratedVanadiumWorkspace=vanadium_integral,
-                           DiagnosticsWorkspace=vanadium_diagnostics,
-                           **optional_parameters
-                           )
+        DirectILLReduction(
+            InputWorkspace=ws,
+            OutputWorkspace=sofq_output,
+            OutputSofThetaEnergyWorkspace=softw_output,
+            IntegratedVanadiumWorkspace=vanadium_integral,
+            DiagnosticsWorkspace=vanadium_diagnostics,
+            **optional_parameters
+        )
 
         if len(to_remove) > 0 and self.clear_cache:
             self._clean_up(to_remove)
