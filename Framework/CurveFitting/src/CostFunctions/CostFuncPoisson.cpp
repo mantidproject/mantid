@@ -103,7 +103,7 @@ void CostFuncPoisson::addValDerivHessian(API::IFunction_sptr function, API::Func
   }
 }
 
-void CostFuncPoisson::calculateDerivative(API::IFunction &function, FunctionDomain &domain,
+void CostFuncPoisson::calculateDerivative(API::IFunction &function, const FunctionDomain &domain,
                                           FunctionValues &values) const {
   const size_t numParams = function.nParams();
   const size_t numDataPoints = domain.size();
@@ -163,8 +163,8 @@ void CostFuncPoisson::calculateDerivative(API::IFunction &function, FunctionDoma
   m_value += 2.0 * costVal;
 }
 
-void CostFuncPoisson::calculateHessian(API::IFunction &function, API::FunctionDomain &domain,
-                                       API::FunctionValues &values) const {
+void CostFuncPoisson::calculateHessian(API::IFunction &function, const API::FunctionDomain &domain,
+                                       const API::FunctionValues &values) const {
   size_t numParams = function.nParams(); // number of parameters
   size_t numDataPoints = domain.size();  // number of data points
 
