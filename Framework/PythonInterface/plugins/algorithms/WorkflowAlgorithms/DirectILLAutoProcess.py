@@ -492,13 +492,19 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         """Creates, if necessary, a self-attenuation workspace and uses it to correct the provided sample workspace."""
         if sample_no == 0:
             self._prepare_self_attenuation_ws(ws)
-
         if self.absorption_corr:
-            ApplyPaalmanPingsCorrection(
-                    SampleWorkspace=ws,
-                    OutputWorkspace=ws,
-                    CorrectionsWorkspace=self.absorption_corr
+            tmp_corr = '{}_tmp'.format(self.absorption_corr)
+            RebinToWorkspace(
+                WorkspaceToRebin=self.absorption_corr,
+                WorkspaceToMatch=ws,
+                OutputWorkspace=tmp_corr
             )
+            ApplyPaalmanPingsCorrection(
+                SampleWorkspace=ws,
+                OutputWorkspace=ws,
+                CorrectionsWorkspace=tmp_corr
+            )
+            DeleteWorkspace(Workspace=tmp_corr)
 
     @staticmethod
     def _clean_up(to_clean):
@@ -527,7 +533,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             if self.instrument == 'IN5':  # there is an extra bank that contains all of the tubes
                 n_tubes -= 1
             n_pixels_per_tube = int(n_pixels / n_tubes)
-            print("N tubes:", n_tubes, 'npix/tube:', n_pixels_per_tube)
             grouping_pattern = []
             pixel_id = 0
             while pixel_id < n_pixels - (group_by_x - 1) * n_pixels_per_tube:
