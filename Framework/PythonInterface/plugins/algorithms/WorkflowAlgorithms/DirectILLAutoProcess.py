@@ -467,6 +467,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             kwargs[common.PROP_DET_HOR_GROUPING] = self.getProperty(common.PROP_DET_HOR_GROUPING).value
         if not self.getProperty(common.PROP_DET_VER_GROUPING).isDefault:
             kwargs[common.PROP_DET_VER_GROUPING] = self.getProperty(common.PROP_DET_VER_GROUPING).value
+        if self.elastic_channel_ws is not None:
+            kwargs['ElasticChannelWorkspace'] = self.elastic_channel_ws
         if vanadium:
             kwargs['EPPCreationMethod'] = 'Calculate EPP'
             kwargs['ElasticChannel'] = 'Elastic Channel AUTO'
@@ -474,11 +476,13 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             self.to_clean.append(self.vanadium_epp)
-        DirectILLCollectData(Run=sample, OutputWorkspace=ws,
-                             IncidentEnergyCalibration=self.incident_energy_calibration,
-                             IncidentEnergyWorkspace=self.incident_energy_ws,
-                             ElasticChannelWorkspace=self.elastic_channel_ws,
-                             **kwargs)
+        DirectILLCollectData(
+            Run=sample,
+            OutputWorkspace=ws,
+            IncidentEnergyCalibration=self.incident_energy_calibration,
+            IncidentEnergyWorkspace=self.incident_energy_ws,
+            **kwargs
+        )
         instrument = mtd[ws].getInstrument().getName()
         if self.instrument and instrument != self.instrument:
             self.log().error("Sample data: {} comes from different instruments that the rest of the data:"
