@@ -126,6 +126,26 @@ public:
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }
 
+  void test_RelativeErrorInPeaksWorkspace() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    const double tol = checker.getProperty("Tolerance");
+    auto pws1 = std::make_shared<LeanElasticPeaksWorkspace>();
+    auto pws2 = std::make_shared<LeanElasticPeaksWorkspace>();
+    LeanElasticPeak pk1(V3D(4.0, 0.0, 0.0));
+    pws1->addPeak(pk1);
+    LeanElasticPeak pk2(V3D(4.0 + 2.0 * tol, 0.0, 0.0));
+    pws2->addPeak(pk2);
+
+    // check matches with relative error
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
   void testPeaks_extrapeak() {
     if (!checker.isInitialized())
       checker.initialize();

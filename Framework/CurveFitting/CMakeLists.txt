@@ -85,6 +85,8 @@ set(SRC_FILES
     src/Functions/CrystalFieldSpectrum.cpp
     src/Functions/CrystalFieldSusceptibility.cpp
     src/Functions/CubicSpline.cpp
+    src/Functions/DecoupAsymPowderMagLong.cpp
+    src/Functions/DecoupAsymPowderMagRot.cpp
     src/Functions/DeltaFunction.cpp
     src/Functions/DiffRotDiscreteCircle.cpp
     src/Functions/DiffSphere.cpp
@@ -162,6 +164,7 @@ set(SRC_FILES
     src/LatticeFunction.cpp
     src/MSVesuvioHelpers.cpp
     src/MultiDomainCreator.cpp
+    src/MuonHelpers.cpp
     src/ParDomain.cpp
     src/ParameterEstimator.cpp
     src/RalNlls/TrustRegion.cpp
@@ -259,6 +262,8 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
     inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
     inc/MantidCurveFitting/Functions/CubicSpline.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagLong.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagRot.h
     inc/MantidCurveFitting/Functions/DeltaFunction.h
     inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/DiffSphere.h
@@ -339,6 +344,7 @@ set(INC_FILES
     inc/MantidCurveFitting/LatticeFunction.h
     inc/MantidCurveFitting/MSVesuvioHelpers.h
     inc/MantidCurveFitting/MultiDomainCreator.h
+    inc/MantidCurveFitting/MuonHelpers.h
     inc/MantidCurveFitting/ParDomain.h
     inc/MantidCurveFitting/ParameterEstimator.h
     inc/MantidCurveFitting/RalNlls/TrustRegion.h
@@ -428,6 +434,8 @@ set(TEST_FILES
     Functions/CrystalFieldSusceptibilityTest.h
     Functions/CrystalFieldTest.h
     Functions/CubicSplineTest.h
+    Functions/DecoupAsymPowderMagLongTest.h
+    Functions/DecoupAsymPowderMagRotTest.h
     Functions/DeltaFunctionTest.h
     Functions/DiffRotDiscreteCircleTest.h
     Functions/DiffSphereTest.h
@@ -500,6 +508,7 @@ set(TEST_FILES
     LatticeFunctionTest.h
     MultiDomainCreatorTest.h
     MultiDomainFunctionTest.h
+    MuonHelperTest.h
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
     SpecialFunctionSupportTest.h

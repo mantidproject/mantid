@@ -19,7 +19,8 @@ if(CPPCHECK_EXECUTABLE)
       --std=c++${CMAKE_CXX_STANDARD} # use the standard from cmake
       --cppcheck-build-dir="${CPPCHECK_BUILD_DIR}/cache"
       --suppressions-list="${CPPCHECK_BUILD_DIR}/CppCheck_Suppressions.txt"
-      --project=${CMAKE_BINARY_DIR}/compile_commands.json
+      --project="${CMAKE_BINARY_DIR}/compile_commands.json"
+      -i"${CMAKE_BINARY_DIR}"
       # Force cppcheck to check when we use project-wide macros
       -DDLLExport=
       -DMANTID_ALGORITHMS_DLL=

@@ -38,7 +38,7 @@ Bugfixes
 
 - Fixed a bug which prevented workspaces being loaded into Elwin.
 - Fixed a bug which caused VesuvioAnalysis to crash when run with a single element.
-
+- Contour workspaces are now saved when saving in Bayes stretch.
 - The Abins algorithm can also import force constants data from CASTEP
   or Phonopy calculations, using the Euphonic library. (See above.)
 
