@@ -13,7 +13,7 @@ class PlotFreqFitPanePresenter(PlotFitPanePresenter):
     def __init__(self, view, model, context, fitting_context, figure_presenter):
         super().__init__(view, model, context, fitting_context, figure_presenter)
         self._data_type = [FREQ, FIELD]
-        self.context._frequency_context.x_label = FREQ
+        self.context.frequency_context.x_label = FREQ
         self._sort_by = [""]
         self.update_view()
         self._view.hide_plot_raw()
@@ -25,9 +25,9 @@ class PlotFreqFitPanePresenter(PlotFitPanePresenter):
         """
         Handles the data type being changed in the view by plotting the workspaces corresponding to the new data type
         """
-        self.context._frequency_context.x_label = self._view.get_plot_type()
+        self.context.frequency_context.x_label = self._view.get_plot_type()
         self.update_freq_units.notify_subscribers()
-        self._figure_presenter.set_plot_range(self.context._frequency_context.range())
+        self._figure_presenter.set_plot_range(self.context.frequency_context.range())
         # need to send signal out to update stuff => dont undate here
         # the slot will update the plot when the fit list updates
 
