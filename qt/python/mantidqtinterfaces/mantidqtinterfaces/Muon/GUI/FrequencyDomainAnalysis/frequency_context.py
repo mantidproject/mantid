@@ -11,6 +11,8 @@ from mantid.simpleapi import RenameWorkspace
 UNIT="_unit_"
 MHz = "MHz"
 GAUSS = "Gauss"
+FREQ = "Frequency"
+FIELD = "Field"
 
 
 class freq_and_field_ws(object):
@@ -26,7 +28,7 @@ class freq_and_field_ws(object):
             RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=self._field)
 
     def get_ws(self, x_label):
-        if x_label.lower() == "field":
+        if x_label == FIELD:
             return self._field
         #otherwise assume its freq
         return self._freq
@@ -106,7 +108,7 @@ class FrequencyContext(object):
         return list(self._FFT_freq.keys())
 
     def unit(self):
-        if self.x_label == "Field":
+        if self.x_label == FIELD:
             return GAUSS
         else:
             return MHz
@@ -126,7 +128,7 @@ class FrequencyContext(object):
             return name
 
     def range(self):
-        if self.x_label == "Field":
+        if self.x_label == FIELD:
             return [0.0, 1000.0]
         else:
             return [0.0, 30.0]

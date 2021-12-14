@@ -10,7 +10,7 @@ from mantidqtinterfaces.Muon.GUI.Common import thread_model
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, \
     extract_single_spec
 from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
-#from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
     get_group_or_pair_from_name
 import re
@@ -187,9 +187,8 @@ class FFTPresenter(object):
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
                                       frequency_domain_workspace)
         # clean up
-        #remove_ws(frequency_domain_workspace)
-        #remove_ws(ws_field)
-        #remove_ws(real_workspace_input)
+        remove_ws(frequency_domain_workspace)
+        remove_ws(real_workspace_input)
 
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace_label):
         run = re.search('[0-9]+', input_workspace).group()
@@ -213,8 +212,7 @@ class FFTPresenter(object):
             muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws)
             muon_workspace_wrapper.show(directory + fft_workspace_name + spec_type)
             # clean up
-            #remove_ws(fft_workspace_name)
-            #remove_ws(fft_workspace_name + "field")
+            remove_ws(fft_workspace_name)
 
         # This is a small hack to get the output name to a location where it can be part of the calculation finished
         # signal.

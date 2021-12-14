@@ -248,6 +248,7 @@ def run_Plus(parameter_dict):
     return alg.getProperty("OutputWorkspace").value
 
 
+#cannot import the strings from the context as it causes a circular import
 def convert_to_field(workspace_name, output_name):
     """
     Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
@@ -266,7 +267,7 @@ def convert_to_field(workspace_name, output_name):
 
 def convert_to_freq(workspace_name, output_name):
     """
-    Apply the ConvertAxisByFormula algorithm to convert from MHz to Field.
+    Apply the ConvertAxisByFormula algorithm to convert from Field to MHz.
     """
     alg = mantid.AlgorithmManager.create("ConvertAxisByFormula")
     alg.initialize()

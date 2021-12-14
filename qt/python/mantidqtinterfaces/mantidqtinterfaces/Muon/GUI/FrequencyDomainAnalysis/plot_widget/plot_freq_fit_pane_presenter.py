@@ -5,14 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.fit_pane.plot_fit_pane_presenter import PlotFitPanePresenter
 from mantidqt.utils.observer_pattern import GenericObservable, GenericObserver
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQ, FIELD, GAUSS
 
 
 class PlotFreqFitPanePresenter(PlotFitPanePresenter):
 
     def __init__(self, view, model, context, fitting_context, figure_presenter):
         super().__init__(view, model, context, fitting_context, figure_presenter)
-        self._data_type = ["Frequency", "Field"]
-        self.context._frequency_context.x_label = "Frequency"
+        self._data_type = [FREQ, FIELD]
+        self.context._frequency_context.x_label = FREQ
         self._sort_by = [""]
         self.update_view()
         self._view.hide_plot_raw()
@@ -35,8 +36,8 @@ class PlotFreqFitPanePresenter(PlotFitPanePresenter):
         return
 
     def _update_fit_pane(self):
-        if self.context.frequency_context.unit() == "Gauss":
-            self._view.set_plot_type("Field")
+        if self.context.frequency_context.unit() == GAUSS:
+            self._view.set_plot_type(FIELD)
         else:
-            self._view.set_plot_type("Frequency")
+            self._view.set_plot_type(FREQ)
         self.handle_data_type_changed()

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_presenter import BasePanePresenter
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver, GenericObservable
+from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQ, FIELD, GAUSS, MHz
 
 
 class DualPlotMaxentPanePresenter(BasePanePresenter):
@@ -13,7 +14,7 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
     def __init__(self, view, model, context, figure_presenter):
         super().__init__(view, model, context, figure_presenter)
         # view set up
-        self._data_type = ["Maxent (MHz) and Counts", "Maxent (Gauss) and Counts"]
+        self._data_type = [f'Maxent ({MHz}) and Counts', f'Maxent ({GAUSS}) and Counts']
         self._sort_by = ["Maxent + Groups/detectors"]
         self.update_view()
         self._view.enable_plot_type_combo()
@@ -82,10 +83,10 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
 
     def get_plot_type(self):
         plot_type = self._view.get_plot_type()
-        if "Gauss" in plot_type:
-            return "Field"
+        if GAUSS in plot_type:
+            return FIELD
         else:
-            return "Frequency"
+            return FREQ
 
     def handle_data_type_changed(self):
         """
