@@ -57,7 +57,7 @@ class TotScatCalculateSelfScatteringTest(unittest.TestCase):
                                                        CalFileName=self.cal_file_path,
                                                        SampleGeometry=self.geometry,
                                                        SampleMaterial=self.material)
-        self.assertEqual(correction_ws.getNumberHistograms(), 2)
+        self.assertEqual(correction_ws.getNumberHistograms(), 6)
 
 
 if __name__ == "__main__":
