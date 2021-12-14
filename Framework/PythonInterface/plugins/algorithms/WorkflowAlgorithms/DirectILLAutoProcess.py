@@ -832,6 +832,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     def _save_output(self, ws_to_save):
         """Saves the output workspaces to an external file."""
         for ws_name in ws_to_save:
+            if self.process == 'Vanadium' and 'diag' in ws_name:
+                SaveMask(InputWorkspace=ws_name, OutputFile=ws_name)
+                continue
             if self.reduction_type == 'SingleCrystal':
                 omega_log = 'SRot.value'  # IN5, IN6
                 if self.instrument == 'PANTHER':
