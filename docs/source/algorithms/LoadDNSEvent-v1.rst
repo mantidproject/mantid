@@ -21,7 +21,7 @@ is the input channel to wich the chopper was connected, must also be set in mesy
 It can be set to integers between 1 and 4. At DNS default is 2.
 
 
-**NumberOfTubes*
+**NumberOfTubes**
 The number of tubes of the detector, each tube has 1024 pixels. The full detector at DNS has 128 tubes. It can be set to integers between 1 and 128.
 
 

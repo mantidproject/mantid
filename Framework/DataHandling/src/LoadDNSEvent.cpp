@@ -302,7 +302,7 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
       windowAsArray = reinterpret_cast<std::array<uint8_t, windowSize> *>(current_window);
       file.readRaw(current_window[0], windowSize);
 
-      while (*windowAsArray != block_sep) { // (!file.eof() ) {
+      while ((*windowAsArray != block_sep) & (!file.eof())) {
         size_t skip_length = skipTable[current_window[windowSize - 1]];
 
         const auto orig_data_size = data.size();
