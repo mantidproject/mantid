@@ -118,9 +118,6 @@ def create_van_per_detector(instrument, run_details, absorb):
     # convert back to TOF based on calibrated detector positions
     # this is unfocused data so the calibration is still valid
 
-    mantid.ApplyDiffCal(InstrumentWorkspace=aligned_ws,
-                        ClearCalibration=True)
-
     run_number = str(run_details.output_run_string)
     ext = run_details.file_extension if run_details.file_extension else ""
     d_spacing_out_name = run_number + ext + "-ResultD"
@@ -169,6 +166,7 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
             for mask_params in bank:
                 vanadium_splines = mantid.MaskBins(InputWorkspace="vanadium_splines", XMin=mask_params[0], XMax=mask_params[1])
     vanadium_splines.clearMonitorWorkspace()
+    vanadium_splines = mantid.RemoveMaskedSpectra(InputWorkspace=vanadium_splines)
     out_name = "van_{}".format(run_details.vanadium_run_numbers)
     out_name = mantid.ConvertUnits(InputWorkspace=vanadium_splines, Target="TOF", OutputWorkspace=out_name)
     out_name = mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,

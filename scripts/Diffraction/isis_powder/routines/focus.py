@@ -144,29 +144,15 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
 
 def _apply_vanadium_corrections_per_detector(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):
 
-    data_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
-    # processed_spectra = _subtract_correction(data_workspace=input_workspace,
-    #                                          correction_workspace=vanadium_splines)
+    input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
     # Remove Masked and Monitor spectra
-    mantid.ExtractMonitors(InputWorkspace=vanadium_splines,
-                           DetectorWorkspace="correction_workspace",
-                           MonitorWorkspace="correction_workspace_monitors")
-    correction_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="correction_workspace")
-    correction_workspace.clearMonitorWorkspace()
-
-    mantid.ExtractMonitors(InputWorkspace=data_workspace,
-                           DetectorWorkspace="data_workspace",
-                           MonitorWorkspace="data_workspace_monitors")
-    data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
-    data_workspace.clearMonitorWorkspace()
-
-    # Match and Subtract workspaces
-    correction_workspace = mantid.RebinToWorkspace(WorkspaceToRebin="correction_workspace",
-                                                   WorkspaceToMatch="data_workspace")
-    processed_spectra = mantid.Divide(LHSWorkspace=data_workspace,
-                                                      RHSWorkspace=correction_workspace,
-                                                      AllowDifferentNumberSpectra=True)
-
+    input_workspace, vanadium_splines = _prepare_for_correction(data_workspace=input_workspace,
+                                                                correction_workspace=vanadium_splines)
+    processed_spectra = mantid.Divide(LHSWorkspace=input_workspace,
+                                      RHSWorkspace=vanadium_splines,
+                                      AllowDifferentNumberSpectra=True)
+    processed_spectra = mantid.ReplaceSpecialValues(InputWorkspace=processed_spectra,
+                                                    NaNValue=0, InfinityValue=0)
     return processed_spectra
 
 
@@ -182,12 +168,15 @@ def _apply_placzek_corrections(instrument, input_workspace, placzek_run_number, 
         CrystalDensity=sample_details.material_object.crystal_density)
 
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, Target="MomentumTransfer", EMode='Elastic')
-    input_workspace = _subtract_correction(data_workspace=input_workspace,
-                                           correction_workspace=self_scattering_correction)
+    input_workspace, self_scattering_correction = _prepare_for_correction(data_workspace=input_workspace,
+                                                                          correction_workspace=self_scattering_correction)
+    input_workspace = mantid.Subtract(LHSWorkspace=input_workspace,
+                                      RHSWorkspace=self_scattering_correction,
+                                      AllowDifferentNumberSpectra=True)
     return input_workspace
 
 
-def _subtract_correction(data_workspace, correction_workspace):
+def _prepare_for_correction(data_workspace, correction_workspace):
 
     # Remove Masked and Monitor spectra
     mantid.ExtractMonitors(InputWorkspace=correction_workspace,
@@ -202,13 +191,11 @@ def _subtract_correction(data_workspace, correction_workspace):
     data_workspace = mantid.RemoveMaskedSpectra(InputWorkspace="data_workspace")
     data_workspace.clearMonitorWorkspace()
 
-    # Match and Subtract workspaces
+    # Match workspaces
     correction_workspace = mantid.RebinToWorkspace(WorkspaceToRebin="correction_workspace",
                                                    WorkspaceToMatch="data_workspace")
-    data_with_correction_subtracted = mantid.Subtract(LHSWorkspace=data_workspace,
-                                                      RHSWorkspace=correction_workspace,
-                                                      AllowDifferentNumberSpectra=True)
-    return data_with_correction_subtracted
+
+    return data_workspace, correction_workspace
 
 
 def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string,
