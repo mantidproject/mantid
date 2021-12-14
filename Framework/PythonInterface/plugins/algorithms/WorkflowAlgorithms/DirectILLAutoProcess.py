@@ -732,8 +732,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
                 to_remove.pop()
         else:
-            processed_sample = 'SofQW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofQW and numor
-            processed_sample_tw = 'SofTW_{}'.format(ws[:ws.rfind('_')])  # name should contain only SofTW and numor
+            processed_sample = 'SofQW_{}'.format(numor)  # name should contain only SofQW and numor
+            processed_sample_tw = 'SofTW_{}'.format(numor)  # name should contain only SofTW and numor
             if self.getPropertyValue('AbsorptionCorrection') != 'None':
                 self._correct_self_attenuation(ws, sample_no)
             vanadium_integral = self.vanadium_integral[0] if self.vanadium_integral else ""
