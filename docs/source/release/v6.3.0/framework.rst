@@ -9,8 +9,9 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-Concepts
+Removals
 --------
+- Both ``RemoteAlgorithms`` and ``RemoteJobManagers`` subpackages have been removed due to lack of use since v3.7.
 
 Algorithms
 ----------
