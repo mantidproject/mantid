@@ -437,8 +437,8 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
             ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
-            nxs_path = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
-            focused_files_list.append(nxs_path)
+            nxs_paths = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
+            focused_files_list.extend(nxs_paths)  # list of .nsx paths for that sample using last dir in focus_dirs
             output_workspaces.append(ws_foc.name())
 
     # Plot the output
