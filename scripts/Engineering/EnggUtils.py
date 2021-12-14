@@ -522,7 +522,7 @@ def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     return sample_ws_foc
 
 
-def _save_output_files(self, focus_dirs, sample_ws_foc, calibration, van_run, rb_num=None):
+def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=None):
     # set bankid for use in fit tab
     foc_suffix = calibration.get_foc_ws_suffix()
     xunit = sample_ws_foc.getDimension(0).name
