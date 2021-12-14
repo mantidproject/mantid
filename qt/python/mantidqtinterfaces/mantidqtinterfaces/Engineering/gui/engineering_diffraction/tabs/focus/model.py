@@ -9,6 +9,8 @@ from typing import Optional
 import Engineering.EnggUtils as EnggUtils
 from Engineering.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import \
+    load_full_instrument_calibration
 
 
 class FocusModel(object):
@@ -21,5 +23,7 @@ class FocusModel(object):
 
     def focus_run(self, sample_paths: list, vanadium_path: str, plot_output: bool, rb_num: str,
                   calibration: CalibrationInfo, save_dir: Optional[str] = output_settings.get_output_path()) -> None:
-        focused_files = EnggUtils.focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir)
+        full_calib = load_full_instrument_calibration()
+        focused_files = EnggUtils.focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir,
+                                            full_calib)
         self._last_focused_files.extend(focused_files)

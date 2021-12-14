@@ -16,8 +16,8 @@ from mantid.simpleapi import (PDCalibration, DeleteWorkspace, DiffractionFocussi
                               CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, ApplyDiffCal, config,
                               SaveNexus, SaveGSS, SaveFocusedXYE, Divide, RebinToWorkspace, ReplaceSpecialValues,
                               EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace, AnalysisDataService as ADS)
-from Engineering.common import path_handling, output_settings
-from Engineering.common.settings_helper import get_setting
+from Engineering.common import path_handling
+
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
@@ -146,20 +146,18 @@ def default_ceria_expected_peak_windows(final=False):
 # Functions in calibration model
 
 
-def create_new_calibration(calibration, rb_num, plot_output, save_dir):
+def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_calib):
     """
     Create a new calibration from a ceria run
     :param calibration: CalibrationInfo object
     :param rb_num: RB number (or any string) used to determine save directory
     :param plot_output: create plot of TOF vs dSpacing (with residuals)
     :param save_dir: top level director for saving files
+    :param full_calib: full instrument calibration workspace
     :return:
     """
     # load ceria data
     ceria_workspace = path_handling.load_workspace(calibration.get_ceria_path())
-
-    # load whole instrument calibration
-    full_calib = load_full_instrument_calibration()
 
     # run PDCalibration
     focused_ceria, cal_table, diag_ws = run_calibration(ceria_workspace, calibration, full_calib)
@@ -228,7 +226,6 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
 
 
 def load_existing_calibration_files(calibration):
-    load_full_instrument_calibration()
     # load prm
     prm_filepath = calibration.prm_filepath
     if not path.exists(prm_filepath):
@@ -398,25 +395,10 @@ def read_diff_constants_from_prm(file_path):
 def _generate_table_workspace_name(bank_num):
     return "engggui_calibration_bank_" + str(bank_num)
 
-
-def load_full_instrument_calibration():
-    if ADS.doesExist("full_inst_calib"):
-        full_calib = ADS.retrieve("full_inst_calib")
-    else:
-        full_calib_path = get_setting(output_settings.INTERFACES_SETTINGS_GROUP,
-                                      output_settings.ENGINEERING_PREFIX, "full_calibration")
-        try:
-            full_calib = Load(full_calib_path, OutputWorkspace="full_inst_calib")
-        except ValueError:
-            logger.error("Error loading Full instrument calibration - this is set in the interface settings.")
-            return
-    return full_calib
-
-
 # Focus model functions
 
 
-def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir):
+def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, save_dir, full_calib):
     """
     Focus some data using the current calibration.
     :param sample_paths: The paths to the data to be focused.
@@ -425,14 +407,14 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
     :param rb_num: Number to signify the user who is running this focus
     :param calibration: CalibrationInfo object that holds all info needed about ROI and instrument
     :param save_dir: top level directory in which to save output
-    :return focused_files_list: list of paths to focused nxs files
+    :param full_calib: full instrument calibration workspace
+    :return focused_files_list: list of paths to focused nxs file
     """
     # check correct region calibration(s) and grouping workspace(s) exists
     if not calibration.is_valid():
         return
 
     # check if full instrument calibration exists, if not load it
-    full_calib = load_full_instrument_calibration()
     # load, focus and process vanadium (retrieve from ADS if exists)
     ws_van_foc, van_run = process_vanadium(vanadium_path, calibration, full_calib)
 

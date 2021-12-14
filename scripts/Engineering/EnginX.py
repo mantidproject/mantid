@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence, Optional
-from os.path import isfile
 
-from mantid.simpleapi import Load
+from mantid.simpleapi import Load, logger
 from Engineering.EnggUtils import GROUP, focus_run, create_new_calibration
 from Engineering.common.calibration_info import CalibrationInfo
 
@@ -29,12 +28,11 @@ class EnginX:
         self.van_run = vanadium_run
         self.focus_runs = focus_runs
         self.save_dir = save_dir
-
         # Load custom full inst calib if supplied (needs to be in ADS)
-        if isfile(full_inst_calib_path):
-            Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
-        else:
-            ValueError("Path to full instrument calibration not valid.")
+        try:
+            self.full_calib = Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
+        except ValueError as e:
+            logger.error("Unable to load calibration file " + full_inst_calib_path + ". Error: " + str(e))
 
         # setup CalibrationInfo object
         if prm_path:
@@ -52,7 +50,8 @@ class EnginX:
         if self.calibration.get_prm_filepath():
             self.calibration.load_relevant_calibration_files()  # loading existing calibration files
         else:
-            create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir)
+            create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir,
+                                   full_calib=self.full_calib)
 
     def focus(self, plot_output: bool) -> None:
         if self.calibration.is_valid() and self.van_run:
