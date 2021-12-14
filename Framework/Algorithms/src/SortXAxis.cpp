@@ -124,7 +124,7 @@ void SortXAxis::sortIndicesByX(std::vector<std::size_t> &workspaceIndicies, cons
  * @param outputWorkspace the emptry output workspace
  * @param specNum the Spectrum it is currently copying over
  */
-void SortXAxis::copyXandDxToOutputWorkspace(std::vector<std::size_t> &workspaceIndicies,
+void SortXAxis::copyXandDxToOutputWorkspace(const std::vector<std::size_t> &workspaceIndicies,
                                             const Mantid::API::MatrixWorkspace &inputWorkspace,
                                             Mantid::API::MatrixWorkspace &outputWorkspace, unsigned int specNum) {
   // Move an ordered X to the output workspace

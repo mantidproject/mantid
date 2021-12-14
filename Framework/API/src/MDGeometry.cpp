@@ -126,7 +126,7 @@ MDGeometry::~MDGeometry() { m_dimensions.clear(); }
  * @param dimensions :: vector of IMDDimension objects, in the order of X, Y, Z,
  *t, etc.
  */
-void MDGeometry::initGeometry(std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
+void MDGeometry::initGeometry(const std::vector<Mantid::Geometry::IMDDimension_sptr> &dimensions) {
   // Copy the dimensions array
   m_dimensions = dimensions;
   // Make sure the basis vectors are big enough

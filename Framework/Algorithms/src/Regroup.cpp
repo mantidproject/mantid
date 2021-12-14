@@ -124,8 +124,8 @@ void Regroup::exec() {
  * @throw runtime_error Thrown if algorithm cannot execute
  * @throw invalid_argument Thrown if input to function is incorrect
  **/
-void Regroup::rebin(const HistogramX &xold, const HistogramY &yold, const HistogramE &eold, std::vector<int> &xoldIndex,
-                    HistogramY &ynew, HistogramE &enew, bool distribution) {
+void Regroup::rebin(const HistogramX &xold, const HistogramY &yold, const HistogramE &eold,
+                    const std::vector<int> &xoldIndex, HistogramY &ynew, HistogramE &enew, bool distribution) {
 
   for (int i = 0; i < int(xoldIndex.size() - 1); i++) {
 
