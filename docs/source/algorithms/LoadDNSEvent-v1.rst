@@ -33,7 +33,7 @@ If the dataset is elastic they can be included, since only the position and not 
 **SetBinBoundary**:
 If set to *true* the bin boundaries of the spectrum histrograms are set to include all events in one bin (0 to maximum TOF).
 It can be turned off for faster loading, then the histograms are empty, with both boundaries close to 0.
-The binning can then later be reproduced by applying  :ref:`Rebin <Rebin>` with the paraemter *Params='0, {0}, {0}'.format(eventWS.getTofMax())*.
+The binning can then later be reproduced by applying  :ref:`Rebin <algm-Rebin>` with the paraemter *Params='0, {0}, {0}'.format(eventWS.getTofMax())*.
 
 
 Restrictions
