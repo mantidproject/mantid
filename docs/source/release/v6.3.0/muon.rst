@@ -17,6 +17,7 @@ New Features
 ############
 
 - Can now select the unit for the frequency spectra (MHz or Gauss), by picking either `Frequency` or `Field` respectfully.
+
 Improvements
 ############
 
