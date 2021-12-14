@@ -856,13 +856,18 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
         empty_correction_ws = "{}_correction".format(empty_ws)
         empty_scaling = self.getProperty('EmptyContainerScaling').value
-        Scale(InputWorkspace=empty_ws,
-              OutputWorkspace=empty_correction_ws,
-              Factor=empty_scaling)
+        if empty_scaling != 1.0:
+            Scale(
+                InputWorkspace=empty_ws,
+                OutputWorkspace=empty_correction_ws,
+                Factor=empty_scaling
+            )
+        else:
+            empty_correction_ws = empty_ws
         Minus(LHSWorkspace=ws,
               RHSWorkspace=mtd[empty_correction_ws][0],
               OutputWorkspace=ws)
-        if self.clear_cache:
+        if self.clear_cache and empty_scaling != 1:
             DeleteWorkspace(Workspace=empty_correction_ws)
 
 
