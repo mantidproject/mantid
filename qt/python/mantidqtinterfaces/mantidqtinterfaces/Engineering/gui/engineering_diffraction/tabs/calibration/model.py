@@ -7,7 +7,7 @@
 from mantid.simpleapi import Load, AnalysisDataService as ADS, logger
 import Engineering.EnggUtils as EnggUtils
 from Engineering.common import output_settings
-from Engineering.common.settings_helper import get_setting
+from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 
 class CalibrationModel(object):

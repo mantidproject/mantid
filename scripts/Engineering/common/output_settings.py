@@ -7,7 +7,7 @@
 """
 Holds some common constants across all tabs.
 """
-from Engineering.common.settings_helper import get_setting
+from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 INTERFACES_SETTINGS_GROUP = "CustomInterfaces"
 ENGINEERING_PREFIX = "EngineeringDiffraction2/"
