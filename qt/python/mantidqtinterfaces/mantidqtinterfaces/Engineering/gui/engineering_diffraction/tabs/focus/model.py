@@ -7,7 +7,7 @@
 from typing import Optional
 
 import Engineering.EnggUtils as EnggUtils
-from Engineering.common import output_settings
+from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.common.calibration_info import CalibrationInfo
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import \
     load_full_instrument_calibration

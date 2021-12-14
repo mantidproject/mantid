@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import Load, AnalysisDataService as ADS, logger
 import Engineering.EnggUtils as EnggUtils
-from Engineering.common import output_settings
+from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
 
 

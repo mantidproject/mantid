@@ -9,7 +9,7 @@ from os import path
 from mantid.simpleapi import Load, logger, EnggEstimateFocussedBackground, Minus, AverageLogData, SetUncertainties, \
     CreateEmptyTableWorkspace, GroupWorkspaces, DeleteWorkspace, DeleteTableRows, RenameWorkspace, CreateWorkspace
 from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from Engineering.common import output_settings
+from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams

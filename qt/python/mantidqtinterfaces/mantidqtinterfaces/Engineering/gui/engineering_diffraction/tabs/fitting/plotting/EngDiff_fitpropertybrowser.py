@@ -14,7 +14,7 @@ from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting
-from Engineering.common import output_settings
+from mantidqtinterfaces.mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
