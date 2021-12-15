@@ -331,7 +331,7 @@ class BasicFittingPresenter:
         # Triggers handle_dataset_name_changed which updates the model
         self.view.current_dataset_name = dataset_name
 
-    def current_dataset(self)->str:
+    def current_dataset(self) -> str:
         return self.view.current_dataset_name
 
     def set_current_dataset_index(self, dataset_index: int) -> None:
