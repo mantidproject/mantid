@@ -68,6 +68,7 @@ class AbstractInst(object):
                do_van_normalisation,
                do_inc_normalisation,
                do_absorb_corrections,
+               do_align_detectors,
                sample_details=None,
                file_name_override=None,
                debug=False):
@@ -83,6 +84,7 @@ class AbstractInst(object):
                            perform_inc_norm=do_inc_normalisation,
                            instrument=self,
                            absorb=do_absorb_corrections,
+                           align=do_align_detectors,
                            sample_details=sample_details,
                            file_name_override=file_name_override,
                            debug=debug)

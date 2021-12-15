@@ -10,7 +10,7 @@ import os
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
 
-from isis_powder.routines import common, instrument_settings
+from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.pearl_routines import pearl_advanced_config, pearl_algs, pearl_calibration_algs, pearl_output, \
     pearl_param_mapping
@@ -32,6 +32,7 @@ class Pearl(AbstractInst):
                                     inst_prefix="PEARL")
 
         self._cached_run_details = {}
+        self._sample_details = None
 
     def focus(self, **kwargs):
         with self._apply_temporary_inst_settings(kwargs, kwargs.get("run_number")):
@@ -43,6 +44,7 @@ class Pearl(AbstractInst):
                                do_absorb_corrections=self._inst_settings.absorb_corrections,
                                do_van_normalisation=self._inst_settings.van_norm,
                                do_inc_normalisation=self._inst_settings.inc_norm,
+                               do_align_detectors=self._inst_settings.align_det,
                                debug=self._inst_settings.debug)
 
     def create_vanadium(self, **kwargs):
@@ -231,21 +233,34 @@ class Pearl(AbstractInst):
                                         x_max=self._inst_settings.van_tof_cropping[-1])
         return cropped_ws
 
-    def _apply_absorb_corrections(self, run_details, ws_to_correct):
-        if self._inst_settings.gen_absorb:
-            absorb_file_name = self._inst_settings.absorb_out_file
-            if not absorb_file_name:
-                raise RuntimeError(
-                    "\"absorb_corrections_out_filename\" must be supplied when generating absorption "
-                    "corrections")
-            absorb_corrections = pearl_algs.generate_vanadium_absorb_corrections(
-                van_ws=ws_to_correct, output_filename=absorb_file_name)
-        else:
-            absorb_corrections = None
+    def set_sample_details(self, **kwargs):
+        kwarg_name = "sample"
+        sample_details_obj = common.dictionary_key_helper(
+            dictionary=kwargs, key=kwarg_name,
+            exception_msg="The argument containing sample details was not found. Please"
+                          " set the following argument: " + kwarg_name)
+        self._sample_details = sample_details_obj
 
-        return pearl_algs.apply_vanadium_absorb_corrections(van_ws=ws_to_correct,
-                                                            run_details=run_details,
-                                                            absorb_ws=absorb_corrections)
+    def _apply_absorb_corrections(self, run_details, ws_to_correct):
+        if self._is_vanadium:
+            if self._inst_settings.gen_absorb:
+                absorb_file_name = self._inst_settings.absorb_out_file
+                if not absorb_file_name:
+                    raise RuntimeError(
+                        "\"absorb_corrections_out_filename\" must be supplied when generating absorption "
+                        "corrections")
+                absorb_corrections_ws = pearl_algs.generate_vanadium_absorb_corrections(
+                    van_ws=ws_to_correct, output_filename=absorb_file_name)
+            else:
+                absorb_corrections_ws = None
+
+            return pearl_algs.apply_vanadium_absorb_corrections(van_ws=ws_to_correct,
+                                                                run_details=run_details,
+                                                                absorb_ws=absorb_corrections_ws)
+        else:
+            return absorb_corrections.run_cylinder_absorb_corrections(
+                ws_to_correct=ws_to_correct, multiple_scattering=False,
+                sample_details_obj=self._sample_details, is_vanadium=self._is_vanadium)
 
     def _switch_long_mode_inst_settings(self, long_mode_on):
         self._inst_settings.update_attributes(

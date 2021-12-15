@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import math
+
 from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
@@ -14,21 +16,21 @@ import numpy
 import os
 
 
-def focus(run_number_string, instrument, perform_vanadium_norm, perform_inc_norm, absorb, sample_details=None,
+def focus(run_number_string, instrument, perform_vanadium_norm, perform_inc_norm, absorb, align, sample_details=None,
           file_name_override=None, debug=False):
     input_batching = instrument._get_input_batching_mode()
     if input_batching == INPUT_BATCHING.Individual:
         return _individual_run_focusing(instrument=instrument, perform_vanadium_norm=perform_vanadium_norm,
-                                        run_number=run_number_string, absorb=absorb, sample_details=sample_details,
+                                        run_number=run_number_string, absorb=absorb, align=align, sample_details=sample_details,
                                         file_name_override=file_name_override)
     elif input_batching == INPUT_BATCHING.Summed:
         return _batched_run_focusing(instrument, perform_vanadium_norm, perform_inc_norm, run_number_string, absorb=absorb,
-                                     sample_details=sample_details, file_name_override=file_name_override, debug=debug)
+                                     align=align, sample_details=sample_details, file_name_override=file_name_override, debug=debug)
     else:
         raise ValueError("Input batching not passed through. Please contact development team.")
 
 
-def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, sample_details,
+def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm, absorb, align, sample_details,
                   vanadium_path, debug=False):
     run_details = instrument._get_run_details(run_number_string=run_number)
     if perform_vanadium_norm:
@@ -68,8 +70,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Material=common.generate_sample_material(sample_details))
         abs_corr_workspace = mantid.CloneWorkspace(inputWorkspace=input_workspace)
     # Align
-    mantid.ApplyDiffCal(InstrumentWorkspace=abs_corr_workspace,
-                        CalibrationFile=run_details.offset_file_path)
+    if align:
+        mantid.ApplyDiffCal(InstrumentWorkspace=abs_corr_workspace,
+                            CalibrationFile=run_details.offset_file_path)
     aligned_ws = mantid.ConvertUnits(InputWorkspace=abs_corr_workspace, Target="dSpacing")
 
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
@@ -94,11 +97,13 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                     min_x = numpy.min(x_data)
                 if numpy.max(x_data) > max_x:
                     max_x = numpy.max(x_data)
-        width_x = (max_x - min_x) / x_data.size
+        #width_x = (max_x - min_x) / x_data.size
+        width_x = math.expm1((math.log(max_x) - math.log(min_x))/aligned_ws.blocksize())
+        print("Rebin parameters = " + str(min_x) + ", " + str(-width_x) + ", " + str(max_x))
         # TO DO: calculate rebin parameters per group
         # and run GroupDetectors on each separately
         aligned_ws = mantid.Rebin(InputWorkspace=aligned_ws,
-                                  Params=[min_x, width_x, max_x],
+                                  Params=[min_x, -width_x, max_x],
                                   IgnoreBinErrors=True)
         focused_ws = mantid.GroupDetectors(InputWorkspace=aligned_ws,
                                            CopyGroupingFromWorkspace='cal_workspace_group')
@@ -153,8 +158,8 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _batched_run_focusing(instrument, perform_vanadium_norm, perform_inc_norm, run_number_string, absorb, sample_details,
-                          file_name_override, debug):
+def _batched_run_focusing(instrument, perform_vanadium_norm, perform_inc_norm, run_number_string, absorb, align,
+                          sample_details, file_name_override, debug):
     read_ws_list = common.load_current_normalised_ws_list(run_number_string=run_number_string,
                                                           instrument=instrument,
                                                           perform_inc_norm = perform_inc_norm,
@@ -171,7 +176,7 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, perform_inc_norm, r
     output = None
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
-                               perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
+                               perform_vanadium_norm=perform_vanadium_norm, absorb=absorb, align=align,
                                sample_details=sample_details, vanadium_path=vanadium_splines, debug=debug)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
         if hasattr(vanadium_splines, "OutputWorkspace"):
@@ -212,7 +217,7 @@ def _divide_by_vanadium_splines(spectra_list, vanadium_splines, instrument):
     return output_list
 
 
-def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, sample_details, file_name_override):
+def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, absorb, align, sample_details, file_name_override):
     # Load and process one by one
     run_numbers = common.generate_run_numbers(run_number_string=run_number)
     run_details = instrument._get_run_details(run_number_string=run_number)
@@ -229,7 +234,7 @@ def _individual_run_focusing(instrument, perform_vanadium_norm, run_number, abso
     for run in run_numbers:
         ws = common.load_current_normalised_ws_list(run_number_string=run, instrument=instrument)
         output = _focus_one_ws(input_workspace=ws[0], run_number=run, instrument=instrument, absorb=absorb,
-                               perform_vanadium_norm=perform_vanadium_norm, sample_details=sample_details,
+                               perform_vanadium_norm=perform_vanadium_norm, align=align, sample_details=sample_details,
                                vanadium_path=vanadium_splines)
     return output
 

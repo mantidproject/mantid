@@ -63,6 +63,7 @@ attr_mapping = [
     ParamMapEntry(ext_name="vanadium_tof_cropping", int_name="van_tof_cropping"),
     ParamMapEntry(ext_name="vanadium_normalisation", int_name="van_norm"),
     ParamMapEntry(ext_name="incident_normalisation", int_name="inc_norm"),
+    ParamMapEntry(ext_name="align_detectors", int_name="align_det"),
     ParamMapEntry(ext_name="filename_override", int_name="filename_override", optional=True),
     ParamMapEntry(ext_name="debug", int_name="debug", optional=True)
 ]
