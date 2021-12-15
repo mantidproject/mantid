@@ -127,7 +127,7 @@ set(TEST_PY_FILES
     plot_fit_panes/plot_time_fit_pane_model_test.py
     plot_fit_panes/plot_fit_pane_presenter_test.py
     plot_fit_panes/plot_freq_fit_pane_model_test.py
-    plot_widget/plot_freq_fit_pane_presenter_test.py
+    plot_fit_panes/plot_freq_fit_pane_presenter_test.py
     plot_fit_panes/plot_model_fit_pane_model_test.py
     plot_fit_panes/plot_model_fit_pane_presenter_test.py
     plot_fit_panes/plot_widget_test.py
