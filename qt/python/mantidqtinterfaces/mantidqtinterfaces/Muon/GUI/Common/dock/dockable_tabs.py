@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt import icons
 
-from qtpy import QtWidgets, QtCore, QtGui, PYQT4
+from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Slot
 from qtpy.QtGui import QIcon
 
@@ -386,66 +386,6 @@ class DetachableTabWidget(QtWidgets.QTabWidget):
             self.drag_initiated = False
 
             QtWidgets.QTabBar.mousePressEvent(self, event)
-
-        def mouseMoveEvent(self, event):
-            """
-            Determine if the current movement is a drag.  If it is, convert it into a QDrag.  If the
-            drag ends inside the tab bar, emit an onMoveTabSignal.  If the drag ends outside the tab
-            bar, emit an onDetachTabSignal.
-            :param event: a mouse move event.
-            """
-
-            # Determine if the current movement is detected as a drag
-            if not self.drag_start_pos.isNull() and (
-                    (event.pos() - self.drag_start_pos).manhattanLength() < QtWidgets.QApplication.startDragDistance()):
-                self.drag_initiated = True
-
-            # If the current movement is a drag initiated by the left button
-            if (event.buttons() & QtCore.Qt.LeftButton) and self.drag_initiated:
-
-                # Stop the move event
-                finish_move_event = QtGui.QMouseEvent(QtCore.QEvent.MouseMove, event.pos(), QtCore.Qt.NoButton,
-                                                      QtCore.Qt.NoButton, QtCore.Qt.NoModifier)
-                QtWidgets.QTabBar.mouseMoveEvent(self, finish_move_event)
-
-                # Convert the move event into a drag
-                drag = QtGui.QDrag(self)
-                mime_data = QtCore.QMimeData()
-                drag.setMimeData(mime_data)
-
-                if PYQT4:
-                    pixmap = QtGui.QPixmap.grabWindow(self.parentWidget().currentWidget().winId())
-                else:
-                    app = QtWidgets.QApplication.instance()
-                    desktop = app.desktop()
-                    screen_number = desktop.screenNumber(self.parentWidget().currentWidget())
-                    screen = app.screens()[screen_number]
-                    # Create the appearance of dragging the tab content
-                    pixmap = QtGui.QScreen.grabWindow(screen, self.parentWidget().currentWidget().winId())
-
-                target_pixmap = QtGui.QPixmap(pixmap.size())
-                target_pixmap.fill(QtCore.Qt.transparent)
-                painter = QtGui.QPainter(target_pixmap)
-                painter.setOpacity(0.85)
-                painter.drawPixmap(0, 0, pixmap)
-                painter.end()
-                drag.setPixmap(target_pixmap)
-
-                # Initiate the drag
-                drop_action = drag.exec_(QtCore.Qt.MoveAction | QtCore.Qt.CopyAction)
-
-                # For Linux:  Here, drag.exec_() will not return MoveAction on Linux.  So it
-                #             must be set manually
-                if self.drag_end_pos.x() != 0 and self.drag_end_pos.y() != 0:
-                    drop_action = QtCore.Qt.MoveAction
-
-                # If the drag completed inside the tab bar, move the selected tab to the new position
-                if drop_action == QtCore.Qt.MoveAction:
-                    if not self.drag_end_pos.isNull():
-                        event.accept()
-                        self.onMoveTabSignal.emit(self.tabAt(self.drag_start_pos), self.tabAt(self.drag_end_pos))
-            else:
-                QtWidgets.QTabBar.mouseMoveEvent(self, event)
 
         def dragEnterEvent(self, event):
             QtWidgets.QTabBar.dragMoveEvent(self, event)
