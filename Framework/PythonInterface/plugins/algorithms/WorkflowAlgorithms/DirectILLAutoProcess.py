@@ -65,6 +65,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     vanadium_diagnostics = None
     vanadium_integral = None
     empty = None
+    cadmium = None
     flat_bkg_scaling = None
     flat_background = None
     to_clean = None
@@ -175,6 +176,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             self.masking = False
         else:
             self.masking = True
+        if not self.getProperty('CadmiumWorkspace').isDefault:
+            self.cadmium = self.getPropertyValue('CadmiumWorkspace')
         self.flat_bkg_scaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
         self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
@@ -402,6 +405,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         for sample_no, sample in enumerate(sample_runs):
             progress.report("Collecting data")
             ws = self._collect_data(sample, vanadium=self.process == 'Vanadium')
+            if self.cadmium:
+                self._subtract_cadmium(ws)
             if self.masking and sample_no == 0:  # prepares masks once, and when the instrument is known
                 progress.report("Preparing masks")
                 self.mask_ws = self._prepare_masks()
@@ -863,8 +868,16 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                         Filename='{}.nxs'.format(ws_name)
                     )
 
+    def _subtract_cadmium(self, ws):
+        """Subtracts cadmium counts from the current input workspace."""
+        Minus(
+            LHSWorkspace=ws,
+            RHSWorkspace=mtd[self.cadmium][0],
+            OutputWorkspace=ws
+        )
+
     def _subtract_empty_container(self, ws):
-        """Subtracts empty container counts from the sample workspace."""
+        """Subtracts empty container counts from the input workspace."""
         empty_ws = self.getPropertyValue('EmptyContainerWorkspace')
         empty_correction_ws = "{}_correction".format(empty_ws)
         empty_scaling = self.getProperty('EmptyContainerScaling').value
@@ -876,9 +889,11 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             )
         else:
             empty_correction_ws = empty_ws
-        Minus(LHSWorkspace=ws,
-              RHSWorkspace=mtd[empty_correction_ws][0],
-              OutputWorkspace=ws)
+        Minus(
+            LHSWorkspace=ws,
+            RHSWorkspace=mtd[empty_correction_ws][0],
+            OutputWorkspace=ws
+        )
         if self.clear_cache and empty_scaling != 1:
             DeleteWorkspace(Workspace=empty_correction_ws)
 
