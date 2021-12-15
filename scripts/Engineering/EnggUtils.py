@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from matplotlib.pyplot import subplots
 from numpy import array, degrees, isfinite, reshape
 from os import path, makedirs
 from shutil import copy2
@@ -56,6 +55,10 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     :param calibration: CalibrationInfo object used to determine subplot axes titles
     :return:
     """
+    # import inside func otherwise causes FindPeaksAutomaticTest to fail
+    # as it checks that pyplot isn't in sys.modules
+    from matplotlib.pyplot import subplots
+
     fitparam = ADS.retrieve(diag_ws.name() + "_fitparam").toDict()
     fiterror = ADS.retrieve(diag_ws.name() + "_fiterror").toDict()
     d_table = ADS.retrieve(diag_ws.name() + "_dspacing").toDict()
@@ -467,6 +470,10 @@ def process_vanadium(vanadium_path, calibration, full_calib):
 
 
 def _plot_focused_workspaces(ws_names):
+    # import inside func otherwise causes FindPeaksAutomaticTest to fail
+    # as it checks that pyplot isn't in sys.modules
+    from matplotlib.pyplot import subplots
+
     for ws_name in ws_names:
         ws_foc = ADS.retrieve(ws_name)
         ws_label = '_'.join([ws_foc.getInstrument().getName(), ws_foc.run().get('run_number').value])
