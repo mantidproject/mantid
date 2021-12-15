@@ -9,12 +9,13 @@ from unittest import mock
 from unittest.mock import call, patch, create_autospec
 from numpy import array
 from os import path
-from Engineering.EnggUtils import GROUP
+from Engineering.EnggUtils import GROUP, read_diff_constants_from_prm, create_output_files
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
 from Engineering.common.calibration_info  import CalibrationInfo
 from testhelpers import assert_any_call_partial
 
 file_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model"
+enggutils_path = "Engineering.EnggUtils"
 
 
 class CalibrationModelTest(unittest.TestCase):
@@ -23,9 +24,9 @@ class CalibrationModelTest(unittest.TestCase):
         self.calibration_info = create_autospec(CalibrationInfo())
         mock.NonCallableMock.assert_any_call_partial = assert_any_call_partial
 
-    @patch(file_path + ".path")
+    @patch(enggutils_path + ".path")
     @patch(file_path + ".load_full_instrument_calibration")
-    @patch(file_path + ".CalibrationModel.write_diff_consts_to_table_from_prm")
+    @patch(enggutils_path + ".write_diff_consts_to_table_from_prm")
     def test_load_existing_calibration_files_valid_prm(self, mock_write_diff_consts, mock_load_full_calib, mock_path):
         mock_path.exists.return_value = True  # prm file exists
 
@@ -44,15 +45,15 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         dummy_file_path = "/foo/bar_123.prm"
         patchable = "builtins.open"
         with mock.patch(patchable, mocked_handle):
-            diff_consts = self.model.read_diff_constants_from_prm(dummy_file_path)
+            diff_consts = read_diff_constants_from_prm(dummy_file_path)
         deltas = abs(diff_consts - array([[2.99, 18306.98, 14.44], [-29.68, 18497.75, -26.5]]))
         self.assertTrue((deltas < 1e-10).all())
 
-    @patch(file_path + ".copy2")
-    @patch(file_path + ".makedirs")
-    @patch(file_path + ".path.exists")
-    @patch(file_path + ".SaveNexus")
-    @patch(file_path + ".CalibrationModel.write_prm_file")
+    @patch(enggutils_path + ".copy2")
+    @patch(enggutils_path + ".makedirs")
+    @patch(enggutils_path + ".path.exists")
+    @patch(enggutils_path + ".SaveNexus")
+    @patch(enggutils_path + ".write_prm_file")
     def test_create_output_files_makes_savdir_and_saves_both_banks(self, mock_write_prm, mock_save_nxs, mock_exists,
                                                                    mock_mkdir, mock_copy):
         mock_exists.return_value = False  # make new directory
@@ -62,7 +63,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         calibration.set_calibration_table("cal_table")
         save_dir = "savedir"
 
-        self.model.create_output_files(save_dir, calibration, "ws")
+        create_output_files(save_dir, calibration, "ws")
 
         mock_mkdir.assert_called_once_with(save_dir)
         self.calibration_info.save_grouping_workspace.assert_not_called()  # only called if not bank data
@@ -77,10 +78,10 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
                       call(nxs_fpath, nxs_fpath.replace("all_banks", "bank_2"))]
         mock_copy.assert_has_calls(copy_calls)
 
-    @patch(file_path + ".copy2")
-    @patch(file_path + ".path")
-    @patch(file_path + ".SaveNexus")
-    @patch(file_path + ".CalibrationModel.write_prm_file")
+    @patch(enggutils_path + ".copy2")
+    @patch(enggutils_path + ".path")
+    @patch(enggutils_path + ".SaveNexus")
+    @patch(enggutils_path + ".write_prm_file")
     def test_create_output_files_saves_custom_group_file(self, mock_write_prm, mock_save_nxs, mock_path, mock_copy):
         mock_path.exists.return_value = True
         prm_fname = "prm.prm"
@@ -91,19 +92,19 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self.calibration_info.get_calibration_table.return_value = "cal_table"  # no bank data e.g. custom
         save_dir = "savedir"
 
-        self.model.create_output_files(save_dir, self.calibration_info, "ws")
+        create_output_files(save_dir, self.calibration_info, "ws")
 
         self.calibration_info.save_grouping_workspace.assert_called_once_with(save_dir)
         mock_write_prm.assert_called_once_with("ws", prm_fname)
         mock_save_nxs.assert_called_once_with(InputWorkspace="cal_table", Filename=prm_fname.replace(".prm", ".nxs"))
         mock_copy.assert_not_called()
 
-    @patch(file_path + '.DeleteWorkspace')
-    @patch(file_path + '.CalibrationModel.create_output_files')
-    @patch(file_path + '.CalibrationModel.make_diff_consts_table')
-    @patch(file_path + '.CalibrationModel.run_calibration')
+    @patch(enggutils_path + '.DeleteWorkspace')
+    @patch(enggutils_path + '.create_output_files')
+    @patch(enggutils_path + '.make_diff_consts_table')
+    @patch(enggutils_path + '.run_calibration')
     @patch(file_path + ".load_full_instrument_calibration")
-    @patch(file_path + ".path_handling.load_workspace")
+    @patch(enggutils_path + ".path_handling.load_workspace")
     def test_non_texture_output_files_saved_to_two_directories_when_rb_num(self, mock_load_ws, mock_load_cal,
                                                                            mock_run_cal, mock_make_diff_table,
                                                                            mock_create_out, mock_del):
@@ -119,12 +120,12 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self.assertEqual(mock_create_out.call_count, 2)
         mock_create_out.assert_has_calls(create_out_calls)
 
-    @patch(file_path + '.DeleteWorkspace')
-    @patch(file_path + '.CalibrationModel.create_output_files')
-    @patch(file_path + '.CalibrationModel.make_diff_consts_table')
-    @patch(file_path + '.CalibrationModel.run_calibration')
+    @patch(enggutils_path + '.DeleteWorkspace')
+    @patch(enggutils_path + '.create_output_files')
+    @patch(enggutils_path + '.make_diff_consts_table')
+    @patch(enggutils_path + '.run_calibration')
     @patch(file_path + ".load_full_instrument_calibration")
-    @patch(file_path + ".path_handling.load_workspace")
+    @patch(enggutils_path + ".path_handling.load_workspace")
     def test_texture_output_files_saved_to_one_directories_when_rb_num(self, mock_load_ws, mock_load_cal,
                                                                        mock_run_cal, mock_make_diff_table,
                                                                        mock_create_out, mock_del):
