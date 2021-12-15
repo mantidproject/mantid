@@ -1601,7 +1601,7 @@ class CrystalFieldFit(object):
             fun_str = re.sub(r'FWHM[X|Y]\d+=\(\),', '', str(fun))
             fun_str = re.sub(r'(name=.*?,)(.*?)(Temperatures=\(.*?\),)',r'\1\3\2', fun_str)
             fun_str = re.sub(r'(name=.*?,)(.*?)(PhysicalProperties=\(.*?\),)',r'\1\3\2', fun_str)
-            fun_str = re.sub(r'f[0-9]+\.f(['+str(fun.getAttributeValue("MaxPeakCount"))+'-9]|[1-9][0-9])\.\w+=.*?,','', fun_str)# noqa: W605
+            fun_str = re.sub(r'f[0-9]+\.f(['+str(fun.getAttributeValue("MaxPeakCount"))+r'-9]|[1-9][0-9])\.\w+=.*?,','', fun_str)
             return CalculateChiSquared(fun_str, **ws_kwargs)[1]
         else:
             return CalculateChiSquared(str(fun), self._input_workspace)[1]
