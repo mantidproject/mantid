@@ -15,21 +15,7 @@ namespace Instrumentation {
 using Kernel::time_point_ns;
 
 AlgoTimeRegister::Dump::Dump(AlgoTimeRegister &atr, const std::string &nm)
-    : m_algoTimeRegister(atr), m_regStart_chrono(std::chrono::high_resolution_clock::now()), m_name(nm) {
-  clock_gettime(CLOCK_MONOTONIC, &m_regStart);
-}
-
-timespec AlgoTimeRegister::diff(timespec start, timespec end) {
-  timespec temp;
-  if ((end.tv_nsec - start.tv_nsec) < 0) {
-    temp.tv_sec = end.tv_sec - start.tv_sec - 1;
-    temp.tv_nsec = 1000000000 + end.tv_nsec - start.tv_nsec;
-  } else {
-    temp.tv_sec = end.tv_sec - start.tv_sec;
-    temp.tv_nsec = end.tv_nsec - start.tv_nsec;
-  }
-  return temp;
-}
+    : m_algoTimeRegister(atr), m_regStart_chrono(std::chrono::high_resolution_clock::now()), m_name(nm) {}
 
 AlgoTimeRegister::Dump::~Dump() {
   const time_point_ns regFinish = std::chrono::high_resolution_clock::now();

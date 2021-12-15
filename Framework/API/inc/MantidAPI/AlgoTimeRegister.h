@@ -13,8 +13,6 @@
 
 #include "MantidAPI/DllConfig.h"
 
-class timespec;
-
 namespace Mantid {
 namespace Instrumentation {
 
@@ -24,7 +22,6 @@ namespace Instrumentation {
 class AlgoTimeRegister {
 public:
   static AlgoTimeRegister globalAlgoTimeRegister;
-  static timespec diff(timespec start, timespec end);
   struct Info {
     std::string m_name;
     std::thread::id m_threadId;
@@ -38,7 +35,6 @@ public:
 
   class Dump {
     AlgoTimeRegister &m_algoTimeRegister;
-    timespec m_regStart;
     Kernel::time_point_ns m_regStart_chrono;
 
     const std::string m_name;
