@@ -26,6 +26,9 @@ class FitControlsView(ui_form, base_widget):
         self.fit_generator_button.hide()
 
     def show_fit_script_generator(self) -> None:
+        """
+        Show the fit script generator in the fitting interface
+        """
         self.fit_generator_button.show()
 
     def set_slot_for_fit_generator_clicked(self, slot) -> None:
