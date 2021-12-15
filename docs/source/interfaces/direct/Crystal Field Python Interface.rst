@@ -387,7 +387,7 @@ Then call `fit()` method::
 
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
 
-The crystal field fit function is derived from the standard Mantid fit function and allows using the fit properties described in :ref:`Fit <algm-Fit>`.
+The crystal field fit function is derived from the standard Mantid fit function and can be used with all properties described in :ref:`Fit <algm-Fit>`.
 
 Two step fitting
 ~~~~~~~~~~~~~~~~
