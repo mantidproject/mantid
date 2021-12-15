@@ -32,7 +32,7 @@ Create a project by clicking the ``+`` (plus) in the upper left hand corner:
 
 .. image:: images/balsamiq_new_project.png
 
-The new project automatically the editor with the canvas and the UI library as well as several toolbars and panels:
+The new project automatically opens within the editor with the canvas and the UI library as well as several toolbars and panels:
 
 .. image:: images/balsamiq_ui.png
 
