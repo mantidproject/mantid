@@ -15,8 +15,8 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 /**
-Provide Activation fit function for data in Kelvin interface to IFunction.
-I.e. function: y = = AttemptRate*exp(-Barrier/x)
+Provide Activation fit function for data in meV interface to IFunction.
+I.e. function: y = AttemptRate*exp(-e*Barrier/(1000 k_B x))
 
 Activation parameters:
 <UL>

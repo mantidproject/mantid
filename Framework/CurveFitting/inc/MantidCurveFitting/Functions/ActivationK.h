@@ -16,7 +16,7 @@ namespace CurveFitting {
 namespace Functions {
 /**
 Provide Activation fit function for data in Kelvin interface to IFunction.
-I.e. function: y = = AttemptRate*exp(-Barrier/x)
+I.e. function: y = AttemptRate*exp(-Barrier/x)
 
 Activation parameters:
 <UL>
