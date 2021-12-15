@@ -67,6 +67,7 @@ set(SRC_FILES
     src/LoadILLPolarizationFactors.cpp
     src/LoadILLPolarizedDiffraction.cpp
     src/LoadILLReflectometry.cpp
+    src/LoadILLSALSA.cpp
     src/LoadILLSANS.cpp
     src/LoadILLTOF2.cpp
     src/LoadISISNexus2.cpp
@@ -282,6 +283,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadILLPolarizationFactors.h
     inc/MantidDataHandling/LoadILLPolarizedDiffraction.h
     inc/MantidDataHandling/LoadILLReflectometry.h
+    inc/MantidDataHandling/LoadILLSALSA.h
     inc/MantidDataHandling/LoadILLSANS.h
     inc/MantidDataHandling/LoadILLTOF2.h
     inc/MantidDataHandling/LoadISISNexus2.h
