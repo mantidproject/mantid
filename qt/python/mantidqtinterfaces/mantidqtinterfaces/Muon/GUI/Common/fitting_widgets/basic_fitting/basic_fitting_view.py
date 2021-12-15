@@ -324,4 +324,7 @@ class BasicFittingView(ui_form, base_widget):
         self.setEnabled(self.workspace_selector.number_of_datasets() != 0)
 
     def show_fit_script_generator(self) ->None:
+        """
+        Show the fit script generator in the fitting interface
+        """
         self.fit_controls.show_fit_script_generator()
