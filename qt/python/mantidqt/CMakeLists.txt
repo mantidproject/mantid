@@ -125,6 +125,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
+    mantidqt/widgets/sliceviewer/test/test_dimensions.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_lineplots.py
@@ -135,6 +136,7 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_dataview.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_zoom.py
+    mantidqt/widgets/sliceviewer/test/test_workspace_info.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_actions.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_model.py
     mantidqt/widgets/sliceviewer/peaksviewer/test/test_peaksviewer_presenter.py

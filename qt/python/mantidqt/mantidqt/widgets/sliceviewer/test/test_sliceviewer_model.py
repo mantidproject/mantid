@@ -9,9 +9,9 @@
 #
 from contextlib import contextmanager
 import unittest
-from unittest.mock import MagicMock, call, patch, DEFAULT
+from unittest.mock import MagicMock, call, patch, DEFAULT, Mock
 
-from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace
+from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
 from mantid.geometry import IMDDimension, OrientedLattice
 from numpy.testing import assert_equal
@@ -247,6 +247,71 @@ class SliceViewerModelTest(unittest.TestCase):
 
     def setUp(self):
         self.ws2d_histo.reset_mock()
+
+    def test_init_with_valid_MatrixWorkspace(self):
+        mock_ws = MagicMock(spec=MatrixWorkspace)
+        mock_ws.getNumberHistograms.return_value = 2
+        mock_ws.getDimension.return_value.getNBins.return_value = 2.
+
+        self.assertIsNotNone(SliceViewerModel(mock_ws))
+
+    def test_init_with_valid_MDHistoWorkspace(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.name = Mock(return_value="")
+        mock_ws.isMDHistoWorkspace = Mock()
+        mock_ws.getNumNonIntegratedDims = Mock()
+        mock_ws.isMDHistoWorkspace.return_value = True
+        mock_ws.getNumNonIntegratedDims.return_value = 700
+
+        with patch.object(SliceViewerModel, "_calculate_axes_angles"):
+            self.assertIsNotNone(SliceViewerModel(mock_ws))
+
+    def test_init_with_valid_MDEventWorkspace(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.name = Mock(return_value="")
+        mock_ws.isMDHistoWorkspace = Mock()
+        mock_ws.getNumDims = Mock()
+        mock_ws.isMDHistoWorkspace.return_value = False
+        mock_ws.getNumDims.return_value = 4
+
+        with patch.object(SliceViewerModel, "_calculate_axes_angles"):
+            self.assertIsNotNone(SliceViewerModel(mock_ws))
+
+    def test_init_raises_for_incorrect_workspace_type(self):
+        mock_ws = MagicMock()
+
+        self.assertRaisesRegex(ValueError, "MatrixWorkspace and MDWorkspace", SliceViewerModel, mock_ws)
+
+    def test_init_raises_if_fewer_than_two_histograms(self):
+        mock_ws = MagicMock(spec=MatrixWorkspace)
+        mock_ws.getNumberHistograms.return_value = 1
+
+        self.assertRaisesRegex(ValueError, "contain at least 2 spectra", SliceViewerModel, mock_ws)
+
+    def test_init_raises_if_fewer_than_two_bins(self):
+        mock_ws = MagicMock(spec=MatrixWorkspace)
+        mock_ws.getNumberHistograms.return_value = 2
+        mock_ws.getDimension.return_value.getNBins.return_value = 1
+
+        self.assertRaisesRegex(ValueError, "contain at least 2 bins", SliceViewerModel, mock_ws)
+
+    def test_init_raises_if_fewer_than_two_integrated_dimensions(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.isMDHistoWorkspace = Mock()
+        mock_ws.getNumNonIntegratedDims = Mock()
+        mock_ws.isMDHistoWorkspace.return_value = True
+        mock_ws.getNumNonIntegratedDims.return_value = 1
+
+        self.assertRaisesRegex(ValueError, "at least 2 non-integrated dimensions", SliceViewerModel, mock_ws)
+
+    def test_init_raises_if_fewer_than_two_dimensions(self):
+        mock_ws = MagicMock(spec=MultipleExperimentInfos)
+        mock_ws.isMDHistoWorkspace = Mock()
+        mock_ws.getNumDims = Mock()
+        mock_ws.isMDHistoWorkspace.return_value = False
+        mock_ws.getNumDims.return_value = 1
+
+        self.assertRaisesRegex(ValueError, "at least 2 dimensions", SliceViewerModel, mock_ws)
 
     def test_model_MDH(self):
         model = SliceViewerModel(self.ws_MD_3D)
