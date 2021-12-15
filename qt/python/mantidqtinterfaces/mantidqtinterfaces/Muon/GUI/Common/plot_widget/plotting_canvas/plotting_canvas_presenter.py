@@ -250,6 +250,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         else:
             return xlims, ylims
 
+    def set_quickedit_by_index(self, index):
+        self._options_presenter.set_selection_by_index(index)
+
     """x or y range changed"""
 
     def _handle_xlim_changed_in_quick_edit_options(self, xlims):

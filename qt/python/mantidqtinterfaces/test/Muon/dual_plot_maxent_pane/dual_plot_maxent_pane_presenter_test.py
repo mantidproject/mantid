@@ -74,7 +74,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.model.add_reconstructed_data.assert_called_once_with(["a"],[0])
         self.presenter.add_list_to_plot.assert_called_once_with(ws, indices, hold=False, autoscale=True)
         self.figure_presenter._options_presenter.set_selection_by_index.assert_called_once_with(1)
-        self.figure_presenter.set_plot_range.assert_called_once_with([0,1000])
+        self.figure_presenter.set_plot_range.assert_called_once_with(self.context._frequency_context.range())
 
     def test_add_data_to_plots_with_maxent(self):
         ws = ["unit", "test"]
@@ -92,7 +92,7 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.model.add_reconstructed_data.assert_called_once_with(["a"],[0])
         self.presenter.add_list_to_plot.assert_called_once_with(ws+["maxent"], indices+[0], hold=False, autoscale=True)
         self.figure_presenter._options_presenter.set_selection_by_index.assert_called_once_with(1)
-        self.figure_presenter.set_plot_range.assert_called_once_with([0,1000])
+        self.figure_presenter.set_plot_range.assert_called_once_with(self.context._frequency_context.range())
 
     def test_handle_reconstructed_data_updated(self):
         data_dict = {"table": "unit", "ws": "test"}
@@ -145,6 +145,26 @@ class DualPlotMaxentPanePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._maxent_ws_name, None)
         self.view.update_selection.aseert_called_once_with([])
         self.presenter.clear_subplots.assert_called_once_with()
+
+    def test_get_plot_type_MHz(self):
+        self.view.get_plot_type.return_value = "Maxent (MHz) and counts"
+        self.assertEqual("Frequency", self.presenter.get_plot_type())
+
+    def test_get_plot_type_Gauss(self):
+        self.view.get_plot_type.return_value = "Maxent (Gauss) and counts"
+        self.assertEqual("Field", self.presenter.get_plot_type())
+
+    def test_handle_data_changed(self):
+        self.presenter.get_plot_type = mock.Mock(return_value="units")
+        self.presenter.update_freq_units = mock.Mock()
+        self.presenter.update_freq_units.notify_subscribers = mock.Mock()
+        self.presenter.handle_maxent_data_updated = mock.Mock()
+        self.context._frequency_context.switch_units_in_name = mock.Mock(return_value="unit test")
+        type(self.context._frequency_context).x_label = mock.PropertyMock()
+
+        self.presenter.handle_data_type_changed()
+        self.presenter.handle_maxent_data_updated.assert_called_once_with("unit test")
+        self.presenter.update_freq_units.notify_subscribers.assert_called_once_with()
 
 
 if __name__ == '__main__':
