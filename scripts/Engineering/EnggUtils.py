@@ -10,14 +10,10 @@ from numpy import array, degrees, isfinite, reshape
 from os import path, makedirs
 from shutil import copy2
 
-from mantid.api import *
+from mantid.api import AnalysisDataService as ADS, AlgorithmManager
 from mantid.kernel import IntArrayProperty, UnitConversion, DeltaEModeType, logger, UnitParams
-from mantid.simpleapi import (PDCalibration, DeleteWorkspace, DiffractionFocussing, CreateDetectorTable,
-                              CreateEmptyTableWorkspace, NormaliseByCurrent, ConvertUnits, Load, ApplyDiffCal, config,
-                              SaveNexus, SaveGSS, SaveFocusedXYE, Divide, RebinToWorkspace, ReplaceSpecialValues,
-                              EnggEstimateFocussedBackground, AddSampleLog, CropWorkspace, AnalysisDataService as ADS)
+import mantid.simpleapi as mantid  # required to call EnggUtils funcs from algorithms to avoid simpleapi error
 from Engineering.common import path_handling
-
 
 ENGINX_BANKS = ['', 'North', 'South', 'Both: North, South', '1', '2']  # used in EnggCalibrate, EnggVanadiumCorrections
 ENGINX_MASK_BIN_MINS = [0, 19930, 39960, 59850, 79930]  # used in EnggFocus
@@ -54,15 +50,15 @@ class GROUP(Enum):
 
 def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
     """
-    Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from PDCalibration
+    Plot fitted TOF vs expected d-spacing from diagnostic workspaces output from mantid.PDCalibration
     :param diag_ws: workspace object of group of diagnostic workspaces
-    :param ws_foc: workspace object of focused data (post ApplyDiffCal with calibrated diff_consts)
+    :param ws_foc: workspace object of focused data (post mantid.ApplyDiffCal with calibrated diff_consts)
     :param calibration: CalibrationInfo object used to determine subplot axes titles
     :return:
     """
-    fitparam = mtd[diag_ws.name() + "_fitparam"].toDict()
-    fiterror = mtd[diag_ws.name() + "_fiterror"].toDict()
-    d_table = mtd[diag_ws.name() + "_dspacing"].toDict()
+    fitparam = ADS.retrieve(diag_ws.name() + "_fitparam").toDict()
+    fiterror = ADS.retrieve(diag_ws.name() + "_fiterror").toDict()
+    d_table = ADS.retrieve(diag_ws.name() + "_dspacing").toDict()
     dspacing = array(sorted(dspacing))  # PDCal sorts the dspacing list passed
     x0 = array(fitparam['X0'])
     x0_er = array(fiterror['X0'])
@@ -117,7 +113,7 @@ def create_spectrum_list_from_string(str_list):
 def default_ceria_expected_peaks(final=False):
     """
     Get the list of expected Ceria peaks, which can be a good default for the expected peaks
-    properties of algorithms like PDCalibration
+    properties of algorithms like mantid.PDCalibration
     @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
     @Returns :: a list of peaks in d-spacing as a float list
     """
@@ -131,7 +127,7 @@ def default_ceria_expected_peaks(final=False):
 
 def default_ceria_expected_peak_windows(final=False):
     """
-    Get the list of windows over which to fit ceria peaks in calls to PDCalibration
+    Get the list of windows over which to fit ceria peaks in calls to mantid.PDCalibration
     @param :: final - if true, returns a list better suited to a secondary fitting of focused banks
     @Returns :: a list of peak windows in d-spacing as a float list
     """
@@ -159,7 +155,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     # load ceria data
     ceria_workspace = path_handling.load_workspace(calibration.get_ceria_path())
 
-    # run PDCalibration
+    # run mantid.PDCalibration
     focused_ceria, cal_table, diag_ws = run_calibration(ceria_workspace, calibration, full_calib)
 
     # extract diffractometer constants from calibration and write to table
@@ -178,7 +174,7 @@ def create_new_calibration(calibration, rb_num, plot_output, save_dir, full_cali
     for calib_dir in calib_dirs:
         create_output_files(calib_dir, calibration, focused_ceria)
 
-    DeleteWorkspace(ceria_workspace)
+    mantid.DeleteWorkspace(ceria_workspace)
 
 
 def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
@@ -248,7 +244,7 @@ def write_diff_consts_to_table_from_prm(prm_filepath):
     """
     diff_consts = read_diff_constants_from_prm(prm_filepath)
     # make table
-    table = CreateEmptyTableWorkspace(OutputWorkspace=DIFF_CONSTS_TABLE_NAME)
+    table = mantid.CreateEmptyTableWorkspace(OutputWorkspace=DIFF_CONSTS_TABLE_NAME)
     table.addColumn("int", "Index")
     table.addColumn("double", "DIFA")
     table.addColumn("double", "DIFC")
@@ -263,7 +259,7 @@ def make_diff_consts_table(ws_foc):
     Summarise diff constants in table workspace (adapt from detector table)
     :param ws_foc: focused ceria workspace
     """
-    table = CreateDetectorTable(InputWorkspace=ws_foc, DetectorTableWorkspace=DIFF_CONSTS_TABLE_NAME)
+    table = mantid.CreateDetectorTable(InputWorkspace=ws_foc, DetectorTableWorkspace=DIFF_CONSTS_TABLE_NAME)
     col_names = ['Spectrum No', "Detector ID(s)", "Monitor", "DIFC - Uncalibrated"]
     for col in col_names:
         table.removeColumn(col)
@@ -280,37 +276,38 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     """
 
     # initial process of ceria ws
-    NormaliseByCurrent(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws)
-    ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_instrument_cal_ws)
-    ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target='dSpacing')
+    mantid.NormaliseByCurrent(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws)
+    mantid.ApplyDiffCal(InstrumentWorkspace=ceria_ws, CalibrationWorkspace=full_instrument_cal_ws)
+    mantid.ConvertUnits(InputWorkspace=ceria_ws, OutputWorkspace=ceria_ws, Target='dSpacing')
 
     # get grouping workspace and focus
     grp_ws = calibration.get_group_ws()  # (creates if doesn't exist)
-    focused_ceria = DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
-    ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
-    focused_ceria = ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
+    focused_ceria = mantid.DiffractionFocussing(InputWorkspace=ceria_ws, GroupingWorkspace=grp_ws)
+    mantid.ApplyDiffCal(InstrumentWorkspace=focused_ceria, ClearCalibration=True)  # DIFC of detector in middle of bank
+    focused_ceria = mantid.ConvertUnits(InputWorkspace=focused_ceria, Target='TOF')
 
-    # Run PDCalibration to fit peaks in TOF
+    # Run mantid.PDCalibration to fit peaks in TOF
     foc_name = focused_ceria.name()  # PDCal invalidates ptr during rebin so keep track of ws name
     cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
     diag_ws_name = "diag_" + calibration.get_group_suffix()
-    cal_table, diag_ws, mask = PDCalibration(InputWorkspace=foc_name, OutputCalibrationTable=cal_table_name,
-                                             DiagnosticWorkspaces=diag_ws_name,
-                                             PeakPositions=default_ceria_expected_peaks(final=True),
-                                             TofBinning=[12000, -0.0003, 52000],
-                                             PeakWindow=default_ceria_expected_peak_windows(final=True),
-                                             MinimumPeakHeight=0.5,
-                                             PeakFunction='BackToBackExponential',
-                                             CalibrationParameters='DIFC+TZERO+DIFA',
-                                             UseChiSq=True)
-    ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
+    cal_table, diag_ws, mask = mantid.PDCalibration(InputWorkspace=foc_name, OutputCalibrationTable=cal_table_name,
+                                                    DiagnosticWorkspaces=diag_ws_name,
+                                                    PeakPositions=default_ceria_expected_peaks(final=True),
+                                                    TofBinning=[12000, -0.0003, 52000],
+                                                    PeakWindow=default_ceria_expected_peak_windows(final=True),
+                                                    MinimumPeakHeight=0.5,
+                                                    PeakFunction='BackToBackExponential',
+                                                    CalibrationParameters='DIFC+TZERO+DIFA',
+                                                    UseChiSq=True)
+    mantid.ApplyDiffCal(InstrumentWorkspace=foc_name, CalibrationWorkspace=cal_table)
 
     # warn user which spectra were unsuccessfully calibrated
     focused_ceria = ADS.retrieve(foc_name)
     masked_detIDs = mask.getMaskedDetectors()
     for ispec in range(focused_ceria.getNumberHistograms()):
         if focused_ceria.getSpectrum(ispec).getDetectorIDs()[0] in masked_detIDs:
-            logger.warning(f'PDCalibration failed for spectrum index {ispec} - proceeding with uncalibrated DIFC.')
+            logger.warning(
+                f'mantid.PDCalibration failed for spectrum index {ispec} - proceeding with uncalibrated DIFC.')
 
     # store cal_table in calibration
     calibration.set_calibration_table(cal_table_name)
@@ -340,7 +337,7 @@ def create_output_files(calibration_dir, calibration, ws_foc):
     # save pdcal output as nexus
     filepath, ext = path.splitext(prm_filepath)
     nxs_filepath = filepath + '.nxs'
-    SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
+    mantid.SaveNexus(InputWorkspace=calibration.get_calibration_table(), Filename=nxs_filepath)
 
     # if both banks calibrated save individual banks separately as well
     if calibration.group == GROUP.BOTH:
@@ -395,6 +392,7 @@ def read_diff_constants_from_prm(file_path):
 def _generate_table_workspace_name(bank_num):
     return "engggui_calibration_bank_" + str(bank_num)
 
+
 # Focus model functions
 
 
@@ -436,14 +434,14 @@ def focus_run(sample_paths, vanadium_path, plot_output, rb_num, calibration, sav
             ws_foc = _apply_vanadium_norm(ws_foc, ws_van_foc)
             _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             # convert units to TOF and save again
-            ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+            ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
             nxs_paths = _save_output_files(focus_dirs, ws_foc, calibration, van_run, rb_num)
             focused_files_list.extend(nxs_paths)  # list of .nsx paths for that sample using last dir in focus_dirs
             output_workspaces.append(ws_foc.name())
 
     # Plot the output
     if output_workspaces:
-        DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
+        mantid.DeleteWorkspace(VAN_CURVE_REBINNED_NAME)
         if plot_output:
             _plot_focused_workspaces(output_workspaces)
 
@@ -481,44 +479,44 @@ def _plot_focused_workspaces(ws_names):
 
 def _load_run_and_convert_to_dSpacing(filepath, instrument, full_calib):
     runno = path_handling.get_run_number_from_path(filepath, instrument)
-    ws = Load(Filename=filepath, OutputWorkspace=str(runno))
+    ws = mantid.Load(Filename=filepath, OutputWorkspace=str(runno))
     if ws.getRun().getProtonCharge() > 0:
-        ws = NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws.name())
+        ws = mantid.NormaliseByCurrent(InputWorkspace=ws, OutputWorkspace=ws.name())
     else:
         logger.warning(f"Run {ws.name()} has invalid proton charge.")
-        DeleteWorkspace(ws)
+        mantid.DeleteWorkspace(ws)
         return None
-    ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
-    ws = ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target='dSpacing')
+    mantid.ApplyDiffCal(InstrumentWorkspace=ws, CalibrationWorkspace=full_calib)
+    ws = mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws.name(), Target='dSpacing')
     return ws
 
 
 def _focus_run_and_apply_roi_calibration(ws, calibration, ws_foc_name=None):
     if not ws_foc_name:
         ws_foc_name = ws.name() + "_" + FOCUSED_OUTPUT_WORKSPACE_NAME + calibration.get_foc_ws_suffix()
-    ws_foc = DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name,
-                                  GroupingWorkspace=calibration.get_group_ws())
-    ApplyDiffCal(InstrumentWorkspace=ws_foc, ClearCalibration=True)
-    ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
-    ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
-    ws_foc = ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='dSpacing')
+    ws_foc = mantid.DiffractionFocussing(InputWorkspace=ws, OutputWorkspace=ws_foc_name,
+                                         GroupingWorkspace=calibration.get_group_ws())
+    mantid.ApplyDiffCal(InstrumentWorkspace=ws_foc, ClearCalibration=True)
+    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='TOF')
+    mantid.ApplyDiffCal(InstrumentWorkspace=ws_foc, CalibrationWorkspace=calibration.get_calibration_table())
+    ws_foc = mantid.ConvertUnits(InputWorkspace=ws_foc, OutputWorkspace=ws_foc.name(), Target='dSpacing')
     return ws_foc
 
 
 def _smooth_vanadium(van_ws_foc):
-    return EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc,
-                                          NIterations=1, XWindow=0.08)
+    return mantid.EnggEstimateFocussedBackground(InputWorkspace=van_ws_foc, OutputWorkspace=van_ws_foc,
+                                                 NIterations=1, XWindow=0.08)
 
 
 def _apply_vanadium_norm(sample_ws_foc, van_ws_foc):
     # divide by curves - automatically corrects for solid angle, det efficiency and lambda dep. flux
-    sample_ws_foc = CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
-    van_ws_foc_rb = RebinToWorkspace(WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc,
-                                     OutputWorkspace=VAN_CURVE_REBINNED_NAME)  # copy so as not to lose data
-    sample_ws_foc = Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,
-                           OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False)
-    sample_ws_foc = ReplaceSpecialValues(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(),
-                                         NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
+    sample_ws_foc = mantid.CropWorkspace(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(), XMin=0.45)
+    van_ws_foc_rb = mantid.RebinToWorkspace(WorkspaceToRebin=van_ws_foc, WorkspaceToMatch=sample_ws_foc,
+                                            OutputWorkspace=VAN_CURVE_REBINNED_NAME)  # copy so as not to lose data
+    sample_ws_foc = mantid.Divide(LHSWorkspace=sample_ws_foc, RHSWorkspace=van_ws_foc_rb,
+                                  OutputWorkspace=sample_ws_foc.name(), AllowDifferentNumberSpectra=False)
+    sample_ws_foc = mantid.ReplaceSpecialValues(InputWorkspace=sample_ws_foc, OutputWorkspace=sample_ws_foc.name(),
+                                                NaNValue=0, NaNError=0.0, InfinityValue=0, InfinityError=0.0)
     return sample_ws_foc
 
 
@@ -530,27 +528,28 @@ def _save_output_files(focus_dirs, sample_ws_foc, calibration, van_run, rb_num=N
     sample_run_no = sample_ws_foc.run().get('run_number').value
     # save all spectra to single ASCII files
     ascii_fname = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run,
-                                                  calibration.get_group_suffix(), xunit_suffix, ext='')
+                                             calibration.get_group_suffix(), xunit_suffix, ext='')
 
     for focus_dir in focus_dirs:
         if not path.exists(focus_dir):
             makedirs(focus_dir)
-        SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'), SplitFiles=False,
-                UseSpectrumNumberAsBankID=True)
-        SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
-                       SplitFiles=False, Format="TOPAS")
+        mantid.SaveGSS(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + '.gss'),
+                       SplitFiles=False, UseSpectrumNumberAsBankID=True)
+        mantid.SaveFocusedXYE(InputWorkspace=sample_ws_foc, Filename=path.join(focus_dir, ascii_fname + ".abc"),
+                              SplitFiles=False, Format="TOPAS")
         # Save nxs per spectrum
         nxs_paths = []
-        AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
+        mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="Vanadium Run", LogText=van_run)
         for ispec in range(sample_ws_foc.getNumberHistograms()):
             # add a bankid and vanadium to log that is read by fitting model
-            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec+1}'
-            AddSampleLog(Workspace=sample_ws_foc, LogName="bankid", LogText=bankid.replace('_', ' '))  # overwrites
+            bankid = foc_suffix if sample_ws_foc.getNumberHistograms() == 1 else f'{foc_suffix}_{ispec + 1}'
+            mantid.AddSampleLog(Workspace=sample_ws_foc, LogName="bankid",
+                                LogText=bankid.replace('_', ' '))  # overwrites
             # save spectrum as nexus
             filename = _generate_output_file_name(calibration.get_instrument(), sample_run_no, van_run, bankid,
-                                                       xunit_suffix, ext=".nxs")
+                                                  xunit_suffix, ext=".nxs")
             nxs_path = path.join(focus_dir, filename)
-            SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
+            mantid.SaveNexus(InputWorkspace=sample_ws_foc, Filename=nxs_path, WorkspaceIndexList=[ispec])
             nxs_paths.append(nxs_path)
     return nxs_paths  # from last focus_dir only
 
@@ -623,7 +622,7 @@ def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
     @param bank :: value passed in the input property 'Bank' to an Engg algorithm
     @param detector_indices :: value passed in the 'Det
 
-    @returns list of workspace indices that can be used in mantid algorithms such as CropWorkspace.
+    @returns list of workspace indices that can be used in mantid algorithms such as mantid.CropWorkspace.
     """
 
     if bank and detector_indices:
@@ -660,7 +659,7 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
     @param workspace :: input workspace (with instrument)
     @param spectrum_numbers :: range of spectrum numbers (or list of ranges) as given to an algorithm
 
-    @return list of workspace indices, ready to be used in mantid algorithms such as CropWorkspace
+    @return list of workspace indices, ready to be used in mantid algorithms such as mantid.CropWorkspace
     """
     segments = [s.split("-") for s in spectrum_numbers.split(",")]
     indices = [idx for s in segments for idx in range(int(s[0]), int(s[-1]) + 1)]
@@ -712,10 +711,10 @@ def get_detector_ids_for_bank(bank):
     @returns list of detector IDs corresponding to the specified Engg bank number
     """
     import os
-    grouping_file_path = os.path.join(config.getInstrumentDirectory(),
+    grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(),
                                       'Grouping', 'ENGINX_Grouping.xml')
 
-    alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
+    alg = AlgorithmManager.create('mantid.LoadDetectorsGroupingFile')
     alg.initialize()
     alg.setLogging(False)
     alg.setProperty('InputFile', grouping_file_path)
@@ -723,13 +722,13 @@ def get_detector_ids_for_bank(bank):
     alg.setProperty('OutputWorkspace', group_name)
     alg.execute()
 
-    # LoadDetectorsGroupingFile produces a 'Grouping' workspace.
+    # mantid.LoadDetectorsGroupingFile produces a 'Grouping' workspace.
     # PropertyWithValue<GroupingWorkspace> not working (GitHub issue 13437)
     # => cannot run as child and get outputworkspace property properly
     if not ADS.doesExist(group_name):
-        raise RuntimeError('LoadDetectorsGroupingFile did not run correctly. Could not '
+        raise RuntimeError('mantid.LoadDetectorsGroupingFile did not run correctly. Could not '
                            'find its output workspace: ' + group_name)
-    grouping = mtd[group_name]
+    grouping = ADS.retrieve(group_name)
 
     detector_ids = set()
 
@@ -746,7 +745,7 @@ def get_detector_ids_for_bank(bank):
         if grouping.readY(i)[0] in bank_int:
             detector_ids.add(grouping.getDetector(i).getID())
 
-    DeleteWorkspace(grouping)
+    mantid.DeleteWorkspace(grouping)
 
     if len(detector_ids) == 0:
         raise ValueError('Could not find any detector for this bank: ' + bank + '. This looks like an unknown bank')
@@ -765,7 +764,7 @@ def generate_output_param_table(name, difa, difc, tzero):
     @param difc :: DIFC calibration parameter
     @param tzero :: TZERO calibration parameter
     """
-    tbl = CreateEmptyTableWorkspace(OutputWorkspace=name)
+    tbl = mantid.CreateEmptyTableWorkspace(OutputWorkspace=name)
     tbl.addColumn('double', 'DIFA')
     tbl.addColumn('double', 'DIFZ')
     tbl.addColumn('double', 'TZERO')
@@ -794,7 +793,7 @@ def apply_vanadium_corrections(parent, ws, indices, vanadium_ws, van_integration
                          (vanadium_ws.getNumberHistograms(), len(indices)))
     elif van_integration_ws and van_curves_ws:
         # filter only indices from vanIntegWS (crop the table)
-        tbl = CreateEmptyTableWorkspace(OutputWorkspace="__vanadium_integration_ws")
+        tbl = mantid.CreateEmptyTableWorkspace(OutputWorkspace="__vanadium_integration_ws")
         tbl.addColumn('double', 'Spectra Integration')
         for i in indices:
             tbl.addRow([van_integration_ws.cell(i, 0)])
@@ -823,7 +822,7 @@ def convert_to_d_spacing(parent, ws):
     """
     DEPRECATED: not used in UI, only in deprecated functions (EnggVanadiumCorrections and EnggFocus)
 
-    Converts a workspace to dSpacing using 'ConvertUnits' as a child algorithm.
+    Converts a workspace to dSpacing using 'mantid.ConvertUnits' as a child algorithm.
 
     @param parent :: parent (Mantid) algorithm that wants to run this
     @param ws :: workspace (normally in ToF units) to convert (not modified)

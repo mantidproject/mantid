@@ -52,7 +52,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
     @patch(enggutils_path + ".copy2")
     @patch(enggutils_path + ".makedirs")
     @patch(enggutils_path + ".path.exists")
-    @patch(enggutils_path + ".SaveNexus")
+    @patch(enggutils_path + ".mantid.SaveNexus")
     @patch(enggutils_path + ".write_prm_file")
     def test_create_output_files_makes_savdir_and_saves_both_banks(self, mock_write_prm, mock_save_nxs, mock_exists,
                                                                    mock_mkdir, mock_copy):
@@ -80,7 +80,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
 
     @patch(enggutils_path + ".copy2")
     @patch(enggutils_path + ".path")
-    @patch(enggutils_path + ".SaveNexus")
+    @patch(enggutils_path + ".mantid.SaveNexus")
     @patch(enggutils_path + ".write_prm_file")
     def test_create_output_files_saves_custom_group_file(self, mock_write_prm, mock_save_nxs, mock_path, mock_copy):
         mock_path.exists.return_value = True
@@ -99,7 +99,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         mock_save_nxs.assert_called_once_with(InputWorkspace="cal_table", Filename=prm_fname.replace(".prm", ".nxs"))
         mock_copy.assert_not_called()
 
-    @patch(enggutils_path + '.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
     @patch(enggutils_path + '.create_output_files')
     @patch(enggutils_path + '.make_diff_consts_table')
     @patch(enggutils_path + '.run_calibration')
@@ -120,7 +120,7 @@ INS  2 ICONS  18497.75    -29.68    -26.50"""
         self.assertEqual(mock_create_out.call_count, 2)
         mock_create_out.assert_has_calls(create_out_calls)
 
-    @patch(enggutils_path + '.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
     @patch(enggutils_path + '.create_output_files')
     @patch(enggutils_path + '.make_diff_consts_table')
     @patch(enggutils_path + '.run_calibration')

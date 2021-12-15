@@ -31,8 +31,8 @@ class FocusModelTest(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.test_dir)
 
-    @patch(enggutils_path + '.DeleteWorkspace')
-    @patch(enggutils_path + '.ConvertUnits')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
     @patch(enggutils_path + '._save_output_files')
     @patch(enggutils_path + '._apply_vanadium_norm')
     @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
@@ -65,8 +65,8 @@ class FocusModelTest(unittest.TestCase):
 
         mock_plot.assert_not_called()
 
-    @patch(enggutils_path + '.DeleteWorkspace')
-    @patch(enggutils_path + '.ConvertUnits')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
     @patch(enggutils_path + '._save_output_files')
     @patch(enggutils_path + '._apply_vanadium_norm')
     @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
@@ -96,8 +96,8 @@ class FocusModelTest(unittest.TestCase):
                                self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
-    @patch(enggutils_path + '.DeleteWorkspace')
-    @patch(enggutils_path + '.ConvertUnits')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
     @patch(enggutils_path + '._save_output_files')
     @patch(enggutils_path + '._apply_vanadium_norm')
     @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
@@ -126,7 +126,7 @@ class FocusModelTest(unittest.TestCase):
                                sample_foc_ws, self.calibration, van_run, rb_num)]
         mock_save_out.assert_has_calls(save_calls)
 
-    @patch(enggutils_path + '.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
     @patch(enggutils_path + '._save_output_files')
     @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
     @patch(enggutils_path + '._plot_focused_workspaces')
@@ -195,11 +195,11 @@ class FocusModelTest(unittest.TestCase):
         self.assertEqual(ws_van_foc, "van_ws_foc")
         self.assertEqual(van_run, "123456")
 
-    @patch(enggutils_path + '.DeleteWorkspace')
-    @patch(enggutils_path + '.NormaliseByCurrent')
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.NormaliseByCurrent')
     @patch(enggutils_path + '.logger')
     @patch(enggutils_path + '.path_handling.get_run_number_from_path')
-    @patch(enggutils_path + '.Load')
+    @patch(enggutils_path + '.mantid.Load')
     def test_load_runs_ignores_empty_runs_with_zeros_charge(self, mock_load, mock_path, mock_log, mock_norm, mock_del):
         ws = MagicMock()
         ws.getRun.return_value = MagicMock()
@@ -214,10 +214,10 @@ class FocusModelTest(unittest.TestCase):
         mock_del.assert_called_once()
 
     @patch(enggutils_path + '.path.exists')
-    @patch(enggutils_path + ".SaveFocusedXYE")
-    @patch(enggutils_path + ".SaveGSS")
-    @patch(enggutils_path + ".SaveNexus")
-    @patch(enggutils_path + ".AddSampleLog")
+    @patch(enggutils_path + ".mantid.SaveFocusedXYE")
+    @patch(enggutils_path + ".mantid.SaveGSS")
+    @patch(enggutils_path + ".mantid.SaveNexus")
+    @patch(enggutils_path + ".mantid.AddSampleLog")
     def test_save_output_files_both_banks_no_RB_number_path_exists(self, mock_add_log, mock_save_nxs, mock_save_gss,
                                                                    mock_save_xye, mock_path):
         mock_path.return_value = True  # directory exists
@@ -244,10 +244,10 @@ class FocusModelTest(unittest.TestCase):
 
     @patch(enggutils_path + '.makedirs')
     @patch(enggutils_path + '.path.exists')
-    @patch(enggutils_path + ".SaveFocusedXYE")
-    @patch(enggutils_path + ".SaveGSS")
-    @patch(enggutils_path + ".SaveNexus")
-    @patch(enggutils_path + ".AddSampleLog")
+    @patch(enggutils_path + ".mantid.SaveFocusedXYE")
+    @patch(enggutils_path + ".mantid.SaveGSS")
+    @patch(enggutils_path + ".mantid.SaveNexus")
+    @patch(enggutils_path + ".mantid.AddSampleLog")
     def test_save_output_files_North_Bank_RB_number_path_not_exists(self, mock_add_log, mock_save_nxs, mock_save_gss,
                                                                     mock_save_xye, mock_path, mock_mkdir):
         self.calibration.get_group_suffix.return_value = "bank_1"
