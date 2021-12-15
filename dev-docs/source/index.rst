@@ -210,6 +210,9 @@ GUI Development
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
 
+:doc:`BalsamiqWireframes`
+   An introduction to mockups with Balsamiq Wireframes.
+
 :doc:`MantidUsedIconsTable`
    The currently used Icons in Mantid and what they are used for.
 
