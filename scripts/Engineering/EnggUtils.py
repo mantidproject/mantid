@@ -714,7 +714,7 @@ def get_detector_ids_for_bank(bank):
     grouping_file_path = os.path.join(mantid.config.getInstrumentDirectory(),
                                       'Grouping', 'ENGINX_Grouping.xml')
 
-    alg = AlgorithmManager.create('mantid.LoadDetectorsGroupingFile')
+    alg = AlgorithmManager.create('LoadDetectorsGroupingFile')
     alg.initialize()
     alg.setLogging(False)
     alg.setProperty('InputFile', grouping_file_path)
@@ -722,11 +722,11 @@ def get_detector_ids_for_bank(bank):
     alg.setProperty('OutputWorkspace', group_name)
     alg.execute()
 
-    # mantid.LoadDetectorsGroupingFile produces a 'Grouping' workspace.
+    # LoadDetectorsGroupingFile produces a 'Grouping' workspace.
     # PropertyWithValue<GroupingWorkspace> not working (GitHub issue 13437)
     # => cannot run as child and get outputworkspace property properly
     if not ADS.doesExist(group_name):
-        raise RuntimeError('mantid.LoadDetectorsGroupingFile did not run correctly. Could not '
+        raise RuntimeError('LoadDetectorsGroupingFile did not run correctly. Could not '
                            'find its output workspace: ' + group_name)
     grouping = ADS.retrieve(group_name)
 
