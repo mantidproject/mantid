@@ -76,7 +76,7 @@ private:
   /// Sets the detector geometry cache if necessary
   void getDetectorGeometry(const Geometry::IDetector &det, double &detRadius, Kernel::V3D &detAxis);
   /// Computes the distance to the given shape from a starting point
-  double distToSurface(const Kernel::V3D start, const Geometry::IObject *shape) const;
+  double distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const;
   /// Calculate the detector efficiency
   double detectorEfficiency(const double alpha, const double scale_factor = 1.0) const;
   /// Log any errors with spectra that occurred

@@ -15,7 +15,7 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 class MANTIDQT_ISISREFLECTOMETRY_DLL PreviewRow : public Item {
 public:
-  explicit PreviewRow(const std::vector<std::string> runNumbers);
+  explicit PreviewRow(const std::vector<std::string> &runNumbers);
 
   // These copy constructors are disabled as we need to pass by-ref
   // for call-backs to work through to the model

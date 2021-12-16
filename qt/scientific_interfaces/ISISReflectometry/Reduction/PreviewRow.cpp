@@ -11,7 +11,7 @@
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-PreviewRow::PreviewRow(const std::vector<std::string> runNumbers) : Item(), m_runNumbers(std::move(runNumbers)) {
+PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers) : Item(), m_runNumbers(std::move(runNumbers)) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
@@ -27,5 +27,12 @@ int PreviewRow::completedItems() const { return 1; }
 
 Mantid::API::MatrixWorkspace_sptr PreviewRow::getLoadedWs() const noexcept { return m_loadedWs; }
 
-void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = ws; }
+void PreviewRow::setLoadedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_loadedWs = std::move(ws); }
+void PreviewRow::setSummedWs(Mantid::API::MatrixWorkspace_sptr ws) noexcept { m_summedWs = std::move(ws); }
+
+std::vector<Mantid::detid_t> PreviewRow::getSelectedBanks() const noexcept { return m_selectedBanks; }
+
+void PreviewRow::setSelectedBanks(std::vector<Mantid::detid_t> selectedBanks) noexcept {
+  m_selectedBanks = std::move(selectedBanks);
+}
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

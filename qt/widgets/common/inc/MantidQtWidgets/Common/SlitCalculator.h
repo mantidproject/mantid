@@ -25,7 +25,7 @@ class EXPORT_OPT_MANTIDQT_COMMON SlitCalculator : public QDialog, public ISlitCa
 public:
   SlitCalculator(QWidget *parent);
   ~SlitCalculator() override;
-  void setCurrentInstrumentName(std::string instrumentName) override;
+  void setCurrentInstrumentName(const std::string &instrumentName) override;
   void processInstrumentHasBeenChanged() override;
   void show() override;
 

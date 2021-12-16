@@ -69,7 +69,7 @@ void MCInteractionStatistics::UpdateScatterPointCounts(int componentIndex, bool 
  * @param toStart Vector from scatter point to point on beam profile where
  * @param scatteredDirec Vector from scatter point to detector
  */
-void MCInteractionStatistics::UpdateScatterAngleStats(V3D toStart, V3D scatteredDirec) {
+void MCInteractionStatistics::UpdateScatterAngleStats(const V3D &toStart, const V3D &scatteredDirec) {
   double scatterAngleDegrees = scatteredDirec.angle(-toStart) * 180. / M_PI;
   double delta = scatterAngleDegrees - m_scatterAngleMean;
   int totalScatterPoints = m_sampleScatterPoints.usedPointCount;
