@@ -52,6 +52,7 @@ Improvements
 - The plots no longer use scientific notation for the axis values.
 - On resizing priority is given to plotting.
 - The Sequentially Fit all button is now visible for 4K displays
+- The plot guess option in Fitting can now have its range interpolated or extrapolated.
 
 Bugfixes
 ########
