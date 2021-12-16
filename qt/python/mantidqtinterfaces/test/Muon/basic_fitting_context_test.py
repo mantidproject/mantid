@@ -48,7 +48,7 @@ class BasicFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.fit_statuses, [])
         self.assertEqual(self.fitting_context.chi_squared, [])
         self.assertEqual(self.fitting_context.plot_guess, False)
-        self.assertEqual(self.fitting_context.plot_guess_type, None)
+        self.assertEqual(self.fitting_context.plot_guess_type, 'x from fit range')
         self.assertEqual(self.fitting_context.plot_guess_points, None)
         self.assertEqual(self.fitting_context.plot_guess_start_x, None)
         self.assertEqual(self.fitting_context.plot_guess_end_x, None)
