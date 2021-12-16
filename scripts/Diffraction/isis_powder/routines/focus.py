@@ -68,6 +68,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Material=common.generate_sample_material(sample_details))
 
     if placzek_run_number:
+        mantid.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace="DataBeforeCorrections")
         # apply per detector vanadium correction on uncalibrated data
         input_workspace = _apply_vanadium_corrections_per_detector(instrument=instrument,
                                                                    input_workspace=input_workspace,
@@ -94,6 +95,8 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                              GroupingFileName=run_details.grouping_file_path)
 
+    mantid.ConvertToDistribution(focused_ws)
+
     instrument.apply_calibration_to_focused_data(focused_ws)
 
     if not placzek_run_number:
@@ -103,6 +106,14 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                                  vanadium_splines=vanadium_path)
 
     if placzek_run_number:
+        # Divide each spectrum by number of detectors in their bank
+        number_detectors_in_banks = []
+        for bank_number in range(5):
+            number_detectors_in_banks.append(len(focused_ws.getSpectrum(bank_number).getDetectorIDs()))
+        number_detectors_ws = mantid.CreateWorkspace(DataX=[0, 0, 0, 0, 0], DataY=number_detectors_in_banks,
+                                                     NSpec=5, UnitX="dSpacing")
+        focused_ws = mantid.Divide(LHSWorkspace=focused_ws, RHSWorkspace=number_detectors_ws)
+
         focused_ws = common.extract_ws_spectra(focused_ws)
 
     output_spectra = instrument._crop_banks_to_user_tof(focused_ws)
