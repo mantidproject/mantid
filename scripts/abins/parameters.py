@@ -27,7 +27,7 @@ instruments = {
         'resolution': 0.01,  # Width of broadening function as a fraction of incident energy
         'q_size': 200,  # Number of q slices in output plot
         'q_range': (0, 20),  # Lower and upper limits of measurement q sampling
-        'e_init': [4100.0],  # Incident energies in cm-1
+        'e_init': 4100.0,  # Incident energies in cm-1
         'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'}},

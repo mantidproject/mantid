@@ -165,10 +165,6 @@ BUF = 65536
 
 CRYSTAL = False
 
-# Bin limits for q rebinning during semi-empirical powder sum
-Q_BEGIN = 0.7
-Q_END = 30.0
-
 # definition of momentum transfer range
 ACOUSTIC_PHONON_THRESHOLD = 10.0  # acoustic threshold in cm^-1
 

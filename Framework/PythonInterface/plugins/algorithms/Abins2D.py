@@ -113,7 +113,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
                                                      bin_width=self._bin_width)
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
-        raise Exception(s_data)
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
@@ -127,33 +126,31 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=atoms_data, selection=self._atoms)
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
-        workspaces = [self._create_dummy_workspace('dummy')]
-        GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+        # 5) create workspaces for atoms in interest
         self.setProperty('OutputWorkspace', self._out_ws_name)
 
-        # # 5) create workspaces for atoms in interest
-        # workspaces = []
-        # workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
-        #                                          max_quantum_order=self._num_quantum_order_events))
-        # workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
-        #                                          max_quantum_order=self._num_quantum_order_events))
-        # prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
+        workspaces = []
+        workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
+                                                 max_quantum_order=self._max_event_order))
+        workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
+                                                 max_quantum_order=self._max_event_order))
+        prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
 
-        # # 6) Create a workspace with sum of all atoms if required
-        # if self._sum_contributions:
-        #     self.create_total_workspace(workspaces)
-        #     prog_reporter.report("Workspace with total S has been constructed.")
+        # 6) Create a workspace with sum of all atoms if required
+        if self._sum_contributions:
+            self.create_total_workspace(workspaces)
+            prog_reporter.report("Workspace with total S has been constructed.")
 
-        # GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+        GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
-        # # 8) save workspaces to ascii_file
-        # if self._save_ascii:
-        #     self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
-        #     prog_reporter.report("All workspaces have been saved to ASCII files.")
+        # 8) save workspaces to ascii_file
+        if self._save_ascii:
+            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
+            prog_reporter.report("All workspaces have been saved to ASCII files.")
 
-        # # 9) set  OutputWorkspace
-        # self.setProperty('OutputWorkspace', self._out_ws_name)
-        # prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
+        # 9) set  OutputWorkspace
+        self.setProperty('OutputWorkspace', self._out_ws_name)
+        prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
     def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """
@@ -202,7 +199,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         return wrk
 
     def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
-        from abins.constants import Q_BEGIN, Q_END
         from mantid.api import NumericAxis
 
         if protons_number is not None:
@@ -217,7 +213,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         freq_axis = NumericAxis.create(n_freq_bins)
 
         q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
-        q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size + 1)
+        q_begin, q_end = abins.parameters.instruments[self._instrument.get_name()]['q_range']
+        q_bins = np.linspace(start=q_begin, stop=q_end, num=q_size + 1)
 
         freq_offset = (self._bins[1] - self._bins[0]) / 2
         for i, freq in enumerate(self._bins[1:]):
@@ -275,6 +272,12 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
+
+        # Increase max event order if using autoconvolution
+        if self._autoconvolution:
+            self._max_event_order = abins.parameters.autoconvolution['max_order']
+        else:
+            self._max_event_order = self._num_quantum_order_events
 
 
 AlgorithmFactory.subscribe(Abins2D)

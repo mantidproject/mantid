@@ -7,15 +7,21 @@ from mantid.kernel import logger
 import abins
 from abins.constants import FLOAT_TYPE, WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
-from .broadening import broaden_spectrum, prebin_required_schemes
+from .broadening import broaden_spectrum  # , prebin_required_schemes
 
 
 class TwoDMap(Instrument):
     """An instrument for q-resolved 2D maps"""
-    def __init__(self, setting='', chopper_frequency=None):
+    def __init__(self, setting='', chopper_frequency=None, e_init=None):
         super().__init__(setting=setting)
         self._name = 'TwoDMap'
-        self._e_init = None
+
+        if e_init is None:
+            params = abins.parameters.instruments[self._name]
+            self._e_init = params['e_init']
+        else:
+            self._e_init = e_init
+
         logger.information("Ignoring chopper settings, not used by TwoDMap")
 
     def get_angles(self):
@@ -67,9 +73,9 @@ class TwoDMap(Instrument):
         if scheme == 'auto':
             scheme = 'interpolate'
 
-        if scheme in prebin_required_schemes:
-            s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
-            frequencies = (bins[1:] + bins[:-1]) / 2
+        # if scheme in prebin_required_schemes:
+        #     s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
+        #     frequencies = (bins[1:] + bins[:-1]) / 2
 
         sigma = np.full(frequencies.size, self._calculate_sigma(), dtype=FLOAT_TYPE)
 

@@ -208,12 +208,10 @@ class SPowderSemiEmpiricalCalculator:
         :returns: object of type SData and dictionary with total S.
         """
         data = self._calculate_s()
-
         self._clerk.add_file_attributes()
         self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
         self._clerk.add_data("data", data.extract())
-        self._clerk.save()
-
+        #  self._clerk.save()  # This is really slow, disable while developing...
         return data
 
     @property
@@ -332,6 +330,10 @@ class SPowderSemiEmpiricalCalculator:
         This data is averaged over the phonon k-points and Debye-Waller factors
         are included.
 
+        Instrumental broadening is applied in-place: for all terms with simple q-dependence,
+        broadening is applied in 1D before q-dependence is applied. For fundamentals with
+        mode-dependent Debye-Waller factor, broadening must be calculated for each q bin.
+
         In the resulting SData, spectra have the shape (n_qpts, n_ebins)
 
         Returns:
@@ -370,17 +372,22 @@ class SPowderSemiEmpiricalCalculator:
             sdata_1d.add_autoconvolution_spectra(normalise=False)
             sdata_1d = sdata_1d.rebin(self._bins)  # Don't need fine bins any more, so reduce cost of remaining steps
 
-            # Apply appropriate q-dependence to each order, along with 1/(n!) term
+            # Compute appropriate q-dependence for each order, along with 1/(n!) term
             factorials = factorial(range(1, max_dw_order + 1))[:, np.newaxis, np.newaxis]
             factorials[:min_order + 1] = 1.  # Remove 1/n! for orders that were explicitly calculated
 
-            q2n_over_n_factorial = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis, np.newaxis] / factorials
-            sdata = sdata_1d * q2n_over_n_factorial
+            q2_order_corrections = q2 ** np.arange(1, max_dw_order + 1)[:, np.newaxis, np.newaxis] / factorials
+
         else:
             # (order, q, energy)
             q2_order_corrections = q2**np.arange(self._quantum_order_num)[:, np.newaxis, np.newaxis]
 
-            sdata = sdata_1d * q2_order_corrections
+        self._report_progress("Applying instrumental broadening to all orders with simple q-dependence")
+        broadening_scheme = abins.parameters.sampling['broadening_scheme']
+        sdata_1d = self._broaden_sdata(sdata_1d, broadening_scheme=broadening_scheme)
+
+        self._report_progress("Applying q^2n / n! q-dependence")
+        sdata = sdata_1d * q2_order_corrections
 
         if isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
             self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
@@ -390,23 +397,29 @@ class SPowderSemiEmpiricalCalculator:
 
         # Calculate fundamentals with DW corrections explicitly
         fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
+        fundamentals_sdata_with_dw = self._broaden_sdata(fundamentals_sdata_with_dw,
+                                                         broadening_scheme=broadening_scheme)
+
         sdata.update(fundamentals_sdata_with_dw)
 
-        import matplotlib.pyplot as plt
-        from matplotlib.image import NonUniformImage
-        from matplotlib.colors import Normalize
-        fig, ax = plt.subplots()
-        image = NonUniformImage(ax,
-                                extent=(min(self._q_bins), max(self._q_bins),
-                                        min(self._bins), max(self._bins)))
-        image.set_norm(Normalize(0, 0.1))
-        image.set_data(self._q_bin_centres, self._bin_centres,
-                       sdata.get_total_intensity().T)
-        ax.images.append(image)
-        ax.set_xlim(min(self._q_bins), max(self._q_bins))
-        ax.set_ylim(min(self._bins), max(self._bins))
-        plt.show(fig)
-        raise Exception(np.sum(fundamentals_sdata_with_dw.get_total_intensity()))
+        # import matplotlib.pyplot as plt
+        # from matplotlib.image import NonUniformImage
+        # from matplotlib.colors import Normalize
+        # fig, ax = plt.subplots()
+        # plt.plot(self._bin_centres, sdata_1d.get_total_intensity().T)
+        # plt.show(fig)
+
+        # fig, ax = plt.subplots()
+        # image = NonUniformImage(ax,
+        #                         extent=(min(self._q_bins), max(self._q_bins),
+        #                                 min(self._bins), max(self._bins)))
+        # image.set_norm(Normalize(0, 0.1))
+        # image.set_data(self._q_bin_centres, self._bin_centres,
+        #                sdata.get_total_intensity().T)
+        # ax.images.append(image)
+        # ax.set_xlim(min(self._q_bins), max(self._q_bins))
+        # ax.set_ylim(min(self._bins), max(self._bins))
+        # plt.show(fig)
 
         return sdata
 
@@ -546,18 +559,30 @@ class SPowderSemiEmpiricalCalculator:
                        broadening_scheme: str = 'auto') -> SData:
         """
         Apply instrumental broadening to scattering data
+
+        If the data is 2D, process line-by-line.
+        (There is room for improvement, by reworking all the broadening
+        implementations to accept 2-D input.)
         """
         sdata_dict = sdata.extract()
         frequencies = sdata_dict['frequencies']
         del sdata_dict['frequencies']
 
         for atom_key in sdata_dict:
-            for order_key in sdata_dict[atom_key]['s']:
-                _, sdata_dict[atom_key]['s'][order_key] = (
-                    self._instrument.convolve_with_resolution_function(
-                        frequencies=frequencies, bins=self._bins,
-                        s_dft=sdata_dict[atom_key]['s'][order_key],
-                        scheme=broadening_scheme))
+            for order_key, s_dft in sdata_dict[atom_key]['s'].items():
+                if len(s_dft.shape) == 1:
+                    _, sdata_dict[atom_key]['s'][order_key] = (
+                        self._instrument.convolve_with_resolution_function(
+                            frequencies=frequencies, bins=self._bins,
+                            s_dft=s_dft,
+                            scheme=broadening_scheme))
+                else:  # 2-D data, broaden one line at a time
+                    for q_i, s_dft_row in enumerate(sdata_dict[atom_key]['s'][order_key]):
+                        _, sdata_dict[atom_key]['s'][order_key][q_i] = (
+                            self._instrument.convolve_with_resolution_function(
+                                frequencies=frequencies, bins=self._bins,
+                                s_dft=s_dft_row, scheme=broadening_scheme))
+
         return SData(data=sdata_dict, frequencies=self._bin_centres,
                      temperature = sdata.get_temperature(),
                      sample_form = sdata.get_sample_form())

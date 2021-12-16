@@ -3,6 +3,7 @@ import math
 from typing import Optional
 
 import numpy as np
+from mantidqtinterfaces.PyChop import PyChop2
 from mantidqtinterfaces.PyChop import Instruments as pychop_instruments
 
 import abins
@@ -117,7 +118,6 @@ class PyChopInstrument(Instrument):
         return np.polyval(self._polyfits[self._e_init], frequencies)
 
     def _polyfit_resolution(self, n_values=40, order=4):
-        from PyChop import PyChop2
         from abins.constants import MILLI_EV_TO_WAVENUMBER
 
         frequencies_invcm = np.linspace(0, self._e_init, n_values, endpoint=False)
