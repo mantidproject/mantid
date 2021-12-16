@@ -59,6 +59,10 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Crop to largest acceptable TOF range
     input_workspace = instrument._crop_raw_to_expected_tof_range(ws_to_crop=input_workspace)
 
+    if align:
+        mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
+                            CalibrationFile=run_details.offset_file_path)
+
     # Correct for absorption / multiple scattering if required
     if absorb:
         abs_corr_workspace = instrument._apply_absorb_corrections(run_details=run_details, ws_to_correct=input_workspace)
@@ -69,10 +73,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
         abs_corr_workspace = mantid.CloneWorkspace(inputWorkspace=input_workspace)
-    # Align
-    if align:
-        mantid.ApplyDiffCal(InstrumentWorkspace=abs_corr_workspace,
-                            CalibrationFile=run_details.offset_file_path)
+
     aligned_ws = mantid.ConvertUnits(InputWorkspace=abs_corr_workspace, Target="dSpacing")
 
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
