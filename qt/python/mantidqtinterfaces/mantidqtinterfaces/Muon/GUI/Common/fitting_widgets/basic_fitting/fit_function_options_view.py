@@ -9,6 +9,9 @@ from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.functionbrowser import FunctionBrowser
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
 from qtpy.QtCore import Qt
@@ -431,9 +434,7 @@ class FitFunctionOptionsView(ui_form, base_widget):
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_TYPE, "Plot guess using")
         self.plot_guess_type_combo = table_utils.addComboToTable(self.fit_options_table, PLOT_GUESS_TYPE,
-                                                                 ['x from fit range',
-                                                                  'Uniform points across data range',
-                                                                  'Custom x range'])
+                                                                 [X_FROM_FIT_RANGE, X_FROM_DATA_RANGE, X_FROM_CUSTOM])
 
         table_utils.setRowName(self.fit_options_table, PLOT_GUESS_POINTS, "Points")
         self.plot_guess_points_spin_box = table_utils.addSpinBoxToTable(self.fit_options_table, 1000, PLOT_GUESS_POINTS)

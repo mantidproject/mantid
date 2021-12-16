@@ -10,6 +10,9 @@ from unittest import mock
 from mantid.api import AnalysisDataService, FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateSampleWorkspace
 
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel, DEFAULT_START_X
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.muon_base_pair import MuonBasePair
@@ -497,7 +500,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from fit range'
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -519,7 +522,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from fit range'
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -542,7 +545,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = False
-        self.model.plot_guess_type = 'x from fit range'
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=None)
@@ -560,7 +563,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from fit range'
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=True)
@@ -581,7 +584,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'x from fit range'
+        self.model.plot_guess_type = X_FROM_FIT_RANGE
 
         self.model.context = mock.Mock()
         self.model._double_pulse_enabled = mock.Mock(return_value=False)
@@ -603,7 +606,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'Uniform points across data range'
+        self.model.plot_guess_type = X_FROM_DATA_RANGE
         self.model.plot_guess_points = 1000
 
         self.model.context = mock.Mock()
@@ -626,7 +629,7 @@ class BasicFittingModelTest(unittest.TestCase):
         self.model.end_xs = [10.0, 11.0]
         self.model.current_dataset_index = 0
         self.model.plot_guess = True
-        self.model.plot_guess_type = 'Custom x range'
+        self.model.plot_guess_type = X_FROM_CUSTOM
         self.model.plot_guess_points = 1000
         self.model.plot_guess_start_x = 2.0
         self.model.plot_guess_end_x = 12.0

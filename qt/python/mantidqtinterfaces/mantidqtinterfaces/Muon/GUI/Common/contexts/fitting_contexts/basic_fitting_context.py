@@ -8,6 +8,9 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_wor
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FittingContext
 
 SINGLE_FITS_KEY = "SingleFits"
+X_FROM_FIT_RANGE = 'x from fit range'
+X_FROM_DATA_RANGE = 'Uniform points across data range'
+X_FROM_CUSTOM = 'Custom x range'
 
 
 class BasicFittingContext(FittingContext):
@@ -37,7 +40,7 @@ class BasicFittingContext(FittingContext):
         self._chi_squared_for_undo: list = []
 
         self._plot_guess: bool = False
-        self._plot_guess_type: str = None
+        self._plot_guess_type: str = X_FROM_FIT_RANGE
         self._plot_guess_points: int = None
         self._plot_guess_start_x: float = None
         self._plot_guess_end_x: float = None

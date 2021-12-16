@@ -17,7 +17,10 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (chec
                                                                             get_pair_phasequad_name,
                                                                             get_run_numbers_as_string_from_workspace_name)
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import BasicFittingContext
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (BasicFittingContext,
+                                                                                                X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit
@@ -814,26 +817,26 @@ class BasicFittingModel:
 
     def _evaluate_function(self, fit_function: IFunction, output_workspace: str) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
-        if self.fitting_context.plot_guess_type == 'x from fit range':
+        if self.fitting_context.plot_guess_type == X_FROM_FIT_RANGE:
             data_ws = retrieve_ws(self.current_dataset_name)
             data = np.linspace(self.current_start_x, self.current_end_x, data_ws.getNumberBins())
-        elif self.fitting_context.plot_guess_type == 'Uniform points across data range':
+        elif self.fitting_context.plot_guess_type == X_FROM_DATA_RANGE:
             data_ws = retrieve_ws(self.current_dataset_name)
             data = np.linspace(data_ws.dataX(0)[0], data_ws.dataX(0)[-1], self.fitting_context.plot_guess_points)
-        elif self.fitting_context.plot_guess_type == 'Custom x range':
+        elif self.fitting_context.plot_guess_type == X_FROM_CUSTOM:
             data = np.linspace(self.fitting_context.plot_guess_start_x, self.fitting_context.plot_guess_end_x,
                                self.fitting_context.plot_guess_points)
         else:
-            raise ValueError('Plot guess type: ' + self.fitting_context.plot_guess_type + ' is not recognised')
+            raise ValueError(f"Plot guess type '{self.fitting_context.plot_guess_type}' is not recognised.")
 
-        tmp_guess_workspace = self._create_guess_range_workspace(x_range=data, output_workspace='guess_range',
-                                                                 store_in_ads=False)
+        extended_workspace = self._create_guess_range_workspace(x_data=data, output_workspace='extended_workspace',
+                                                                store_in_ads=False)
 
         try:
             if self._double_pulse_enabled():
                 self._evaluate_double_pulse_function(fit_function, output_workspace)
             else:
-                EvaluateFunction(InputWorkspace=tmp_guess_workspace,
+                EvaluateFunction(InputWorkspace=extended_workspace,
                                  Function=fit_function,
                                  OutputWorkspace=output_workspace)
         except RuntimeError:
@@ -856,16 +859,16 @@ class BasicFittingModel:
         alg.setProperty("Output", output_workspace)
         alg.execute()
 
-    def _create_guess_range_workspace(self, x_range: np.array, output_workspace: str, store_in_ads: bool = True) -> Workspace:
-        """Create a workspace with the requested fit range."""
+    def _create_guess_range_workspace(self, x_data: np.array, output_workspace: str, store_in_ads: bool = True) \
+            -> Workspace:
         alg = AlgorithmManager.create("CreateWorkspace")
         alg.initialize()
         alg.setAlwaysStoreInADS(store_in_ads)
-        alg.setProperty("DataX", x_range)
-        alg.setProperty("DataY", x_range)
+        alg.setProperty("DataX", x_data)
+        alg.setProperty("DataY", x_data)
         alg.setProperty("OutputWorkspace", output_workspace)
         alg.execute()
-        return alg.getProperty('OutputWorkspace').value
+        return alg.getProperty("OutputWorkspace").value
 
     def _get_plot_guess_name(self) -> str:
         """Returns the name to use for the plot guess workspace."""

@@ -10,6 +10,9 @@ from unittest import mock
 from mantid.api import FrameworkManager, FunctionFactory
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantidqt.widgets.fitscriptgenerator import FittingMode
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.fitting_mock_setup import MockBasicFitting
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
@@ -284,21 +287,21 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_plot_range(self):
-        self.presenter.view.plot_guess_type = 'x from fit range'
+        self.presenter.view.plot_guess_type = X_FROM_FIT_RANGE
         self.presenter.handle_plot_guess_type_changed()
         self.view.show_plot_guess_points.assert_called_with(False)
         self.view.show_plot_guess_start_x.assert_called_with(False)
         self.view.show_plot_guess_end_x.assert_called_with(False)
 
     def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_data_points(self):
-        self.presenter.view.plot_guess_type = 'Uniform points across data range'
+        self.presenter.view.plot_guess_type = X_FROM_DATA_RANGE
         self.presenter.handle_plot_guess_type_changed()
         self.view.show_plot_guess_points.assert_called_with(True)
         self.view.show_plot_guess_start_x.assert_called_with(False)
         self.view.show_plot_guess_end_x.assert_called_with(False)
 
     def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_custom_range(self):
-        self.presenter.view.plot_guess_type = 'Custom x range'
+        self.presenter.view.plot_guess_type = X_FROM_CUSTOM
         self.presenter.handle_plot_guess_type_changed()
         self.view.show_plot_guess_points.assert_called_with(True)
         self.view.show_plot_guess_start_x.assert_called_with(True)

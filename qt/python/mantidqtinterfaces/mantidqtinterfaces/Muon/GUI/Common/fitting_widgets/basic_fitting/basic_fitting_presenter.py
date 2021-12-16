@@ -9,6 +9,9 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
@@ -217,6 +220,7 @@ class BasicFittingPresenter:
         self.update_start_and_end_x_in_view_from_model()
 
         self.update_plot_fit()
+        self.update_guess_parameters()
         self.update_plot_guess()
 
     def handle_covariance_matrix_clicked(self) -> None:
@@ -241,15 +245,15 @@ class BasicFittingPresenter:
     def handle_plot_guess_type_changed(self) -> None:
         """Handle when the evaluation type is changed."""
         self.model.plot_guess_type = self.view.plot_guess_type
-        if self.model.plot_guess_type == 'x from fit range':
+        if self.model.plot_guess_type == X_FROM_FIT_RANGE:
             self.view.show_plot_guess_points(False)
             self.view.show_plot_guess_start_x(False)
             self.view.show_plot_guess_end_x(False)
-        elif self.model.plot_guess_type == 'Uniform points across data range':
+        elif self.model.plot_guess_type == X_FROM_DATA_RANGE:
             self.view.show_plot_guess_points(True)
             self.view.show_plot_guess_start_x(False)
             self.view.show_plot_guess_end_x(False)
-        elif self.model.plot_guess_type == 'Custom x range':
+        elif self.model.plot_guess_type == X_FROM_CUSTOM:
             self.view.show_plot_guess_points(True)
             self.view.show_plot_guess_start_x(True)
             self.view.show_plot_guess_end_x(True)
@@ -452,6 +456,7 @@ class BasicFittingPresenter:
         self.update_plot_guess_notifier.notify_subscribers()
 
     def update_guess_parameters(self) -> None:
+        """Update the parameters for the guess plot"""
         self.model.plot_guess_type = self.view.plot_guess_type
         self.model.plot_guess_points = self.view.plot_guess_points
         self.model.plot_guess_start_x = self.view.plot_guess_start_x
