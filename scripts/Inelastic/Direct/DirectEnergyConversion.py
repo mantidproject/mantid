@@ -589,9 +589,6 @@ class DirectEnergyConversion(object):
            masking_ws -- if provided, mask empty background workspace before extracting it from
                          workspaces requested
         """
-        prop_man = self.prop_man
-        if prop_man.empty_bg_run is None: # Nothing to do. No empty background
-            return
 
         # list of RunDescriptors to extract and process workspaces
         rd_to_process = ['sample_run','wb_run','monovan_run','wb_for_monovan_run']
