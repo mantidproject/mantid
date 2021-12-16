@@ -30,7 +30,7 @@ class EnginX:
         self.save_dir = save_dir
         # Load custom full inst calib if supplied (needs to be in ADS)
         try:
-            self.full_calib = Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
+            self.full_calib_ws = Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
         except ValueError as e:
             logger.error("Unable to load calibration file " + full_inst_calib_path + ". Error: " + str(e))
 
@@ -51,12 +51,12 @@ class EnginX:
             self.calibration.load_relevant_calibration_files()  # loading existing calibration files
         else:
             create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir,
-                                   full_calib=self.full_calib)
+                                   full_calib=self.full_calib_ws)
 
     def focus(self, plot_output: bool) -> None:
         if self.calibration.is_valid() and self.van_run:
             focus_run(self.focus_runs, self.van_run, plot_output, rb_num=None, calibration=self.calibration,
-                      save_dir=self.save_dir)
+                      save_dir=self.save_dir, full_calib=self.full_calib_ws)
 
     def main(self, plot_cal: bool = False, plot_foc: bool = False):
         self.calibrate(plot_cal)
