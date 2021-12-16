@@ -9,6 +9,7 @@
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexus/NexusClasses.h"
 
 #include <memory>
 

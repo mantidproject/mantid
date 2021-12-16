@@ -10,10 +10,15 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NexusClasses.h"
+
+#include <H5Cpp.h>
+#include <iterator>
+#include <vector>
 
 namespace Mantid::DataHandling {
 
@@ -50,12 +55,23 @@ void LoadILLSALSA::init() {
 void LoadILLSALSA::exec() {
   const std::string filename = getPropertyValue("Filename");
 
+  // load scanned variables names
+  std::vector<std::string> scanVariableNames;
+  {
+    H5::H5File h5file(filename, H5F_ACC_RDONLY);
+    H5::Group scanVariables = h5file.openGroup("entry0/data_scan/scanned_variables/variables_names");
+    scanVariableNames = H5Util::readStringVector(scanVariables, "name");
+    scanVariables.close();
+    h5file.close();
+  }
+
+  // load data (detector and scanned variables)
   Mantid::NeXus::NXRoot dataRoot(filename);
   Mantid::NeXus::NXEntry dataFirstEntry = dataRoot.openFirstEntry();
 
-  Mantid::NeXus::NXData monitorGroup = dataFirstEntry.openNXData("/monitor/data");
-  Mantid::NeXus::NXInt monitor = monitorGroup.openIntData();
-  monitor.load();
+  Mantid::NeXus::NXData scanVariablesGroup = dataFirstEntry.openNXData("/data_scan/scanned_variables/data");
+  Mantid::NeXus::NXDouble scanVariables = scanVariablesGroup.openDoubleData();
+  scanVariables.load();
 
   Mantid::NeXus::NXData dataGroup = dataFirstEntry.openNXData("/data_scan/detector_data/data");
   Mantid::NeXus::NXInt data = dataGroup.openIntData();
@@ -68,6 +84,7 @@ void LoadILLSALSA::exec() {
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
                                                                     HistogramData::Points(m_numberOfScans));
 
+  // create instrument
   auto loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("InstrumentName", "SALSA");
   loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
@@ -75,6 +92,7 @@ void LoadILLSALSA::exec() {
   loadInst->execute();
   setProperty("OutputWorkspace", m_outputWorkspace);
 
+  // fill detector data
   int index = 0;
   for (int i = 0; i < m_numberOfRows; i++) {
     for (int j = 0; j < m_numberOfColumns; j++) {
@@ -89,10 +107,14 @@ void LoadILLSALSA::exec() {
       index++;
     }
   }
+
+  // fill monitor data
+  auto it = std::find(scanVariableNames.cbegin(), scanVariableNames.cend(), "Monitor1");
+  auto monitorIndex = std::distance(scanVariableNames.cbegin(), it);
   for (int i = 0; i < m_numberOfScans; i++) {
-    m_outputWorkspace->mutableY(index) = monitor(0, 0, 0);
-    m_outputWorkspace->mutableE(index) = sqrt(monitor(0, 0, 0));
-    m_outputWorkspace->mutableX(index) = i;
+    m_outputWorkspace->mutableY(index)[i] = scanVariables((int)monitorIndex, i);
+    m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
+    m_outputWorkspace->mutableX(index)[i] = i;
   }
 }
 } // namespace Mantid::DataHandling
