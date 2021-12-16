@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 from qtpy.QtCore import Qt, Signal
-from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import FIT_STATUS_COLUMN
+from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.QSequentialTableModel import FIT_STATUS_COLUMN, NUM_DEFAULT_COLUMNS
 from mantidqtinterfaces.Muon.GUI.Common.seq_fitting_tab_widget.SequentialTableDelegates import FitQualityDelegate
+from mantidqtinterfaces.Muon.GUI.Common.utilities.table_utils import DoubleItemDelegate
 
 
 class QSequentialTableView(QtWidgets.QTableView):
@@ -20,6 +21,7 @@ class QSequentialTableView(QtWidgets.QTableView):
         self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
         self.setItemDelegateForColumn(FIT_STATUS_COLUMN, FitQualityDelegate(self))
+        self.setItemDelegateForColumn(NUM_DEFAULT_COLUMNS+1, FitQualityDelegate(self))
         self.setAlternatingRowColors(True)
 
     def resizeColumnsToContents(self):
@@ -28,6 +30,10 @@ class QSequentialTableView(QtWidgets.QTableView):
         for col in range(self.model().columnCount()):
             if col == 0:
                 self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.Stretch)
+            elif col > NUM_DEFAULT_COLUMNS-1:
+                self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
+                self.setItemDelegateForColumn(col, DoubleItemDelegate(self))
+
             else:
                 self.horizontalHeader().setSectionResizeMode(col, QtWidgets.QHeaderView.ResizeToContents)
 

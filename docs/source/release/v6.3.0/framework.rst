@@ -9,8 +9,9 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-Concepts
+Removals
 --------
+- Both ``RemoteAlgorithms`` and ``RemoteJobManagers`` subpackages have been removed due to lack of use since v3.7.
 
 Algorithms
 ----------
@@ -32,12 +33,17 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
 - An importance sampling option has been added to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` so that it handles spikes in the structure factor S(Q) better
 - Added parameter to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` to control number of attempts to generate initial scatter point
+- Relative error option now enabled for peak table workspaces in :ref:`CompareWorkspaces <algm-CompareWorkspaces>`.
 
 Bugfixes
 ########
 
+- Fix bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fix bug in :ref:`Integration <algm-Integration>` when using UsePartialBinsOption with integration limits that are either equal or close together
+- Fix bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where calculation aborts with exception due to floating point rounding error when track segment close to vertical
+  Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
+- Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
 
 Fit Functions
 -------------
@@ -83,5 +89,6 @@ Bugfixes
 
 
 - Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
 
 :ref:`Release 6.3.0 <v6.3.0>`

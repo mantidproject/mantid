@@ -22,7 +22,7 @@ DIFF_CONSTS_TABLE_NAME = "diffractometer_consts_table"
 
 class CalibrationModel(object):
 
-    def create_new_calibration(self, calibration, rb_num, plot_output):
+    def create_new_calibration(self, calibration, rb_num, plot_output, save_dir=output_settings.get_output_path()):
         """
         Create a new calibration from a ceria run
         :param ceria_path: Path to ceria (CeO2) data file
@@ -47,11 +47,14 @@ class CalibrationModel(object):
                                                      calibration)
 
         # save output
+        calib_dirs = [path.join(save_dir, "Calibration", "")]
         if rb_num:
-            calib_dir = path.join(output_settings.get_output_path(), "User", rb_num, "Calibration", "")
-        else:
-            calib_dir = path.join(output_settings.get_output_path(), "Calibration", "")
-        self.create_output_files(calib_dir, calibration, focused_ceria)
+            calib_dirs.append(path.join(save_dir, "User", rb_num, "Calibration", ""))
+            if calibration.group == EnggUtils.GROUP.TEXTURE:
+                calib_dirs.pop(0)  # only save to RB directory to limit number files saved
+
+        for calib_dir in calib_dirs:
+            self.create_output_files(calib_dir, calibration, focused_ceria)
 
         DeleteWorkspace(ceria_workspace)
 
@@ -171,8 +174,8 @@ class CalibrationModel(object):
         cal_table, diag_ws, mask = PDCalibration(InputWorkspace=foc_name, OutputCalibrationTable=cal_table_name,
                                                  DiagnosticWorkspaces=diag_ws_name,
                                                  PeakPositions=EnggUtils.default_ceria_expected_peaks(final=True),
-                                                 TofBinning=[15500, -0.0003, 52000],
-                                                 PeakWindow=0.04,
+                                                 TofBinning=[12000, -0.0003, 52000],
+                                                 PeakWindow=EnggUtils.default_ceria_expected_peak_windows(final=True),
                                                  MinimumPeakHeight=0.5,
                                                  PeakFunction='BackToBackExponential',
                                                  CalibrationParameters='DIFC+TZERO+DIFA',

@@ -23,7 +23,7 @@ from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 from textwrap import wrap
-
+from matplotlib.ticker import StrMethodFormatter, NullFormatter
 from mantidqt.MPLwidgets import FigureCanvas
 
 # Default color cycle using Matplotlib color codes C0, C1...ect
@@ -33,7 +33,7 @@ DEFAULT_COLOR_CYCLE = ["C" + str(index) for index in range(NUMBER_OF_COLOURS)]
 
 class ShadedRegionInfo(object):
     def __init__(self, workspace_name: str,
-                 axis: int,
+                 axis,
                  x_values: List[float],
                  y1_values: List[float],
                  y2_values: List[float]):
@@ -44,11 +44,24 @@ class ShadedRegionInfo(object):
         self.y2_values = y2_values
         self.ID = None
 
-    def shade_region(self, axis, color):
+    def update(self, axis,
+               x_values: List[float],
+               y1_values: List[float],
+               y2_values: List[float]):
+        self.axis = axis
+        self.x_values = x_values
+        self.y1_values = y1_values
+        self.y2_values = y2_values
+        if self.ID:
+            color = self.ID.get_facecolor()
+            self.remove()
+            self.shade_region(color)
+
+    def shade_region(self, color):
         x_values = self.x_values
         y1 = self.y1_values
         y2 = self.y2_values
-        self.ID = axis.fill_between(x_values, y1, y2, facecolor=color, interpolate=True, alpha=0.25)
+        self.ID = self.axis.fill_between(x_values, y1, y2, facecolor=color, interpolate=True, alpha=0.25)
 
     def remove(self):
         if self.ID:
@@ -157,6 +170,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         for color_queue in self._color_queue:
             color_queue.reset()
 
+        for shaded_region in self._shaded_regions:
+            shaded_region.remove()
+        self._shaded_regions={}
+
         self._plot_information_list = []
 
     def _make_plot(self, workspace_plot_info: WorkspacePlotInformation):
@@ -174,7 +191,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         plot_kwargs['color'] = self._color_queue[axis_number]()
         if workspace_name in self._shaded_regions.keys() and errors:
             errors = False
-            self.shade_region(ax, plot_kwargs['color'], workspace_name)
+            self.shade_region(plot_kwargs['color'], workspace_name)
 
         _do_single_plot(ax, workspace, ws_index, errors=errors,
                         plot_kwargs=plot_kwargs)
@@ -196,12 +213,20 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
             for axis_number in range(int(self._number_of_axes), int(nrows*ncols)):
                 self.hide_axis(axis_number, nrows, ncols)
 
-    def add_shaded_region(self, workspace_name, axis, x_values, y1_values, y2_values):
-        self._shaded_regions[workspace_name] = ShadedRegionInfo(workspace_name = workspace_name,
-                                                                axis = axis,
-                                                                x_values = x_values,
-                                                                y1_values = y1_values,
-                                                                y2_values = y2_values)
+    def add_shaded_region(self, workspace_name, axis_number, x_values, y1_values, y2_values):
+        # -1 to count from 0 instead of 1
+        axis = self.fig.axes[axis_number-1]
+        if workspace_name in self._shaded_regions.keys():
+            self._shaded_regions[workspace_name].update(axis = axis,
+                                                        x_values = x_values,
+                                                        y1_values = y1_values,
+                                                        y2_values = y2_values)
+        else:
+            self._shaded_regions[workspace_name] = ShadedRegionInfo(workspace_name = workspace_name,
+                                                                    axis = axis,
+                                                                    x_values = x_values,
+                                                                    y1_values = y1_values,
+                                                                    y2_values = y2_values)
 
     def _wrap_labels(self, labels: list) -> list:
         """Wraps a list of labels so that every line is at most self._settings.wrap_width characters long."""
@@ -210,7 +235,10 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _set_text_tick_labels(self, axis_number):
         ax = self.fig.axes[axis_number]
         # set the axes to not "simplify" the values
-        ax.ticklabel_format(useOffset=self._settings.sci_notation)
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+        ax.xaxis.set_minor_formatter(NullFormatter())
+        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+        ax.yaxis.set_minor_formatter(NullFormatter())
         if self._x_tick_labels:
             ax.set_xticks(range(len(self._x_tick_labels)))
             labels = self._wrap_labels(self._x_tick_labels)
@@ -269,6 +297,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 axis.remove_workspace_artists(workspace)
                 self._plot_information_list.remove(workspace_plot_info)
                 if workspace_name in self._shaded_regions.keys():
+                    self._shaded_regions[workspace_name].remove()
                     del self._shaded_regions[workspace_name]
 
     def _update_color_queue_on_workspace_removal(self, axis_number, workspace_name):
@@ -303,13 +332,17 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 if workspace_name in self._shaded_regions.keys() and workspace_plot_info.errors:
                     # remove old shade first
                     self._shaded_regions[workspace_name].remove()
-                    color = get_color_from_artist(artists)
-                    self.shade_region(axis, color, workspace_name)
+                    ws_artist = axis.tracked_workspaces[workspace_name][0]
+                    color = get_color_from_artist(ws_artist._artists[0])
+                    self.shade_region(color, workspace_name)
+
         self.redraw_figure()
 
     # not used for tiled plots
     def replot_workspace_with_error_state(self, workspace_name, with_errors: bool):
         for plot_info in self.plotted_workspace_information:
+            # update plot info error state -> important for shading
+            plot_info.errors= with_errors
             if plot_info.workspace_name == workspace_name:
                 axis = self.fig.axes[plot_info.axis]
                 workspace_name = plot_info.workspace_name
@@ -323,15 +356,15 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                             if with_errors:
                                 # replot without errors to get the fit on top
                                 axis.replot_artist(artist, False, **plot_kwargs)
-                                self.shade_region(axis, color, workspace_name)
-                            elif len(axis.collections)>0:
-                                axis.collections.pop()
+                                self.shade_region(color, workspace_name)
+                            else:
+                                self._shaded_regions[workspace_name].remove()
                         else:
                             axis.replot_artist(artist, with_errors, **plot_kwargs)
         self.redraw_figure()
 
-    def shade_region(self, axis, color, name):
-        self._shaded_regions[name].shade_region(axis, color)
+    def shade_region(self, color, name):
+        self._shaded_regions[name].shade_region(color)
 
     def set_axis_xlimits(self, axis_number, xlims):
         ax = self.fig.axes[axis_number]

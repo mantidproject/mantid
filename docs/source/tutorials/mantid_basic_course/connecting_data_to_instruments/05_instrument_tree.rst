@@ -1,7 +1,7 @@
 .. _05_instrument_tree:
 
 ===============
-Instrument Tree 
+Instrument Tree
 ===============
 
 

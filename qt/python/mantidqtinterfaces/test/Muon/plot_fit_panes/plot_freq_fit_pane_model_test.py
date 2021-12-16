@@ -25,7 +25,7 @@ class PlotFreqFitPaneModelTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.context = setup_context()
+        cls.context = setup_context(freq=True)
 
     @classmethod
     def tearDownClass(cls):

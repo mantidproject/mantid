@@ -57,7 +57,15 @@ Usage
 
     import os
 
-    wsPeaks = LoadIsawPeaks('TOPAZ_3007.peaks')
+    # make a peaks workspace
+    LoadEmptyInstrument(InstrumentName='SXD', OutputWorkspace='sxd')
+    ub = np.array([[-0.00601763, 0.07397297, 0.05865706],
+                   [0.05373321, 0.050198, -0.05651455],
+                   [-0.07822144, 0.0295911, -0.04489172]])
+    SetUB('SXD', UB=ub)
+    wsPeaks = PredictPeaks('SXD', WavelengthMin=1, WavelengthMax=1.1,
+                           MinDSpacing=1, MaxDSPacing=1.1)
+    # save and load peaks in .hkl format
     SaveHKL(wsPeaks, Filename='testHKL.hkl')
     wsHKL = LoadHKL('testHKL.hkl')
 

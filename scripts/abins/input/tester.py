@@ -17,6 +17,7 @@ class Tester(object):
     _loaders_extensions = {"CASTEPLoader": "phonon",
                            "CRYSTALLoader": "out",
                            "DMOL3Loader": "outmol",
+                           "EuphonicLoader": "castep_bin",
                            "GAUSSIANLoader": "log",
                            "VASPLoader": "xml",
                            "VASPOUTCARLoader": "OUTCAR"}

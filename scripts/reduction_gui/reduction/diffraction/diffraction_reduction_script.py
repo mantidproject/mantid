@@ -334,7 +334,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
                 continue
 
             # Add to script
-            script += "{}{} = '{}',\n".format(DiffractionReductionScripter.WIDTH, propname, propvalue)
+            if '{' in propvalue and '}' in propvalue:
+                script += "{}{} = {},\n".format(DiffractionReductionScripter.WIDTH, propname, propvalue)
+            else:
+                script += "{}{} = '{}',\n".format(DiffractionReductionScripter.WIDTH, propname, propvalue)
         # ENDFOR
 
         # 3. Optional spliter workspace
