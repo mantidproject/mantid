@@ -157,20 +157,33 @@ def _create_vanadium_splines_one_ws(vanadium_splines, instrument, run_details):
                            DetectorWorkspace="vanadium_splines",
                            MonitorWorkspace="vanadium_monitors")
 
+    from mantid.api import AnalysisDataService as ADS
     if instrument._inst_settings.masking_file_name is not None:
         import os
         masking_file_path = os.path.join(instrument.calibration_dir,
                                          instrument._inst_settings.masking_file_name)
         bragg_mask_list = common.read_masking_file(masking_file_path)
-        for bank in bragg_mask_list:
-            for mask_params in bank:
-                vanadium_splines = mantid.MaskBins(InputWorkspace="vanadium_splines", XMin=mask_params[0], XMax=mask_params[1])
+        vanadium_splines = ADS.retrieve("vanadium_splines")
+        for bank_number, peaks_on_bank in enumerate(bragg_mask_list):
+            ws_indices_on_bank_to_mask = []
+            for workspace_index in range(vanadium_splines.getNumberHistograms()):
+                # assuming that each spectrum only has one detector ID
+                detector = vanadium_splines.getInstrument().getDetector(vanadium_splines.getSpectrum(workspace_index).getDetectorIDs()[0])
+                bank_name_containing_detector = detector.getFullName().split('/')[1]
+                if bank_name_containing_detector == f"bank{bank_number+1}":
+                    ws_indices_on_bank_to_mask.append(workspace_index)
+            for mask_params in peaks_on_bank:
+                vanadium_splines = mantid.MaskBins(InputWorkspace="vanadium_splines",
+                                                   XMin=mask_params[0], XMax=mask_params[1],
+                                                   InputWorkspaceIndexSet=ws_indices_on_bank_to_mask)
+
     vanadium_splines.clearMonitorWorkspace()
     vanadium_splines = mantid.RemoveMaskedSpectra(InputWorkspace=vanadium_splines)
     out_name = "van_{}".format(run_details.vanadium_run_numbers)
-    out_name = mantid.ConvertUnits(InputWorkspace=vanadium_splines, Target="TOF", OutputWorkspace=out_name)
-    out_name = mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,
-                                       EndWorkspaceIndex=out_name.getNumberHistograms()-1,
-                                       NCoeff=instrument._inst_settings.spline_coeff)
+    mantid.ConvertUnits(InputWorkspace=vanadium_splines, Target="TOF", OutputWorkspace=out_name)
+    mantid.SplineBackground(InputWorkspace=out_name, WorkspaceIndex=0,
+                            EndWorkspaceIndex=ADS.retrieve(out_name).getNumberHistograms()-1,
+                            NCoeff=instrument._inst_settings.spline_coeff,
+                            OutputWorkspace=out_name)
     out_spline_van_file_path = run_details.splined_vanadium_file_path
     mantid.SaveNexus(Filename=out_spline_van_file_path, InputWorkspace=out_name)
