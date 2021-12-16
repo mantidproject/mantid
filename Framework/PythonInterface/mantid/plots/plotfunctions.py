@@ -206,16 +206,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
     else:
         if ax.is_waterfall():
-            for i in range(len(nums)*len(workspaces)):
-                errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
-                datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
+            _overplot_waterfall(ax,len(nums)*len(workspaces))
 
-                if ax.waterfall_has_fill():
-                    datafunctions.waterfall_update_fill(ax)
-
-                ax.lines += errorbar_cap_lines
-
-    if superplot and not waterfall and not tiled:
+    if ax.is_waterfall():
+        #If axes is waterfall, update axes limits following line offset.
+        ax.relim()
+        ax.autoscale()
+    elif superplot and not tiled:
         fig.canvas.manager.superplot_toggle()
         if not spectrum_nums and not wksp_indices:
             workspace_names = [ws.name() for ws in workspaces]
@@ -225,6 +222,17 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     # update and show figure
     return _update_show_figure(fig)
+
+
+def _overplot_waterfall(ax, no_of_lines):
+    for i in range(no_of_lines):
+        errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+        datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
+
+        if ax.waterfall_has_fill():
+            datafunctions.waterfall_update_fill(ax)
+
+        ax.lines += errorbar_cap_lines
 
 
 def _update_show_figure(fig):
