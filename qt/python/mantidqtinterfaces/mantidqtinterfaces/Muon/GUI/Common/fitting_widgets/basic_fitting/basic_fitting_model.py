@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
 from mantid.api import CompositeFunction, IAlgorithm, IFunction
-from mantid.simpleapi import CopyLogs, EvaluateFunction, Workspace
+from mantid.simpleapi import CopyLogs, EvaluateFunction
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_group_definition import add_list_to_group
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist, retrieve_ws, make_group
@@ -23,7 +23,7 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_
                                                                                                 X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.fitting_context import FitInformation
 from mantidqtinterfaces.Muon.GUI.Common.contexts.muon_context import MuonContext
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_Fit, run_create_workspace_without_storing
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_data_utils import check_exclude_start_and_end_x_is_valid, x_limits_of_workspace
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
@@ -829,8 +829,8 @@ class BasicFittingModel:
         else:
             raise ValueError(f"Plot guess type '{self.fitting_context.plot_guess_type}' is not recognised.")
 
-        extended_workspace = self._create_guess_range_workspace(x_data=data, output_workspace='extended_workspace',
-                                                                store_in_ads=False)
+        extended_workspace = run_create_workspace_without_storing(x_data=data, y_data=data,
+                                                                  name='extended_workspace')
 
         try:
             if self._double_pulse_enabled():
@@ -858,17 +858,6 @@ class BasicFittingModel:
         alg.setProperty("MaxIterations", 0)
         alg.setProperty("Output", output_workspace)
         alg.execute()
-
-    def _create_guess_range_workspace(self, x_data: np.array, output_workspace: str, store_in_ads: bool = True) \
-            -> Workspace:
-        alg = AlgorithmManager.create("CreateWorkspace")
-        alg.initialize()
-        alg.setAlwaysStoreInADS(store_in_ads)
-        alg.setProperty("DataX", x_data)
-        alg.setProperty("DataY", x_data)
-        alg.setProperty("OutputWorkspace", output_workspace)
-        alg.execute()
-        return alg.getProperty("OutputWorkspace").value
 
     def _get_plot_guess_name(self) -> str:
         """Returns the name to use for the plot guess workspace."""

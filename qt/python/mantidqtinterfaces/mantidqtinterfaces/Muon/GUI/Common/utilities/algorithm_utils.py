@@ -382,3 +382,14 @@ def run_create_workspace(x_data, y_data, name):
     alg.setProperty("OutputWorkspace", name)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+
+def run_create_workspace_without_storing(x_data, y_data, name):
+    alg = mantid.AlgorithmManager.create("CreateWorkspace")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(False)
+    alg.setProperty("DataX", x_data)
+    alg.setProperty("DataY", y_data)
+    alg.setProperty("OutputWorkspace", name)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").value
