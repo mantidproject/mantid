@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
+from mantid.kernel import logger
 
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.pearl_routines import pearl_algs
@@ -14,9 +15,10 @@ from isis_powder.pearl_routines import pearl_algs
 
 def generate_and_save_focus_output(instrument, processed_spectra, run_details, attenuation_filepath, focus_mode):
     output_file_paths = instrument._generate_out_file_paths(run_details=run_details)
-    if instrument._inst_settings.tt_mode=="custom":
+    if instrument._inst_settings.tt_mode == "custom" and len(processed_spectra) != 14:
+        logger.warning('Custom grouping file does not contain 14 groups so switching to focus_mode=Mods')
         processed_nexus_files = _focus_mode_mods(output_file_paths=output_file_paths,
-                                                   calibrated_spectra=processed_spectra)
+                                                 calibrated_spectra=processed_spectra)
     elif focus_mode == "all":
         processed_nexus_files = _focus_mode_all(output_file_paths=output_file_paths,
                                                 processed_spectra=processed_spectra,
