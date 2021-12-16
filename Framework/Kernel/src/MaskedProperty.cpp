@@ -21,8 +21,8 @@ namespace Mantid::Kernel {
  * Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-MaskedProperty<TYPE>::MaskedProperty(const std::string &name, TYPE defaultvalue, const IValidator_sptr &validator,
-                                     const unsigned int direction)
+MaskedProperty<TYPE>::MaskedProperty(const std::string &name, const TYPE &defaultvalue,
+                                     const IValidator_sptr &validator, const unsigned int direction)
     : Kernel::PropertyWithValue<TYPE>(name, defaultvalue, validator, direction), m_maskedValue("") {
   this->setRemember(false);
 }

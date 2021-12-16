@@ -133,7 +133,7 @@ std::shared_ptr<CSGObject> createSphere(double radius, const V3D &centre, const 
   return shapeMaker.createShape(sphereXML(radius, centre, id));
 }
 
-std::string cuboidXML(double xHalfLength, double yHalfLength, double zHalfLength, Mantid::Kernel::V3D centrePos,
+std::string cuboidXML(double xHalfLength, double yHalfLength, double zHalfLength, const V3D &centrePos,
                       const std::string &id) {
   const double szX = xHalfLength;
   const double szY = (yHalfLength == -1.0 ? szX : yHalfLength);
@@ -168,7 +168,7 @@ std::string cuboidXML(double xHalfLength, double yHalfLength, double zHalfLength
 //----------------------------------------------------------------------------------------------
 /** Create a cuboid shape for your pixels */
 std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength, double zHalfLength,
-                                        Mantid::Kernel::V3D centrePos, const std::string &id) {
+                                        const V3D &centrePos, const std::string &id) {
   ShapeFactory shapeCreator;
   return shapeCreator.createShape(cuboidXML(xHalfLength, yHalfLength, zHalfLength, centrePos, id));
 }
@@ -184,7 +184,7 @@ std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength, 
  * @return a pointer to the cuboid shape
  */
 std::shared_ptr<CSGObject> createCuboid(double xHalfLength, double yHalfLength, double zHalfLength, double angle,
-                                        Mantid::Kernel::V3D axis) {
+                                        const Mantid::Kernel::V3D &axis) {
   // top\bottom along z
   V3D leftFrontBottom{xHalfLength, -yHalfLength, -zHalfLength};
   V3D leftFrontTop{xHalfLength, -yHalfLength, zHalfLength};

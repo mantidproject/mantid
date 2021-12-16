@@ -302,9 +302,11 @@ public:
 
   void find(Boolean, size_t &, const size_t &) override { throw std::runtime_error("find not implemented"); }
 
-  void find(std::string, size_t &, const size_t &) override { throw std::runtime_error("find not implemented"); }
+  void find(const std::string &, size_t &, const size_t &) override {
+    throw std::runtime_error("find not implemented");
+  }
 
-  void find(Mantid::Kernel::V3D, size_t &, const size_t &) override {
+  void find(const Mantid::Kernel::V3D &, size_t &, const size_t &) override {
     throw std::runtime_error("find not implemented");
   }
 
