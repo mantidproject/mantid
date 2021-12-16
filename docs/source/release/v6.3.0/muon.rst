@@ -58,6 +58,8 @@ Bugfixes
 - Fixed a bug that prevented the GUI working with workspace history and project recovery.
 - Detaching tabs, then closing Mantid no longer causes a crash.
 - When a new fit is performed in Muon Analysis it no longer reselects all parameter workspaces in the results tab.
+- Mantid no longer crashes when changing tabs on MacOS
+- Dragging tabs no longer shows a translucent preview that does nothing
 
 ALC
 ---
