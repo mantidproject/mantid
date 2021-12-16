@@ -110,7 +110,7 @@ int LoadMLZ::confidence(Kernel::NexusDescriptor &descriptor) const {
 /**
  * Loads Masked detectors from the /Scan/instrument/Detector/pixel_mask
  */
-void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
+void LoadMLZ::maskDetectors(const NeXus::NXEntry &entry) {
   // path to the pixel_mask
   std::string pmpath = "instrument/detector/pixel_mask";
 

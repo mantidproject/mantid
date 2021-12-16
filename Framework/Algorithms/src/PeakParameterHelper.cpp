@@ -48,8 +48,8 @@ template <typename vector_like> size_t findXIndex(const vector_like &vecx, const
  * @param peak_height :: estimated peak height (output)
  * @return :: state whether peak center can be found by obervation
  */
-int observePeakCenter(const Histogram &histogram, FunctionValues &bkgd_values, size_t start_index, size_t stop_index,
-                      double &peak_center, size_t &peak_center_index, double &peak_height) {
+int observePeakCenter(const Histogram &histogram, const FunctionValues &bkgd_values, size_t start_index,
+                      size_t stop_index, double &peak_center, size_t &peak_center_index, double &peak_height) {
   const auto &vector_x = histogram.points();
 
   // find the original starting point
@@ -90,8 +90,7 @@ int observePeakCenter(const Histogram &histogram, FunctionValues &bkgd_values, s
 //----------------------------------------------------------------------------------------------
 /** estimate peak width from 'observation'
  * @param histogram :: Histogram instance
- * @param bkgd_values :: (output) background values calculated from X in given
- * histogram
+ * @param bkgd_values :: background values calculated from X in given histogram
  * @param ipeak :: array index for the peak center in histogram
  * @param istart :: array index for the left boundary of the peak
  * @param istop :: array index for the right boundary of the peak
@@ -99,7 +98,7 @@ int observePeakCenter(const Histogram &histogram, FunctionValues &bkgd_values, s
  * @param peakWidthPercentage :: fwhm scaling factor when guessing from instrument
  * @return peak width as double
  */
-double observePeakFwhm(const Histogram &histogram, FunctionValues &bkgd_values, size_t ipeak, size_t istart,
+double observePeakFwhm(const Histogram &histogram, const FunctionValues &bkgd_values, size_t ipeak, size_t istart,
                        size_t istop, const EstimatePeakWidth peakWidthEstimateApproach,
                        const double peakWidthPercentage) {
   double peak_fwhm(-0.);
