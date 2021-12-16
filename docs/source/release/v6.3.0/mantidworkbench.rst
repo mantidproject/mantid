@@ -26,6 +26,8 @@ New and Improved
 
 - The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path)
 
+- The font in python editor and IPython console are ensured to be monospace on KDE Neon distribution, too.
+
 Bugfixes
 --------
 - Fixed an issue when save_as a running script leads to crash upon script completion.
