@@ -225,6 +225,7 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
 
 def _overplot_waterfall(ax, no_of_lines):
+    #If overplotting onto a waterfall axes, convert lines to overplot to waterfall.
     for i in range(no_of_lines):
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
         datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
