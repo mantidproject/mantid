@@ -92,6 +92,7 @@ private:
   void getXMinMax(const Mantid::API::MatrixWorkspace &ws, double &xmin, double &xmax) const;
   MatrixWorkspace_uptr prepareQSQ(double kinc);
   double getKf(const MatrixWorkspace_sptr &SOfQ, const int iW, const double kinc);
+  void convertWsToPoints(MatrixWorkspace_sptr &ws);
   std::tuple<double, double> getKinematicRange(double kf, double ki);
   long long m_callsToInterceptSurface{0};
   std::map<int, int> m_attemptsToGenerateInitialTrack;
