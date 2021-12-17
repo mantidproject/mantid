@@ -401,19 +401,13 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             self.superplot = None
             self.toolbar._actions["toggle_superplot"].setChecked(False)
         else:
-            self.window.addDockWidget(Qt.LeftDockWidgetArea,
-                                      self.superplot.get_side_view())
-            self.window.addDockWidget(Qt.BottomDockWidgetArea,
-                                      self.superplot.get_bottom_view())
+            self.superplot.show()
             self.toolbar._actions["toggle_superplot"].setChecked(True)
-            self.superplot.get_bottom_view().setFocus()
 
     def _superplot_hide(self):
         """Hide the superplot"""
         if self.superplot is None:
             return
-        self.window.removeDockWidget(self.superplot.get_side_view())
-        self.window.removeDockWidget(self.superplot.get_bottom_view())
         self.superplot.close()
         self.superplot = None
         self.toolbar._actions["toggle_superplot"].setChecked(False)
