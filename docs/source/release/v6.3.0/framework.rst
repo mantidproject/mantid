@@ -44,6 +44,7 @@ Bugfixes
   Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 - Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
+- Fix bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are saved correctly when workspace indices are supplied.
 
 Fit Functions
 -------------
