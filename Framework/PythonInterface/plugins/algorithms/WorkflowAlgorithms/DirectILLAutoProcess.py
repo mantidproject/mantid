@@ -444,7 +444,8 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
 
     def _apply_mask(self, ws):
         """Applies selected masks."""
-        MaskDetectors(Workspace=ws, MaskedWorkspace=self.mask_ws)
+        if self.mask_ws is not None:
+            MaskDetectors(Workspace=ws, MaskedWorkspace=self.mask_ws)
         # masks bins below the chosen threshold, this has to be applied for each ws and cannot be created ahead:
         min_threshold_defined = not self.getProperty('MaskThresholdMin').isDefault
         max_threshold_defined = not self.getProperty('MaskThresholdMax').isDefault
@@ -619,11 +620,14 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             existing_masks.append(self.vanadium_diagnostics)
 
         mask_ws = 'mask_ws'
-        if len(existing_masks) > 1:
+        if len(existing_masks) == 0:
+            mask_ws = None
+        elif len(existing_masks) > 1:
             MergeRuns(InputWorkspaces=existing_masks, OutputWorkspace=mask_ws)
-        else:
+        else:  # exactly one
             RenameWorkspace(InputWorkspace=existing_masks[0], OutputWorkspace=mask_ws)
-        self.to_clean.append(mask_ws)
+        if mask_ws is not None:
+            self.to_clean.append(mask_ws)
         return mask_ws
 
     def _prepare_self_attenuation_ws(self, ws):
