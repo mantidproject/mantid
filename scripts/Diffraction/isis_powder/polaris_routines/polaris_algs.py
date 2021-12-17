@@ -6,9 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
 import math
+from typing import Union
 
 import mantid.simpleapi as mantid
 from mantid.api import WorkspaceGroup
+from mantid.dataobjects import Workspace2D
 from isis_powder.routines import absorb_corrections, common
 from isis_powder.routines.common_enums import WORKSPACE_UNITS
 from isis_powder.routines.run_details import create_run_details_object, get_cal_mapping_dict
@@ -136,7 +138,7 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     return pdf_output
 
 
-def _obtain_focused_run(run_number, focus_file_path):
+def _obtain_focused_run(run_number, focus_file_path) -> Union[Workspace2D, WorkspaceGroup]:
     """
     Searches for the focused workspace to use (based on user specified run number) in the ADS and then the output
     directory.

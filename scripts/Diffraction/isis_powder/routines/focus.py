@@ -10,6 +10,7 @@ from mantid.kernel import logger
 
 import isis_powder.routines.common as common
 from isis_powder.routines.common_enums import INPUT_BATCHING
+from mantid.dataobjects import Workspace2D
 import numpy
 import os
 
@@ -153,7 +154,8 @@ def _apply_vanadium_corrections(instrument, input_workspace, perform_vanadium_no
     return processed_spectra
 
 
-def _apply_vanadium_corrections_per_detector(instrument, input_workspace, perform_vanadium_norm, vanadium_splines):
+def _apply_vanadium_corrections_per_detector(instrument, input_workspace: Workspace2D,
+                                             perform_vanadium_norm, vanadium_splines: Workspace2D):
 
     input_workspace = mantid.ConvertUnits(InputWorkspace=input_workspace, OutputWorkspace=input_workspace, Target="TOF")
     # Remove Masked and Monitor spectra
@@ -167,7 +169,7 @@ def _apply_vanadium_corrections_per_detector(instrument, input_workspace, perfor
     return processed_spectra
 
 
-def _apply_placzek_corrections(instrument, input_workspace, placzek_run_number, sample_details, run_details):
+def _apply_placzek_corrections(instrument, input_workspace: Workspace2D, placzek_run_number, sample_details, run_details):
     raw_ws = mantid.Load(Filename='POLARIS' + str(placzek_run_number) + '.nxs')
     sample_geometry = common.generate_sample_geometry(sample_details)
     sample_material = common.generate_sample_material(sample_details)
@@ -187,7 +189,7 @@ def _apply_placzek_corrections(instrument, input_workspace, placzek_run_number, 
     return input_workspace
 
 
-def _prepare_for_correction(data_workspace, correction_workspace):
+def _prepare_for_correction(data_workspace: Workspace2D, correction_workspace: Workspace2D):
 
     # Remove Masked and Monitor spectra
     mantid.ExtractMonitors(InputWorkspace=correction_workspace,
