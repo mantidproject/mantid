@@ -132,7 +132,7 @@ class SPowderSemiEmpiricalCalculator:
         # If operating in 2-D mode, there is also an explicit set of q bins
         if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
             params = abins.parameters.instruments[self._instrument.get_name()]
-            q_min, q_max = params.get('q_range')
+            q_min, q_max = self._instrument.get_q_bounds()
             self._q_bins = np.linspace(q_min, q_max, params.get('q_size') + 1)
             self._q_bin_centres = (self._q_bins[:-1] + self._q_bins[1:]) / 2
         else:
@@ -192,10 +192,11 @@ class SPowderSemiEmpiricalCalculator:
 
         else:
             atoms_s = {key: value for key, value in data["datasets"]["data"].items()
-                       if key != "frequencies"}
+                       if key not in ("frequencies", "q_bins")}
+            q_bins = data["datasets"]["data"].get("q_bins", None)
 
         s_data = abins.SData(temperature=self._temperature, sample_form=self._sample_form,
-                             data=atoms_s, frequencies=frequencies)
+                             data=atoms_s, frequencies=frequencies, q_bins=q_bins)
 
         if s_data.get_bin_width is None:
             raise Exception("Loaded data does not have consistent frequency spacing")
@@ -273,16 +274,8 @@ class SPowderSemiEmpiricalCalculator:
                              'powder averaging.'.format(self._instrument.get_name()))
 
     def _calculate_s_powder_2d(self, isotropic_fundamentals: bool = False) -> SData:
-        if self._instrument.get_name() == 'TwoDMap':
-            #params = abins.parameters.instruments[self._instrument.get_name()]
-            # q_min, q_max = params.get('q_range')
-            # q = np.linspace(q_min, q_max, params.get('q_size'))
-
-            return self._calculate_s_powder_over_k_and_q(
-                isotropic_fundamentals=isotropic_fundamentals)
-
-        else:
-            raise NotImplementedError('2D instruments not supported in this version.')
+        return self._calculate_s_powder_over_k_and_q(
+            isotropic_fundamentals=isotropic_fundamentals)
 
     def _calculate_s_powder_1d(self, isotropic_fundamentals=False) -> SData:
         """
@@ -388,6 +381,7 @@ class SPowderSemiEmpiricalCalculator:
 
         self._report_progress("Applying q^2n / n! q-dependence")
         sdata = sdata_1d * q2_order_corrections
+        sdata.set_q_bins(self._q_bins)
 
         if isotropic_fundamentals or (self._quantum_order_num > 1) or self._autoconvolution:
             self._report_progress(f"Applying isotropic Debye-Waller factor to orders {min_order} and above.",
@@ -395,8 +389,11 @@ class SPowderSemiEmpiricalCalculator:
             iso_dw = self.calculate_isotropic_dw(q2=q2[:,np.newaxis])
             sdata.apply_dw(np.swapaxes(iso_dw, 0, 1), min_order=min_order, max_order=max_dw_order)
 
-        # Calculate fundamentals with DW corrections explicitly
+        self._report_progress("Calculating fundamentals with mode-dependent Debye-Waller factor",
+                              reporter=self.progress_reporter)
         fundamentals_sdata_with_dw = self._calculate_fundamentals_over_k(q2=q2)
+        self._report_progress("Broadening fundamentals",
+                              reporter=self.progress_reporter)
         fundamentals_sdata_with_dw = self._broaden_sdata(fundamentals_sdata_with_dw,
                                                          broadening_scheme=broadening_scheme)
 
@@ -447,6 +444,7 @@ class SPowderSemiEmpiricalCalculator:
         """
         # Initialize the main data container
         sdata = self._get_empty_sdata(use_fine_bins=self._autoconvolution, max_order=self._quantum_order_num)
+        sdata.set_q_bins(self._q_bins)
 
         # Get q^2 series corresponding to energy bins
         q2 = self._instrument.calculate_q_powder(input_data=self._bin_centres, angle=angle)
@@ -546,14 +544,17 @@ class SPowderSemiEmpiricalCalculator:
 
         if (shape and shape.lower() == '1d') or (shape is None and self._q_bin_centres is None):
             n_rows = None
+            q_bins = None
         else:
             n_rows = len(self._q_bin_centres)
+            q_bins = self._q_bins
 
         return SData.get_empty(frequencies=bin_centres,
                                atom_keys=list(self._abins_data.get_atoms_data().extract().keys()),
                                order_keys=[f'order_{n}' for n in range(1, max_order + 1)],
                                n_rows=n_rows,
-                               temperature=self._temperature, sample_form=self._sample_form)
+                               temperature=self._temperature, sample_form=self._sample_form,
+                               q_bins=q_bins)
 
     def _broaden_sdata(self, sdata: SData,
                        broadening_scheme: str = 'auto') -> SData:
@@ -567,6 +568,8 @@ class SPowderSemiEmpiricalCalculator:
         sdata_dict = sdata.extract()
         frequencies = sdata_dict['frequencies']
         del sdata_dict['frequencies']
+        if 'q_bins' in sdata_dict:
+            del sdata_dict['q_bins']
 
         for atom_key in sdata_dict:
             for order_key, s_dft in sdata_dict[atom_key]['s'].items():
@@ -584,8 +587,9 @@ class SPowderSemiEmpiricalCalculator:
                                 s_dft=s_dft_row, scheme=broadening_scheme))
 
         return SData(data=sdata_dict, frequencies=self._bin_centres,
-                     temperature = sdata.get_temperature(),
-                     sample_form = sdata.get_sample_form())
+                     temperature=sdata.get_temperature(),
+                     sample_form=sdata.get_sample_form(),
+                     q_bins=sdata.get_q_bins())
 
     def _calculate_fundamentals_over_k(self,
                                        angle: float = None,

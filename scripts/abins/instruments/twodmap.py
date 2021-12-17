@@ -1,8 +1,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import math
-
-from mantid.kernel import logger
+from typing import Tuple
 
 import abins
 from abins.constants import FLOAT_TYPE, WAVENUMBER_TO_INVERSE_A
@@ -12,7 +11,7 @@ from .broadening import broaden_spectrum  # , prebin_required_schemes
 
 class TwoDMap(Instrument):
     """An instrument for q-resolved 2D maps"""
-    def __init__(self, setting='', chopper_frequency=None, e_init=None):
+    def __init__(self, setting='', e_init=None):
         super().__init__(setting=setting)
         self._name = 'TwoDMap'
 
@@ -22,11 +21,14 @@ class TwoDMap(Instrument):
         else:
             self._e_init = e_init
 
-        logger.information("Ignoring chopper settings, not used by TwoDMap")
-
     def get_angles(self):
         parameters = abins.parameters.instruments[self._name]
         return parameters['angles']
+
+    def get_q_bounds(self, pad: float = 0.) -> Tuple[float, float]:
+        params = abins.parameters.instruments[self._name]
+        q_min, q_max = params.get('q_range')
+        return (q_min, q_max * (1. + pad))
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """

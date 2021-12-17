@@ -1,14 +1,15 @@
 from __future__ import (absolute_import, division, print_function)
+import logging
 import math
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 import numpy as np
+import mantid.kernel
 from mantidqtinterfaces.PyChop import PyChop2
 from mantidqtinterfaces.PyChop import Instruments as pychop_instruments
 
 import abins
 from abins.constants import FLOAT_TYPE, MILLI_EV_TO_WAVENUMBER, WAVENUMBER_TO_INVERSE_A
-from abins.sdata import SDataByAngle
 from .instrument import Instrument
 from .broadening import broaden_spectrum, prebin_required_schemes
 
@@ -21,15 +22,82 @@ class PyChopInstrument(Instrument):
 
     The "tthlims" data from PyChop is used to determine sampling angles.
     """
-    def __init__(self, name='MAPS', setting='', chopper_frequency=400):
+    def __init__(self,
+                 name: str = 'MAPS',
+                 setting: str = '',
+                 chopper_frequency: Optional[int] = None) -> None:
         self._name = name
         self._e_init = None
         self._chopper = setting
-        self._chopper_frequency = chopper_frequency
+        self._chopper_frequency = self._check_chopper_frequency(chopper_frequency)
+
         self._polyfits = {}
         self._tthlims = pychop_instruments.Instrument(self._name).detector.tthlims
 
         super().__init__(setting=setting)
+
+    def _check_chopper_frequency(
+            self,
+            chopper_frequency: Union[int, None],
+            logger: Union[logging.Logger, mantid.kernel.Logger, None] = None
+            ) -> int:
+
+        if chopper_frequency is None:
+            parameters = abins.parameters.instruments[self._name]
+            chopper_frequency = parameters['chopper_frequency_default']
+
+            if logger is None:
+                mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
+                logger = mantid_logger
+
+            logger.notice(f'Using default chopper frequency for instrument {self._name}: '
+                          f'{chopper_frequency} Hz')
+
+        return chopper_frequency
+
+    def get_abs_q_limits(self, energy: np.ndarray) -> np.ndarray:
+        """Get absolute q range accessible for given energy transfer at set incident energy
+
+        Args:
+            energy: 1-D array of energy transfer values
+
+
+        Returns:
+            limits: (2, N) array of q-limits corresponding to energy series
+        """
+        assert len(energy.shape) == 1
+
+        min_angle, max_angle = np.min(self._tthlims), np.max(self._tthlims)
+
+        # Actual limits depend on |2θ|, so some shuffling is necessary to get
+        # absolute values in the right order, spanning the whole range.
+        if (min_angle < 0) and (max_angle <= 0):
+            min_angle, max_angle = -max_angle, -min_angle
+        elif (min_angle < 0):
+            # e.g. if -10 < 2θ < 20, we don't want to set limits 10 < |2θ| < 20
+            # as this would omit contributions from the range -10 < θ < 10
+            min_angle = 0
+
+        q_limits = np.empty((2, energy.size))
+        q_limits[0, :] = np.sqrt(self.calculate_q_powder(input_data=energy, angle=min_angle))
+        q_limits[1, :] = np.sqrt(self.calculate_q_powder(input_data=energy, angle=max_angle))
+        return q_limits
+
+    def get_q_bounds(self, pad: float = 0.05) -> Tuple[float, float]:
+        """Calculate appropriate q range for instrument
+
+        Coarsely sample the outer E-Q lines to determine plotting extent
+
+        Args:
+            pad: Additional fraction of maximum value to use as padding
+
+        """
+        energy_samples = np.linspace(0, self._e_init, 10)
+        q_values = self.get_abs_q_limits(energy_samples).flatten()
+        q_min, q_max = np.min(q_values), np.max(q_values)
+        if q_min - (pad * q_max) < 0:
+            q_min = 0
+        return (q_min, q_max * (1 + pad))
 
     def get_angles(self):
         parameters = abins.parameters.instruments[self._name]
@@ -118,8 +186,6 @@ class PyChopInstrument(Instrument):
         return np.polyval(self._polyfits[self._e_init], frequencies)
 
     def _polyfit_resolution(self, n_values=40, order=4):
-        from abins.constants import MILLI_EV_TO_WAVENUMBER
-
         frequencies_invcm = np.linspace(0, self._e_init, n_values, endpoint=False)
         frequencies_mev = frequencies_invcm / MILLI_EV_TO_WAVENUMBER
         ei_mev = self._e_init / MILLI_EV_TO_WAVENUMBER
@@ -134,101 +200,3 @@ class PyChopInstrument(Instrument):
         fit = np.polyfit(frequencies_invcm, resolution / MILLI_EV_TO_WAVENUMBER, order)
 
         self._polyfits[self._e_init] = fit
-
-    def save_nxspe(self, data: SDataByAngle,
-                   filename: str = 'abins.nxspe'):
-
-        import h5py
-        import time
-
-        distances = {'MARI': 4.021999835968018}
-        if self.get_name() not in distances:
-            raise ValueError(f"Cannot write nxspe for instrument {self.get_name()}, "
-                             "detector distance(s) unknown.")
-
-        # Get regular bins from frequencies; for some reason SData doesn't store them
-        bin_width = data[0].get_bin_width()
-        bins = np.concatenate([data.frequencies[:1] - bin_width / 2,
-                               data.frequencies + bin_width / 2])
-
-        n_detectors = len(self._tthlims) // 2
-        angles_per_detector = abins.parameters.instruments[self._name]['angles_per_detector']
-        angle_ranges = [(start, end) for (start, end) in zip(self._tthlims[0::2],
-                                                             self._tthlims[1::2])]
-        detector_midpoint_angles = [(end + start) / 2 for (start, end) in angle_ranges]
-        detector_widths = [(end - start) for (start, end) in angle_ranges]
-
-        summed_data = np.zeros((n_detectors, len(data.frequencies)))
-        for detector_index in range(n_detectors):
-            for sdata in data[(detector_index * angles_per_detector)
-                              :((detector_index + 1) * angles_per_detector)]:
-                summed_data[detector_index, :] += sdata.get_total_intensity()
-
-        def _create_entry(root, entry_type: str,
-                          entry_name: str,
-                          attrs: Optional[dict] = None,
-                          **kwargs) -> h5py.Group:
-            entry_functions = {'dataset': 'create_dataset',
-                               'group': 'create_group'}
-
-            entry = getattr(root, entry_functions[entry_type])(entry_name, **kwargs)
-
-            if attrs is not None:
-                for key, value in attrs.items():
-                    if isinstance(value, str):
-                        value = np.array(value, dtype='S')  # Cast strings to fixed-length
-                    entry.attrs[key] = value
-            return entry
-
-        with h5py.File(filename, 'w') as f:
-            for key, value in {'HDF5_Version': '1.8.15',
-                               'NeXus_version': '4.3.2',
-                               'file_name': filename,
-                               'file_time': time.strftime('%Y-%m-%dT%H:%M:%S+00:00', time.gmtime())
-                               }.items():
-                f.attrs[key] = np.array(value, dtype='S')
-
-            root = _create_entry(f, 'group', 'SyntheticData',
-                                 attrs={'NX_class': 'NXentry'})
-
-            _create_entry(root, 'dataset', 'definition',
-                          data=np.array('NXSPE', dtype='S'), shape=(1,), attrs={'version': '1.2'})
-            _create_entry(root, 'dataset', 'program_name',
-                          data=np.array('mantid', dtype='S'), shape=(1,), attrs={'version': '3.13.0'})
-
-            _create_entry(root, 'group', 'sample', attrs={'NX_class': 'NXsample'})
-
-            nxspe_info = _create_entry(root, 'group', 'NXSPE_info', attrs={'NX_class': 'NXcollection'})
-            _create_entry(nxspe_info, 'dataset', 'fixed_energy',
-                          data=(np.array([self._e_init]) / MILLI_EV_TO_WAVENUMBER), dtype=np.float64,
-                          attrs={'units': 'meV'})
-            _create_entry(nxspe_info, 'dataset', 'ki_over_kf_scaling', shape=(1,),
-                          data=1, dtype=np.int32)
-            _create_entry(nxspe_info, 'dataset', 'psi', data=np.array(['NaN'], dtype=np.float64),
-                          attrs={'units': 'degrees'})
-
-            data_group = _create_entry(root, 'group', 'data', attrs={'NX_class': 'NXdata'})
-
-            # Azimuthal values are not used in this model, fill with dummy values
-            _create_entry(data_group, 'dataset', 'azimuthal', data=np.zeros(n_detectors))
-            _create_entry(data_group, 'dataset', 'azimuthal_width', data=np.full(n_detectors, 45.))
-
-            _create_entry(data_group, 'dataset', 'data',
-                          data=summed_data, attrs={'axes': 'polar:energy', 'signal': 1})
-            _create_entry(data_group, 'dataset', 'distance',
-                          data=np.full(n_detectors, distances[self.get_name()]))
-            _create_entry(data_group, 'dataset', 'energy',
-                          data=(bins / MILLI_EV_TO_WAVENUMBER), attrs={'units': 'meV'})
-            _create_entry(data_group, 'dataset', 'error', data=np.zeros_like(summed_data))
-            _create_entry(data_group, 'dataset', 'polar',
-                          data=np.array(detector_midpoint_angles, dtype=np.float64))
-            _create_entry(data_group, 'dataset', 'polar_width',
-                          data=np.array(detector_widths), dtype=np.float64)
-
-            instrument = _create_entry(root, 'group', 'instrument', attrs={'NX_class': 'NXinstrument'})
-            _create_entry(instrument, 'dataset', 'name',
-                          data=np.array(self.get_name(), dtype='S'), shape=(1,),
-                          attrs={'short_name': self.get_name()})
-
-            instrument_fermi = _create_entry(instrument, 'group', 'fermi', attrs={'NX_class': 'NXfermi_chopper'})
-            _create_entry(instrument_fermi, 'dataset', 'energy', data=self._e_init, dtype=np.float64)

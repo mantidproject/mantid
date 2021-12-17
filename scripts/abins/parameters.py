@@ -17,7 +17,6 @@ value dictionaries through the Python API if possible. e.g.::
 """
 
 import math
-import numpy as np
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 
 # Instruments constants  #############################
@@ -28,29 +27,43 @@ instruments = {
         'q_size': 200,  # Number of q slices in output plot
         'q_range': (0, 20),  # Lower and upper limits of measurement q sampling
         'e_init': 4100.0,  # Incident energies in cm-1
-        'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'}},
-        'chopper_frequency_default': 400,
         'chopper_allowed_frequencies': list(range(50, 601, 50))
+        },
+    'PANTHER' : {
+        'q_size': 100,
+        'e_init': 150 * MILLI_EV_TO_WAVENUMBER,
+        'settings_default': 'G004',
+        'settings': {'G_004': {'chopper': 'G004'}},
+        'angle_range': (5, 140),
+        'chopper_frequency_default': 400,
+        'chopper_allowed_frequencies': list(range(50, 601, 50)),
+        'max_wavenumber': 1613,  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+        'min_wavenumber': 0.0,  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
+        # Resolution function fitted to incident energy and energy transfer:
+        # sigma = polyval(abs_meV, ɛ) + E_i × ei_dependence + E_i × ɛ × ei_energy_product
+        # (i.e. a quartic polynomial in ɛ, plus linear dependence on Ei and ɛ×Ei)
+        'resolution': {'abs_meV': [-8.41735065e-07,  4.81061749e-04,
+                                   -1.98567658e-02, -1.36760126e+00],
+                       'ei_dependence': 6.90987065e-2,
+                       'ei_energy_product': 7.66507127e-4}
         },
     'MAPS': {
         'resolution': 'pychop',
         'q_size': 100,
-        'e_init': 400,
-        'angles_per_detector': 20,
+        'e_init': 400 * MILLI_EV_TO_WAVENUMBER,
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'},
                      'S': {'chopper': 'S'},
                      },
-        #'chopper_frequency_default': 400,
+        'chopper_frequency_default': 400,
         'chopper_allowed_frequencies': list(range(50, 601, 50))
         },
     'MARI': {
         'resolution': 'pychop',
         'q_size': 100,
-        'e_init': 400,
-        'angles_per_detector': 10,
+        'e_init': 400 * MILLI_EV_TO_WAVENUMBER,
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'},
                      'R': {'chopper': 'A'},

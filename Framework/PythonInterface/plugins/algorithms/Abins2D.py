@@ -11,6 +11,7 @@ from typing import Dict
 
 from mantid.api import AlgorithmFactory, PythonAlgorithm, Progress
 from mantid.api import WorkspaceFactory, AnalysisDataService
+from mantid.kernel import logger
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import GroupWorkspaces
@@ -35,6 +36,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
     _out_ws_name = None
     _num_quantum_order_events = None
     _autoconvolution = None
+    _q_bins = None
 
     def category(self) -> str:
         return "Simulation"
@@ -56,7 +58,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
             default="TwoDMap", choices=TWO_DIMENSIONAL_INSTRUMENTS,
             multiple_choice_settings=[('Chopper', 'settings', 'Chopper package')],
             freeform_settings=[('IncidentEnergy', '4100', 'Incident energy in wavenumber'),
-                               ('ChopperFrequency', '400', 'Chopper frequency in Hz')])
+                               ('ChopperFrequency', '', 'Chopper frequency in Hz')])
 
     def validateInputs(self) -> Dict[str,str]:
         """
@@ -68,18 +70,26 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         self._check_advanced_parameter()
 
-        if not isinstance(float(self.getProperty("IncidentEnergy").value), numbers.Real):
-            issues["IncidentEnergy"] = "Incident energy must be a real number"
-
         instrument_name = self.getProperty("Instrument").value
         allowed_frequencies = abins.parameters.instruments[instrument_name]['chopper_allowed_frequencies']
-        default_frequency = abins.parameters.instruments[instrument_name].get('chopper_default_frequency', None)
+        default_frequency = abins.parameters.instruments[instrument_name].get('chopper_frequency_default', None)
 
         if (self.getProperty("ChopperFrequency").value) == '' and (default_frequency is None):
             issues["ChopperFrequency"] = "This instrument does not have a default chopper frequency"
-        elif int(self.getProperty("ChopperFrequency").value) not in allowed_frequencies:
+        elif (self.getProperty("ChopperFrequency").value
+              and int(self.getProperty("ChopperFrequency").value) not in allowed_frequencies):
             issues["ChopperFrequency"] = (f"This chopper frequency is not valid for the instrument {instrument_name}. "
                                           "Valid frequencies: " + ", ".join([str(freq) for freq in allowed_frequencies]))
+
+        if not isinstance(float(self.getProperty("IncidentEnergy").value), numbers.Real):
+            issues["IncidentEnergy"] = "Incident energy must be a real number"
+
+        if 'max_energy' in abins.parameters.instruments[instrument_name]:
+            max_energy = abins.parameters.instruments[instrument_name]
+        else:
+            max_energy = abins.parameters.sampling['max_wavenumber']
+        if float(self.getProperty("IncidentEnergy").value) > max_energy:
+            issues["IncidentEnergy"] = f"Incident energy cannot be greater than {max_energy} for this instrument."
 
         return issues
 
@@ -113,6 +123,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
                                                      bin_width=self._bin_width)
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
+        self._q_bins = s_data.get_q_bins()
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)
@@ -206,19 +217,19 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
                                                           protons_number=protons_number,
                                                           nucleons_number=nucleons_number)
 
-        n_q_bins, n_freq_bins = s_points.shape
+        n_q_values, n_freq_bins = s_points.shape
+        n_q_bins = self._q_bins.size
+        assert n_q_values + 1 == n_q_bins
 
-        wrk = WorkspaceFactory.create("Workspace2D", NVectors=n_freq_bins, XLength=n_q_bins + 1, YLength=n_q_bins)
+        wrk = WorkspaceFactory.create("Workspace2D", NVectors=n_freq_bins, XLength=n_q_bins, YLength=n_q_values)
 
         freq_axis = NumericAxis.create(n_freq_bins)
 
-        q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
-        q_begin, q_end = abins.parameters.instruments[self._instrument.get_name()]['q_range']
-        q_bins = np.linspace(start=q_begin, stop=q_end, num=q_size + 1)
+        # q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
 
         freq_offset = (self._bins[1] - self._bins[0]) / 2
         for i, freq in enumerate(self._bins[1:]):
-            wrk.setX(i, q_bins)
+            wrk.setX(i, self._q_bins)
             wrk.setY(i, s_points[:, i].T)
             freq_axis.setValue(i, freq + freq_offset)
         freq_axis.setUnit("Energy_inWavenumber")
@@ -251,26 +262,41 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         """
         Loads all properties to object's attributes.
         """
+        from abins.constants import TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS  # , ENERGY_BIN_PADDING
         self.get_common_properties()
         self._autoconvolution = self.getProperty("Autoconvolution").value
 
-        self._instrument_kwargs = {"setting": self.getProperty("Chopper").value,
-                                   "chopper_frequency": self.getProperty("ChopperFrequency")}
+        self._instrument_kwargs = {"setting": self.getProperty("Chopper").value}
+
+        instrument_name = self.getProperty("Instrument").value
+        if instrument_name in TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS:
+            chopper_frequency = self.getProperty("ChopperFrequency").value
+            chopper_frequency = int(chopper_frequency) if chopper_frequency else None
+
+            self._instrument_kwargs.update(
+                {"chopper_frequency": chopper_frequency})
+        elif self.getProperty("ChopperFrequency").value:
+            logger.warning("The selected instrument does not use a chopper: "
+                           "chopper frequency will be ignored.")
+
         self.set_instrument()
 
-        instrument_params = abins.parameters.instruments[self._instrument.get_name()]
+        # instrument_params = abins.parameters.instruments[self._instrument.get_name()]
 
         # Incident energy currently handled differently, but this should be changed to an
         # instrument parameter as well
-        instrument_params['e_init'] = float(self.getProperty("IncidentEnergy").value)
+        #instrument_params['e_init'] = float(self.getProperty("IncidentEnergy").value)
+        self._instrument.set_incident_energy(float(self.getProperty("IncidentEnergy").value))
 
-        # Sampling mesh is determined by
+        # Sampling mesh is determined by abins.parameters,
         # abins.parameters.sampling['min_wavenumber']
         # abins.parameters.sampling['max_wavenumber'],
         # while abins.parameters.sampling['bin_width'] is set from user input
+
         step = abins.parameters.sampling['bin_width'] = self._bin_width
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
+        # stop = self._instrument._e_init * ENERGY_BIN_PADDING
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
 
         # Increase max event order if using autoconvolution

@@ -49,7 +49,8 @@ class SData(collections.abc.Sequence):
                  data: dict,
                  frequencies: np.ndarray,
                  temperature: Optional[float] = None,
-                 sample_form: str = ''
+                 sample_form: str = '',
+                 q_bins: Optional[np.ndarray] = None
                  ) -> None:
         super().__init__()
 
@@ -67,6 +68,12 @@ class SData(collections.abc.Sequence):
 
         self._frequencies = np.asarray(frequencies, dtype=FLOAT_TYPE)
         self._check_frequencies()
+
+        if q_bins is not None:
+            self._q_bins = np.asarray(q_bins, dtype=FLOAT_TYPE)
+        else:
+            self._q_bins = None
+        self._check_q_bins()
 
         self._data = data
         self._check_data()
@@ -175,6 +182,22 @@ class SData(collections.abc.Sequence):
     def get_frequencies(self) -> np.ndarray:
         return self._frequencies.copy()
 
+    def get_q_bins(self) -> np.ndarray:
+        if self._q_bins is None:
+            return None
+        else:
+            return self._q_bins.copy()
+
+    def set_q_bins(self, q_bins: np.ndarray) -> None:
+        """Update q-bins stored on SData
+
+        Args:
+            q_bins: 1-D set of q-point bin edges surrounding rows in S data
+            """
+        self._q_bins = q_bins
+        self._check_q_bins()
+        self._check_data()
+
     def get_temperature(self) -> Union[float, None]:
         return self._temperature
 
@@ -228,10 +251,20 @@ class SData(collections.abc.Sequence):
                            self._frequencies):
             raise ValueError("Frequencies not sorted low to high")
 
+    def _check_q_bins(self):
+        if (self._q_bins is not None) and (len(self._q_bins.shape) != 1):
+            raise IndexError("Q-bins should be a 1-D array")
+
     def _check_data(self):
         """Check data set is consistent and has correct types"""
         if not isinstance(self._data, dict):
             raise ValueError("New value of S  should have a form of a dict.")
+
+        n_frequencies = self._frequencies.size
+        if self._q_bins is None:
+            expected_shapes = [(n_frequencies,), (1, n_frequencies)]
+        else:
+            expected_shapes = [(self._q_bins.size - 1, n_frequencies),]
 
         for key, item in self._data.items():
             if ATOM_LABEL in key:
@@ -244,6 +277,11 @@ class SData(collections.abc.Sequence):
                 for order in item[S_LABEL]:
                     if not isinstance(item[S_LABEL][order], np.ndarray):
                         raise ValueError("Numpy array was expected.")
+                    elif item[S_LABEL][order].shape not in expected_shapes:
+                        raise ValueError(f"SData not dimensionally consistent with frequencies / q-bins "
+                                         f"for {key}, {order}. "
+                                         f"Expected shape " + " or ".join(map(str, expected_shapes))
+                                         + f"; got shape {item[S_LABEL][order].shape}")
 
             elif item == "frequencies":
                 raise Exception("The Abins SData format is changed, do not put frequencies in this dict")
@@ -259,6 +297,8 @@ class SData(collections.abc.Sequence):
         # Use a shallow copy so that 'frequencies' is not added to self._data
         full_data = self._data.copy()
         full_data.update({'frequencies': self._frequencies})
+        if self._q_bins is not None:
+            full_data.update({'q_bins': self._q_bins})
         return full_data
 
     def rebin(self, bins: np.array) -> 'SData':
@@ -393,7 +433,8 @@ class SData(collections.abc.Sequence):
         new_sdata = SData(data=deepcopy(self._data),
                           frequencies=self.get_frequencies(),
                           temperature=self.get_temperature(),
-                          sample_form=self.get_sample_form())
+                          sample_form=self.get_sample_form(),
+                          q_bins=self.get_q_bins())
         new_sdata *= other
 
         return new_sdata

@@ -8,6 +8,7 @@
 from abins.constants import ALL_INSTRUMENTS
 from .instrument import Instrument
 from .lagrangeinstrument import LagrangeInstrument
+from .panther import PantherInstrument
 from .pychop import PyChopInstrument
 from .toscainstrument import ToscaInstrument
 from .twodmap import TwoDMap
@@ -17,7 +18,8 @@ instruments = {"lagrange": LagrangeInstrument,
                "tosca": ToscaInstrument,
                "twodmap": TwoDMap,
                "maps": (PyChopInstrument, {'name': 'MAPS'}),
-               "mari": (PyChopInstrument, {'name': 'MARI'})}
+               "mari": (PyChopInstrument, {'name': 'MARI'}),
+               "panther": PantherInstrument}
 
 def get_instrument(name: str, **kwargs) -> Instrument:
     """Instantiate a named Instrument
