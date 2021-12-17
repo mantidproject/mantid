@@ -8,9 +8,9 @@ from mantid.api import IFunction, AlgorithmManager, mtd
 from mantid.kernel import logger
 from mantid.simpleapi import CalculateChiSquared, FunctionFactory, plotSpectrum
 from .function import PeaksFunction, PhysicalProperties, ResolutionModel, Background, Function
-from CrystalField.energies import energies
-from CrystalField.normalisation import split2range
-from CrystalField.CrystalFieldMultiSite import CrystalFieldMultiSite
+from .energies import energies
+from .normalisation import split2range, ionname2Nre
+from .CrystalFieldMultiSite import CrystalFieldMultiSite
 from scipy.constants import physical_constants
 import numpy as np
 import re
@@ -37,24 +37,6 @@ def makeWorkspace(xArray, yArray):
 
 def islistlike(arg):
     return (not hasattr(arg, "strip")) and (hasattr(arg, "__getitem__") or hasattr(arg, "__iter__")) and hasattr(arg, "__len__")
-
-
-def ionname2Nre(ionname):
-    ion_nre_map = {'Ce': 1, 'Pr': 2, 'Nd': 3, 'Pm': 4, 'Sm': 5, 'Eu': 6, 'Gd': 7,
-                   'Tb': 8, 'Dy': 9, 'Ho': 10, 'Er': 11, 'Tm': 12, 'Yb': 13}
-    if ionname not in ion_nre_map.keys():
-        msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
-              (ionname, ', '.join(list(ion_nre_map.keys())))
-        arbitraryJ = re.match(r'[SJsj]([0-9\.]+)', ionname)
-        if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
-            nre = int(-float(arbitraryJ.group(1)) * 2.)
-            if nre < -99:
-                raise RuntimeError('J value ' + str(-nre / 2) + ' is too large.')
-        else:
-            raise RuntimeError(msg+', S<n>, J<n>')
-    else:
-        nre = ion_nre_map[ionname]
-    return nre
 
 
 def cfpstrmaker(x, pref='B'):
@@ -1115,7 +1097,7 @@ class CrystalField(object):
         """
         if self._dirty_eigensystem:
             self._eigenvalues, self._eigenvectors, self._hamiltonian = \
-                energies.energies(self._nre, **self._getFieldParameters())
+                energies(self._nre, **self._getFieldParameters())
             self._dirty_eigensystem = False
 
     def _calcPeaksList(self, i):
@@ -1276,9 +1258,6 @@ class CrystalFieldFit(object):
         self.model.FixAllPeaks = fix_all_peaks
 
     def two_step_fit(self, OverwriteMaxIterations: list = None, OverwriteMinimizers: list = None, Iterations: int = 20) -> None:
-        if isinstance(self.model, CrystalFieldMultiSite):
-            logger.notice('The two_step_fit algorithm is only available for single-site calculations at the moment')
-            return
         logger.warning("Please note that this is a first experimental version of the two_step_fit algorithm.")
         fix_all_peaks = self.model.FixAllPeaks
         fit_properties = self._fit_properties
