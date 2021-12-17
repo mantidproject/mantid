@@ -32,18 +32,15 @@ double getDiffAz(double xValue, const double charField) {
 }
 
 double getActivationFunc(double xValue, const double attemptRate, const double barrier, const double unitMultiply) {
-  double activationFunc = attemptRate * exp(-(unitMultiply * barrier) / xValue);
-  return activationFunc;
+  return attemptRate * exp(-(unitMultiply * barrier) / xValue);
 }
 
 double getAttemptRateDiff(double xValue, const double barrier, const double unitMultiply) {
-  double diffAR = exp(-(unitMultiply * barrier) / xValue);
-  return diffAR;
+  return exp(-(unitMultiply * barrier) / xValue);
 }
 
 double getBarrierDiff(double xValue, const double attemptRate, const double barrier, const double unitMultiply) {
-  double diffBarrier = -(attemptRate * unitMultiply * (exp(-(unitMultiply * barrier) / xValue))) / xValue;
-  return diffBarrier;
+  return -(attemptRate * unitMultiply * (exp(-(unitMultiply * barrier) / xValue))) / xValue;
 }
 
 } // namespace Mantid::CurveFitting::MuonHelper
