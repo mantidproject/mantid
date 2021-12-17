@@ -204,9 +204,8 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
     if not overplot:
         fig.canvas.set_window_title(figure_title(workspaces, fig.number))
-    else:
-        if ax.is_waterfall():
-            _overplot_waterfall(ax,len(nums)*len(workspaces))
+    elif ax.is_waterfall():
+        _overplot_waterfall(ax,len(nums)*len(workspaces))
 
     if ax.is_waterfall():
         #If axes is waterfall, update axes limits following line offset.
@@ -225,7 +224,12 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
 
 
 def _overplot_waterfall(ax, no_of_lines):
-    #If overplotting onto a waterfall axes, convert lines to overplot to waterfall.
+    """
+    If overplotting onto a waterfall axes, convert lines to waterfall (add x and y offset) before overplotting.
+
+    :param ax: object of MantidAxes type to overplot onto.
+    :param no_of_lines: number of lines to overplot onto input axes.
+    """
     for i in range(no_of_lines):
         errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
         datafunctions.convert_single_line_to_waterfall(ax, len(ax.get_lines()) - (i + 1))
