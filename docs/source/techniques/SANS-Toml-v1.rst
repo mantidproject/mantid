@@ -16,8 +16,8 @@ General Notes
 Format Changes
 ==============
 
-V0 to V1
---------
+V0 (Mantid 6.1.x) to V1 (Mantid 6.2.x)
+--------------------------------------
 
 - *normalisation* and *normalization* are both accepted and equivalent
 - *detector.calibration* was renamed to *detector.correction*
@@ -164,8 +164,8 @@ For converting existing files the following process is recommended:
 - Try the TOML user file in Mantid!
 
 
-Command Set
-===========
+Legacy Command Set
+==================
 
 .. _back_mon_times-ref:
 
@@ -179,7 +179,7 @@ data are rebinned into wavelength.
 
 This particular command subtracts the *same* background level from
 *all* monitors. The continued use of this method of monitor correction
-is now deprecated. See See :ref:`back_mn_times-ref`.
+is now deprecated. See also :ref:`back_mn_times-ref`.
 
 Times were specified in microseconds.
 
@@ -389,7 +389,7 @@ DET/RESCALE n
 This command specified the factor by which the reduced *front*
 detector data should be multiplied to allow it to overlap the
 reduced rear detector data. If omitted n was assumed to be 1.0
-(no rescaling). See also :ref:`det_rescale_fit-ref` and :ref:`det_shift_n-ref`.
+(no rescaling). See also :ref:`det_rescale_fit-ref` and :ref:`det_shift_y-ref`.
 
 ..  code-block:: none
 
@@ -452,15 +452,15 @@ Scattering vectors were specified in inverse Angstroms.
       max = 0.24
       use_fit = true
 
-.. _det_shift_n-ref:
+.. _det_shift_y-ref:
 
-DET/SHIFT n
+DET/SHIFT y
 -----------
 
 This command specified the relative amount (a constant) by which the
 reduced *front* detector data should be shifted in intensity to allow
 it to overlap the reduced rear detector data. If omitted n was assumed
-to be 0.0 (no shift). See also :ref:`det_rescale_fit-ref` and :ref:`det_shift_n-ref`.
+to be 0.0 (no shift). See also :ref:`det_rescale_fit-ref` and :ref:`det_shift_y-ref`.
 
 ..  code-block:: none
 
@@ -492,7 +492,7 @@ This command was used to automatically estimate the relative amount
 shifted to allow it to overlap the reduced rear detector data. A
 specific Q-range over which to compare intensities could be optionally
 specified. If omitted, all overlapping Q values were used. See also
-DET/SHIFT y.
+:ref:`det_shift_y-ref`.
 
 Scattering vectors were specified in inverse Angstroms.
 
@@ -562,7 +562,7 @@ FIT/CENTRE t1 t2
 This command was used to specify a time window within which
 the 'prompt spike' could be found in *detector* spectra. This
 information was used to remove the spike by interpolating
-along the time-of-flight distribution. Also see :ref:`fit_monitor-ref`.
+along the time-of-flight distribution. See also :ref:`fit_monitor-ref`.
 
 Times were specified in microseconds.
 
@@ -608,7 +608,7 @@ FIT/MONITOR t1 t2
 This command was used to specify a time window within which
 the 'prompt spike' could be found in *monitor* spectra. This
 information was used to remove the spike by interpolating
-along the time-of-flight distribution. Also see :ref:`fit_centre-ref`.
+along the time-of-flight distribution. See also :ref:`fit_centre-ref`.
 
 Times were specified in microseconds.
 
@@ -638,7 +638,7 @@ FIT/TRANS[/CLEAR][/OFF]
 -----------------------
 
 This command was used to disable fitting of the calculated
-transmission data. Also see :ref:`fitting_on-ref`.
+transmission data. See also :ref:`fitting_on-ref`.
 
 **Replacement**
 
@@ -677,7 +677,7 @@ FIT/TRANS[[/SAMPLE][/CAN]][/LINEAR][/YLOG][/POLYNOMIALn] [w1 w2]
 This command was used to specify how the calculated transmission data
 should be fitted. Subsequent data processing would then use transmission
 values interpolated using the fit function. In some instances doing this
-could improve the statistical quality of the transmission data. Also see
+could improve the statistical quality of the transmission data. See also
 :ref:`trans_fitting_off-ref`.
 
 Wavelengths were specified in Angstroms. If w1 and w2 were omitted then the
@@ -734,7 +734,7 @@ GRAVITY[/ON/OFF]
 This command was used to specify whether the detector data should be
 corrected for the ballistic effects of gravity on the neutrons. This
 correction is particularly important at long sample-detector distances
-and/or when using long wavelengths. Also see :ref:`gravity_extra_len-ref`.
+and/or when using long wavelengths. See also :ref:`gravity_extra_len-ref`.
 
 If Q-resolution estimation is enabled (see QRESOL[/ON][/OFF]) any gravity
 corrections will be included in that calculation too.
@@ -767,7 +767,7 @@ GRAVITY/LEXTRA x
 This command was used to specify an extra length that can be added
 to the gravity correction. The extra length is only taken into account
 when the gravity correction is enabled and the default value is x=0.0.
-Also see :ref:`gravity_on-ref`.
+See also :ref:`gravity_on-ref`.
 
 **Replacement**
 
@@ -871,13 +871,15 @@ Angles were specified in degrees.
         start = -45
         stop = 45
 
+.. _q-ref:
+
 L/Q binning_string
 ------------------
 
 L was an accepted abbreviation for LIMIT.
 
 This command was used to specify a Q-binning scheme to be applied
-during 1D data reduction. Also see L/QXY binning_string.
+during 1D data reduction. See also :ref:`qxy-ref`.
 
 For historical reasons, several variants of this command were
 implemented but they can be summarised thus:
@@ -996,13 +998,15 @@ The cut-off wavelength was specified in Angstroms.
       [binning.1d_reduction]
         wavelength_cut = 8.0
 
+.. _qxy-ref:
+
 L/QXY binning_string
 --------------------
 
 L was an accepted abbreviation for LIMIT.
 
 This command was used to specify a Q-binning scheme to be applied
-during 2D data reduction. Also see L/Q binning_string.
+during 2D data reduction. See also :ref:`q-ref`.
 
 For historical reasons, several variants of this command were
 implemented but they can be summarised thus:
@@ -1199,12 +1203,14 @@ regions of pixels from the calculation.
     [mask]
     mask_files = ["a.xml", "b.xml", "c.xml"]
 
+:ref:`mask_h-ref`
+
 MASK[/FRONT][/REAR] Hn
 ----------------------
 
 This command was used to specify a **horizontal row** of detector pixels
-to be omitted from the calculation during data reduction. Also see
-MASK Hn>Hm.
+to be omitted from the calculation during data reduction. See also
+:ref:`mask_h_h-ref`.
 
 The TOML replacement command actually permits several rows to be
 specified at once.
@@ -1233,12 +1239,14 @@ specified at once.
         # Masks horizontal 100 and 200
         detector_rows = [100, 200]
 
+:ref:`mask_h_h-ref`
+
 MASK[/FRONT][/REAR] Hn>Hm
 -------------------------
 
 This command was used to specify several **contiguous horizontal rows**
 of detector pixels to be omitted from the calculation during data reduction.
-Also see MASK Hn.
+See also :ref:`mask_h-ref`.
 
 The TOML replacement command actually permits multiple ranges of rows to be
 specified at once.
@@ -1267,12 +1275,14 @@ specified at once.
         # Also includes 130-135 to show multiple can be masked
         detector_row_ranges = [[126, 127], [130, 135]]
 
+:ref:`mask_v-ref`
+
 MASK[/FRONT][/REAR] Vn
 ----------------------
 
 This command was used to specify a **vertical column** of detector pixels
-to be omitted from the calculation during data reduction. Also see
-MASK Vn>Vm.
+to be omitted from the calculation during data reduction. See also
+:ref:`mask_v_v-ref`.
 
 The TOML replacement command actually permits several columns to be
 specified at once.
@@ -1301,12 +1311,14 @@ specified at once.
         # Masks vertical 100 and 200
         detector_columns = [100, 200]
 
+:ref:`mask_v_v-ref`
+
 MASK[/FRONT][/REAR] Vn>Vm
 -------------------------
 
 This command was used to specify several **contiguous vertical columns**
 of detector pixels to be omitted from the calculation during data reduction.
-Also see MASK Vn.
+See also :ref:`mask_v-ref`.
 
 The TOML replacement command actually permits multiple ranges of columns to be
 specified at once.
@@ -1364,7 +1376,7 @@ MASK/LINE a b
 -------------
 
 This command was used to specify a **diagonal line** of detector pixels
-to be omitted from the calculation during data reduction. Also see
+to be omitted from the calculation during data reduction. See also
 :ref:`mask_line_four_params-ref`.
 
 The line started at the centre of the scattering pattern (see SET CENTRE a b)
@@ -1406,7 +1418,7 @@ MASK/LINE a b c d
 -----------------
 
 This command was used to specify a **diagonal line** of detector pixels
-to be omitted from the calculation during data reduction. Also see :ref:`mask_line_two_params`.
+to be omitted from the calculation during data reduction. See also :ref:`mask_line_two_params`.
 
 This command works identically to :ref:`mask_line_two_params`. Instead of starting at (0, 0)
 the coordinates for x and y (represented by c and d) are given by the user.
@@ -1581,12 +1593,14 @@ efficiency.
       [detector.correction.flat]
         rear_file = "flat_file.091"
 
+.. _habeff-ref:
+
 MON/HABEFF=a
 ------------
 
 This command was used to specify an approximate correction to the LOQ
 instrument high-angle detector efficiencies arising from the longer path
-length through the detection volume at high angles. Also see MON/HABPATH[/ON][/OFF].
+length through the detection volume at high angles. See also :ref:`habpath-ref`.
 
 The correction assumed a value (parameter a) for the efficiency at
 1 Angstrom, the default value of which was 0.2. Setting a=1.0 was akin
@@ -1604,12 +1618,14 @@ to ignoring this correction.
 
 Unsupported
 
+.. _habpath-ref:
+
 MON/HABPATH[/ON][/OFF]
 ----------------------
 
 This command was used to activate a correction to calculated transmissions
 on the LOQ instrument arising from the longer path length through the
-sample/can at high angles. Also see MON/HABEFF=a.
+sample/can at high angles. See also :ref:`habeff-ref`.
 
 **This command was never implemented in Mantid (but was in COLETTE)! But see
 SAMPLE/PATH[/ON][/OFF].**
@@ -1632,7 +1648,7 @@ monitor s stored in the Mantid Instrument Definition File in instances where
 a very accurate time-of-flight calculation was required. The parameter z was
 the moderator-monitor distance.
 
-**This command was never (knowingly) implemented in Mantid!** But see TRANS/TRANSPEC=s/SHIFT=dz.
+**This command was never (knowingly) implemented in Mantid!** But see :ref:`trans_transpec-ref`.
 
 **Replacement Example**
 
@@ -1696,7 +1712,6 @@ rebin of the specified monitor spectrum. This could be useful as a means of
   [binning]
     [binning.2d_reduction]
       interpolate = true
-
 
 PRINT string
 ------------
@@ -1841,12 +1856,14 @@ in :ref:`algm-TOFSANSResolutionByPixel`.
   [q_resolution]
     delta_r = 0.003  # mm
 
+.. _a1-ref:
+
 QRESOL/A1=x
 -----------
 
 This command was used to specify the **source** aperture *diameter* to be
-used in the estimation of the Q-resolution. Also see QRESOL/A2=x and
-QRESOL/H1=x.
+used in the estimation of the Q-resolution. See also :ref:`a2-ref` and
+:ref:`h1_w1_h2_w2-ref`.
 
 For more information, see the
 `TOFSANSResolutionByPixel <https://docs.mantidproject.org/nightly/algorithms/TOFSANSResolutionByPixel-v1.html>`_
@@ -1875,12 +1892,14 @@ pinhole collimation!**
   [q_resolution]
     source_aperture = 0.03
 
+.. _a2-ref:
+
 QRESOL/A2=x
 -----------
 
 This command was used to specify the **sample** aperture *diameter* to be
-used in the estimation of the Q-resolution. Also see QRESOL/A1=x and
-QRESOL/H2=x.
+used in the estimation of the Q-resolution. See also :ref:`a1-ref` and
+:ref:`h1_w1_h2_w2-ref`.
 
 For more information, see the
 `TOFSANSResolutionByPixel <https://docs.mantidproject.org/nightly/algorithms/TOFSANSResolutionByPixel-v1.html>`_
@@ -1915,12 +1934,14 @@ block at the top of TOML User Files instead of the [q_resolution] block.
   [instrument.configuration]
     sample_aperture_diameter = 0.02
 
+.. _h1_w1_h2_w2-ref:
+
 QRESOL[/H1=x1][/W1=y1][/H2=x2][/W2=y2]
 --------------------------------------
 
 This command was used to specify the **source and sample** slit sizes to be
-used in the estimation of the Q-resolution. Also see QRESOL/A1=x and
-QRESOL/A2=x.
+used in the estimation of the Q-resolution. See also :ref:`a1-ref` and
+:ref:`a2-ref`.
 
 For more information, see the
 `TOFSANSResolutionByPixel <https://docs.mantidproject.org/nightly/algorithms/TOFSANSResolutionByPixel-v1.html>`_
@@ -2047,6 +2068,8 @@ algorithm description.
 
 Unsupported, pending future discussion.
 
+.. _set_centre-ref:
+
 SET CENTRE a b
 --------------
 
@@ -2149,7 +2172,7 @@ All workspaces are currently scaled by the value represented by `a` for all valu
 rather than on a per-bank basis.
 
 The TOML replacement command allows separate but single scaling factors for
-both rear and front detectors to be specified. To maintain compatibility
+both rear and front detectors to be specified. But to maintain compatibility
 `front_scale` is ignored by the parser and will not do anything.
 
 ..  code-block:: none
@@ -2205,6 +2228,8 @@ Definition File.**
 
 Unsupported
 
+.. _clear_xcor_ycor-ref:
+
 SET[/XCOR][/YCOR][/ON][/OFF][/CLEAR]
 ------------------------------------
 
@@ -2213,7 +2238,7 @@ corrections to LOQ instrument detector data should be applied
 during data reduction. The /XCOR (/XC was also supported) qualifier
 specified that detector x coordinates were to be corrected. Similarly,
 the /YCOR (or /YC) qualifier specified that detector y coordinates
-were to be corrected. Also see SET[/NOTABLES][/XCOR][/YCOR]=filename.
+were to be corrected. See also :ref:`set_xcor_ycor-ref`.
 
 The /CLEAR qualifier was equivalent to /OFF.
 
@@ -2227,12 +2252,14 @@ The /CLEAR qualifier was equivalent to /OFF.
 
 Unsupported
 
+.. _set_xcor_ycor-ref:
+
 SET[/NOTABLES][/XCOR][/YCOR]=filename
 -------------------------------------
 
 This command was used to specify a file containing non-linear
 coordinate corrections to LOQ instrument detector data. Separate files
-were required for the x and y coordinates. Also see SET[/XCOR][/YCOR][/ON][/OFF][/CLEAR].
+were required for the x and y coordinates. See also :ref:`clear_xcor_ycor-ref`.
 
 The /NOTABLES (/NOTAB was also supported) qualifier could be used to
 stop a redundant call to the routine mapping detectors if both x and y1
@@ -2250,6 +2277,90 @@ coordinates were being corrected (see example below).
 **Replacement Example**
 
 Unsupported
+
+.. _trans_mask-ref:
+
+TRANS/MASK=filename
+------------------
+
+This command was used in conjunction with TRANS/RADIUS=r or, more likely,
+TRANS/ROI=filename to *exclude* regions of the detector specified by those
+commands. See also :ref:`trans_radius-ref` and :ref:`trans_roi-ref`.
+
+filename was expected to be a Mantid mask file in XML format.
+
+**Note that if also present a TRANS/TRANSPEC=s command would always supersede a
+TRANS/MASK=filename command.** See also :ref:`trans_transpec-ref`.
+
+**Existing Example:**
+
+..  code-block:: none
+
+    TRANS/ROI=select.xml
+    TRANS/MASK=exclude.xml
+
+**Replacement Example**
+
+Unsupported, pending future discussion.
+
+.. _trans_radius-ref:
+
+TRANS/RADIUS=r
+--------------
+
+This command was used to specify a circular region-of-interest (ROI) of radius r
+on the detector taking the transmitted beam which was to be used in place of a
+dedicated transmission monitor. The ROI was assumed to be centred on the beam
+centre coordinates (see :ref:`set_centre-ref`). See also :ref:`trans_mask-ref`
+and :ref:`trans_roi-ref`.
+
+For this command to have had any sensible purpose, it would have been necessary
+for the detector beamstop to have been removed for transmission measurements.
+
+The radius was specified in mm.
+
+**Note that if also present a TRANS/TRANSPEC=s command would always supersede a
+TRANS/RADIUS=r command.** See also :ref:`trans_transpec-ref`.
+
+**Existing Example:**
+
+..  code-block:: none
+
+    TRANS/RADIUS=30
+
+**Replacement Example**
+
+Unsupported, pending future discussion.
+
+.. _trans_roi-ref:
+
+TRANS/ROI=filename
+------------------
+
+This command was used to specify an arbitrary region-of-interest (ROI) on the
+detector taking the transmitted beam which was to be used in place of a dedicated
+transmission monitor. See also :ref:`trans_mask-ref` and :ref:`trans_radius-ref`.
+
+For this command to have had any sensible purpose, the ROI would have been needed
+to have been outside of any masked regions of the detector (eg, the beamstop
+and/or beamstop support arm shadows).
+
+filename was expected to be a Mantid mask file in XML format.
+
+**Note that if also present a TRANS/TRANSPEC=s command would always supersede a
+TRANS/ROI=filename command.** See also :ref:`trans_transpec-ref`.
+
+**Existing Example:**
+
+..  code-block:: none
+
+    TRANS/ROI=filename.xml
+
+**Replacement Example**
+
+Unsupported, pending future discussion.
+
+.. _trans_transpec-ref:
 
 TRANS/TRANSPEC=s
 -----------------
