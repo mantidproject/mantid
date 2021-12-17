@@ -91,7 +91,11 @@ Fitting Functions
 -----------------
 New Features
 ############
-* Added an :ref:`Activation <func-Activation>` fitting function to MuonModelling Fit Functions.
+* Added two Activation fitting functions to MuonModelling Fit Functions.
+
+  * `ActivationK <func-ActivationK>` can be used for data in Kelvins.
+  * `ActivationmeV <func-ActivationmeV>`can be used for data in meV.
+
 * Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to MuonModelling\Magnetism Fit Functions.
 * Added two fitting functions for the decoupling of asymmetry in the ordered state of a powedered magnet for fitting.
 
