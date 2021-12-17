@@ -19,7 +19,6 @@ from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
-from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
 
@@ -208,44 +207,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         self._call_peaks_presenter_if_created("notify",
                                               PeaksViewerPresenter.Event.SlicePointChanged)
         self.update_plot_data()
-
-    def line_plots(self, state):
-        """
-        Toggle the attached line plots for the integrated signal over each dimension for the current cursor
-        position
-        :param state: If true a request is being made to turn them on, else they should be turned off
-        """
-        tool = PixelLinePlot
-        data_view = self.view.data_view
-        if state:
-            data_view.add_line_plots(tool, self)
-            if data_view.track_cursor_checked():
-                data_view._line_plots.connect()
-        else:
-            data_view.deactivate_tool(ToolItemText.REGIONSELECTION)
-            data_view.remove_line_plots()
-
-    def region_selection(self, state):
-        """
-        Toggle the region selection tool. If the line plots are disabled then they are enabled.
-        :param state: If true a request is being made to turn them on, else they should be turned off
-        :param region_selection: If true the region selection rather than single pixel selection should
-                                 be enabled.
-        """
-        data_view = self.view.data_view
-        if state:
-            # incompatible with drag zooming/panning as they both require drag selection
-            data_view.deactivate_and_disable_tool(ToolItemText.ZOOM)
-            data_view.deactivate_and_disable_tool(ToolItemText.PAN)
-            tool = RectangleSelectionLinePlot
-            if data_view.line_plots_active:
-                data_view.switch_line_plots_tool(RectangleSelectionLinePlot, self)
-            else:
-                data_view.add_line_plots(tool, self)
-        else:
-            data_view.enable_tool_button(ToolItemText.ZOOM)
-            data_view.enable_tool_button(ToolItemText.PAN)
-            data_view.switch_line_plots_tool(PixelLinePlot, self)
 
     def export_roi(self, limits):
         """Notify that an roi has been selected for export to a workspace
