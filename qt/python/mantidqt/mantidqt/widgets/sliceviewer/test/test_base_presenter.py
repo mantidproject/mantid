@@ -12,6 +12,10 @@ from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBa
 
 class SliceViewerBasePresenterShim(SliceViewerBasePresenter):
     """Shim class to implement the abstract methods to allow us to test the base class"""
+
+    def nonorthogonal_axes(self, state: bool) -> None:
+        pass
+
     def new_plot(self, *args, **kwargs):
         pass
 

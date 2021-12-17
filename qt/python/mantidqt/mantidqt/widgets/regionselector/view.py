@@ -23,3 +23,5 @@ class RegionSelectorView(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self._data_view)
         self.setLayout(layout)
+
+        self.setWindowTitle("Region Selector")

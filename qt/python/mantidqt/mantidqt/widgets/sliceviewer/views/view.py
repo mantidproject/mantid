@@ -114,5 +114,5 @@ class SliceViewerView(QWidget, ObservingView):
         # handles the signal emitted from ObservingView.emit_close
         self.close()
 
-    def _on_rename(self, new_title):
+    def _on_rename(self, new_title: str):
         self.setWindowTitle(new_title)
