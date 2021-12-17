@@ -92,26 +92,26 @@ def save_unsplined_vanadium(vanadium_ws, output_path):
 def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None, cal_file_name=None,
                     sample_details=None, delta_r=None, delta_q=None, pdf_type="G(r)", lorch_filter=None,
                     freq_params=None, debug=False):
-    focused_ws = _obtain_focused_run(run_number, focus_file_path)
-    for ws in focused_ws:
+    focused_workspaces = _obtain_focused_run(run_number, focus_file_path)
+    for ws in focused_workspaces:
         mantid.ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws,
                             Target="MomentumTransfer", EMode='Elastic')
 
-    focused_ws -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
+    focused_workspaces -= 1  # This -1 to the correction has been moved out of CalculatePlaczekSelfScattering
     if delta_q:
-        focused_ws = mantid.Rebin(InputWorkspace=focused_ws, Params=delta_q)
+        focused_workspaces = mantid.Rebin(InputWorkspace=focused_workspaces, Params=delta_q)
     if merge_banks:
         q_min, q_max = _load_qlims(q_lims)
-        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_ws, XMin=q_min, XMax=q_max,
+        merged_ws = mantid.MatchAndMergeWorkspaces(InputWorkspaces=focused_workspaces, XMin=q_min, XMax=q_max,
                                                    CalculateScale=False)
         fast_fourier_filter(merged_ws, freq_params=freq_params)
         pdf_output = mantid.PDFFourierTransform(Inputworkspace="merged_ws", InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
     else:
-        for ws in focused_ws:
+        for ws in focused_workspaces:
             fast_fourier_filter(ws, freq_params=freq_params)
-        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_ws, InputSofQType="S(Q)-1", PDFType=pdf_type,
+        pdf_output = mantid.PDFFourierTransform(Inputworkspace=focused_workspaces, InputSofQType="S(Q)-1", PDFType=pdf_type,
                                                 Filter=lorch_filter, DeltaR=delta_r,
                                                 rho0=sample_details.material_object.crystal_density)
         pdf_output = mantid.RebinToWorkspace(WorkspaceToRebin=pdf_output, WorkspaceToMatch=pdf_output[4],
@@ -121,13 +121,13 @@ def generate_ts_pdf(run_number, focus_file_path, merge_banks=False, q_lims=None,
     # Rename output ws
     if 'merged_ws' in locals():
         mantid.RenameWorkspace(InputWorkspace='merged_ws', OutputWorkspace=run_number + '_merged_Q')
-    mantid.RenameWorkspace(InputWorkspace='focused_ws', OutputWorkspace=run_number+'_focused_Q')
+    mantid.RenameWorkspace(InputWorkspace=focused_workspaces, OutputWorkspace=run_number+'_focused_Q')
     target_focus_ws_name = run_number + '_focused_Q_'
     target_pdf_ws_name = run_number + '_pdf_R_'
-    if isinstance(focused_ws, WorkspaceGroup):
-        for i in range(len(focused_ws)):
-            if str(focused_ws[i]) != (target_focus_ws_name + str(i+1)):
-                mantid.RenameWorkspace(InputWorkspace=focused_ws[i], OutputWorkspace=target_focus_ws_name + str(i+1))
+    if isinstance(focused_workspaces, WorkspaceGroup):
+        for i in range(len(focused_workspaces)):
+            if str(focused_workspaces[i]) != (target_focus_ws_name + str(i+1)):
+                mantid.RenameWorkspace(InputWorkspace=focused_workspaces[i], OutputWorkspace=target_focus_ws_name + str(i+1))
     mantid.RenameWorkspace(InputWorkspace='pdf_output', OutputWorkspace=run_number+'_pdf_R')
     if isinstance(pdf_output, WorkspaceGroup):
         for i in range(len(pdf_output)):
@@ -147,19 +147,19 @@ def _obtain_focused_run(run_number, focus_file_path):
     """
     # Try the ADS first to avoid undesired loading
     if mantid.mtd.doesExist('%s-ResultTOF' % run_number):
-        focused_ws = mantid.mtd['%s-ResultTOF' % run_number]
+        focused_workspaces = mantid.mtd['%s-ResultTOF' % run_number]
     elif mantid.mtd.doesExist('%s-ResultD' % run_number):
-        focused_ws = mantid.mtd['%s-ResultD' % run_number]
+        focused_workspaces = mantid.mtd['%s-ResultD' % run_number]
     else:
         # Check output directory
         print('No loaded focused files found. Searching in output directory...')
         try:
-            focused_ws = mantid.LoadNexus(Filename=focus_file_path, OutputWorkspace='focused_ws').OutputWorkspace
+            focused_workspaces = mantid.LoadNexus(Filename=focus_file_path, OutputWorkspace='focused_workspaces').OutputWorkspace
         except ValueError:
             raise ValueError("Could not find focused file for run number:%s\n"
                              "Please ensure a focused file has been produced and is located in the output directory."
                              % run_number)
-    return focused_ws
+    return focused_workspaces
 
 
 def _load_qlims(q_lims):

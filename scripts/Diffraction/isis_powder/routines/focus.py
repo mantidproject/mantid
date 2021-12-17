@@ -100,10 +100,10 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     instrument.apply_calibration_to_focused_data(focused_ws)
 
     if not placzek_run_number:
-        focused_ws = _apply_vanadium_corrections(instrument=instrument,
-                                                 input_workspace=focused_ws,
-                                                 perform_vanadium_norm=perform_vanadium_norm,
-                                                 vanadium_splines=vanadium_path)
+        calibrated_spectra = _apply_vanadium_corrections(instrument=instrument,
+                                                         input_workspace=focused_ws,
+                                                         perform_vanadium_norm=perform_vanadium_norm,
+                                                         vanadium_splines=vanadium_path)
 
     if placzek_run_number:
         # Divide each spectrum by number of detectors in their bank
@@ -114,9 +114,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                                      NSpec=5, UnitX="dSpacing")
         focused_ws = mantid.Divide(LHSWorkspace=focused_ws, RHSWorkspace=number_detectors_ws)
 
-        focused_ws = common.extract_ws_spectra(focused_ws)
+        calibrated_spectra = common.extract_ws_spectra(focused_ws)
 
-    output_spectra = instrument._crop_banks_to_user_tof(focused_ws)
+    output_spectra = instrument._crop_banks_to_user_tof(calibrated_spectra)
 
     bin_widths = instrument._get_instrument_bin_widths()
     if bin_widths:
@@ -133,7 +133,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
     # Tidy workspaces from Mantid
     common.remove_intermediate_workspace(input_workspace)
     common.remove_intermediate_workspace(aligned_ws)
-    # common.remove_intermediate_workspace(focused_ws)
+    common.remove_intermediate_workspace(focused_ws)
     common.remove_intermediate_workspace(output_spectra)
 
     return d_spacing_group
