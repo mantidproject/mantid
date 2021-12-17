@@ -40,3 +40,6 @@ class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
 
     def new_plot(self, *args, **kwargs):
         self.new_plot_matrix()
+
+    def nonorthogonal_axes(self, state: bool) -> None:
+        pass
