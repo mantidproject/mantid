@@ -9,6 +9,7 @@ set(TEST_PY_FILES
     CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py
     DirectILLApplySelfShieldingTest.py
+    DirectILLAutoProcessTest.py
     DirectILLCollectDataTest.py
     DirectILLDiagnosticsTest.py
     DirectILLIntegrateVanadiumTest.py
