@@ -4,14 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string
+from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string, CALIB_DIR
 from Engineering.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
-
-GROUP_XML_DIR = path.join(path.abspath(path.join(__file__, path.sep.join(5*['..']))), "calib")
 
 GROUP_FILES = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
                GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
@@ -207,7 +205,7 @@ class CalibrationInfo:
         ws_name = GROUP_WS_NAMES[self.group]
         grp_ws = None
         try:
-            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(GROUP_XML_DIR, GROUP_FILES[self.group]),
+            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(CALIB_DIR, GROUP_FILES[self.group]),
                                                OutputWorkspace=ws_name)
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")

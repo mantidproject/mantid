@@ -6,11 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Sequence, Optional
 
-from mantid.simpleapi import Load
-from Engineering.EnggUtils import GROUP
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration.model import CalibrationModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus.model import FocusModel
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from mantid.simpleapi import Load, logger
+from Engineering.EnggUtils import GROUP, focus_run, create_new_calibration
+from Engineering.common.calibration_info import CalibrationInfo
 
 
 class EnginX:
@@ -18,7 +16,7 @@ class EnginX:
                  vanadium_run: str,
                  focus_runs: Sequence[str],
                  save_dir: str,
-                 full_inst_calib_path: Optional[str] = None,
+                 full_inst_calib_path: str,
                  prm_path: Optional[str] = None,
                  ceria_run: Optional[str] = None,
                  group: Optional[GROUP] = None,
@@ -27,11 +25,14 @@ class EnginX:
 
         # init attributes
         self.calibration = CalibrationInfo()
-        self.calib_model = CalibrationModel()
-        self.focus_model = FocusModel()
         self.van_run = vanadium_run
         self.focus_runs = focus_runs
         self.save_dir = save_dir
+        # Load custom full inst calib if supplied (needs to be in ADS)
+        try:
+            self.full_calib_ws = Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
+        except ValueError as e:
+            logger.error("Unable to load calibration file " + full_inst_calib_path + ". Error: " + str(e))
 
         # setup CalibrationInfo object
         if prm_path:
@@ -45,21 +46,17 @@ class EnginX:
             elif group == GROUP.CROPPED and spectrum_num:
                 self.calibration.set_spectra_list(spectrum_num)
 
-        if full_inst_calib_path:
-            # Load custom full inst calib if supplied (needs to be in ADS otherwise default used)
-            Load(full_inst_calib_path, OutputWorkspace="full_inst_calib")
-
     def calibrate(self, plot_output: bool) -> None:
         if self.calibration.get_prm_filepath():
             self.calibration.load_relevant_calibration_files()  # loading existing calibration files
         else:
-            self.calib_model.create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output,
-                                                    save_dir=self.save_dir)
+            create_new_calibration(self.calibration, rb_num=None, plot_output=plot_output, save_dir=self.save_dir,
+                                   full_calib=self.full_calib_ws)
 
     def focus(self, plot_output: bool) -> None:
         if self.calibration.is_valid() and self.van_run:
-            self.focus_model.focus_run(self.focus_runs, self.van_run, plot_output, rb_num=None,
-                                       calibration=self.calibration, save_dir=self.save_dir)
+            focus_run(self.focus_runs, self.van_run, plot_output, rb_num=None, calibration=self.calibration,
+                      save_dir=self.save_dir, full_calib=self.full_calib_ws)
 
     def main(self, plot_cal: bool = False, plot_foc: bool = False):
         self.calibrate(plot_cal)
