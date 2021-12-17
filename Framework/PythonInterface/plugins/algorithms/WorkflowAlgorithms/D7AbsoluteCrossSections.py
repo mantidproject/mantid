@@ -619,7 +619,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     Divide(LHSWorkspace=paramagneticComponent,
                            RHSWorkspace=normalisation_name,
                            OutputWorkspace=ws_name)
-            else: # Incoherent
+            else:  # Incoherent
                 if self._mode == 'TOF':
                     raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
                 for spectrum_no in range(mtd[cross_section_ws][2].getNumberHistograms()):

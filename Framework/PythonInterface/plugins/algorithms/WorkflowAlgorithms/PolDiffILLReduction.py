@@ -537,8 +537,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                      LoaderOptions={'PositionCalibration': calibration_setting,
                                     'YIGFileName': self.getPropertyValue('InstrumentCalibration')},
                      OutputWorkspace=ws, startProgress=0.0, endProgress=0.6)
-        if self.getPropertyValue("OutputTreatment") not in ['AverageTwoTheta', 'Individual', 'IndividualXY'] \
-                and measurement_technique != 'SingleCrystal':
+        if self.getPropertyValue("OutputTreatment") not in ['AverageTwoTheta', 'IndividualXY'] \
+                and measurement_technique != 'SingleCrystal' and process != 'Transmission':
             self._merge_twoTheta_scans(ws)
         masked_detectors = self.getProperty('MaskDetectors').value
         if len(masked_detectors) > 0:
