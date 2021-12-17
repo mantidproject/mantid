@@ -22,6 +22,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     _sampleAndEnvironmentProperties = None
     _mode = None
+    _debug = None
 
     @staticmethod
     def _max_value_per_detector(ws, one_per_detector=True):
@@ -260,6 +261,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to delete intermediate workspaces.')
+
+        self.declareProperty('DebugMode',
+                             defaultValue=False,
+                             doc="Whether to create and show all intermediate workspaces at each correction step.")
 
     def _data_structure_helper(self, ws):
         """Returns the number of polarisation orientations present in the data and checks against the chosen
@@ -571,6 +576,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=list(to_clean))
         output_name = ws + '_separated_cs'
         GroupWorkspaces(InputWorkspaces=separated_cs, OutputWorkspace=output_name)
+        if self._debug:
+            clone_name = '{}_separated_cs'.format(output_name)
+            CloneWorkspace(InputWorkspace=output_name, OutputWorkspace=clone_name)
         return output_name
 
     def _detector_efficiency_correction(self, cross_section_ws):
@@ -594,7 +602,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             Multiply(LHSWorkspace=cross_section_ws,
                      RHSWorkspace=norm_ws,
                      OutputWorkspace=det_efficiency_ws)
-        elif calibrationType in  ['Paramagnetic', 'Incoherent']:
+        elif calibrationType in ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
                 if self._mode == 'TOF':
                     raise RuntimeError('Paramagnetic calibration is not valid in the TOF mode.')
@@ -641,6 +649,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(to_clean)
+        if self._debug:
+            clone_name = '{}_det_efficiency'.format(det_efficiency_ws)
+            CloneWorkspace(InputWorkspace=det_efficiency_ws, OutputWorkspace=clone_name)
         return det_efficiency_ws
 
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
@@ -683,6 +694,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                    OutputWorkspace=ws_name)
         output_ws = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
+        if self._debug:
+            clone_name = '{}_absolute_scale'.format(output_ws)
+            CloneWorkspace(InputWorkspace=output_ws, OutputWorkspace=clone_name)
         return output_ws
 
     def _qxy_rebin(self, ws):
@@ -985,6 +999,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
         nMeasurements, nComponents = self._data_structure_helper(input_ws)
+        self._debug = self.getProperty('DebugMode').value
         to_clean = []
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':

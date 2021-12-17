@@ -25,6 +25,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     _instrument = None
     _sampleAndEnvironmentProperties = None
     _elastic_channels_ws = None
+    _debug = None
 
     _DEG_2_RAD = np.pi / 180.0
 
@@ -332,6 +333,10 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('PerformAnalyserTrCorrection', tofMeasurement)
 
+        self.declareProperty('DebugMode',
+                             defaultValue=False,
+                             doc="Whether to create and show all intermediate workspaces at each correction step.")
+
     @staticmethod
     def _calculate_transmission(ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample and empty beam."""
@@ -496,26 +501,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     @staticmethod
-    def _correct_frame_overlap(ws):
-        """Corrects for the frame-overlap using data from the final 10 time channels,
-        assumes fourth power for the time ratio."""
-        nfit = 10
-        nchannels = int(mtd[ws][0].getRun().getLogData('Detector.time_of_flight_1').value)
-        ifit1 = nchannels - nfit
-        ifit2 = nchannels
-        chopper_rps = mtd[ws][0].getRun().getLogData('Chopper.rotation_speed').value / 60.0  # rotations / s
-        period = 1e6 / chopper_rps  # in us
-        for entry in mtd[ws]:
-            TOF = entry.extractX()
-            dataY = entry.extractY()
-            time_average = np.sum(TOF[:, ifit1:ifit2], axis=1) / nfit  # average time in the final nfit channels
-            counts_average = np.sum(dataY[:, ifit1:ifit2], axis=1) / nfit  # average counts in the final nfit channels
-            t1 = time_average + period  # time of the next period
-            frame_overlap = np.power(time_average / t1, 4)
-            correction = np.expand_dims(frame_overlap * counts_average, axis=1)  # expands so the shape is (132, 1)
-            dataY -= correction
-
-    @staticmethod
     def _set_final_naming_scheme(ws, output_ws):
         """Renames individual workspaces to contain the proper output name."""
         for entry in mtd[ws]:
@@ -588,6 +573,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         # the following factor to scale normalisation comes from legacy LAMP reduction code
         lampCompatibilityFactor = 1000.0 if normaliseBy == 'Monitor' else 100.0
         transmissionProcess = self.getPropertyValue("ProcessAs") in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']
+        if self._debug:
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace='{}_raw'.format(ws))
         for entry in mtd[ws]:
             mon = ws + '_mon'
             norm = entry.name() + '_norm'
@@ -609,6 +596,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 Divide(LHSWorkspace=detectors, RHSWorkspace=norm, OutputWorkspace=detectors)
                 mtd[detectors].setDistribution(False)
             DeleteWorkspaces(WorkspaceList=[mon, norm])
+        if self._debug:
+            clone_name = '{}_normalised'.format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         return ws
 
     def _figure_out_measurement_method(self, ws):
@@ -854,6 +844,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                   RHSWorkspace=background_ws,
                   OutputWorkspace=entry)
             tmp_names.extend(tmp_ws)
+        if self._debug:
+            clone_name = "{}_bkg_subtracted".format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         if self.getProperty('ClearCache').value and len(tmp_names) > 0:
             DeleteWorkspaces(WorkspaceList=tmp_names)
         return ws
@@ -988,6 +981,28 @@ class PolDiffILLReduction(PythonAlgorithm):
             DeleteWorkspace(Workspace=tmp_ws)
         return correction_ws
 
+    def _correct_frame_overlap(self, ws):
+        """Corrects for the frame-overlap using data from the final 10 time channels,
+        assumes fourth power for the time ratio."""
+        nfit = 10
+        nchannels = int(mtd[ws][0].getRun().getLogData('Detector.time_of_flight_1').value)
+        ifit1 = nchannels - nfit
+        ifit2 = nchannels
+        chopper_rps = mtd[ws][0].getRun().getLogData('Chopper.rotation_speed').value / 60.0  # rotations / s
+        period = 1e6 / chopper_rps  # in us
+        for entry in mtd[ws]:
+            TOF = entry.extractX()
+            dataY = entry.extractY()
+            time_average = np.sum(TOF[:, ifit1:ifit2], axis=1) / nfit  # average time in the final nfit channels
+            counts_average = np.sum(dataY[:, ifit1:ifit2], axis=1) / nfit  # average counts in the final nfit channels
+            t1 = time_average + period  # time of the next period
+            frame_overlap = np.power(time_average / t1, 4)
+            correction = np.expand_dims(frame_overlap * counts_average, axis=1)  # expands so the shape is (132, 1)
+            dataY -= correction
+        if self._debug:
+            clone_name = '{}_frame_overlap_corrected'.format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
+
     def _correct_analyser_transmission(self, ws):
         """Corrects for the energy-dependent analyser transmission."""
         correction_ws = self._get_analyser_transmission_correction(ws)
@@ -1000,8 +1015,14 @@ class PolDiffILLReduction(PythonAlgorithm):
         if self.getProperty('ConvertToEnergy').value:
             DetectorEfficiencyCorUser(InputWorkspace=ws, OutputWorkspace=ws,
                                       IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+            if self._debug:
+                clone_name = '{}_det_energy_eff'.format(ws)
+                CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
             if self.getProperty("PerformAnalyserTrCorrection").value:
                 self._correct_analyser_transmission(ws)
+                if self._debug:
+                    clone_name = '{}_analyser_tr_corrected'.format(ws)
+                    CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         else:
             self.log().information('Detector-analyser energy efficiency will not be corrected as unit conversion'
                                    'is not permitted.')
@@ -1051,6 +1072,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         to_clean += ['one_m_pol', 'one_p_pol', 'lhs_nominator', 'rhs_nominator', 'nominator', 'denominator']
         DeleteWorkspaces(WorkspaceList=to_clean)
+        if self._debug:
+            clone_name = '{}_pol_corrected'.format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         return ws
 
     def _read_experiment_properties(self, ws):
@@ -1244,6 +1268,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             if 'corrected' in mtd: # coming from ApplyPaalmanPingsCorrection
                 ws_to_delete.append('corrected')
             DeleteWorkspaces(WorkspaceList=ws_to_delete)
+        if self._debug:
+            clone_name = '{}_self_attenuation'.format(sample_ws)
+            CloneWorkspace(InputWorkspace=sample_ws, OutputWorkspace=clone_name)
         return sample_ws
 
     def _data_structure_helper(self):
@@ -1295,6 +1322,17 @@ class PolDiffILLReduction(PythonAlgorithm):
                 tof_correction = peak_positions[pixel_no] - tof_deltaE_0
                 time_axis = entry.dataX(pixel_no)
                 time_axis -= tof_correction
+        if self._debug:
+            clone_name = '{}_epp_calibrated'.format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
+
+    def _convert_to_energy(self, ws):
+        """Converts the TOF data workspace to energy exchange unit."""
+        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
+                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+        if self._debug:
+            clone_name = '{}_energy_converted'.format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
 
     def _calculate_epp_energy_width(self, ws):
         """Calculates elastic peak width in energy exchange units based on known widths in time-of-flight."""
@@ -1368,6 +1406,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._integrate_elastic_peak(ws)
         Divide(LHSWorkspace=ws, RHSWorkspace=norm_name, OutputWorkspace=ws)
         DeleteWorkspaces(WorkspaceList=to_remove)
+        if self._debug:
+            clone_name = '{}_vanadium_normalised'.format(ws)
+            CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         return ws
 
     def _set_units(self, ws, process):
@@ -1427,6 +1468,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         if measurement_technique == 'SingleCrystal':
             nReports += 2
         progress = Progress(self, start=0.0, end=1.0, nreports=int(nReports[processes.index(process)]))
+        self._debug = self.getProperty('DebugMode').value
 
         ws, progress = self._load_and_prepare_data(measurement_technique, process, progress)
         if process in ['EmptyBeam', 'BeamWithCadmium', 'Transmission']:
@@ -1487,8 +1529,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._calibrate_elastic_peak_position(ws)
                     if self.getProperty('ConvertToEnergy').value:
                         progress.report('Converting data to energy exchange unit.')
-                        ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='DeltaE', EMode='Direct',
-                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+                        self._convert_to_energy(ws)
                     if self.getProperty('DetectorEnergyEfficiencyCorrection').value:
                         progress.report('Correcting detector-analyser efficiency')
                         self._detector_analyser_energy_efficiency(ws)
