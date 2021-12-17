@@ -420,7 +420,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->x(i).rawData().data(), start, asize);
+      NXputslab(fileID, localworkspace->x(spec[i]).rawData().data(), start, asize);
       start[0]++;
     }
   }
