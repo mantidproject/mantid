@@ -118,6 +118,8 @@ void LoadILLSALSA::exec() {
 
   // fill monitor data
   auto it = std::find(scanVariableNames.cbegin(), scanVariableNames.cend(), "Monitor1");
+  if (it == scanVariableNames.cend())
+    throw std::runtime_error("Monitor was not found in scanned variable. Please check your nexus file.");
   auto monitorIndex = std::distance(scanVariableNames.cbegin(), it);
   for (int i = 0; i < m_numberOfScans; i++) {
     m_outputWorkspace->mutableY(index)[i] = scanVariables((int)monitorIndex, i);
