@@ -36,10 +36,10 @@ namespace Kernel {
 */
 template <typename TYPE> class DLLExport PropertyWithValue : public Property {
 public:
-  PropertyWithValue(const std::string &name, TYPE defaultValue,
+  PropertyWithValue(const std::string name, TYPE defaultValue,
                     IValidator_sptr validator = IValidator_sptr(new NullValidator),
                     const unsigned int direction = Direction::Input);
-  PropertyWithValue(const std::string &name, TYPE defaultValue, const unsigned int direction);
+  PropertyWithValue(const std::string name, TYPE defaultValue, const unsigned int direction);
   PropertyWithValue(const std::string &name, TYPE defaultValue, const std::string &defaultValueStr,
                     IValidator_sptr validator, const unsigned int direction);
   PropertyWithValue(const PropertyWithValue<TYPE> &right);

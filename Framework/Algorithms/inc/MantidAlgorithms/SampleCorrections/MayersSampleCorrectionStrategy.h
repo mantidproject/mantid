@@ -46,8 +46,8 @@ public:
   };
 
   /// Constructor
-  MayersSampleCorrectionStrategy(const MayersSampleCorrectionStrategy::Parameters &params,
-                                 HistogramData::Histogram inputHist);
+  MayersSampleCorrectionStrategy(const MayersSampleCorrectionStrategy::Parameters params,
+                                 const HistogramData::Histogram inputHist);
   /// Destructor - defined in cpp file to use forward declaration with
   /// unique_ptr
   ~MayersSampleCorrectionStrategy();
