@@ -41,6 +41,8 @@ Group &ReductionJobs::appendGroup(Group group) {
   assertOrThrow(group.name().empty() || !hasGroupWithName(group.name()),
                 "Cannot have multiple groups with a matching non-empty name.");
   m_groups.emplace_back(std::move(group));
+  // TODO: Move this to a move constructor
+  m_groups.back().setAllRowParents();
   return m_groups.back();
 }
 

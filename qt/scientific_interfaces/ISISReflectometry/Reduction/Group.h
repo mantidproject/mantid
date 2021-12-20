@@ -29,11 +29,11 @@ public:
 
   ~Group() = default;
 
-  Group(Group&& group) = default;
-  Group(const Group &group) = delete;
+  Group(Group &&group) = default;
+  Group(const Group &group) = default;
 
   Group &operator=(Group &&) = default;
-  Group &operator=(Group const &) = delete;
+  Group &operator=(Group const &) = default;
 
   bool isGroup() const override;
   bool isPreview() const override;
