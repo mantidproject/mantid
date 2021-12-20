@@ -24,7 +24,7 @@ Logger g_log("PropertyManagerOwner");
 PropertyManagerOwner::PropertyManagerOwner() : m_properties(new PropertyManager) {}
 
 /// Copy constructor
-PropertyManagerOwner::PropertyManagerOwner(const PropertyManagerOwner &po) { m_properties = po.m_properties; }
+PropertyManagerOwner::PropertyManagerOwner(const PropertyManagerOwner &po) : m_properties(po.m_properties) {}
 
 /// Assignment operator
 PropertyManagerOwner &PropertyManagerOwner::operator=(const PropertyManagerOwner &po) {

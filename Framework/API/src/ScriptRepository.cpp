@@ -9,9 +9,8 @@
 namespace Mantid::API {
 
 ScriptRepoException::ScriptRepoException(const std::string &info, const std::string &system, const std::string &file,
-                                         int line) {
-  _system_error = system;
-  _user_info = info;
+                                         int line)
+    : _system_error(system), _user_info(info) {
 
   if (file.empty()) {
     _file_path = "Not provided";

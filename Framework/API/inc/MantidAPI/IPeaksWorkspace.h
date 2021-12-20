@@ -33,9 +33,8 @@ namespace API {
 class MANTID_API_DLL IPeaksWorkspace : public ITableWorkspace, public Mantid::API::ExperimentInfo {
 public:
   /// Ctor
-  IPeaksWorkspace() : ITableWorkspace(), ExperimentInfo() {
-    convention = Kernel::ConfigService::Instance().getString("Q.convention");
-  }
+  IPeaksWorkspace()
+      : ITableWorkspace(), ExperimentInfo(), convention(Kernel::ConfigService::Instance().getString("Q.convention")) {}
 
   /// Returns a clone of the workspace
   IPeaksWorkspace_uptr clone() const { return IPeaksWorkspace_uptr(doClone()); }

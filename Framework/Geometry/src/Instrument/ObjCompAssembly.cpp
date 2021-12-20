@@ -61,8 +61,7 @@ ObjCompAssembly::ObjCompAssembly(const std::string &n, IComponent *reference) : 
  *  @param ass :: assembly to copy
  */
 ObjCompAssembly::ObjCompAssembly(const ObjCompAssembly &ass)
-    : ICompAssembly(ass), IObjComponent(ass), ObjComponent(ass) {
-  group = ass.group;
+    : ICompAssembly(ass), IObjComponent(ass), ObjComponent(ass), group(ass.group) {
   // Need to do a deep copy
   comp_it it;
   for (it = group.begin(); it != group.end(); ++it) {

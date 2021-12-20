@@ -33,9 +33,7 @@ Kernel::Logger g_log("vtkGeometryCacheReader");
 /**
  * Constructor
  */
-vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) {
-  mFileName = std::move(filename);
-  mDoc = nullptr;
+vtkGeometryCacheReader::vtkGeometryCacheReader(std::string filename) : mFileName(std::move(filename)), mDoc(nullptr) {
   Init();
 }
 

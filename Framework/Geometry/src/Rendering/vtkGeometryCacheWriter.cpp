@@ -40,10 +40,8 @@ Kernel::Logger g_log("vtkGeometryCacheWriter");
 /**
  * Constructor
  */
-vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename) {
-  mFileName = std::move(filename);
-
-  mDoc = new Document();
+vtkGeometryCacheWriter::vtkGeometryCacheWriter(std::string filename)
+    : mFileName(std::move(filename)), mDoc(new Document()) {
   Init();
 }
 
