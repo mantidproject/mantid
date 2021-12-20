@@ -20,46 +20,76 @@ When to write a design document
 
 This section provides some guidelines on when to produce a design document.
 Note that, it is not about when to do a design and when not.
-One should always perform design work before coding, no matter the scope and the nature of the feature.
+Except for trivial changes, one should always perform design work before coding, no matter the scope or the nature of the feature.
 These guidelines set out in which cases the design must be a *public*, *written* and *persistent* document, rather than a sketch on a white-board in a stand-up meeting.
 Just like coding, design is an iterative and collaborative process.
-Having a written document allows for discussion and iterations with peers before the first line of code is written.
+Having a written document allows for discussion and iterations with peers before the first line of code is typed.
 Besides, the written document facilitates the pull request review process.
 Having the design already approved, the reviewer will not need to do a design review with the code review, but will just need to make sure that the implementation matches the previously agreed design.
 Finally, once written, the document can also serve as (or easily be turned into) a developer documentation for future reference.
 
 Not every feature requires a design document. The benefit it adds must be gauged with the time and effort that goes into it.
-Bug fixes, small extensions to the current functionalities, as well as concrete, single-class plugins, such as algorithms, do not need a document.
-In the contrary, if the feature is large-scope, brand-new, many-class, including abstractions, and/or touches or refactors the internals of the core framework, it will most likely need a document.
-Below are a couple of metrics that could help a developer decide whether or not the feature falls into that category.
+Below are the main scenarios when a design document is necessary or not.
 
-- Number of classes and components.
++-----------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
+|        Design Document Needed                                         |                          Design Document Not Needed                                                                                                   |
++=======================================================================+=======================================================================================================================================================+
+| * Large-scope feature - e.g. slice viewer, instrument viewer          |  * Bug fixes of any kind                                                                                                                              |
+| * A brand-new feature - e.g. crash reporter, plot manager             |  * Minor extensions to the current functionalities - e.g. adding another button in a GUI widget, or a new functionality to an extant algorithm        |
+| * Core refactors - e.g. HistogramData, DetectorInfo                   |  * Concrete, single-class plugins - e.g. a new algorithm or a new fit function                                                                        |
+| * Abstractions and APIs - e.g. simpleapi, a new workspace type, etc.  |                                                                                                                                                       |
+| * Fully fledged libraries - e.g. Crystal library in the framework     |                                                                                                                                                       |
++-----------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
 
-  If the number of classes is more than just a few, the document is relevant in order to describe the relations between them.
+Below are a handful of measurable quantities that could help a developer decide which category the feature belongs to.
 
-- Fraction of abstract classes and interfaces in the design.
+Amount of classes
+-----------------
 
-  Abstractions and APIs are hard to change, once in. So whenever the feature concerns creations of new abstraction layers and APIs, a wider discussion on the design is needed, hence the necessity of the document.
+Single-class plugins, such as algorithms, do not require design documents.
+In the contrary, if the number of classes is more than a dozen, the document could be relevant in order to describe the relations between them.
 
-- Amount of files and components the feature will be touching.
+Amount of files
+---------------
 
-  Single file edits are less likely to require a document.
+If the feature intends to touch (add or edit) a single file, design document is not needed.
+If it is more than a hundred, opposite is likely the case.
 
-- The layer the feature will be added to.
+Abstractness fraction
+---------------------
 
-  If the feature is deep in the framework or workbench, it is more critical to have a document.
-  If the feature is just a plugin (algorithm, function, GUI, script) in the periphery, with low risk of side effects, a design document is less important.
+Stability of a piece of code must be proportional to its abstractness; abstractions and APIs are hard to change, once in.
+So whenever the feature concerns creations of new abstraction layers and APIs, a wider discussion on the design is needed, hence the necessity of the document.
+A good measure for this is the intended fraction of the abstract classes (virtual or pure virtual) in the design.
 
-- Number of developers involved.
+The layer of intent
+-------------------
 
-  If the feature is large enough that the implementation will be done in a distributed way, the document will ensure that the whole team has a common vision, discussed and agreed upfront.
+If the feature is deep in the framework or workbench, it is more critical to have a document.
+Features in the core layer must be carefully thought out, as many other things will depend on it.
+In the contrary, if the feature is just a plugin in the periphery (algorithm, function, GUI, script), with low risk of side effects, a design document is less important.
 
-- Number of users the feature will be facing.
+Number of developers
+--------------------
 
-  If the feature is generic, it will be facing a wider audience of users, hence a document and design review will make sure that the right feature is being built in the right way.
-  In the contrary, if the feature is specific to one instrument or technique at one facility, producing a document is less critical.
+If the feature is large enough that the implementation will be done in a distributed way (i.e. more than one developer), the document will ensure that the whole team has a common vision, discussed and agreed upfront.
 
-These are just guidelines and a good intuition on when to write a document comes with experience.
+Number of users
+---------------
+
+If the feature is generic, it will be facing a wider audience of users, hence a document and design review will make sure that the right feature is being built in the right way.
+In the contrary, if the feature is specific to one instrument or technique at one facility, producing a document is less important.
+
+Number of person-months
+-----------------------
+
+Another metric could be the estimated effort in person-months. If the feature is estimated to take a year to develop, it is worth spending a few weeks to iterate and improve on the design.
+If the feature is less than one month of work, it's probably an overkill.
+
+These are just guidelines and not strict rules.
+It is hard to define exact thresholds on these quantities, and often your feature is going to be in a grey zone anyway.
+Therefore, it is advised to combine all these metrics and make a professional judgement on a case-by-case basis.
+Nevertheless, a good intuition on when a document is useful, and when not, comes with experience.
 That's why, whenever in doubt, get in touch with the senior members of the team - the gatekeepers.
 A good first contact could be the local team lead at your facility, or the *tech-qa* channel on slack.
 
@@ -70,7 +100,7 @@ Once identified that for a given feature a design document is needed, the proces
 
 #. Create an item in the technical working group roadmap `here <https://github.com/mantidproject/roadmap/projects/1>`__ under the intended release.
 
-#. Produce the document in `markdown <http://en.wikipedia.org/wiki/Markdown>`__ format with the md extension. Once ready for review, open a PR in `here <https://github.com/mantidproject/documents/tree/main/Design>`__ or a subdirectory therein. The pull request should also include the sources (and not just the images) of any diagrams you put in the document. The diagrams must be drawn with `staruml <https://staruml.io/>`__ free edition, as it is cross-platform.
+#. Produce the document in `markdown <http://en.wikipedia.org/wiki/Markdown>`__ format with the md extension. Once ready for review, open a PR in `here <https://github.com/mantidproject/documents/tree/main/Design>`__ or a subdirectory therein. The pull request should also include the sources (and not just the images) of any diagrams you put in the document. The diagrams can be drawn with `staruml <https://staruml.io/>`__ or similar cross-platform or WEB solution.
 
 #. Once the PR is ready for review, put a message with a link in *tech-qa* channel, inviting the gatekeepers or other interested parties take a look and provide comments within one calendar week. Unlike the PR for code, the design reviews can and should have more than one assigned reviewer. The period can be extended if the scope is very large.
 
@@ -78,9 +108,9 @@ Once identified that for a given feature a design document is needed, the proces
 
 #. Once the comments are incorporated, in absence of outstanding conflicts, the gatekeepers will approve and merge the PR of the design, which gives a green light to start the implementation.
 
-#. If there is still a debate between gatekeepers, the :ref:`TSC` will set up a dedicated meeting, where the author will be invited to present and defend the design, and all the conflicts must be settled via discussion or, eventually with a majority vote.
+#. If there is still a debate between gatekeepers, the :ref:`TSC` will set up a dedicated meeting, where the author will be invited to present and defend the design, and all the conflicts must be settled ideally via consensus, or in the absence thereof, via majority vote.
 
-#. Once the implementation PR is opened, the design document must be referenced in the PR message.
+#. Once the implementation PR is opened, the design document must be referenced in the PR message. If the feature required a design document, high is the chance that the implementation PR will require also a developer documentation.
 
 Design document content
 #######################
