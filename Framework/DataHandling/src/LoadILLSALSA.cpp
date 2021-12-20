@@ -18,6 +18,7 @@
 
 #include <H5Cpp.h>
 #include <iterator>
+#include <sstream>
 #include <vector>
 
 namespace Mantid::DataHandling {
@@ -80,6 +81,13 @@ void LoadILLSALSA::exec() {
   m_numberOfScans = data.dims(0);
   m_numberOfRows = data.dims(1);
   m_numberOfColumns = data.dims(2);
+
+  if (scanVariables.dims(1) != m_numberOfScans) {
+    std::ostringstream msg;
+    msg << "Number of scans in detector data (" << m_numberOfScans << ") ";
+    msg << "and scanned variables (" << scanVariables.dims(1) << ") do not match, please check your nexus file.";
+    throw std::runtime_error(msg.str());
+  }
 
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
                                                                     HistogramData::Points(m_numberOfScans));
