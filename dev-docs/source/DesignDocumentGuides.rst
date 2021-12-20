@@ -23,7 +23,7 @@ Note that, it is not about when to do a design and when not.
 Except for trivial changes, one should always perform design work before coding, no matter the scope or the nature of the feature.
 These guidelines set out in which cases the design must be a *public*, *written* and *persistent* document, rather than a sketch on a white-board in a stand-up meeting.
 Just like coding, design is an iterative and collaborative process.
-Having a written document allows for discussion and iterations with peers before the first line of code is typed.
+Having a written document allows for discussion and iterations with peers, including across facilities, before the first line of code is typed.
 Besides, the written document facilitates the pull request review process.
 Having the design already approved, the reviewer will not need to do a design review with the code review, but will just need to make sure that the implementation matches the previously agreed design.
 Finally, once written, the document can also serve as (or easily be turned into) a developer documentation for future reference.
@@ -31,15 +31,15 @@ Finally, once written, the document can also serve as (or easily be turned into)
 Not every feature requires a design document. The benefit it adds must be gauged with the time and effort that goes into it.
 Below are the main scenarios when a design document is necessary or not.
 
-+-----------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
-|        Design Document Needed                                         |                          Design Document Not Needed                                                                                                   |
-+=======================================================================+=======================================================================================================================================================+
-| * Large-scope feature - e.g. slice viewer, instrument viewer          |  * Bug fixes of any kind                                                                                                                              |
-| * A brand-new feature - e.g. crash reporter, plot manager             |  * Minor extensions to the current functionalities - e.g. adding another button in a GUI widget, or a new functionality to an extant algorithm        |
-| * Core refactors - e.g. HistogramData, DetectorInfo                   |  * Concrete, single-class plugins - e.g. a new algorithm or a new fit function                                                                        |
-| * Abstractions and APIs - e.g. simpleapi, a new workspace type, etc.  |                                                                                                                                                       |
-| * Fully fledged libraries - e.g. Crystal library in the framework     |                                                                                                                                                       |
-+-----------------------------------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+
++-----------------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+|        Design Document Needed                                         |                          Design Document Not Needed                                             |
++=======================================================================+=================================================================================================+
+| * Large-scope feature - e.g. slice viewer, instrument viewer          |  * Bug fixes of any kind                                                                        |
+| * Brand-new feature - e.g. crash reporter, plot manager               |  * Minor extensions to the current tools - e.g. adding another button in a GUI widget           |
+| * Core refactors - e.g. HistogramData, DetectorInfo                   |  * New functionalities to an extant algorithm – e.g. another target of unit conversion          |
+| * Abstractions, APIs - e.g. simpleapi, a new workspace type           |  * Concrete, single-class plugins - e.g. a new algorithm or a new fit function                  |
+| * Fully fledged libraries - e.g. Crystal library in the framework     |                                                                                                 |
++-----------------------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 
 Below are a handful of measurable quantities that could help a developer decide which category the feature belongs to.
 
@@ -66,7 +66,7 @@ The layer of intent
 -------------------
 
 If the feature is deep in the framework or workbench, it is more critical to have a document.
-Features in the core layer must be carefully thought out, as many other things will depend on it.
+Features in the core layer must be carefully thought out, as many other things will depend on them.
 In the contrary, if the feature is just a plugin in the periphery (algorithm, function, GUI, script), with low risk of side effects, a design document is less important.
 
 Number of developers
