@@ -815,9 +815,9 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   std::vector<std::string> workspaces;
   const auto groups = m_model.selectedGroups();
 
-  for (const auto &group : groups) {
-    if (group.state() == State::ITEM_COMPLETE)
-      workspaces.emplace_back(group.postprocessedWorkspaceName());
+  for (const auto *group : groups) {
+    if (group->state() == State::ITEM_COMPLETE)
+      workspaces.emplace_back(group->postprocessedWorkspaceName());
   }
 
   if (workspaces.empty())

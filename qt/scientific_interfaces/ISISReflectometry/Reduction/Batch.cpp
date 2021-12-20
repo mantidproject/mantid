@@ -27,8 +27,6 @@ std::vector<MantidWidgets::Batch::RowLocation> Batch::selectedRowLocations() con
   return m_runsTable.selectedRowLocations();
 }
 
-std::vector<Group> Batch::selectedGroups() const { return m_runsTable.selectedGroups(); }
-
 LookupRow const *Batch::findLookupRow(boost::optional<double> thetaAngle) const {
   return experiment().findLookupRow(thetaAngle, runsTable().thetaTolerance());
 }
