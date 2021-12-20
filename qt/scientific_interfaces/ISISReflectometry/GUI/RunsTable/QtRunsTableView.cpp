@@ -23,6 +23,8 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> instruments)
       QStringList(
           {"Run(s)", "Angle", "1st Trans Run(s)", "2nd Trans Run(s)", "Q min", "Q max", "dQ/Q", "Scale", "Options"}),
       MantidQt::MantidWidgets::Batch::Cell(""), this);
+  constexpr double runColScaleFactor = 1.5;
+  m_jobs->setColumnWidth(0, int(m_jobs->columnWidth(0) * runColScaleFactor));
   m_ui.mainLayout->insertWidget(2, m_jobs.get());
   showAlgorithmPropertyHintsInOptionsColumn();
   addToolbarActions();

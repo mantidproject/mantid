@@ -56,7 +56,7 @@ private:
   void exec() override;
 
   void rebin(const HistogramData::HistogramX &xold, const HistogramData::HistogramY &yold,
-             const HistogramData::HistogramE &eold, std::vector<int> &xoldIndex, HistogramData::HistogramY &ynew,
+             const HistogramData::HistogramE &eold, const std::vector<int> &xoldIndex, HistogramData::HistogramY &ynew,
              HistogramData::HistogramE &enew, bool distribution);
 };
 

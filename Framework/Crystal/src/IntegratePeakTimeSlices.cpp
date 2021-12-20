@@ -667,8 +667,8 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(const std::shared_ptr<Geometry::
  * @param NewRadius   new Radius
  * @param neighborRadius  old the new neighborhood radius
  */
-bool IntegratePeakTimeSlices::updateNeighbors(std::shared_ptr<Geometry::IComponent> &comp, V3D CentPos, V3D oldCenter,
-                                              double NewRadius, double &neighborRadius) {
+bool IntegratePeakTimeSlices::updateNeighbors(const std::shared_ptr<Geometry::IComponent> &comp, V3D CentPos,
+                                              V3D oldCenter, double NewRadius, double &neighborRadius) {
   double DD = (CentPos - oldCenter).norm();
   bool changed = false;
   if (DD + NewRadius > neighborRadius) {
@@ -1701,7 +1701,7 @@ DataModeHandler::DataModeHandler(const DataModeHandler &handler) {
  * @param StatBase - The "data".
  */
 void DataModeHandler::CalcVariancesFromData(double background, double meanx, double meany, double &Varxx, double &Varxy,
-                                            double &Varyy, std::vector<double> &StatBase) {
+                                            double &Varyy, const std::vector<double> &StatBase) {
 
   double Den = StatBase[IIntensities] - background * StatBase[ISS1];
   Varxx = (StatBase[ISSIxx] - 2 * meanx * StatBase[ISSIx] + meanx * meanx * StatBase[IIntensities] -

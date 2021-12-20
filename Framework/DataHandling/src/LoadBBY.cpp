@@ -425,7 +425,7 @@ std::vector<bool> LoadBBY::createRoiVector(const std::string &maskfile) {
 }
 
 // loading instrument parameters
-void LoadBBY::loadInstrumentParameters(NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
+void LoadBBY::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<std::string, double> &logParams,
                                        std::map<std::string, std::string> &logStrings,
                                        std::map<std::string, std::string> &allParams) {
   using namespace Poco::XML;
@@ -688,7 +688,7 @@ void LoadBBY::createInstrument(ANSTO::Tar::File &tarFile, InstrumentInfo &instru
 }
 
 // load nx dataset
-template <class T> bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry, const std::string &path, T &value) {
+template <class T> bool LoadBBY::loadNXDataSet(const NeXus::NXEntry &entry, const std::string &path, T &value) {
   try {
     NeXus::NXDataSetTyped<T> dataSet = entry.openNXDataSet<T>(path);
     dataSet.load();
@@ -699,7 +699,7 @@ template <class T> bool LoadBBY::loadNXDataSet(NeXus::NXEntry &entry, const std:
     return false;
   }
 }
-bool LoadBBY::loadNXString(NeXus::NXEntry &entry, const std::string &path, std::string &value) {
+bool LoadBBY::loadNXString(const NeXus::NXEntry &entry, const std::string &path, std::string &value) {
   try {
     NeXus::NXChar dataSet = entry.openNXChar(path);
     dataSet.load();

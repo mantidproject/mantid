@@ -27,6 +27,8 @@ public:
   MOCK_METHOD0(disableSaveAndLoadBatch, void());
   MOCK_METHOD0(enableSaveAndLoadBatch, void());
   MOCK_CONST_METHOD0(batches, std::vector<IBatchView *>());
+  MOCK_METHOD0(acceptCloseEvent, void());
+  MOCK_METHOD0(ignoreCloseEvent, void());
   ~MockMainWindowView() override{};
 };
 } // namespace ISISReflectometry
