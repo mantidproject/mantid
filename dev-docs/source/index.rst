@@ -100,7 +100,7 @@ Development Process
    Overview of the role of the technical steering committee.
 
 :doc:`DesignDocumentGuides`
-   How to write a good design document.
+   When and how to write a good design document.
 
 
 =====
