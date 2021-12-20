@@ -615,6 +615,9 @@ class MainWindow(QMainWindow):
             if self.memorywidget is not None:
                 self.memorywidget.presenter.cancel_memory_update()
 
+            if self.raw_data_explorer is not None:
+                self.raw_data_explorer.raw_data_explorer_presenter.cancel_memory_update()
+
             if self.interface_manager is not None:
                 self.interface_manager.closeHelpWindow()
 

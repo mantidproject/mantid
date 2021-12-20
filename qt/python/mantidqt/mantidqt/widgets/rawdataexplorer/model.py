@@ -95,6 +95,9 @@ class MemoryManager(QObject):
         If the memory is too high, ask for workspace deletion.
         """
         mem_used_percent = self.update_memory_usage()
+        if mem_used_percent is None:
+            return
+
         if mem_used_percent > self.MEMORY_THRESHOLD:
             self.sig_free_memory.emit()
 
