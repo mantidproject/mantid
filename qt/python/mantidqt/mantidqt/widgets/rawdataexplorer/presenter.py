@@ -106,6 +106,12 @@ class RawDataExplorerPresenter(QObject):
 
         self.model.sig_new_preview.connect(self.on_new_preview)
 
+    def cancel_memory_update(self):
+        """
+        Cancel any further memory updates, so the memory manager can stop.
+        """
+        self.model.memory_manager.cancel_memory_update()
+
     def setup_connections(self):
         """
         Set up the connections between signals and slots in the widget.
