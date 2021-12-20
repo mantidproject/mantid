@@ -77,9 +77,9 @@ namespace Mantid::Algorithms {
  * @param inputHist A histogram containing the TOF values corresponding
  * to the values to be corrected.
  */
-MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(const MayersSampleCorrectionStrategy::Parameters &params,
-                                                               HistogramData::Histogram inputHist)
-    : m_pars(params), m_histogram(std::move(inputHist)), m_tofVals(m_histogram.points()),
+MayersSampleCorrectionStrategy::MayersSampleCorrectionStrategy(const MayersSampleCorrectionStrategy::Parameters params,
+                                                               const HistogramData::Histogram inputHist)
+    : m_pars(std::move(params)), m_histogram(std::move(inputHist)), m_tofVals(m_histogram.points()),
       m_histoYSize(m_histogram.size()), m_muRrange(calculateMuRange()), m_rng(std::make_unique<MersenneTwister>(1)) {
 
   const auto &xVals = m_histogram.x();

@@ -8,8 +8,8 @@
 
 namespace Mantid::DataHandling {
 
-LoadSingleMesh::LoadSingleMesh(const std::string &filename, std::ios_base::openmode mode, ScaleUnits scaleType)
-    : MeshFileIO(scaleType), m_filename(filename) {
+LoadSingleMesh::LoadSingleMesh(const std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType)
+    : MeshFileIO(scaleType), m_filename(std::move(filename)) {
   m_file = std::ifstream(filename.c_str(), mode);
   if (!m_file) {
     g_log.error("Unable to open file: " + filename);
