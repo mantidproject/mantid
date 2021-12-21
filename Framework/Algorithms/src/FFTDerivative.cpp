@@ -147,7 +147,7 @@ void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in, Histo
  * @param &re :: complete real Y  of input histogram
  * @param &im :: complete imaginary Y of input histogram
  */
-void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re, HistogramY &im) {
+void FFTDerivative::multiplyTransform(const HistogramX &nu, HistogramY &re, HistogramY &im) {
   int dn = getProperty("Order");
   bool swap_re_im = dn % 2 != 0;
   int sign_re = 1;

@@ -51,7 +51,7 @@ dependencies:
   - mesa-libgl-cos7-x86_64>=18.3.4
 
   # Linux only
-  - gxx_linux-64==9.3.*
+  - gxx_linux-64==10.3.*
   - libglu>=9.0.0
 
   # Needed for test suite on Linux

@@ -387,7 +387,36 @@ Then call `fit()` method::
 
 After fitting finishes the `CrystalField` object updates automatically and contains new fitted parameter values.
 
-The crystal field fit function is derived from the standard Mantid fit function and allows using the fit properties described in :ref:`algorithm page <algm-Fit>`.
+The crystal field fit function is derived from the standard Mantid fit function and can be used with all properties described in :ref:`Fit <algm-Fit>`.
+
+Two step fitting
+~~~~~~~~~~~~~~~~
+Alternatively, a two step fitting process can be used. Please note that this fitting process is much slower than the standard fitting described above.
+In this two step process only crystal field parameters are fitted in the first step and only peak parameters in the second step.
+
+Two step fitting is only available for single ions at the moment. It can be used both for a single spectrum or multiple spectra.
+
+There are two versions of two step fitting. One version is entirely based on the standard Mantid fit function and attempts to fit all free field
+parameters at the same time in the first step. It is used by calling the two_step_fit() method for an instance of the `CrystalFieldFit` class::
+
+    fit.two_step_fit()
+
+The other version, two_step_fit_sc(), applies ``scipy.optimize.minimize`` to fit each of the free field parameters sequentially in the first step but uses
+Mantid fitting for the peak parameters::
+
+    fit.two_step_fit_sc()
+
+Both methods allow overwriting the maximal number of iterations both per step and overall as well as the minimizer used for fitting per step.
+For example::
+
+    fit.two_step_fit(OverwriteMaxIterations=[2,10], OverwriteMinimizers=['BFGS', 'Levenberg-Marquardt'], Iterations=30)
+
+runs the first step for up to 2 iterations with the 'BFGS' minimizer and then the second step for up to 10 iterations with the 'Levenberg-Marquardt' minimizer.
+The whole fitting process is limited to 30 iterations.
+
+A complete list of minimizers available for ``scipy.optimize.minimize`` can be found at: https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.minimize.html
+
+If the minimizer is not overwritten, 'L-BFGS-B' is set as a default for ``scipy.optimize.minimize`` and 'Levenberg-Marquardt' for Mantid fitting.
 
 
 Multiple Ions

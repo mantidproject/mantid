@@ -471,10 +471,6 @@
       <archiveSearch plugin="SNSDataSearch" />
    </archive>
 
-   <computeResource name="Fermi">
-     <baseURL>https://fermi.ornl.gov/MantidRemote</baseURL>
-   </computeResource>
-
    <timezone>US/Eastern</timezone>
 
    <instrument name="DAS">

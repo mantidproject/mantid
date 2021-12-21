@@ -22,7 +22,7 @@ Kernel::Logger g_log("LogarithmScale");
 
 DECLARE_TRANSFORMSCALE(LogarithmScale)
 
-void LogarithmScale::setBase(double &base) {
+void LogarithmScale::setBase(const double base) {
   if (base <= 0) {
     g_log.error("Error: logarithm base must be a positive number");
   }

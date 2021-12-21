@@ -11,6 +11,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.setting
 
 
 class CalibrationModel(object):
+    # model shares code with the EnginX auto reduction script - code is kept in EnggUtils.py
     @staticmethod
     def create_new_calibration(calibration, rb_num, plot_output, save_dir=output_settings.get_output_path()):
         full_calib = load_full_instrument_calibration()

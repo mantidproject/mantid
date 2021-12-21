@@ -26,6 +26,8 @@ New and Improved
 
 - The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path)
 
+- The font in python editor and IPython console are ensured to be monospace on KDE Neon distribution, too.
+
 Bugfixes
 --------
 - Fixed an issue when save_as a running script leads to crash upon script completion.
@@ -43,5 +45,6 @@ Bugfixes
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 - Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
+- The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
 
 :ref:`Release 6.3.0 <v6.3.0>`

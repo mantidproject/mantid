@@ -32,9 +32,11 @@ public:
 
 private:
   /// Calculates the derivative for the addValDerivHessian method
-  void calculateDerivative(API::IFunction &function, API::FunctionDomain &domain, API::FunctionValues &values) const;
+  void calculateDerivative(API::IFunction &function, const API::FunctionDomain &domain,
+                           API::FunctionValues &values) const;
   /// Calculates the Hessian matrix for the addValDerivHessian method
-  void calculateHessian(API::IFunction &function, API::FunctionDomain &domain, API::FunctionValues &values) const;
+  void calculateHessian(API::IFunction &function, const API::FunctionDomain &domain,
+                        const API::FunctionValues &values) const;
 };
 
 } // namespace CostFunctions

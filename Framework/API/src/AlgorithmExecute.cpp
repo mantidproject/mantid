@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/Timer.h"
 
 namespace Mantid::API {
 //---------------------------------------------------------------------------------------------
@@ -19,4 +20,11 @@ namespace Mantid::API {
  *  @return true if executed successfully.
  */
 bool Algorithm::execute() { return executeInternal(); }
+
+void Algorithm::addTimer(const std::string &name, const Kernel::time_point_ns &begin,
+                         const Kernel::time_point_ns &end) {
+  UNUSED_ARG(name);
+  UNUSED_ARG(begin);
+  UNUSED_ARG(end);
+}
 } // namespace Mantid::API

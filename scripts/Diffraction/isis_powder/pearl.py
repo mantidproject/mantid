@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from contextlib import contextmanager
+import os
 
 import mantid.simpleapi as mantid
 from mantid.kernel import logger
@@ -97,26 +98,9 @@ class Pearl(AbstractInst):
         else:
             self._inst_settings.update_attributes(kwargs=kwargs)
 
-        # check that cache exists
-        run_number_string_key = self._generate_run_details_fingerprint(
-            run, self._inst_settings.file_extension, self._inst_settings.tt_mode)
-        if run_number_string_key in self._cached_run_details:
-            # update spline path of cache
-
-            add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
-                [self._inst_settings.tt_mode]
-
-            self._cached_run_details[run_number_string_key].update_file_paths(
-                self._inst_settings, add_spline)
         yield
         # reset instrument settings
         self._inst_settings = copy.deepcopy(self._default_inst_settings)
-
-        # reset spline path
-        add_spline = [self._inst_settings.tt_mode, "long"] if self._inst_settings.long_mode else \
-            [self._inst_settings.tt_mode]
-
-        self._cached_run_details[run_number_string_key].update_file_paths(self._inst_settings, add_spline)
 
     def _run_create_vanadium(self):
         # Provides a minimal wrapper so if we have tt_mode 'all' we can loop round
@@ -124,8 +108,12 @@ class Pearl(AbstractInst):
                                      do_absorb_corrections=self._inst_settings.absorb_corrections)
 
     def _get_run_details(self, run_number_string):
+        tt_mode_string = self._inst_settings.tt_mode
+        if self._inst_settings.tt_mode == "custom":
+            grouping_file_name = pearl_algs._pearl_get_tt_grouping_file_name(self._inst_settings)
+            tt_mode_string += os.path.splitext(os.path.basename(grouping_file_name))[0]
         run_number_string_key = self._generate_run_details_fingerprint(
-            run_number_string, self._inst_settings.file_extension, self._inst_settings.tt_mode)
+            run_number_string, self._inst_settings.file_extension, tt_mode_string, self._inst_settings.long_mode)
         if run_number_string_key in self._cached_run_details:
             return self._cached_run_details[run_number_string_key]
 

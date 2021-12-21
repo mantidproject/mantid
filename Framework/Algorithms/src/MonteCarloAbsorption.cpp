@@ -449,15 +449,17 @@ void MonteCarloAbsorption::interpolateFromSparse(MatrixWorkspace &targetWS, cons
   PARALLEL_FOR_IF(Kernel::threadSafe(targetWS, sparseWS))
   for (int64_t i = 0; i < static_cast<decltype(i)>(spectrumInfo.size()); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    double lat, lon;
-    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
-    const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
-    if (spatiallyInterpHisto.size() > 1) {
-      auto targetHisto = targetWS.histogram(i);
-      interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
-      targetWS.setHistogram(i, targetHisto);
-    } else {
-      targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+    if (spectrumInfo.hasDetectors(i)) {
+      double lat, lon;
+      std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+      const auto spatiallyInterpHisto = sparseWS.bilinearInterpolateFromDetectorGrid(lat, lon);
+      if (spatiallyInterpHisto.size() > 1) {
+        auto targetHisto = targetWS.histogram(i);
+        interpOpt.applyInPlace(spatiallyInterpHisto, targetHisto);
+        targetWS.setHistogram(i, targetHisto);
+      } else {
+        targetWS.mutableY(i) = spatiallyInterpHisto.y().front();
+      }
     }
     PARALLEL_END_INTERUPT_REGION
   }

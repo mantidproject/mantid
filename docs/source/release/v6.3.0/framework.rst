@@ -9,8 +9,9 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
-Concepts
+Removals
 --------
+- Both ``RemoteAlgorithms`` and ``RemoteJobManagers`` subpackages have been removed due to lack of use since v3.7.
 
 Algorithms
 ----------
@@ -43,6 +44,8 @@ Bugfixes
   Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 - Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
+- Fix bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
+  that didn't have any detectors it failed with an error
 
 Fit Functions
 -------------
