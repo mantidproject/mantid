@@ -96,6 +96,29 @@ class FocusTexture(systemtesting.MantidSystemTest):
         return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture.nxs"
 
 
+class FocusTexture30(systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE30)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture30")
+
+    def validate(self):
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 30)
+        # don't assert diff constants of one group
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(23)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19898, delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.9, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -22.2, delta=2)
+        # compare TOF workspaces
+        self.tolerance = 1e-6
+        self.disableChecking.extend(['Instrument'])  # don't check
+        return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture30.nxs"
+
+
 def _try_delete_cal_and_focus_dirs(parent_dir):
     for folder in ['Calibration', 'Focus']:
         rm_dir = os.path.join(parent_dir, folder)
