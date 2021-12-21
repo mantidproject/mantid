@@ -20,7 +20,8 @@ Row::Row(std::vector<std::string> runNumbers, double theta,
          ReductionWorkspaces reducedWorkspaceNames)
     : Item(), m_runNumbers(std::move(runNumbers)), m_theta(theta), m_qRange(std::move(qRange)), m_qRangeOutput(),
       m_scaleFactor(std::move(scaleFactor)), m_transmissionRuns(std::move(transmissionRuns)),
-      m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)) {
+      m_reducedWorkspaceNames(std::move(reducedWorkspaceNames)), m_reductionOptions(std::move(reductionOptions)),
+      m_parent(nullptr) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
@@ -68,7 +69,7 @@ void Row::renameOutputWorkspace(std::string const &oldName, std::string const &n
 
 void Row::setParent(IGroup *parent) const { m_parent = parent; }
 
-IGroup* Row::getParent() const { return m_parent; }
+IGroup *Row::getParent() const { return m_parent; }
 
 void Row::updateParent() {
   if (m_parent) {
