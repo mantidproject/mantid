@@ -47,9 +47,9 @@ struct V3DTrueComparator {
 
 class DLLExport LoadStl : public LoadSingleMesh {
 public:
-  LoadStl(const std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType)
+  LoadStl(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType)
       : LoadSingleMesh(filename, mode, scaleType), m_setMaterial(false) {}
-  LoadStl(const std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType,
+  LoadStl(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType,
           ReadMaterial::MaterialParameters params)
       : LoadSingleMesh(filename, mode, scaleType), m_setMaterial(true), m_params(std::move(std::move(params))) {}
   virtual ~LoadStl() = default;
