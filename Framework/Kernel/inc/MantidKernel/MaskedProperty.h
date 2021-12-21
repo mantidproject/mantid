@@ -27,10 +27,11 @@ namespace Kernel {
 template <typename TYPE = std::string> class MaskedProperty : public Kernel::PropertyWithValue<TYPE> {
 public:
   /// Constructor with a validator
-  MaskedProperty(std::string name, TYPE defaultvalue, IValidator_sptr validator = IValidator_sptr(new NullValidator),
+  MaskedProperty(const std::string &name, const TYPE &defaultvalue,
+                 IValidator_sptr validator = IValidator_sptr(new NullValidator),
                  const unsigned int direction = Direction::Input);
   /// Constructor with a validator without validation
-  MaskedProperty(std::string name, TYPE defaultvalue, const unsigned int direction);
+  MaskedProperty(const std::string &name, const TYPE &defaultvalue, const unsigned int direction);
 
   MaskedProperty(const MaskedProperty &) = default;
   // Unhide the PropertyWithValue assignment operator
