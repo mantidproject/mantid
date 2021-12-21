@@ -12,18 +12,20 @@ from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWork
 from mantid.kernel import logger
 
 GROUP_FILES = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
-               GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
+               GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml",
+               GROUP.TEXTURE30: "ENGINX_Texture30_grouping.xml"}
 GROUP_BANK_ARGS = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
 GROUP_DESCRIPTIONS = {GROUP.BOTH: "North and South Banks", GROUP.NORTH: "North Bank",
                       GROUP.SOUTH: "South Bank", GROUP.CROPPED: "Custom spectrum numbers",
-                      GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE: "Texture"}
+                      GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE: "Texture", GROUP.TEXTURE30: "Texture30"}
 GROUP_WS_NAMES = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthBank_grouping",
                   GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
-                  GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture_grouping"}
-GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
-                GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}  # prm suffix
-GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
-                       GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
+                  GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture_grouping",
+                  GROUP.TEXTURE30: "Texture30_grouping"}
+GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2", GROUP.CROPPED: "Cropped",
+                GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture", GROUP.TEXTURE30: "Texture30"}  # prm suffix
+GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2", GROUP.CROPPED: "Cropped",
+                       GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture", GROUP.TEXTURE30: "Texture30"}
 
 
 class CalibrationInfo:
