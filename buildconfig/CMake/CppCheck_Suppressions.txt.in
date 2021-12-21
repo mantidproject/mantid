@@ -405,7 +405,6 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatter
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:257
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculatePlaczekSelfScattering.cpp:29
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSampleEnvironment.cpp:255
-useInitializationList:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSingleMesh.cpp:13
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpec.cpp:141
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:429
 nullPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:737
