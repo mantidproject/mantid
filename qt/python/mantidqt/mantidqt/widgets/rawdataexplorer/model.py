@@ -34,6 +34,8 @@ class PreviewModel(QObject):
     """
     sig_workspace_changed = Signal()
 
+    sig_request_close = Signal()
+
     def __init__(self, preview_type, workspace_name):
         super().__init__()
         self._type = preview_type
@@ -215,6 +217,12 @@ class RawDataExplorerModel(QObject):
                 return
 
         preview_model = PreviewModel(preview, ws_name)
+
+        previews = [preview for preview in self._previews]
+        for preview in previews:
+            preview.sig_request_close.emit()
+            self.del_preview(preview)
+
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
 
@@ -223,7 +231,8 @@ class RawDataExplorerModel(QObject):
         Delete a preview model.
         @param previewModel(PreviewModel): reference to the model.
         """
-        self._previews.remove(previewModel)
+        if previewModel in self._previews:
+            self._previews.remove(previewModel)
 
     def can_delete_workspace(self, ws_name):
         """
