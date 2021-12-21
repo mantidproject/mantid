@@ -23,6 +23,23 @@ Group::Group(
     std::string name)
     : m_name(std::move(name)), m_rows() {}
 
+Group::Group(const Group &old_group)
+    : IGroup(old_group), m_name(old_group.m_name), m_postprocessedWorkspaceName(old_group.m_postprocessedWorkspaceName),
+      m_rows(old_group.m_rows) {
+  setAllRowParentsImpl();
+}
+
+Group::Group(Group &&old_group) noexcept : Group(old_group.m_name) {
+  swap(*this, old_group);
+  setAllRowParentsImpl();
+}
+
+Group &Group::operator=(Group old_group) {
+  swap(*this, old_group);
+  setAllRowParentsImpl();
+  return *this;
+}
+
 bool Group::isGroup() const { return true; }
 
 bool Group::isPreview() const { return false; }
@@ -216,7 +233,13 @@ int Group::completedItems() const {
   });
 }
 
-void Group::setAllRowParents() {
+void Group::setAllRowParents() { setAllRowParentsImpl(); }
+
+/**
+ * Calling virtual methods in constructors should be avoided, so this method exists to
+ * ensure that the behaviour of the constructor is consistent.
+ */
+void Group::setAllRowParentsImpl() {
   std::for_each(m_rows.cbegin(), m_rows.cend(), [this](boost::optional<Row> const &row) {
     if (row)
       row->setParent(this);

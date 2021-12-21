@@ -30,11 +30,19 @@ public:
 
   ~Group() = default;
 
-  Group(Group &&group) = default;
-  Group(const Group &group) = default;
+  Group(Group &&group) noexcept;
 
-  Group &operator=(Group &&) = default;
-  Group &operator=(Group const &) = default;
+  Group(const Group &old_group);
+
+  Group &operator=(Group);
+
+  friend void swap(Group &first, Group &second) {
+    std::swap(first.m_name, second.m_name);
+    std::swap(first.m_rows, second.m_rows);
+    std::swap(first.m_postprocessedWorkspaceName, second.m_postprocessedWorkspaceName);
+    std::swap(first.m_itemState, second.m_itemState);
+    std::swap(first.m_skipped, second.m_skipped);
+  }
 
   // Overrides from Item
   bool isGroup() const override;
@@ -78,6 +86,8 @@ private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
+
+  void setAllRowParentsImpl();
 
   friend class Encoder;
   friend class Decoder;

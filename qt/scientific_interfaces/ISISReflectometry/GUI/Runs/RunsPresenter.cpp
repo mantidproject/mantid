@@ -429,7 +429,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
   UNUSED_ARG(matchType);
   if (validateRowsToTransfer(rowsToTransfer)) {
     auto progress = setupProgressBar(rowsToTransfer);
-    auto &jobs = mutableRunsTable().mutableReductionJobs();
+    auto jobs = runsTable().reductionJobs();
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
