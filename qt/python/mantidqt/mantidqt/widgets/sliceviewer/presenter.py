@@ -10,7 +10,6 @@
 from qtpy.QtCore import Qt
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
-import sip
 
 # local imports
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
@@ -425,10 +424,7 @@ class SliceViewer(ObservingPresenter):
         """
         Updates the view to enable/disable certain options depending on the model.
         """
-        # The view currently introduces a delay before calling this function, which
-        # causes a race condition where it's possible the view could be closed in
-        # the meantime, so check it still exists. See github issue #30406 for detail.
-        if isinstance(self.view, sip.simplewrapper) and sip.isdeleted(self.view):
+        if not self.view:
             return
 
         # we don't want to use model.get_ws for the image info widget as this needs
@@ -523,6 +519,9 @@ class SliceViewer(ObservingPresenter):
     def _close_view_with_message(self, message: str):
         self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
+
+    def notify_close(self):
+        self.view = None
 
     def action_open_help_window(self):
         InterfaceManager().showHelpPage('qthelp://org.mantidproject/doc/workbench/sliceviewer.html')

@@ -655,6 +655,10 @@ class SliceViewerView(QWidget, ObservingView):
         """
         self.peaks_view.set_visible(on)
 
+    def close(self):
+        self.presenter.notify_close()
+        super().close()
+
     def _run_close(self):
         # handles the signal emitted from ObservingView.emit_close
         self.close()
