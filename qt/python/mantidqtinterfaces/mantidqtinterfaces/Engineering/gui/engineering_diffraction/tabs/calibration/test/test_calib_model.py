@@ -74,6 +74,24 @@ class CalibrationModelTest(unittest.TestCase):
         mock_create_out.assert_called_once_with(path.join('dir', 'User', '1', 'Calibration', ''),
                                                 self.calibration_info, 'foc_ceria_ws')
 
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.create_output_files')
+    @patch(enggutils_path + '.make_diff_consts_table')
+    @patch(enggutils_path + '.run_calibration')
+    @patch(file_path + ".load_full_instrument_calibration")
+    @patch(enggutils_path + ".path_handling.load_workspace")
+    def test_texture30_output_files_saved_to_one_directories_when_rb_num(self, mock_load_ws, mock_load_cal,
+                                                                         mock_run_cal, mock_make_diff_table,
+                                                                         mock_create_out, mock_del):
+        rb_num = "1"
+        self.calibration_info.group = GROUP.TEXTURE30
+        mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
+
+        self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir='dir')
+
+        mock_create_out.assert_called_once_with(path.join('dir', 'User', '1', 'Calibration', ''),
+                                                self.calibration_info, 'foc_ceria_ws')
+
 
 if __name__ == '__main__':
     unittest.main()
