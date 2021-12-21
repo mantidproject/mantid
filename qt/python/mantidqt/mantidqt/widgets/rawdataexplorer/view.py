@@ -9,6 +9,7 @@
 
 from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel, QAbstractItemView
 from qtpy.QtCore import *
+from matplotlib import pyplot as plt
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.instrumentview.api import *
@@ -18,7 +19,7 @@ from mantidqt.plotting.functions import pcolormesh
 from workbench.config import get_window_config
 
 
-class PreviewView:
+class PreviewView(QObject):
 
     """
     Type of the preview when the instrument viewer widget is used to show the
@@ -61,8 +62,13 @@ class PreviewView:
     """
     _widget = None
 
+    """
+    Signal to request closing the preview
+    """
+    sig_request_close = Signal()
+
     def __init__(self):
-        pass
+        super().__init__()
 
     def set_type(self, preview_type):
         """
@@ -91,19 +97,26 @@ class PreviewView:
             self._widget = get_instrumentview(workspace_name, get_window_config()[1])
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
+            self.sig_request_close.connect(self._widget.container.emit_close)
         if self._type == self.SVIEW:
             self._widget = SliceViewer(ws=mtd[workspace_name])
             self._widget.view.show()
             self._widget.view.close_signal.connect(self.on_close)
+            self.sig_request_close.connect(self._widget.view.emit_close)
         if self._type == self.PLOT2D:
             self._widget = pcolormesh([workspace_name])
             self._widget.canvas.mpl_connect("close_event", self.on_close)
+            self.sig_request_close.connect(lambda: plt.close(self._widget))
+
         if self._type == self.PLOT1D:
             self._widget = plotBin(workspace_name, 0, error_bars=True)
             self._widget.canvas.mpl_connect("close_event", self.on_close)
+            self.sig_request_close.connect(lambda: plt.close(self._widget))
+
         if self._type == self.PLOTSPECTRUM:
             self._widget = plotSpectrum(workspace_name, 0, error_bars=True)
             self._widget.canvas.mpl_connect("close_event", self.on_close)
+            self.sig_request_close.connect(lambda: plt.close(self._widget))
 
     def change_workspace(self, workspace_name):
         """

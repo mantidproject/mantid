@@ -62,6 +62,7 @@ class PreviewPresenter:
         workspace_name = self._model.get_workspace_name()
         self._view.show_workspace(workspace_name)
         self._model.sig_workspace_changed.connect(self.on_workspace_changed)
+        self._model.sig_request_close.connect(lambda: self._view.sig_request_close.emit())
 
     def close_preview(self):
         """
