@@ -440,8 +440,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer, const Transfer
       mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName());
     }
 
-    // TODO remove this if tests still pass
-    // tablePresenter()->mergeAdditionalJobs(jobs);
+    tablePresenter()->mergeAdditionalJobs(jobs);
   }
 }
 

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Row.h"
 #include "Common/Map.h"
-#include "Group.h"
+#include "IGroup.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/variant.hpp>
 
@@ -66,9 +66,9 @@ void Row::renameOutputWorkspace(std::string const &oldName, std::string const &n
   m_reducedWorkspaceNames.renameOutput(oldName, newName);
 }
 
-void Row::setParent(Group *parent) const { m_parent = parent; }
+void Row::setParent(IGroup *parent) const { m_parent = parent; }
 
-Group* Row::getParent() const { return m_parent; }
+IGroup* Row::getParent() const { return m_parent; }
 
 void Row::updateParent() {
   if (m_parent) {

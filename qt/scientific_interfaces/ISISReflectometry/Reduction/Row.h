@@ -20,7 +20,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class Group;
+class IGroup;
 
 /** @class Row
 
@@ -50,8 +50,8 @@ public:
   bool hasOutputWorkspace(std::string const &wsName) const;
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
 
-  void setParent(Group *parent) const;
-  Group *getParent() const;
+  void setParent(IGroup *parent) const;
+  IGroup *getParent() const;
   void updateParent() override;
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
@@ -68,7 +68,7 @@ private:
   TransmissionRunPair m_transmissionRuns;
   ReductionWorkspaces m_reducedWorkspaceNames;
   ReductionOptionsMap m_reductionOptions;
-  mutable Group *m_parent;
+  mutable IGroup *m_parent;
 
   friend class Encoder;
 };

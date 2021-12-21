@@ -8,6 +8,7 @@
 #include "Common/DllConfig.h"
 #include "Item.h"
 #include "Row.h"
+#include "IGroup.h"
 #include <boost/optional.hpp>
 #include <string>
 #include <vector>
@@ -22,7 +23,7 @@ class Row;
 
     The Group model holds information about a group of rows in the runs table.
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL Group : public Item {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Group : public IGroup {
 public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
@@ -35,41 +36,43 @@ public:
   Group &operator=(Group &&) = default;
   Group &operator=(Group const &) = default;
 
+  // Overrides from Item
   bool isGroup() const override;
   bool isPreview() const override;
-  std::string const &name() const;
-  void setName(std::string const &name);
-  bool hasPostprocessing() const;
   bool requiresProcessing(bool reprocessFailed) const override;
-  bool requiresPostprocessing(bool reprocessFailed) const;
-  std::string postprocessedWorkspaceName() const;
   void setOutputNames(std::vector<std::string> const &outputNames) override;
   void resetOutputs() override;
-
-  void appendEmptyRow();
-  void appendRow(boost::optional<Row> const &row);
-  void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex);
-  int insertRowSortedByAngle(boost::optional<Row> const &row);
-  void removeRow(int rowIndex);
-  void updateRow(int rowIndex, boost::optional<Row> const &row);
-
   int totalItems() const override;
   int completedItems() const override;
-
   void resetState(bool resetChildren = true) override;
-  void resetSkipped();
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
-
-  boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const;
-
-  boost::optional<Row> const &operator[](int rowIndex) const;
-  std::vector<boost::optional<Row>> const &rows() const;
-  std::vector<boost::optional<Row>> &mutableRows();
-
-  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName);
-
-  void setAllRowParents();
   void updateParent() override;
+
+  // Overrides from IGroup
+  std::string const &name() const override;
+  void setName(std::string const &name) override;
+  bool hasPostprocessing() const override;
+  bool requiresPostprocessing(bool reprocessFailed) const override;
+  std::string postprocessedWorkspaceName() const override;
+
+  void appendEmptyRow() override;
+  void appendRow(boost::optional<Row> const &row) override;
+  void insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) override;
+  int insertRowSortedByAngle(boost::optional<Row> const &row) override;
+  void removeRow(int rowIndex) override;
+  void updateRow(int rowIndex, boost::optional<Row> const &row) override;
+
+  void resetSkipped() override;
+
+  boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const override;
+
+  boost::optional<Row> const &operator[](int rowIndex) const override;
+  std::vector<boost::optional<Row>> const &rows() const override;
+  std::vector<boost::optional<Row>> &mutableRows() override;
+
+  boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) override;
+
+  void setAllRowParents() override;
 
 private:
   std::string m_name;
