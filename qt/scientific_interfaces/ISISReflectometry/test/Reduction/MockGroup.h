@@ -22,14 +22,14 @@ public:
   MOCK_METHOD(void, updateParent, (), (override));
 
   // Mock methods overridden from IGroup
-  MOCK_METHOD(std::string const&, name, (), (const, override));
-  MOCK_METHOD(void, setName, (std::string const&), (override));
+  MOCK_METHOD(std::string const &, name, (), (const, override));
+  MOCK_METHOD(void, setName, (std::string const &), (override));
   MOCK_METHOD(bool, hasPostprocessing, (), (const, override));
   MOCK_METHOD(bool, requiresPostprocessing, (bool), (const, override));
   MOCK_METHOD(std::string, postprocessedWorkspaceName, (), (const, override));
 
   MOCK_METHOD(void, appendEmptyRow, (), (override));
-  MOCK_METHOD(void, appendRow, (boost::optional<Row> const&), (override));
+  MOCK_METHOD(void, appendRow, (boost::optional<Row> const &), (override));
   MOCK_METHOD(void, insertRow, (boost::optional<Row> const &, int), (override));
   MOCK_METHOD(int, insertRowSortedByAngle, (boost::optional<Row> const &), (override));
   MOCK_METHOD(void, removeRow, (int), (override));
@@ -47,6 +47,6 @@ public:
 
   MOCK_METHOD(void, setAllRowParents, (), (override));
 
-  boost::optional<Row> const& operator[] (int rowIndex) const override { return bracketOp(rowIndex); }
+  boost::optional<Row> const &operator[](int rowIndex) const override { return bracketOp(rowIndex); }
 };
-}
+} // namespace MantidQt::CustomInterfaces::ISISReflectometry

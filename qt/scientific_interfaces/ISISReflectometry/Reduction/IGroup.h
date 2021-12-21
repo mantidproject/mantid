@@ -17,7 +17,7 @@ class IGroup : public Item {
 public:
   virtual ~IGroup() = default;
 
-  virtual std::string const &name() const  = 0;
+  virtual std::string const &name() const = 0;
   virtual void setName(std::string const &name) = 0;
   virtual bool hasPostprocessing() const = 0;
   virtual bool requiresPostprocessing(bool reprocessFailed) const = 0;
@@ -41,6 +41,5 @@ public:
   virtual boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
 
   virtual void setAllRowParents() = 0;
-
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

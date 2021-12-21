@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
+#include "IGroup.h"
 #include "Item.h"
 #include "Row.h"
-#include "IGroup.h"
 #include <boost/optional.hpp>
 #include <string>
 #include <vector>

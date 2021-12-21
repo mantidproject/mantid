@@ -92,7 +92,7 @@ std::string ReductionJobs::nextEmptyGroupName() {
 }
 
 void ReductionJobs::setAllRowParents() {
-  std::for_each(m_groups.begin(), m_groups.end(), [](auto &group){ group.setAllRowParents(); });
+  std::for_each(m_groups.begin(), m_groups.end(), [](auto &group) { group.setAllRowParents(); });
 }
 
 /* Return true if the reduction table has content. This excludes the
