@@ -5,9 +5,9 @@ authors:
   - name: "The Mantid Project team"
     email: mantid-help@mantidproject.org
     website: https://www.mantidproject.org/
-title: The Manipulation and Analysis Toolkit for Instrument Data
+title: Manipulation and Analysis Toolkit for Instrument Data
 version: 6.2.0
-doi: 10.5281/zenodo.5171937
+doi: 10.5286/SOFTWARE/MANTID6.2
 date-released: 2021-09-29
 keywords:
   - mantid
