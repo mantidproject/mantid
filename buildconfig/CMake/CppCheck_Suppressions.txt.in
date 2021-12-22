@@ -186,6 +186,9 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateFloodWorkspac
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResetNegatives.cpp:115
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ResizeRectangularDetector.cpp:74
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/MCInteractionStatistics.cpp:77
+useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:141
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:152
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:321
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:532
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:256
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/VesuvioL1ThetaResolution.cpp:241
@@ -766,7 +769,9 @@ shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GU
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:284
 shadowFunction:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/Encoder.cpp:311
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.cpp:61
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:121
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/MainWindow/MainWindowPresenter.cpp:161
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:128
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/DensityOfStates.cpp:170
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectCorrections.cpp:80
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataAnalysis.cpp:93
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectFunctionBrowser/ConvTypes.h:170
