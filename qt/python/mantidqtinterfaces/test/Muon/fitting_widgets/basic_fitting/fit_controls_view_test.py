@@ -30,10 +30,6 @@ class FitControlsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(not self.view.undo_fit_button.isEnabled())
         self.assertTrue(not self.view.plot_guess)
 
-    def test_that_the_plot_guess_checkbox_can_be_ticked_as_expected(self):
-        self.view.plot_guess = True
-        self.assertTrue(self.view.plot_guess)
-
     def test_that_the_undo_fit_button_can_be_enabled_when_you_set_more_than_zero_undos(self):
         self.view.set_number_of_undos(2)
         self.assertTrue(self.view.undo_fit_button.isEnabled())

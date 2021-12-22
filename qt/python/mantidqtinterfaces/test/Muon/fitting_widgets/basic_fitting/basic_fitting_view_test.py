@@ -40,10 +40,6 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.close())
         QApplication.sendPostedEvents()
 
-    def test_that_the_plot_guess_checkbox_can_be_ticked_as_expected(self):
-        self.view.plot_guess = True
-        self.assertTrue(self.view.plot_guess)
-
     def test_that_enable_view_does_not_enable_the_tab_if_there_are_no_datasets_loaded(self):
         self.view.enable_view()
         self.assertTrue(not self.view.isEnabled())

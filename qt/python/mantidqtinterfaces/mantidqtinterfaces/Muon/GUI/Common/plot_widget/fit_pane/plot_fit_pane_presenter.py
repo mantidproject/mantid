@@ -82,7 +82,7 @@ class PlotFitPanePresenter(BasePanePresenter):
             self._figure_presenter.remove_workspace_names_from_plot([self._fitting_context.guess_workspace_name])
 
     def handle_update_plot_guess(self):
-        if self._fitting_context.guess_workspace_name is not None and self._fitting_context.plot_guess:
+        if self._fitting_context.guess_workspace_name is not None:
             self._figure_presenter.plot_guess_workspace(self._fitting_context.guess_workspace_name)
 
     def create_empty_plot(self):

@@ -64,7 +64,7 @@ class BasicFittingPresenter:
         self.view.set_slot_for_fit_generator_clicked(self.handle_fit_generator_clicked)
         self.view.set_slot_for_fit_button_clicked(self.handle_fit_clicked)
         self.view.set_slot_for_undo_fit_clicked(self.handle_undo_fit_clicked)
-        self.view.set_slot_for_plot_guess_changed(self.handle_plot_guess_changed)
+        self.view.set_slot_for_plot_guess_clicked(self.handle_plot_guess_clicked)
         self.view.set_slot_for_fit_name_changed(self.handle_function_name_changed_by_user)
         self.view.set_slot_for_dataset_changed(self.handle_dataset_name_changed)
         self.view.set_slot_for_covariance_matrix_clicked(self.handle_covariance_matrix_clicked)
@@ -111,7 +111,6 @@ class BasicFittingPresenter:
         """Handle when new data has been loaded into the interface."""
         self.update_and_reset_all_data()
 
-        self.view.plot_guess, self.model.plot_guess = False, False
         self.clear_undo_data()
 
         if self.model.number_of_datasets == 0:
@@ -134,9 +133,8 @@ class BasicFittingPresenter:
         if "DoublePulseEnabled" in updated_variables:
             self.update_and_reset_all_data()
 
-    def handle_plot_guess_changed(self) -> None:
+    def handle_plot_guess_clicked(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
-        self.model.plot_guess = self.view.plot_guess
         self.update_guess_parameters()
         self.update_plot_guess()
 
@@ -258,22 +256,17 @@ class BasicFittingPresenter:
             self.view.show_plot_guess_start_x(True)
             self.view.show_plot_guess_end_x(True)
 
-        self.update_plot_guess()
-
     def handle_plot_guess_points_changed(self) -> None:
         """Handle when the evaluation type is changed."""
         self.model.plot_guess_points = self.view.plot_guess_points
-        self.update_plot_guess()
 
     def handle_plot_guess_start_x_changed(self) -> None:
         """Handle when the evaluation type is changed."""
         self.model.plot_guess_start_x = self.view.plot_guess_start_x
-        self.update_plot_guess()
 
     def handle_plot_guess_end_x_changed(self) -> None:
         """Handle when the evaluation type is changed."""
         self.model.plot_guess_end_x = self.view.plot_guess_end_x
-        self.update_plot_guess()
 
     def handle_function_structure_changed(self) -> None:
         """Handle when the function structure is changed."""
@@ -286,8 +279,6 @@ class BasicFittingPresenter:
 
         self.reset_fit_status_and_chi_squared_information()
 
-        self.update_plot_guess()
-
         self.fit_function_changed_notifier.notify_subscribers()
 
         # Required to update the function browser to display the errors when first adding a function.
@@ -297,8 +288,6 @@ class BasicFittingPresenter:
         """Handle when the value of a parameter in a function is changed."""
         full_parameter = f"{function_index}{parameter}"
         self.model.update_parameter_value(full_parameter, self.view.parameter_value(full_parameter))
-
-        self.update_plot_guess()
 
         self.fit_function_changed_notifier.notify_subscribers()
         self.fit_parameter_changed_notifier.notify_subscribers()
@@ -449,8 +438,6 @@ class BasicFittingPresenter:
         """Updates the start and end x in the model using the provided values."""
         self.view.start_x, self.view.end_x = start_x, end_x
         self.model.current_start_x, self.model.current_end_x = start_x, end_x
-
-        self.update_plot_guess()
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""

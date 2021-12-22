@@ -362,16 +362,6 @@ class BasicFittingModel:
         self.fitting_context.chi_squared[self.fitting_context.current_dataset_index] = chi_squared
 
     @property
-    def plot_guess(self) -> bool:
-        """Returns true if plot guess is turned on."""
-        return self.fitting_context.plot_guess
-
-    @plot_guess.setter
-    def plot_guess(self, plot_guess: bool) -> None:
-        """Sets that the plot guess should or should not be plotted."""
-        self.fitting_context.plot_guess = plot_guess
-
-    @property
     def plot_guess_type(self) -> str:
         """Returns the guess plot range type."""
         return self.fitting_context.plot_guess_type
@@ -490,7 +480,7 @@ class BasicFittingModel:
 
     def update_plot_guess(self) -> None:
         """Updates the guess plot using the current dataset and function."""
-        self.fitting_context.guess_workspace_name = self._evaluate_plot_guess(self.plot_guess)
+        self.fitting_context.guess_workspace_name = self._evaluate_plot_guess()
 
     def remove_all_fits_from_context(self) -> None:
         """Removes all fit results from the context."""
@@ -805,9 +795,9 @@ class BasicFittingModel:
         except AttributeError:
             return function.name()
 
-    def _evaluate_plot_guess(self, plot_guess: bool) -> str:
+    def _evaluate_plot_guess(self) -> str:
         """Evaluate the plot guess fit function and returns the name of the resulting guess workspace."""
-        if not plot_guess or self.current_dataset_name is None:
+        if self.current_dataset_name is None:
             return ""
 
         fit_function = self._get_plot_guess_fit_function()
