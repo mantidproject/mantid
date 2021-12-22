@@ -25,3 +25,9 @@ MuSR Changes
   - The Model Fitting tab no longer resets when the instrument is changed.
   - When a new results table is created the Model Fitting tab selects the default parameters to plot based on log values or parameters in the results table.
   - Fixed a bug that prevented the Model Fitting plot showing when data was binned.
+
+
+Changes
+#######
+
+- The plot guess checkbox in Muon Analysis and Frequency Domain Analysis has been replaced with a push button.

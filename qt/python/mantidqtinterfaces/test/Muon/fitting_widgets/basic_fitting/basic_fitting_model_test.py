@@ -538,23 +538,6 @@ class BasicFittingModelTest(unittest.TestCase):
         self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
         self.mock_context_guess_workspace_name.assert_called_with(guess_workspace_name)
 
-    def test_update_plot_guess_notifies_subscribers_with_the_guess_workspace_name_as_none_if_plot_guess_is_false(self):
-        self.model.dataset_names = self.dataset_names
-        self.model.single_fit_functions = self.single_fit_functions
-        self.model.start_xs = [0.0, 1.0]
-        self.model.end_xs = [10.0, 11.0]
-        self.model.current_dataset_index = 0
-        self.model.plot_guess = False
-        self.model.plot_guess_type = X_FROM_FIT_RANGE
-
-        self.model.context = mock.Mock()
-        self.mock_context_guess_workspace_name = mock.PropertyMock(return_value=None)
-        type(self.model.fitting_context).guess_workspace_name = self.mock_context_guess_workspace_name
-        self.model.update_plot_guess()
-
-        self.assertEqual(1, self.mock_context_guess_workspace_name.call_count)
-        self.mock_context_guess_workspace_name.assert_called_with("")
-
     def test_update_plot_guess_will_evaluate_the_function_when_in_double_fit_mode(self):
         guess_workspace_name = "__frequency_domain_analysis_fitting_guessName1"
         self.model.dataset_names = self.dataset_names

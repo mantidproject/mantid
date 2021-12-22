@@ -26,9 +26,8 @@ class FitControlsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertTrue(self.view.close())
         QApplication.sendPostedEvents()
 
-    def test_that_the_view_has_been_initialized_with_the_undo_fit_button_disabled_and_plot_guess_unchecked(self):
+    def test_that_the_view_has_been_initialized_with_the_undo_fit_button_disabled(self):
         self.assertTrue(not self.view.undo_fit_button.isEnabled())
-        self.assertTrue(not self.view.plot_guess)
 
     def test_that_the_undo_fit_button_can_be_enabled_when_you_set_more_than_zero_undos(self):
         self.view.set_number_of_undos(2)

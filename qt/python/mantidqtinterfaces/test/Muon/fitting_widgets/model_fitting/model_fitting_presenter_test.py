@@ -68,7 +68,7 @@ class ModelFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_slot_for_fit_generator_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_button_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_undo_fit_clicked.call_count, 1)
-        self.assertEqual(self.view.set_slot_for_plot_guess_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_plot_guess_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_name_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_structure_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_parameter_changed.call_count, 1)

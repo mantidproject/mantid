@@ -52,7 +52,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.assertEqual(self.view.set_slot_for_fit_generator_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_button_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_undo_fit_clicked.call_count, 1)
-        self.assertEqual(self.view.set_slot_for_plot_guess_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_plot_guess_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_name_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_covariance_matrix_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_structure_changed.call_count, 1)
@@ -101,8 +101,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.mock_view_plot_guess.assert_called_once_with(False)
-        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
 
@@ -114,8 +112,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.mock_view_plot_guess.assert_called_once_with(False)
-        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
         self.view.disable_view.assert_called_once_with()
 
@@ -140,7 +136,7 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.selected_fit_results_changed.notify_subscribers.assert_called_once_with([])
 
     def test_that_handle_plot_guess_changed_will_update_plot_guess_using_the_model(self):
-        self.presenter.handle_plot_guess_changed()
+        self.presenter.handle_plot_guess_clicked()
         self.model.update_plot_guess.assert_called_once_with()
 
     def test_that_handle_undo_fit_clicked_will_attempt_to_reset_the_fit_data_and_notify_that_the_data_has_changed(self):
@@ -285,7 +281,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.presenter.clear_undo_data.assert_called_once_with()
         self.model.get_active_fit_function.assert_called_once_with()
         self.presenter.reset_fit_status_and_chi_squared_information.assert_called_once_with()
-        self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_function_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_plot_guess_type_changed_will_set_guess_parameters_for_plot_range(self):
@@ -309,18 +304,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.view.show_plot_guess_start_x.assert_called_with(True)
         self.view.show_plot_guess_end_x.assert_called_with(True)
 
-    def test_that_handle_plot_guess_points_changed_will_update_the_guess(self):
-        self.presenter.handle_plot_guess_points_changed()
-        self.model.update_plot_guess.assert_called_once_with()
-
-    def test_that_handle_plot_guess_start_x_changed_will_update_the_guess(self):
-        self.presenter.handle_plot_guess_start_x_changed()
-        self.model.update_plot_guess.assert_called_once_with()
-
-    def test_that_handle_plot_guess_end_x_changed_will_update_the_guess(self):
-        self.presenter.handle_plot_guess_end_x_changed()
-        self.model.update_plot_guess.assert_called_once_with()
-
     def test_that_handle_function_parameter_changed_will_update_the_fit_functions_and_notify_they_are_updated(self):
         function_index = ""
         parameter = "A0"
@@ -336,7 +319,6 @@ class BasicFittingPresenterTest(unittest.TestCase, MockBasicFitting):
         self.view.parameter_value.assert_called_once_with(full_parameter)
         self.model.update_parameter_value.assert_called_once_with(full_parameter, parameter_value)
 
-        self.model.update_plot_guess.assert_called_once_with()
         self.presenter.fit_parameter_changed_notifier.notify_subscribers.assert_called_once_with()
 
     def test_that_handle_start_x_updated_will_attempt_to_update_the_start_x_in_the_model(self):

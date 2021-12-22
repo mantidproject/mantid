@@ -65,7 +65,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_slot_for_fit_generator_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_button_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_undo_fit_clicked.call_count, 1)
-        self.assertEqual(self.view.set_slot_for_plot_guess_changed.call_count, 1)
+        self.assertEqual(self.view.set_slot_for_plot_guess_clicked.call_count, 1)
         self.assertEqual(self.view.set_slot_for_fit_name_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_structure_changed.call_count, 1)
         self.assertEqual(self.view.set_slot_for_function_parameter_changed.call_count, 1)
@@ -134,8 +134,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.mock_view_plot_guess.assert_called_once_with(False)
-        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
         self.presenter.enable_editing_notifier.notify_subscribers.assert_called_once_with()
         self.assertEqual(self.mock_view_tf_asymmetry_mode.call_count, 1)
@@ -150,8 +148,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.presenter.handle_new_data_loaded()
 
         self.presenter.update_and_reset_all_data.assert_called_with()
-        self.mock_view_plot_guess.assert_called_once_with(False)
-        self.mock_model_plot_guess.assert_called_once_with(False)
         self.presenter.clear_undo_data.assert_called_with()
         self.view.disable_view.assert_called_once_with()
         self.mock_view_tf_asymmetry_mode.assert_called_with(False)
@@ -299,8 +295,6 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         type(self.view).start_x = self.mock_view_start_x
         self.mock_view_end_x = mock.PropertyMock(return_value=self.end_x)
         type(self.view).end_x = self.mock_view_end_x
-        self.mock_view_plot_guess = mock.PropertyMock(return_value=self.plot_guess)
-        type(self.view).plot_guess = self.mock_view_plot_guess
         self.mock_view_function_name = mock.PropertyMock(return_value=self.function_name)
         type(self.view).function_name = self.mock_view_function_name
         self.mock_view_simultaneous_fitting_mode = mock.PropertyMock(return_value=self.simultaneous_fitting_mode)
@@ -314,7 +308,7 @@ class TFAsymmetryFittingPresenterTest(unittest.TestCase):
         self.view.set_slot_for_fit_generator_clicked = mock.Mock()
         self.view.set_slot_for_fit_button_clicked = mock.Mock()
         self.view.set_slot_for_undo_fit_clicked = mock.Mock()
-        self.view.set_slot_for_plot_guess_changed = mock.Mock()
+        self.view.set_slot_for_plot_guess_clicked = mock.Mock()
         self.view.set_slot_for_fit_name_changed = mock.Mock()
         self.view.set_slot_for_function_structure_changed = mock.Mock()
         self.view.set_slot_for_function_parameter_changed = mock.Mock()
