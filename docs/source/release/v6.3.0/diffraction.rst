@@ -47,7 +47,7 @@ Engineering Diffraction
 -----------------------
 New features
 ############
-- Now support two texture grouping schemes (10 groups per bank and 15 groups per bank) for ENGIN-X in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`. Note this involved changes to the bankID log values saved with focused data, so this means the UI will not load in previously focused .nxs files.
+- Now support two texture grouping schemes: Texture20 (10 groups per bank, 20 in total) and Texture30 (15 groups per bank, 30 in total) for ENGIN-X in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`. Note this involved changes to the bankID log values saved with focused data, so this means the UI will not load in previously focused .nxs files.
 
 Improvements
 ############
