@@ -115,7 +115,7 @@ class FocusModelTest(unittest.TestCase):
         sample_foc_ws.name.return_value = "foc_name"
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
-        self.calibration.group = GROUP.TEXTURE
+        self.calibration.group = GROUP.TEXTURE20
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,

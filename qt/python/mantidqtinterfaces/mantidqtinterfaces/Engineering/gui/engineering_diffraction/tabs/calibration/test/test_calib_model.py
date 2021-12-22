@@ -66,7 +66,7 @@ class CalibrationModelTest(unittest.TestCase):
                                                                        mock_run_cal, mock_make_diff_table,
                                                                        mock_create_out, mock_del):
         rb_num = "1"
-        self.calibration_info.group = GROUP.TEXTURE
+        self.calibration_info.group = GROUP.TEXTURE20
         mock_run_cal.return_value = ("foc_ceria_ws", None, None)  # focused_ceria, cal_table, diag_ws
 
         self.model.create_new_calibration(self.calibration_info, rb_num, plot_output=False, save_dir='dir')

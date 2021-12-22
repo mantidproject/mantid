@@ -77,7 +77,7 @@ class FocusTexture(systemtesting.MantidSystemTest):
 
     def runTest(self):
         enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
-                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE)
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE20)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
         self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture")
