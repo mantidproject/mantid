@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 
@@ -21,7 +22,16 @@ public:
   // Holds a reference to the matplotlib artist object
   explicit Artist(Common::Python::Object obj);
 
+  /**
+   * Set a property on the Artist given by name and value
+   * @param name The name of the property
+   * @param value The value of the property
+   */
+  template <typename ValueType> void set(const std::string &name, ValueType value) {
+    Mantid::PythonInterface::callMethodNoCheck<void>(pyobj().ptr(), ("set_" + name).c_str(), std::move(value));
+  }
   void set(const Common::Python::Dict &kwargs);
+
   void remove();
 };
 
