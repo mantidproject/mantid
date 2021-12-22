@@ -70,7 +70,7 @@ noCopyConstructor:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Rend
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/CompositeValidator.h:57
 operatorEqShouldBeLeftUnimplemented:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Exception.cpp:229
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:444
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:166
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:160
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:55
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:59
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:74
@@ -207,8 +207,8 @@ stlFindInsert:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawPeaks.cpp:581
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:126
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:192
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/MaskPeaksWorkspace.cpp:193
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:392
-nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:177
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:388
+nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:173
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SetSpecialCoordinates.cpp:86
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SetSpecialCoordinates.cpp:98
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/DoublePulseFit.cpp:198
@@ -217,14 +217,14 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/DoubleP
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:53
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:149
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/PlotPeakByLogValueHelper.cpp:190
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:239
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:240
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:241
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:242
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:243
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:244
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:245
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:306
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:307
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/ProfileChiSquared1D.cpp:308
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/CostFunctions/CostFuncFitting.cpp:373
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:1069
 constParameter:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/TrustRegionMinimizer.cpp:807
@@ -461,7 +461,7 @@ nullPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefi
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2149
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:922
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:1356
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ObjCompAssembly.cpp:335
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ObjCompAssembly.cpp:334
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ParameterMap.cpp:361
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/StructuredDetector.cpp:297
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/StructuredDetector.cpp:299
@@ -471,8 +471,8 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cp
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:948
 invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
 duplicateExpression:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/BnId.cpp:91
-accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
-accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:676
+accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:674
+accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:674
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:89
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:133
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/MeshObject.cpp:306
@@ -484,8 +484,8 @@ accessMoved:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/RuleItems.cpp:134
 operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/Rules.cpp:446
 constParameter:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/ShapeFactory.cpp:939
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/ShapeFactory.cpp:59
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:121
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:146
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:119
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:144
 invalidFunctionArgBool:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Surfaces/General.cpp:53
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/HistogramData/src/Interpolate.cpp:393
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
