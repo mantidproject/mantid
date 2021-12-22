@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use Mantid in your research, please cite it using this metadata."
-abstract: "The Mantid project provides a framework that supports high-performance computing and visualisation of scientific data. Mantid has been created to manipulate and analyse Neutron and Muon scattering data, but could be applied to many other techniques. The framework is open source and supported on multiple target platforms (Windows, Linux, Mac OS X)."
+abstract: "The Mantid project provides a framework that supports high-performance computing and visualisation of scientific data. Mantid has been created to manipulate and analyse Neutron and Muon scattering data, but could be applied to many other techniques. The framework is open source and is supported on multiple target platforms (Windows, Linux, macOS)."
 authors:
   - name: "The Mantid Project team"
     email: mantid-help@mantidproject.org
