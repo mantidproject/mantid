@@ -73,10 +73,12 @@ void LoadILLSALSA::exec() {
   Mantid::NeXus::NXData scanVariablesGroup = dataFirstEntry.openNXData("/data_scan/scanned_variables/data");
   Mantid::NeXus::NXDouble scanVariables = scanVariablesGroup.openDoubleData();
   scanVariables.load();
+  scanVariablesGroup.close();
 
   Mantid::NeXus::NXData dataGroup = dataFirstEntry.openNXData("/data_scan/detector_data/data");
   Mantid::NeXus::NXInt data = dataGroup.openIntData();
   data.load();
+  dataGroup.close();
 
   m_numberOfScans = data.dims(0);
   m_numberOfRows = data.dims(1);
