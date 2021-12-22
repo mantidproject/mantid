@@ -39,18 +39,19 @@ class InstrumentViewPresenter(ObservingPresenter):
 
         # Update the instrument view manager
         InstrumentViewManager.register(self, self.ws_name)
-        self.container.closing.connect(lambda : self.close(self.ws_name))
+        self.container.closing.connect(lambda: self.close(self.ws_name))
 
     def current_workspace_equals(self, name):
         return self.ws_name == name
 
-    """
-    Replace the workspace being shown by the instrument widget.
-    @param new_workspace_name : the name of the new workspace to set
-    @param new_window_name : the new title of the window. Optional, if none provided, uses the name of the workspace.
-    """
     def replace_workspace(self, new_workspace_name, new_window_name=None):
+        """
+        Replace the workspace being shown by the instrument widget.
+        @param new_workspace_name: the name of the new workspace to set
+        @param new_window_name: the new title of the window. Optional, if none provided, uses the name of the workspace.
+        """
         self.container.replace_workspace(new_workspace_name, new_window_name)
+        self.ws_name = new_workspace_name
 
     def rename_workspace(self, old_name, new_name):
         # rename is handled by the InstrumentWidget inside C++
