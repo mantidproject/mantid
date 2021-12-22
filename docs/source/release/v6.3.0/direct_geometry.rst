@@ -19,6 +19,7 @@ Bugfixes
 ########
 
 - Update instrument created by :ref:`LoadNXSPE <algm-LoadNXSPE>` to be viewable in instrument 3D view.
+- Fixed a bug that caused empty plot windows and crashes when running scripts generated from plot windows.
 
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
