@@ -10,7 +10,7 @@ from unittest.mock import patch, MagicMock
 from unittest import mock
 from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 tab_path = 'mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration'
 

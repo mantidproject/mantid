@@ -45,5 +45,6 @@ Bugfixes
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 - Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
+- The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
 
 :ref:`Release 6.3.0 <v6.3.0>`

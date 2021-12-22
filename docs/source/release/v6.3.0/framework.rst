@@ -45,6 +45,8 @@ Bugfixes
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 - Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
 - Fix bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are saved correctly when workspace indices are supplied.
+- Fix bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
+  that didn't have any detectors it failed with an error
 
 Fit Functions
 -------------

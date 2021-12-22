@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_presenter import CroppingPresenter
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from Engineering.common.calibration_info import CalibrationInfo
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
 from Engineering.EnggUtils import GROUP
 
 from mantidqt.utils.asynchronous import AsyncTask

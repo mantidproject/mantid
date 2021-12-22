@@ -1,34 +1,26 @@
-.. _func-Activation:
+.. _func-ActivationmeV:
 
-==========
-Activation
-==========
+=============
+ActivationmeV
+=============
 
-.. index:: Activation
+.. index:: ActivationmeV
 
 Description
 -----------
 
-The activation fitting function can be written as:
-
-.. math:: y = A_R e^{-\frac{b}{x}}
-
-where:
-- A_R - Attempt Rate
-- b - Barrier energy
-- x - is in Kelvin
-
-
-When fitting to meV instead it can be described as:
+The ActivationmeV fitting function can be written as:
 
 .. math:: y = A_R e^{-\frac{E\times b}{1000 k_B x}}
 
 where:
+- A_R - Attempt Rate
+- b - Barrier energy
 - E - activation energy
 - k_B - Boltzmann Constant
+- x - is in meV
 
-
-When using this function the Unit must be set to either K or meV otherwise the fitting function will not be applied.
+Alternatively use the `ActivationK <func-ActivationK>` fitting function when fitting to Kelvin.
 
 Examples
 --------
