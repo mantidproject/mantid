@@ -69,8 +69,8 @@ private:
   void exec_peaks();
   Kernel::V3D getOffsetVector(const std::string &label);
 
-  void predictOffsets(const int indexModulatedVector, Kernel::V3D offsets, const int maxOrder, const int runNumber,
-                      const Kernel::Matrix<double> &goniometer, const Kernel::V3D &hkl,
+  void predictOffsets(const int indexModulatedVector, const Kernel::V3D &offsets, const int maxOrder,
+                      const int runNumber, const Kernel::Matrix<double> &goniometer, const Kernel::V3D &hkl,
                       const Geometry::HKLFilterWavelength &lambdaFilter, const bool includePeaksInRange,
                       const bool includeOrderZero, std::vector<std::vector<int>> &alreadyDonePeaks);
 

@@ -34,7 +34,7 @@ public:
   MCInteractionStatistics(detid_t detectorID, const API::Sample &sample);
   std::string generateScatterPointStats();
   void UpdateScatterPointCounts(int componentIndex, bool pointUsed);
-  void UpdateScatterAngleStats(Kernel::V3D toStart, Kernel::V3D scatteredDirec);
+  void UpdateScatterAngleStats(const Kernel::V3D &toStart, const Kernel::V3D &scatteredDirec);
 
 private:
   detid_t m_detectorID;

@@ -12,7 +12,7 @@
 #include <vector>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
-PreviewRow::PreviewRow(const std::vector<std::string> runNumbers) : Item(), m_runNumbers(std::move(runNumbers)) {
+PreviewRow::PreviewRow(const std::vector<std::string> &runNumbers) : Item(), m_runNumbers(std::move(runNumbers)) {
   std::sort(m_runNumbers.begin(), m_runNumbers.end());
 }
 
