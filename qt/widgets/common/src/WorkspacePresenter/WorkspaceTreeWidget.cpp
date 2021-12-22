@@ -1405,7 +1405,7 @@ void WorkspaceTreeWidget::onClickPlotAdvanced() {
 /** Plots one or more spectra from each selected workspace
  * @param type "Simple", "Errors" show error bars, "Advanced" advanced plotting.
  */
-void WorkspaceTreeWidget::plotSpectrum(std::string type) {
+void WorkspaceTreeWidget::plotSpectrum(const std::string &type) {
   const bool isAdvanced = type == "Advanced";
   const auto userInput = m_tree->chooseSpectrumFromSelected(true, true, true, isAdvanced);
   // An empty map will be returned if the user clicks cancel in the spectrum

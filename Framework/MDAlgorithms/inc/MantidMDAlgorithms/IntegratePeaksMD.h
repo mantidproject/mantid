@@ -49,7 +49,7 @@ private:
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
-  bool detectorQ(Mantid::Kernel::V3D QLabFrame, double r);
+  bool detectorQ(const Mantid::Kernel::V3D &QLabFrame, double r);
 
   /// Instrument reference
   Geometry::Instrument_const_sptr inst;

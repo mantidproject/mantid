@@ -303,7 +303,7 @@ PredictSatellitePeaks::determineWorkspaceType(API::IPeaksWorkspace_sptr const &i
   }
 }
 
-void PredictSatellitePeaks::predictOffsets(const int indexModulatedVector, V3D offsets, const int maxOrder,
+void PredictSatellitePeaks::predictOffsets(const int indexModulatedVector, const V3D &offsets, const int maxOrder,
                                            const int runNumber, const Kernel::Matrix<double> &goniometer,
                                            const V3D &hkl, const HKLFilterWavelength &lambdaFilter,
                                            const bool includePeaksInRange, const bool includeOrderZero,
