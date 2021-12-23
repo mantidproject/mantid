@@ -62,8 +62,8 @@ public:
            const API::FunctionDomain &domain, API::FunctionValues &values, double chi0,
            std::vector<int> &freeParameters)
       : m_fixedParameterIndex(fixedParameterIndex), m_domain(domain), m_values(values), m_chi0(chi0),
-        m_function(std::move(inputFunction)), m_ws(std::move(inputWS)), m_workspaceIndex(workspaceIndex),
-        m_freeParameters(freeParameters), m_fitalg(AlgorithmFactory::Instance().create("Fit", -1)) {
+        m_fitalg(AlgorithmFactory::Instance().create("Fit", -1)), m_function(std::move(inputFunction)),
+        m_ws(std::move(inputWS)), m_workspaceIndex(workspaceIndex), m_freeParameters(freeParameters) {
     // create a fitting algorithm based on least squares (which is the default)
     m_fitalg->setChild(true);
   }

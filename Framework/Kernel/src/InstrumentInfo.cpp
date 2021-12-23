@@ -34,8 +34,8 @@ Logger g_log("InstrumentInfo");
  * @throw std::runtime_error if name or at least one technique are not defined
  */
 InstrumentInfo::InstrumentInfo(const FacilityInfo *f, const Poco::XML::Element *elem)
-    : m_facility(f), m_name(elem->getAttribute("name")), m_delimiter(elem->getAttribute("delimiter")),
-      m_shortName(elem->getAttribute("shortname")) {
+    : m_facility(f), m_name(elem->getAttribute("name")), m_shortName(elem->getAttribute("shortname")),
+      m_delimiter(elem->getAttribute("delimiter")) {
 
   if (m_delimiter.empty())
     m_delimiter = f->delimiter();
