@@ -589,7 +589,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBro
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:512
 shadowVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:1801
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/PropertyHandler.h:194
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3281
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitPropertyBrowser.cpp:3277
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorDataTable.cpp:200
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FitScriptGeneratorModel.cpp:611
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FlowLayout.cpp:131
@@ -690,7 +690,7 @@ stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlot
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:103
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:105
 stlFindInsert:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsModel.cpp:107
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:113
+unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectPlotOptionsView.cpp:92
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectSymmetrise.cpp:173
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectDataValidationHelper.cpp:33
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/IndirectLoadILL.cpp:129
