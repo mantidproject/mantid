@@ -70,11 +70,7 @@ void EditLocalParameterDialog::doSetup(const QString &parName, const QStringList
   m_uiForm.logValueSelector->setCheckboxShown(true);
   connect(m_uiForm.logValueSelector, SIGNAL(logOptionsEnabled(bool)), this, SIGNAL(logOptionsChecked(bool)));
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  header->setResizeMode(0, QHeaderView::Stretch);
-#else
   header->setSectionResizeMode(QHeaderView::Stretch);
-#endif
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this, SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
