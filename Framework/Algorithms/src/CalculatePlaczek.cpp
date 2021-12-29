@@ -345,9 +345,9 @@ void CalculatePlaczek::exec() {
         double inelasticPlaczekCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerms.firstTerm;
         // -- calculate second order correction
         if (order == 2) {
-          const double k = 2 * M_PI / xLambda[xIndex];                       // wave vector in 1/angstrom
-          const double energy = E_mev_toNeutronWavenumberSq * (k * k);       // in meV
-          const double kBToverE = kBT / energy;                              // unitless
+          const double k = 2 * M_PI / xLambda[xIndex];                 // wave vector in 1/angstrom
+          const double energy = E_mev_toNeutronWavenumberSq * (k * k); // in meV
+          const double kBToverE = kBT / energy;                        // unitless
           // NOTE: see the equation A1.15 in Howe et al. The analysis of liquid structure, 1989
           const double bracket_1 = (8 * f - 9) * (f - 1) * phi1[xIndex]            //
                                    - 3 * f * (2 * f - 3) * eps1[xIndex]            //
