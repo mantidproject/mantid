@@ -51,10 +51,10 @@ Struct calculateSummationTerm(const Kernel::Material &material) {
   Struct s;
   // add together the weighted sum
   const auto &formula = material.chemicalFormula();
-  auto sumLambda_first = [](double sum, auto &formula_unit) {
+  auto sumLambda_first = [](double sum, const auto &formula_unit) {
     return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / formula_unit.atom->mass;
   };
-  auto sumLambda_second = [](double sum, auto &formula_unit) {
+  auto sumLambda_second = [](double sum, const auto &formula_unit) {
     const double mass_sq = formula_unit.atom->mass * formula_unit.atom->mass;
     return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / mass_sq;
   };
