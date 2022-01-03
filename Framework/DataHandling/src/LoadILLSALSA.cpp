@@ -102,6 +102,28 @@ void LoadILLSALSA::exec() {
   loadInst->execute();
   setProperty("OutputWorkspace", m_outputWorkspace);
 
+  // move detector
+  Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
+  theta.load();
+  double distance = 1.125; // TODO read distance from calibration file
+  double thetaDeg = theta[0];
+  double thetaRad = (-thetaDeg) * M_PI / 180.0 + M_PI / 2;
+  double dx = -distance * cos(thetaRad);
+  double dz = distance * sin(thetaRad);
+  auto moveInst = createChildAlgorithm("MoveInstrumentComponent");
+  moveInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
+  moveInst->setPropertyValue("ComponentName", "detector");
+  moveInst->setProperty<double>("X", dx);
+  moveInst->setProperty<double>("Z", dz);
+  moveInst->setProperty<bool>("RelativePosition", false);
+  moveInst->execute();
+  auto rotateInst = createChildAlgorithm("RotateInstrumentComponent");
+  rotateInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
+  rotateInst->setPropertyValue("ComponentName", "detector");
+  rotateInst->setPropertyValue("Y", "1");
+  rotateInst->setProperty<double>("Angle", thetaDeg);
+  rotateInst->execute();
+
   // fill detector data
   int index = 0;
   for (int i = 0; i < m_numberOfRows; i++) {
