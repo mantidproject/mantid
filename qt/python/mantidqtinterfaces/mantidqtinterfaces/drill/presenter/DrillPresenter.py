@@ -269,7 +269,7 @@ class DrillPresenter:
             acquisionMode = self.model.getAcquisitionMode()
             if ((acquisionMode in RundexSettings.PROCESSING_MODE)
                 and (RundexSettings.PROCESSING_MODE[acquisionMode]
-                    == RundexSettings.GROUP_BY_GROUP)):
+                     == RundexSettings.GROUP_BY_GROUP)):
                 result = self.model.processGroupByGroup(rows)
             else:
                 result = self.model.processGroup(rows)
