@@ -6,13 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from assert_called import assert_called
-from fake_signal import FakeSignal
 from unittest import mock
 from sans.common.enums import BinningType
 from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
+from test.SANS.gui_logic.fake_signal import FakeSignal
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):
@@ -42,11 +41,11 @@ class SummationSettingsPresenterTest(unittest.TestCase):
 
     def test_retrieves_additional_time_shifts_when_changed(self):
         self.view.additionalTimeShiftsChanged.emit()
-        assert_called(self.view.additional_time_shifts)
+        self.view.additional_time_shifts.assert_called()
 
     def test_retrieves_bin_settings_when_changed(self):
         self.view.binSettingsChanged.emit()
-        assert_called(self.view.bin_settings)
+        self.view.bin_settings.assert_called()
 
     def test_updates_model_when_bin_settings_changed(self):
         new_bin_settings = 'bin settings'
@@ -73,11 +72,11 @@ class SummationSettingsPresenterTest(unittest.TestCase):
 
     def test_enables_overlay_workspace_when_enabled(self):
         self.view.preserveEventsChanged.emit(True)
-        assert_called(self.summation_settings.enable_overlay_event_workspaces)
+        self.summation_settings.enable_overlay_event_workspaces.assert_called()
 
     def test_disabled_overay_workspace_when_disabled(self):
         self.view.preserveEventsChanged.emit(False)
-        assert_called(self.summation_settings.disable_overlay_event_workspaces)
+        self.summation_settings.disable_overlay_event_workspaces.assert_called()
 
 
 if __name__ == '__main__':

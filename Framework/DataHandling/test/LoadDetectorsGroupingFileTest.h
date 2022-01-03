@@ -13,7 +13,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 
 #include "Poco/File.h"
 

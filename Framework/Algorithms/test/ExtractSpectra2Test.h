@@ -15,9 +15,9 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidIndexing/IndexInfo.h"
 
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
 using Mantid::Algorithms::ExtractSpectra2;
 using namespace Mantid;

@@ -42,7 +42,7 @@ namespace Kernel {
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, TYPE defaultValue, IValidator_sptr validator,
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue, IValidator_sptr validator,
                                            unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
       m_initialValue(std::move(defaultValue)), m_validator(std::move(validator)) {}
@@ -54,7 +54,7 @@ PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, TYPE default
  * or Direction::InOut (Input & Output) property
  */
 template <typename TYPE>
-PropertyWithValue<TYPE>::PropertyWithValue(const std::string &name, TYPE defaultValue, unsigned int direction)
+PropertyWithValue<TYPE>::PropertyWithValue(std::string name, TYPE defaultValue, unsigned int direction)
     : Property(std::move(name), typeid(TYPE), direction), m_value(defaultValue),
       m_initialValue(std::move(defaultValue)), m_validator(std::make_shared<NullValidator>()) {}
 

@@ -171,4 +171,7 @@ mtd_add_qt_library(
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
 
-add_subdirectory(test)
+# Testing target
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_subdirectory(test)
+endif()

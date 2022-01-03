@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/FindSXPeaksHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <gmock/gmock.h>
 
 #include <string>

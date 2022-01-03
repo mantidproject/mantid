@@ -12,9 +12,9 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidHistogramData/HistogramIterator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Geometry::deg2rad;
 using Mantid::Reflectometry::ReflectometrySumInQ;
@@ -231,9 +231,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", static_cast<double>(detectorIdx)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(),
-                            std::string("Some invalid Properties found: [ "
-                                        "BeamCentre InputWorkspaceIndexSet ]"))
+    std::string err_msg("Some invalid Properties found: \n"
+                        " BeamCentre: Beam centre is not included in InputWorkspaceIndexSet.\n"
+                        " InputWorkspaceIndexSet: A neighbour to any detector in the index set cannot be a monitor");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(), err_msg)
   }
 
   void test_monitorInIndexSetThrows() {
@@ -250,9 +251,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", static_cast<double>(monitorIdx)))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(),
-                            std::string("Some invalid Properties found: [ "
-                                        "BeamCentre InputWorkspaceIndexSet ]"))
+    std::string err_msg("Some invalid Properties found: \n"
+                        " BeamCentre: Beam centre is not included in InputWorkspaceIndexSet.\n"
+                        " InputWorkspaceIndexSet: Index set cannot include monitors.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(), err_msg);
   }
 
   void test_BeamCentreNotInIndexSetThrows() {
@@ -268,8 +270,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("BeamCentre", 2.))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("FlatSample", true))
-    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(),
-                            std::string("Some invalid Properties found: [ BeamCentre ]"))
+    std::string err_msg("Some invalid Properties found: \n"
+                        " BeamCentre: Beam centre is not included in InputWorkspaceIndexSet.");
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::runtime_error &e, e.what(), err_msg);
   }
 
 private:

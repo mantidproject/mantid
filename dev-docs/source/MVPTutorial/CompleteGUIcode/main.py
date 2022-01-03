@@ -10,8 +10,8 @@ import sys
 
 import model_colour
 import model_data
-import master_view
-import master_presenter
+import main_view
+import main_presenter
 
 """
 A wrapper class for setting the main window
@@ -20,15 +20,15 @@ A wrapper class for setting the main window
 
 class Demo(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        super(Demo, self).__init__(parent)
+        super().__init__(parent)
 
         data_model = model_data.DataGenerator()
         colour_list = model_colour.line_colours()
 
         self.window = QtWidgets.QMainWindow()
 
-        my_view = master_view.MasterView(parent=self)
-        self.master_presenter = master_presenter.MasterPresenter(my_view, data_model, colour_list)
+        my_view = main_view.MainView(parent=self)
+        self.main_presenter = main_presenter.MainPresenter(my_view, data_model, colour_list)
 
         # set the view for the main window
         self.setCentralWidget(my_view)

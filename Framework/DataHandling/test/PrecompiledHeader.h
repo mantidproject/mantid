@@ -10,8 +10,8 @@
 #include <cxxtest/WrappedTestSuite.h>
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/System.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 // STL
 

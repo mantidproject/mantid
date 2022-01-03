@@ -19,6 +19,10 @@ system of equations representing the mapping from (h,k,l) to Q for each
 indexed peak. The system of linear equations is then solved in the least
 squares sense, using QR factorization.
 
+The option ``CommonUBForAll`` only effects the calculation of the
+uncertainty in the modulation UB. If ``True`` the UB will be optimized
+separately for each subset of runs before calculating the error.
+
 Usage
 -----
 

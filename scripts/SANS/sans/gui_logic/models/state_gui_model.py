@@ -337,12 +337,10 @@ class StateGuiModel(ModelCommon):
         if attr_name in ["wavelength_full_range", "wavelength_step", "selected_ranges"]:
             # These attrs are in wavelength_interval
             to_check = [self._all_states.adjustment.calculate_transmission.wavelength_interval,
-                        self._all_states.adjustment.normalize_to_monitor.wavelength_interval,
                         self._all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_interval,
                         self._all_states.wavelength.wavelength_interval]
         else:
             to_check = [self._all_states.adjustment.calculate_transmission,
-                        self._all_states.adjustment.normalize_to_monitor,
                         self._all_states.adjustment.wavelength_and_pixel_adjustment,
                         self._all_states.wavelength]
         return to_check

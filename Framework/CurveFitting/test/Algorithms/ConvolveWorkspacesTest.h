@@ -17,8 +17,8 @@
 #include "MantidCurveFitting/Algorithms/Fit.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

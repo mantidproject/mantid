@@ -42,7 +42,7 @@ namespace { // anonymous namespace
 double calculateSummationTerm(const Kernel::Material &material) {
   // add together the weighted sum
   const auto &formula = material.chemicalFormula();
-  auto sumLambda = [](double sum, auto &formula_unit) {
+  auto sumLambda = [](double sum, const auto &formula_unit) {
     return sum + formula_unit.multiplicity * formula_unit.atom->neutron.tot_scatt_xs / formula_unit.atom->mass;
   };
   const double unnormalizedTerm = std::accumulate(formula.begin(), formula.end(), 0.0, sumLambda);

@@ -247,7 +247,7 @@ target_link_libraries(
 add_subdirectory(test)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidDataObjectsTargets")
   mtd_install_framework_lib(TARGETS DataObjects EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()

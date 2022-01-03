@@ -11,12 +11,12 @@
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MDFrameValidator.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/QLab.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;

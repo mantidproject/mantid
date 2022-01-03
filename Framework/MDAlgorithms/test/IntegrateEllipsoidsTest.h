@@ -13,11 +13,11 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <boost/tuple/tuple.hpp>
 #include <cxxtest/TestSuite.h>
 #include <memory>

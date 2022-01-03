@@ -14,8 +14,8 @@ class PlotFreqFitPaneModel(PlotFitPaneModel):
 
     def __init__(self, context):
         super().__init__(context,"Frequency Data")
-        end_x = self.context.default_end_x
-        self.context.plot_panes_context[self.name].set_defaults([0.,end_x], [0.0, 1.0])
+        x_range = self.context._frequency_context.range()
+        self.context.plot_panes_context[self.name].set_defaults(x_range, [0.0, 1.0])
 
     def _create_workspace_label(self, workspace_name, index):
         group = str(get_group_or_pair_from_name(workspace_name))

@@ -18,13 +18,13 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/WriteLock.h"
-#include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 #include <map>
 #include <utility>

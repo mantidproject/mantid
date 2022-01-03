@@ -5,13 +5,7 @@ mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesDirectTest
   QT_VERSION 5
   SRC ${TEST_FILES}
-  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc
-               ../../../../Framework/TestHelpers/inc ../
-  TEST_HELPER_SRCS
-    ../../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
+  INCLUDE_DIRS ../../../../Framework/CurveFitting/inc ../../../../Framework/DataObjects/inc ../
   LINK_LIBS Mantid::DataObjects
             ${GMOCK_LIBRARIES}
             ${GTEST_LIBRARIES}
@@ -27,3 +21,5 @@ mtd_add_qt_tests(
                    MantidQtWidgetsPlotting MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests
 )
+
+add_framework_test_helpers(MantidQtInterfacesDirectTestQt5)

@@ -34,12 +34,12 @@ try:
     from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 except ImportError:
     from qtpy import PYQT4, PYQT5, PYSIDE, PYSIDE2  # noqa
-    if PYQT5 or PYSIDE2:
-        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-        from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-    elif PYQT4 or PYSIDE:
+    if PYQT4 or PYSIDE:
         from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
         from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
+    elif PYQT5 or PYSIDE2:
+        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+        from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
     else:
         raise RuntimeError('Do not know which matplotlib backend to set')
     from matplotlib.legend import Legend
@@ -129,17 +129,27 @@ class PyChopGui(QMainWindow):
         else:
             self.widgets['MultiRepCheck'].setEnabled(False)
             self.widgets['MultiRepCheck'].setChecked(False)
-        self.widgets['Chopper2Phase']['Edit'].hide()
-        self.widgets['Chopper2Phase']['Label'].hide()
+        self._hide_phases()
         if self.engine.chopper_system.isPhaseIndependent:
-            self.widgets['Chopper2Phase']['Edit'].show()
-            self.widgets['Chopper2Phase']['Label'].show()
-            self.widgets['Chopper2Phase']['Edit'].setText(str(self.engine.chopper_system.defaultPhase[0]))
-            self.widgets['Chopper2Phase']['Label'].setText(self.engine.chopper_system.phaseNames[0])
+            for idx in range(len(self.engine.chopper_system.isPhaseIndependent)):
+                if idx > self.n_indep_phase:
+                    phase_label = QLabel("")
+                    phase_edit = QLineEdit(self)
+                    phase_edit.returnPressed.connect(self.setFreq)
+                    self.leftPanel.insertWidget(self.phase_index, phase_edit)
+                    self.leftPanel.insertWidget(self.phase_index, phase_label)
+                    self.widgets[f"Chopper{idx}Phase"] = {'Edit':phase_edit, 'Label':phase_label}
+                    self.n_indep_phase += 1
+                    self.phase_index += 2
+                else:
+                    self.widgets[f"Chopper{idx}Phase"]['Edit'].show()
+                    self.widgets[f"Chopper{idx}Phase"]['Label'].show()
+                self.widgets[f"Chopper{idx}Phase"]['Edit'].setText(str(self.engine.chopper_system.defaultPhase[idx]))
+                self.widgets[f"Chopper{idx}Phase"]['Label'].setText(self.engine.chopper_system.phaseNames[idx])
             # Special case for MERLIN - hide phase control from normal users
             if 'MERLIN' in str(instname) and not self.instSciAct.isChecked():
-                self.widgets['Chopper2Phase']['Edit'].hide()
-                self.widgets['Chopper2Phase']['Label'].hide()
+                self.widgets['Chopper0Phase']['Edit'].hide()
+                self.widgets['Chopper0Phase']['Label'].hide()
         self.engine.setChopper(str(self.widgets['ChopperCombo']['Combo'].currentText()))
         self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
         val = self.flxslder.val * self.maxE[self.engine.instname] / 100
@@ -158,12 +168,12 @@ class PyChopGui(QMainWindow):
             self.tabs.setTabEnabled(self.qetabID, True)
         # show s2 for HYSPEC only
         if 'HYSPEC' in str(instname):
-            self.widgets[f"S2Edit"]['Edit'].show()
-            self.widgets[f"S2Edit"]['Edit'].setText(str(self.hyspecS2))
-            self.widgets[f"S2Edit"]['Label'].show()
+            self.widgets["S2Edit"]['Edit'].show()
+            self.widgets["S2Edit"]['Edit'].setText(str(self.hyspecS2))
+            self.widgets["S2Edit"]['Label'].show()
         else:
-            self.widgets[f"S2Edit"]['Edit'].hide()
-            self.widgets[f"S2Edit"]['Label'].hide()
+            self.widgets["S2Edit"]['Edit'].hide()
+            self.widgets["S2Edit"]['Label'].hide()
 
     def setChopper(self, choppername):
         """
@@ -172,21 +182,7 @@ class PyChopGui(QMainWindow):
         self.engine.setChopper(str(choppername))
         self.engine.setFrequency(float(self.widgets['FrequencyCombo']['Combo'].currentText()))
         # Special case for MERLIN - only enable multirep for 'G' chopper
-        if 'MERLIN' in self.engine.instname:
-            if 'G' in str(choppername):
-                self.widgets['MultiRepCheck'].setEnabled(True)
-                self.tabs.setTabEnabled(self.tdtabID, True)
-                self.widgets['Chopper2Phase']['Edit'].setText('1500')
-                self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
-                if self.instSciAct.isChecked():
-                    self.widgets['Chopper2Phase']['Edit'].show()
-                    self.widgets['Chopper2Phase']['Label'].show()
-            else:
-                self.widgets['MultiRepCheck'].setEnabled(False)
-                self.widgets['MultiRepCheck'].setChecked(False)
-                self.tabs.setTabEnabled(self.tdtabID, False)
-                self.widgets['Chopper2Phase']['Edit'].hide()
-                self.widgets['Chopper2Phase']['Label'].hide()
+        self._merlin_chopper()
 
     def setFreq(self, freqtext=None, **kwargs):
         """
@@ -197,15 +193,45 @@ class PyChopGui(QMainWindow):
         if len(self.engine.getFrequency()) > 1 and (not hasattr(freq_in, '__len__') or len(freq_in)==1):
             freqpr = float(self.widgets['PulseRemoverCombo']['Combo'].currentText())
             freq_in = [freq_in, freqpr]
-        if not self.widgets['Chopper2Phase']['Label'].isHidden():
-            chop2phase = self.widgets['Chopper2Phase']['Edit'].text()
-            if isinstance(self.engine.chopper_system.defaultPhase[0], str):
-                chop2phase = str(chop2phase)
-            else:
-                chop2phase = float(chop2phase) % (1e6 / self.engine.moderator.source_rep)
-            self.engine.setFrequency(freq_in, phase=chop2phase)
+        # Checks for independent phases
+        phases = []
+        for key, widget in self.widgets.items():
+            if key.endswith('Phase') and not widget['Label'].isHidden():
+                idx = int(key[7])
+                phase = widget['Edit'].text()
+                if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
+                    phase = str(phase)
+                else:
+                    try:
+                        phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
+                    except ValueError:
+                        raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
+                phases.append(phase)
+        if phases:
+            self.engine.setFrequency(freq_in, phase=phases)
         else:
             self.engine.setFrequency(freq_in)
+
+    def _hide_phases(self):
+        for widget in [wdg for key, wdg in self.widgets.items() if key.endswith('Phase')]:
+            widget['Edit'].hide()
+            widget['Label'].hide()
+
+    def _merlin_chopper(self):
+        if 'MERLIN' in self.engine.instname:
+            if 'G' in self.engine.getChopper():
+                self.widgets['MultiRepCheck'].setEnabled(True)
+                self.tabs.setTabEnabled(self.tdtabID, True)
+                if self.instSciAct.isChecked():
+                    self.widgets['Chopper0Phase']['Edit'].setText('1500')
+                    self.widgets['Chopper0Phase']['Label'].setText('Disk chopper phase delay time')
+                    self.widgets['Chopper0Phase']['Edit'].show()
+                    self.widgets['Chopper0Phase']['Label'].show()
+            else:
+                self.widgets['MultiRepCheck'].setEnabled(False)
+                self.widgets['MultiRepCheck'].setChecked(False)
+                self.tabs.setTabEnabled(self.tdtabID, False)
+                self._hide_phases()
 
     def setEi(self):
         """
@@ -215,9 +241,10 @@ class PyChopGui(QMainWindow):
             eitxt = float(self.widgets['EiEdit']['Edit'].text())
         except ValueError:
             raise ValueError('No Ei specified, or Ei string not understood')
-        self.engine.setEi(eitxt)
-        if self.eiPlots.isChecked():
-            self.calc_callback()
+        else:
+            self.engine.setEi(eitxt)
+            if self.eiPlots.isChecked():
+                self.calc_callback()
 
     def setS2(self):
         """
@@ -238,7 +265,8 @@ class PyChopGui(QMainWindow):
         try:
             if self.engine.getChopper() is None:
                 self.setChopper(self.widgets['ChopperCombo']['Combo'].currentText())
-            self.setEi()
+            if not self.eiPlots.isChecked():
+                self.setEi()
             if self.engine.name=='HYSPEC':
                 self.setS2()
             self.setFreq()
@@ -246,8 +274,8 @@ class PyChopGui(QMainWindow):
             if self.errormess:
                 idx = [i for i, ei in enumerate(self.eis) if np.abs(ei - self.engine.getEi()) < 1.e-4]
                 if idx and self.flux[idx[0]] == 0:
-                    raise ValueError(self.errormess)
-                self.errormessage(self.errormess)
+                    raise ValueError(self.errormess) # No rep has any flux, skips plot
+                self.errormessage(self.errormess)    # Some rep have flux, still plot
             self.plot_res()
             self.plot_frame()
             if self.instSciAct.isChecked():
@@ -283,6 +311,7 @@ class PyChopGui(QMainWindow):
                 self.flux = self.engine.getFlux()
                 if len(w) > 0:
                     raise ValueError(w[0].message)
+                    # will be caught by calc_callback()
 
     def _set_overplot(self, overplot, axisname):
         axis = getattr(self, axisname)
@@ -376,7 +405,7 @@ class PyChopGui(QMainWindow):
         update = kwargs['update'] if 'update' in kwargs.keys() else False
         # Do not recalculate if all relevant parameters still the same.
         _, labels = self.flxaxes2.get_legend_handles_labels()
-        searchStr = '([A-Z]+) "(.+)" ([0-9]+) Hz'
+        searchStr = '([A-Z0-9]+) "(.+)" ([0-9]+) Hz'
         tmpinst = []
         if (labels and (overplot or len(labels) == 1)) or update:
             for prevtitle in labels:
@@ -459,7 +488,7 @@ class PyChopGui(QMainWindow):
         overplot = self.widgets['HoldCheck'].isChecked()
         # Do not recalculate if one of the plots has the same parametersc
         _, labels = self.frqaxes2.get_legend_handles_labels()
-        searchStr = '([A-Z]+) "(.+)" Ei = ([0-9.-]+) meV'
+        searchStr = '([A-Z0-9]+) "(.+)" Ei = ([0-9.-]+) meV'
         if labels and (overplot or len(labels) == 1):
             for prevtitle in labels:
                 prevInst, prevChop, prevEi = re.search(searchStr, prevtitle).groups()
@@ -506,15 +535,7 @@ class PyChopGui(QMainWindow):
         Callback function for the "Instrument Scientist Mode" menu option
         """
         # MERLIN is a special case - want to hide ability to change phase from users
-        if 'MERLIN' in self.engine.instname and 'G' in self.engine.getChopper():
-            if self.instSciAct.isChecked():
-                self.widgets['Chopper2Phase']['Edit'].show()
-                self.widgets['Chopper2Phase']['Label'].show()
-                self.widgets['Chopper2Phase']['Edit'].setText('1500')
-                self.widgets['Chopper2Phase']['Label'].setText('Disk chopper phase delay time')
-            else:
-                self.widgets['Chopper2Phase']['Edit'].hide()
-                self.widgets['Chopper2Phase']['Label'].hide()
+        self._merlin_chopper()
         if self.instSciAct.isChecked():
             self.tabs.insertTab(self.scrtabID, self.scrtab, 'ScriptOutput')
             self.scrtab.show()
@@ -540,6 +561,7 @@ class PyChopGui(QMainWindow):
             new_inst = Instrument(yaml_file)
         except (RuntimeError, AttributeError, ValueError) as err:
             self.errormessage(err)
+            return
         newname = new_inst.name
         if newname in self.instruments.keys() and not self.overwriteload.isChecked():
             overwrite, newname = self._ask_overwrite()
@@ -604,12 +626,9 @@ class PyChopGui(QMainWindow):
         obj = Instrument(obj_in)
         obj.setEi(ei)
         en = np.linspace(0, 0.95*ei, 10)
-        try:
-            flux = self.engine.getFlux()
-            res = self.engine.getResolution(en)
-        except ValueError as err:
-            self.errormessage(err)
-            raise ValueError(err)
+        # ValueErrors here will be caught in showText() or writeText()
+        flux = self.engine.getFlux()
+        res = self.engine.getResolution(en)
         tsqvan, tsqdic, tsqmodchop = obj.getVanVar()
         v_mod, v_chop = tuple(np.sqrt(tsqmodchop[:2]) * 1e6)
         x0, _, x1, x2, _ = obj.chopper_system.getDistances()
@@ -679,7 +698,8 @@ class PyChopGui(QMainWindow):
         """
         try:
             generatedText = self.genText()
-        except ValueError:
+        except ValueError as err:
+            self.errormessage(err)
             return
         self.txtwin = QDialog()
         self.txtedt = QTextEdit()
@@ -703,11 +723,16 @@ class PyChopGui(QMainWindow):
         """
         Saves the generated text to a file (opens file dialog).
         """
+        try:
+            generatedText = self.genText()
+        except ValueError as err:
+            self.errormessage(err)
+            return
         fname = QFileDialog.getSaveFileName(self, 'Open file', '')
         if isinstance(fname, tuple):
             fname = fname[0]
         fid = open(fname, 'w')
-        fid.write(self.genText())
+        fid.write(generatedText)
         fid.close()
 
     def update_script(self):
@@ -765,25 +790,34 @@ class PyChopGui(QMainWindow):
             self.hlploop = QEventLoop()
             self.hlploop.exec_()
 
+    def _catch(self, fn):
+        # Wrapper to catch exceptions in callbacks
+        def wrapped(*args, **kwargs):
+            try:
+                fn(*args, **kwargs)
+            except Exception as err:
+                self.errormessage(err)
+        return wrapped
+
     def drawLayout(self):
         """
         Draws the GUI layout.
         """
         self.widgetslist = [
-            ['pair', 'show', 'Instrument', 'combo', self.instruments, self.setInstrument, 'InstrumentCombo'],
-            ['pair', 'show', 'Chopper', 'combo', '', self.setChopper, 'ChopperCombo'],
-            ['pair', 'show', 'Frequency', 'combo', '', self.setFreq, 'FrequencyCombo'],
-            ['pair', 'hide', 'Pulse remover chopper freq', 'combo', '', self.setFreq, 'PulseRemoverCombo'],
-            ['pair', 'show', 'Ei', 'edit', '', self.setEi, 'EiEdit'],
-            ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self.setFreq, 'Chopper2Phase'],
-            ['pair', 'hide', 'S2', 'edit', '', self.setS2, 'S2Edit'],
+            ['pair', 'show', 'Instrument', 'combo', self.instruments, self._catch(self.setInstrument), 'InstrumentCombo'],
+            ['pair', 'show', 'Chopper', 'combo', '', self._catch(self.setChopper), 'ChopperCombo'],
+            ['pair', 'show', 'Frequency', 'combo', '', self._catch(self.setFreq), 'FrequencyCombo'],
+            ['pair', 'hide', 'Pulse remover chopper freq', 'combo', '', self._catch(self.setFreq), 'PulseRemoverCombo'],
+            ['pair', 'show', 'Ei', 'edit', '', self._catch(self.setEi), 'EiEdit'],
+            ['pair', 'hide', 'Chopper 2 phase delay time', 'edit', '5', self._catch(self.setFreq), 'Chopper2Phase'],
+            ['pair', 'hide', 'S2', 'edit', '', self._catch(self.setS2), 'S2Edit'],
             ['spacer'],
             ['single', 'show', 'Calculate and Plot', 'button', self.calc_callback, 'CalculateButton'],
             ['single', 'show', 'Hold current plot', 'check', lambda: None, 'HoldCheck'],
             ['single', 'show', 'Show multi-reps', 'check', lambda: None, 'MultiRepCheck'],
             ['spacer'],
-            ['single', 'show', 'Show data ascii window', 'button', self.showText, 'ShowAsciiButton'],
-            ['single', 'show', 'Save data as ascii', 'button', self.saveText, 'SaveAsciiButton']
+            ['single', 'show', 'Show data ascii window', 'button', self._catch(self.showText), 'ShowAsciiButton'],
+            ['single', 'show', 'Save data as ascii', 'button', self._catch(self.saveText), 'SaveAsciiButton']
         ]
         self.droplabels = []
         self.dropboxes = []
@@ -794,7 +828,12 @@ class PyChopGui(QMainWindow):
         self.rightPanel = QVBoxLayout()
         self.tabs = QTabWidget(self)
         self.fullWindow = QGridLayout()
+        self.n_indep_phase = -1
+        idx = 0
         for widget in self.widgetslist:
+            if widget[-1] == 'Chopper2Phase':
+                self.phase_index = idx
+                continue
             if 'pair' in widget[0]:
                 self.droplabels.append(QLabel(widget[2]))
                 if 'combo' in widget[3]:
@@ -811,6 +850,7 @@ class PyChopGui(QMainWindow):
                     raise RuntimeError('Bug in code - widget %s is not recognised.' % (widget[3]))
                 self.leftPanel.addWidget(self.droplabels[-1])
                 self.leftPanel.addWidget(self.dropboxes[-1])
+                idx += 2
                 if 'hide' in widget[1]:
                     self.droplabels[-1].hide()
                     self.dropboxes[-1].hide()
@@ -824,11 +864,13 @@ class PyChopGui(QMainWindow):
                 else:
                     raise RuntimeError('Bug in code - widget %s is not recognised.' % (widget[3]))
                 self.leftPanel.addWidget(self.singles[-1])
+                idx += 1
                 if 'hide' in widget[1]:
                     self.singles[-1].hide()
                 self.widgets[widget[-1]] = self.singles[-1]
             elif 'spacer' in widget[0]:
                 self.leftPanel.addItem(QSpacerItem(0, 35))
+                idx += 1
             else:
                 raise RuntimeError('Bug in code - widget class %s is not recognised.' % (widget[0]))
 

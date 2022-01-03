@@ -187,7 +187,7 @@ class FitSingleSpectrumNoBackgroundTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = 0.000602
+        index_one_first = 0.000794
         index_one_last = 0.007207
         index_two_first = 1.127134e-05
         index_two_last = 6.902223e-05
@@ -266,7 +266,7 @@ class SingleSpectrumBackground(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(50.0, fitted_ws.readX(0)[0])
         self.assertAlmostEqual(562.0, fitted_ws.readX(0)[-1])
 
-        index_one_first = 0.000602
+        index_one_first = 0.000819
         index_one_last = 0.007221
         calc_data_height_expected = 0.133021
         calc_data_bin_expected = 635

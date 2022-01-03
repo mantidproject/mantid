@@ -11,8 +11,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/File.h>
 

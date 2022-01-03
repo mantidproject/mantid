@@ -80,9 +80,8 @@ class PeaksViewerModelTest(unittest.TestCase):
         slice_info = MagicMock()
         slice_info.slicepoint = [0.5, None, None]
         slice_info.z_index = 0
-        slice_info.frame = SpecialCoordinateSystem.QSample
 
-        slicepoint = model.slicepoint(0, slice_info)
+        slicepoint = model.slicepoint(0, slice_info, SpecialCoordinateSystem.QSample)
 
         peak0 = model.ws.getPeak(0)
         peak0.getQSampleFrame.assert_called_once()

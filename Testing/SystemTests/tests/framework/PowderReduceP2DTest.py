@@ -7,6 +7,8 @@
 import systemtesting
 from mantid.simpleapi import PowderReduceP2D
 
+import sys
+
 
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
     def __init__(self):
@@ -122,11 +124,8 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 4
 
     def _loadReference(self):
-        return 'PowderReduceP2D_reference.p2d'
+        suffix = "" if sys.platform != 'win32' else "_msvc"
+        return f'PowderReduceP2D_reference{suffix}.p2d'
 
     def _outputFile(self):
         return 'PowderReduceP2D_Test'
-
-
-if __name__ == '__main__':
-    unittest.main()

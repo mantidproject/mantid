@@ -59,9 +59,11 @@ mtd_add_qt_library(
   LINK_LIBS ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES} ${JSONCPP_LIBRARIES}
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsMplCpp MantidQtWidgetsPlotting
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
-  OSX_INSTALL_RPATH @loader_path/../../Contents/MacOS @loader_path/../../plugins/qt5
+  OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
 
 # Testing target
-add_subdirectory(test)
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_subdirectory(test)
+endif()

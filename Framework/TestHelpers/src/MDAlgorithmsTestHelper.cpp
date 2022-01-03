@@ -9,11 +9,11 @@
  *
  *  This collection of functions MAY ONLY be used in packages above MDAlgorithms
  *********************************************************************************/
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
 namespace Mantid {
 using namespace API;

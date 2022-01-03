@@ -7,9 +7,9 @@
 #pragma once
 
 #include "MantidAlgorithms/TimeAtSampleStrategyIndirect.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::Algorithms::TimeAtSampleStrategyIndirect;

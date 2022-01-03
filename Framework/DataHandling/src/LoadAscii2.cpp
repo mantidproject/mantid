@@ -575,7 +575,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
  * Check if the file has been found to inconsistently include spectra IDs
  * @param[in] columns : the columns of values in the current line of data
  */
-void LoadAscii2::addToCurrentSpectra(std::list<std::string> &columns) {
+void LoadAscii2::addToCurrentSpectra(const std::list<std::string> &columns) {
   std::vector<double> values(m_baseCols, 0.);
   m_spectraStart = false;
   fillInputValues(values, columns);

@@ -78,7 +78,7 @@ endfunction()
 # ######################################################################################################################
 # Common install RPATH setting for all extension modules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../MacOS)
+  set(EXT_INSTALL_RPATH "${DL_ORIGIN_TAG}/../../../MacOS;${DL_ORIGIN_TAG}/../../../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../${LIB_DIR})
 endif()

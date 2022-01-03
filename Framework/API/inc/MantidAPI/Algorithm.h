@@ -40,6 +40,10 @@ class Value;
 }
 
 namespace Mantid {
+namespace Kernel {
+// this is declared in MantidKernel/Timer.h
+typedef std::chrono::time_point<std::chrono::high_resolution_clock> time_point_ns;
+} // namespace Kernel
 namespace Indexing {
 class SpectrumIndexSet;
 }
@@ -211,6 +215,7 @@ public:
   /** @name IAlgorithm methods */
   void initialize() override;
   bool execute() override final;
+  void addTimer(const std::string &name, const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end);
   void executeAsChildAlg() override;
   std::map<std::string, std::string> validateInputs() override;
 
@@ -332,6 +337,7 @@ public:
 
   std::string getPropertyValue(const std::string &name) const override;
   const std::vector<Kernel::Property *> &getProperties() const override;
+  std::vector<std::string> getDeclaredPropertyNames() const noexcept override;
 
   /// Get the value of a property
   TypedValue getProperty(const std::string &name) const override;

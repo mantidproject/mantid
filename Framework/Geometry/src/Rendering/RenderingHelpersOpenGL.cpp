@@ -41,6 +41,7 @@ GNU_DIAG_OFF("cast-qual")
 #include <BRep_Tool.hxx>
 #include <Poly_Array1OfTriangle.hxx>
 #include <Poly_Triangulation.hxx>
+#include <Standard_Version.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
@@ -53,7 +54,33 @@ GNU_DIAG_ON("cast-qual")
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191
 #endif
+
+namespace {
+auto getNode(const Handle(Poly_Triangulation) facing, Standard_Integer i) {
+#if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
+  return facing->Node(i);
+#else
+  // Compat shim to support OCCT 7.5 and below
+  TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
+  tab = facing->Nodes();
+  return tab.Value(i);
+
 #endif
+}
+
+auto getTriangle(const Handle(Poly_Triangulation) facing, Standard_Integer i) {
+#if OCC_VERSION_MAJOR >= 7 && OCC_VERSION_MINOR >= 6
+  return facing->Triangle(i);
+#else
+  // Compat shim to support OCCT 7.5 and below
+  Poly_Array1OfTriangle tri(1, facing->NbTriangles());
+  tri = facing->Triangles();
+  return tri.Value(i);
+
+#endif
+}
+} // namespace
+#endif // ENABLE_OPENCASCADE
 
 namespace Mantid::Geometry {
 using Kernel::Quat;
@@ -107,20 +134,17 @@ void render(const TopoDS_Shape &ObjSurf) {
       TopoDS_Face F = TopoDS::Face(Ex.Current());
       TopLoc_Location L;
       Handle(Poly_Triangulation) facing = BRep_Tool::Triangulation(F, L);
-      TColgp_Array1OfPnt tab(1, (facing->NbNodes()));
-      tab = facing->Nodes();
-      Poly_Array1OfTriangle tri(1, facing->NbTriangles());
-      tri = facing->Triangles();
+
       for (Standard_Integer i = 1; i <= (facing->NbTriangles()); i++) {
-        Poly_Triangle trian = tri.Value(i);
+        const Poly_Triangle trian = getTriangle(facing, i);
         Standard_Integer index1, index2, index3;
         trian.Get(index1, index2, index3);
-        gp_Pnt point1 = tab.Value(index1);
-        gp_Pnt point2 = tab.Value(index2);
-        gp_Pnt point3 = tab.Value(index3);
-        gp_XYZ pt1 = tab.Value(index1).XYZ();
-        gp_XYZ pt2 = tab.Value(index2).XYZ();
-        gp_XYZ pt3 = tab.Value(index3).XYZ();
+        gp_Pnt point1 = getNode(facing, index1);
+        gp_Pnt point2 = getNode(facing, index2);
+        gp_Pnt point3 = getNode(facing, index3);
+        gp_XYZ pt1 = point1.XYZ();
+        gp_XYZ pt2 = point2.XYZ();
+        gp_XYZ pt3 = point3.XYZ();
 
         gp_XYZ v1 = pt2 - pt1;
         gp_XYZ v2 = pt3 - pt2;

@@ -9,7 +9,7 @@
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MDAlgorithms::FitResolutionConvolvedModel;
 

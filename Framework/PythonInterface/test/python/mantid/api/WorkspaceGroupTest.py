@@ -190,6 +190,10 @@ class WorkspaceGroupTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             group.getItem(-400)
 
+    def test_isGroup(self):
+        group = self.create_group_via_GroupWorkspace_algorithm()
+        self.assertEqual(group.isGroup(), True)
+
 
 if __name__ == '__main__':
     unittest.main()

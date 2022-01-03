@@ -9,7 +9,6 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidGeometry/Surfaces/LineIntersectVisit.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
@@ -344,7 +343,7 @@ void BasePeak::setAbsorptionWeightedPathLength(double pathLength) { m_absorption
  */
 double BasePeak::getAbsorptionWeightedPathLength() const { return m_absorptionWeightedPathLength; }
 
-double BasePeak::calculateWavelengthFromQLab(const V3D qLab) {
+double BasePeak::calculateWavelengthFromQLab(const V3D &qLab) {
   /* The q-vector direction of the peak is = goniometer * ub * hkl_vector
    * The incident neutron wavevector is along the beam direction, ki = 1/wl
    * (usually z, but referenceframe is definitive).

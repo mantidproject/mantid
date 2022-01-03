@@ -11,9 +11,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidDataObjects/Events.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 

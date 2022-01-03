@@ -8,8 +8,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
 #include "MantidMDAlgorithms/MultiplyMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

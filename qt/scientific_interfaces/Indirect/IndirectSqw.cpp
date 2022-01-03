@@ -8,6 +8,7 @@
 #include "IndirectDataValidationHelper.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
@@ -172,10 +173,11 @@ void IndirectSqw::run() {
   sqwAlg->setProperty("Method", "NormalisedPolygon");
   sqwAlg->setProperty("ReplaceNaNs", true);
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
-  sqwInputProps["InputWorkspace"] = rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString();
+  auto sqwInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  sqwInputProps->setPropertyValue("InputWorkspace",
+                                  rebinInEnergy ? eRebinWsName.toStdString() : sampleWsName.toStdString());
 
-  m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
+  m_batchAlgoRunner->addAlgorithm(sqwAlg, std::move(sqwInputProps));
 
   // Add sample log for S(Q, w) algorithm used
   auto sampleLogAlg = AlgorithmManager::Instance().create("AddSampleLog");
@@ -184,10 +186,10 @@ void IndirectSqw::run() {
   sampleLogAlg->setProperty("LogType", "String");
   sampleLogAlg->setProperty("LogText", "NormalisedPolygon");
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps inputToAddSampleLogProps;
-  inputToAddSampleLogProps["Workspace"] = sqwWsName.toStdString();
+  auto inputToAddSampleLogProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  inputToAddSampleLogProps->setPropertyValue("Workspace", sqwWsName.toStdString());
 
-  m_batchAlgoRunner->addAlgorithm(sampleLogAlg, inputToAddSampleLogProps);
+  m_batchAlgoRunner->addAlgorithm(sampleLogAlg, std::move(inputToAddSampleLogProps));
 
   // Set the name of the result workspace for Python export
   m_pythonExportWsName = sqwWsName.toStdString();

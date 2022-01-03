@@ -18,10 +18,10 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>

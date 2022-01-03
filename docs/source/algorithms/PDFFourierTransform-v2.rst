@@ -125,11 +125,12 @@ Usage
     import numpy as np;
     xx = np.array(range(0,100))*0.1
     yy = np.exp(-(2.0 * xx)**2)
+    yy = np.delete(yy,-1) # need one less Y value than X value for histogram data
     ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
-    Rt = PDFFourierTransform(ws, SofQType='S(Q)', PDFType='g(r)')
+    Rt = PDFFourierTransform(ws, SofQType='S(Q)-1', PDFType='g(r)')
 
     # Look at sample results:
-    print('part of S(Q) and its correlation function')
+    print('part of S(Q)-1 and its correlation function')
     for i in range(10):
        print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
@@ -143,17 +144,17 @@ Usage
 
 .. testoutput:: ExPDFFourierTransform
 
-   part of S(Q) and its correlation function
-   ! 0.00 ! 1.000000 ! 0.317333 ! -3.977042 !
-   ! 0.10 ! 0.960789 ! 0.634665 ! 2.248558 !
-   ! 0.20 ! 0.852144 ! 0.951998 ! 0.449916 !
-   ! 0.30 ! 0.697676 ! 1.269330 ! 1.314437 !
-   ! 0.40 ! 0.527292 ! 1.586663 ! 0.803744 !
-   ! 0.50 ! 0.367879 ! 1.903996 ! 1.141098 !
-   ! 0.60 ! 0.236928 ! 2.221328 ! 0.900872 !
-   ! 0.70 ! 0.140858 ! 2.538661 ! 1.080090 !
-   ! 0.80 ! 0.077305 ! 2.855993 ! 0.940530 !
-   ! 0.90 ! 0.039164 ! 3.173326 ! 1.051576 !
+   part of S(Q)-1 and its correlation function
+   ! 0.00 ! 1.000000 ! 0.317333 ! 1.003494 !
+   ! 0.10 ! 0.960789 ! 0.634665 ! 1.003423 !
+   ! 0.20 ! 0.852144 ! 0.951998 ! 1.003308 !
+   ! 0.30 ! 0.697676 ! 1.269330 ! 1.003154 !
+   ! 0.40 ! 0.527292 ! 1.586663 ! 1.002965 !
+   ! 0.50 ! 0.367879 ! 1.903996 ! 1.002750 !
+   ! 0.60 ! 0.236928 ! 2.221328 ! 1.002515 !
+   ! 0.70 ! 0.140858 ! 2.538661 ! 1.002269 !
+   ! 0.80 ! 0.077305 ! 2.855993 ! 1.002018 !
+   ! 0.90 ! 0.039164 ! 3.173326 ! 1.001770 !
 
 
 .. categories::
