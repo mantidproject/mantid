@@ -27,8 +27,6 @@
 
 #include <utility>
 
-// using namespace std;
-
 namespace Mantid::Algorithms {
 
 using Mantid::API::WorkspaceProperty;
