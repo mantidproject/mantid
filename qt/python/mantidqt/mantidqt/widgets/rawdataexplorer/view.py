@@ -229,6 +229,15 @@ class RawDataExplorerView(QWidget):
         """
         self._previews.remove(preview)
 
+    def clear_selection(self):
+        """
+        Clear all items currently selected
+        """
+        selection_model = self.fileTree.selectionModel()
+        for index in selection_model.selectedRows():
+            selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
+        self._current_selection = set()
+
     def get_last_clicked(self):
         """
         Get last file clicked
