@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.contexts.plotting_context import Plottin
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_view import PlottingCanvasView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.quick_edit.quick_edit_widget import QuickEditWidget
 
-from qtpy.QtWidgets import QApplication
 import numpy as np
 
 
@@ -33,7 +32,6 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def make_plot_side_effect(self, _unused):
         self._count +=1

@@ -13,8 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.general_fitting.general_
                                                                                                      SIMULTANEOUS_FIT_LABEL,
                                                                                                      SINGLE_FIT_LABEL)
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
@@ -25,7 +23,6 @@ class GeneralFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_can_be_initialized_without_an_error(self):
         self.view = GeneralFittingView()

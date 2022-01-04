@@ -12,8 +12,6 @@ from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.model_fitting.model_fitting_data_selector_view import ModelFittingDataSelectorView
 from mantidqtinterfaces.Muon.GUI.Common.results_tab_widget.results_tab_model import TableColumnType
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class ModelFittingDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
@@ -25,7 +23,6 @@ class ModelFittingDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_update_result_table_names_will_set_the_names_in_the_result_table_names_combobox(self):
         result_table_names = ["Name1", "Name2", "Name3"]

@@ -23,8 +23,6 @@ from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.background_correc
                                                                                                    STATUS_COLUMN_INDEX,
                                                                                                    SHOW_MATRIX_COLUMN_INDEX)
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
@@ -47,7 +45,6 @@ class BackgroundCorrectionsViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_has_been_initialized_with_most_background_correction_options_invisible(self):
         self.assertTrue(self.view.select_function_label.isHidden())

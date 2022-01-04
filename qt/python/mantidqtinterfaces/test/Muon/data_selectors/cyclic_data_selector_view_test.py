@@ -11,8 +11,6 @@ from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view import CyclicDataSelectorView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class CyclicDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
@@ -24,7 +22,6 @@ class CyclicDataSelectorViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_update_dataset_name_combo_box_will_set_the_names_in_the_dataset_name_combobox(self):
         dataset_names = ["Name1", "Name2", "Name3"]

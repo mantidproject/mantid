@@ -15,8 +15,6 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_functi
                                                                                                         RAW_DATA_TABLE_ROW)
 from mantidqtinterfaces.Muon.GUI.Common.utilities.workspace_utils import StaticWorkspaceWrapper
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
@@ -32,7 +30,6 @@ class FitFunctionOptionsViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_has_been_initialized_with_the_raw_data_option_shown(self):
         self.view = FitFunctionOptionsView()

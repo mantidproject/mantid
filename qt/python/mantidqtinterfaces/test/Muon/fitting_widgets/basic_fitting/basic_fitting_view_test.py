@@ -20,8 +20,6 @@ from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_functi
                                                                                                         PLOT_GUESS_START_X,
                                                                                                         PLOT_GUESS_END_X)
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
@@ -38,7 +36,6 @@ class BasicFittingViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_plot_guess_checkbox_can_be_ticked_as_expected(self):
         self.view.plot_guess = True

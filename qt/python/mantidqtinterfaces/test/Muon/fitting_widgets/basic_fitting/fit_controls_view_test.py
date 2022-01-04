@@ -11,8 +11,6 @@ from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.fit_controls_view import FitControlsView
 
-from qtpy.QtWidgets import QApplication
-
 
 @start_qapplication
 class FitControlsViewTest(unittest.TestCase, QtWidgetFinder):
@@ -24,7 +22,6 @@ class FitControlsViewTest(unittest.TestCase, QtWidgetFinder):
 
     def tearDown(self):
         self.assertTrue(self.view.close())
-        QApplication.sendPostedEvents()
 
     def test_that_the_view_has_been_initialized_with_the_undo_fit_button_disabled_and_plot_guess_unchecked(self):
         self.assertTrue(not self.view.undo_fit_button.isEnabled())
