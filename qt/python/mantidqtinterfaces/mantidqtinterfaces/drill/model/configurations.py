@@ -326,6 +326,7 @@ class RundexSettings(object):
                 "BeamRadius",
                 "SampleThicknessFrom",
                 "SampleNamesFrom",
+                "WaterCrossSection",
                 "ProduceSensitivity",
                 "SensitivityWithOffset",
                 "OutputType",
