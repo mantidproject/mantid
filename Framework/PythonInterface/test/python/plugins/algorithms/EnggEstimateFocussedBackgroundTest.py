@@ -28,13 +28,14 @@ class EnggEstimateFocussedBackground_Test(unittest.TestCase):
     def setUp(self):
         # create some fairly realistic fake data with peaks and background
         x = np.linspace(0, 160, 401)
-        mask = np.ones(x.shape, dtype=bool)
         cens = [60, 70, 100]
+        mask = np.ones(x.shape, dtype=bool)
+        mask[(x > cens[0] - 4) & (x < cens[-1] + 4)] = False  # mask that includes xvalues at each end (away from peaks)
         pin = []
         for ipk in range(0, len(cens)):
             pin += [3, cens[ipk], 1]  # height, centre, sig
-            mask[(x > cens[ipk] - 4) & (x < cens[ipk] + 4)] = False  # mask points at peak for comparing bg residuals
         pin += [3, 80, 20]  # broad peak as background
+
         y = mgauss(x, pin)
         self.ws = CreateWorkspace(OutputWorkspace = 'ws', DataX=x, DataY=y + np.random.normal(y, 0.2 * np.sqrt(y)))
         self.mask = mask
