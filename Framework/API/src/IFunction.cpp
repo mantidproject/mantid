@@ -787,12 +787,20 @@ void IFunction::Attribute::setString(const std::string &str) {
  * @param d :: The new value
  */
 void IFunction::Attribute::setDouble(const double &d) {
-  try {
-    boost::get<double>(m_data) = d;
-  } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() +
-                             " attribute "
-                             "as double");
+  std::string error;
+
+  error = evaluateValidator(d);
+
+  if (error == "") {
+    try {
+      boost::get<double>(m_data) = d;
+    } catch (...) {
+      throw std::runtime_error("Trying to access a " + type() +
+                               " attribute "
+                               "as double");
+    }
+  } else {
+    throw std::runtime_error(error);
   }
 }
 
@@ -801,12 +809,20 @@ void IFunction::Attribute::setDouble(const double &d) {
  * @param i :: The new value
  */
 void IFunction::Attribute::setInt(const int &i) {
-  try {
-    boost::get<int>(m_data) = i;
-  } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() +
-                             " attribute "
-                             "as int");
+  std::string error;
+
+  error = evaluateValidator(i);
+
+  if (error == "") {
+    try {
+      boost::get<int>(m_data) = i;
+    } catch (...) {
+      throw std::runtime_error("Trying to access a " + type() +
+                               " attribute "
+                               "as int");
+    }
+  } else {
+    throw std::runtime_error(error);
   }
 }
 
@@ -815,12 +831,20 @@ void IFunction::Attribute::setInt(const int &i) {
  * @param b :: The new value
  */
 void IFunction::Attribute::setBool(const bool &b) {
-  try {
-    boost::get<bool>(m_data) = b;
-  } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() +
-                             " attribute "
-                             "as bool");
+  std::string error;
+
+  error = evaluateValidator(b);
+
+  if (error == "") {
+    try {
+      boost::get<bool>(m_data) = b;
+    } catch (...) {
+      throw std::runtime_error("Trying to access a " + type() +
+                               " attribute "
+                               "as bool");
+    }
+  } else {
+    throw std::runtime_error(error);
   }
 }
 
@@ -830,13 +854,21 @@ void IFunction::Attribute::setBool(const bool &b) {
  * @param v :: The new value
  */
 void IFunction::Attribute::setVector(const std::vector<double> &v) {
-  try {
-    auto &value = boost::get<std::vector<double>>(m_data);
-    value.assign(v.begin(), v.end());
-  } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() +
-                             " attribute "
-                             "as vector");
+  std::string error;
+
+  error = evaluateValidator(v);
+
+  if (error == "") {
+    try {
+      auto &value = boost::get<std::vector<double>>(m_data);
+      value.assign(v.begin(), v.end());
+    } catch (...) {
+      throw std::runtime_error("Trying to access a " + type() +
+                               " attribute "
+                               "as vector");
+    }
+  } else {
+    throw std::runtime_error(error);
   }
 }
 
