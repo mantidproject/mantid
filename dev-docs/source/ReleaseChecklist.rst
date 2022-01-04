@@ -378,4 +378,10 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 
 *  The script will prompt you for the password. Ask a senior developer to share the username and
    password with you if you do not already have access to it.
-*  Notify the Release Manager when you complete all your tasks.
+
+**Update Citation File**
+
+Open a PR updating the software ``doi``, ``date-released`` and ``version`` in the ``CITATION.cff`` file
+at the root of the repository.
+
+Notify the Release Manager when you complete all your tasks.
