@@ -331,7 +331,6 @@ class RundexSettings(object):
                 "SensitivityWithOffset",
                 "OutputType",
                 "DistanceAtWavelength2",
-                "SubAlgorithmOffset",
                 "OutputBinning",
                 "CalculateResolution",
                 "DefaultQBinning",
