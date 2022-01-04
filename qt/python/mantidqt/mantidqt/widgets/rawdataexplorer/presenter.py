@@ -71,6 +71,9 @@ class PreviewPresenter:
         self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
 
+        if self._main_view.accumulate.isChecked():
+            self._main_view.clear_selection()
+
     def on_workspace_changed(self):
         """
         Triggered when the workspace in the model is modified.
