@@ -15,6 +15,7 @@
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidKernel/IValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Unit.h"
 
@@ -254,6 +255,13 @@ public:
     /// Apply a lambda visitor
     template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { boost::apply_visitor(v, m_data); }
 
+    ////Set validator to enforce limits on attribute value
+    void setValidator(const Kernel::IValidator_sptr &validator);
+    /// Evaluates the validator associated with this attribute. Returns error as a string.
+    std::string evaluateValidator();
+    /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
+    template <typename T> std::string evaluateValidator(T &input);
+
     /// Returns type of the attribute
     std::string type() const;
     /// Returns the attribute value as a string
@@ -273,7 +281,7 @@ public:
     double asDouble() const;
     /// Returns bool value if attribute is a bool, throws exception otherwise
     bool asBool() const;
-    /// Returns bool value if attribute is a vector, throws exception otherwise
+    // Returns vector<double> if attribute is vector<double>, throws exception otherwise
     std::vector<double> asVector() const;
     /// Check if a string attribute is empty
     bool isEmpty() const;
@@ -301,6 +309,8 @@ public:
     mutable boost::variant<std::string, int, double, bool, std::vector<double>> m_data;
     /// Flag indicating if the string value should be returned quoted
     bool m_quoteValue = false;
+    /// Associated Validator
+    Kernel::IValidator_sptr m_validator;
   };
 
   //---------------------------------------------------------//
@@ -578,6 +588,10 @@ protected:
 
   /// Declare a single attribute
   void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
+  /// Declare a single attribute with validator
+  void declareAttribute(const std::string &name, API::IFunction::Attribute &defaultValue,
+                        const Kernel::IValidator &validator);
+
   /// Store an attribute's value
   void storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value);
   /// A read-only ("mutable") attribute can be stored in a const method

@@ -10,6 +10,8 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/ListValidator.h"
 
 #include <cxxtest/TestSuite.h>
 
@@ -31,6 +33,17 @@ public:
     v[1] = 2;
     v[2] = 3;
     declareAttribute("VAttr1", Attribute(v));
+
+    // declareAttribute("Test 1", Attribute(25), Mantid::Kernel::BoundedValidator<int>(0, 100));
+    // declareAttribute("Test 2", Attribute(-50), Mantid::Kernel::BoundedValidator<int>(0, 100));
+
+    declareAttribute("Unit", Attribute("K"), Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"}));
+    Attribute test_att = getAttribute("Unit");
+    test_att.setString("meV");
+    test_att.setString("X");
+
+    declareAttribute("Unit1", Attribute("X"),
+                     Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"}));
   }
 
   std::string name() const override { return "IFT_Funct"; }

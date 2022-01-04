@@ -765,12 +765,20 @@ std::vector<double> IFunction::Attribute::asVector() const {
  * @param str :: The new value
  */
 void IFunction::Attribute::setString(const std::string &str) {
-  try {
-    boost::get<std::string>(m_data) = str;
-  } catch (...) {
-    throw std::runtime_error("Trying to access a " + type() +
-                             " attribute "
-                             "as string");
+  std::string error;
+
+  error = evaluateValidator(str);
+
+  if (error == "") {
+    try {
+      boost::get<std::string>(m_data) = str;
+    } catch (...) {
+      throw std::runtime_error("Trying to access a " + type() +
+                               " attribute "
+                               "as string");
+    }
+  } else {
+    throw std::runtime_error(error);
   }
 }
 
@@ -907,6 +915,45 @@ private:
 void IFunction::Attribute::fromString(const std::string &str) {
   SetValue tmp(str);
   apply(tmp);
+}
+
+/** Set validator to enforce limits on attribute value
+ * @param validator :: shared ptr to validator object
+ */
+void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator) { m_validator = validator; }
+
+/**
+ *  Evaluates the validator associated with this attribute. Returns error as a string.
+ */
+std::string IFunction::Attribute::evaluateValidator() {
+  std::string dataTypeName;
+
+  dataTypeName = type();
+
+  if (dataTypeName == "int") {
+    return m_validator->isValid(boost::get<int>(m_data));
+  } else if (dataTypeName == "double") {
+    return m_validator->isValid(boost::get<double>(m_data));
+  } else if (dataTypeName == "std::string") {
+    return m_validator->isValid(boost::get<std::string>(m_data));
+  } else if (dataTypeName == "bool") {
+    return m_validator->isValid(boost::get<bool>(m_data));
+  } else if (dataTypeName == "std::vector<double>") {
+    return m_validator->isValid(boost::get<std::vector<double>>(m_data));
+  } else {
+    throw std::runtime_error("Invalid Type, must be int, dbl, str, bool, vector<double>");
+  }
+}
+
+/**
+ *  Evaluates the validator associated with this attribute. Returns error as a string.
+ *  @param name :: T
+ *  @param subjectValue :: The value to be validated by the validator.
+ */
+template <typename T> std::string IFunction::Attribute::evaluateValidator(T &inputData) {
+  if (m_validator != Kernel::IValidator_sptr()) {
+    return m_validator->isValid(inputData);
+  }
 }
 
 /// Value of i-th active parameter. Override this method to make fitted
@@ -1331,6 +1378,28 @@ void IFunction::declareAttribute(const std::string &name, const API::IFunction::
   m_attrs.emplace(name, defaultValue);
 }
 
+/**
+ * Declares a single attribute with a validator
+ * @param name :: The name of the attribute
+ * @param defaultValue :: A default value
+ * @param validator :: validator to restrict allows input value of defaultValue param
+ */
+void IFunction::declareAttribute(const std::string &name, API::IFunction::Attribute &defaultValue,
+                                 const Kernel::IValidator &validator) {
+  const Kernel::IValidator_sptr validatorClone = validator.clone();
+  std::string error;
+
+  defaultValue.setValidator(validatorClone);
+
+  error = defaultValue.evaluateValidator();
+
+  if (error == "") {
+    m_attrs.emplace(name, defaultValue);
+  } else {
+    throw std::runtime_error(name + ": " + error);
+  }
+}
+
 /// Initialize the function. Calls declareAttributes & declareParameters
 void IFunction::init() {
   declareAttributes();
@@ -1538,4 +1607,4 @@ IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(const 
 }
 
 } // namespace Mantid::Kernel
-///\endcond TEMPLATE
+  ///\endcond TEMPLATE
