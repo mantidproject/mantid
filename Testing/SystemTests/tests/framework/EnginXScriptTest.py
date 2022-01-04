@@ -80,7 +80,7 @@ class FocusTexture(systemtesting.MantidSystemTest):
                         full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE20)
         enginx.main(plot_cal=False, plot_foc=False)
         # store workspaces for validation
-        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture")
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture20")
 
     def validate(self):
         # assert correct number spectra
