@@ -9,7 +9,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
-#include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringContainsValidator.h"
@@ -20,13 +19,12 @@ using namespace Mantid;
 using namespace Mantid::API;
 
 namespace detail {
-class IFT_Funct : public ParamFunction, public IFunction1D {
+class FAVT_Funct : public ParamFunction, public IFunction1D {
 public:
-  IFT_Funct() {
+  FAVT_Funct() {
     declareAttribute("DAttr", Attribute(0.0), Mantid::Kernel::BoundedValidator<double>(0.0, 100.0));
 
-    int i[5] = {1, 2, 3, 4, 5};
-    declareAttribute("IAttr", Attribute(i), Mantid::Kernel::ArrayLengthValidator<int>(3, 10));
+    declareAttribute("IAttr", Attribute(5), Mantid::Kernel::BoundedValidator<int>(0, 10));
 
     declareAttribute("SAttr", Attribute("K"),
                      Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"}));
@@ -56,8 +54,7 @@ private:
         declareAttribute("DAttr_invalid", Attribute(-1), Mantid::Kernel::BoundedValidator<double>(0.0, 100.0)),
         const std::runtime_error &);
 
-    int i[2] = {1, 2};
-    TS_ASSERT_THROWS(declareAttribute("IAttr_invalid", Attribute(i), Mantid::Kernel::ArrayLengthValidator<int>(3, 10)),
+    TS_ASSERT_THROWS(declareAttribute("IAttr_invalid", Attribute(11), Mantid::Kernel::BoundedValidator<int>(0, 10)),
                      const std::runtime_error &);
 
     TS_ASSERT_THROWS(declareAttribute("SAttr_invalid", Attribute("Invalid"),
@@ -82,13 +79,13 @@ private:
   }
 };
 
-DECLARE_FUNCTION(IFT_Funct)
+DECLARE_FUNCTION(FAVT_Funct)
 } // namespace detail
 
 class FunctionAttributeTest : public CxxTest::TestSuite {
 public:
   void test_double_attribute_validator() {
-    detail::IFT_Funct f;
+    detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("DAttr");
 
     TS_ASSERT_THROWS(att.setDouble(-1), const std::runtime_error &);
@@ -98,19 +95,17 @@ public:
   }
 
   void test_int_attribute_validator() {
-    detail::IFT_Funct f;
+    detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("IAttr");
 
-    int i[2] = {1, 2};
-    TS_ASSERT_THROWS(att.setInt(i), const std::runtime_error &);
+    TS_ASSERT_THROWS(att.setInt(11), const std::runtime_error &);
 
-    int i[5] = {1, 2, 3, 4, 5};
-    att.setInt(i);
-    TS_ASSERT(f.getAttribute("IAttr").asInt() == i);
+    att.setInt(3);
+    TS_ASSERT(f.getAttribute("IAttr").asInt() == 3);
   }
 
   void test_string_attribute_validator() {
-    detail::IFT_Funct f;
+    detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("SAttr");
 
     TS_ASSERT_THROWS(att.setString("Invalid"), const std::runtime_error &);
@@ -120,7 +115,7 @@ public:
   }
 
   void test_quoted_string_attribute_validator() {
-    detail::IFT_Funct f;
+    detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("SQAttr");
 
     TS_ASSERT_THROWS(att.setString("ab"), const std::runtime_error &);
@@ -130,7 +125,7 @@ public:
   }
 
   void test_vector_attribute_validator() {
-    detail::IFT_Funct f;
+    detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("VAttr");
 
     std::vector<double> v(3);
