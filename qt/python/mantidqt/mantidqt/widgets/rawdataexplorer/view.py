@@ -262,9 +262,6 @@ class RawDataExplorerView(QWidget):
         selection_model = self.fileTree.selectionModel()
         file_model = self.fileTree.model()
 
-        # forbid deselecting anything
-        selection_model.select(last_clicked_index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
-
         selected_indexes = selection_model.selectedRows()
         selection = set()
 

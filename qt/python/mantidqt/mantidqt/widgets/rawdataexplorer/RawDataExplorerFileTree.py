@@ -21,3 +21,18 @@ class RawDataExplorerFileTree(QTreeView):
     def currentChanged(self, current_index, previous_index):
         self.sig_new_current.emit(current_index)
         super(RawDataExplorerFileTree, self).currentChanged(current_index, previous_index)
+
+    def selectionChanged(self, selected, deselected):
+        super(RawDataExplorerFileTree, self).selectionChanged(selected, deselected)
+        if len(selected.indexes()) == 0 and len(deselected.indexes()) != 0:
+            # checking if something was deselected
+
+            first_row = deselected.indexes()[0].row()
+            # if multiple lines have been deselected, then we are clearing the widget, which is ok
+            for index in deselected.indexes():
+                if index.row() != first_row:
+                    return
+
+            # but it is not allowed for the user to deselect a line, so we select it back
+            for index in deselected.indexes():
+                self.selectionModel().select(index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
