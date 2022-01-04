@@ -61,7 +61,7 @@ private:
                                       Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"})),
                      const std::runtime_error &);
 
-    std::vector<std::string> sV;
+    std::vector<std::string> sV(3);
     sV[0] = "a";
     sV[1] = "b";
     sV[2] = "c";
@@ -82,7 +82,7 @@ private:
 DECLARE_FUNCTION(FAVT_Funct)
 } // namespace detail
 
-class FunctionAttributeTest : public CxxTest::TestSuite {
+class FunctionAttributeValidatorTest : public CxxTest::TestSuite {
 public:
   void test_double_attribute_validator() {
     detail::FAVT_Funct f;
@@ -91,7 +91,7 @@ public:
     TS_ASSERT_THROWS(att.setDouble(-1), const std::runtime_error &);
 
     att.setDouble(50.0);
-    TS_ASSERT(f.getAttribute("DAttr").asDouble() == 50.0);
+    TS_ASSERT(att.asDouble() == 50.0);
   }
 
   void test_int_attribute_validator() {
@@ -101,7 +101,7 @@ public:
     TS_ASSERT_THROWS(att.setInt(11), const std::runtime_error &);
 
     att.setInt(3);
-    TS_ASSERT(f.getAttribute("IAttr").asInt() == 3);
+    TS_ASSERT(att.asInt() == 3);
   }
 
   void test_string_attribute_validator() {
@@ -111,7 +111,7 @@ public:
     TS_ASSERT_THROWS(att.setString("Invalid"), const std::runtime_error &);
 
     att.setString("meV");
-    TS_ASSERT(f.getAttribute("SAttr").asString() == "meV");
+    TS_ASSERT(att.asString() == "meV");
   }
 
   void test_quoted_string_attribute_validator() {
@@ -121,7 +121,7 @@ public:
     TS_ASSERT_THROWS(att.setString("ab"), const std::runtime_error &);
 
     att.setString("abcd");
-    TS_ASSERT(f.getAttribute("SQAttr").asString() == "abcd");
+    TS_ASSERT(att.asString() == "\"abcd\"");
   }
 
   void test_vector_attribute_validator() {
@@ -134,7 +134,7 @@ public:
     v[2] = 5.0;
 
     att.setVector(v);
-    TS_ASSERT(f.getAttribute("VAttr").asVector() == v);
+    TS_ASSERT(att.asVector() == v);
 
     v[2] = 50;
     TS_ASSERT_THROWS(att.setVector(v), const std::runtime_error &);
