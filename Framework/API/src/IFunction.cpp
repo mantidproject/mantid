@@ -985,6 +985,8 @@ std::string IFunction::Attribute::evaluateValidator() {
 template <typename T> std::string IFunction::Attribute::evaluateValidator(T &inputData) {
   if (m_validator != Kernel::IValidator_sptr()) {
     return m_validator->isValid(inputData);
+  } else {
+    return {};
   }
 }
 
