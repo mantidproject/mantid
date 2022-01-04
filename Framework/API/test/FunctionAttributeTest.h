@@ -33,21 +33,6 @@ public:
     v[1] = 2;
     v[2] = 3;
     declareAttribute("VAttr1", Attribute(v));
-
-    declareAttribute("Test 1", Attribute(25), Mantid::Kernel::BoundedValidator<int>(0, 100));
-    Attribute test_att1 = getAttribute("Test 1");
-    test_att1.setInt(50);
-    test_att1.setInt(150);
-
-    declareAttribute("Test 2", Attribute(-50), Mantid::Kernel::BoundedValidator<int>(0, 100));
-
-    declareAttribute("Unit", Attribute("K"), Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"}));
-    Attribute test_att = getAttribute("Unit");
-    test_att.setString("meV");
-    test_att.setString("X");
-
-    declareAttribute("Unit1", Attribute("X"),
-                     Mantid::Kernel::StringListValidator(std::vector<std::string>{"K", "meV"}));
   }
 
   std::string name() const override { return "IFT_Funct"; }
