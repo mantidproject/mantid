@@ -1143,6 +1143,10 @@ QRESOL/A2=x
 QRESOL/DELTAR=x
 ---------------
 
+The virtual ring width of the detector in meters.
+This is used to calculate the Q Resolution from TOF SANS Data on a per-pixel
+in :ref:`algm-TOFSANSResolutionByPixel`.
+
 **Replacement**
 
 ..  code-block:: none
@@ -1154,14 +1158,14 @@ QRESOL/DELTAR=x
 
 ..  code-block:: none
 
-  QRESOL/DELTAR=10
+  QRESOL/DELTAR=10  # mm
 
 **Existing Replacement**
 
 ..  code-block:: none
 
   [q_resolution]
-    delta_r = 10
+    delta_r = 0.01  # m
 
 QRESOL/MODERATOR=filename.txt
 -----------------------------

@@ -21,7 +21,7 @@ Mantid::Kernel::Logger g_log("LoadSingleMesh");
 }
 class DLLExport LoadSingleMesh : public MeshFileIO {
 public:
-  LoadSingleMesh(const std::string &filename, std::ios_base::openmode mode, ScaleUnits scaleType);
+  LoadSingleMesh(std::string filename, std::ios_base::openmode mode, ScaleUnits scaleType);
   virtual ~LoadSingleMesh();
   virtual std::unique_ptr<Geometry::MeshObject> readShape() = 0;
 

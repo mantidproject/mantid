@@ -598,58 +598,6 @@ class BaseReductionScripter(object):
         script = self.to_live_script()
         self.execute_script(script)
 
-    def cluster_submit(self, output_dir, user, pwd, resource=None,
-                       nodes=4, cores_per_node=4, job_name=None):
-        """
-            Submit the reduction job to a cluster
-            @param output_dir: directory where the output data will be written
-            @param user: name of the user on the cluster
-            @param pwd: password of the user on the cluster
-        """
-        Logger("scripter").notice("Preparing remote reduction job submission")
-
-        if HAS_MANTID:
-            # Generate reduction script and write it to file
-            scripts = self.to_batch()
-            for i in range(len(scripts)):
-                script = scripts[i]
-                script_name = "job_submission_%s.py" % i
-
-                lower_case_instr = self.instrument_name.lower()
-                job_name_lower = job_name.lower()
-                _job_name = job_name
-                if job_name is None or len(job_name) == 0:
-                    _job_name = lower_case_instr
-                elif job_name_lower.find(lower_case_instr) >= 0:
-                    _job_name = job_name.strip()
-                else:
-                    _job_name = "%s_%s" % (lower_case_instr, job_name.strip())
-
-                # Make sure we have unique job names
-                if len(scripts) > 1:
-                    _job_name += "_%s" % i
-                # Submit the job
-                # Note: keeping version 1 for now. See comment about
-                # versions in cluster_status.py
-                submit_cmd = "Authenticate(Version=1, ComputeResource='%s', " % resource
-                submit_cmd += "UserName='%s', Password='%s')\n" % (user, pwd)
-
-                # Note: keeping version 1 for now. See comment about
-                # versions in cluster_status.py
-                submit_cmd += "id=StartRemoteTransaction(Version=1, ComputeResource='%s')\n" % resource
-
-                # Note: keeping version 1 for now. See comment about
-                # versions in cluster_status.py
-                submit_cmd += "SubmitRemoteJob(Version=1, ComputeResource='%s', " % resource
-                submit_cmd += "TaskName='%s'," % _job_name
-                submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
-                submit_cmd += "TransactionID=id, "
-                submit_cmd += "PythonScript=\"\"\"%s\"\"\", " % script
-                submit_cmd += "ScriptName='%s')" % script_name
-                execute_script(submit_cmd)
-        else:
-            Logger("scripter").error("Mantid is unavailable to submit a reduction job")
-
     def execute_script(self, script):
         """
         Executes the given script code.

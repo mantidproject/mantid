@@ -455,7 +455,7 @@ void FABADAMinimizer::tieApplication(const size_t &parameterIndex, GSLVector &ne
  * @param newParameters :: new value of the fitting parameters
  */
 void FABADAMinimizer::algorithmDisplacement(const size_t &parameterIndex, const double &chi2New,
-                                            GSLVector &newParameters) {
+                                            const GSLVector &newParameters) {
 
   // If new Chi square value is lower, jumping directly to new parameter
   if (chi2New < m_chi2) {

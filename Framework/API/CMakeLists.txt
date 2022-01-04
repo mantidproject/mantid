@@ -127,7 +127,6 @@ set(SRC_FILES
     src/PropertyWithValue.cpp
     src/RawCountValidator.cpp
     src/RefAxis.cpp
-    src/RemoteJobManagerFactory.cpp
     src/ResizeRectangularDetectorHelper.cpp
     src/Run.cpp
     src/Sample.cpp
@@ -273,7 +272,6 @@ set(INC_FILES
     inc/MantidAPI/IPeaksWorkspace_fwd.h
     inc/MantidAPI/IPowderDiffPeakFunction.h
     inc/MantidAPI/IPreview.h
-    inc/MantidAPI/IRemoteJobManager.h
     inc/MantidAPI/ISpectrum.h
     inc/MantidAPI/ISplittersWorkspace.h
     inc/MantidAPI/ITableWorkspace.h
@@ -332,7 +330,6 @@ set(INC_FILES
     inc/MantidAPI/Projection.h
     inc/MantidAPI/RawCountValidator.h
     inc/MantidAPI/RefAxis.h
-    inc/MantidAPI/RemoteJobManagerFactory.h
     inc/MantidAPI/ResizeRectangularDetectorHelper.h
     inc/MantidAPI/Run.h
     inc/MantidAPI/Sample.h
@@ -469,7 +466,6 @@ set(TEST_FILES
     ProgressTest.h
     ProjectionTest.h
     RawCountValidatorTest.h
-    RemoteJobManagerFactoryTest.h
     ResizeRectangularDetectorHelperTest.h
     RunTest.h
     SampleShapeValidatorTest.h

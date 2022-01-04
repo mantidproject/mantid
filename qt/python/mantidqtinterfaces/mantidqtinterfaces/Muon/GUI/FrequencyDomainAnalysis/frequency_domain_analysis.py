@@ -42,6 +42,7 @@ from mantidqtinterfaces.Muon.GUI.Common.plotting_dock_widget.plotting_dock_widge
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantidqtinterfaces.Muon.GUI.Common.features.model_analysis import AddModelAnalysis
 from mantidqtinterfaces.Muon.GUI.Common.features.raw_plots import AddRawPlots
+from mantidqtinterfaces.Muon.GUI.Common.features.add_fitting import AddFitting
 from mantidqtinterfaces.Muon.GUI.Common.features.load_features import load_features
 
 from mantidqtinterfaces.Muon.GUI.Common.features.add_grouping_workspaces import AddGroupingWorkspaces
@@ -139,6 +140,8 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
         self.add_model_analysis = AddModelAnalysis(self, feature_dict)
         self.add_raw_plots = AddRawPlots(self, feature_dict)
+        self.add_fitting = AddFitting(self, feature_dict)
+
         setup_group_ws = AddGroupingWorkspaces(self, feature_dict)
 
         self.setup_tabs()
@@ -220,6 +223,9 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
             self.plot_widget.maxent_mode.period_changed)
         self.context.data_context.instrumentNotifier.add_subscriber(
             self.plot_widget.maxent_mode.instrument_observer)
+        self.update_fits_observer = GenericObserver(self.handle_units_changed)
+        self.plot_widget.update_freq_units_add_subscriber(
+            self.update_fits_observer)
 
     def setup_tabs(self):
         """
@@ -256,8 +262,21 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.plot_widget.set_plot_view(plot_mode)
 
     def handle_transform_performed(self, new_data_workspace_name):
-        self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
+        self.update_fit_ws_list()
         self.fitting_tab.fitting_tab_presenter.set_selected_dataset(new_data_workspace_name)
+
+    def handle_units_changed(self):
+        old_name = self.fitting_tab.fitting_tab_presenter.current_dataset()
+        if old_name =="":
+            return
+        self.update_fit_ws_list()
+        new_name = self.frequency_context.switch_units_in_name(old_name)
+        self.fitting_tab.fitting_tab_presenter.set_selected_dataset(new_name)
+        x_lim = self.frequency_context.range()
+        self.fitting_tab.fitting_tab_presenter.update_start_and_end_x_in_view_and_model(x_lim[0], x_lim[1])
+
+    def update_fit_ws_list(self):
+        self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
         self.seq_fitting_tab.seq_fitting_tab_presenter.handle_selected_workspaces_changed()
 
     def set_tab_warning(self, tab_name: str, message: str):

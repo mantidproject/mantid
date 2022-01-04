@@ -608,12 +608,12 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.model.get_shade_lines.side_effect = shade_mock
         self.presenter.add_shaded_region(["unit", "test"], [0,1])
         self.view.add_shaded_region.assert_any_call(workspace_name="unit",
-                                                    axis=0,
+                                                    axis_number=0,
                                                     x_values=0,
                                                     y1_values=1,
                                                     y2_values=2)
         self.view.add_shaded_region.assert_any_call(workspace_name="test",
-                                                    axis=1,
+                                                    axis_number=1,
                                                     x_values=1,
                                                     y1_values=2,
                                                     y2_values=3)

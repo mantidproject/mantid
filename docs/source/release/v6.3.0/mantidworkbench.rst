@@ -26,8 +26,11 @@ New and Improved
 
 - The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path)
 
+- The font in python editor and IPython console are ensured to be monospace on KDE Neon distribution, too.
+
 Bugfixes
 --------
+- Fixed an issue when save_as a running script leads to crash upon script completion.
 - Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
 - Fixed a bug where the option "SignedInPlaneTwoTheta" in :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` would not give signed results.
 - Fixed a bug where the toggle state of the "Grids on/off" toolbar button was incorrect when opening a 3D surface plot.
@@ -42,6 +45,7 @@ Bugfixes
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 - Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
+- The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
 - Fixed a bug where folding the pick tab in the instrument viewer crashed Mantid.
 
 :ref:`Release 6.3.0 <v6.3.0>`

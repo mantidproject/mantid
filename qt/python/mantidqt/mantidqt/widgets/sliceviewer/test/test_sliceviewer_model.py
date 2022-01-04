@@ -9,18 +9,14 @@
 #
 from contextlib import contextmanager
 import unittest
-from unittest.mock import MagicMock, call, patch
-import sys
+from unittest.mock import MagicMock, call, patch, DEFAULT
 
 from mantid.api import MatrixWorkspace, IMDEventWorkspace, IMDHistoWorkspace
 from mantid.kernel import SpecialCoordinateSystem
 from mantid.geometry import IMDDimension, OrientedLattice
 from numpy.testing import assert_equal
 import numpy as np
-
-# Mock out simpleapi to import expensive import of something we patch out anyway
-sys.modules['mantid.simpleapi'] = MagicMock()
-from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE, MIN_WIDTH # noqa: E402
+from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE, MIN_WIDTH
 
 
 # Mock helpers
@@ -657,8 +653,12 @@ class SliceViewerModelTest(unittest.TestCase):
                           slicepoint=(None, 0, 0),
                           transpose=False)
 
-    @patch('mantidqt.widgets.sliceviewer.roi.ExtractSpectra')
-    def test_export_roi_for_matrixworkspace(self, mock_extract_spectra):
+    @patch.multiple('mantidqt.widgets.sliceviewer.roi',
+                    ExtractSpectra=DEFAULT,
+                    Rebin=DEFAULT,
+                    SumSpectra=DEFAULT,
+                    Transpose=DEFAULT)
+    def test_export_roi_for_matrixworkspace(self, ExtractSpectra, **_):
         xmin, xmax, ymin, ymax = -1., 3., 2., 4.
 
         def assert_call_as_expected(exp_xmin, exp_xmax, exp_start_index, exp_end_index, transpose,
@@ -680,14 +680,14 @@ class SliceViewerModelTest(unittest.TestCase):
             else:
                 mock_ws.getAxis(1).extractValues.assert_called_once()
 
-            mock_extract_spectra.assert_called_once_with(InputWorkspace=mock_ws,
+            ExtractSpectra.assert_called_once_with(InputWorkspace=mock_ws,
                                                          OutputWorkspace='mock_ws_roi',
                                                          XMin=exp_xmin,
                                                          XMax=exp_xmax,
                                                          StartWorkspaceIndex=exp_start_index,
                                                          EndWorkspaceIndex=exp_end_index,
                                                          EnableLogging=True)
-            mock_extract_spectra.reset_mock()
+            ExtractSpectra.reset_mock()
 
         assert_call_as_expected(xmin, xmax, 3, 5, transpose=False, is_spectra=True)
         assert_call_as_expected(2., 4., 0, 4, transpose=True, is_spectra=True)

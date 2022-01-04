@@ -908,12 +908,12 @@ public:
    *   @param name :: The name of the class
    *   @return the nxdata entry
    */
-  NXData openNXData(const std::string &name) { return openNXClass<NXData>(name); }
+  NXData openNXData(const std::string &name) const { return openNXClass<NXData>(name); }
   /**  Opens a NXInstrument
    *   @param name :: The name of the class
    *   @return the instrument
    */
-  NXInstrument openNXInstrument(const std::string &name) { return openNXClass<NXInstrument>(name); }
+  NXInstrument openNXInstrument(const std::string &name) const { return openNXClass<NXInstrument>(name); }
 };
 
 /**  Implements NXroot Nexus class.
