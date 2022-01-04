@@ -49,6 +49,7 @@ Improvements
 
 Bugfixes
 ########
+- Fixed a bug with algorithm :ref:`CalculatePlaczek <algm-CalculatePlaczek>` for computing Placzek correction factors. There were a few flaws in previously implemented formulation.
 - Fixed a bug when filtering events in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>` based on time-of-flight. The code now allows setting the minimum time-of-flight to zero (inclusive).
 - Corrected the equation for pseudo-voigt FWHM and mixing parameter in peak profile function :ref:`Bk2BkExpConvPV <func-Bk2BkExpConvPV>`.
 - Fixed the issue with the calibration diagnostics script when dealing with instruments of which the detector ID does not start from 0.
