@@ -13,6 +13,7 @@
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidNexus/NexusClasses.h"
 
@@ -48,6 +49,9 @@ void LoadILLSALSA::init() {
                   "File path of the Data file to load");
   declareProperty(std::make_unique<API::WorkspaceProperty<>>("OutputWorkspace", "", Kernel::Direction::Output),
                   "The name to use for the output workspace");
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+  declareProperty("DetectorDistance", 1.0, mustBePositive, "Distance between the sample and the detector");
 }
 
 /**
@@ -105,7 +109,7 @@ void LoadILLSALSA::exec() {
   // move detector
   Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
   theta.load();
-  double distance = 1.125; // TODO read distance from calibration file
+  double distance = getProperty("DetectorDistance");
   double thetaDeg = theta[0];
   double thetaRad = (-thetaDeg) * M_PI / 180.0 + M_PI / 2;
   double dx = -distance * cos(thetaRad);
