@@ -205,15 +205,15 @@ public:
     /// Virtual destructor
     virtual ~ConstAttributeVisitor() = default;
     /// implements static_visitor's operator() for std::string
-    T operator()(std::string &str) const { return apply(str); }
+    T operator()(const std::string &str) const { return apply(str); }
     /// implements static_visitor's operator() for double
-    T operator()(double &d) const { return apply(d); }
+    T operator()(const double &d) const { return apply(d); }
     /// implements static_visitor's operator() for int
-    T operator()(int &i) const { return apply(i); }
+    T operator()(const int &i) const { return apply(i); }
     /// implements static_visitor's operator() for bool
-    T operator()(bool &b) const { return apply(b); }
+    T operator()(const bool &b) const { return apply(b); }
     /// implements static_visitor's operator() for vector
-    T operator()(std::vector<double> &v) const { return apply(v); }
+    T operator()(const std::vector<double> &v) const { return apply(v); }
 
   protected:
     /// Implement this mathod to access attribute as string
