@@ -107,39 +107,6 @@ Data analysis - MSD
 #. Repeat the previous steps with ``Peters`` and ``Yi`` functions
 #. Try run fits using the different ``Minimizer`` options (except FABADA), each time change the ``End X`` value either + or - 0.1
 
-Data analysis Conv Fit
-----------------------
-
-*Preparation*
-
--  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
-
-**Time required 3 - 5 minutes**
-
---------------
-
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
-#. Go to the ``Conv Fit`` tab
-#. Set the sample data field to ``irs26176_graphite002_red.nxs``
-#. Set the resolution file field to ``irs26173_graphite002_res.nxs``
-#. Ensure all spectra is ticked
-#. Try removing entries using shift-click so only spectra 0-5 exist in the table
-#. Set ``Lorentzians`` to 2
-#. Set ``Max iterations`` to 400
-#. Click ``Run``
-#. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
-#. Under the fit preview, change the plotted spectra to 3 and fit the single spectra
-#. Click ``Run`` the plot should update and new workspaces are created in the main Mantid GUI
-#. In the fitting table, remove all spectra except the rows for 3 and 4.
-#. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
-#. Try the various ``Plot`` options in the interface
-
-   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots
-   (b)  ``Plot Current Preview`` - should result in a plot with three datasets
-   (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
-
-#. Change the ``Fit type`` to different functions and run fits
-
 Data analysis I(Q, T)
 ----------------------
 
@@ -174,3 +141,36 @@ I(Q, T) - Fit:
 #. Click ``Run``
 #. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
+
+Data analysis Conv Fit
+----------------------
+
+*Preparation*
+
+-  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
+
+**Time required 3 - 5 minutes**
+
+--------------
+
+#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to the ``Conv Fit`` tab
+#. Set the sample data field to ``irs26176_graphite002_red.nxs``
+#. Set the resolution file field to ``irs26173_graphite002_res.nxs``
+#. Ensure all spectra is ticked
+#. Try removing entries using shift-click so only spectra 0-5 exist in the table
+#. Set ``Lorentzians`` to 2
+#. Set ``Max iterations`` to 400
+#. Click ``Run``
+#. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
+#. Under the fit preview, change the plotted spectra to 3 and fit the single spectra
+#. Click ``Run`` the plot should update and new workspaces are created in the main Mantid GUI
+#. In the fitting table, remove all spectra except the rows for 3 and 4.
+#. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
+#. Try the various ``Plot`` options in the interface
+
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots
+   (b)  ``Plot Current Preview`` - should result in a plot with three datasets
+   (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
+
+#. Change the ``Fit type`` to different functions and run fits
