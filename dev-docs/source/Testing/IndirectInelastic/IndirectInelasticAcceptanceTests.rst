@@ -104,7 +104,7 @@ Data analysis - MSD
 #. This should produce a plot of the fitted function in the interface
 #. Change ``End X`` to 1.0
 #. Click ``Run``
-#. Repeat the previous steps with ``Peters`` and ``Yi`` functions
+#. Repeat the previous steps with the ``FitType`` set to ``Peters`` and ``Yi`` functions
 #. Try run fits using the different ``Minimizer`` options (except FABADA), each time change the ``End X`` value either + or - 0.1
 
 Data analysis I(Q, T)
