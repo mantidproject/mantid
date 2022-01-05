@@ -289,8 +289,7 @@ class Dimension(QWidget):
             self.valueChanged.emit()
 
     def spinbox_changed(self):
-        self.value = self.spinbox.value()
-        self.update_slider()
+        self.set_value(self.spinbox.value())  # For MDE this won't update value when updating slider
 
     def slider_changed(self):
         if self.update_value_from_slider:
