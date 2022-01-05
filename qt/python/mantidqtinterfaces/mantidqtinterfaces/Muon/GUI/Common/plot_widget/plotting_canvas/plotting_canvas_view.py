@@ -235,9 +235,9 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
     def _set_text_tick_labels(self, axis_number):
         ax = self.fig.axes[axis_number]
         # set the axes to not "simplify" the values
-        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.3g}'))
         ax.xaxis.set_minor_formatter(NullFormatter())
-        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+        ax.yaxis.set_major_formatter(StrMethodFormatter('{x:.3g}'))
         ax.yaxis.set_minor_formatter(NullFormatter())
         if self._x_tick_labels:
             ax.set_xticks(range(len(self._x_tick_labels)))
