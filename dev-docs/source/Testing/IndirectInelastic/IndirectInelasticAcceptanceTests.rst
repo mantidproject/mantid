@@ -14,7 +14,7 @@ Data reduction
 -  Instrument ``IRIS``
 -  You need access to the ISIS data archive
 
-**Time required 2-5 minutes**
+**Time required 10-15 minutes**
 
 --------------
 
@@ -36,15 +36,14 @@ Data reduction
 #. Click ``Run``, this should produce a ``_calib`` workspace
 #. Make sure that you keep the ``_calib`` workspace, it is needed for the next test
 #. Enter ``Run number`` 59057-59059 and check ``Sum Files``
-#. Set ``Reflection`` to 004
+#. Set ``Reflection`` to 004 in the top right of the interface
+#. Click ``Run`` again
 #. This should produce a new ``_calib`` workspace, with ``004`` in the name
 
-**Time required 5-10 minutes**
+Energy Transfer Tab Steps
+=========================
 
---------------
-
-#. Open ``Interfaces`` > ``Indirect`` > ``Data reduction``
-#. Make sure ``Instrument`` is set to ``IRIS``
+#. Switch to the ``Energy Transfer`` tab
 #. Check the ``Sum Files`` box
 #. In the ``Run files`` box enter ``26184-26185``
 #. Click ``Run``
@@ -53,7 +52,7 @@ Data reduction
 #. Click ``Run``
 #. In the main GUI right-click on the ``iris26184_multi_graphite002_red`` workspace
 #. Choose ``Plot spectrum``, note the number of spectra, should be 51
-#. Click ``Cancel``
+#. Select a random spectra and check data is plotted
 #. In the ``Data reduction`` GUI, change the ``Detector Grouping`` to Groups
 #. Set ``Groups`` to 5
 #. Click ``Run``
@@ -85,6 +84,7 @@ Data analysis Elwin
 --------------
 
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Ensure you are on the ``Elwin`` tab
 #. Enter ``irs26176_graphite002_red.nxs`` in ``Input file``
 #. Click ``Run`` - this should produce 3 new workspaces ``_elf``, ``_eq`` and ``_eq2``
 #. Now in ``Input file`` choose browse, navigate to the ISIS-Sample data and select the two files above simultaneously, by using shift key
@@ -92,7 +92,7 @@ Data analysis Elwin
 #. Click ``Run``
 #. This should result in three new workspaces again, this time with file ranges as their name
 #. In the main GUI right-click on ``irs26174-26176_graphite002_red_elwin_eq2`` and choose ``Plot Spectrum``, choose ``Plot All``
-#. This should plot two lines of :math:`A^2` vs :math:`Q`
+#. This should plot two lines of A^2 vs Q
 #. Right-click on the ``irs26176_graphite002_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice; you will use this file in the next test
 
 Data analysis MSD
@@ -108,7 +108,8 @@ Data analysis MSD
 
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``MSD fit`` tab
-#. Load the file that you saved in the previous test
+#. Load the file that you saved in the previous test using the ``Add Workspace`` button
+#. Click ``All Spectra``, then ``Add Workspace``
 #. Set ``Fit type`` to Gaussian
 #. Click ``Run``
 #. This should produce a plot of the fitted function in the interface
@@ -130,20 +131,21 @@ Data analysis Conv Fit
 
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``Conv Fit`` tab
-#. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
-#. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
-#. Set ``Fit spectra`` to 0 - 5
+#. Set the sample data field to ``irs26176_graphite002_red.nxs``
+#. Set the resolution file field to ``irs26173_graphite002_res.nxs``
+#. Ensure all spectra is ticked
+#. Try removing entries using shift-click so only spectra 0-5 exist in the table
 #. Set ``Lorentzians`` to 2
 #. Set ``Max iterations`` to 400
 #. Click ``Run``
 #. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
-#. In the ``Fit`` tab, change ``Fit spectra`` to String and enter 3
+#. Under the fit preview, change the plotted spectra to 3 and fit the single spectra
 #. Click ``Run`` the plot should update and new workspaces are created in the main Mantid GUI
-#. Set ``Fit spectra`` to String 3-4
+#. In the fitting table, remove all spectra except the rows for 3 and 4.
 #. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
 #. Try the various ``Plot`` options in the interface
 
-   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 4 separate plots
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 5 separate plots
    (b)  ``Plot Current Preview`` - should result in a plot with three datasets
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 
@@ -165,7 +167,7 @@ Data analysis I(Q, T)
 #. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
 #. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
 #. Click ``Run``
-#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 87 x 6 table. **NB** keep this workspace for the next test
+#. A new workspace with the suffix ``_iqt`` should appear in the main GUI, it should be a 86x51 workspace. **NB** keep this workspace for the next test.
 #. Click ``Plot Current View`` this should plot the same data as the preview window
 #. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
@@ -184,7 +186,7 @@ Data analysis I(Q, T) Fit
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``I(Q, T) Fit`` tab
 #. Load the ``_iqt`` workspace from the previous test
-#. Set ``Exponential`` to 1
+#. Set ``Exponentials`` to 1
 #. Set ``EndX`` to 0.14
 #. Click ``Run``
 #. This should produce a fit and a difference plot in the window
@@ -193,4 +195,3 @@ Data analysis I(Q, T) Fit
 #. Click ``Run``
 #. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
-
