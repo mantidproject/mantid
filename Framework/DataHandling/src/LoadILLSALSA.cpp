@@ -80,19 +80,19 @@ void LoadILLSALSA::exec() {
   data.load();
   dataGroup.close();
 
-  m_numberOfScans = data.dims(0);
-  m_numberOfRows = data.dims(1);
-  m_numberOfColumns = data.dims(2);
+  int numberOfScans = data.dims(0);
+  int numberOfRows = data.dims(1);
+  int numberOfColumns = data.dims(2);
 
-  if (scanVariables.dims(1) != m_numberOfScans) {
+  if (scanVariables.dims(1) != numberOfScans) {
     std::ostringstream msg;
-    msg << "Number of scans in detector data (" << m_numberOfScans << ") ";
+    msg << "Number of scans in detector data (" << numberOfScans << ") ";
     msg << "and scanned variables (" << scanVariables.dims(1) << ") do not match, please check your nexus file.";
     throw std::runtime_error(msg.str());
   }
 
-  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(m_numberOfRows * m_numberOfColumns + 1,
-                                                                    HistogramData::Points(m_numberOfScans));
+  m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(numberOfRows * numberOfColumns + 1,
+                                                                    HistogramData::Points(numberOfScans));
 
   // create instrument
   auto loadInst = createChildAlgorithm("LoadInstrument");
@@ -126,12 +126,12 @@ void LoadILLSALSA::exec() {
 
   // fill detector data
   int index = 0;
-  for (int i = 0; i < m_numberOfRows; i++) {
-    for (int j = 0; j < m_numberOfColumns; j++) {
+  for (int i = 0; i < numberOfRows; i++) {
+    for (int j = 0; j < numberOfColumns; j++) {
       auto &spectrum = m_outputWorkspace->mutableY(index);
       auto &errors = m_outputWorkspace->mutableE(index);
       auto &axis = m_outputWorkspace->mutableX(index);
-      for (int k = 0; k < m_numberOfScans; k++) {
+      for (int k = 0; k < numberOfScans; k++) {
         spectrum[k] = data(k, i, j);
         errors[k] = sqrt(data(k, i, j));
         axis[k] = k;
@@ -145,7 +145,7 @@ void LoadILLSALSA::exec() {
   if (it == scanVariableNames.cend())
     throw std::runtime_error("Monitor was not found in scanned variable. Please check your nexus file.");
   auto monitorIndex = std::distance(scanVariableNames.cbegin(), it);
-  for (int i = 0; i < m_numberOfScans; i++) {
+  for (int i = 0; i < numberOfScans; i++) {
     m_outputWorkspace->mutableY(index)[i] = scanVariables((int)monitorIndex, i);
     m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
     m_outputWorkspace->mutableX(index)[i] = i;

@@ -37,12 +37,6 @@ private:
   void init() override;
   // Execution code
   void exec() override;
-  // Number of scans
-  int m_numberOfScans;
-  // Number of rows on the detector
-  int m_numberOfRows;
-  // Number of columns on the detector
-  int m_numberOfColumns;
   // Output workspace
   std::shared_ptr<DataObjects::Workspace2D> m_outputWorkspace;
 };
