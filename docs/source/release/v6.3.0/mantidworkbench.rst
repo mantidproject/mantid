@@ -25,6 +25,7 @@ New and Improved
     :align: center
 
 - The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path)
+- New general setting: `Provide auto-completion suggestions in the script editor` for making auto-completion optional in the script editor
 
 Bugfixes
 --------
