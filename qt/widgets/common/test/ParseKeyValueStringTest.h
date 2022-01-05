@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <cxxtest/TestSuite.h>
 
@@ -78,6 +79,20 @@ public:
     QtMap kvp = parseKeyValueQString(R"(a=1;b=2)", ";");
     TS_ASSERT_EQUALS(kvp["a"], "1");
     TS_ASSERT_EQUALS(kvp["b"], "2");
+  }
+
+  void testConvertAlgPropsToString() {
+    auto algProps = MantidQt::API::AlgorithmRuntimeProps();
+    algProps.setPropertyValue("prop1", "val1");
+    algProps.setPropertyValue("prop2", "val2");
+    auto result = MantidQt::MantidWidgets::convertAlgPropsToString(algProps);
+    TS_ASSERT_EQUALS("prop1=val1;prop2=val2", result);
+  }
+
+  void testConvertEmptyAlgPropsToString() {
+    auto algProps = MantidQt::API::AlgorithmRuntimeProps();
+    auto result = MantidQt::MantidWidgets::convertAlgPropsToString(algProps);
+    TS_ASSERT_EQUALS("", result);
   }
 
 private:

@@ -53,6 +53,8 @@ public:
   virtual std::vector<IBatchView *> batches() const override;
 
   void closeEvent(QCloseEvent *event) override;
+  void acceptCloseEvent() override;
+  void ignoreCloseEvent() override;
 
   IBatchView *newBatch() override;
   void removeBatch(int batchIndex) override;
@@ -95,6 +97,7 @@ private:
   std::unique_ptr<QtOptionsDialogView> m_optionsDialogView;
   std::vector<IBatchView *> m_batchViews;
   int m_batchIndex;
+  QCloseEvent *m_closeEvent;
 
   friend class Encoder;
   friend class Decoder;

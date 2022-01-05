@@ -116,7 +116,7 @@ target_include_directories(
 generate_mantid_export_header(Muon FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidMuonTargets")
   mtd_install_framework_lib(TARGETS Muon PLUGIN_LIB)
 else()

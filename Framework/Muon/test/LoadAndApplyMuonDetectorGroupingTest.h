@@ -15,8 +15,8 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidMuon/LoadAndApplyMuonDetectorGrouping.h"
 
-#include "MantidTestHelpers/MuonGroupingXMLHelper.h"
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MuonGroupingXMLHelper.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

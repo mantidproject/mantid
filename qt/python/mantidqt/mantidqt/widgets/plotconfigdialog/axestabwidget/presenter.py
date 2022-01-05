@@ -8,7 +8,7 @@
 
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-from mantid.plots import convert_color_to_hex
+from mantid.plots import convert_color_to_hex, axesfunctions
 from mantidqt.widgets.plotconfigdialog import generate_ax_name, get_axes_names_dict
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.view import AxesTabWidgetView
@@ -54,10 +54,22 @@ class AxesTabWidgetPresenter:
         """Update the axes with the user inputted properties"""
         # Make sure current_view_props is up to date if values have been changed
         self.axis_changed()
-
         ax = self.get_selected_ax()
-
         self.set_ax_title(ax, self.current_view_props['title'])
+        self._apply_properties_to_axes(ax)
+        self.update_view()
+
+    def apply_all_properties(self):
+        """Update the axes with the user inputted properties"""
+        # Make sure current_view_props is up to date if values have been changed
+        self.axis_changed()
+        for ax in self.axes_names_dict.values():
+            self._apply_properties_to_axes(ax)
+            ax.figure.canvas.draw()
+        self.update_view()
+
+    def _apply_properties_to_axes(self, ax):
+        """Apply current properties to given set of axes"""
         self.set_ax_canvas_color(ax, self.current_view_props['canvas_color'])
 
         if not isinstance(ax, Axes3D):
@@ -84,7 +96,10 @@ class AxesTabWidgetPresenter:
             ax.set_xscale(self.current_view_props['xscale'])
 
             if self.current_view_props['xautoscale']:
-                ax.autoscale(True, axis="x")
+                if ax.images:
+                    axesfunctions.update_colorplot_datalimits(ax, ax.images, axis='x')
+                else:
+                    ax.autoscale(True, axis="x")
             else:
                 if isinstance(ax, Axes3D):
                     ax.set_xlim3d(self.current_view_props['xlim'])
@@ -96,7 +111,10 @@ class AxesTabWidgetPresenter:
             ax.set_yscale(self.current_view_props['yscale'])
 
             if self.current_view_props['yautoscale']:
-                ax.autoscale(True, axis="y")
+                if ax.images:
+                    axesfunctions.update_colorplot_datalimits(ax, ax.images, axis='y')
+                else:
+                    ax.autoscale(True, axis="y")
             else:
                 if isinstance(ax, Axes3D):
                     ax.set_ylim3d(self.current_view_props['ylim'])
@@ -110,69 +128,6 @@ class AxesTabWidgetPresenter:
                 ax.autoscale(True, axis="z")
             else:
                 ax.set_zlim3d(self.current_view_props['zlim'])
-
-        self.update_view()
-
-    def apply_all_properties(self):
-        """Update the axes with the user inputted properties"""
-        # Make sure current_view_props is up to date if values have been changed
-        self.axis_changed()
-        view_props = self.current_view_props
-        for ax in self.axes_names_dict.values():
-
-            self.set_ax_canvas_color(ax, view_props['canvas_color'])
-
-            if self.current_view_props['minor_ticks']:
-                ax.minorticks_on()
-            else:
-                ax.minorticks_off()
-
-            ax.show_minor_gridlines = self.current_view_props['minor_gridlines']
-
-            # If the grid is enabled update it
-            if ax.show_minor_gridlines:
-                if ax.xaxis._gridOnMajor and ax.yaxis._gridOnMajor:
-                    ax.grid(True, which='minor')
-                elif ax.xaxis._gridOnMajor:
-                    ax.grid(True, axis='x', which='minor')
-                elif ax.yaxis._gridOnMajor:
-                    ax.grid(True, axis='y', which='minor')
-            else:
-                ax.grid(False, which='minor')
-
-            if "xlabel" in view_props:
-                ax.set_xlabel(view_props['xlabel'])
-                ax.set_xscale(view_props['xscale'])
-
-                if self.current_view_props['xautoscale']:
-                    ax.autoscale(True, axis="x")
-                else:
-                    if isinstance(ax, Axes3D):
-                        ax.set_xlim3d(view_props['xlim'])
-                    else:
-                        ax.set_xlim(view_props['xlim'])
-
-            if "ylabel" in view_props:
-                ax.set_ylabel(view_props['ylabel'])
-                ax.set_yscale(view_props['yscale'])
-
-                if self.current_view_props['yautoscale']:
-                    ax.autoscale(True, axis="y")
-                else:
-                    if isinstance(ax, Axes3D):
-                        ax.set_ylim3d(view_props['ylim'])
-                    else:
-                        ax.set_ylim(view_props['ylim'])
-
-            if isinstance(ax, Axes3D) and "zlabel" in view_props:
-                ax.set_zlabel(view_props['zlabel'])
-                ax.set_zscale(view_props['zscale'])
-                if self.current_view_props['zautoscale']:
-                    ax.autoscale(True, axis="z")
-                else:
-                    ax.set_zlim3d(view_props['zlim'])
-            ax.figure.canvas.draw()
-        self.update_view()
 
     def get_selected_ax(self):
         """Get Axes object of selected axes"""

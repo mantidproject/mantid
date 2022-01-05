@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/JSONGeometryParserTestHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidNexusGeometry/JSONGeometryParser.h"
 #include "MantidNexusGeometry/JSONInstrumentBuilder.h"
-#include "MantidTestHelpers/JSONGeometryParserTestHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <json/json.h>
 
@@ -24,7 +24,7 @@ public:
   static void destroySuite(JSONInstrumentBuilderTest *suite) { delete suite; }
 
   void test_constructor_pass_valid_instrument() {
-    auto json = TestHelpers::getFullJSONInstrumentSimpleWithChopper();
+    auto json = FrameworkTestHelpers::getFullJSONInstrumentSimpleWithChopper();
     TS_ASSERT_THROWS_NOTHING((JSONInstrumentBuilder(json)));
   }
 
@@ -33,13 +33,13 @@ public:
   }
 
   void test_build_geometry() {
-    auto json = TestHelpers::getFullJSONInstrumentSimpleWithChopper();
+    auto json = FrameworkTestHelpers::getFullJSONInstrumentSimpleWithChopper();
     JSONInstrumentBuilder builder(json);
     TS_ASSERT_THROWS_NOTHING((builder.buildGeometry()));
   }
 
   void test_simple_instrument() {
-    auto json = TestHelpers::getFullJSONInstrumentSimpleWithMonitor();
+    auto json = FrameworkTestHelpers::getFullJSONInstrumentSimpleWithMonitor();
     JSONInstrumentBuilder builder(json);
     auto instrument = builder.buildGeometry();
 

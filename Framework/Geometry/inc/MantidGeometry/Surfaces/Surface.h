@@ -60,7 +60,7 @@ public:
   virtual int side(const Kernel::V3D &) const;
 
   /// is point valid on surface
-  virtual int onSurface(const Kernel::V3D &R) const = 0;
+  virtual bool onSurface(const Kernel::V3D &R) const = 0;
 
   /// returns the minimum distance to the surface
   virtual double distance(const Kernel::V3D &) const = 0;

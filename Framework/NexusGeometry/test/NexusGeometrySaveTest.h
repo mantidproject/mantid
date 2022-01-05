@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
+#include "MantidFrameworkTestHelpers/NexusFileReader.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -13,9 +16,6 @@
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FileResource.h"
-#include "MantidTestHelpers/NexusFileReader.h"
 
 #include "mockobjects.h"
 #include <cxxtest/TestSuite.h>

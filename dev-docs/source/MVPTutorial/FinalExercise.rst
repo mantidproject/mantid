@@ -11,7 +11,7 @@ to create three presenters.
    from your table.
 2. A presenter to interact with ``plot_view``, passing x and y values
    from the ``DataGenerator`` model to be plotted.
-3. A presenter to interact with ``master_view`` and ``model`` directly
+3. A presenter to interact with ``main_view`` and ``model`` directly
    and calling functions in your other presenters.
 
 See :ref:`here <CompleteGUI>` for the solution and complete functioning

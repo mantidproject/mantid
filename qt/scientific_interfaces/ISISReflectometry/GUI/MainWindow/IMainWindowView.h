@@ -7,6 +7,7 @@
 #pragma once
 
 #include "GUI/Batch/IBatchView.h"
+#include <QCloseEvent>
 #include <string>
 #include <vector>
 
@@ -30,6 +31,7 @@ public:
   virtual void notifyLoadBatchRequested(int) = 0;
   virtual void notifyShowOptionsRequested() = 0;
   virtual void notifyShowSlitCalculatorRequested() = 0;
+  virtual void notifyCloseEvent() = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 
@@ -41,6 +43,8 @@ public:
   virtual std::vector<IBatchView *> batches() const = 0;
   virtual void disableSaveAndLoadBatch() = 0;
   virtual void enableSaveAndLoadBatch() = 0;
+  virtual void acceptCloseEvent() = 0;
+  virtual void ignoreCloseEvent() = 0;
 
   virtual ~IMainWindowView() = default;
 };

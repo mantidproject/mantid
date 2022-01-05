@@ -14,8 +14,8 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidCurveFitting/Algorithms/PawleyFit.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::Algorithms::PawleyFit;
 using Mantid::CurveFitting::Algorithms::V3DFromHKLColumnExtractor;

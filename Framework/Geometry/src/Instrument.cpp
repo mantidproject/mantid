@@ -1081,8 +1081,9 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
     if (detector && isMonitor(detector->getID()))
       continue;
 
-    // skip choppers HACK!
-    if (comp->getName() == "chopper-position") {
+    // skip choppers, slits and supermirrors - HACK!
+    const auto &name = comp->getName();
+    if (name == "chopper-position" || name.substr(0, 4) == "slit" || name == "supermirror") {
       continue;
     }
 

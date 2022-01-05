@@ -12,13 +12,13 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/LorentzCorrection.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
 using Mantid::Algorithms::LorentzCorrection;

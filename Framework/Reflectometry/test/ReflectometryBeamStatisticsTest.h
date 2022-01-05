@@ -13,8 +13,8 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <boost/math/special_functions/pow.hpp>
 
@@ -151,11 +151,13 @@ private:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitName", slit2))
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SecondSlitSizeSampleLog", "slit2.size"));
     if (slit == 1) {
-      TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(),
-                              std::string("Some invalid Properties found: [ FirstSlitName ]"));
+      std::string err_msg("Some invalid Properties found: \n"
+                          " FirstSlitName: No component called 'non-existent' found in ReflectedBeamWorkspace");
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(), err_msg);
     } else if (slit == 2) {
-      TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(),
-                              std::string("Some invalid Properties found: [ SecondSlitName ]"));
+      std::string err_msg("Some invalid Properties found: \n"
+                          " SecondSlitName: No component called 'non-existent' found in ReflectedBeamWorkspace");
+      TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, e.what(), err_msg);
     }
     TS_ASSERT(!alg.isExecuted())
   }

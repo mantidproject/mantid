@@ -146,7 +146,7 @@ target_include_directories(
 generate_mantid_export_header(HistogramData FALSE)
 
 # Installation settings
-if(CONDA_BUILD)
+if(CONDA_ENV)
   set(TARGET_EXPORT_NAME "MantidHistogramDataTargets")
   mtd_install_framework_lib(TARGETS HistogramData INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()

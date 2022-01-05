@@ -94,8 +94,11 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection, const IObject &shape
   // Create track for distance in cylinder before scattering point
   Track incoming(position, -beamDirection);
 
-  shape.interceptSurface(incoming);
-  return incoming.totalDistInsideObject();
+  if (shape.interceptSurface(incoming) > 0) {
+    return incoming.totalDistInsideObject();
+  } else {
+    return 0;
+  }
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape, const double cubeSizeInMetre) {
@@ -319,7 +322,15 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, c
     const double z = (static_cast<double>(i) + 0.5) * sliceThickness - 0.5 * params.height;
 
     // Number of elements in 1st annulus
-    size_t Ni = 0;
+    // NOTE:
+    // For example, if the hollow cylinder consist of an inner cylinder surface with
+    // two annulus, and two annulus for the hollow ring (i.e. total four annulus for
+    // the outter cylinder surface). We have
+    // Ni = [6,  12,  18, 24]
+    //              ^
+    //       inner    outter
+    const auto nSteps = params.innerRadius / deltaR;
+    size_t Ni = static_cast<size_t>(nSteps) * 6;
     // loop over annuli
     for (size_t j = 0; j < numAnnuli; ++j) {
       Ni += 6;

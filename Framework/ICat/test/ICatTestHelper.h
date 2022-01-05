@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/CatalogSession.h"
-#include "MantidTestHelpers/FacilityHelper.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
 
 namespace ICatTestHelper {
 

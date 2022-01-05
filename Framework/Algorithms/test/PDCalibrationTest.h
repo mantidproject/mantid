@@ -273,11 +273,13 @@ public:
     // setup the peak postions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     const double TZERO = 20.;
+    const double DIFA = 0.05;
     std::vector<double> dValues(PEAK_TOFS);
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
     std::vector<double> unusedy;
     dSpacingUnit.fromTOF(dValues, unusedy, -1., 0,
-                         Mantid::Kernel::UnitParametersMap{{UnitParams::difc, DIFC_155}, {UnitParams::tzero, TZERO}});
+                         Mantid::Kernel::UnitParametersMap{
+                             {UnitParams::difc, DIFC_155}, {UnitParams::tzero, TZERO}, {UnitParams::difa, DIFA}});
 
     const std::string prefix{"PDCalibration_difc_tzero_difa"};
 
@@ -289,6 +291,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputCalibrationTable", prefix + "cal"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DiagnosticWorkspaces", prefix + "diag"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakPositions", dValues));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("UseChiSq", true)); // don't bias fit on pk height
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("CalibrationParameters", "DIFC+TZERO+DIFA"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
@@ -304,13 +307,13 @@ public:
     size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
     TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, 0.1); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 2), DIFA, 0.01);    // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
     index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
     TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
     TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, 0.1); // difc
-    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 2), DIFA, 0.01);    // difa
     TS_ASSERT_DELTA(calTable->cell<double>(index, 3), TZERO, 0.1);    // tzero
 
     MatrixWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(prefix + "cal_mask");

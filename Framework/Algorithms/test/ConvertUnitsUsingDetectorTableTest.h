@@ -10,7 +10,7 @@
 
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"

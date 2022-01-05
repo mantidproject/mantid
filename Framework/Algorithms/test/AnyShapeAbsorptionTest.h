@@ -13,9 +13,9 @@
 #include "MantidAlgorithms/AnyShapeAbsorption.h"
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;

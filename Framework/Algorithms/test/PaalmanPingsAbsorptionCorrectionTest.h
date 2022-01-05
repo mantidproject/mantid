@@ -11,9 +11,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::PaalmanPingsAbsorptionCorrection;
 using Mantid::API::AlgorithmManager;
@@ -87,7 +87,7 @@ public:
     TS_ASSERT_DELTA(ass->readY(0)[0], 0.1466219, 1e-7);
     TS_ASSERT_DELTA(ass->readY(1)[0], 0.1977505, 1e-7);
     TS_ASSERT_DELTA(ass->readY(2)[0], 0.2517314, 1e-7);
-    TS_ASSERT_DELTA(ass->readY(3)[0], 0.1622336, 1e-7);
+    TS_ASSERT_DELTA(ass->readY(3)[0], 0.1622546, 1e-7);
 
     Mantid::API::MatrixWorkspace_sptr assc;
     TS_ASSERT_THROWS_NOTHING(assc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
@@ -95,23 +95,23 @@ public:
     TS_ASSERT_DELTA(assc->readY(0)[0], 0.1406871, 1e-7);
     TS_ASSERT_DELTA(assc->readY(1)[0], 0.1903367, 1e-7);
     TS_ASSERT_DELTA(assc->readY(2)[0], 0.2422601, 1e-7);
-    TS_ASSERT_DELTA(assc->readY(3)[0], 0.1550374, 1e-7);
+    TS_ASSERT_DELTA(assc->readY(3)[0], 0.1550581, 1e-7);
 
     Mantid::API::MatrixWorkspace_sptr acc;
     TS_ASSERT_THROWS_NOTHING(acc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outWSgroup + "_acc")));
-    TS_ASSERT_DELTA(acc->readY(0)[0], 0.9489914, 1e-7);
-    TS_ASSERT_DELTA(acc->readY(1)[0], 0.9471159, 1e-7);
-    TS_ASSERT_DELTA(acc->readY(2)[0], 0.9493414, 1e-7);
-    TS_ASSERT_DELTA(acc->readY(3)[0], 0.9365069, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(0)[0], 0.9429243, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(1)[0], 0.9427054, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(2)[0], 0.9434231, 1e-7);
+    TS_ASSERT_DELTA(acc->readY(3)[0], 0.9324084, 1e-7);
 
     Mantid::API::MatrixWorkspace_sptr acsc;
     TS_ASSERT_THROWS_NOTHING(acsc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve(outWSgroup + "_acsc")));
-    TS_ASSERT_DELTA(acsc->readY(0)[0], 0.2919232, 1e-7);
-    TS_ASSERT_DELTA(acsc->readY(1)[0], 0.4162723, 1e-7);
-    TS_ASSERT_DELTA(acsc->readY(2)[0], 0.5561810, 1e-7);
-    TS_ASSERT_DELTA(acsc->readY(3)[0], 0.3984180, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(0)[0], 0.3251095, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(1)[0], 0.4218324, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(2)[0], 0.5778520, 1e-7);
+    TS_ASSERT_DELTA(acsc->readY(3)[0], 0.4014179911, 1e-7);
 
     // Compare to the AbsorptionCorrection algorithm, the A_s,s should
     // match the ScatterFrom='Sample', and A_c,c should match
@@ -130,10 +130,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(absorptionCorrection_ass = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve("absorptionCorrection_ass")));
 
-    TS_ASSERT_DELTA(ass->readY(0)[0], absorptionCorrection_ass->readY(0)[0], 1e-14);
-    TS_ASSERT_DELTA(ass->readY(1)[0], absorptionCorrection_ass->readY(1)[0], 1e-14);
-    TS_ASSERT_DELTA(ass->readY(2)[0], absorptionCorrection_ass->readY(2)[0], 1e-14);
-    TS_ASSERT_DELTA(ass->readY(3)[0], absorptionCorrection_ass->readY(3)[0], 1e-14);
+    TS_ASSERT_DELTA(ass->readY(0)[0], absorptionCorrection_ass->readY(0)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->readY(1)[0], absorptionCorrection_ass->readY(1)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->readY(2)[0], absorptionCorrection_ass->readY(2)[0], 1e-7);
+    TS_ASSERT_DELTA(ass->readY(3)[0], absorptionCorrection_ass->readY(3)[0], 1e-7);
 
     // now compare for A_c,c
     absorptionCorrectionAlg->setPropertyValue("ScatterFrom", "Container");
@@ -143,9 +143,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(absorptionCorrection_acc = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  AnalysisDataService::Instance().retrieve("absorptionCorrection_acc")));
 
-    TS_ASSERT_DELTA(acc->readY(0)[0], absorptionCorrection_acc->readY(0)[0], 1e-14);
-    TS_ASSERT_DELTA(acc->readY(1)[0], absorptionCorrection_acc->readY(1)[0], 1e-14);
-    TS_ASSERT_DELTA(acc->readY(2)[0], absorptionCorrection_acc->readY(2)[0], 1e-14);
-    TS_ASSERT_DELTA(acc->readY(3)[0], absorptionCorrection_acc->readY(3)[0], 1e-14);
+    TS_ASSERT_DELTA(acc->readY(0)[0], absorptionCorrection_acc->readY(0)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->readY(1)[0], absorptionCorrection_acc->readY(1)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->readY(2)[0], absorptionCorrection_acc->readY(2)[0], 1e-7);
+    TS_ASSERT_DELTA(acc->readY(3)[0], absorptionCorrection_acc->readY(3)[0], 1e-7);
   }
 };

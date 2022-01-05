@@ -269,7 +269,7 @@ class MaxEntPresenter(object):
 
         # Storing this on the class so it can be sent as part of the calculation
         # finished signal.
-        self._maxent_output_workspace_name = base_name
+        self._maxent_output_workspace_name = self.context._frequency_context.get_ws_name(base_name)
 
     def get_maxent_output_options(self):
         output_options = {}

@@ -10,9 +10,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidFrameworkTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidMDAlgorithms/PlusMD.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 
 #include <Poco/File.h>
 

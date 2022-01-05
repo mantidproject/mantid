@@ -17,11 +17,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidHistogramData/HistogramDx.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/make_cow.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::GroupWorkspaces;

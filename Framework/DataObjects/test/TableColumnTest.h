@@ -10,7 +10,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 
 #include <memory>
 

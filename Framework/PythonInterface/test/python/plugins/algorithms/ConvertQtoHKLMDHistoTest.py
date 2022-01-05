@@ -23,7 +23,7 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
         # Test with getting UB from peaks
-        HB3AFindPeaks(InputWorkspace=mtd["mde_ws"],
+        HB3AFindPeaks(InputWorkspace="mde_ws",
                       CellType="Tetragonal",
                       Centering="I",
                       PeakDistanceThreshold=0.25,

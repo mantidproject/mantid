@@ -18,8 +18,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <string>
 #include <utility>
@@ -32,23 +32,17 @@ class BaseCustomInstrumentPresenterTest : public CxxTest::TestSuite {
 public:
   BaseCustomInstrumentPresenterTest() { FrameworkManager::Instance(); }
 
-  static BaseCustomInstrumentPresenterTest *createSuite() {
-    return new BaseCustomInstrumentPresenterTest();
-  }
+  static BaseCustomInstrumentPresenterTest *createSuite() { return new BaseCustomInstrumentPresenterTest(); }
 
-  static void destroySuite(BaseCustomInstrumentPresenterTest *suite) {
-    delete suite;
-  }
+  static void destroySuite(BaseCustomInstrumentPresenterTest *suite) { delete suite; }
 
   void setUp() override {
     m_model = new NiceMock<MockBaseCustomInstrumentModel>();
     m_view = new NiceMock<MockBaseCustomInstrumentView>("EMU");
     m_paneView = new NiceMock<MockPlotFitAnalysisPaneView>();
     m_paneModel = new NiceMock<MockPlotFitAnalysisPaneModel>();
-    m_pane =
-        new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
-    m_presenter =
-        new PartMockBaseCustomInstrumentPresenter(m_view, m_model, m_pane);
+    m_pane = new NiceMock<MockPlotFitAnalysisPanePresenter>(m_paneView, m_paneModel);
+    m_presenter = new PartMockBaseCustomInstrumentPresenter(m_view, m_model, m_pane);
   }
 
   void tearDown() override {

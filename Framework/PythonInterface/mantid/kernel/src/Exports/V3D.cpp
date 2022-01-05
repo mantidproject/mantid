@@ -28,7 +28,7 @@ namespace {
  */
 V3D directionAnglesDefault(V3D &self) { return self.directionAngles(); }
 
-long hashV3D(V3D &self) {
+Py_hash_t hashV3D(V3D &self) {
   boost::python::object tmpObj(self.toString());
 
   return PyObject_Hash(tmpObj.ptr());

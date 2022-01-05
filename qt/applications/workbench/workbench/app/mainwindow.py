@@ -13,7 +13,7 @@ Defines the QMainWindow of the application and the main() entry point.
 import builtins
 import os
 
-from mantid.api import FrameworkManager
+from mantid.api import FrameworkManager, AlgorithmManager
 from mantid.kernel import ConfigService, logger
 from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
@@ -587,6 +587,9 @@ class MainWindow(QMainWindow):
             # We don't want this at module scope here
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
+
+            # Cancel all running (managed) algorithms
+            AlgorithmManager.Instance().cancelAll()
 
             app = QApplication.instance()
             if app is not None:

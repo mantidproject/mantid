@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

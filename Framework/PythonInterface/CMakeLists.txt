@@ -58,9 +58,7 @@ function(SET_PYTHON_PROPERTIES TARGET TARGET_NAME)
   set_target_properties(${TARGET} PROPERTIES PREFIX "")
   # Library name needs to end in .pyd for Windows
   if(MSVC)
-    set_target_properties(
-      ${TARGET} PROPERTIES SUFFIX .pyd COMPILE_FLAGS "/bigobj /w44005 /w44244"
-    ) # bigobj required for intensive templating
+    set_target_properties(${TARGET} PROPERTIES SUFFIX .pyd)
   elseif(APPLE)
     # and in .so on the Mac
     set_target_properties(${TARGET} PROPERTIES SUFFIX .so)
@@ -80,7 +78,7 @@ endfunction()
 # ######################################################################################################################
 # Common install RPATH setting for all extension modules
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../MacOS)
+  set(EXT_INSTALL_RPATH "${DL_ORIGIN_TAG}/../../../MacOS;${DL_ORIGIN_TAG}/../../../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set(EXT_INSTALL_RPATH ${DL_ORIGIN_TAG}/../../../${LIB_DIR})
 endif()

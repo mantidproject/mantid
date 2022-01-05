@@ -21,24 +21,6 @@ if(CXXTEST_FOUND)
   set(PLUSMINUSTEST_DO_PLUS false)
   configure_file(PlusMinusTest.in.h ${CMAKE_CURRENT_SOURCE_DIR}/MinusTest.h)
 
-  # Make the rest of the tests
-  include_directories(../../TestHelpers/inc)
-  # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable. It
-  # will go out of scope at the end of this file so doesn't need un-setting
-  set(TESTHELPER_SRCS
-      ../../TestHelpers/src/ComponentCreationHelper.cpp
-      ../../TestHelpers/src/FileComparisonHelper.cpp
-      ../../TestHelpers/src/IndirectFitDataCreationHelper.cpp
-      ../../TestHelpers/src/InstrumentCreationHelper.cpp
-      ../../TestHelpers/src/MDEventsTestHelper.cpp
-      ../../TestHelpers/src/MuonWorkspaceCreationHelper.cpp
-      ../../TestHelpers/src/SANSInstrumentCreationHelper.cpp
-      ../../TestHelpers/src/ScopedFileHelper.cpp
-      ../../TestHelpers/src/TearDownWorld.cpp
-      ../../TestHelpers/src/WorkspaceCreationHelper.cpp
-      ../../TestHelpers/src/ParallelRunner.cpp
-      ../../TestHelpers/src/ReflectometryHelper.cpp
-  )
   cxxtest_add_test(AlgorithmsTest ${TEST_FILES})
   if(WIN32)
     # On Windows Boost uuid requires the bcrypt library
@@ -60,6 +42,9 @@ if(CXXTEST_FOUND)
             ${BCRYPT}
             gmock
   )
+
+  add_framework_test_helpers(AlgorithmsTest)
+
   add_dependencies(AlgorithmsTest Crystal CurveFitting)
   add_dependencies(FrameworkTests AlgorithmsTest)
   # Test data

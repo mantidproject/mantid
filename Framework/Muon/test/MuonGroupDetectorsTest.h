@@ -10,8 +10,8 @@
 
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMuon/MuonGroupDetectors.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::MuonGroupDetectors;
 

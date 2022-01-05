@@ -12,6 +12,7 @@ matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
 import numpy as np
 
+from unittest import mock
 import mantid.api
 import mantid.plots.axesfunctions as funcs
 from mantid.plots.utility import MantidAxType
@@ -189,6 +190,27 @@ class PlotFunctionsTest(unittest.TestCase):
 
     def test_update_colorplot_datalimits_for_imshow(self):
         self._do_update_colorplot_datalimits(funcs.imshow)
+
+    def test_update_colorplot_datalimits_for_x_axis(self):
+        """Check that the function is only operating on the x-axis"""
+        ax_mock = mock.MagicMock()
+        funcs.update_colorplot_datalimits(ax_mock, ax_mock.images, 'x')
+        ax_mock.update_datalim.assert_called_once_with(mock.ANY, True, False)
+        ax_mock.autoscale.assert_called_once_with(axis='x')
+
+    def test_update_colorplot_datalimits_for_y_axis(self):
+        """Check that the function is only operating on y-axis"""
+        ax_mock = mock.MagicMock()
+        funcs.update_colorplot_datalimits(ax_mock, ax_mock.images, 'y')
+        ax_mock.update_datalim.assert_called_once_with(mock.ANY, False, True)
+        ax_mock.autoscale.assert_called_once_with(axis='y')
+
+    def test_update_colorplot_datalimits_for_both_axis(self):
+        """Check that the function is only operating on y-axis"""
+        ax_mock = mock.MagicMock()
+        funcs.update_colorplot_datalimits(ax_mock, ax_mock.images, 'both')
+        ax_mock.update_datalim.assert_called_once_with(mock.ANY, True, True)
+        ax_mock.autoscale.assert_called_once_with(axis='both')
 
     def test_1d_plots_with_unplottable_type_raises_attributeerror(self):
         table = CreateEmptyTableWorkspace()

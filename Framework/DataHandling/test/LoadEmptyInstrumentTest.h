@@ -12,13 +12,13 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/Exception.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <vector>
 
 using namespace Mantid::API;

@@ -2,13 +2,12 @@ name: mantid-developer
 
 channels:
   - conda-forge
-  - DLR-SC # Required for OpenCascade
 
 dependencies:
   - boost=1.75.* # Also pulls in boost-cpp
   - cmake>=3.20.*
   - doxygen>=1.9.*
-  - eigen=3.3.*
+  - eigen=3.4.*
   - euphonic=0.6.*
   - graphviz>=2.47.0
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
@@ -22,7 +21,7 @@ dependencies:
   - nexus=4.4.*
   - ninja>=1.10.2
   - numpy>=1.20.2
-  - opencascade>=7.4.0
+  - occt
   - pip>=21.0.1
   - poco=1.10.*
   - psutil>=5.8.0
@@ -39,7 +38,7 @@ dependencies:
   - requests>=2.25.1
   - scipy>=1.6.2
   - setuptools=48.0.0 # Pinned purposefully due to incompatibility with later versions
-  - sphinx>=3.5.4
+  - sphinx<=3.5.4 # Pinned at 3.5.4 and below due to styling changes in 4.0, and 4.3 has a bug fix which imports a lot of matplotlib code (probably correctly, based on what we have in the api/python/mantid/plots/index.html file) and fails the doctests.
   - tbb-devel=2020.2.*
   - tbb=2020.2.*
   - texlive-core>=20180414

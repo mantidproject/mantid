@@ -8,9 +8,9 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidParallel/Communicator.h"
 #include "MantidParallel/Nonblocking.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace Parallel;

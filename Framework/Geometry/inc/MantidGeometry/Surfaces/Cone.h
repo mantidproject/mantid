@@ -50,8 +50,8 @@ public:
   /// Calculate if the point R is within the cone (return -1) or outside (return
   /// 1)
   int side(const Kernel::V3D &R) const override;
-  /// Calculate if the point R is on the cone(1=on the surface, 0=not)
-  int onSurface(const Kernel::V3D &R) const override;
+  /// Calculate if the point R is on the cone
+  bool onSurface(const Kernel::V3D &R) const override;
 
   /// Accept visitor for line calculation
   void acceptVisitor(BaseVisit &A) const override { A.Accept(*this); }

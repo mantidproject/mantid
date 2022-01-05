@@ -14,7 +14,7 @@
 #include "MantidAlgorithms/CropWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

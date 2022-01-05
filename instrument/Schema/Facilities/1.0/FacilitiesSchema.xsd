@@ -18,18 +18,6 @@
                   </xs:choice>
                 </xs:complexType>
               </xs:element>
-              <xs:element name="computeResource" minOccurs="0">
-                <xs:complexType>
-                  <xs:choice maxOccurs="unbounded">
-                    <xs:element name="baseURL" type="xs:string" />
-                    <xs:element name="configFileURL" type="xs:string" />
-                    <xs:element name="mpirunExecutable" type="xs:string" />
-                    <xs:element name="pythonExecutable" type="xs:string" />
-                  </xs:choice>
-                  <xs:attribute name="name"/>
-                  <xs:attribute name="jobmanagertype"/>
-                </xs:complexType>
-              </xs:element>
               <xs:element name="catalog">
                 <xs:complexType>
                   <xs:sequence>

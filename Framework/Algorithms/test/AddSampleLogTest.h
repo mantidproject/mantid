@@ -12,8 +12,8 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>768</width>
+    <width>773</width>
     <height>644</height>
    </rect>
   </property>
@@ -60,13 +60,6 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="1" colspan="2">
-      <widget class="QLineEdit" name="input_name_line_edit">
-       <property name="maxLength">
-        <number>128</number>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
@@ -83,6 +76,9 @@
      </item>
      <item row="1" column="2">
       <widget class="QLabel" name="privacy_policy_label">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -122,14 +118,37 @@
        </property>
       </spacer>
      </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="input_name_line_edit">
+       <property name="maxLength">
+        <number>128</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QCheckBox" name="rememberContactInfoCheckbox">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Tick to save your name and email locally. They will be prefilled next time to make sending error reports more convenient.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Remember Me</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="4" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="fullShareButton">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Information about your system architecture and mantid version are shared as well as a hashed user ID. For a full list see the privacy policy linked above.&lt;/p&gt;&lt;p&gt;The name and email entered in the two boxes above is also shared.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Information about your system architecture and mantid version are shared as well as a hashed user ID. For a full list see the privacy policy linked above.&lt;/p&gt;&lt;p&gt;The name, email and additional info entered in the boxes above are also shared.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Yes, share information</string>
@@ -138,8 +157,11 @@
      </item>
      <item>
       <widget class="QPushButton" name="nonIDShareButton">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
        <property name="toolTip">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Information about your system architecture and mantid version are shared as well as a hashed user ID. For a full list see the privacy policy linked above.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Information about your system architecture and mantid version are shared as well as a hashed user ID. For a full list see the privacy policy linked above.&lt;/p&gt;&lt;p&gt;The additional info box entered above is also shared, but the name and email are not.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
        <property name="text">
         <string>Share non-identifiable information</string>
@@ -148,6 +170,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="noShareButton">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;No error report is sent.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -158,6 +183,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="moreDetailsButton">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
+       </property>
        <property name="text">
         <string>Show more details</string>
        </property>
@@ -196,6 +224,9 @@
         </item>
         <item>
          <widget class="QRadioButton" name="radioButtonExit">
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
           <property name="text">
            <string>Terminate</string>
           </property>
@@ -203,6 +234,9 @@
         </item>
         <item>
          <widget class="QRadioButton" name="radioButtonContinue">
+          <property name="focusPolicy">
+           <enum>Qt::ClickFocus</enum>
+          </property>
           <property name="text">
            <string>Continue</string>
           </property>
@@ -268,6 +302,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="frameShadow">
       <enum>QFrame::Plain</enum>
      </property>
@@ -314,16 +351,9 @@ p, li { white-space: pre-wrap; }
   </layout>
  </widget>
  <tabstops>
-  <tabstop>radioButtonExit</tabstop>
-  <tabstop>radioButtonContinue</tabstop>
-  <tabstop>requestTextBrowser</tabstop>
   <tabstop>input_free_text</tabstop>
   <tabstop>input_name_line_edit</tabstop>
   <tabstop>input_email_line_edit</tabstop>
-  <tabstop>fullShareButton</tabstop>
-  <tabstop>nonIDShareButton</tabstop>
-  <tabstop>noShareButton</tabstop>
-  <tabstop>moreDetailsButton</tabstop>
  </tabstops>
  <resources/>
  <connections/>

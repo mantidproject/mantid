@@ -15,11 +15,11 @@
 #include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/RemoveLogs.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include <vector>
 

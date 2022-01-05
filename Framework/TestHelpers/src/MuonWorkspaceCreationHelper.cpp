@@ -4,11 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MuonWorkspaceCreationHelper.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/MatrixWorkspace.h"

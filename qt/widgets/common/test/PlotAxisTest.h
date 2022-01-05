@@ -10,11 +10,11 @@
 
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/PlotAxis.h"
 #include "MantidQtWidgets/Common/QStringUtils.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class PlotAxisTest : public CxxTest::TestSuite {
 private:

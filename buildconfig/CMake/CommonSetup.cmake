@@ -97,7 +97,7 @@ if(BUILD_MANTIDFRAMEWORK)
     add_definitions(-DENABLE_OPENCASCADE)
   endif()
 
-  if(CMAKE_HOST_WIN32 AND NOT CONDA_BUILD)
+  if(CMAKE_HOST_WIN32 AND NOT CONDA_ENV)
     find_package(ZLIB REQUIRED CONFIGS zlib-config.cmake)
     set(HDF5_DIR "${THIRD_PARTY_DIR}/cmake/hdf5")
     find_package(
@@ -106,7 +106,7 @@ if(BUILD_MANTIDFRAMEWORK)
       REQUIRED CONFIGS hdf5-config.cmake
     )
     set(HDF5_LIBRARIES hdf5::hdf5_cpp-shared hdf5::hdf5_hl-shared)
-  elseif(CONDA_BUILD)
+  elseif(CONDA_ENV)
     # We'll use the cmake finder
     find_package(ZLIB REQUIRED)
     find_package(
@@ -346,6 +346,11 @@ if(NOT BUNDLES)
 endif()
 
 # ######################################################################################################################
+# Set an auto generate warning for .in files.
+# ######################################################################################################################
+set(AUTO_GENERATE_WARNING "/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/")
+
+# ######################################################################################################################
 # Setup pre-commit here as otherwise it will be overwritten by earlier pre-commit hooks being added
 # ######################################################################################################################
 option(ENABLE_PRECOMMIT "Enable pre-commit framework" ON)
@@ -361,7 +366,7 @@ if(ENABLE_PRECOMMIT)
   endif()
 
   if(WIN32)
-    if(CONDA_BUILD)
+    if(CONDA_ENV)
       execute_process(
         COMMAND "${PRE_COMMIT_EXE}" install --overwrite
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
@@ -378,7 +383,7 @@ if(ENABLE_PRECOMMIT)
       message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
     # Create pre-commit script wrapper to use mantid third party python for pre-commit
-    if(NOT CONDA_BUILD)
+    if(NOT CONDA_ENV)
       file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
       file(
         WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"

@@ -17,11 +17,11 @@
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/pow.hpp>

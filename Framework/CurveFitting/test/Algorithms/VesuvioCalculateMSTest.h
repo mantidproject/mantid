@@ -18,8 +18,8 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include "../Functions/ComptonProfileTestHelpers.h"
 
@@ -40,7 +40,7 @@ Mantid::API::IAlgorithm_sptr createTestAlgorithm(const Mantid::API::MatrixWorksp
   alg->setProperty("AtomicProperties", std::vector<double>(sampleProps, sampleProps + 9));
   alg->setProperty("BeamRadius", 2.5);
   // reduce number of events for test purposes
-  alg->setProperty("NumEventsPerRun", 10000);
+  alg->setProperty("NumEventsPerRun", 100000);
 
   // outputs
   alg->setPropertyValue("TotalScatteringWS", "__unused_for_child");
@@ -165,14 +165,14 @@ public:
     auto alg = createTestAlgorithm(createFlatPlateSampleWS());
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    checkOutputValuesAsExpected(alg, 0.0089444492, 0.0004539721);
+    checkOutputValuesAsExpected(alg, 0.0134925929, 0.0045957949);
   }
 
   void test_exec_with_flat_plate_sample_with_grouped_detectors() {
     auto alg = createTestAlgorithm(createFlatPlateSampleWS(true, true));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
-    checkOutputValuesAsExpected(alg, 0.0089444492, 0.0004539721);
+    checkOutputValuesAsExpected(alg, 0.0134925929, 0.0045957949);
   }
 
   // --------------------- Failure Cases --------------------------------

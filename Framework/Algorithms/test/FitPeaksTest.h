@@ -17,8 +17,8 @@
 #include "MantidAlgorithms/FitPeaks.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Algorithms::FitPeaks;
 

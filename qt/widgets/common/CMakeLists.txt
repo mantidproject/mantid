@@ -1,15 +1,17 @@
-set(QT5_SRC_FILES
+set(SRC_FILES
     src/AddWorkspaceDialog.cpp
     src/AlgorithmDialog.cpp
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
     src/AlgorithmRunner.cpp
+    src/AlgorithmRuntimeProps.cpp
     src/AlgorithmSelectorWidget.cpp
     src/AlternateCSPythonLexer.cpp
-    src/ConvolutionFunctionModel.cpp
     src/BatchAlgorithmRunner.cpp
     src/BoolPropertyWidget.cpp
+    src/ConfiguredAlgorithm.cpp
+    src/ConvolutionFunctionModel.cpp
     src/DataSelector.cpp
     src/DropEventHelper.cpp
     src/EditLocalParameterDialog.cpp
@@ -259,6 +261,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/ConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FitDomain.h
@@ -271,6 +274,8 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
+    inc/MantidQtWidgets/Common/IAlgorithmRuntimeProps.h
+    inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
@@ -279,13 +284,11 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h
     inc/MantidQtWidgets/Common/ImageInfoModelMD.h
     inc/MantidQtWidgets/Common/ImageInfoPresenter.h
-    inc/MantidQtWidgets/Common/IMessageHandler.h
     inc/MantidQtWidgets/Common/IndexTypes.h
     inc/MantidQtWidgets/Common/InterfaceManager.h
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
-    inc/MantidQtWidgets/Common/MessageHandler.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -345,191 +348,6 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/SelectFunctionDialog.ui
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
-)
-
-set(SRC_FILES
-    src/AddWorkspaceDialog.cpp
-    src/AlgorithmDialog.cpp
-    src/AlgorithmHistoryWindow.cpp
-    src/AlgorithmInputHistory.cpp
-    src/AlgorithmPropertiesWidget.cpp
-    src/AlgorithmRunner.cpp
-    src/AlternateCSPythonLexer.cpp
-    src/BatchAlgorithmRunner.cpp
-    src/BoolPropertyWidget.cpp
-    src/DropEventHelper.cpp
-    src/EditLocalParameterDialog.cpp
-    src/FileDialogHandler.cpp
-    src/FilePropertyWidget.cpp
-    src/GenericDialog.cpp
-    src/HelpWindow.cpp
-    src/FlowLayout.cpp
-    src/Hint.cpp
-    src/ImageInfoModel.cpp
-    src/ImageInfoModelMatrixWS.cpp
-    src/ImageInfoModelMD.cpp
-    src/ImageInfoPresenter.cpp
-    src/ImageInfoWidget.cpp
-    src/InterfaceManager.cpp
-    src/ListPropertyWidget.cpp
-    src/LocalParameterEditor.cpp
-    src/LocalParameterItemDelegate.cpp
-    src/LogValueFinder.cpp
-    src/ManageUserDirectories.cpp
-    src/MantidDesktopServices.cpp
-    src/MantidDialog.cpp
-    src/MantidHelpInterface.cpp
-    src/MantidWidget.cpp
-    src/Message.cpp
-    src/MuonPeriodInfo.cpp
-    src/NonOrthogonal.cpp
-    src/FileFinderWidget.cpp
-    src/OptionsPropertyWidget.cpp
-    src/pixmaps.cpp
-    src/PlotAxis.cpp
-    src/PluginLibraries.cpp
-    src/PropertyWidget.cpp
-    src/PropertyWidgetFactory.cpp
-    src/PythonRunner.cpp
-    src/QScienceSpinBox.cpp
-    src/QtSignalChannel.cpp
-    src/QtJSONUtils.cpp
-    src/RepoModel.cpp
-    src/ScriptRepositoryView.cpp
-    src/SelectionNotificationService.cpp
-    src/SignalBlocker.cpp
-    src/SyncedCheckboxes.cpp
-    src/TextPropertyWidget.cpp
-    src/TSVSerialiser.cpp
-    src/UserInputValidator.cpp
-    src/UserSubWindow.cpp
-    src/UserSubWindowFactory.cpp
-    src/WidgetScrollbarDecorator.cpp
-    src/WindowIcons.cpp
-    src/WorkspaceObserver.cpp
-    src/WorkspaceIcons.cpp
-    src/AlgorithmSelectorWidget.cpp
-    src/CatalogHelper.cpp
-    src/CatalogSearch.cpp
-    src/CatalogSelector.cpp
-    src/ConvolutionFunctionModel.cpp
-    src/CheckboxHeader.cpp
-    src/DataProcessorUI/AbstractTreeModel.cpp
-    src/DataProcessorUI/TreeData.cpp
-    src/DataProcessorUI/GenerateNotebook.cpp
-    src/DataProcessorUI/OneLevelTreeManager.cpp
-    src/DataProcessorUI/OptionsMap.cpp
-    src/DataProcessorUI/PostprocessingAlgorithm.cpp
-    src/DataProcessorUI/PreprocessingAlgorithm.cpp
-    src/DataProcessorUI/PreprocessMap.cpp
-    src/DataProcessorUI/ProcessingAlgorithm.cpp
-    src/DataProcessorUI/ProcessingAlgorithmBase.cpp
-    src/DataProcessorUI/TreeData.cpp
-    src/DataProcessorUI/TwoLevelTreeManager.cpp
-    src/DataProcessorUI/WhiteList.cpp
-    src/DataProcessorUI/WorkspaceNameUtils.cpp
-    src/DataProcessorUI/PostprocessingStep.cpp
-    src/DataProcessorUI/GenericDataProcessorPresenter.cpp
-    src/DataProcessorUI/Column.cpp
-    src/DataProcessorUI/ConstColumnIterator.cpp
-    src/ParseKeyValueString.cpp
-    src/ParseNumerics.cpp
-    src/DataProcessorUI/QOneLevelTreeModel.cpp
-    src/DataProcessorUI/QTwoLevelTreeModel.cpp
-    src/DataProcessorUI/QDataProcessorWidget.cpp
-    src/DataProcessorUI/QtDataProcessorOptionsDialog.cpp
-    src/DataProcessorUI/VectorString.cpp
-    src/Batch/RowLocation.cpp
-    src/Batch/RowLocationAdapter.cpp
-    src/Batch/RowPredicate.cpp
-    src/Batch/Row.cpp
-    src/Batch/Cell.cpp
-    src/Batch/CellStandardItem.cpp
-    src/Batch/ExtractSubtrees.cpp
-    src/Batch/FindSubtreeRoots.cpp
-    src/Batch/JobTreeView.cpp
-    src/Batch/JobTreeViewSignalAdapter.cpp
-    src/Batch/QtStandardItemTreeAdapter.cpp
-    src/Batch/FilteredTreeModel.cpp
-    src/Batch/QtBasicNavigation.cpp
-    src/Batch/QtTreeCursorNavigation.cpp
-    src/Batch/CellDelegate.cpp
-    src/Batch/BuildSubtreeItems.cpp
-    src/DataSelector.cpp
-    src/DiagResults.cpp
-    src/DoubleSpinBox.cpp
-    src/FindDialog.cpp
-    src/FindFilesThreadPoolManager.cpp
-    src/FindFilesWorker.cpp
-    src/FindReplaceDialog.cpp
-    src/FitDomain.cpp
-    src/FitOptionsBrowser.cpp
-    src/FitPropertyBrowser.cpp
-    src/FitScriptGeneratorDataTable.cpp
-    src/FitScriptGeneratorModel.cpp
-    src/FitScriptGeneratorPresenter.cpp
-    src/FitScriptGeneratorView.cpp
-    src/FittingGlobals.cpp
-    src/FunctionBrowser/FunctionBrowserUtils.cpp
-    src/FunctionBrowser.cpp
-    src/FunctionModel.cpp
-    src/FunctionModelDataset.cpp
-    src/FunctionModelSpectra.cpp
-    src/FunctionMultiDomainPresenter.cpp
-    src/FunctionTreeView.cpp
-    src/HintingLineEdit.cpp
-    src/IFunctionModel.cpp
-    src/InputController.cpp
-    src/InstrumentSelector.cpp
-    src/LineEditWithClear.cpp
-    src/LogValueSelector.cpp
-    src/MantidHelpWindow.cpp
-    src/MantidTreeModel.cpp
-    src/MantidTreeWidget.cpp
-    src/MantidTreeWidgetItem.cpp
-    src/MantidWSIndexDialog.cpp
-    src/MessageDisplay.cpp
-    src/MultifitSetupDialog.cpp
-    src/MuonFitDataSelector.cpp
-    src/MuonFitPropertyBrowser.cpp
-    src/MuonFunctionBrowser.cpp
-    src/ProcessingAlgoWidget.cpp
-    src/ProgressableView.cpp
-    src/ProjectSavePresenter.cpp
-    src/ProjectSaveModel.cpp
-    src/PropertyHandler.cpp
-    src/RenameParDialog.cpp
-    src/SaveWorkspaces.cpp
-    src/ScriptEditor.cpp
-    src/SelectFunctionDialog.cpp
-    src/SelectWorkspacesDialog.cpp
-    src/SequentialFitDialog.cpp
-    src/SlicingAlgorithmDialog.cpp
-    src/SlitCalculator.cpp
-    src/TrackedAction.cpp
-    src/UserFunctionDialog.cpp
-    src/WorkspacePresenter/ADSAdapter.cpp
-    src/WorkspacePresenter/WorkspacePresenter.cpp
-    src/WorkspacePresenter/WorkspaceTreeWidget.cpp
-    src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
-    src/WorkspaceSelector.cpp
-    src/pqHelpWindow.cxx
-    src/QtPropertyBrowser/qtpropertybrowser.cpp
-    src/QtPropertyBrowser/qtpropertymanager.cpp
-    src/QtPropertyBrowser/qteditorfactory.cpp
-    src/QtPropertyBrowser/qtvariantproperty.cpp
-    src/QtPropertyBrowser/qttreepropertybrowser.cpp
-    src/QtPropertyBrowser/qtbuttonpropertybrowser.cpp
-    src/QtPropertyBrowser/qtgroupboxpropertybrowser.cpp
-    src/QtPropertyBrowser/qtpropertybrowserutils.cpp
-    src/QtPropertyBrowser/DoubleDialogEditor.cpp
-    src/QtPropertyBrowser/DoubleEditorFactory.cpp
-    src/QtPropertyBrowser/FilenameDialogEditor.cpp
-    src/QtPropertyBrowser/FormulaDialogEditor.cpp
-    src/QtPropertyBrowser/ParameterPropertyManager.cpp
-    src/QtPropertyBrowser/StringDialogEditor.cpp
-    src/QtPropertyBrowser/StringEditorFactory.cpp
-    src/QtPropertyBrowser/WorkspaceEditorFactory.cpp
 )
 
 set(MOC_FILES
@@ -859,9 +677,6 @@ foreach(_header ${OLD_UI_HEADERS})
   file(REMOVE ${_header})
 endforeach()
 
-# Python unit tests
-set(TEST_PY_FILES test/FileFinderWidgetTest.py)
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -914,7 +729,7 @@ endif()
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 5
-  SRC ${QT5_SRC_FILES}
+  SRC ${SRC_FILES}
   MOC ${QT5_MOC_FILES}
   NOMOC ${QT5_INC_FILES} ${_sip_include_dir}/sip.h
   UI ${QT5_UI_FILES}
@@ -983,6 +798,7 @@ set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTes
 
 set(QT5_TEST_FILES
     test/AddWorkspaceDialogTest.h
+    test/AlgorithmRuntimePropsTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
@@ -1004,6 +820,7 @@ set(QT5_TEST_FILES
     test/MuonPeriodInfoTest.h
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
+    test/ParseKeyValueStringTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
@@ -1019,24 +836,23 @@ if(NOT APPLE)
   list(APPEND QT5_TEST_FILES test/Python/SipTest.h)
 endif()
 
-mtd_add_qt_tests(
-  TARGET_NAME MantidQtWidgetsCommonTest
-  QT_VERSION 5
-  SRC ${QT5_TEST_FILES}
-  INCLUDE_DIRS ../../../Framework/TestHelpers/inc ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
-  TEST_HELPER_SRCS
-    ../../../Framework/TestHelpers/src/TearDownWorld.cpp
-    ../../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/InstrumentCreationHelper.cpp
-    ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp
-  LINK_LIBS ${TARGET_LIBRARIES}
-            ${Boost_LIBRARIES}
-            Mantid::PythonInterfaceCore
-            Mantid::DataObjects
-            gmock
-            Qt5::Test
-            Python::Python
-  MTD_QT_LINK_LIBS MantidQtWidgetsCommon
-  PARENT_DEPENDENCIES GUITests
-)
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  mtd_add_qt_tests(
+    TARGET_NAME MantidQtWidgetsCommonTest
+    QT_VERSION 5
+    SRC ${QT5_TEST_FILES}
+    INCLUDE_DIRS ../../../Framework/DataObjects/inc ../../../Framework/Crystal/inc
+    LINK_LIBS ${TARGET_LIBRARIES}
+              ${Boost_LIBRARIES}
+              Mantid::PythonInterfaceCore
+              Mantid::DataObjects
+              gmock
+              Qt5::Test
+              Python::Python
+    MTD_QT_LINK_LIBS MantidQtWidgetsCommon
+    PARENT_DEPENDENCIES GUITests
+  )
+
+  add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
+  pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
+endif()

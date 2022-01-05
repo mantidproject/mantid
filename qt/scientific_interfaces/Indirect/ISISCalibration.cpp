@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -654,9 +655,9 @@ void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
   smoothAlg->initialize();
   smoothAlg->setProperty("OutputWorkspace", workspaceName.toStdString());
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps smoothAlgInputProps;
-  smoothAlgInputProps["InputWorkspace"] = workspaceName.toStdString() + "_pre_smooth";
-  m_batchAlgoRunner->addAlgorithm(smoothAlg, smoothAlgInputProps);
+  auto smoothAlgInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  smoothAlgInputProps->setPropertyValue("InputWorkspace", workspaceName.toStdString() + "_pre_smooth");
+  m_batchAlgoRunner->addAlgorithm(smoothAlg, std::move(smoothAlgInputProps));
 }
 
 IAlgorithm_sptr ISISCalibration::calibrationAlgorithm(const QString &inputFiles) {

@@ -70,13 +70,14 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
                 peak.remove()
         self._representations.clear()
 
-    def draw_peaks(self, slice_info, painter):
+    def draw_peaks(self, slice_info, painter, frame):
         """
         Draw a list of Peaks on the display
         :param slice_info: Object describing current slicing information
         :param painter: A reference to the object that will draw to the screen
+        :param frame: coordinate system of workspace
         """
-        frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
+        frame_to_slice_fn = self._frame_to_slice_fn(frame)
 
         representations = []
         for peak in self.ws:
@@ -109,13 +110,13 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
         closest_peak_index = np.argmin(distances_squared)
         return self.peaks_workspace.removePeak(int(closest_peak_index))  # required cast from numpy.int64 to int
 
-    def slicepoint(self, selected_index, slice_info):
+    def slicepoint(self, selected_index, slice_info, frame):
         """
         Return the value of the center in the slice dimension for the peak at the given index
         :param selected_index: Index of a peak in the table
         :param slice_info: Information on the current slice
         """
-        frame_to_slice_fn = self._frame_to_slice_fn(slice_info.frame)
+        frame_to_slice_fn = self._frame_to_slice_fn(frame)
         peak = self.ws.getPeak(selected_index)
         slicepoint = slice_info.slicepoint
         slicepoint[slice_info.z_index] = getattr(peak, frame_to_slice_fn)()[slice_info.z_index]

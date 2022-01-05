@@ -6,7 +6,7 @@
 
 # package imports
 from mantid.simpleapi import AlignComponents, DeleteWorkspaces, LoadAscii, LoadEmptyInstrument
-from mantid.utils.logging import to_file
+from mantid.utils.logging import capture_logs
 
 # standard imports
 from systemtesting import MantidSystemTest
@@ -30,7 +30,7 @@ class DetectorIDTest(MantidSystemTest):
                   Unit='Dimensionless', OutputWorkspace=prefix + 'peak_centers')
         LoadEmptyInstrument(InstrumentName='SNAP', OutputWorkspace=prefix + 'snap')
 
-        with to_file(level='debug') as log_file:
+        with capture_logs(level='debug') as logs:
             AlignComponents(PeakCentersTofTable=prefix + 'peak_centers',
                             PeakPositions='1.3143, 1.3854,1.6967, 1.8587, 2.0781',
                             AdjustmentsTable=prefix + 'adjustments',
@@ -41,7 +41,7 @@ class DetectorIDTest(MantidSystemTest):
                             ComponentList='Column1',
                             XPosition=False, YPosition=False, ZPosition=True,
                             AlphaRotation=False, BetaRotation=False, GammaRotation=False)
-            assert 'First and last detectorID for Column1 are 0, 196607' in open(log_file, 'r').read()
+            assert 'First and last detectorID for Column1 are 0, 196607' in logs.getvalue()
 
         # Clean up workspaces
         temporary = ['peak_centers', 'snap', 'adjustments', 'displacements', 'snap_modified']

@@ -14,11 +14,11 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadIDFFromNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 #include <Poco/Path.h>
 
 using namespace Mantid::API;

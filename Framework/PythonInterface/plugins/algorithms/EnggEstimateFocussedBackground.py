@@ -35,7 +35,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
         self.declareProperty(
             name="NIterations",
-            defaultValue=40,
+            defaultValue=50,
             direction=Direction.Input,
             validator=IntBoundedValidator(lower=1),
             doc="Number of iterations of the smoothing procedure to perform. Too few iterations and the background will"
@@ -44,7 +44,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
         self.declareProperty(
             name="XWindow",
-            defaultValue=1000.0,
+            defaultValue=600.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0),
             doc="Extent of the convolution window in the x-axis for all spectra. A reasonable value is about 4-8 times"

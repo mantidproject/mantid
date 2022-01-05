@@ -136,7 +136,7 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
     TS_ASSERT_EQUALS(root["name"].asString(), "");
     TS_ASSERT_EQUALS(root["email"].asString(), "");
-    TS_ASSERT_EQUALS(root["textBox"].asString(), "");
+    TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
     TS_ASSERT_EQUALS(root["stacktrace"].asString(), "");
   }
 };

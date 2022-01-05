@@ -417,8 +417,8 @@ A typical example could look as follows:
 .. code-block:: c++
   :linenos:
 
-  #include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-  #include "MantidTestHelpers/ParallelRunner.h"
+  #include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+  #include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
   namespace {
   void run_algorithm(const Parallel::Communicator &comm,

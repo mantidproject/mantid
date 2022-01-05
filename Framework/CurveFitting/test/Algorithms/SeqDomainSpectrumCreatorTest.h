@@ -13,8 +13,8 @@
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidCurveFitting/SeqDomain.h"
 #include "MantidCurveFitting/SeqDomainSpectrumCreator.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/TableRow.h"

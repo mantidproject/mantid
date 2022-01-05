@@ -29,7 +29,7 @@ The view has the following imports:
     from qtpy import QtWidgets, QtCore, QtGui
     import matplotlib.pyplot as plt
 
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 The fourth line imports Matplotlib and the last line allows it to
 interface with the GUI.
@@ -41,7 +41,7 @@ the plot and creating an empty plot (no data).
 
     class PlotView(QtWidgets.QWidget):
         def __init__(self, parent=None):
-            super(PlotView, self).__init__(parent)
+            super().__init__(parent)
 
             self.figure = plt.figure()
             grid = QtWidgets.QVBoxLayout(self)

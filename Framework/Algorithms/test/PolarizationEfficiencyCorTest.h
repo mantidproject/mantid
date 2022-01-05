@@ -23,7 +23,7 @@
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Eigen/Dense>
 

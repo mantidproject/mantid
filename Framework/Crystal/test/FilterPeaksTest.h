@@ -12,7 +12,7 @@
 #include "MantidCrystal/FilterPeaks.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::Crystal::FilterPeaks;
 using namespace Mantid::API;

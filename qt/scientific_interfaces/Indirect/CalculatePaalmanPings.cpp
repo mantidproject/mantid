@@ -12,14 +12,12 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
 
-#include <QDoubleValidator>
 #include <QLineEdit>
-#include <QList>
-#include <QRegExpValidator>
 #include <QValidator>
 
 using namespace Mantid::API;
@@ -100,7 +98,7 @@ void CalculatePaalmanPings::run() {
   auto algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
   algorithmName = algorithmName.replace("Annulus", "Cylinder"); // Use the cylinder algorithm for annulus
 
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
+  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
   auto absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
   absCorAlgo->initialize();
 
@@ -128,14 +126,14 @@ void CalculatePaalmanPings::run() {
 
     auto const convertedSampleWorkspace = addConvertUnitsStep(sampleWs, "Wavelength", "UNIT", emode, efixed);
     if (convertedSampleWorkspace)
-      absCorProps["SampleWorkspace"] = convertedSampleWorkspace.get();
+      absCorProps->setPropertyValue("SampleWorkspace", convertedSampleWorkspace.get());
     else {
       setRunIsRunning(false);
       return;
     }
 
   } else {
-    absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
+    absCorProps->setPropertyValue("SampleWorkspace", sampleWsName.toStdString());
   }
 
   auto const sampleDensityType = m_uiForm.cbSampleDensity->currentText().toStdString();
@@ -168,14 +166,14 @@ void CalculatePaalmanPings::run() {
 
       auto const convertedWorkspace = addConvertUnitsStep(canWs, "Wavelength", "UNIT", emode);
       if (convertedWorkspace)
-        absCorProps["CanWorkspace"] = convertedWorkspace.get();
+        absCorProps->setPropertyValue("CanWorkspace", convertedWorkspace.get());
       else {
         setRunIsRunning(false);
         return;
       }
 
     } else {
-      absCorProps["CanWorkspace"] = canWsName;
+      absCorProps->setPropertyValue("CanWorkspace", canWsName);
     }
 
     auto const canDensityType = m_uiForm.cbCanDensity->currentText().toStdString();
@@ -206,7 +204,7 @@ void CalculatePaalmanPings::run() {
   absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
   // Add corrections algorithm to queue
-  m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
+  m_batchAlgoRunner->addAlgorithm(absCorAlgo, std::move(absCorProps));
 
   // Run algorithm queue
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));

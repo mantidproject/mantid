@@ -15,11 +15,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Counts.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <array>
 #include <fstream>

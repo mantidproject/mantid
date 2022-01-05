@@ -1,7 +1,7 @@
 # ######################################################################################################################
 # Configure required dependencies if necessary
 # ######################################################################################################################
-if(MSVC AND NOT CONDA_BUILD)
+if(MSVC AND NOT CONDA_ENV)
   # Git LFS does not work properly with <= 1.9
   find_package(Git 1.9.5 REQUIRED)
   find_package(GitLFS REQUIRED)
@@ -101,7 +101,7 @@ if(MSVC AND NOT CONDA_BUILD)
   set(BOOST_INCLUDEDIR "${CMAKE_INCLUDE_PATH}")
   set(BOOST_LIBRARYDIR "${CMAKE_LIBRARY_PATH}")
   set(Boost_NO_SYSTEM_PATHS TRUE)
-elseif(MSVC AND CONDA_BUILD)
+elseif(MSVC AND CONDA_ENV)
   # Print out where we are looking for 3rd party stuff
   set(Python_FIND_REGISTRY NEVER)
   # used in later parts for MSVC to bundle Python

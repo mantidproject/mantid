@@ -156,7 +156,10 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def remove_ws_from_fitbrowser(self, ws):
         # only one spectra per workspace
-        self.fit_browser.removeWorkspaceAndSpectra(ws.name())
+        try:
+            self.fit_browser.removeWorkspaceAndSpectra(ws.name())
+        except:
+            pass # name may not be available if ws has just been deleted
 
     def update_legend(self, ax):
         if ax.get_lines():

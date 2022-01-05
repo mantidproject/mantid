@@ -54,13 +54,14 @@ IKafkaStreamDecoder::IKafkaStreamDecoder(std::shared_ptr<IKafkaBroker> broker, s
                                          std::string monitorTopic)
     : m_broker(std::move(broker)), m_streamTopic(std::move(streamTopic)), m_runInfoTopic(std::move(runInfoTopic)),
       m_sampleEnvTopic(std::move(sampleEnvTopic)), m_chopperTopic(std::move(chopperTopic)),
-      m_monitorTopic(std::move(monitorTopic)), m_interrupt(false), m_specToIdx(), m_runStart(), m_runId(""), m_thread(),
-      m_capturing(false), m_exception(), m_extractWaiting(false), m_cbIterationEnd([] {}), m_cbError([] {}) {}
+      m_monitorTopic(std::move(monitorTopic)), m_interrupt(false), m_eventIdToWkspIdx(), m_runStart(), m_runId(""),
+      m_thread(), m_capturing(false), m_exception(), m_extractWaiting(false), m_cbIterationEnd([] {}),
+      m_cbError([] {}) {}
 
 IKafkaStreamDecoder::IKafkaStreamDecoder(IKafkaStreamDecoder &&o) noexcept
     : m_broker(std::move(o.m_broker)), m_streamTopic(o.m_streamTopic), m_runInfoTopic(o.m_runInfoTopic),
       m_sampleEnvTopic(o.m_sampleEnvTopic), m_chopperTopic(o.m_chopperTopic), m_monitorTopic(o.m_monitorTopic),
-      m_interrupt(o.m_interrupt.load()), m_specToIdx(std::move(o.m_specToIdx)), m_runStart(o.m_runStart),
+      m_interrupt(o.m_interrupt.load()), m_eventIdToWkspIdx(std::move(o.m_eventIdToWkspIdx)), m_runStart(o.m_runStart),
       m_runId(std::move(o.m_runId)), m_thread(std::move(o.m_thread)), m_capturing(o.m_capturing.load()),
       m_exception(std::move(o.m_exception)), m_cbIterationEnd(std::move(o.m_cbIterationEnd)),
       m_cbError(std::move(o.m_cbError)) {

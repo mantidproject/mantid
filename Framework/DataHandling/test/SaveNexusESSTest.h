@@ -14,6 +14,10 @@
 #include "MantidDataHandling/SaveNexusESS.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
+#include "MantidFrameworkTestHelpers/NexusFileReader.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -22,10 +26,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FileResource.h"
-#include "MantidTestHelpers/NexusFileReader.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <boost/filesystem.hpp>
 #include <memory>
 

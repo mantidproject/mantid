@@ -100,7 +100,7 @@ class CalibrationInfo:
         """
         basepath, fname = path.split(file_path)
         # fname has form INSTRUMENT_ceriaRunNo_BANKS
-        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom"
+        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture"
         fname_words = fname.split('_')
         suffix = fname_words[-1].split('.')[0]  # take last element and remove extension
         if any(grp.value == suffix for grp in GROUP):
@@ -127,7 +127,12 @@ class CalibrationInfo:
         """
         filepath = path.splitext(self.prm_filepath)[0] + '.nxs'  # change extension to .nxs
         self.calibration_table = output_prefix + "_calibration_" + self.get_group_suffix()
-        Load(Filename=filepath, OutputWorkspace=self.calibration_table)
+
+        try:
+            Load(Filename=filepath, OutputWorkspace=self.calibration_table)
+        except Exception as e:
+            logger.error("Unable to load calibration file " + filepath + ". Error: " + str(e))
+
         # load in custom grouping - checks if applicable inside method
         if not self.group.banks:
             self.load_custom_grouping_workspace()

@@ -21,7 +21,8 @@ class IN4(systemtesting.MantidSystemTest):
             Run='ILL/IN4/085801-085802.nxs',
             OutputWorkspace='vanadium',
             OutputEPPWorkspace='vanadium-epps',
-            OutputRawWorkspace='vanadium-raw')
+            OutputRawWorkspace='vanadium-raw',
+            MonitorPeakWidthInSigmas=3.0)
         DirectILLIntegrateVanadium(
             InputWorkspace='vanadium',
             OutputWorkspace='integrated',
@@ -36,13 +37,15 @@ class IN4(systemtesting.MantidSystemTest):
             Run='ILL/IN4/087294+087295.nxs',
             OutputWorkspace='sample',
             OutputIncidentEnergyWorkspace='Ei',
-            OutputElasticChannelWorkspace='Elp')
+            OutputElasticChannelWorkspace='Elp',
+            MonitorPeakWidthInSigmas=3.0)
         # Containers
         DirectILLCollectData(
             Run='ILL/IN4/087306-087309.nxs',
             OutputWorkspace='container',
             IncidentEnergyWorkspace='Ei',
-            ElasticChannelWorkspace='Elp')
+            ElasticChannelWorkspace='Elp',
+            MonitorPeakWidthInSigmas=3.0)
         geometry = {
             'Shape': 'HollowCylinder',
             'Height': 4.0,
@@ -83,6 +86,9 @@ class IN4(systemtesting.MantidSystemTest):
         self.disableChecking = ['Instrument', 'Sample']
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-4
+        # NOTE: a new reference file is added to the standard system test file location
+        #       as I cannot figure out how to properly replace the existing file for ILL
+        #       standard.  Please consider moving/adjust the reference file as you see fit.
         return ['cropped', 'ILL_IN4_SofQW.nxs']
 
 
@@ -94,7 +100,8 @@ class IN5(systemtesting.MantidSystemTest):
         DirectILLCollectData(
             Run='ILL/IN5/095893.nxs',
             OutputWorkspace='vanadium',
-            OutputEPPWorkspace='vanadium-epps',)
+            OutputEPPWorkspace='vanadium-epps',
+            MonitorPeakWidthInSigmas=3.0)
         DirectILLDiagnostics(
             InputWorkspace='vanadium',
             OutputWorkspace='diagnostics',
@@ -118,7 +125,8 @@ class IN5(systemtesting.MantidSystemTest):
         DirectILLCollectData(
             Run='ILL/IN5/096003.nxs',
             OutputWorkspace='sample',
-            OutputEppWorkspace='epps')
+            OutputEppWorkspace='epps',
+            MonitorPeakWidthInSigmas=3.0)
         DirectILLTubeBackground(
             InputWorkspace='sample',
             OutputWorkspace='bkg',

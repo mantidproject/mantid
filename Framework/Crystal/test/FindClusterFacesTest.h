@@ -13,11 +13,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

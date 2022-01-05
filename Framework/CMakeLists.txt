@@ -21,6 +21,7 @@ if(MPI_EXPERIMENTAL)
 endif()
 
 add_custom_target(FrameworkTests) # target for all framework tests
+include(TestTargetFunctions)
 add_dependencies(check FrameworkTests)
 add_dependencies(FrameworkTests Framework)
 
@@ -29,28 +30,27 @@ add_subdirectory(Json)
 add_subdirectory(Kernel)
 add_subdirectory(Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
-add_subdirectory(HistogramData)
-add_subdirectory(Indexing)
-add_subdirectory(Beamline)
-add_subdirectory(Geometry)
+add_subdirectory(Algorithms)
 add_subdirectory(API)
+add_subdirectory(Beamline)
+add_subdirectory(Catalog)
+add_subdirectory(Crystal)
+add_subdirectory(CurveFitting)
+add_subdirectory(DataHandling)
+add_subdirectory(DataObjects)
+add_subdirectory(Geometry)
+add_subdirectory(HistogramData)
+add_subdirectory(ICat)
+add_subdirectory(Indexing)
+add_subdirectory(LiveData)
+add_subdirectory(Muon)
+add_subdirectory(Nexus)
 add_subdirectory(NexusGeometry)
 add_subdirectory(PythonInterface)
-add_subdirectory(DataObjects)
-add_subdirectory(Catalog)
-add_subdirectory(Nexus)
-add_subdirectory(DataHandling)
-add_subdirectory(Algorithms)
-add_subdirectory(WorkflowAlgorithms)
-add_subdirectory(CurveFitting)
-add_subdirectory(Crystal)
-add_subdirectory(ICat)
-add_subdirectory(LiveData)
-add_subdirectory(RemoteAlgorithms)
-add_subdirectory(RemoteJobManagers)
-add_subdirectory(SINQ)
-add_subdirectory(Muon)
 add_subdirectory(Reflectometry)
+add_subdirectory(SINQ)
+add_subdirectory(TestHelpers)
+add_subdirectory(WorkflowAlgorithms)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if(MPI_BUILD)
@@ -84,8 +84,6 @@ set(FRAMEWORK_LIBS
     MDAlgorithms
     WorkflowAlgorithms
     LiveData
-    RemoteAlgorithms
-    RemoteJobManagers
     SINQ
     Muon
     Reflectometry
@@ -102,6 +100,7 @@ foreach(_bundle ${BUNDLES})
   install(
     DIRECTORY ../instrument/
     DESTINATION ${_bundle}/instrument
+    COMPONENT Runtime
     PATTERN "*UNIT_TESTING*" EXCLUDE
     PATTERN ".gitignore" EXCLUDE
   )
@@ -112,6 +111,7 @@ foreach(_bundle ${BUNDLES})
       install(
         DIRECTORY ../scripts/
         DESTINATION ${_bundle}/scripts
+        COMPONENT Runtime
         PATTERN "*.pyc" EXCLUDE
         PATTERN ".svn" EXCLUDE
         PATTERN ".gitignore" EXCLUDE
@@ -125,6 +125,7 @@ foreach(_bundle ${BUNDLES})
       install(
         DIRECTORY ../scripts/
         DESTINATION ${_bundle}scripts
+        COMPONENT Runtime
         PATTERN "*.pyc" EXCLUDE
         PATTERN ".svn" EXCLUDE
         PATTERN ".gitignore" EXCLUDE
@@ -142,6 +143,7 @@ foreach(_bundle ${BUNDLES})
     install(
       DIRECTORY ../scripts/
       DESTINATION ${_bundle}scripts
+      COMPONENT Runtime
       PATTERN "*.pyc" EXCLUDE
       PATTERN ".svn" EXCLUDE
       PATTERN ".gitignore" EXCLUDE
@@ -159,7 +161,7 @@ if(NOT FULL_PACKAGE_BUILD)
   add_subdirectory(PostInstall)
 endif()
 
-if(CONDA_BUILD)
+if(CONDA_ENV)
   configure_package_config_file(
     ${CMAKE_SOURCE_DIR}/buildconfig/CMake/MantidFrameworkConfig.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake
@@ -172,14 +174,17 @@ if(CONDA_BUILD)
     COMPATIBILITY SameMajorVersion
   )
 
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
-                "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
-          DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+  install(
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfig.cmake"
+          "${CMAKE_CURRENT_BINARY_DIR}/MantidFrameworkConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework
+    COMPONENT Devel
   )
 
   install(
     FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
           ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindTBB.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
+    COMPONENT Devel
   )
 endif()

@@ -228,6 +228,7 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.backgroundMethodComboBox->setEnabled(enabled);
   m_ui.polynomialDegreeSpinBox->setEnabled(enabled);
   m_ui.costFunctionComboBox->setEnabled(enabled);
+  m_ui.addPerAngleOptionsButton->setEnabled(enabled);
 }
 
 void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }

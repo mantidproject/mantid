@@ -237,9 +237,9 @@ class BasicFittingPresenter:
         """Handle when the function structure is changed."""
         self.update_fit_functions_in_model_from_view()
         self.automatically_update_function_name()
+        self.clear_undo_data()
 
         if self.model.get_active_fit_function() is None:
-            self.clear_undo_data()
             self.update_plot_fit()
 
         self.reset_fit_status_and_chi_squared_information()
@@ -330,6 +330,9 @@ class BasicFittingPresenter:
         """Sets the workspace to be displayed in the view programmatically."""
         # Triggers handle_dataset_name_changed which updates the model
         self.view.current_dataset_name = dataset_name
+
+    def current_dataset(self) -> str:
+        return self.view.current_dataset_name
 
     def set_current_dataset_index(self, dataset_index: int) -> None:
         """Set the current dataset index in the model and view."""

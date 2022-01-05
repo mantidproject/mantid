@@ -16,10 +16,10 @@
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 using namespace Mantid;

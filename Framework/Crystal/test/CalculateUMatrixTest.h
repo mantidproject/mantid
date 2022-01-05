@@ -18,8 +18,8 @@
 
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Crystal;

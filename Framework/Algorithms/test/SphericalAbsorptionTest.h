@@ -12,8 +12,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SphericalAbsorption.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -64,9 +64,9 @@ public:
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING(result = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
                                  Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)));
-    TS_ASSERT_DELTA(result->readY(0).front(), 0.9942, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0).back(), 0.9674, 0.0001);
-    TS_ASSERT_DELTA(result->readY(0)[8], 0.9703, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).front(), 0.9955, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0).back(), 0.9744, 0.0001);
+    TS_ASSERT_DELTA(result->readY(0)[8], 0.9767, 0.0001);
 
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }

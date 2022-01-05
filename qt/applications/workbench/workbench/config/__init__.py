@@ -40,6 +40,9 @@ _ADDITIONAL_MAINWINDOWS_PARENT = None
 # -----------------------------------------------------------------------------
 # Public Constants
 # -----------------------------------------------------------------------------
+# The strings APPNAME, ORG_DOMAIN, ORGANIZATION are duplicated
+# in mantidqt/dialogs/errorreports/main.py
+
 ORGANIZATION = 'mantidproject'
 ORG_DOMAIN = 'mantidproject.org'
 APPNAME = 'mantidworkbench'

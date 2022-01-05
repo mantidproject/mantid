@@ -11,8 +11,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/FFTSmooth2.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

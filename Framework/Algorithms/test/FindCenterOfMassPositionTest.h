@@ -16,7 +16,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidTestHelpers/SANSInstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/SANSInstrumentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

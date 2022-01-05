@@ -27,16 +27,12 @@ def set_matplotlib_backend():
     correct matplotlib widgets.'''
     backend = matplotlib.get_backend()
     if backend.startswith('module://'):
-        if backend.endswith('qt4agg'):
-            backend = 'Qt4Agg'
-        elif backend.endswith('workbench') or backend.endswith('qt5agg'):
+        if backend.endswith('workbench') or backend.endswith('qt5agg'):
             backend = 'Qt5Agg'
     else:
-        from qtpy import PYQT4, PYQT5  # noqa
+        from qtpy import PYQT5  # noqa
         if PYQT5:
             backend = 'Qt5Agg'
-        elif PYQT4:
-            backend = 'Qt4Agg'
         else:
             raise RuntimeError('Do not know which matplotlib backend to set')
         matplotlib.use(backend)

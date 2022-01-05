@@ -229,7 +229,6 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         selected_range = [(1.0,2.0), (2.0, 3.0)]
         state.wavelength.wavelength_interval.selected_ranges = selected_range
-        state.adjustment.normalize_to_monitor.wavelength_interval.selected_ranges = selected_range
         state.adjustment.calculate_transmission.wavelength_interval.selected_ranges = selected_range
         state.adjustment.wavelength_and_pixel_adjustment.wavelength_interval.selected_ranges = selected_range
 
@@ -276,7 +275,6 @@ class SANSBatchReductionTest(unittest.TestCase):
 
         selected_range = [(1.0, 2.0), (1.0, 3.0)]
         state.wavelength.wavelength_interval.selected_ranges = selected_range
-        state.adjustment.normalize_to_monitor.wavelength_interval.selected_ranges = selected_range
         state.adjustment.calculate_transmission.wavelength_interval.selected_ranges = selected_range
         state.adjustment.wavelength_and_pixel_adjustment.wavelength_interval.selected_ranges = selected_range
 
@@ -315,7 +313,3 @@ class SANSBatchReductionRunnerTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self._success
-
-
-if __name__ == '__main__':
-    unittest.main()

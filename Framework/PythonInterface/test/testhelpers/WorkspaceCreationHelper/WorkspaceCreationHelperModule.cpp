@@ -17,10 +17,10 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h" // These are still concerned with workspace creation so attach them here
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Policies/AsType.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h" // These are still concerned with workspace creation so attach them here
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -77,6 +77,9 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
   def("createEventWorkspace", (EventWorkspace_sptr(*)())createEventWorkspace,
       return_value_policy<AsType<Workspace_sptr>>());
   def("createEventWorkspace2", &createEventWorkspace2, return_value_policy<AsType<Workspace_sptr>>());
+  def("createEventWorkspaceWithNonUniformInstrument",
+      (EventWorkspace_sptr(*)(const int, const bool))createEventWorkspaceWithNonUniformInstrument,
+      return_value_policy<AsType<Workspace_sptr>>());
 
   //=================================== Peak Workspaces
   //===================================

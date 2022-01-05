@@ -11,11 +11,11 @@
 #include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/Unit.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "SofQWTest.h"
