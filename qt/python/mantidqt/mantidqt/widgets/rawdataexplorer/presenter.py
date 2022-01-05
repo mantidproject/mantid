@@ -11,7 +11,7 @@ import os.path
 from qtpy.QtWidgets import QAbstractItemView
 from qtpy.QtCore import *
 
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, config
 from mantid.api import PreviewManager, PreviewType
 
 from .model import RawDataExplorerModel
@@ -100,10 +100,7 @@ class RawDataExplorerPresenter(QObject):
 
         self.displays = DisplayManager()
 
-        # TODO remember previous one ? set to some default directory ? ManageUserDirectory ?
-        self.working_dir = "~/mantid/build/ExternalData/Testing/Data/UnitTest/ILL"
-
-        self.set_working_directory(self.working_dir)
+        self._set_initial_directory()
         self.preview_manager = PreviewManager.Instance()
 
         self.setup_connections()
@@ -124,6 +121,24 @@ class RawDataExplorerPresenter(QObject):
         self.view.repositoryPath.editingFinished.connect(self.on_qlineedit)
 
         self.view.accumulate.stateChanged.connect(self.on_accumulate_checked)
+
+    def _set_initial_directory(self):
+        """
+        Set the directory in which the tree starts.
+        """
+
+        data_search_dirs = config.getDataSearchDirs()
+
+        for directory in data_search_dirs:
+            if os.path.isdir(directory):
+                # we take the first valid directory in the user defined list
+                path = directory
+                break
+        else:
+            # if none were found, we use the root as default
+            path = os.path.abspath(os.sep)
+
+        self.set_working_directory(path)
 
     def set_working_directory(self, new_working_directory):
         """
