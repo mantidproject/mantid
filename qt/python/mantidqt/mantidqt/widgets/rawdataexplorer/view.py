@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtWidgets import QFileDialog, QWidget, QHeaderView, QFileSystemModel, QAbstractItemView
+from qtpy.QtWidgets import QFileDialog, QWidget
 from qtpy.QtCore import *
 from matplotlib import pyplot as plt
 
@@ -148,11 +148,6 @@ class RawDataExplorerView(QWidget):
     """
 
     """
-    List of filters for the file system tree widget.
-    """
-    _FILE_SYSTEM_FILTERS = ["*.nxs"]
-
-    """
     Presenter.
     """
     _presenter = None
@@ -188,21 +183,7 @@ class RawDataExplorerView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setup_connections()
 
-        # tree widget setup
-        file_model = QFileSystemModel()
-        file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
-        file_model.setNameFilterDisables(0)
-        file_model.setRootPath("/")
-        self.fileTree.setModel(file_model)
-        self.fileTree.header().hideSection(2)
-        self.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.fileTree.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        self.fileTree.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
-        self.fileTree.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
-        self.fileTree.header().setStretchLastSection(False)
-        # self.fileTree.clicked.connect(self.on_file_clicked)
         self.fileTree.sig_new_current.connect(self.on_file_clicked, Qt.QueuedConnection)
-        #self.fileTree.activated.connect(self.on_file_clicked)
         self.is_busy = False
 
     def closeEvent(self, event):
@@ -266,14 +247,15 @@ class RawDataExplorerView(QWidget):
         selection = set()
 
         for index in selected_indexes:
+
             file_path = file_model.filePath(index)
-            if index == last_clicked_index:
-                self._last_clicked = file_model.filePath(last_clicked_index)
             if file_model.isDir(index):
                 # we don't select directories
                 selection_model.select(index, QItemSelectionModel.Deselect | QItemSelectionModel.Rows)
                 continue
 
+            if index == last_clicked_index:
+                self._last_clicked = file_model.filePath(last_clicked_index)
             selection.add(file_path)
 
         if selection != self._current_selection:

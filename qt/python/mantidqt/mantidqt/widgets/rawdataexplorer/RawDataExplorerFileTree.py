@@ -7,18 +7,42 @@
 #  This file is part of the mantidqt package
 #
 
-from qtpy.QtWidgets import QTreeView
+from qtpy.QtWidgets import QTreeView, QFileSystemModel, QAbstractItemView, QHeaderView
 from qtpy.QtCore import *
 
 
 class RawDataExplorerFileTree(QTreeView):
+    """
+    List of filters for the file system tree widget.
+    """
+    _FILE_SYSTEM_FILTERS = ["*.nxs"]
+
+    """
+    Index of the column corresponding to the files
+    """
+    _FILES_COLUMN = 0
 
     sig_new_current = Signal(QModelIndex)
 
     def __init__(self, parent=None):
         super(RawDataExplorerFileTree, self).__init__(parent)
 
+        file_model = QFileSystemModel()
+        file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
+        file_model.setNameFilterDisables(0)
+        file_model.setRootPath("/")
+        self.setModel(file_model)
+        self.header().hideSection(2)
+        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.header().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.header().setStretchLastSection(False)
+
     def currentChanged(self, current_index, previous_index):
+        if current_index.column() != self._FILES_COLUMN:
+            current_index = current_index.sibling(current_index.row(), self._FILES_COLUMN)
+
         self.sig_new_current.emit(current_index)
         super(RawDataExplorerFileTree, self).currentChanged(current_index, previous_index)
 
