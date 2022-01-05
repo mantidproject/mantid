@@ -9,7 +9,8 @@
 import os.path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import Load, config, mtd, Plus, RenameWorkspace, DeleteWorkspace
+from mantid.simpleapi import config, mtd, Plus, RenameWorkspace, DeleteWorkspace
+from mantid.api import AlgorithmManager
 from mantid.kernel import logger
 
 from ...utils.asynchronous import set_interval
@@ -196,7 +197,13 @@ class RawDataExplorerModel(QObject):
         ws_name = os.path.basename(filename)[:-4]
 
         if not mtd.doesExist(ws_name):
-            Load(Filename=filename, OutputWorkspace=ws_name)
+            load_alg = AlgorithmManager.create("Load")
+            load_alg.setLogging(True)
+            load_alg.setProperty("Filename", filename)
+            load_alg.setProperty("OutputWorkspace", ws_name)
+            load_alg.execute()
+            if not load_alg.isExecuted():
+                raise TypeError("Failed to load " + filename)
 
         self.memory_manager.workspace_interacted_with(ws_name)
 
