@@ -14,7 +14,7 @@ Data reduction
 -  Instrument ``IRIS``
 -  You need access to the ISIS data archive
 
-**Time required 10-15 minutes**
+**Time required 15-20 minutes**
 
 --------------
 
@@ -40,8 +40,7 @@ Data reduction
 #. Click ``Run`` again
 #. This should produce a new ``_calib`` workspace, with ``004`` in the name
 
-Energy Transfer Tab Steps
-=========================
+Reducing Data:
 
 #. Switch to the ``Energy Transfer`` tab
 #. Check the ``Sum Files`` box
@@ -79,7 +78,7 @@ Data analysis Elwin
 -  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
 -  Make sure that the data set is on your list of search directories
 
-**Time required 3 - 5 minutes**
+**Time required 10 - 15 minutes**
 
 --------------
 
@@ -95,18 +94,8 @@ Data analysis Elwin
 #. This should plot two lines of A^2 vs Q
 #. Right-click on the ``irs26176_graphite002_elwin_eq`` workspace and ``Save Nexus``; save to a location of your choice; you will use this file in the next test
 
-Data analysis MSD
------------------
+Data analysis - MSD
 
-*Preparation*
-
--  The ``_eq.nxs`` file from the previous test
-
-**Time required 3 - 5 minutes**
-
---------------
-
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``MSD fit`` tab
 #. Load the file that you saved in the previous test using the ``Add Workspace`` button
 #. Click ``All Spectra``, then ``Add Workspace``
@@ -158,7 +147,7 @@ Data analysis I(Q, T)
 
 -  Access to ISIS sample data
 
-**Time required 3 - 5 minutes**
+**Time required 10-15 minutes**
 
 --------------
 
@@ -172,18 +161,8 @@ Data analysis I(Q, T)
 #. Choose some workspace indices (e.g. 0-2) in the ``Output`` section and click ``Plot Spectra`` this should give a plot with the title *irs26176_graphite002_iqt*
 #. Click the down arrow on the ``Plot Spectra`` button and then select ``Plot Tiled``. This should give a tiled plot of the selected workspace indices.
 
-Data analysis I(Q, T) Fit
--------------------------
+I(Q, T) - Fit:
 
-*Preparation*
-
--  The ``_iqt`` workspace from the previous test
-
-**Time required 3 - 5 minutes**
-
---------------
-
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``I(Q, T) Fit`` tab
 #. Load the ``_iqt`` workspace from the previous test
 #. Set ``Exponentials`` to 1
