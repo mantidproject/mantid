@@ -174,3 +174,16 @@ Data analysis Conv Fit
    (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
 
 #. Change the ``Fit type`` to different functions and run fits
+
+Data analysis F(Q)
+----------------------
+
+*Preparation*
+
+-  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
+
+**Time required Unknown minutes**
+
+--------------
+
+TODO
