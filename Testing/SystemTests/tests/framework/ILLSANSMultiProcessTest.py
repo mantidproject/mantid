@@ -132,3 +132,45 @@ class ILL_SANS_D11B_KINE_MULTI_TEST(systemtesting.MantidSystemTest):
                             CalculateResolution='DirectBeam',
                             BinningFactor=2,
                             OutputWorkspace='out')
+
+
+class ILL_SANS_D33_MONO_MULTI_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a mono data reduction with the multiprocess algorithm for D33 data.
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D33_MONO_MULTI_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['out', 'ILL_SANS_D33_MONO_MULTI.nxs']
+
+    def runTest(self):
+        SANSILLMultiProcess(SampleRunsD1="027925",
+                            NormaliseBy="Time",
+                            DarkCurrentRuns="027885",
+                            EmptyBeamRuns="027916",
+                            TrEmptyBeamRuns="027858",
+                            ContainerTrRuns="027860",
+                            EmptyContainerRuns="027930",
+                            SampleTrRunsW1="027985",
+                            DefaultMask="D33_mask.nxs",
+                            OutputWorkspace="out")

@@ -18,10 +18,11 @@ N_LAMBDAS = 2 # maximum number of distinct wavelengths used in the experiment
 
 class SANSILLMultiProcess(DataProcessorAlgorithm):
     '''
-    Performs an entire experiment processing from ILL SANS beamlines.
-    Supports standard monochromatic and kinetic SANS. Support for TOF to be added.
-    Provides azimuthal integration only (I(Q)), optionally with sectors.
+    Performs an entire experiment processing from ILL SANS beamlines (D11, D22, D33 but NOT D16).
+    Supports standard monochromatic, kinetic monochromatic, rebinned event (mono) and TOF SANS.
+    Provides azimuthal integration - I(Q), optionally with sectors/wedges and panel separation.
     Reduces all the samples at all the distances together in the most optimal way.
+    Allows for up to 2 wavelengths, and up to 5 detector distances.
     '''
     instrument = None # the name of the instrument [D11, D11B, D16, D22, D22B, D33]
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations

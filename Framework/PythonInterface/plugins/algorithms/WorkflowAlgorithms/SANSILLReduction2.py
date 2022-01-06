@@ -16,10 +16,10 @@ import numpy as np
 
 class SANSILLReduction(PythonAlgorithm):
     """
-        Performs unit data reduction of the given process type
-        Supports stadard monochromatic, kinetic, rebinned event (monochromatic)
-        and TOF measurements (equidistant and non-equidistant, D33 only)
-        Supports D11, D16, D22, and D33 instruments at the ILL
+        Performs unit data reduction of the given process type.
+        Supports D11, D16, D22, and D33 instruments at the ILL.
+        Supports stadard monochromatic, kinetic monochromatic, rebinned event (monochromatic)
+        and TOF measurements (equidistant and non-equidistant, D33 only).
     """
 
     mode = None # the acquisition mode of the reduction
