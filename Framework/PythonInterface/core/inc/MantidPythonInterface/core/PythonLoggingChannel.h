@@ -25,7 +25,6 @@ namespace Poco {
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonLoggingChannel : public Poco::Channel {
 public:
   PythonLoggingChannel();
-  ~PythonLoggingChannel() override = default;
 
   void log(const Poco::Message &msg) override;
 
