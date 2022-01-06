@@ -53,6 +53,8 @@ public:
   void setName(const std::string &name);
   /// Return the sample shape
   const Geometry::IObject &getShape() const;
+  /// Return a pointer to the sample shape
+  const Geometry::IObject_sptr getShapePtr() const;
   /// Update the shape of the object
   void setShape(const Geometry::IObject_sptr &shape);
 

@@ -8,8 +8,10 @@
 from .view import SuperplotView
 from .model import SuperplotModel
 
+from mantid.kernel import ConfigService
 from mantid.api import mtd
 from mantid.plots.utility import MantidAxType, legend_set_draggable
+from mantid.plots.plotfunctions import MARKER_MAP
 from mantid.plots import MantidAxes
 
 
@@ -117,11 +119,11 @@ class SuperplotPresenter:
         self._update_hold_button()
         self._update_plot()
 
-    def get_side_view(self):
-        return self._view.get_side_widget()
-
-    def get_bottom_view(self):
-        return self._view.get_bottom_widget()
+    def show(self):
+        """
+        Show the superplot.
+        """
+        self._view.show()
 
     def close(self):
         if self.parent:
@@ -148,6 +150,7 @@ class SuperplotPresenter:
         first checks that the plotted data are consistent (i.e. only bins, only
         spectra), if not, it returns without updating the model.
         """
+
         figure = self._canvas.figure
         axes = figure.gca()
         artists = axes.get_tracked_artists()
@@ -198,6 +201,25 @@ class SuperplotPresenter:
             ws_name = ws.name()
             self._model.add_workspace(ws_name)
             self._model.add_data(ws_name, spec_index)
+
+    def get_kwargs_from_settings(self):
+        """
+        Get the useful plot keyword arguments from the global settings.
+
+        Returns:
+            dict(str: str): plot keyword arguments
+        """
+        kwargs = dict()
+        kwargs['linestyle'] = ConfigService.getString("plots.line.Style")
+        kwargs['drawstyle'] = ConfigService.getString("plots.line.DrawStyle")
+        kwargs['linewidth'] = float(ConfigService.getString("plots.line.Width"))
+        kwargs['marker'] = MARKER_MAP[ConfigService.getString("plots.marker.Style")]
+        if self._error_bars:
+            kwargs['capsize'] = float(ConfigService.getString("plots.errorbar.Capsize"))
+            kwargs['capthick'] = float(ConfigService.getString("plots.errorbar.CapThickness"))
+            kwargs['errorevery'] = int(ConfigService.getString("plots.errorbar.errorEvery"))
+            kwargs['elinewidth'] = float(ConfigService.getString("plots.errorbar.Width"))
+        return kwargs
 
     def on_visibility_changed(self, visible):
         """
@@ -379,7 +401,7 @@ class SuperplotPresenter:
                     continue
                 if (ws_name, sp) not in plotted_data:
                     ws = mtd[ws_name]
-                    kwargs = {}
+                    kwargs = self.get_kwargs_from_settings()
                     if mode == self.SPECTRUM_MODE_TEXT:
                         kwargs["axis"] = MantidAxType.SPECTRUM
                         kwargs["specNum"] = ws.getSpectrumNumbers()[sp]

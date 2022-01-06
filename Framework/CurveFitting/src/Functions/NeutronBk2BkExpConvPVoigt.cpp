@@ -107,7 +107,7 @@ void NeutronBk2BkExpConvPVoigt::init() {
  * Exception: if the peak profile parameter is not in this peak, then
  *            return an Empty_DBL
  */
-double NeutronBk2BkExpConvPVoigt::getPeakParameter(std::string paramname) {
+double NeutronBk2BkExpConvPVoigt::getPeakParameter(const std::string &paramname) {
   // Calculate peak parameters if required
   if (m_hasNewParameterValue) {
     calculateParameters(false);

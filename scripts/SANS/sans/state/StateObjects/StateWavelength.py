@@ -10,7 +10,7 @@ import json
 import copy
 
 from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import (RebinType, RangeStepType, SANSFacility)
+from sans.common.enums import (RangeStepType, SANSFacility)
 from sans.state.StateObjects.wavelength_interval import WavelengthInterval
 from sans.state.automatic_setters import automatic_setters
 from sans.state.state_functions import one_is_none, validation_message
@@ -19,7 +19,6 @@ from sans.state.state_functions import one_is_none, validation_message
 class StateWavelength(metaclass=JsonSerializable):
     def __init__(self):
         super(StateWavelength, self).__init__()
-        self.rebin_type = RebinType.REBIN
         self.wavelength_interval: WavelengthInterval = WavelengthInterval()
         self.wavelength_step_type = RangeStepType.NOT_SET
 
@@ -63,9 +62,6 @@ class StateWavelengthBuilder(object):
 
     def set_wavelength_step_type(self, val):
         self.state.wavelength_step_type = val
-
-    def set_rebin_type(self, val):
-        self.state.rebin_type = val
 
 
 def get_wavelength_builder(data_info):

@@ -1,7 +1,7 @@
 .. _08_exercises_c:
 
 =========
-Exercises 
+Exercises
 =========
 
 Exercise 1
@@ -59,14 +59,14 @@ detector for a small angle dataset.
 #. Select the ellipse drawing button |PickTabEllipseButton.png|.
 #. Draw an ellipse in the middle of the panel to cover completely the
    blue disk there. [Tip: Set the Instrument View window to full screen to make this easier!]
-   
+
    |LOQEllipseMasking.png|
 
 #. Select the button for drawing a rectangular ring
    |PickTabRectRingButton.png|
 #. Draw a ring masking the edge detectors of the panel. Use its control
    points to adjust it to the right size and thickness.
-   
+
    |LOQRectRingMasking.png|
 
 #. Click |ApplyToViewButton.png| button.

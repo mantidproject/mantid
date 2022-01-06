@@ -1,5 +1,5 @@
 name: LET
-# Input file for PyChop2 for the LET spectrometer at ISIS.
+# Input file for PyChop for the LET spectrometer at ISIS.
 # At a minimum, the "chopper_system" and "moderator" entries must be present
 
 chopper_system:

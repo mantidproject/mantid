@@ -35,7 +35,7 @@ public:
   /*
    * Add a time splitter to table workspace
    */
-  virtual void addSplitter(Kernel::SplittingInterval splitter) = 0;
+  virtual void addSplitter(const Kernel::SplittingInterval &splitter) = 0;
 
   /*
    * Get the corresponding workspace index of a time

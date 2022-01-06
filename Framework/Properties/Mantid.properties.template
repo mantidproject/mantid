@@ -181,7 +181,7 @@ loading.multifile=On
 loading.multifilelimit =
 
 # Hide algorithms that use a Property Manager by default.
-algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development;Remote
+algorithms.categories.hidden=Workflow\\Inelastic\\UsesPropertyManager;Workflow\\SANS\\UsesPropertyManager;DataHandling\\LiveData\\Support;Deprecated;Utility\\Development
 
 # Response upon invoking a deprecated algorithm.
 # Allowed values are:

@@ -1,7 +1,7 @@
 Mantid
 ======
 
-The Mantid project provides a framework that supports high-performance computing and visualisation of scientific data. Mantid has been created to manipulate and analyse Neutron and Muon scattering data, but could be applied to many other techniques. The framework is open source and supported on multiple target platforms (Windows, Linux, Mac OS X).
+The Mantid project provides a framework that supports high-performance computing and visualisation of scientific data. Mantid has been created to manipulate and analyse Neutron and Muon scattering data, but could be applied to many other techniques. The framework is open source and is supported on multiple target platforms (Windows, Linux, macOS).
 
 Useful links
 ------------
@@ -12,5 +12,5 @@ Useful links
  * Build server: https://builds.mantidproject.org
  * Developer site: https://developer.mantidproject.org
 
-[![Build Status](https://builds.mantidproject.org/job/master_incremental/badge/icon)](https://builds.mantidproject.org/job/master_incremental/)
+[![Build Status](https://builds.mantidproject.org/job/main_incremental/badge/icon)](https://builds.mantidproject.org/job/main_incremental/)
 [![Coverity Scan Build Status](https://img.shields.io/coverity/scan/335.svg)](https://scan.coverity.com/projects/335)

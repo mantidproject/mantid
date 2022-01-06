@@ -76,7 +76,7 @@ Output:
 
 .. testoutput:: ExHRPDFocussing
 
-   The 51st y-value is: 900.709
+   The 51st y-value is: 900.148
 
 **Example - Demonstrating option PreserveEvents:**
 

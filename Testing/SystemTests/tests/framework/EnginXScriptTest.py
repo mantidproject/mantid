@@ -8,102 +8,124 @@ import os
 import shutil
 import systemtesting
 
-import mantid.simpleapi as simple
-
 from mantid import config
-from Engineering.EnginX import main
+from mantid.api import AnalysisDataService as ADS
+from mantid.kernel import UnitParams
+from Engineering.EnginX import EnginX
+from Engineering.EnggUtils import GROUP
 
-DIRS = config['datasearch.directories'].split(';')
-ref_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(DIRS[0]))),
-                       "SystemTests", "tests", "framework", "reference")
-root_directory = os.path.join(DIRS[0], "ENGINX")
-cal_directory = os.path.join(root_directory, "cal")
-focus_directory = os.path.join(root_directory, "focus")
-WHOLE_INST_CALIB = os.path.join(root_directory, "ENGINX_whole_inst_calib.nxs")
+CWDIR = os.path.join(config['datasearch.directories'].split(';')[0], "ENGINX")
+FULL_CALIB = os.path.join(CWDIR, "ENGINX_whole_inst_calib.nxs")
+
+BANK_DIFF_CONSTS = {'North': {UnitParams.difc: 18422, UnitParams.difa: -6.6, UnitParams.tzero: -15},
+                    'South': {UnitParams.difc: 18427, UnitParams.difa: -7.9, UnitParams.tzero: -19.4}}
 
 
 class FocusBothBanks(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run="299080", force_cal=True, directory=focus_directory,
-             full_inst_calib_path=WHOLE_INST_CALIB)
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.BOTH)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_bank")
 
     def validate(self):
-        self.tolerance = 3
-        self.checkInstrument = False
-        if systemtesting.using_gsl_v1():
-            return ("engg_focus_output_bank_1", "engg_focusing_output_ws_bank_1_gsl1.nxs",
-                    "engg_focus_output_bank_2", "engg_focusing_output_ws_bank_2_gsl1.nxs")
-        else:
-            return ("engg_focus_output_bank_1", "engg_focusing_output_ws_bank_1.nxs",
-                    "engg_focus_output_bank_2", "engg_focusing_output_ws_bank_2.nxs")
+        # bank 1
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS['North'][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['North'][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['North'][UnitParams.tzero], delta=2)
+        # bank 2
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(1)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS['South'][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['South'][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['South'][UnitParams.tzero], delta=2)
+        # compare foc data in TOF (conversion to d already tested by assertions on diff consts)
+        self.tolerance = 1e-6
+        self.disableChecking.extend(['Instrument'])  # don't check
+        return self._ws_foc.name(), "299080_engggui_focusing_output_ws_bank.nxs"
 
     def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(focus_directory)
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
 
 
-class FocusCropped(systemtesting.MantidSystemTest):
+class FocusCroppedSpectraSameDiffConstsAsBank(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run="299080", directory=focus_directory,
-             crop_type="spectra", crop_on="1-20", full_inst_calib_path=WHOLE_INST_CALIB)
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749",
+                        group=GROUP.CROPPED, spectrum_num="1-1200")  # North
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Cropped")
 
     def validate(self):
-        self.tolerance = 1e-3
-        return "engg_focus_output_cropped", "engg_focusing_output_ws_bank_cropped.nxs"
+        # only assert diff constants (both banks tests normalisation etc.)
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(0)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], BANK_DIFF_CONSTS['North'][UnitParams.difc], delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], BANK_DIFF_CONSTS['North'][UnitParams.difa], delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], BANK_DIFF_CONSTS['North'][UnitParams.tzero], delta=2)
 
     def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(focus_directory)
+        ADS.clear()
+        _try_delete_cal_and_focus_dirs(CWDIR)
 
 
-class FocusTextureMode(systemtesting.MantidSystemTest):
+class FocusTexture(systemtesting.MantidSystemTest):
 
     def runTest(self):
-        _make_test_directories()
-        main(vanadium_run="236516", user="test", focus_run=None, force_cal=True, directory=focus_directory,
-             full_inst_calib_path=WHOLE_INST_CALIB)
-        simple.mtd.clear()
-        csv_file = os.path.join(root_directory, "EnginX.csv")
-        location = os.path.join(focus_directory, "User", "test", "Calibration")
-        shutil.copy2(csv_file, location)
-        csv_file = os.path.join(location, "EnginX.csv")
-        main(vanadium_run="236516", user="test", focus_run="299080", force_cal=True, directory=focus_directory,
-             grouping_file=csv_file, full_inst_calib_path=WHOLE_INST_CALIB)
-        output = "engg_focusing_output_ws_texture_bank_{}{}"
-        group = ""
-
-        for i in range(1, 11):
-            group = group + output.format(i, ",")
-        simple.GroupWorkspaces(InputWorkspaces=group, OutputWorkspace="test")
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE20)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture20")
 
     def validate(self):
-        self.tolerance = 1e-3
-        outputlist = ["engg_focusing_output_ws_texture_bank_{}".format(i) for i in range(1, 11)]
-        filelist = ["engg_texture_bank_{}.nxs".format(i) for i in range(1, 11)]
-        validation_list = [x for t in zip(*[outputlist, filelist]) for x in t]
-        return validation_list
-
-    def cleanup(self):
-        simple.mtd.clear()
-        _try_delete(focus_directory)
-
-
-def _make_test_directories():
-    """Attempts to make the input directory for the tests"""
-    if not os.path.exists(cal_directory):
-        os.makedirs(cal_directory)
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 20)
+        # don't assert diff constants of one group
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(10)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 17250, delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.5, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -20.3, delta=2)
+        # compare TOF workspaces
+        self.tolerance = 1e-6
+        self.disableChecking.extend(['Instrument'])  # don't check
+        return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture.nxs"
 
 
-def _try_delete(path):
-    try:
-        # Use this instead of os.remove as we could be passed a non-empty dir
-        if os.path.isdir(path):
-            shutil.rmtree(path)
-        else:
-            os.remove(path)
-    except OSError:
-        print("Could not delete output file at: ", path)
+class FocusTexture30(systemtesting.MantidSystemTest):
+
+    def runTest(self):
+        enginx = EnginX(vanadium_run="ENGINX236516", focus_runs=["ENGINX299080"], save_dir=CWDIR,
+                        full_inst_calib_path=FULL_CALIB, ceria_run="ENGINX193749", group=GROUP.TEXTURE30)
+        enginx.main(plot_cal=False, plot_foc=False)
+        # store workspaces for validation
+        self._ws_foc = ADS.retrieve("299080_engggui_focusing_output_ws_Texture30")
+
+    def validate(self):
+        # assert correct number spectra
+        self.assertEqual(self._ws_foc.getNumberHistograms(), 30)
+        # don't assert diff constants of one group
+        diff_consts = self._ws_foc.spectrumInfo().diffractometerConstants(23)
+        self.assertAlmostEqual(diff_consts[UnitParams.difc], 19898, delta=5)
+        self.assertAlmostEqual(diff_consts[UnitParams.difa], -8.9, delta=1)
+        self.assertAlmostEqual(diff_consts[UnitParams.tzero], -22.2, delta=2)
+        # compare TOF workspaces
+        self.tolerance = 1e-6
+        self.disableChecking.extend(['Instrument'])  # don't check
+        return self._ws_foc.name(), "299080_engggui_focusing_output_ws_Texture30.nxs"
+
+
+def _try_delete_cal_and_focus_dirs(parent_dir):
+    for folder in ['Calibration', 'Focus']:
+        rm_dir = os.path.join(parent_dir, folder)
+        try:
+            if os.path.isdir(rm_dir):
+                shutil.rmtree(rm_dir) # don't use os.remove as we could be passed a non-empty dir
+            else:
+                os.remove(rm_dir)
+        except OSError:
+            print("Could not delete output file at: ", rm_dir)

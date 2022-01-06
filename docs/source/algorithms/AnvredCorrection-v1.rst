@@ -41,6 +41,9 @@ spectrum.
 The pixel efficiency and incident spectrum correction are NOT CURRENTLY
 USED. The absorption correction, trans, depends on both lamda and the
 pixel, Which is a fairly expensive calculation when done for each event.
+The transmission is calculated for a spherical sample using the fits to
+the tabulated values of :math:`A^* = 1/\text{transmission}` in [#WEB]_
+using the functional form set out in [#DWI]_.
 
 Also see :ref:`algm-LorentzCorrection`
 
@@ -54,6 +57,14 @@ Usage
     ws = CreateSampleWorkspace("Event",XMin=5000)
     wsOut = AnvredCorrection(ws,LinearScatteringCoef=1.302,
         LinearAbsorptionCoef=1.686,Radius=0.170,PowerLambda=3)
+
+References
+----------
+
+.. [#WEB] Weber, K. *Acta Crystallographica Section B*, 25.6 (1969): 1174-1178.
+          `doi: 10.1107/S0567740869003682 <https://doi.org/10.1107/S0567740869003682>`_
+.. [#DWI] Dwiggins, C. W. *Acta Crystallographica Section A* 31.3 (1975): 395-396.
+          `doi: 10.1107/S0567739475000873 <https://doi.org/10.1107/S0567739475000873>`_
 
 .. categories::
 

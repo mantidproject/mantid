@@ -7,7 +7,7 @@ externalproject_add(
   mslice
   PREFIX ${_mslice_external_root}
   GIT_REPOSITORY "https://github.com/mantidproject/mslice.git"
-  GIT_TAG 3796427e5e3e909e807c170e6cebdf32e630e52d
+  GIT_TAG d80e0dfc233854cc0113cff25b298aaeafe801d8
   EXCLUDE_FROM_ALL 1
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ""
@@ -36,5 +36,9 @@ set(MSLICE_DEV
 
 # Installation MSLICE_DEV is only set in PARENT_SCOPE! so don't use it here
 foreach(_bundle ${BUNDLES})
-  install(DIRECTORY ${_mslice_external_root}/src/mslice/mslice/ DESTINATION ${_bundle}scripts/ExternalInterfaces/mslice)
+  install(
+    DIRECTORY ${_mslice_external_root}/src/mslice/mslice/
+    DESTINATION ${_bundle}scripts/ExternalInterfaces/mslice
+    COMPONENT Runtime
+  )
 endforeach()

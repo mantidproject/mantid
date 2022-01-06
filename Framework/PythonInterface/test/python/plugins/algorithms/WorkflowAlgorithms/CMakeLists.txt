@@ -44,6 +44,7 @@ set(TEST_PY_FILES
     D7YIGPositionCalibrationTest.py
     D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
+    MatchAndMergeWorkspacesTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
     MSDFitTest.py

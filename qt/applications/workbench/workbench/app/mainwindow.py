@@ -577,17 +577,8 @@ class MainWindow(QMainWindow):
                     event.ignore()
                     return
 
-        # Close windows
-        app = QApplication.instance()
-        if app is not None:
-            for window in app.topLevelWindows():
-                if not window.close():
-                    # Allow GUIs to cancel the closure if they want to save
-                    event.ignore()
-                    return
-
         # Close editors
-        if self.editor is None or (self.editor.editors.current_editor() and self.editor.app_closing()):
+        if self.editor is None or self.editor.app_closing():
             # write out any changes to the mantid config file
             ConfigService.saveConfig(ConfigService.getUserFilename())
             # write current window information to global settings object
@@ -597,12 +588,12 @@ class MainWindow(QMainWindow):
             import matplotlib.pyplot as plt  # noqa
             plt.close('all')
 
-            # Close any remaining windows
-            if app is not None:
-                app.closeAllWindows()
-
             # Cancel all running (managed) algorithms
             AlgorithmManager.Instance().cancelAll()
+
+            app = QApplication.instance()
+            if app is not None:
+                app.closeAllWindows()
 
             # Kill the project recovery thread and don't restart should a save be in progress and clear out current
             # recovery checkpoint as it is closing properly
@@ -746,6 +737,9 @@ class MainWindow(QMainWindow):
             font_string = settings.get('MainWindow/font').split(',')
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
+
+        # reset font for ipython console to ensure it stays monospace
+        self.ipythonconsole.console.reset_font()
 
         # make sure main window is smaller than the desktop
         desktop = QDesktopWidget()

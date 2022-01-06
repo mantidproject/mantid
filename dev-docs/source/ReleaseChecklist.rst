@@ -259,8 +259,8 @@ Monday, 3 weeks
 
 **Create the Release Branch (once most PR's are merged)**
 
-*  Ensure the `master build and system test
-   <https://builds.mantidproject.org/view/Master%20Pipeline/>`__
+*  Ensure the `main build and system test
+   <https://builds.mantidproject.org/view/Main%20Pipeline/>`__
    jobs have passed for all build environments for this release.
 *  Run `open-release-testing
    <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__
@@ -284,14 +284,14 @@ Monday, 3 weeks
 
   .. code
 
-  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as master.
+  The release branch for <version>, called release-next, has now been created: https://github.com/mantidproject/mantid/tree/release-next.  If you've not worked with the release/main/-branch workflow before then please take a moment to familiarise yourself with the process: https://developer.mantidproject.org/GitWorkflow.html#code-freeze. The part about ensuring new branches have the correct parent is the most important part (although this can be corrected afterwards). All branches and PRs that were created before this release branch was created are fine, as their history is the same as ``main``.
 
 **Create Release Notes Skeleton**
 
-*  Create a skeleton set of release notes on master for the next version using the
+*  Create a skeleton set of release notes on ``main`` for the next version using the
    `python helper tool
    <https://github.com/mantidproject/mantid/blob/main/tools/release_generator/release.py>`_
-   and open a pull request to put them on ``master``. Make sure the
+   and open a pull request to put them on ``main``. Make sure the
    ``docs/source/release/index.rst`` file has a link to the new release docs.
 
 .. code-block:: bash
@@ -323,9 +323,9 @@ We are now ready to create the release candidates ready for Smoke testing.
 *  On the ``release-next`` branch, create a PR to update the `major & minor
    <https://github.com/mantidproject/mantid/blob/main/buildconfig/CMake/VersionNumber.cmake>`__
    versions accordingly. Also, uncomment ``VERSION_PATCH`` and set it to ``0``.
-*  Ask a gatekeeper to: merge the ``release-next`` branch back to ``master`` locally, and then comment
-   out the ``VERSION_PATCH`` on the ``master`` branch. They should then commit and push these changes
-   directly to the remote ``master`` without making a PR.
+*  Ask a gatekeeper to: merge the ``release-next`` branch back to ``main`` locally, and then comment
+   out the ``VERSION_PATCH`` on the ``main`` branch. They should then commit and push these changes
+   directly to the remote ``main`` without making a PR.
 *  Build the `release kit builds <https://builds.mantidproject.org/view/Release%20Pipeline/>`__
    and set the ``PACKAGE_SUFFIX`` parameter to an empty string
 *  Liase with the Quality Assurance Manager to announce the creation of the Smoke testing
@@ -368,7 +368,7 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 *  Make sure that you have updated your local copy of git to grab the new tag.
    ``git fetch -p``
 *  If the script below fails you may need to update the authors list and push the
-   updates to master. Look for ``authors.py`` in the ``tools/DOI`` directory.
+   updates to ``main``. Look for ``authors.py`` in the ``tools/DOI`` directory.
    It does not matter that these are not on the release branch.
 
 .. code-block:: bash
@@ -378,4 +378,10 @@ publish a new `release <https://github.com/mantidproject/mantid/releases>`__ on 
 
 *  The script will prompt you for the password. Ask a senior developer to share the username and
    password with you if you do not already have access to it.
-*  Notify the Release Manager when you complete all your tasks.
+
+**Update Citation File**
+
+Open a PR updating the software ``doi``, ``date-released`` and ``version`` in the ``CITATION.cff`` file
+at the root of the repository.
+
+Notify the Release Manager when you complete all your tasks.

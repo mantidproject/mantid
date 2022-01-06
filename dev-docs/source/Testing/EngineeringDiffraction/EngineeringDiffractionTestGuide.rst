@@ -95,7 +95,9 @@ This test covers the RB number.
 
 1. Enter a string into the RB number box.
 
-2. Follow the steps of Test 1, any output files should now be located in [Save location]/user/[RB number]
+2. Follow the steps of Test 1, any output files (for non-texture ROI) should now be located in both
+[Save location]/user/[RB number] and [Save location] (for texture ROI the files will be saved in the first location
+if an RB number is specified, otherwise they will be saved in the latter - this is to reduce the number of files being written).
 
 
 Test 3

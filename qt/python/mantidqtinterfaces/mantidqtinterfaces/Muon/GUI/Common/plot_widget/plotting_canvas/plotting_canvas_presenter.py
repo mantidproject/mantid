@@ -140,7 +140,7 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for name, index in zip(workspaces, indices):
             x_data, y1_data, y2_data = self._model.get_shade_lines(name, index)
             self._view.add_shaded_region(workspace_name = name,
-                                         axis = index,
+                                         axis_number = index,
                                          x_values = x_data,
                                          y1_values = y1_data,
                                          y2_values = y2_data)
@@ -249,6 +249,9 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             return None, None
         else:
             return xlims, ylims
+
+    def set_quickedit_by_index(self, index):
+        self._options_presenter.set_selection_by_index(index)
 
     """x or y range changed"""
 

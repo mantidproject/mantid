@@ -8,8 +8,9 @@ update the model. The view should then be able to be updated by the
 presenter to only show the line colours allowed in the model. To
 achieve this you will need to add:
 
-#. A function to the model containing a dictionary of allowed
-   line colours and returning them when called.
+#. A function to the model containing a list of allowed
+   line colours and returning them when called. Does not need to be
+   a method of the class
 #. A method in the view to update the ComboBox values to match some
    input values.
 #. In the initialisation of the presenter get the allowed colours from

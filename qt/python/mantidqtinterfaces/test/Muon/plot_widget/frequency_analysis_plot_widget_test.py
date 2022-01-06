@@ -77,7 +77,7 @@ class FrequencyAnalysisPlotWidgetTest(unittest.TestCase):
         self.mock_muon_base_view.return_value = mock.MagicMock(autospec=BasePaneView)
         self.mock_muon_canvas.side_effect = self.canvas_mocks
 
-        self.context = setup_context(False)
+        self.context = setup_context(freq=True)
         self.widget = FrequencyAnalysisPlotWidget(self.context)
 
     def test_setup(self):

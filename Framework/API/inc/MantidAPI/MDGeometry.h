@@ -39,7 +39,7 @@ public:
   MDGeometry();
   MDGeometry(const MDGeometry &other);
   virtual ~MDGeometry();
-  void initGeometry(std::vector<std::shared_ptr<Geometry::IMDDimension>> &dimensions);
+  void initGeometry(const std::vector<std::shared_ptr<Geometry::IMDDimension>> &dimensions);
 
   // --------------------------------------------------------------------------------------------
   // These are the main methods for dimensions, that CAN be overridden (e.g. by

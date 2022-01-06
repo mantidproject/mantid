@@ -75,7 +75,7 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
     }
   }
 
-  const std::size_t bufferThreshold = getProperty("BufferThreshold");
+  const uint64_t bufferThreshold = getProperty("BufferThreshold");
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(broker, eventTopic, runInfoTopic, sampleEnvTopic,

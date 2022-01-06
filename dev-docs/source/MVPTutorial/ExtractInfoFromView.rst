@@ -17,7 +17,7 @@ be used.
         doSomethingSignal = QtCore.Signal()
 
         def __init__(self, parent=None):
-            super(view, self).__init__(parent)
+            super().__init__(parent)
 
             self.button = QtWidgets.QPushButton('Hi', self)
             self.button.setStyleSheet("background-color:lightgrey")
@@ -47,7 +47,7 @@ be used.
             print ("hellow from view")
             self.doSomethingSignal.emit()
 
-            def getValue(self):
+        def getValue(self):
             return float(self.value.text())
 
 The last function ``getValue`` returns the value of the line
