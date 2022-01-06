@@ -114,7 +114,7 @@ public:
     auto alg = createCorrectTOFAxisAlgorithm();
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWs))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     const double l2 = inputWs->spectrumInfo().l2(13);
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("L2", l2))
@@ -146,7 +146,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(eppIndex)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(eppIndex)))
     TS_ASSERT_THROWS_NOTHING(alg->setProperty("EFixed", actualEi))
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
@@ -202,7 +202,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "_unused_for_child"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("IndexType", "Workspace Index"))
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("ReferenceSpectra", "1-300"))
-    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<int>(elasticBin)))
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("ElasticBinIndex", static_cast<double>(elasticBin)))
     TS_ASSERT_THROWS_ANYTHING(alg->execute());
     TS_ASSERT(!alg->isExecuted());
   }
