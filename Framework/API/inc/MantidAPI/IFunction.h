@@ -256,11 +256,11 @@ public:
     template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) { boost::apply_visitor(v, m_data); }
 
     ////Set validator to enforce limits on attribute value
-    void setValidator(const Kernel::IValidator_sptr &validator);
+    void setValidator(const Kernel::IValidator_sptr &validator) const;
     /// Evaluates the validator associated with this attribute. Returns error as a string.
-    std::string evaluateValidator();
+    std::string evaluateValidator() const;
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
-    template <typename T> std::string evaluateValidator(T &input);
+    template <typename T> std::string evaluateValidator(T &input) const;
 
     /// Returns type of the attribute
     std::string type() const;
@@ -310,7 +310,7 @@ public:
     /// Flag indicating if the string value should be returned quoted
     bool m_quoteValue = false;
     /// Associated Validator
-    Kernel::IValidator_sptr m_validator;
+    mutable Kernel::IValidator_sptr m_validator;
   };
 
   //---------------------------------------------------------//

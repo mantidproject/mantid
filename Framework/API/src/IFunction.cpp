@@ -952,12 +952,12 @@ void IFunction::Attribute::fromString(const std::string &str) {
 /** Set validator to enforce limits on attribute value
  * @param validator :: shared ptr to validator object
  */
-void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator) { m_validator = validator; }
+void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator) const { m_validator = validator; }
 
 /**
  *  Evaluates the validator associated with this attribute. Returns error as a string.
  */
-std::string IFunction::Attribute::evaluateValidator() {
+std::string IFunction::Attribute::evaluateValidator() const {
   std::string dataTypeName;
 
   dataTypeName = type();
@@ -982,7 +982,7 @@ std::string IFunction::Attribute::evaluateValidator() {
  *  @param name :: T
  *  @param subjectValue :: The value to be validated by the validator.
  */
-template <typename T> std::string IFunction::Attribute::evaluateValidator(T &inputData) {
+template <typename T> std::string IFunction::Attribute::evaluateValidator(T &inputData) const {
   if (m_validator != Kernel::IValidator_sptr()) {
     return m_validator->isValid(inputData);
   } else {
