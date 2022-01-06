@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import math
+#import math
 
 from mantid.api import WorkspaceGroup
 import mantid.simpleapi as mantid
@@ -83,7 +83,7 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
 
     # Focus the spectra into banks
     if aligned_ws.isDistribution():
-        mantid.LoadCalFile(InputWorkspace=aligned_ws,
+        '''mantid.LoadCalFile(InputWorkspace=aligned_ws,
                            CalFileName=run_details.grouping_file_path,
                            Workspacename='cal_workspace',
                            MakeOffsetsWorkspace=False,
@@ -108,7 +108,11 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                                   IgnoreBinErrors=True)
         focused_ws = mantid.GroupDetectors(InputWorkspace=aligned_ws,
                                            CopyGroupingFromWorkspace='cal_workspace_group')
-        mantid.DeleteWorkspace('cal_workspace_group')
+        mantid.DeleteWorkspace('cal_workspace_group')'''
+        mantid.ConvertFromDistribution(aligned_ws)
+        focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
+                                                 GroupingFileName=run_details.grouping_file_path)
+        mantid.ConvertToDistribution(focused_ws)
     else:
         focused_ws = mantid.DiffractionFocussing(InputWorkspace=aligned_ws,
                                                  GroupingFileName=run_details.grouping_file_path)

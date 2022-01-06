@@ -9,6 +9,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -212,12 +213,15 @@ void DiscusMultipleScatteringCorrection::exec() {
   MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
   // avoid repeated conversion of bin edges to points inside loop by converting to point data
   if (SQWS->isHistogramData()) {
-    auto pointDataAlgorithm = this->createChildAlgorithm("ConvertToPointData");
-    pointDataAlgorithm->initialize();
-    pointDataAlgorithm->setProperty("InputWorkspace", SQWS);
-    pointDataAlgorithm->setProperty("OutputWorkspace", "_");
-    pointDataAlgorithm->execute();
-    SQWS = pointDataAlgorithm->getProperty("OutputWorkspace");
+    // flat interpolation is later used on S(Q) so convert to points by assigning Y value to LH bin edge
+    MatrixWorkspace_sptr SQWSPoints = API::WorkspaceFactory::Instance().create(SQWS, SQWS->getNumberHistograms(),
+                                                                               SQWS->blocksize(), SQWS->blocksize());
+    SQWSPoints->setSharedY(0, SQWS->sharedY(0));
+    SQWSPoints->setSharedE(0, SQWS->sharedE(0));
+    std::vector<double> newX = SQWS->histogram(0).dataX();
+    newX.pop_back();
+    SQWSPoints->setSharedX(0, HistogramData::Points(newX).cowData());
+    SQWS = SQWSPoints;
   }
 
   MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
