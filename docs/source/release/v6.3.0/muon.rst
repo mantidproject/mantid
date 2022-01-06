@@ -12,7 +12,7 @@ Frequency Domain Analysis
 New Features
 ############
 
-- Users can now select the unit for the frequency spectra (MHz or Gauss) in plotting, by picking either `Frequency` or `Field` respectively after a transform has been calculated.
+- Users can now select the unit for the frequency spectra (MHz or Gauss) in plotting, by picking either ``Frequency`` or ``Field`` respectively after a transform has been calculated.
 
 Bugfixes
 ########
@@ -42,8 +42,8 @@ Improvements
 - The plots no longer use scientific notation for the axis values.
 - On resizing the GUI, priority is given to plotting.
 - The plot guess option in Fitting can now have its range interpolated or extrapolated.
-- The `alpha` values on :ref:`Grouping Tab <muon_grouping_tab-ref>` are now to six decimal places.
-- The numerical values in the `run info` box on the :ref:`Home Tab <muon_home_tab-ref>` are now rounded to either 4 significant figures or a whole number, whichever is more precise.
+- The ``alpha`` values on :ref:`Grouping Tab <muon_grouping_tab-ref>` are now to six decimal places.
+- The numerical values in the ``run info`` box on the :ref:`Home Tab <muon_home_tab-ref>` are now rounded to either 4 significant figures or a whole number, whichever is more precise.
 - The Sequentially Fit all button is now visible for 4K displays.
 
 
@@ -64,7 +64,7 @@ ALC
 New Features
 ############
 
-- Can now read `nxs_v2` files.
+- Can now read ``nxs_v2`` files.
 
 
 Algorithms
@@ -80,27 +80,27 @@ Fitting Functions
 -----------------
 New Features
 ############
-* Added two Activation fitting functions to MuonModelling Fit Functions.
+* Added two Activation fitting functions to ``MuonModelling`` Fit Functions.
 
-  * `ActivationK <func-ActivationK>` can be used for data in Kelvins.
-  * `ActivationmeV <func-ActivationmeV>`can be used for data in meV.
+  * :ref:`ActivationK <func-ActivationK>` can be used for data in Kelvins.
+  * :ref:`ActivationmeV <func-ActivationmeV>`can be used for data in meV.
 
-* Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to MuonModelling\Magnetism Fit Functions.
+* Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to ``MuonModelling\Magnetism`` Fit Functions.
 * Added two fitting functions for the decoupling of asymmetry in the ordered state of a powedered magnet for fitting.
 
-  * `DecoupAsymPowderMagLong <func-DecoupAsymPowderMagLong>` can be used for longitudinal polarization.
-  * `DecoupAsymPowderMagRot <func-DecoupAsymPowderMagRot>`can be used for rotational asymmetry.
+  * :ref:`DecoupAsymPowderMagLong <func-DecoupAsymPowderMagLong>` can be used for longitudinal polarization.
+  * :ref:`DecoupAsymPowderMagRot <func-DecoupAsymPowderMagRot>`can be used for rotational asymmetry.
 
-* Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to MuonModelling\Magentism Fit Functions.
-* Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to MuonModelling Fit Functions.
-* Added a :ref:`Power Law <func-PowerLaw>` fitting function to MuonModelling Fit Functions.
-* Added a ref:`Smooth Transition <func-SmoothTransition>` function to MuonModelling Fit Functions.
+* Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to ``MuonModelling\Magentism`` Fit Functions.
+* Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to ``MuonModelling`` Fit Functions.
+* Added a :ref:`Power Law <func-PowerLaw>` fitting function to ``MuonModelling`` Fit Functions.
+* Added a :ref:`Smooth Transition <func-SmoothTransition>` function to ``MuonModelling`` Fit Functions.
 
 
 Improvements
 ############
-- created a new category, 'Magnetism', in the MuonModelling Fit Functions list.
-- :ref:`Gaussian <func-Gaussian>`, :ref:`Lorentzian <func-Lorentzian>` and :ref:`Polynomial fitting <func-Polynomial>` functions can now also be found under MuonModelling in the Fitting Functions Tree.
+- created a new category, ``Magnetism``, in the ``MuonModelling`` Fit Functions list.
+- :ref:`Gaussian <func-Gaussian>`, :ref:`Lorentzian <func-Lorentzian>` and :ref:`Polynomial fitting <func-Polynomial>` functions can now also be found under ``MuonModelling`` in the Fitting Functions Tree.
 
 :ref:`Release 6.3.0 <v6.3.0>`
 
