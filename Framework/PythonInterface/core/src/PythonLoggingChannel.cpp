@@ -17,38 +17,48 @@ namespace Poco {
 // TODO gil ?
 
 namespace {
-auto importPythonLogger() {
+auto importLogger() {
   const auto logging = boost::python::import("logging");
   return logging.attr("getLogger")("Mantid");
 }
 
-int pythonLevel(const Message::Priority prio) {
-  // TODO get values from python
+// See https://docs.python.org/3/library/logging.html#logging-levels
+enum class PyLogLevel : int {
+  CRITICAL = 50,
+  ERROR = 40,
+  WARNING = 30,
+  INFO = 20,
+  DEBUG = 10,
+  NOTSET = 0,
+};
+
+PyLogLevel pythonLevel(const Message::Priority prio) {
   switch (prio) {
   case Message::Priority::PRIO_FATAL:
   case Message::Priority::PRIO_CRITICAL:
-    return 50;
+    return PyLogLevel::CRITICAL;
   case Message::Priority::PRIO_ERROR:
-    return 40;
+    return PyLogLevel::ERROR;
   case Message::Priority::PRIO_WARNING:
-    return 30;
+    return PyLogLevel::WARNING;
   case Message::Priority::PRIO_NOTICE:
   case Message::Priority::PRIO_INFORMATION:
-    return 20;
+    return PyLogLevel::INFO;
   case Message::Priority::PRIO_DEBUG:
   case Message::Priority::PRIO_TRACE:
-    return 10;
+    return PyLogLevel::DEBUG;
+  default:
+    return PyLogLevel::NOTSET;
   }
-  return 0;
 }
 
 } // namespace
 
-PythonLoggingChannel::PythonLoggingChannel() : m_pyLogger(importPythonLogger()) {}
+PythonLoggingChannel::PythonLoggingChannel() : m_pyLogger(importLogger()) {}
 
 void PythonLoggingChannel::log(const Poco::Message &msg) {
   const auto logFn = m_pyLogger.attr("log");
-  const auto numericLevel = pythonLevel(msg.getPriority());
+  const auto numericLevel = static_cast<int>(pythonLevel(msg.getPriority()));
   logFn(numericLevel, msg.getText());
 }
 } // namespace Poco
