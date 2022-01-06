@@ -9,6 +9,7 @@
 #include "MantidPythonInterface/core/PythonLoggingChannel.h"
 
 // 3rd-party includes
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <Poco/Message.h>
 #include <boost/python/import.hpp>
 
@@ -55,6 +56,7 @@ PyLogLevel pythonLevel(const Message::Priority prio) {
 PythonLoggingChannel::PythonLoggingChannel() : m_pyLogger(importLogger()) {}
 
 void PythonLoggingChannel::log(const Poco::Message &msg) {
+  Mantid::PythonInterface::GlobalInterpreterLock gil; // acquire the GIL
   const auto logFn = m_pyLogger.attr("log");
   const auto numericLevel = static_cast<int>(pythonLevel(msg.getPriority()));
   logFn(numericLevel, msg.getText());
