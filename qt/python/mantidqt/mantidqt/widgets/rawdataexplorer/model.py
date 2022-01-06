@@ -207,6 +207,8 @@ class RawDataExplorerModel(QObject):
 
         self.memory_manager.workspace_interacted_with(ws_name)
 
+        self.memory_manager.workspace_interacted_with(ws_name)
+
         # determine the preview given the prepared data
         preview = self.choose_preview(ws_name)
 

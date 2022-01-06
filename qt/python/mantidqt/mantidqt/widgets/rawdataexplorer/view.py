@@ -184,6 +184,7 @@ class RawDataExplorerView(QWidget):
         self.setup_connections()
 
         self.fileTree.sig_new_current.connect(self.on_file_clicked, Qt.QueuedConnection)
+
         self.is_busy = False
 
     def closeEvent(self, event):
