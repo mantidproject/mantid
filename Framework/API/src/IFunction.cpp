@@ -979,8 +979,7 @@ std::string IFunction::Attribute::evaluateValidator() const {
 
 /**
  *  Evaluates the validator associated with this attribute. Returns error as a string.
- *  @param name :: T
- *  @param subjectValue :: The value to be validated by the validator.
+ *  @param inputData :: The value to be validated by the validator.
  */
 template <typename T> std::string IFunction::Attribute::evaluateValidator(T &inputData) const {
   if (m_validator != Kernel::IValidator_sptr()) {
