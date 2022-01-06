@@ -7,7 +7,9 @@
 //
 // PythonLoggingChannel.h
 //
-// TODO
+// Channel for logging. Sends messages to Python's standard library logging framework.
+// Usage: use it in Mantid.properties or mantid.user.properties in addition to, or
+// instead of other channel classes.
 //
 
 #pragma once
