@@ -589,7 +589,7 @@ protected:
   /// Declare a single attribute
   void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue);
   /// Declare a single attribute with validator
-  void declareAttribute(const std::string &name, API::IFunction::Attribute &defaultValue,
+  void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
                         const Kernel::IValidator &validator);
 
   /// Store an attribute's value

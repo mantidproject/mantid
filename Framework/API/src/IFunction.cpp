@@ -1418,7 +1418,7 @@ void IFunction::declareAttribute(const std::string &name, const API::IFunction::
  * @param defaultValue :: A default value
  * @param validator :: validator to restrict allows input value of defaultValue param
  */
-void IFunction::declareAttribute(const std::string &name, API::IFunction::Attribute &defaultValue,
+void IFunction::declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
                                  const Kernel::IValidator &validator) {
   const Kernel::IValidator_sptr validatorClone = validator.clone();
   std::string error;
