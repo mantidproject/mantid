@@ -24,7 +24,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     Reduces all the samples at all the distances together in the most optimal way.
     Allows for up to 2 wavelengths, and up to 5 detector distances.
     '''
-    instrument = None # the name of the instrument [D11, D11B, D16, D22, D22B, D33]
+    instrument = None # the name of the instrument [D11, D11B, D22, D22B, D33]
     rank = None # the rank of the reduction, i.e. the number of (detector distance, wavelength) configurations
     lambda_rank = None # how many wavelengths are we dealing with, i.e. how many transmissions need to be calculated
     n_samples = None # how many samples are being reduced
