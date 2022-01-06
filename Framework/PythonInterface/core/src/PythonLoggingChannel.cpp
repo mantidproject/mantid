@@ -14,8 +14,6 @@
 
 namespace Poco {
 
-// TODO gil ?
-
 namespace {
 auto importLogger() {
   const auto logging = boost::python::import("logging");
