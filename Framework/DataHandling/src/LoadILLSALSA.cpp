@@ -111,9 +111,9 @@ void LoadILLSALSA::exec() {
   theta.load();
   double distance = getProperty("DetectorDistance");
   double thetaDeg = theta[0];
-  double thetaRad = (-thetaDeg) * M_PI / 180.0 + M_PI / 2;
-  double dx = -distance * cos(thetaRad);
-  double dz = distance * sin(thetaRad);
+  double thetaRad = thetaDeg * M_PI / 180.0;
+  double dx = -distance * sin(thetaRad);
+  double dz = distance * cos(thetaRad);
   auto moveInst = createChildAlgorithm("MoveInstrumentComponent");
   moveInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
   moveInst->setPropertyValue("ComponentName", "detector");
@@ -125,7 +125,7 @@ void LoadILLSALSA::exec() {
   rotateInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
   rotateInst->setPropertyValue("ComponentName", "detector");
   rotateInst->setPropertyValue("Y", "1");
-  rotateInst->setProperty<double>("Angle", thetaDeg);
+  rotateInst->setProperty<double>("Angle", -thetaDeg);
   rotateInst->execute();
 
   // fill detector data
