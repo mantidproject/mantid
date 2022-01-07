@@ -214,8 +214,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 self.hide_axis(axis_number, nrows, ncols)
 
     def add_shaded_region(self, workspace_name, axis_number, x_values, y1_values, y2_values):
-        # -1 to count from 0 instead of 1
-        axis = self.fig.axes[axis_number-1]
+        axis = self.fig.axes[axis_number]
         if workspace_name in self._shaded_regions.keys():
             self._shaded_regions[workspace_name].update(axis = axis,
                                                         x_values = x_values,
