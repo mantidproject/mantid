@@ -52,6 +52,7 @@ void LoadILLSALSA::init() {
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("DetectorDistance", 1.0, mustBePositive, "Distance between the sample and the detector");
+  declareProperty("ThetaOffset", 0.0, "Offset for the 2theta value");
 }
 
 /**
@@ -110,7 +111,7 @@ void LoadILLSALSA::exec() {
   Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
   theta.load();
   double distance = getProperty("DetectorDistance");
-  double thetaDeg = theta[0];
+  double thetaDeg = theta[0] - static_cast<double>(getProperty("ThetaOffset"));
   double thetaRad = thetaDeg * M_PI / 180.0;
   double dx = -distance * sin(thetaRad);
   double dz = distance * cos(thetaRad);
