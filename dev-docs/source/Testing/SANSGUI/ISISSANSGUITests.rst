@@ -55,7 +55,7 @@ In the ``Runs`` tab:
    the file in an editor or Excel and ensure it looks like a sensible
    representation of the table in the format ``key,value,key,value,...``. All
    columns except ``Options`` and ``Sample Shape`` should be included.
-#. Try unticking ``Sample Geometry`` and ticking ``Multi-period``. The
+#. Try unticking ``Sample Geometry`` and ticking ``Multi-period`` and resave the CSV. The
    displayed columns change but the saved file should contain the same set of
    columns regardless of whether these are ticked.
 #. Click ``Load Batch file`` and select the newly saved table. All columns
@@ -90,6 +90,7 @@ In the ``Settings`` tab:
 #. Click ``Display Mask``.
 #. This should give an instrument view with a circle at the centre.
 #. Go to ``Q, Wavelength, Detector Limits`` sub-tab.
+#. Close the Instrument View window
 #. Change the ``Phi Limit`` to read 0 to 45 and uncheck ``use mirror sector``.
 #. Go to ``Mask`` sub-tab.
 #. Click ``Display Mask``.
@@ -109,14 +110,15 @@ Processing
 #. After some seconds the rows should turn green.
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
-#. Check your default save directory - there should be two saved output files
-   (an ``.xml`` and ``.h5`` file) for each main output (three types) as well as the
-   unsubtracted can and sample workspaces, i.e. six output files for each row.
+#. Check your default save directory. For each reduction two banks (HAB/main) should
+   be saved. In total there should be 8 workspaces (4 .xml and 4 .nxs) saved.
+#. Clear the newly created files and workspaces to make the next test easier
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Change the contents of the first cell in the first row to ``74045`` and click
    ``Process Selected``.
 #. The row should turn blue; hovering over the row should give an error message.
 #. Change the first column of the first row back to ``74044``.
+#. Click on another row, the modified row should have cleared its colour
 
 *2D reduction*
 
@@ -130,6 +132,7 @@ Processing
    can do a colourfill plot.
 #. Check your save directory. There should now only be a ``.h5`` file for each
    output.
+#. Clear the newly created files and workspaces to make future tests easier
 #. Change ``Reduction`` back to 1D.
 #. Click ``Process All``.
 #. A new plot window should open and you should end up with multiple lines plotted.
@@ -160,11 +163,11 @@ Beam centre finder
 
 In the ``Beam centre`` tab:
 
-#. In the drop down run with ``main-detector``, check the values in the first row have changed on completion
-#. Change to ``Hab`` and re-run ensuring only the values for the front has changed
-#. For both plot should appear after some seconds, with four lines.
+#. Check that detector is set to ``main-detector`` and click run
+#. Check the values in the first row (Centre Position - Rear) have changed on completion
+#. Change the detector to ``Hab`` and re-run ensuring only the values for the front has changed
+#. For both a plot should appear, as the centre finder is running  with four lines.
 #. The four lines should gradually get closer together.
-#. This will run for some time, probably minutes.
 
 Sum runs
 ########
@@ -174,7 +177,7 @@ In the ``Sum Runs`` tab:
 #. Enter ``74044, 74019`` in the top line.
 #. Click ``Add`` at the side.
 #. Enter ``LOQ74044-add`` as Output file.
-#. Click ``Select Save Directory`` and select a directory in your managed paths.
+#. In the top-right, click ``Select Save Directory`` and select a directory in your managed paths.
 #. Click ``Sum`` at the bottom.
 #. Go back to the ``Runs`` tab.
 #. Remove all rows.
@@ -201,5 +204,5 @@ Display
    clear tooltips by hovering over them.
 #. Check that ``Zero Error Free`, ``Use Optimizations``, and ``Plot Results``
    have clear tooltips.
-#. In all tabs, check the tooltips are still there by hovering over each box.
+#. In the settings, hover over a random selection of buttons and text boxes to check tooltips are still there.
    Users rely on the tooltips a lot and really do notice each missing one.
