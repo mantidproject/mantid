@@ -70,6 +70,9 @@ Python
 
   -  Existing arguments, such as version, start and end progress...etc. are unaffected by this change.
   -  E.g. `createChildAlgorithm("CreateSampleWorkspace", version=1, XUnit="Wavelength")`
+- The package on Windows now includes the `euphonic <https://pypi.org/project/euphonic/>`_ package
+  for calculating phonon bandstructures.
+
 
 Installation
 ------------
