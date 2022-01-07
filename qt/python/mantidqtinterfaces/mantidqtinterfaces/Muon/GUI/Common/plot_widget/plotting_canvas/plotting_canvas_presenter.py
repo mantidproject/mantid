@@ -137,10 +137,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._set_axes_limits_and_titles(autoscale)
 
     def add_shaded_region(self, workspaces, indices):
-        for name, index in zip(workspaces, indices):
+        workspace_plot_info = self._model.create_workspace_plot_information(workspaces, indices,
+                                                                            self._options_presenter.get_errors())
+        for plot_info in workspace_plot_info:
+            name = plot_info.workspace_name
+            index = plot_info.index
+            axis = plot_info.axis
             x_data, y1_data, y2_data = self._model.get_shade_lines(name, index)
+
             self._view.add_shaded_region(workspace_name = name,
-                                         axis_number = index,
+                                         axis_number = axis,
                                          x_values = x_data,
                                          y1_values = y1_data,
                                          y2_values = y2_data)
