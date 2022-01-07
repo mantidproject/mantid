@@ -142,11 +142,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         for plot_info in workspace_plot_info:
             name = plot_info.workspace_name
             index = plot_info.index
-            axis = plot_info.axis
             x_data, y1_data, y2_data = self._model.get_shade_lines(name, index)
 
             self._view.add_shaded_region(workspace_name = name,
-                                         axis_number = axis,
+                                         axis_number = plot_info.axis,
                                          x_values = x_data,
                                          y1_values = y1_data,
                                          y2_values = y2_data)
