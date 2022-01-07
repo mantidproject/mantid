@@ -71,6 +71,8 @@ Python
   -  Existing arguments, such as version, start and end progress...etc. are unaffected by this change.
   -  E.g. `createChildAlgorithm("CreateSampleWorkspace", version=1, XUnit="Wavelength")`
 
+- Added possibility to forward log messages to Python, see `mantid.utils.logging.log_to_python`.
+
 Installation
 ------------
 
