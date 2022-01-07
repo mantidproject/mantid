@@ -94,7 +94,8 @@ class PreviewView(QObject):
         @param workspace_name (str): name of the workspace
         """
         if self._type == self.IVIEW:
-            self._widget = get_instrumentview(workspace_name, get_window_config()[1])
+            parent, flags = get_window_config()
+            self._widget = get_instrumentview(workspace_name, parent, flags)
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
             self.sig_request_close.connect(self._widget.container.emit_close)
