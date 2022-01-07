@@ -70,7 +70,7 @@ PythonLoggingChannel::~PythonLoggingChannel() {
 }
 
 void PythonLoggingChannel::log(const Poco::Message &msg) {
-  if (m_pyLogger) {
+  if (m_pyLogger && Py_IsInitialized()) {
     Mantid::PythonInterface::GlobalInterpreterLock gil;
     const auto logFn = m_pyLogger->attr("log");
     const auto numericLevel = static_cast<int>(pythonLevel(msg.getPriority()));
