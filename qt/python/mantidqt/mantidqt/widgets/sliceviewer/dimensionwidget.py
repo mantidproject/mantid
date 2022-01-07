@@ -221,6 +221,8 @@ class Dimension(QWidget):
         self.spinbox.setDecimals(3)
         self.spinbox.setRange(self.get_bin_center(0), self.get_bin_center(self.nbins - 1))
         self.spinbox.setSingleStep(self.width)
+        self.set_value(self.spinbox.minimum())
+        self.update_spinbox()  # not updated with set_value unless instance of DimensionNonIntegrated
         self.spinbox.editingFinished.connect(self.spinbox_changed)
 
         self.layout.addWidget(self.name)
@@ -235,7 +237,6 @@ class Dimension(QWidget):
         self.layout.addWidget(self.spinbox)
         self.layout.addWidget(self.units)
 
-        self.set_value(self.spinbox.minimum())
         if self.nbins < 2:
             state = State.DISABLE
 
