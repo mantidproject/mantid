@@ -21,17 +21,25 @@
 // 3rd-party includes
 #include <Poco/ConsoleChannel.h>
 #include <boost/python/object.hpp>
+#include <memory>
 
 namespace Poco {
 
 class MANTID_PYTHONINTERFACE_CORE_DLL PythonLoggingChannel : public Poco::Channel {
 public:
   PythonLoggingChannel();
+  ~PythonLoggingChannel() override;
+  // Because of boost::python::object
+  PythonLoggingChannel(const PythonLoggingChannel &) = delete;
+  PythonLoggingChannel &operator=(const PythonLoggingChannel &) = delete;
+  // Because of Poco::Channel
+  PythonLoggingChannel(PythonLoggingChannel &&) = delete;
+  PythonLoggingChannel &operator=(PythonLoggingChannel &&) = delete;
 
   void log(const Poco::Message &msg) override;
 
 private:
-  boost::python::object m_pyLogger;
+  std::unique_ptr<boost::python::object> m_pyLogger;
 };
 
 } // namespace Poco

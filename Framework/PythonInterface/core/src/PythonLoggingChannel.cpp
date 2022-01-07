@@ -16,11 +16,6 @@
 namespace Poco {
 
 namespace {
-auto importLogger() {
-  const auto logging = boost::python::import("logging");
-  return logging.attr("getLogger")("Mantid");
-}
-
 // See https://docs.python.org/3/library/logging.html#logging-levels
 enum class PyLogLevel : int {
   CRITICAL = 50,
@@ -53,12 +48,33 @@ PyLogLevel pythonLevel(const Message::Priority prio) {
 
 } // namespace
 
-PythonLoggingChannel::PythonLoggingChannel() : m_pyLogger(importLogger()) {}
+PythonLoggingChannel::PythonLoggingChannel() {
+  Mantid::PythonInterface::GlobalInterpreterLock gil;
+  auto logger = (boost::python::import("logging").attr("getLogger")("Mantid"));
+  m_pyLogger = std::make_unique<boost::python::object>(std::move(logger));
+}
+
+// The special behavior here is needed because Poco's LoggingFactory can be destroyed
+// after the Python interpreter was shut down.
+PythonLoggingChannel::~PythonLoggingChannel() {
+  if (Py_IsInitialized()) {
+    Mantid::PythonInterface::GlobalInterpreterLock gil;
+    // Destroy the object while the GIL is held.
+    m_pyLogger = nullptr;
+  } else {
+    // The Python interpreter has been shut down and our logger object destroyed.
+    // We can no longer safely call the destructor of *m_pLogger,
+    // so just deallocate the memory.
+    operator delete(m_pyLogger.release());
+  }
+}
 
 void PythonLoggingChannel::log(const Poco::Message &msg) {
-  Mantid::PythonInterface::GlobalInterpreterLock gil; // acquire the GIL
-  const auto logFn = m_pyLogger.attr("log");
-  const auto numericLevel = static_cast<int>(pythonLevel(msg.getPriority()));
-  logFn(numericLevel, msg.getText());
+  if (m_pyLogger) {
+    Mantid::PythonInterface::GlobalInterpreterLock gil;
+    const auto logFn = m_pyLogger->attr("log");
+    const auto numericLevel = static_cast<int>(pythonLevel(msg.getPriority()));
+    logFn(numericLevel, msg.getText());
+  }
 }
 } // namespace Poco
