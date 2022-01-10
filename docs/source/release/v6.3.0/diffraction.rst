@@ -26,10 +26,10 @@ Improvements
 * A number of improvements have been made to the :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>` algorithm
 
   * The parameter ``IncidentSpectra`` has been renamed to fix a typo, which is a breaking change for this algorithm.
-  * The algorithm now validates that the IncidentSpectra is in units of Wavelength and will output in the same unit as the InputWorkspace.
+  * The algorithm now validates that the ``IncidentSpectra`` is in units of Wavelength and will output in the same unit as the ``InputWorkspace``.
   * the addition of 1 to the Placzek correction has been moved out of this algorithm and into :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` .
 
-* PEARL powder diffraction scripts now cope if ``absorption correction`` workspace is a different size to the ``Vanadium`` workspace without generating NaN values.
+* PEARL powder diffraction scripts now cope if ``absorption correction`` workspace is a different size to the ``Vanadium`` workspace without generating ``NaN`` values.
 * Improved the ``tt_mode=Custom`` in the ISIS PEARL powder diffraction scripts. Specifically ``tt_mode=Custom`` now supports all the different ``focus_modes`` if the grouping file contains 14 groups.
 * :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
 * :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now has an option to manually specify sample geometry for absorption correction.
