@@ -21,7 +21,7 @@ Data Objects
 Python
 ------
 
-- Added possibility to forward log messages to Python, see `mantid.utils.logging.log_to_python`.
+- Added possibility to forward log messages to Python, see :ref:`mantid.utils.logging.log_to_python`.
 
 Installation
 ------------
