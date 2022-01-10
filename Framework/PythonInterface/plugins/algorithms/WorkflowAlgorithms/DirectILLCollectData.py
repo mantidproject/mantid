@@ -15,7 +15,7 @@ from mantid.kernel import (CompositeValidator, Direct, Direction, FloatBoundedVa
 from mantid.simpleapi import (AddSampleLog, CalculateFlatBackground, CorrectTOFAxis, CreateEPP,
                               CreateSingleValuedWorkspace, CreateWorkspace, CropWorkspace, DeleteWorkspace, ExtractMonitors,
                               FindEPP, GetEiMonDet, LoadAndMerge, Minus, NormaliseToMonitor, Scale, SetInstrumentParameter)
-import numpy
+import numpy as np
 
 _MONSUM_LIMIT = 100
 
@@ -131,7 +131,7 @@ def _createFlatBkg(ws, wsType, windowWidth, wsNames, algorithmLogging):
 
 def _fitElasticChannel(ys, wsNames, wsCleanup, algorithmLogging):
     """Return index to the peak position of ys."""
-    xs = numpy.array([i for i in range(len(ys))])
+    xs = np.array([i for i in range(len(ys))])
     l2SumWSName = wsNames.withSuffix('summed_detectors_at_l2')
     l2SumWS = CreateWorkspace(OutputWorkspace=l2SumWSName,
                               DataX=xs,
@@ -247,7 +247,7 @@ def _subtractFlatBkg(ws, wsType, bkgWorkspace, bkgScaling, wsNames, wsCleanup, a
 def _sumDetectorsAtDistance(ws, distance, tolerance):
     """Return a sum of the Y values of detectors at distance away from the sample."""
     histogramCount = ws.getNumberHistograms()
-    ySums = numpy.zeros(ws.blocksize())
+    ySums = np.zeros(ws.blocksize())
     detectorInfo = ws.detectorInfo()
     sample = ws.getInstrument().getSample()
     for i in range(histogramCount):
