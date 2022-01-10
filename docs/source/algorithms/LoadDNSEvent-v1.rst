@@ -17,7 +17,7 @@ This algorithm loads a DNS mesytec psd listmode file into an :ref:`EventWorkspac
     :ref:`EventWorkspace <EventWorkspace>` with the X-axis in the Time-of-flight units.
 
 **ChopperChannel**
-is the input channel to wich the chopper was connected, must also be set in mesydaq gui.
+The chopper input channel as set in mesydaq gui.
 It can be set to integers between 1 and 4. At DNS default is 2.
 
 

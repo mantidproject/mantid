@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "BitStream.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
@@ -6,11 +12,6 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/System.h"
 #include "MantidTypes/Core/DateAndTime.h"
-
-#include <array>
-#include <fstream>
-#include <limits>
-//#include <iterator>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -23,29 +24,9 @@ namespace Mantid::DataHandling {
   Algorithm used to generate an EventWorkspace from a DNS PSD listmode (.mdat)
   file.
 
-  @author Joachim Coenen, Jülich Centre for Neutron Science
-  @date 2018-08-16
+  @author Joachim Coenen, Thomas Mueller, Jülich Centre for Neutron Science
+  @date 2022-01-10
 
-  Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
-
-  This file is part of Mantid.
-
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
-
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport LoadDNSEvent : public API::IFileLoader<Kernel::FileDescriptor> {
@@ -57,53 +38,62 @@ public:
     return "Loads data from the DNS PSD detector to a Mantid EventWorkspace.";
   }
 
-  /// Algorithm's version for identification
+  // Algorithm's version for identification
   int version() const override { return 1; }
   const std::vector<std::string> seeAlso() const override { return {}; }
-  /// Algorithm's category for identification
+  // Algorithm's category for identification
   const std::string category() const override { return "DataHandling"; }
-  /// Returns a confidence value that this algorithm can load a file
+  // Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::FileDescriptor &descriptor) const override;
 
 private:
-  /// Initialise the properties
+  // Initialise the properties
   void init() override;
-  /// Run the algorithm
+  // Run the algorithm
   void exec() override;
 
   struct BufferHeader {
-    uint16_t bufferLength;
-    uint16_t bufferVersion;
-    uint16_t headerLength;
-    uint16_t bufferNumber;
-    uint16_t runId;
-    uint8_t mcpdId;
-    uint8_t deviceStatus;
-    uint64_t timestamp;
+    uint16_t bufferLength = 0;
+    uint16_t bufferVersion = 0;
+    uint16_t headerLength = 0;
+    uint16_t bufferNumber = 0;
+    uint16_t runId = 0;
+    uint8_t mcpdId = 0;
+    uint8_t deviceStatus = 0;
+    uint64_t timestamp = 0;
   };
 
 public:
   enum event_id_e { NEUTRON = 0, TRIGGER = 1 };
 
   struct CompactEvent {
-    uint64_t timestamp;
+    uint64_t timestamp = 0;
   };
 
 private:
   struct EventAccumulator {
-    //! Neutron Events for each pixel
+    // Neutron Events for each pixel
     std::vector<std::vector<CompactEvent>> neutronEvents;
     std::vector<CompactEvent> triggerEvents;
   };
 
-  uint32_t chopperChannel;
-  uint32_t detectorPixelCount;
+  struct TriggerEvent {
+    bool isChopperTrigger = false;
+    CompactEvent event = {};
+  };
 
-  // uint32_t monitorChannel;
-  bool discardPreChopperEvents;
-  bool setBinBoundary;
+  struct NeutronEvent {
+    uint8_t wsIndex = 0;
+    CompactEvent event = {};
+  };
 
-  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr eventWS,
+  uint32_t m_chopperChannel = 2;
+  uint32_t m_detectorPixelCount = 0;
+
+  bool m_discardPreChopperEvents = true;
+  bool m_setBinBoundary = false;
+
+  void populate_EventWorkspace(Mantid::DataObjects::EventWorkspace_sptr &eventWS,
                                EventAccumulator &finalEventAccumulator);
 
   EventAccumulator parse_File(FileByteStream &file, const std::string &fileName);
@@ -121,6 +111,9 @@ private:
                                 EventAccumulator &eventAccumulator);
 
   void parse_EndSignature(FileByteStream &file);
+
+  TriggerEvent processTrigger(const uint64_t &data, const LoadDNSEvent::BufferHeader &bufferHeader);
+  NeutronEvent processNeutron(const uint64_t &data, const LoadDNSEvent::BufferHeader &bufferHeader);
 };
 
 } // namespace Mantid::DataHandling

@@ -1,4 +1,11 @@
-﻿#include "MantidDataHandling/LoadDNSEvent.h"
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+
+#include "MantidDataHandling/LoadDNSEvent.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RegisterFileLoader.h"
@@ -20,30 +27,6 @@
 #include <chrono>
 #include <iostream>
 
-#define USE_PARALLELISM true
-
-namespace {
-
-/// coverts data into a hex string
-template <typename T> std::string n2hexstr(T const &w, size_t sizeofw = sizeof(T), bool useSpacers = false) {
-  static const char *digits = "0123456789ABCDEF";
-  const size_t charsPerByte = useSpacers ? 3 : 2;
-  const size_t stringLength = (sizeofw - 1) * charsPerByte + 2;
-  std::string result(stringLength, '_');
-
-  uint8_t const *const wtmp_p = reinterpret_cast<uint8_t const *const>(&w);
-
-  // auto wtmp = *wtmp_p;
-  for (size_t i = 0; i < sizeofw; i++) {
-    const auto j = i * charsPerByte;
-    result[j] = digits[(wtmp_p[i] & 0xF0) >> 4];
-    result[j + 1] = digits[wtmp_p[i] & 0x0F];
-  }
-  return result;
-}
-
-} // namespace
-
 typedef std::array<uint8_t, 8> separator_t;
 static constexpr separator_t header_sep{0x00, 0x00, 0x55, 0x55, 0xAA, 0xAA, 0xFF, 0xFF};
 static constexpr separator_t block_sep = {0x00, 0x00, 0xFF, 0xFF, 0x55, 0x55, 0xAA, 0xAA};   // 0xAAAA5555FFFF0000; //
@@ -52,155 +35,6 @@ static constexpr separator_t closing_sig = {0xFF, 0xFF, 0xAA, 0xAA, 0x55, 0x55, 
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-namespace Mantid::DataHandling {
-
-DECLARE_FILELOADER_ALGORITHM(LoadDNSEvent)
-
-/**
- * Return the confidence with with this algorithm can load the file
- * @param descriptor A descriptor for the file
- * @returns An integer specifying the confidence level. 0 indicates it will not
- * be used
- */
-int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
-  const std::string &extn = descriptor.extension();
-  if (extn != ".mdat")
-    return 0;
-  auto &file = descriptor.data();
-
-  std::string fileline;
-  std::getline(file, fileline);
-  if (fileline.find("mesytec psd listmode data") != std::string::npos) {
-    return 80;
-  } else
-    return 0;
-}
-
-const unsigned MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
-const unsigned PIXEL_PER_TUBE = 1024;        // maximum buffer size in data file
-
-void LoadDNSEvent::init() {
-  /// Initialise the properties
-
-  const std::vector<std::string> exts{".mdat"};
-  declareProperty(std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
-                  "A DNS mesydaq listmode event datafile.");
-
-  declareProperty<uint32_t>("ChopperChannel", 2u, std::make_shared<BoundedValidator<uint32_t>>(1, 4),
-                            "The Chopper Channel (1 to 4)", Kernel::Direction::Input);
-
-  declareProperty<uint32_t>("NumberOfTubes", 128, std::make_shared<BoundedValidator<uint32_t>>(1, 128),
-                            "The number of tubes, each tube has 1024 pixels (1 to 128)", Kernel::Direction::Input);
-
-  declareProperty<bool>("DiscardPreChopperEvents", true, std::make_shared<BoundedValidator<bool>>(0, 1),
-                        "Discards events before first chopper trigger (turn off for elastic)",
-                        Kernel::Direction::Input);
-
-  declareProperty<bool>("SetBinBoundary", true, std::make_shared<BoundedValidator<bool>>(0, 1),
-                        "Sets all bin boundaries to include all events (can be turned off to save time).",
-                        Kernel::Direction::Input);
-
-  declareProperty(
-      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>("OutputWorkspace", "", Direction::Output),
-      "The name of the output workspace.");
-}
-
-/// Run the algorithm
-void LoadDNSEvent::exec() {
-  // loadProperties:
-  const std::string fileName = getPropertyValue("InputFile");
-  chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
-  discardPreChopperEvents = static_cast<bool>(getProperty("DiscardPreChopperEvents"));
-  setBinBoundary = static_cast<bool>(getProperty("SetBinBoundary"));
-  detectorPixelCount = static_cast<uint32_t>(getProperty("NumberOfTubes")) * PIXEL_PER_TUBE;
-
-  // create workspace
-  EventWorkspace_sptr outputWS = std::dynamic_pointer_cast<EventWorkspace>(
-      WorkspaceFactory::Instance().create("EventWorkspace", detectorPixelCount, 1, 1));
-  outputWS->switchEventType(Mantid::API::EventType::TOF);
-  outputWS->getAxis(0)->setUnit("TOF");
-  outputWS->setYUnit("Counts");
-
-  // g_log.notice() << "ChopperChannel: " << chopperChannel << std::endl;
-
-  FileByteStream file(static_cast<std::string>(fileName), endian::big);
-
-  auto finalEventAccumulator = parse_File(file, fileName);
-  populate_EventWorkspace(outputWS, finalEventAccumulator);
-  if (setBinBoundary && (outputWS->getNumberEvents() > 0)) {
-    outputWS->setAllX({0, outputWS->getEventXMax()});
-  }
-  setProperty("OutputWorkspace", outputWS);
-}
-
-template <typename Vector, typename _Compare> void sortVector(Vector &v, _Compare comp) {
-  std::sort(v.begin(), v.end(), comp);
-}
-
-void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr eventWS, EventAccumulator &finalEventAccumulator) {
-  static const unsigned EVENTS_PER_PROGRESS = 100;
-  // The number of steps depends on the type of input file
-  Progress progress(this, 0.0, 1.0, finalEventAccumulator.neutronEvents.size() / EVENTS_PER_PROGRESS);
-
-  // Sort reversed (latest event first, most early event last):
-  sortVector(finalEventAccumulator.triggerEvents, [](auto l, auto r) { return l.timestamp > r.timestamp; });
-
-  std::atomic<uint64_t> oversizedChanelIndexCounterA(0);
-  std::atomic<uint64_t> oversizedPosCounterA(0);
-
-  PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS) && USE_PARALLELISM)
-  for (int j = 0; j < static_cast<int>(finalEventAccumulator.neutronEvents.size()); ++j) {
-    // uint64_t chopperTimestamp = 0;
-    uint64_t oversizedChanelIndexCounter = 0;
-    uint64_t oversizedPosCounter = 0;
-    uint64_t i = 0;
-    const auto wsIndex = j;
-    auto &eventList = finalEventAccumulator.neutronEvents[j];
-    if (eventList.size() != 0) {
-      std::sort(eventList.begin(), eventList.end(), [](auto l, auto r) { return l.timestamp < r.timestamp; });
-    }
-
-    auto chopperIt = finalEventAccumulator.triggerEvents.cbegin();
-
-    auto &spectrum = eventWS->getSpectrum(wsIndex);
-    // PARALLEL_START_INTERUPT_REGION
-
-    for (const auto &event : eventList) {
-      i++;
-      if (i % EVENTS_PER_PROGRESS == 0) {
-        progress.report();
-        if (this->getCancel()) {
-          throw CancelException();
-        }
-      }
-
-      chopperIt =
-          std::lower_bound(finalEventAccumulator.triggerEvents.cbegin(), finalEventAccumulator.triggerEvents.cend(),
-                           event.timestamp, [](auto l, auto r) { return l.timestamp > r; });
-      const uint64_t chopperTimestamp = chopperIt != finalEventAccumulator.triggerEvents.cend()
-                                            ? chopperIt->timestamp
-                                            : 0; // before first chopper trigger
-      if ((chopperTimestamp == 0) && discardPreChopperEvents) {
-        // throw away events before first chopper trigger
-        continue;
-      }
-      spectrum.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
-    }
-
-    // PARALLEL_END_INTERUPT_REGION
-    oversizedChanelIndexCounterA += oversizedChanelIndexCounter;
-    oversizedPosCounterA += oversizedPosCounter;
-    // PARALLEL_CHECK_INTERUPT_REGION
-  }
-
-  if (oversizedChanelIndexCounterA > 0) {
-    g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
-  }
-  if (oversizedPosCounterA > 0) {
-    g_log.warning() << "Bad position values: " << oversizedPosCounterA << std::endl;
-  }
-}
 
 namespace {
 template <typename Iterable>
@@ -232,7 +66,162 @@ template <typename Iterable> const std::vector<uint8_t> buildSkipTable2(const It
   return skipTable;
 }
 
+template <typename V1, typename V2> bool startsWith(const V1 &sequence, const V2 &subSequence) {
+  return std::equal(std::begin(subSequence), std::end(subSequence), std::begin(sequence));
+}
+
+template <typename V1, typename V2> bool endsWith(const V1 &sequence, const V2 &subSequence) {
+  auto dist = std::distance(std::begin(subSequence), std::end(subSequence));
+  return std::equal(begin(subSequence), end(subSequence), end(sequence) - dist);
+}
+
 } // namespace
+
+namespace Mantid::DataHandling {
+
+DECLARE_FILELOADER_ALGORITHM(LoadDNSEvent)
+
+/**
+ * Return the confidence with with this algorithm can load the file
+ * @param descriptor A descriptor for the file
+ * @returns An integer specifying the confidence level. 0 indicates it will not
+ * be used
+ */
+int LoadDNSEvent::confidence(Kernel::FileDescriptor &descriptor) const {
+  const std::string &extn = descriptor.extension();
+  if (extn != ".mdat")
+    return 0;
+  auto &file = descriptor.data();
+
+  std::string fileline;
+  std::getline(file, fileline);
+  if (fileline.find("mesytec psd listmode data") != std::string::npos) {
+    return 80;
+  } else
+    return 0;
+}
+
+const unsigned int MAX_BUFFER_BYTES_SIZE = 1500; // maximum buffer size in data file
+const unsigned int PIXEL_PER_TUBE = 1024;        // maximum buffer size in data file
+
+void LoadDNSEvent::init() {
+  /// Initialise the properties
+
+  const std::vector<std::string> exts{".mdat"};
+  declareProperty(std::make_unique<FileProperty>("InputFile", "", FileProperty::Load, exts),
+                  "A DNS mesydaq listmode event datafile.");
+
+  declareProperty<uint32_t>("ChopperChannel", 2u, std::make_shared<BoundedValidator<uint32_t>>(1, 4),
+                            "The Chopper Channel (1 to 4)", Kernel::Direction::Input);
+
+  declareProperty<uint32_t>("NumberOfTubes", 128, std::make_shared<BoundedValidator<uint32_t>>(1, 128),
+                            "The number of tubes, each tube has 1024 pixels (1 to 128)", Kernel::Direction::Input);
+
+  declareProperty<bool>("DiscardPreChopperEvents", true, std::make_shared<BoundedValidator<bool>>(0, 1),
+                        "Discards events before first chopper trigger (turn off for elastic)",
+                        Kernel::Direction::Input);
+
+  declareProperty<bool>("SetBinBoundary", true, std::make_shared<BoundedValidator<bool>>(0, 1),
+                        "Sets all bin boundaries to include all events (can be turned off to save time).",
+                        Kernel::Direction::Input);
+
+  declareProperty(
+      std::make_unique<WorkspaceProperty<DataObjects::EventWorkspace>>("OutputWorkspace", "", Direction::Output),
+      "The name of the output workspace.");
+}
+
+/// Run the algorithm
+void LoadDNSEvent::exec() {
+  // loadProperties:
+  const std::string fileName = getPropertyValue("InputFile");
+  m_chopperChannel = static_cast<uint32_t>(getProperty("ChopperChannel"));
+  m_discardPreChopperEvents = getProperty("DiscardPreChopperEvents");
+  m_setBinBoundary = getProperty("SetBinBoundary");
+  m_detectorPixelCount = static_cast<uint32_t>(getProperty("NumberOfTubes")) * PIXEL_PER_TUBE;
+
+  // create workspace
+  EventWorkspace_sptr outputWS = std::dynamic_pointer_cast<EventWorkspace>(
+      WorkspaceFactory::Instance().create("EventWorkspace", m_detectorPixelCount, 1, 1));
+  outputWS->switchEventType(Mantid::API::EventType::TOF);
+  outputWS->getAxis(0)->setUnit("TOF");
+  outputWS->setYUnit("Counts");
+
+  // g_log.notice() << "ChopperChannel: " << m_chopperChannel << std::endl;
+
+  FileByteStream file(static_cast<std::string>(fileName));
+
+  auto finalEventAccumulator = parse_File(file, fileName);
+  populate_EventWorkspace(outputWS, finalEventAccumulator);
+  if (m_setBinBoundary && (outputWS->getNumberEvents() > 0)) {
+    outputWS->setAllX({0, outputWS->getEventXMax()});
+  }
+  setProperty("OutputWorkspace", outputWS);
+}
+
+void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr &eventWS, EventAccumulator &finalEventAccumulator) {
+  static const unsigned EVENTS_PER_PROGRESS = 100;
+  // The number of steps depends on the type of input file
+  Progress progress(this, 0.0, 1.0, finalEventAccumulator.neutronEvents.size() / EVENTS_PER_PROGRESS);
+
+  // Sort reversed (latest event first, most early event last):
+  std::sort(finalEventAccumulator.triggerEvents.begin(), finalEventAccumulator.triggerEvents.end(),
+            [](auto l, auto r) { return l.timestamp > r.timestamp; });
+
+  std::atomic<unsigned int> oversizedChanelIndexCounterA(0);
+  std::atomic<unsigned int> oversizedPosCounterA(0);
+
+  PARALLEL_FOR_IF(Kernel::threadSafe(*eventWS))
+  for (int eventIndex = 0; eventIndex < static_cast<int>(finalEventAccumulator.neutronEvents.size()); ++eventIndex) {
+    // uint64_t chopperTimestamp = 0;
+    unsigned int oversizedChanelIndexCounter = 0;
+    unsigned int oversizedPosCounter = 0;
+    const auto wsIndex = eventIndex;
+    auto &eventList = finalEventAccumulator.neutronEvents[eventIndex];
+    if (eventList.size() != 0) {
+      std::sort(eventList.begin(), eventList.end(), [](auto l, auto r) { return l.timestamp < r.timestamp; });
+    }
+
+    auto chopperIt = finalEventAccumulator.triggerEvents.cbegin();
+
+    auto &spectrum = eventWS->getSpectrum(wsIndex);
+    PARALLEL_START_INTERUPT_REGION
+
+    uint64_t numProcessed = 0;
+    for (const auto &event : eventList) {
+      numProcessed++;
+      if (numProcessed % EVENTS_PER_PROGRESS == 0) {
+        progress.report();
+        if (this->getCancel()) {
+          throw CancelException();
+        }
+      }
+
+      chopperIt =
+          std::lower_bound(finalEventAccumulator.triggerEvents.cbegin(), finalEventAccumulator.triggerEvents.cend(),
+                           event.timestamp, [](auto l, auto r) { return l.timestamp > r; });
+      const uint64_t chopperTimestamp = chopperIt != finalEventAccumulator.triggerEvents.cend()
+                                            ? chopperIt->timestamp
+                                            : 0; // before first chopper trigger
+      if ((chopperTimestamp == 0) && m_discardPreChopperEvents) {
+        // throw away events before first chopper trigger
+        continue;
+      }
+      spectrum.addEventQuickly(Types::Event::TofEvent(double(event.timestamp - chopperTimestamp) / 10.0));
+    }
+
+    PARALLEL_END_INTERUPT_REGION
+    oversizedChanelIndexCounterA += oversizedChanelIndexCounter;
+    oversizedPosCounterA += oversizedPosCounter;
+    PARALLEL_CHECK_INTERUPT_REGION
+  }
+
+  if (oversizedChanelIndexCounterA > 0) {
+    g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
+  }
+  if (oversizedPosCounterA > 0) {
+    g_log.warning() << "Bad position values: " << oversizedPosCounterA << std::endl;
+  }
+}
 
 std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   // using Boyer-Moore String Search:
@@ -243,29 +232,23 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
 
   std::array<uint8_t, header_sep.size()> current_window;
   file.readRaw(current_window);
-  try {
-    while (!file.eof()) {
-      if (current_window == header_sep) {
-        return header;
-      } else {
-        auto iter = skipTable.find(*current_window.rbegin());
-        size_t skip_length = (iter == skipTable.end()) ? header_sep.size() : iter->second;
+  while (!file.eof()) {
+    if (current_window == header_sep) {
+      return header;
+    } else {
+      auto iter = skipTable.find(*current_window.rbegin());
+      size_t skip_length = (iter == skipTable.end()) ? header_sep.size() : iter->second;
 
-        const auto orig_header_size = header.size();
-        header.resize(header.size() + skip_length);
-        const auto win_data = current_window.data();
-        std::copy(win_data, win_data + skip_length, header.data() + orig_header_size);
+      const auto orig_header_size = header.size();
+      header.resize(header.size() + skip_length);
+      const auto win_data = current_window.data();
+      std::copy(win_data, win_data + skip_length, header.data() + orig_header_size);
 
-        const std::array<uint8_t, header_sep.size()> orig_window = current_window;
-        file.readRaw(current_window, skip_length);
-        std::copy(orig_window.data() + skip_length, orig_window.data() + header_sep.size(), win_data);
-      }
+      const std::array<uint8_t, header_sep.size()> orig_window = current_window;
+      file.readRaw(current_window, skip_length);
+      std::copy(orig_window.data() + skip_length, orig_window.data() + header_sep.size(), win_data);
     }
-
-  } catch (std::ifstream::failure &) {
-    return header;
   }
-
   return header;
 }
 
@@ -321,19 +304,6 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
   return result;
 }
 
-namespace {
-
-template <typename V1, typename V2> bool startsWith(const V1 &sequence, const V2 &subSequence) {
-  return std::equal(std::begin(subSequence), std::end(subSequence), std::begin(sequence));
-}
-
-template <typename V1, typename V2> bool endsWith(const V1 &sequence, const V2 &subSequence) {
-  auto dist = std::distance(std::begin(subSequence), std::end(subSequence));
-  return std::equal(begin(subSequence), end(subSequence), end(sequence) - dist);
-}
-
-} // namespace
-
 LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, const std::string &fileName) {
   // File := Header Body
   std::vector<uint8_t> header = parse_Header(file);
@@ -345,27 +315,27 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
   }
 
   // Parse actual data:
-  const int threadCount = USE_PARALLELISM ? PARALLEL_GET_MAX_THREADS : 8;
+  const int threadCount = PARALLEL_GET_MAX_THREADS;
   // Split File:
   std::vector<std::vector<uint8_t>> filechuncks = split_File(file, threadCount);
   g_log.debug() << "filechuncks count = " << filechuncks.size() << std::endl;
 
   std::vector<EventAccumulator> eventAccumulators(filechuncks.size());
   for (auto &evtAcc : eventAccumulators) {
-    evtAcc.neutronEvents.resize(detectorPixelCount);
+    evtAcc.neutronEvents.resize(m_detectorPixelCount);
   }
 
   // parse individual file chuncks:
-  PARALLEL_FOR_IF(USE_PARALLELISM)
+  PARALLEL_FOR_IF(true)
   for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
     auto filechunck = filechuncks[static_cast<size_t>(i)];
     g_log.debug() << "filechunck.size() = " << filechunck.size() << std::endl;
-    auto vbs = VectorByteStream(filechunck, file.endianess());
+    auto vbs = VectorByteStream(filechunck);
     parse_BlockList(vbs, eventAccumulators[static_cast<size_t>(i)]);
   }
 
   EventAccumulator finalEventAccumulator;
-  finalEventAccumulator.neutronEvents.resize(detectorPixelCount);
+  finalEventAccumulator.neutronEvents.resize(m_detectorPixelCount);
 
   // combine eventAccumulators:
 
@@ -384,9 +354,6 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
                               v.neutronEvents[static_cast<size_t>(i)].end());
     }
   }
-
-  // parse_BlockList(file, _eventAccumulator);
-  // parse_EndSignature(file);
 
   return finalEventAccumulator;
 }
@@ -407,8 +374,7 @@ void LoadDNSEvent::parse_Block(VectorByteStream &file, EventAccumulator &eventAc
 void LoadDNSEvent::parse_BlockSeparator(VectorByteStream &file) {
   auto separator = file.readRaw(separator_t());
   if (separator != block_sep) {
-    throw std::runtime_error(std::string("File Integrety LOST. (ugh!) 0x") + n2hexstr(separator) +
-                             std::string("expected 0x") + n2hexstr(block_sep));
+    throw std::runtime_error(std::string("File Integrety LOST. 0x"));
   }
 }
 
@@ -424,9 +390,9 @@ void LoadDNSEvent::parse_DataBuffer(VectorByteStream &file, EventAccumulator &ev
 }
 
 LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
-  uint16_t ts1;
-  uint16_t ts2;
-  uint16_t ts3;
+  uint16_t ts1 = 0;
+  uint16_t ts2 = 0;
+  uint16_t ts3 = 0;
   BufferHeader header = {};
   file.read<2>(header.bufferLength);
   file.read<2>(header.bufferVersion);
@@ -440,75 +406,65 @@ LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream
   file.read<2>(ts3);
   // 48 bit timestamp is 3 2-byte MSB words ordered LSB
   header.timestamp = (uint64_t)ts3 << 32 | (uint64_t)ts2 << 16 | ts1;
-  // g_log.debug() << int(header.bufferLength)  << " "
-  //              << int(header.headerLength)  << " "
-  //              << int(header.bufferNumber)  << " "
-  //             << int(header.runId)  << " "
-  //             << int(header.runId)  << " "
-  //             << int(header.mcpdId)  << " "
-  //             << int(header.deviceStatus)  << " "
-  //             << ts1  << " "
-  //             << ts2  << " "
-  //             << ts3  << " "
-  //             << header.timestamp  << " "
-  //             << std::endl;
   file.skip<24>();
   return header;
+}
+
+LoadDNSEvent::TriggerEvent LoadDNSEvent::processTrigger(const uint64_t &data,
+                                                        const LoadDNSEvent::BufferHeader &bufferHeader) {
+  TriggerEvent triggerEvent = {};
+  uint8_t trigId;
+  uint8_t dataId;
+  trigId = (data >> 44) & 0b111;                 // 3 bit
+  dataId = (data >> 40) & 0b1111;                // 4 bit
+  triggerEvent.event.timestamp = data & 0x7ffff; // 19bit
+  triggerEvent.event.timestamp += bufferHeader.timestamp;
+  triggerEvent.isChopperTrigger = ((dataId = m_chopperChannel - 1) && (trigId == 7));
+  return triggerEvent;
+}
+
+LoadDNSEvent::NeutronEvent LoadDNSEvent::processNeutron(const uint64_t &data,
+                                                        const LoadDNSEvent::BufferHeader &bufferHeader) {
+  NeutronEvent neutronEvent = {};
+  uint16_t position;
+  uint8_t modid;
+  uint8_t slotid;
+  modid = (data >> 44) & 0b111;                    // 3bit
+  slotid = (data >> 39) & 0b11111;                 // 5bit
+  position = (data >> 19) & 0x3ff;                 // 10bit
+  neutronEvent.event.timestamp = (data & 0x7ffff); // 19bit
+  neutronEvent.event.timestamp += bufferHeader.timestamp;
+  neutronEvent.wsIndex = (bufferHeader.mcpdId << 6u | modid << 3u | slotid) << 10u | position;
+  return neutronEvent;
 }
 
 void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent::BufferHeader &bufferHeader,
                                      LoadDNSEvent::EventAccumulator &eventAccumulator) {
   CompactEvent event = {};
-  uint16_t data1;
-  uint16_t data2;
-  uint16_t data3;
-  uint64_t data;
+  uint16_t data1 = 0;
+  uint16_t data2 = 0;
+  uint16_t data3 = 0;
+  uint64_t data = 0;
   event_id_e eventId;
   file.read<2>(data1);
   file.read<2>(data2);
   file.read<2>(data3);
+  // file.readSixBitLSB(data);
   // 48 bit event is 3 2-byte MSB words ordered LSB
   data = (uint64_t)data3 << 32 | (uint64_t)data2 << 16 | data1;
   eventId = static_cast<event_id_e>((data >> 47) & 0b1);
   switch (eventId) {
   case event_id_e::TRIGGER: {
-    uint8_t trigId;
-    uint8_t dataId;
-    trigId = (data >> 44) & 0b111;    // 3 bit
-    dataId = (data >> 40) & 0b1111;   // 4 bit
-    event.timestamp = data & 0x7ffff; // 19bit
-    event.timestamp += bufferHeader.timestamp;
-    // g_log.debug() << "trigger " << trigId
-    //              << " data_id " << dataId
-    //             << " timestamp " << event.timestamp << std::endl;
-    // trigId = 7 is register change and
-    // dataId 0-3 corresponds to chopperchannel 1-4 in the gui
-    if ((dataId != chopperChannel - 1) || (trigId != 7)) {
-      return;
+    const auto triggerEvent = processTrigger(data, bufferHeader);
+    if (triggerEvent.isChopperTrigger) {
+      eventAccumulator.triggerEvents.push_back(triggerEvent.event);
     }
-    eventAccumulator.triggerEvents.push_back(event);
   } break;
   case event_id_e::NEUTRON: {
-    uint16_t position;
-    uint8_t modid;
-    uint8_t slotid;
-    modid = (data >> 44) & 0b111;       // 3bit
-    slotid = (data >> 39) & 0b11111;    // 5bit
-    position = (data >> 19) & 0x3ff;    // 10bit
-    event.timestamp = (data & 0x7ffff); // 19bit
-    event.timestamp += bufferHeader.timestamp;
-    const size_t wsIndex = (bufferHeader.mcpdId << 6u | modid << 3u | slotid) << 10u | position;
-    // g_log.notice() << "channel " << int(modid * 8 + slotid)
-    //    << " slot " << int(slotid) << " mod " << int(modid)
-    //              << " position " << position
-    //              << " mcpd " << int(bufferHeader.mcpdId)
-    //               << " ws " << wsIndex
-    //                << " channelindex" << channelIndex
-    //              << std::endl;
-    eventAccumulator.neutronEvents[wsIndex].push_back(event);
+    const auto neutronEvent = processNeutron(data, bufferHeader);
+    eventAccumulator.neutronEvents[neutronEvent.wsIndex].push_back(neutronEvent.event);
   } break;
   default:
-    // Panic!!!!
     g_log.error() << "unknown event id " << eventId << "\n";
     break;
   }
@@ -517,8 +473,7 @@ void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent:
 void LoadDNSEvent::parse_EndSignature(FileByteStream &file) {
   auto separator = file.readRaw(separator_t());
   if (separator != closing_sig) {
-    throw std::runtime_error(std::string("File Integrety LOST. (ugh!) 0x") + n2hexstr(separator) +
-                             std::string("expected 0x") + n2hexstr(closing_sig));
+    throw std::runtime_error(std::string("File Integrety LOST. 0x"));
   }
 }
 
