@@ -8,46 +8,50 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
-- :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
-- `GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
-- `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
-- Extending :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to the sample and container case.
-- `absorptioncorrutils` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now has an option to manually specify sample geometry for absorption correction.
-- Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
-- PEARL powder diffraction scripts now cope if absorption correction workspace is different size to the Vanadium workspace without generating NaN values
-- :ref:`AnvredCorrection <algm-AnvredCorrection>` (and :ref:`SphericalAbsorption <algm-SphericalAbsorption>` which calls it) will now take the radius of a spherical sample from the workspace if the radius isn't specified (if the sample is not a sphere this will produce an error).
-- :ref:`AnvredCorrection <algm-AnvredCorrection>` (and :ref:`SphericalAbsorption <algm-SphericalAbsorption>` which calls it) have been extended to evaluate the attenuation by more absorbing spherical samples (with muR < 9).
-- :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` now groups the correction by detector bank in MomentumTransfer (rather than TOF)
-  and includes the following update.
-- :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` now validates that the IncidentSpectra
-  is in units of Wavelength and will output in the same unit as the InputWorkspace. The parameter IncidentSpectra for :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>` has been
-  renamed to fix a typo, which is a breaking change for this algorithm. Note that the addition of 1 to the Placzek correction has been moved out of this algorithm.
 
 New features
 ############
-- Add new input concerning sample height information from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI.
+- ``absorptioncorrutils`` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
+- Extended :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to both the sample and container case.
+- Both :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` and :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` can use a different element size for container now.
+- Added a new input for sample height information from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI.
+- :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
 
 Improvements
 ############
-- :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
-- improve the Custom tt_mode in the ISIS PEARL powder diffraction scripts. Specifically the tt_mode Custom now supports all the different focus_modes if the grouping file contains 14 groups
+* Several improvements have been made to :ref:`AnvredCorrection <algm-AnvredCorrection>` (and :ref:`SphericalAbsorption <algm-SphericalAbsorption>` which calls it)
+
+  * the algorithm has been extended to evaluate the attenuation by more absorbing spherical samples (with muR < 9).
+  * the algorithm will now take the radius of a spherical sample from the workspace if the radius isn't specified. If the sample is not a sphere this will produce an error.
+
+* A number of improvements have been made to the :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>` algorithm
+
+  * The parameter ``IncidentSpectra`` has been renamed to fix a typo, which is a breaking change for this algorithm.
+  * The algorithm now validates that the IncidentSpectra is in units of Wavelength and will output in the same unit as the InputWorkspace.
+  * the addition of 1 to the Placzek correction has been moved out of this algorithm and into :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` .
+
+* PEARL powder diffraction scripts now cope if ``absorption correction`` workspace is a different size to the ``Vanadium`` workspace without generating NaN values.
+* Improved the ``tt_mode=Custom`` in the ISIS PEARL powder diffraction scripts. Specifically ``tt_mode=Custom`` now supports all the different ``focus_modes`` if the grouping file contains 14 groups.
+* :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
+* :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now has an option to manually specify sample geometry for absorption correction.
+* :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` now groups the correction by detector bank in ``MomentumTransfer`` (rather than ``TOF``).
 
 Bugfixes
 ########
-- :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` now correctly writes all spectra to a single file when SplitFiles is False (previously wrote only a single spectrum).
-- For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
-- Restored behavior in :ref:`ConvertUnits <algm-ConvertUnits>` where negative time-of-flight converts to negative d-spacing when ``DIFA==0``
-- Identification in :ref:`AlignComponents <algm-AlignComponents>` of the first and last detector-ID for an instrument component with unsorted detector-ID's.
-- :ref:`LoadPDFgetNFile <algm-LoadPDFgetNFile>` now returns standard units for atomic distance rather than label
-- Fix issue in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` where in some cases you end up with zeros as output.
-- Fix bug such that attenuation calculated in :ref:`AnvredCorrection <algm-AnvredCorrection>` is now accurate to within 0.5% for typical muR.
+- Identification in :ref:`AlignComponents <algm-AlignComponents>` of the first and last ``detector-ID`` for an instrument component with unsorted detector-ID's as the smallest and largest ``detector-ID`` values.
+- Fixed a bug such that attenuation calculated in :ref:`AnvredCorrection <algm-AnvredCorrection>` is now accurate to within 0.5% for typical muR.
+- Restored behavior in :ref:`ConvertUnits <algm-ConvertUnits>` where negative TOF converts to negative d-spacing when ``DIFA==0`` .
+- :ref:`LoadPDFgetNFile <algm-LoadPDFgetNFile>` now returns standard units for atomic distance rather than the label.
 - The integration range has been corrected inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
-- Fix problem with the create_vanadium action when running with tt_mode=Custom in the ISIS PEARL powder diffraction scripts. Create a separate Vanadium file for each different custom grouping file rather than one for all custom runs
-
+- :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` now correctly writes all spectra to a single file when ``SplitFiles`` is ``False``. Previously it wrote only a single spectrum.
+- For processing vanadium run it no longer finds the environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
+- Fixed an issue in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` where in some cases users ended up with zeros as output.
+- Fixed a problem with the ``create_vanadium`` action when running with ``tt_mode=Custom`` in the ISIS PEARL powder diffraction scripts. Created a separate Vanadium file for each different custom grouping file rather than one for all custom runs
 
 Deprecation
 ############
+- ``GetDetOffsetsMultiPeaks``, which is deprecate since v6.2.0, is removed.
+- ``CalibrateRectangularDetectors``, which is deprecate since v6.2.0, is removed.
 
 Engineering Diffraction
 -----------------------
