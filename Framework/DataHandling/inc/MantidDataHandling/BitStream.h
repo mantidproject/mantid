@@ -13,6 +13,7 @@
 
 #include <boost/endian/conversion.hpp>
 #include <fstream>
+#include <sys/stat.h>
 #include <vector>
 
 class FileByteStream {

@@ -390,9 +390,9 @@ void LoadDNSEvent::parse_DataBuffer(VectorByteStream &file, EventAccumulator &ev
 }
 
 LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream &file) {
-  uint16_t ts1;
-  uint16_t ts2;
-  uint16_t ts3;
+  uint16_t ts1 = 0;
+  uint16_t ts2 = 0;
+  uint16_t ts3 = 0;
   BufferHeader header = {};
   file.read<2>(header.bufferLength);
   file.read<2>(header.bufferVersion);
@@ -413,8 +413,8 @@ LoadDNSEvent::BufferHeader LoadDNSEvent::parse_DataBufferHeader(VectorByteStream
 LoadDNSEvent::TriggerEvent LoadDNSEvent::processTrigger(const uint64_t &data,
                                                         const LoadDNSEvent::BufferHeader &bufferHeader) {
   TriggerEvent triggerEvent = {};
-  uint8_t trigId;
-  uint8_t dataId;
+  uint8_t trigId = 0;
+  uint8_t dataId = 0;
   trigId = (data >> 44) & 0b111;                 // 3 bit
   dataId = (data >> 40) & 0b1111;                // 4 bit
   triggerEvent.event.timestamp = data & 0x7ffff; // 19bit
@@ -426,9 +426,9 @@ LoadDNSEvent::TriggerEvent LoadDNSEvent::processTrigger(const uint64_t &data,
 LoadDNSEvent::NeutronEvent LoadDNSEvent::processNeutron(const uint64_t &data,
                                                         const LoadDNSEvent::BufferHeader &bufferHeader) {
   NeutronEvent neutronEvent = {};
-  uint16_t position;
-  uint8_t modid;
-  uint8_t slotid;
+  uint16_t position = 0;
+  uint8_t modid = 0;
+  uint8_t slotid = 0;
   modid = (data >> 44) & 0b111;                    // 3bit
   slotid = (data >> 39) & 0b11111;                 // 5bit
   position = (data >> 19) & 0x3ff;                 // 10bit
@@ -440,11 +440,10 @@ LoadDNSEvent::NeutronEvent LoadDNSEvent::processNeutron(const uint64_t &data,
 
 void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent::BufferHeader &bufferHeader,
                                      LoadDNSEvent::EventAccumulator &eventAccumulator) {
-  CompactEvent event = {};
-  uint16_t data1;
-  uint16_t data2;
-  uint16_t data3;
-  uint64_t data;
+  uint16_t data1 = 0;
+  uint16_t data2 = 0;
+  uint16_t data3 = 0;
+  uint64_t data = 0;
   event_id_e eventId;
   file.read<2>(data1);
   file.read<2>(data2);

@@ -83,7 +83,7 @@ private:
   };
 
   struct NeutronEvent {
-    uint8_t wsIndex = 0;
+    size_t wsIndex = 0;
     CompactEvent event = {};
   };
 
