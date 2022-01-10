@@ -183,6 +183,12 @@ if(APPLE AND NOT CONDA_BUILD)
 
   # We can't do this in a conda_env as it looks for homebrew packages
   if(NOT CONDA_ENV)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      # This is a horrible hack to remove the directories that eigen installs as it does not seem possible to change the
+      # location without editing the install command within the eigen source. This will not be an issue when we stop
+      # using eigen as an external project.
+      install(CODE "file(REMOVE_RECURSE \${CMAKE_INSTALL_PREFIX}/include \${CMAKE_INSTALL_PREFIX}/share)")
+    endif()
     install(
       CODE "
       execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
@@ -194,6 +200,7 @@ if(APPLE AND NOT CONDA_BUILD)
       endif()
   "
     )
+
   else()
     include(BundleOSXConda)
   endif()
