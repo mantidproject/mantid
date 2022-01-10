@@ -143,7 +143,7 @@ class MemoryManager(QObject):
             if self.rdexp_model.can_delete_workspace(ws_name):
                 self._current_workspaces.pop(index)
                 if mtd.doesExist(ws_name):
-                    logger.information("Deleting cached workspace ", ws_name)
+                    logger.information("Deleting cached workspace " + ws_name)
                     DeleteWorkspace(Workspace=ws_name)
                     break
             index += 1

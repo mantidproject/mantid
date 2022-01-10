@@ -27,7 +27,7 @@ class InstrumentViewPresenter(ObservingPresenter):
     """
     @param ws : The workspace object OR workspace name.
     """
-    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None):
+    def __init__(self, ws, parent=None, window_flags=Qt.Window, ads_observer=None, view: InstrumentView=None, use_thread=True):
         super(InstrumentViewPresenter, self).__init__()
         self.ws_name = str(ws)
 
@@ -37,7 +37,7 @@ class InstrumentViewPresenter(ObservingPresenter):
             workspace.readLock()
             try:
                 self.container = InstrumentView(parent=parent, presenter=self,
-                                                name=self.ws_name, window_flags=window_flags)
+                                                name=self.ws_name, window_flags=window_flags, use_thread=use_thread)
             finally:
                 workspace.unlock()
 
