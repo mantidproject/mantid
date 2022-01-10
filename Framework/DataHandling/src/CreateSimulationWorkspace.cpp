@@ -118,7 +118,7 @@ void CreateSimulationWorkspace::init() {
       "An optional filename (currently RAW or ISIS NeXus) that "
       "contains UDET & SPEC tables to access hardware grouping");
 
-  declareProperty("SetErrors", true, "Whether to set histogram bin errors to sqrt of intensity.");
+  declareProperty("SetErrors", false, "Whether to set histogram bin errors to sqrt of intensity.");
 }
 
 //----------------------------------------------------------------------------------------------
