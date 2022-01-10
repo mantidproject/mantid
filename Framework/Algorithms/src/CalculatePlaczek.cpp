@@ -34,19 +34,13 @@ using Mantid::Kernel::Direction;
 using PhysicalConstants::BoltzmannConstant;
 using PhysicalConstants::E_mev_toNeutronWavenumberSq; // in [meV*Angstrom^2]
 
-struct summationTerms {
-  double firstTerm, secondTerm;
-};
-
-typedef struct summationTerms Struct;
-
 namespace { // anonymous namespace
 
 // calculate summation term w/ neutron mass over molecular mass ratio
 // NOTE:
 //  - this is directly borrowed from the original CalculatePlaczekSelfScattering
-Struct calculateSummationTerm(const Kernel::Material &material) {
-  Struct s;
+std::pair<double, double> calculateSummationTerm(const Kernel::Material &material) {
+  std::pair<double, double> s;
   // add together the weighted sum
   const auto &formula = material.chemicalFormula();
   auto sumLambda_first = [](double sum, const auto &formula_unit) {
@@ -65,8 +59,8 @@ Struct calculateSummationTerm(const Kernel::Material &material) {
   // normalizing by totalStoich (number of atoms) comes out of the sum
   const double totalStoich = material.totalAtoms();
   // converting scattering cross section to scattering length square comes out of the sum
-  s.firstTerm = neutronMass * unnormalizedTermFirst / (4. * M_PI * totalStoich);
-  s.secondTerm = neutronMassSq * unnormalizedTermSecond / (4. * M_PI * totalStoich);
+  s.first = neutronMass * unnormalizedTermFirst / (4. * M_PI * totalStoich);
+  s.second = neutronMassSq * unnormalizedTermSecond / (4. * M_PI * totalStoich);
 
   return s;
 }
@@ -283,7 +277,7 @@ void CalculatePlaczek::exec() {
   const auto xLambda = incidentWS->getSpectrum(0).points();
   // pre-compute the coefficients
   // - calculate summation term w/ neutron mass over molecular mass ratio
-  const Struct summationTerms = calculateSummationTerm(inWS->sample().getMaterial());
+  const std::pair<double, double> summationTerms = calculateSummationTerm(inWS->sample().getMaterial());
   const double packingFraction = getPackingFraction(inWS);
   // NOTE:
   // - when order==1, we don't care what's inside sampleTemperature.
@@ -340,7 +334,7 @@ void CalculatePlaczek::exec() {
         // -- calculate first order correction
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);
-        double inelasticPlaczekCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerms.firstTerm;
+        double inelasticPlaczekCorrection = 2.0 * (term1 + term2 - 3) * sinHalfAngleSq * summationTerms.first;
         // -- calculate second order correction
         if (order == 2) {
           const double k = 2 * M_PI / xLambda[xIndex];                 // wave vector in 1/angstrom
@@ -353,14 +347,14 @@ void CalculatePlaczek::exec() {
                                    + (1 - f) * (1 - f) * phi2[xIndex]              //
                                    + f * f * eps2[xIndex]                          //
                                    + 3 * (4 * f - 5) * (f - 1);
-          const double P2_part1 = summationTerms.firstTerm * (kBToverE / 2.0 + kBToverE * sinHalfAngleSq * bracket_1);
+          const double P2_part1 = summationTerms.first * (kBToverE / 2.0 + kBToverE * sinHalfAngleSq * bracket_1);
           const double bracket_2 = (4 * f - 7) * (f - 1) * phi1[xIndex]            //
                                    + f * (7 - 2 * f) * eps1[xIndex]                //
                                    + 2 * f * (1 - f) * phi1[xIndex] * eps1[xIndex] //
                                    + (1 - f) * (1 - f) * phi2[xIndex]              //
                                    + f * f * eps2[xIndex]                          //
                                    + (2 * f * f - 7 * f + 8);
-          const double P2_part2 = 2 * sinHalfAngleSq * summationTerms.secondTerm * (1 + sinHalfAngleSq * bracket_2);
+          const double P2_part2 = 2 * sinHalfAngleSq * summationTerms.second * (1 + sinHalfAngleSq * bracket_2);
           // added to the factor
           inelasticPlaczekCorrection += P2_part1 + P2_part2;
         }
