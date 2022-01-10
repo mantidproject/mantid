@@ -8,9 +8,9 @@
 # package imports
 from mantid.kernel import ConfigService, logger
 from mantid.utils.logging import capture_logs, log_to_python
+from testhelpers import temporary_config
 
 # standard imports
-from contextlib import contextmanager
 import logging
 import unittest
 
@@ -24,17 +24,6 @@ class CaptureHandler(logging.Handler):
         self.records.append(record)
 
 
-@contextmanager
-def backup_config():
-    try:
-        config = ConfigService.Instance()
-        backup = {key: config[key] for key in config.keys() if 'logging' in key}
-        yield
-    finally:
-        for key, val in backup.items():
-            config[key] = val
-
-
 class loggingTest(unittest.TestCase):
     def test_capture_logs(self):
 
@@ -42,16 +31,17 @@ class loggingTest(unittest.TestCase):
             logger.error('Error message')
             self.assertTrue('Error message' in logs.getvalue())
 
-        config = ConfigService.Instance()
-        config['logging.loggers.root.level'] = 'information'
-        with capture_logs(level='error') as logs:
-            self.assertTrue(config['logging.loggers.root.level'] == 'error')
-            logger.error('Error-message')
-            logger.debug('Debug-message')
-            self.assertTrue('Error-message' in logs.getvalue())
-            self.assertFalse('Debug-message' in logs.getvalue())
+        with temporary_config():
+            config = ConfigService.Instance()
+            config['logging.loggers.root.level'] = 'information'
+            with capture_logs(level='error') as logs:
+                self.assertTrue(config['logging.loggers.root.level'] == 'error')
+                logger.error('Error-message')
+                logger.debug('Debug-message')
+                self.assertTrue('Error-message' in logs.getvalue())
+                self.assertFalse('Debug-message' in logs.getvalue())
 
-        self.assertTrue(config['logging.loggers.root.level'] == 'information')
+            self.assertTrue(config['logging.loggers.root.level'] == 'information')
 
     def test_log_to_python(self):
         py_logger = logging.getLogger('Mantid')
@@ -61,7 +51,7 @@ class loggingTest(unittest.TestCase):
             py_logger.removeHandler(hdlr)
         py_logger.addHandler(handler)
 
-        with backup_config():
+        with temporary_config():
             log_to_python()
             logger.information('[[info]]')
             logger.warning('[[warning]]')
