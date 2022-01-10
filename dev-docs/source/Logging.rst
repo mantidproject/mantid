@@ -119,7 +119,7 @@ Inside the algorithms:
 
   self.log().information('Number of scan steps is something')
 
-In general:
+In general (see :class:`mantid.kernel.Logger`):
 
 .. code-block:: python
 
