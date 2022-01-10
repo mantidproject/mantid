@@ -248,12 +248,16 @@ class PeaksViewerCollectionPresenter:
         child_presenters = self._child_presenters
         presenter_to_remove = None
         for child in child_presenters:
-            if child.model.peaks_workspace.name() == name:
+            if child.model._peaks_ws_name == name:
                 presenter_to_remove = child
                 child.notify(PeaksViewerPresenter.Event.ClearPeaks)
                 index = self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
+
+        # update combo box for add/remove peak actions
+        self._actions_view.set_peaksworkspace(self.workspace_names())
+
         return index
 
     def workspace_names(self):
@@ -262,7 +266,7 @@ class PeaksViewerCollectionPresenter:
         """
         names = []
         for presenter in self._child_presenters:
-            names.append(presenter.model.peaks_workspace.name())
+            names.append(presenter.model._peaks_ws_name)
 
         return names
 
