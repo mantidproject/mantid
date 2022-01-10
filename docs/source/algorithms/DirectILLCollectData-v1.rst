@@ -98,7 +98,6 @@ Some optional input and output workspaces come in pairs. If the input workspace 
 * *IncidentEnergyWorkspace* --- *OutputIncidentEnergyWorkspace*: single-valued workspace containing calibrated incident energy, used for incident energy calibration.
 * *FlatBkgWorkspace* --- *OutputFlatBkgWorkspace*: a MatrixWorkspace containing the flat backgrounds. Used for flat background subtraction. Note that *FlatBkgScaling* is not applied to *OutputFlatBkgWorkspace*.
 * *ElasticChannelWorkspace* --- *OutputElasticChannelWorkspace*: a single-valued workspace containing the index of the nominal elastic channel (can be a floating-point number). Used for the TOF axis adjustment.
-* *ElasticChannelIndexPrecision*: number of significant digits to use when the index of the elastic peak position comes from fitting. The default is 0, corresponding to integral value of the bin index.
 
 Raw output workspace
 ^^^^^^^^^^^^^^^^^^^^

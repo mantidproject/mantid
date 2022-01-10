@@ -417,10 +417,6 @@ class DirectILLCollectData(DataProcessorAlgorithm):
                              optional=PropertyMode.Optional),
                              doc='A single value workspace containing the nominal elastic channel index'
                                  '(can be floating point). Overrides {}.'.format(common.PROP_ELASTIC_CHANNEL_MODE))
-        self.declareProperty(name=common.PROP_ELASTIC_PEAK_PRECISION,
-                             defaultValue=0,
-                             doc='Number of significant digits of the elastic peak index to use when calibrating'
-                                 'elastic peak position from the fit. Zero corresponds to an integer precision.')
         self.declareProperty(name=common.PROP_MON_INDEX,
                              defaultValue=Property.EMPTY_INT,
                              validator=positiveInt,
@@ -631,7 +627,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             else:
                 ys = _sumDetectorsAtDistance(mainWS, l2, 1e-5)
                 index = _fitElasticChannel(ys, self._names, self._cleanup, self._subalgLogging)
-                precision = self.getProperty(common.PROP_ELASTIC_PEAK_PRECISION).value
+                precision = int(mainWS.getInstrument().getIntParameter("elastic_channel_precision")[0])
                 index = np.trunc(index * 10 ** precision) / 10 ** precision
         correctedWSName = self._names.withSuffix('tof_axis_corrected')
         correctedWS = CorrectTOFAxis(InputWorkspace=mainWS,
@@ -645,8 +641,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             indexOutputWSName = self._names.withSuffix('elastic_channel_output')
             indexOutputWS = CreateSingleValuedWorkspace(
                 OutputWorkspace=indexOutputWSName,
-                DataValue=round(index,
-                                self.getProperty(common.PROP_ELASTIC_PEAK_PRECISION).value),
+                DataValue=index,
                 EnableLogging=self._subalgLogging)
             self.setProperty(common.PROP_OUTPUT_ELASTIC_CHANNEL_WS, indexOutputWS)
             self._cleanup.cleanup(indexOutputWS)

@@ -167,7 +167,6 @@ class IN6(systemtesting.MantidSystemTest):
         DirectILLCollectData(
             Run='ILL/IN6/164192.nxs',
             OutputWorkspace='vanadium',
-            ElasticChannelIndexPrecision=2,
             OutputEPPWorkspace='vanadium-epps',
             OutputRawWorkspace='vanadium-raw')
         DirectILLIntegrateVanadium(
@@ -181,7 +180,6 @@ class IN6(systemtesting.MantidSystemTest):
         # Simulate sample with vanadium
         DirectILLCollectData(
             Run='ILL/IN6/164192.nxs',
-            ElasticChannelIndexPrecision=2,
             OutputWorkspace='sample')
         DirectILLReduction(
             InputWorkspace='sample',
@@ -257,7 +255,6 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
             Normalisation='Normalisation Time',
             OutputIncidentEnergyWorkspace='Ei',
             OutputElasticChannelWorkspace='Elc',
-            ElasticChannelIndexPrecision=2,
             OutputWorkspace='raw',
             OutputEPPWorkspace='Epp'
         )
