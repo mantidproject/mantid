@@ -1,7 +1,7 @@
-.. _Muon_Analysis_TestGuide_4_MA2-ref:
+.. _Muon_Analysis_PSI-ref:
 
-Muon Unscripted Testing: Group 5 PSI
-==================================================
+Muon Unscripted Testing: PSI
+============================
 
 .. contents:: Table of Contents
     :local:
@@ -9,9 +9,9 @@ Muon Unscripted Testing: Group 5 PSI
 Introduction
 ^^^^^^^^^^^^
 
-These are unscripted tests for PSI data.
-
-The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
+These are unscripted tests for PSI data and introduce background corrections.
+For continous sources background corrections are very important.
+Fitting a flat background to the data (sometimes along with a exp decay), it is possible to remove the background from the data.
 
 Tests
 ^^^^^
@@ -24,9 +24,10 @@ Setup:
 - The load current run button should be greyed out
 - Load **dolly 1529** using the **Browse** button
 - Set `Rebin` to `Fixed` and enter a value of `5`
-- You will get 4 sets of data that curve upwards
+- You will get data that curves upwards
 - In the **Grouping** tab there will be 4 groups defined
-
+- To see all of the data press the XXXXX button and select all of the rows in the pop-up
+- If you tick the `Plot raw` option the data will change
 
 Auto Background Corrections:
 ----------------------------
@@ -43,7 +44,6 @@ Auto Background Corrections:
 - The new values should be similar (within 1) to before
 
 
-
 Flat Background Corrections:
 ----------------------------
 
@@ -54,7 +54,7 @@ Flat Background Corrections:
 - Untick ``Time Zero``
 - Switch the plot from ``Asymmetry`` to ``Counts``
 - Set the ``Time Zero`` to be ``0``
-- The plots will now show a large peak
+- The plots will now show a large peak, prior to this is only background
 - Using the options at the bottom of the plot, set the x range from ``0.0`` to ``1.0``
 - Go to the **Corrections** tab
 - Change the ``Start X`` to ``0.0``, it will automatically change to ``0.007``
@@ -69,7 +69,7 @@ Manual Background Corrections:
 - Change the plot back to ``Asymmetry``
 - Change the ``Background`` to ``Manual``
 - Untick the ``Apply parameter change to all domains``
-- Change some of the background values
+- Change some of the background values, but leave some as they are
 - Go to the **Home** tab
 - Tick the ``Time Zero`` box
 - The plots that you changed will drift away from zero at large times
