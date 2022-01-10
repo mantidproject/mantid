@@ -5,13 +5,10 @@ Diffraction Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
 
 Powder Diffraction
 ------------------
-* :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
+- :ref:`StripVanadiumPeaks <algm-StripVanadiumPeaks-v2>` has 3 additional peak positions of 0.41192, 0.4279, 0.4907 angstroms.
 - `GetDetOffsetsMultiPeaks`, which is deprecate since v6.2.0, is removed.
 - `CalibrateRectangularDetectors`, which is deprecate since v6.2.0, is removed. And system test CalibrateRectangularDetectors_Test is removed.
 - Extending :ref:`MultipleScatteringCorrection <algm-MultipleScatteringCorrection>` to the sample and container case.
@@ -26,6 +23,10 @@ Powder Diffraction
 - :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` now validates that the IncidentSpectra
   is in units of Wavelength and will output in the same unit as the InputWorkspace. The parameter IncidentSpectra for :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>` has been
   renamed to fix a typo, which is a breaking change for this algorithm. Note that the addition of 1 to the Placzek correction has been moved out of this algorithm.
+
+New features
+############
+- Add new input concerning sample height information from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI.
 
 Improvements
 ############
@@ -43,6 +44,10 @@ Bugfixes
 - Fix bug such that attenuation calculated in :ref:`AnvredCorrection <algm-AnvredCorrection>` is now accurate to within 0.5% for typical muR.
 - The integration range has been corrected inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
 - Fix problem with the create_vanadium action when running with tt_mode=Custom in the ISIS PEARL powder diffraction scripts. Create a separate Vanadium file for each different custom grouping file rather than one for all custom runs
+
+
+Deprecation
+############
 
 Engineering Diffraction
 -----------------------
