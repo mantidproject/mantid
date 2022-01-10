@@ -258,6 +258,10 @@ class PeaksViewerCollectionPresenter:
         # update combo box for add/remove peak actions
         self._actions_view.set_peaksworkspace(self.workspace_names())
 
+        # hide if no peak tables remain
+        if not child_presenters:
+            self._view.hide()
+
         return index
 
     def workspace_names(self):
