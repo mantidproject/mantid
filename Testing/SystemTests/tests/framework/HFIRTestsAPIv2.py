@@ -13,20 +13,17 @@
     The following tests were converted from the unittest framework
     that is part of python to the systemtesting framework used in Mantid.
 """
-import types
 
-import traceback
+from functools import reduce
 import math
+from pathlib import PurePath
+import traceback
+import types
 
 import systemtesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 from reduction_workflow.command_interface import AppendDataFile, Reduce, Reduce1D
-from functools import reduce
-
-
-# Set directory containing the System test dir
-TEST_DIR = ConfigService.Instance()["datasearch.directories"].split(';')[0]
 
 
 def _diff_iq(x, y):
@@ -118,32 +115,10 @@ def _check_result(ws, test_file, tolerance=1e-6):
     return passed
 
 
-def do_cleanup():
-    Files = ["GPSANS_reduction.log",
-             "BioSANS_exp61_scan0004_0001_Iq.txt",
-             "BioSANS_exp61_scan0004_0001_Iq.xml",
-             "BioSANS_exp61_scan0004_0001_Iqxy.dat",
-             "BioSANS_exp61_scan0004_0001_reduction.log",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iqxy.dat",
-             "BioSANS_test_data_reduction.log",
-             "test_data_Iq.txt",
-             "test_data_Iq.xml",
-             "test_data_Iqxy.dat",
-             "test_data_reduction.log"]
-    for filename in Files:
-        absfile = FileFinder.getFullPath(filename)
-        if os.path.exists(absfile):
-            os.remove(absfile)
-    return True
-
-
 class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def assertTrue(self, condition):
         if not condition:
@@ -206,15 +181,12 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
     def test_data_path(self):
         self.assertEqual(ReductionSingleton()._data_path, '.')
-        # any path that definitely exists on a computer with Mantid installed
-        test_path = os.path.normcase(ConfigService.Instance()[
-                                     'instrumentDefinition.directory'])
-        DataPath(test_path)
-        self.assertEqual(ReductionSingleton()._data_path, test_path)
+        DataPath(self._work_dir)
+        self.assertEqual(PurePath(ReductionSingleton()._data_path), PurePath(self._work_dir))
 
     def test_set_detector_distance(self):
         GPSANS()
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile("BioSANS_test_data.xml")
         SetSampleDetectorDistance(2500.0)
         Reduce1D()
@@ -226,7 +198,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_set_detector_offset(self):
         GPSANS()
         SetSampleDetectorDistance(6500)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile("BioSANS_test_data.xml")
         # SetSampleDetectorOffset(500.0)
         Reduce1D()
@@ -241,7 +213,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         """
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile("BioSANS_test_data.xml")
         SetSampleDetectorDistance(2500.0)
         SetSampleDetectorOffset(500.0)
@@ -254,7 +226,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_set_wavelength(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile("BioSANS_test_data.xml")
         SetWavelength(5.0, 1.2)
         Reduce1D()
@@ -267,7 +239,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_direct_beam_center(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         Reduce()
@@ -303,7 +275,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_load_run(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         self.assertEqual(len(ReductionSingleton()._data_files), 0)
         AppendDataFile("BioSANS_test_data.xml")
         self.assertEqual(len(ReductionSingleton()._data_files), 1)
@@ -311,7 +283,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_to_steps(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
@@ -326,12 +298,12 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
         self.assertTrue(_check_result(
-            ws, TEST_DIR + "reduced_center_calculated.txt", tolerance=1e-4))
+            ws, FileFinder.getFullPath("reduced_center_calculated.txt"), tolerance=1e-4))
 
     def test_reduction_1(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
@@ -366,7 +338,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         '''
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml")
@@ -419,7 +391,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_no_solid_angle(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         NoSolidAngle()
@@ -436,7 +408,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_reduction_2(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         DarkCurrent("BioSANS_dark_current.xml")
@@ -474,7 +446,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_straight_Q1D(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
@@ -507,7 +479,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_transmission(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
@@ -543,7 +515,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_spreader_transmission(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11", error_weighting=True)
         BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
@@ -563,7 +535,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_transmission_by_hand(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -575,12 +547,12 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
         self.assertTrue(_check_result(
-            ws, TEST_DIR + "reduced_transmission.txt", 0.0001))
+            ws, FileFinder.getFullPath("reduced_transmission.txt"), 0.0001))
 
     def test_center_by_hand(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml",
@@ -591,12 +563,12 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
 
         ws = AnalysisDataService.retrieve("BioSANS_test_data_Iq")
         self.assertTrue(_check_result(
-            ws, TEST_DIR + "reduced_center_by_hand.txt", 0.0001))
+            ws, FileFinder.getFullPath("reduced_center_by_hand.txt"), 0.0001))
 
     def test_background(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml",
@@ -619,7 +591,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         """
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml")
         SensitivityCorrection("BioSANS_flood_data.xml",
@@ -639,7 +611,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_bck_w_transmission(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         SetBeamCenter(16, 95)
         AppendDataFile("BioSANS_test_data.xml", "test_data")
         SensitivityCorrection("BioSANS_flood_data.xml",
@@ -660,7 +632,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_transmission_by_hand_w_sensitivity(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml")
         SetTransmission(0.51944, 0.011078)
@@ -699,7 +671,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         # pylint: disable=unreachable
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile("BioSANS_test_data.xml")
         SampleGeometry('cuboid')
         SampleThickness(2.0)
@@ -758,7 +730,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         DivideByThickness(1)
         SetTransmission(1, 0)
         ThetaDependentTransmission(True)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile(["BioSANS_exp61_scan0004_0001.xml"])
         Background("BioSANS_test_data.xml")
         SetBckTransmission(1, 0)
@@ -803,7 +775,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         DivideByThickness(1)
         SetTransmission(1, 0)
         ThetaDependentTransmission(True)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile(["BioSANS_exp61_scan0004_0001.xml"])
         Background("BioSANS_test_data.xml")
         SetBckTransmission(1, 0)
@@ -846,7 +818,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         DivideByThickness(1)
         SetTransmission(1, 0)
         ThetaDependentTransmission(True)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         AppendDataFile(["BioSANS_exp61_scan0004_0001.xml"])
         Background("BioSANS_test_data.xml")
         SetBckTransmission(1, 0)
@@ -863,7 +835,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_transmission_beam_center(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
         SensitivityCorrection("BioSANS_flood_data.xml",
@@ -885,7 +857,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_bck_transmission_default_beam_center(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
         DarkCurrent("BioSANS_dark_current.xml")
@@ -905,7 +877,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_bck_transmission_set_beam_center(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         AppendDataFile("BioSANS_test_data.xml", "test_data")
         DarkCurrent("BioSANS_dark_current.xml")
@@ -925,7 +897,7 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
     def test_bck_transmission_direct_beam_center(self):
         GPSANS()
         SetSampleDetectorDistance(6000)
-        DataPath(TEST_DIR)
+        DataPath(self._work_dir)
         # DirectBeamCenter("BioSANS_empty_cell.xml")
         SetBeamCenter(100, 15)
         AppendDataFile("BioSANS_test_data.xml", "test_data")

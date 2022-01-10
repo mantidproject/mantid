@@ -485,6 +485,7 @@ class SliceViewerModel:
         return help_msg
 
     def workspace_equals(self, ws_name):
+        # TODO put something better here
         return str(self._get_ws()) == ws_name
 
     # private api

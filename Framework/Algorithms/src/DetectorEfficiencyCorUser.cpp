@@ -95,7 +95,8 @@ void DetectorEfficiencyCorUser::exec() {
  * @param parser :: muParser used to evalute f(e)
  * @param index :: the workspace index of the histogram to correct
  */
-void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser) {
+void DetectorEfficiencyCorUser::correctHistogram(const size_t index, const double eff0, double &e,
+                                                 const mu::Parser &parser) {
   const auto &xIn = m_inputWS->points(index);
   const auto &yIn = m_inputWS->y(index);
   const auto &eIn = m_inputWS->e(index);

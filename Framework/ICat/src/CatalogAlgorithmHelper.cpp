@@ -10,9 +10,9 @@
 #include <json/value.h>
 #include <set>
 
-namespace Mantid::ICat {
-
 using Poco::Net::HTTPResponse;
+
+namespace Mantid::ICat {
 
 /**
  * Obtain the error message returned by the IDS.
@@ -22,7 +22,7 @@ using Poco::Net::HTTPResponse;
  * @returns An appropriate error message for the user if it exists. Otherwise an
  * empty string.
  */
-const std::string CatalogAlgorithmHelper::getIDSError(HTTPResponse::HTTPStatus &HTTPStatus,
+const std::string CatalogAlgorithmHelper::getIDSError(const HTTPResponse::HTTPStatus &HTTPStatus,
                                                       std::istream &responseStream) {
   std::set<HTTPResponse::HTTPStatus> successHTTPStatus = {HTTPResponse::HTTP_OK, HTTPResponse::HTTP_CREATED,
                                                           HTTPResponse::HTTP_ACCEPTED};

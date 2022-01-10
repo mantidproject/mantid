@@ -85,7 +85,7 @@ void PoldiHeliumDetector::initializeFixedParameters(double radius, size_t elemen
   m_totalOpeningAngle = static_cast<double>(m_elementCount) * m_angularResolution;
 }
 
-void PoldiHeliumDetector::initializeCalibratedParameters(Kernel::V2D position, double centerTwoTheta) {
+void PoldiHeliumDetector::initializeCalibratedParameters(const Kernel::V2D &position, double centerTwoTheta) {
   m_calibratedPosition = position;
   m_vectorAngle = atan(m_calibratedPosition.Y() / m_calibratedPosition.X());
   m_distanceFromSample = m_calibratedPosition.norm();

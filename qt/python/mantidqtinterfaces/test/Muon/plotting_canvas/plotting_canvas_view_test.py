@@ -346,7 +346,7 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
         self.view.add_shaded_region(name, axis, x_data, y1_data, y2_data)
 
         self.assertEqual(list(self.view._shaded_regions.keys()), [name])
-        self.assertEqual(self.view._shaded_regions[name].axis, 1)
+        self.assertEqual(self.view._shaded_regions[name].axis, 2)
         self.assertEqual(self.view._shaded_regions[name].x_values, x_data)
         self.assertEqual(self.view._shaded_regions[name].y1_values, y1_data)
         self.assertEqual(self.view._shaded_regions[name].y2_values, y2_data)
@@ -369,7 +369,7 @@ class PlottingCanvasViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.view.add_shaded_region(name, axis, new_x, new_y1, new_y2)
         self.assertEqual(list(self.view._shaded_regions.keys()), [name])
-        self.assertEqual(self.view._shaded_regions[name].axis, 1)
+        self.assertEqual(self.view._shaded_regions[name].axis, 2)
         self.assertEqual(self.view._shaded_regions[name].x_values, new_x)
         self.assertEqual(self.view._shaded_regions[name].y1_values, new_y1)
         self.assertEqual(self.view._shaded_regions[name].y2_values, new_y2)

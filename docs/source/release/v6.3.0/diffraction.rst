@@ -30,6 +30,7 @@ Powder Diffraction
 Improvements
 ############
 - :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
+- improve the Custom tt_mode in the ISIS PEARL powder diffraction scripts. Specifically the tt_mode Custom now supports all the different focus_modes if the grouping file contains 14 groups
 
 Bugfixes
 ########
@@ -37,15 +38,17 @@ Bugfixes
 - For processing vanadium run, we don't want to find environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
 - Restored behavior in :ref:`ConvertUnits <algm-ConvertUnits>` where negative time-of-flight converts to negative d-spacing when ``DIFA==0``
 - Identification in :ref:`AlignComponents <algm-AlignComponents>` of the first and last detector-ID for an instrument component with unsorted detector-ID's.
+- :ref:`LoadPDFgetNFile <algm-LoadPDFgetNFile>` now returns standard units for atomic distance rather than label
 - Fix issue in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` where in some cases you end up with zeros as output.
 - Fix bug such that attenuation calculated in :ref:`AnvredCorrection <algm-AnvredCorrection>` is now accurate to within 0.5% for typical muR.
 - The integration range has been corrected inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
+- Fix problem with the create_vanadium action when running with tt_mode=Custom in the ISIS PEARL powder diffraction scripts. Create a separate Vanadium file for each different custom grouping file rather than one for all custom runs
 
 Engineering Diffraction
 -----------------------
 New features
 ############
-- Now support texture grouping (10 groups per bank) for ENGIN-X in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`. Note this involved changes to the bankID log values saved with focused data, so this means the UI will not load in previously focused .nxs files.
+- Now support two texture grouping schemes: Texture20 (10 groups per bank, 20 in total) and Texture30 (15 groups per bank, 30 in total) for ENGIN-X in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`. Note this involved changes to the bankID log values saved with focused data, so this means the UI will not load in previously focused .nxs files.
 
 Improvements
 ############
@@ -75,4 +78,5 @@ Bugfixes
 ########
 - :ref:`ConvertWANDSCDtoQ<algm-ConvertWANDSCDtoQ>` and :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` units now display correctly in terms of 'in X.XXX A^-1'
 - :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` output orientation fixed
+- :ref:`SaveReflections <algm-SaveReflections>` now scales intensities and errors to ensure the width of the columns in the output file are not exceeded.
 :ref:`Release 6.3.0 <v6.3.0>`

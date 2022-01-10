@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 
 class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-        return 8000
+        return 9500
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
@@ -69,7 +69,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
 class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-        return 8000
+        return 9500
 
     def runTest(self):
         LoadMD('HB3A_data.nxs', OutputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data')
@@ -120,7 +120,7 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
 
 class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-        return 8000
+        return 9500
 
     def runTest(self):
         angleOffset = 45

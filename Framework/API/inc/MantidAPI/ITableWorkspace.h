@@ -276,10 +276,10 @@ public:
   virtual void find(API::Boolean value, size_t &row, const size_t &col) = 0;
   /// find method to get the index of cellstd::string  value in a table
   /// workspace
-  virtual void find(std::string value, size_t &row, const size_t &col) = 0;
+  virtual void find(const std::string &value, size_t &row, const size_t &col) = 0;
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table
   /// workspace
-  virtual void find(Mantid::Kernel::V3D value, size_t &row, const size_t &col) = 0;
+  virtual void find(const Mantid::Kernel::V3D &value, size_t &row, const size_t &col) = 0;
 
   void modified();
 

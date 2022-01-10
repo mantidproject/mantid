@@ -15,6 +15,7 @@ New and Improved
     :align: center
 - The instrument is now loaded in a background thread when opening the instrument viewer which prevents running scripts from hanging.
 - The integration slider in the instrument viewer now support discrete steps when the axis has discrete values.
+- The Y-position of the HKL labels on the miniplot within the instrument viewer is now fixed in Axes coordinates so that the label remains visible as the zoom level changes.
 - The algorithm browser has been tidied to reduce the number of single algorithm categories.
 - Table workspaces can now have read-only columns added to them (`ws.addReadOnlyColumn(<TYPE>, <NAME>)`). Existing columns can also be set to be read-only (`ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)`).
 - Cells containing vector data in a table workspace can now be viewed in the table workspace display.
@@ -25,6 +26,8 @@ New and Improved
     :align: center
 
 - The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path)
+
+- The font in python editor and IPython console are ensured to be monospace on KDE Neon distribution, too.
 
 Bugfixes
 --------
@@ -43,5 +46,6 @@ Bugfixes
 - Workbench will no longer hang if an algorithm was running when workbench was closed.
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 - Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
+- The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
 
 :ref:`Release 6.3.0 <v6.3.0>`

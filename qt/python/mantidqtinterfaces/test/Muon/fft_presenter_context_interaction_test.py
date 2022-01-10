@@ -197,14 +197,12 @@ class FFTPresenterTest(unittest.TestCase):
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_PaddingAndApodization')
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_FFT')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.convert_to_field')
-    def test_calculate_FFT_calls_correct_algorithm_sequence_for_no_imaginary(self, field_mock, fft_mock,
+    @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.remove_ws')
+    def test_calculate_FFT_calls_correct_algorithm_sequence_for_no_imaginary(self, rm_mock, fft_mock,
                                                                              apodization_mock):
         self.view.imaginary_data = False
         name = 'MUSR22725; Group; top; Asymmetry; FD'
 
-        field_mock_return = mock.MagicMock()
-        field_mock.return_value = field_mock_return
         apodization_mock_return = mock.MagicMock()
         fft_mock_return = mock.MagicMock()
         fft_mock.return_value = fft_mock_return
@@ -227,20 +225,17 @@ class FFTPresenterTest(unittest.TestCase):
                                           'AutoShift': True,
                                           'Transform': 'Forward'})
 
-        field_mock.assert_called_once_with(fft_mock_return)
-        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, '', field_mock_return)
+        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, '', fft_mock_return)
 
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_PaddingAndApodization')
     @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.run_FFT')
-    @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.convert_to_field')
-    def test_calculate_FFT_calls_correct_algorithm_sequence_with_imaginary(self, field_mock, fft_mock,
+    @mock.patch('mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.FFT.fft_presenter.remove_ws')
+    def test_calculate_FFT_calls_correct_algorithm_sequence_with_imaginary(self, rm_mock, fft_mock,
                                                                            apodization_mock):
         self.view.imaginary_data = True
         name = 'MUSR22725; Group; top; Asymmetry; FD'
         Im_name = 'MUSR22725; Pair Asym; test_pair; FD'
 
-        field_mock_return = mock.MagicMock()
-        field_mock.return_value = field_mock_return
         apodization_mock_return = mock.MagicMock()
         fft_mock_return = mock.MagicMock()
         fft_mock.return_value = fft_mock_return
@@ -270,8 +265,7 @@ class FFTPresenterTest(unittest.TestCase):
             'AutoShift': True,
             'InputImagWorkspace': apodization_mock_return,
             "Imaginary": 0})
-        field_mock.assert_called_once_with(fft_mock_return)
-        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, Im_name, field_mock_return)
+        self.presenter.add_fft_workspace_to_ADS.assert_called_once_with(name, Im_name, fft_mock_return)
 
     def test_selection_removed_WorkspaceName(self):
         # Remove first group from selection

@@ -26,13 +26,14 @@ template <typename vector_like>
 MANTID_ALGORITHMS_DLL size_t findXIndex(const vector_like &vecx, const double x, const size_t startindex = 0);
 
 /// observe peak center
-MANTID_ALGORITHMS_DLL int observePeakCenter(const HistogramData::Histogram &histogram, API::FunctionValues &bkgd_values,
-                                            size_t start_index, size_t stop_index, double &peak_center,
-                                            size_t &peak_center_index, double &peak_height);
+MANTID_ALGORITHMS_DLL int observePeakCenter(const HistogramData::Histogram &histogram,
+                                            const API::FunctionValues &bkgd_values, size_t start_index,
+                                            size_t stop_index, double &peak_center, size_t &peak_center_index,
+                                            double &peak_height);
 
 /// Observe peak width
 MANTID_ALGORITHMS_DLL double observePeakFwhm(const HistogramData::Histogram &histogram,
-                                             API::FunctionValues &bkgd_values, size_t ipeak, size_t istart,
+                                             const API::FunctionValues &bkgd_values, size_t ipeak, size_t istart,
                                              size_t istop, const EstimatePeakWidth peakWidthEstimateApproach,
                                              const double peakWidthPercentage);
 

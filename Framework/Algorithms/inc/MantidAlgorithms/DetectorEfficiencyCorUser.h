@@ -53,7 +53,7 @@ private:
   void init() override;
   void exec() override;
   void retrieveProperties();
-  void correctHistogram(const size_t index, const double eff0, double &e, mu::Parser &parser);
+  void correctHistogram(const size_t index, const double eff0, double &e, const mu::Parser &parser);
 
   double evaluate(const mu::Parser &parser) const;
 
