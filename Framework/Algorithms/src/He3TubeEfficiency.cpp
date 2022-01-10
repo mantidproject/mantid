@@ -286,7 +286,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, doub
  *  @throw invalid_argument if there is any error finding the distance
  * @returns The distance to the surface in metres
  */
-double He3TubeEfficiency::distToSurface(const Kernel::V3D start, const Geometry::IObject *shape) const {
+double He3TubeEfficiency::distToSurface(const Kernel::V3D &start, const Geometry::IObject *shape) const {
   // get a vector from the point that was passed to the origin
   const Kernel::V3D direction = normalize(-start);
   // put the point and the vector (direction) together to get a line,

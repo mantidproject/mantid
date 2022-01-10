@@ -119,11 +119,11 @@ class SuperplotPresenter:
         self._update_hold_button()
         self._update_plot()
 
-    def get_side_view(self):
-        return self._view.get_side_widget()
-
-    def get_bottom_view(self):
-        return self._view.get_bottom_widget()
+    def show(self):
+        """
+        Show the superplot.
+        """
+        self._view.show()
 
     def close(self):
         if self.parent:

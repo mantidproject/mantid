@@ -149,7 +149,7 @@ void ScanningWorkspaceBuilder::setRotations(std::vector<std::vector<Kernel::Quat
  * @param rotationAxis the axis to rotate around. e.g. the vertical axis to
  *rotate the instrument in the horizontal plane
  */
-void ScanningWorkspaceBuilder::setRelativeRotationsForScans(std::vector<double> relativeRotations,
+void ScanningWorkspaceBuilder::setRelativeRotationsForScans(const std::vector<double> &relativeRotations,
                                                             const Kernel::V3D &rotationPosition,
                                                             const Kernel::V3D &rotationAxis) {
 

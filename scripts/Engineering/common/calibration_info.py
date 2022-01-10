@@ -4,28 +4,28 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string
+from Engineering.EnggUtils import GROUP, create_spectrum_list_from_string, CALIB_DIR
 from Engineering.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from os import path
 from mantid.simpleapi import Load, LoadDetectorsGroupingFile, CreateGroupingWorkspace, SaveDetectorsGrouping
 from mantid.kernel import logger
 
-GROUP_XML_DIR = path.join(path.abspath(path.join(__file__, path.sep.join(5*['..']))), "calib")
-
 GROUP_FILES = {GROUP.BOTH: "ENGINX_NorthAndSouth_grouping.xml", GROUP.NORTH: "ENGINX_North_grouping.xml",
-               GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE: "ENGINX_Texture_grouping.xml"}
+               GROUP.SOUTH: "ENGINX_South_grouping.xml", GROUP.TEXTURE20: "ENGINX_Texture20_grouping.xml",
+               GROUP.TEXTURE30: "ENGINX_Texture30_grouping.xml"}
 GROUP_BANK_ARGS = {GROUP.BOTH: "NorthBank,SouthBank", GROUP.NORTH: "NorthBank", GROUP.SOUTH: "SouthBank"}
 GROUP_DESCRIPTIONS = {GROUP.BOTH: "North and South Banks", GROUP.NORTH: "North Bank",
                       GROUP.SOUTH: "South Bank", GROUP.CROPPED: "Custom spectrum numbers",
-                      GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE: "Texture"}
+                      GROUP.CUSTOM: "Custom .cal file", GROUP.TEXTURE20: "Texture20", GROUP.TEXTURE30: "Texture30"}
 GROUP_WS_NAMES = {GROUP.BOTH: "NorthAndSouthBank_grouping", GROUP.NORTH: "NorthBank_grouping",
                   GROUP.SOUTH: "SouthBank_grouping", GROUP.CROPPED: "Cropped_spectra_grouping",
-                  GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE: "Texture_grouping"}
-GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
-                GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}  # prm suffix
-GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2",
-                       GROUP.CROPPED: "Cropped", GROUP.CUSTOM: "Custom", GROUP.TEXTURE: "Texture"}
+                  GROUP.CUSTOM: "Custom_calfile_grouping", GROUP.TEXTURE20: "Texture20_grouping",
+                  GROUP.TEXTURE30: "Texture30_grouping"}
+GROUP_SUFFIX = {GROUP.BOTH: "all_banks", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2", GROUP.CROPPED: "Cropped",
+                GROUP.CUSTOM: "Custom", GROUP.TEXTURE20: "Texture20", GROUP.TEXTURE30: "Texture30"}  # prm suffix
+GROUP_FOC_WS_SUFFIX = {GROUP.BOTH: "bank", GROUP.NORTH: "bank_1", GROUP.SOUTH: "bank_2", GROUP.CROPPED: "Cropped",
+                       GROUP.CUSTOM: "Custom", GROUP.TEXTURE20: "Texture20", GROUP.TEXTURE30: "Texture30"}
 
 
 class CalibrationInfo:
@@ -100,7 +100,7 @@ class CalibrationInfo:
         """
         basepath, fname = path.split(file_path)
         # fname has form INSTRUMENT_ceriaRunNo_BANKS
-        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture"
+        # BANKS can be "all_banks, "bank_1", "bank_2", "Cropped", "Custom", "Texture20", "Texture30"
         fname_words = fname.split('_')
         suffix = fname_words[-1].split('.')[0]  # take last element and remove extension
         if any(grp.value == suffix for grp in GROUP):
@@ -207,11 +207,11 @@ class CalibrationInfo:
         ws_name = GROUP_WS_NAMES[self.group]
         grp_ws = None
         try:
-            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(GROUP_XML_DIR, GROUP_FILES[self.group]),
+            grp_ws = LoadDetectorsGroupingFile(InputFile=path.join(CALIB_DIR, GROUP_FILES[self.group]),
                                                OutputWorkspace=ws_name)
         except ValueError:
             logger.notice("Grouping file not found in user directories - creating one")
-            if self.group.banks and self.group != GROUP.TEXTURE:
+            if self.group.banks and self.group != GROUP.TEXTURE20 and self.group != GROUP.TEXTURE30:
                 grp_ws, _, _ = CreateGroupingWorkspace(InstrumentName=self.instrument, OutputWorkspace=ws_name,
                                                        GroupNames=GROUP_BANK_ARGS[self.group])
         if grp_ws:

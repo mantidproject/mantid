@@ -113,7 +113,7 @@ public:
   double getAbsorptionWeightedPathLength() const override;
 
 protected:
-  double calculateWavelengthFromQLab(const Mantid::Kernel::V3D qLab);
+  double calculateWavelengthFromQLab(const Mantid::Kernel::V3D &qLab);
 
   // ki-kf for Inelastic convention; kf-ki for Crystallography convention
   std::string convention;

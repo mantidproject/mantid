@@ -738,6 +738,9 @@ class MainWindow(QMainWindow):
             font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
             qapp.setFont(font)
 
+        # reset font for ipython console to ensure it stays monospace
+        self.ipythonconsole.console.reset_font()
+
         # make sure main window is smaller than the desktop
         desktop = QDesktopWidget()
 

@@ -44,6 +44,9 @@ Bugfixes
   Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 - Fix bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where LoaderVersion choice was previously ignored
+- Fix bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are saved correctly when workspace indices are supplied.
+- Fix bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
+  that didn't have any detectors it failed with an error
 
 Fit Functions
 -------------
@@ -67,6 +70,9 @@ Python
 
   -  Existing arguments, such as version, start and end progress...etc. are unaffected by this change.
   -  E.g. `createChildAlgorithm("CreateSampleWorkspace", version=1, XUnit="Wavelength")`
+- The package on Windows now includes the `euphonic <https://pypi.org/project/euphonic/>`_ package
+  for calculating phonon bandstructures.
+
 
 Installation
 ------------

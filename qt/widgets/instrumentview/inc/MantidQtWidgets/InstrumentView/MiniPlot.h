@@ -6,20 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <QtGlobal>
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidQtWidgets/InstrumentView/MiniPlotMpl.h"
-#endif
 
 namespace MantidQt {
 namespace MantidWidgets {
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-using MiniPlot = MiniPlotQwt;
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+
+/// Provides a name that does not specify the implementation
 using MiniPlot = MiniPlotMpl;
-#endif
+
 } // namespace MantidWidgets
 } // namespace MantidQt

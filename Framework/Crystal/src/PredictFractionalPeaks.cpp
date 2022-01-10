@@ -73,7 +73,7 @@ public:
    * @param inputPeaks A peaks workspace used to pull the goniometer and run
    * number.
    */
-  PeaksInRangeStrategy(V3D hklMin, V3D hklMax, HKLFilter *filter, const PeaksWorkspace *const inputPeaks)
+  PeaksInRangeStrategy(const V3D &hklMin, const V3D &hklMax, HKLFilter *filter, const PeaksWorkspace *const inputPeaks)
       : m_hklGenerator(hklMin, hklMax), m_hklIterator(m_hklGenerator.begin()), m_hklFilter(filter),
         m_inputPeaks(inputPeaks) {
     assert(filter);

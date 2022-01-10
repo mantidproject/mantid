@@ -167,6 +167,16 @@ class MantidSystemTest(unittest.TestCase):
         '''Override this to perform more than 1 iteration of the implemented test.'''
         return 1
 
+    def temporary_directory(self):
+        '''Creates a temporary directory and registers a cleanup function to remove it
+        at the end of the test and returns the path to the directory'''
+        tempdir = tempfile.mkdtemp()
+        def rm_tempdir():
+            shutil.rmtree(tempdir, ignore_errors=True)
+
+        self.addCleanup(rm_tempdir)
+        return tempdir
+
     def reportResult(self, name, value):
         '''
         Send a result to be stored as a name,value pair
@@ -241,9 +251,9 @@ class MantidSystemTest(unittest.TestCase):
         if self.excludeInPullRequests():
             sys.exit(TestRunner.SKIP_TEST)
 
-        self.setUp()
-
         try:
+            self.setUp()
+
             # Start timer
             start = time.time()
             countmax = self.maxIterations() + 1
@@ -256,7 +266,10 @@ class MantidSystemTest(unittest.TestCase):
             # Finish
             self.reportResult('time_taken', '%.2f' % delta_t)
         finally:
-            self.tearDown()
+            try:
+                self.tearDown()
+            finally:
+                self.doCleanups()
 
     def __prepASCIIFile(self, filename):
         """Prepare an ascii file for comparison using difflib."""

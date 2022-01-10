@@ -276,9 +276,9 @@ void Q1DWeighted::getViewportParams(const std::string &viewport,
  * @param params the vector of strings containing the data defining the sector
  * @param viewport the previously created map of the viewport's parameters
  */
-void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
-                                 std::map<std::string, std::vector<double>> &viewport) {
-  double zoom = viewport["Zoom"][0];
+void Q1DWeighted::getWedgeParams(const std::vector<std::string> &params,
+                                 const std::map<std::string, std::vector<double>> &viewport) {
+  double zoom = viewport.at("Zoom")[0];
 
   double innerRadius = std::stod(params[1]) / zoom;
   double outerRadius = std::stod(params[2]) / zoom;
@@ -296,8 +296,8 @@ void Q1DWeighted::getWedgeParams(std::vector<std::string> &params,
   // since the viewport was in Z-, the axis are inverted so we have to take the symmetry of the angle
   centerAngle = std::fmod(3 * M_PI - centerAngle, 2 * M_PI);
 
-  double xOffset = viewport["Translation"][0];
-  double yOffset = viewport["Translation"][1];
+  double xOffset = viewport.at("Translation")[0];
+  double yOffset = viewport.at("Translation")[1];
 
   double centerX = -(std::stod(params[5]) - xOffset) / zoom;
   double centerY = (std::stod(params[6]) - yOffset) / zoom;

@@ -603,9 +603,17 @@ class PlottingCanvasPresenterTest(unittest.TestCase):
         self.assertFalse(self.presenter.should_update_all(selected_subplots))
 
     def test_add_shaded_region(self):
+        def plot_info_mock(ws_list, indices, errors):
+            plot_info_list = []
+            for ws, index in zip(ws_list, indices):
+                plot_info_list.append(create_test_plot_information(name=ws, index=index, axis=index,
+                                      normalised=False, errors=False, label=ws))
+            return plot_info_list
+
         def shade_mock(name, index):
             return index, index+1, index+2
         self.model.get_shade_lines.side_effect = shade_mock
+        self.model.create_workspace_plot_information.side_effect = plot_info_mock
         self.presenter.add_shaded_region(["unit", "test"], [0,1])
         self.view.add_shaded_region.assert_any_call(workspace_name="unit",
                                                     axis_number=0,
