@@ -7,6 +7,7 @@ Mantid Workbench Changes
 
 New and Improved
 ----------------
+- New general setting: `Provide auto-completion suggestions in the script editor` for making auto-completion optional in the script editor
 
 Bugfixes
 --------
