@@ -51,10 +51,10 @@ class SliceViewerModel:
         else:
             raise ValueError("only works for MatrixWorkspace and MDWorkspace")
 
-        wsname = self.get_ws_name()
-        self._rebinned_name = wsname + '_svrebinned'
-        self._xcut_name, self._ycut_name = wsname + '_cut_x', wsname + '_cut_y'
-        self._roi_name = wsname + '_roi'
+        self._ws_name = ws.name()
+        self._rebinned_name = self._ws_name+ '_svrebinned'
+        self._xcut_name, self._ycut_name = self._ws_name + '_cut_x', self._ws_name + '_cut_y'
+        self._roi_name = self._ws_name + '_roi'
 
         ws_type = self.get_ws_type()
         if ws_type == WS_TYPE.MDE:
@@ -127,9 +127,12 @@ class SliceViewerModel:
         return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
             0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
+    def set_ws_name(self, new_name):
+        self._ws_name = new_name
+
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
-        return self._ws.name()
+        return self._ws_name
 
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
@@ -140,7 +143,7 @@ class SliceViewerModel:
         of the model's workspace if none supplied.
         """
         if not ws_name:
-            ws_name = self.get_ws_name()
+            ws_name = self._ws_name
         return f'Sliceviewer - {ws_name}'
 
     def get_ws_MDE(self,
@@ -485,8 +488,7 @@ class SliceViewerModel:
         return help_msg
 
     def workspace_equals(self, ws_name):
-        # TODO put something better here
-        return str(self._get_ws()) == ws_name
+        return self._ws_name == ws_name
 
     # private api
     def _get_ws(self):
