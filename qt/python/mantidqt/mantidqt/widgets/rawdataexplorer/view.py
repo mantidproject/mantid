@@ -95,7 +95,7 @@ class PreviewView(QObject):
         """
         if self._type == self.IVIEW:
             parent, flags = get_window_config()
-            self._widget = get_instrumentview(workspace_name, parent, flags)
+            self._widget = get_instrumentview(workspace_name, parent, flags, use_thread=False)
             self._widget.show_view()
             self._widget.container.closing.connect(self.on_close)
             self.sig_request_close.connect(self._widget.container.emit_close)
