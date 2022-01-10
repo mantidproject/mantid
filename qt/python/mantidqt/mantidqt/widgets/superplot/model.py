@@ -9,6 +9,7 @@ from qtpy.QtCore import QObject, Signal
 
 from mantid.api import mtd, WorkspaceGroup
 from mantid.dataobjects import Workspace2D, EventWorkspace
+from mantid.kernel import logger
 
 from .ads_observer import SuperplotAdsObserver
 
@@ -94,6 +95,9 @@ class SuperplotModel(QObject):
         if name not in mtd or (not isinstance(mtd[name], Workspace2D)
                                and not isinstance(mtd[name], WorkspaceGroup)
                                and not isinstance(mtd[name], EventWorkspace)):
+
+            logger.warning("Workspace does not exist or is not supported by "
+                           "Superplot")
             return
         if isinstance(mtd[name], WorkspaceGroup):
             names = mtd[name].getNames()
