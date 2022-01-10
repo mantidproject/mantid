@@ -8,7 +8,6 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
-
 New features
 ############
 - ``absorptioncorrutils`` now have the capability to calculate effective absorption correction (considering both absorption and multiple scattering).
@@ -79,19 +78,23 @@ Improvements
 Bugfixes
 ########
 - Save ``.prm`` file from :ref:`Calibration tab <ui engineering calibration>` with correct L2 and two-theta for each group in arbitrary groupings (previously only correct for the two ``ENGIN-X`` banks).
-- The last calibration file (``.prm``) populated in the :ref:`Calibration tab <ui engineering calibration>` is now correct when both banks are focused (previously was populated with just the South bank ``.prm``)
+- The last calibration file (``.prm``) populated in the :ref:`Calibration tab <ui engineering calibration>` is now correct when both banks are focused (previously was populated with just the South bank ``.prm``).
 - Fixed a crash on :ref:`Fitting tab <ui engineering fitting>` when trying to output fit results. The problem was caused by a unit conversion from ``TOF`` to ``d-Spacing`` not being possible e.g. when peak centre at a negative ``TOF`` value.
 - The ``Serial`` and ``Sequential`` fit features on the :ref:`Fitting tab <ui engineering fitting>` now respect the ``Subtract BG`` checkbox in the table and use the background subtracted workspace where this is checked.
 
 Single Crystal Diffraction
 --------------------------
-- Existing :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
-- Enabling :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` to calibrate each detector bank's size if it is a rectagular detector optionally.
-- Fixed calculation of modulation vector uncertainty in :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>`, new option ``CommonUBForAll`` allow selection of calculation handling multiple run the same as :ref:`IndexPeaks <algm-IndexPeaks>`.
+New features
+############
+- Added a new option ``CommonUBForAll`` to :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` to allow selection of the calculation handling multiple runs. This is the same as :ref:`IndexPeaks <algm-IndexPeaks>`.
+- :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` and :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` can now reduce and properly normalise single-crystal data for the D7 ILL instrument.
+- Enabled :ref:`SCDCalibratePanels <algm-SCDCalibratePanels-v2>` to optionally calibrate each detector bank's size if it is a rectagular detector.
 
 Bugfixes
 ########
-- :ref:`ConvertWANDSCDtoQ<algm-ConvertWANDSCDtoQ>` and :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` units now display correctly in terms of 'in X.XXX A^-1'
-- :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` output orientation fixed
+- :ref:`ConvertWANDSCDtoQ<algm-ConvertWANDSCDtoQ>` and :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` units now display correctly in terms of ``in X.XXX A^-1`` .
+- :ref:`ConvertQtoHKLMDHisto<algm-ConvertQtoHKLMDHisto>` output orientation fixed.
+- Fixed calculation of modulation vector uncertainty in :ref:`FindUBUsingIndexedPeaks <algm-FindUBUsingIndexedPeaks>` .
 - :ref:`SaveReflections <algm-SaveReflections>` now scales intensities and errors to ensure the width of the columns in the output file are not exceeded.
+
 :ref:`Release 6.3.0 <v6.3.0>`
