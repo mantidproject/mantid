@@ -117,7 +117,7 @@ public:
 
   explicit InstrumentWidget(QString wsName, QWidget *parent = nullptr, bool resetGeometry = true,
                             bool autoscaling = true, double scaleMin = 0.0, double scaleMax = 0.0,
-                            bool setDefaultView = true, Dependencies deps = Dependencies(), bool useThread = false);
+                            bool setDefaultView = true, bool useThread = true, Dependencies deps = Dependencies());
   ~InstrumentWidget() override;
   QString getWorkspaceName() const;
   std::string getWorkspaceNameStdString() const;

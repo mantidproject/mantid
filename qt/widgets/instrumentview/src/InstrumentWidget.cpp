@@ -114,8 +114,8 @@ public:
  * after creating the widget.
  */
 InstrumentWidget::InstrumentWidget(QString wsName, QWidget *parent, bool resetGeometry, bool autoscaling,
-                                   double scaleMin, double scaleMax, bool setDefaultView, Dependencies deps,
-                                   bool useThread)
+                                   double scaleMin, double scaleMax, bool setDefaultView, bool useThread,
+                                   Dependencies deps)
     : QWidget(parent), WorkspaceObserver(), m_instrumentDisplay(std::move(deps.instrumentDisplay)),
       m_workspaceName(std::move(wsName)), m_instrumentActor(nullptr), m_surfaceType(FULL3D),
       m_savedialog_dir(

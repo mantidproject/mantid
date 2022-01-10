@@ -86,7 +86,7 @@ public:
   InstrumentWidget(const QString &ws_name, QWidget *parent /TransferThis/ = 0,
                    bool reset_geometry = true, bool autoscaling = true,
                    double scale_min = 0.0, double scale_max = 0.0,
-                   bool set_default_view = true) throw (std::runtime_error);
+                   bool set_default_view = true, bool useThread = true) throw (std::runtime_error);
 
 
   bool overlay(const QString & ws_name);
