@@ -72,7 +72,7 @@ class PreviewPresenter:
         self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
 
-        if self._main_view.accumulate.isChecked():
+        if self._main_view.is_accumulating():
             self._main_view.clear_selection()
 
     def on_workspace_changed(self):
@@ -99,6 +99,8 @@ class RawDataExplorerPresenter(QObject):
         self.view = RawDataExplorerView(self, parent) if view is None else view
         self.model = RawDataExplorerModel(self) if model is None else model
 
+        self._is_accumulating = False
+
         self.displays = DisplayManager()
 
         self._set_initial_directory()
@@ -120,8 +122,7 @@ class RawDataExplorerPresenter(QObject):
         """
         self.view.file_tree_path_changed.connect(self.on_file_dialog_choice)
         self.view.repositoryPath.editingFinished.connect(self.on_qlineedit)
-
-        self.view.accumulate.stateChanged.connect(self.on_accumulate_checked)
+        self.view.fileTree.sig_accumulate_changed.connect(self.on_accumulate_changed)
 
     def _set_initial_directory(self):
         """
@@ -168,12 +169,13 @@ class RawDataExplorerPresenter(QObject):
         if os.path.isdir(new_dir):
             self.set_working_directory(self.view.repositoryPath.text())
 
-    def on_accumulate_checked(self):
+    def on_accumulate_changed(self, is_now_accumulating):
         """
         Slot triggered by checking the accumulate checkbox.
         Manage the file selection mode.
         """
-        if self.is_accumulate_checked():
+        self._is_accumulating = is_now_accumulating
+        if is_now_accumulating:
             self.view.fileTree.setSelectionMode(QAbstractItemView.MultiSelection)
         else:
             self.view.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
@@ -266,11 +268,11 @@ class RawDataExplorerPresenter(QObject):
                 workspaces_to_show = self.displays.get_last_workspaces(preview_type)
                 self.view.plot_2D(workspaces_to_show, last_window)
 
-    def is_accumulate_checked(self):
+    def is_accumulating(self):
         """
-        @return whether or not the accumulate checkbox is checked
+        @return whether or not the user is currently accumulating workspaces.
         """
-        return self.view.accumulate.isChecked()
+        return self._is_accumulating
 
 
 class DisplayManager:

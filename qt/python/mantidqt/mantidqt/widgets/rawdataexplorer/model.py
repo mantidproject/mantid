@@ -215,7 +215,7 @@ class RawDataExplorerModel(QObject):
 
         for current_preview in reversed(self._previews):
             if current_preview.get_preview_type() == preview:
-                if self.presenter.is_accumulate_checked():
+                if self.presenter.is_accumulating():
                     ws_name = self.accumulate(current_preview.get_workspace_name(), ws_name)
                     if ws_name is None:
                         return

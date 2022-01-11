@@ -238,8 +238,8 @@ class RawDataExplorerView(QWidget):
 
     def on_file_clicked(self, last_clicked_index):
         """
-        Triggered when a file is clicked in the tree widget. This method check
-        the selected items and sends a signal if it changed.
+        Triggered when a file is clicked in the tree widget. This method checks
+        the selected items and sends a signal if they changed.
         """
         selection_model = self.fileTree.selectionModel()
         file_model = self.fileTree.model()
@@ -268,6 +268,9 @@ class RawDataExplorerView(QWidget):
         Set up connections between signals and slots in the view.
         """
         self.browse.clicked.connect(self.show_directory_manager)
+
+    def is_accumulating(self):
+        return self._presenter.is_accumulating()
 
     def show_directory_manager(self):
         """
