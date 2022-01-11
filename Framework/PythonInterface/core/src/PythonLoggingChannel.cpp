@@ -17,32 +17,30 @@ namespace Poco {
 
 namespace {
 // See https://docs.python.org/3/library/logging.html#logging-levels
-enum class PyLogLevel : int {
-  CRITICAL = 50,
-  ERROR = 40,
-  WARNING = 30,
-  INFO = 20,
-  DEBUG = 10,
-  NOTSET = 0,
-};
+constexpr int PY_CRITICAL = 50;
+constexpr int PY_ERROR = 40;
+constexpr int PY_WARNING = 30;
+constexpr int PY_INFO = 20;
+constexpr int PY_DEBUG = 10;
+constexpr int PY_NOTSET = 0;
 
-PyLogLevel pythonLevel(const Message::Priority prio) {
+auto pythonLevel(const Message::Priority prio) {
   switch (prio) {
   case Message::Priority::PRIO_FATAL:
   case Message::Priority::PRIO_CRITICAL:
-    return PyLogLevel::CRITICAL;
+    return PY_CRITICAL;
   case Message::Priority::PRIO_ERROR:
-    return PyLogLevel::ERROR;
+    return PY_ERROR;
   case Message::Priority::PRIO_WARNING:
-    return PyLogLevel::WARNING;
+    return PY_WARNING;
   case Message::Priority::PRIO_NOTICE:
   case Message::Priority::PRIO_INFORMATION:
-    return PyLogLevel::INFO;
+    return PY_INFO;
   case Message::Priority::PRIO_DEBUG:
   case Message::Priority::PRIO_TRACE:
-    return PyLogLevel::DEBUG;
+    return PY_DEBUG;
   default:
-    return PyLogLevel::NOTSET;
+    return PY_NOTSET;
   }
 }
 
@@ -73,7 +71,7 @@ void PythonLoggingChannel::log(const Poco::Message &msg) {
   if (m_pyLogger && Py_IsInitialized()) {
     Mantid::PythonInterface::GlobalInterpreterLock gil;
     const auto logFn = m_pyLogger->attr("log");
-    const auto numericLevel = static_cast<int>(pythonLevel(msg.getPriority()));
+    const auto numericLevel = pythonLevel(msg.getPriority());
     logFn(numericLevel, msg.getText());
   }
 }
