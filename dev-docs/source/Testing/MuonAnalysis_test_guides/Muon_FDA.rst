@@ -1,65 +1,76 @@
-.. _Muon_Analysis_TestGuide_4_FDAG-ref:
+.. _Muon_Analysis_FDA-ref:
 
-Muon Unscripted Testing: Group 4 (Frequency Domain Analysis)
-=============================================================
+Muon Unscripted Testing: FDA (Frequency Domain Analysis)
+========================================================
 
 .. contents:: Table of Contents
     :local:
 
 Introduction
-^^^^^^^^^^^^
+------------
 
 These are unscripted tests for the :program:`Frequency Domain Analysis` interface.
 The master testing guide is located at :ref:`Muon_Analysis_TestGuide-ref`.
 
-Tests
-^^^^^
 
-Setup
------
-- Open `Frequency Domain Analysis`
-- Load `MUSR62260`
-- Tick the **Autoscale y** option on the plotting window
+------------------------------------
+.. _FFT_test:
 
-Test 1: Basic FFT
------------------
+FFT Test
+--------
+
+- Open **Frequency Domain Analysis** (*Interfaces* > *Muon* > *Frequency Domain Analysis*)
+- Change *Instrument* to **MUSR**, found in the *Home* tab
+- In the loading bar enter ``62260``
 - Go to the **Transform** tab
-- Set the workspace to "MUSR00062260; Group; bkwd; Asym; FD"
-- Click the calculate FFT button and a plot will appear
-- The plot window will show a broad peak
+    - Set the workspace to "MUSR00062260; Group; bkwd; Asym; FD"
+    - Click the calculate FFT button and a plot will appear
+    - The plot window will show a broad peak
 - In the **Fitting** tab it will contain 3 workspace ending in `Re` (real), `Im` (imaginary) and `mod` (modulus)
-- Untick the Imaginary Data and the row beneath should disappear
-- Click the Calculate FFT button
+- Go to the **Transform** tab
+    - Untick the Imaginary Data and the row beneath should disappear
+    - Click the Calculate FFT button
+    - The "Apodization Function" determines the amount of smoothing of the data
+    - Set the "Apodization Function" to ``None`` and press calculate
+    - The plot will show a large peak at 0 and then lots of noise
+    - Set the "Apodization Function" to ``Gaussian``and press calculate
+    - There will be a clear peak
+    - The "padding" adds zeros to the end of the time domain data set, to improve the sampling of the FFT
+    - Set the xrange for the plot to be from ``0`` to ``2`` by changing the x min and x max values below the plot
+    - Set the "padding" to zero and press calculate
+    - The plots should be a nice peak, but it will have lots of straight lines
+    - Set the "padding" to ``50`` and press calculate
+    - The plot will now be nice and smooth
+- At the top of the plotting window change the unit from "Frequency" to "Field", the data will have different x axis
 
-Test 2: Advanced FFT
---------------------
-- The "Apodization Function" determines the amount of smoothing of the data
-- Set the "Apodization Function" to `None` and press calculate
-- The plot will show a large peak at 0 and then lots of noise
-- Set the "Apodization Function" to `Gaussian` and press calculate
-- There will be a clear peak near to 100 Gauss
-- The "padding" adds zeros to the end of the time domain data set, to improve the sampling of the FFT
-- Set the xrange for the plot to be from `50` to `150`
-- Set the "padding" to zero and press calculate
-- The plots should be a nice peak, but it will have lots of straight lines
-- Set the "padding" to `50` and press calculate
-- The plot will now be nice and smooth
+------------------------------------
+.. _phase_test:
 
+Phasequad Test
+--------------
 
-Test 3: PhaseQuad
------------------
-- Go to the phase tab
+Muon data from all of the detectors can be combined into a pair of lines if there is a strong frequency peak.
+This is done by applying a phase shift to each of the detectors, such that they all have a phase of zero.
+The data can then be summed.
+
+- Go to the **Phase** tab
 - Click "calculate phase table"
 - Click "calculate phasequad"
-- When asked for a name enter `pq`
+- When asked for a name enter ``pq``
 - Go to the transform tab
 - Tick the **imaginary Workspace** option
-- You select the real and imaginary parts of 'pq' to be the **Workspace** and **Imaginary Workspace** respectively
+- You select the real and imaginary parts of ``pq`` to be the **Workspace** and **Imaginary Workspace** respectively
 - Click calculate
 
 
-Test 4: MaxEnt
---------------
+------------------------------------
+.. _maxent_test:
+
+Maxent Test
+------------
+
+Maxent calculates the frequency spectra and then converts using an FFT to compare with the time domain data.
+
 - Change the drop-down menu at the top of the interface to "MaxEnt"
 - The interface should look different
 - Click the Calculate MaxEnt button
@@ -71,7 +82,7 @@ Test 4: MaxEnt
 - Click calculate MaxEnt
 - In the plotting window change the plot to ``Maxent Dual Plot``
 - You will now see 5 plots (1 frequency and 4 time domain)
-- In the ADS expand the `MUSR62260 MaxEnt FD` group
+- In the ADS expand the ``MUSR62260 MaxEnt FD`` group
 - It will contain several workspaces
 - The phase convergence will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)
 - Deadtimes and phase table will be table of spectrum number then some numbers

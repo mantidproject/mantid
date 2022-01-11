@@ -7,17 +7,17 @@ Muon Unscripted Testing: PSI
     :local:
 
 Introduction
-^^^^^^^^^^^^
+------------
 
 These are unscripted tests for PSI data and introduce background corrections.
 For continous sources background corrections are very important.
 Fitting a flat background to the data (sometimes along with a exp decay), it is possible to remove the background from the data.
 
-Tests
-^^^^^
+------------------------------------
+.. _loading_test:
 
-Setup:
--------
+Loading Data Test
+-----------------
 
 - Open Muon Analysis
 - On the **Home** tab set the instrument to **PSI**
@@ -29,8 +29,11 @@ Setup:
 - To see all of the data press the XXXXX button and select all of the rows in the pop-up
 - If you tick the `Plot raw` option the data will change
 
-Auto Background Corrections:
-----------------------------
+------------------------------------
+.. _auto_test:
+
+Auto Background Corrections Test
+--------------------------------
 
 - Go to the **Corrections** tab
 - For the ``Background`` select ``Auto``
@@ -43,9 +46,11 @@ Auto Background Corrections:
 - Tick the ``use Raw`` box and the values will change
 - The new values should be similar (within 1) to before
 
+------------------------------------
+.. _flat_test:
 
-Flat Background Corrections:
-----------------------------
+Flat Background Corrections Test
+--------------------------------
 
 - Change the ``Select Function`` to ``Flat Background``
 - The curves will be curved upwards again and the table will report an error
@@ -62,9 +67,11 @@ Flat Background Corrections:
 - This will fit a flat background to the data before the peak
 - The results should be similar to before
 
+------------------------------------
+.. _manual_test:
 
-Manual Background Corrections:
-------------------------------
+Manual Background Corrections Test
+----------------------------------
 
 - Change the plot back to ``Asymmetry``
 - Change the ``Background`` to ``Manual``

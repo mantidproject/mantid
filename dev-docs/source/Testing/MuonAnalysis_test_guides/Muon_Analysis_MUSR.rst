@@ -48,34 +48,34 @@ Loading Data Test
 - Tick the ``Co-Add`` option in the loading area
 - The number of options in the pop-up will be reduced from two to one
 - Go to the **grouping tab**
-- You will see three tables, they are the groups, pairs and differences
-- Underneath the group table press the ``+`` button to create a group called "one"
-- A new group will appear in the table
-- Right click in the table and select ``Add Group``, call this one "two"
-- In the table, tick the ``Analyse`` option for groups "one" and "two"
-- Using the data loading pop up, select the "one" and "two" groups
-- They should be identical
-- In the ``Detector IDs`` column change the value for "two" to be ``2`` and the two groups will now look different
-- Select the groups "one" and "two", then right click and select ``Add Pair``
-- Call the pair "short", it will then appear in the pair table
-- Tick the ``Analyse`` option for the "short" pair
-- In the plot selection pop-up make sure only the "short" pair is selected
-- Change the value of ``Group 1`` to be "two", this will change the data and ``Group 2`` should update to be "one"
-- Click the ``+`` button on the difference table and create a pair called "pairDiff"
-- Tick the ``Analyse`` option for the "pairDiff" difference
-- In the plot selection pop-up make sure only the "pairDiff" difference (this is still technically a pair) is selected
-- Changing the options for ``Pair 1`` and ``Pair 2`` will alter the data
-- Above the difference table, select the ``Groups`` radio button
-- Right click in the difference table and select ``Add diff``, call it "delta"
-- Tick the ``Analyse`` option for the "delta" difference
-- In the plot selection pop-up make sure only the "delta" difference (this is still technically a group) is selected
-- Press the ``Save`` button at the top of the tab and save the grouping as "MUSR_test"
-- Remove groups, pairs and differences by using either by selecting the row and pressing the ``-`` button or by right clicking the row and selecting ``Remove``
-- The GUI will not let you delete a group/pair that is in use elsewhere
-- Press the ``Load`` button and select "MUSR_test"
-- You will have 4 groups, 2 pairs, a difference of pairs and a difference of groups as before.
-- Press the ``Default`` button at the top of the tab
-- You will have two groups and one pair
+	- You will see three tables, they are the groups, pairs and differences
+	- Underneath the group table press the ``+`` button to create a group called "one"
+	- A new group will appear in the table
+	- Right click in the table and select ``Add Group``, call this one "two"
+	- In the table, tick the ``Analyse`` option for groups "one" and "two"
+	- Using the data loading pop up, select the "one" and "two" groups
+	- They should be identical
+	- In the ``Detector IDs`` column change the value for "two" to be ``2`` and the two groups will now look different
+	- Select the groups "one" and "two", then right click and select ``Add Pair``
+	- Call the pair "short", it will then appear in the pair table
+	- Tick the ``Analyse`` option for the "short" pair
+	- In the plot selection pop-up make sure only the "short" pair is selected
+	- Change the value of ``Group 1`` to be "two", this will change the data and ``Group 2`` should update to be "one"
+	- Click the ``+`` button on the difference table and create a pair called "pairDiff"
+	- Tick the ``Analyse`` option for the "pairDiff" difference
+	- In the plot selection pop-up make sure only the "pairDiff" difference (this is still technically a pair) is selected
+	- Changing the options for ``Pair 1`` and ``Pair 2`` will alter the data
+	- Above the difference table, select the ``Groups`` radio button
+	- Right click in the difference table and select ``Add diff``, call it "delta"
+	- Tick the ``Analyse`` option for the "delta" difference
+	- In the plot selection pop-up make sure only the "delta" difference (this is still technically a group) is selected
+	- Press the ``Save`` button at the top of the tab and save the grouping as "MUSR_test"
+	- Remove groups, pairs and differences by using either by selecting the row and pressing the ``-`` button or by right clicking the row and selecting ``Remove``
+	- The GUI will not let you delete a group/pair that is in use elsewhere
+	- Press the ``Load`` button and select "MUSR_test"
+	- You will have 4 groups, 2 pairs, a difference of pairs and a difference of groups as before.
+	- Press the ``Default`` button at the top of the tab
+	- You will have two groups and one pair
 - If you double click the tab heading, the tab will undock, pressing ``X`` will cause it to go back into the main GUI
 - In the load bar enter ``62250``
 - Press the ``>`` in the loading area and the next run will be loaded
@@ -94,17 +94,17 @@ This test will look at transverse field data.
 - In the load bar enter ``62260``
 - In the **grouping tab** you will see four groups and no pairs (you may need to press ``Default``)
 - Go to the **fitting tab**
-- Right click the empty table area; Select ``Add Function``
-- Add ``GuasOsc``
-- Set ``Frequency = 1.3``
-- Add a ``FlatBackground``
-- Do a fit, notice that the value for the background is non-zero, when it should be
-- Remove the flat background
-- Change the ``Fitting type`` from "Normal" to "TF Asymmetry"
-- Press Fit
-- Change the ``Fitting type`` back to "Normal"
-- Add a ``FlatBackground``
-- Do a fit, notice that the value for the background is zero (the value is smaller than the error)
+	- Right click the empty table area; Select ``Add Function``
+	- Add ``GuasOsc``
+	- Set ``Frequency = 1.3``
+	- Add a ``FlatBackground``
+	- Do a fit, notice that the value for the background is non-zero, when it should be
+	- Remove the flat background
+	- Change the ``Fitting type`` from "Normal" to "TF Asymmetry"
+	- Press Fit
+	- Change the ``Fitting type`` back to "Normal"
+	- Add a ``FlatBackground``
+	- Do a fit, notice that the value for the background is zero (the value is smaller than the error)
 
 We can do a better fit by using simultaneous fitting
 
@@ -127,9 +127,9 @@ Rebin and Fitting
 - To see all of the data press the XXXXX button and select all of the rows in the pop-up
 - If you tick the ``Plot raw`` option the data will change
 - Go to the **fitting tab**
-- Add a ``GuasOsc``
-- Set ``Frequency = 1.3``
-- Make sure that ``Fit to Raw`` is ticked and the ``Plot raw`` option is unticked
-- Press fit, the fit will be much smoother than the data
-- Untick ``Fit to Raw`` and press fit
-- The data will now match the jagged data
+	- Add a ``GuasOsc``
+	- Set ``Frequency = 1.3``
+	- Make sure that ``Fit to Raw`` is ticked and the ``Plot raw`` option is unticked
+	- Press fit, the fit will be much smoother than the data
+	- Untick ``Fit to Raw`` and press fit
+	- The data will now match the jagged data

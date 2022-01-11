@@ -47,7 +47,7 @@ Group 3: HIFI data
 ^^^^^^^^^^^^^^^^^^
 
 This group looks at HIFI data and introduces multiple period data.
-Test instructions for group 3 can be found at :ref:`Muon_Analysis_TestGuide_3_Results-ref`.
+Test instructions can be found at :ref:`Muon_Analysis_HIFI-ref`.
 You will need the following runs:
 
 - HIFI 134028-39
@@ -57,7 +57,7 @@ Group 4: EMU data
 ^^^^^^^^^^^^^^^^^
 
 This group looks at EMU data, it uses some advance fitting and plotting features.
-Test instructions for this group can be found at :ref:`Muon_Analysis_TestGuide_3_Results-ref`.
+Test instructions for this group can be found at :ref:`Muon_Analysis_EMU-ref`.
 You will need the following runs:
 
 - EMU 51341-3
@@ -67,7 +67,7 @@ Group 5: ARGUS data
 ^^^^^^^^^^^^^^^^^^^
 
 This group looks at ARGUS data, it explores the difference between single and double pulse data.
-Testing instructions are :ref:`Muon_Analysis_TestGuide_3_Results-ref`.
+Testing instructions are :ref:`Muon_Analysis_ARGUS-ref`.
 You will need the following runs:
 
 - ARGUS 71799-800
@@ -77,7 +77,7 @@ Group 6: Frequequency Domain Analysis
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This group tests the Frequency domain analysis GUI.
-Test instructions for group 6 can be found at :ref:`Muon_Analysis_TestGuide_4_FDAG-ref`.
+Test instructions for group 6 can be found at :ref:`Muon_Analysis_FDA-ref`.
 You will need the following run:
 
 - MUSR 62260
