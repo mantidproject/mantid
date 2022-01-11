@@ -143,7 +143,7 @@ class SliceViewerModel:
         of the model's workspace if none supplied.
         """
         if not ws_name:
-            ws_name = self._ws_name
+            ws_name = self.get_ws_name()
         return f'Sliceviewer - {ws_name}'
 
     def get_ws_MDE(self,
