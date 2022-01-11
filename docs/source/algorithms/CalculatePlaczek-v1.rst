@@ -133,7 +133,7 @@ The second order Placzek correction, :math:`P_2` is similar to the first order, 
               \right]
           \} \\
        &+ 2 \sin^2(\dfrac{\theta}{2})
-            \sum_\alpha c_\alpha \bar{b_\alpha^2} \dfrac{m}{M_\alpha}
+            \sum_\alpha c_\alpha \bar{b_\alpha^2} (\dfrac{m}{M_\alpha})^2
             \{ 1 + \sin^2(\dfrac{\theta}{2})
                    \left[(4f-7)(f-1)\phi_1
                         +f(7-2f)\epsilon_1
