@@ -108,26 +108,11 @@ void LoadILLSALSA::exec() {
   setProperty("OutputWorkspace", m_outputWorkspace);
 
   // move detector
+  double sampleToDetectorDistance = getProperty("DetectorDistance");
   Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
   theta.load();
-  double distance = getProperty("DetectorDistance");
-  double thetaDeg = theta[0] - static_cast<double>(getProperty("ThetaOffset"));
-  double thetaRad = thetaDeg * M_PI / 180.0;
-  double dx = -distance * sin(thetaRad);
-  double dz = distance * cos(thetaRad);
-  auto moveInst = createChildAlgorithm("MoveInstrumentComponent");
-  moveInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
-  moveInst->setPropertyValue("ComponentName", "detector");
-  moveInst->setProperty<double>("X", dx);
-  moveInst->setProperty<double>("Z", dz);
-  moveInst->setProperty<bool>("RelativePosition", false);
-  moveInst->execute();
-  auto rotateInst = createChildAlgorithm("RotateInstrumentComponent");
-  rotateInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
-  rotateInst->setPropertyValue("ComponentName", "detector");
-  rotateInst->setPropertyValue("Y", "1");
-  rotateInst->setProperty<double>("Angle", -thetaDeg);
-  rotateInst->execute();
+  double twoThetaAngle = theta[0] - static_cast<double>(getProperty("ThetaOffset"));
+  moveDetector(sampleToDetectorDistance, twoThetaAngle);
 
   // fill detector data
   int index = 0;
@@ -155,5 +140,28 @@ void LoadILLSALSA::exec() {
     m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
     m_outputWorkspace->mutableX(index)[i] = i;
   }
+}
+
+void LoadILLSALSA::moveDetector(double distance, double angle) {
+  // translation
+  double angleRad = angle * M_PI / 180.0;
+  double dx = -distance * sin(angleRad);
+  double dz = distance * cos(angleRad);
+  auto moveInst = createChildAlgorithm("MoveInstrumentComponent");
+  moveInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
+  moveInst->setPropertyValue("ComponentName", "detector");
+  moveInst->setProperty<double>("X", dx);
+  moveInst->setProperty<double>("Y", 0.);
+  moveInst->setProperty<double>("Z", dz);
+  moveInst->setProperty<bool>("RelativePosition", false);
+  moveInst->execute();
+
+  // rotation
+  auto rotateInst = createChildAlgorithm("RotateInstrumentComponent");
+  rotateInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
+  rotateInst->setPropertyValue("ComponentName", "detector");
+  rotateInst->setPropertyValue("Y", "1");
+  rotateInst->setProperty<double>("Angle", -angle);
+  rotateInst->execute();
 }
 } // namespace Mantid::DataHandling
