@@ -7,7 +7,8 @@
 
 from qtpy.QtCore import QObject, Signal
 
-from mantid.api import mtd, WorkspaceGroup
+from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace
+from mantid.kernel import logger
 
 from .ads_observer import SuperplotAdsObserver
 
@@ -97,6 +98,10 @@ class SuperplotModel(QObject):
         else:
             names = [name]
         for name in names:
+            if not isinstance(mtd[name], MatrixWorkspace):
+                logger.warning("Type of workspace \"{}\" is not supported by "
+                               "Superplot".format(name))
+                continue
             if name not in self._workspaces:
                 self._workspaces.append(name)
 
