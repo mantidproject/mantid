@@ -35,11 +35,28 @@ void DeleteWorkspaces::exec() {
       // properties were set. If a workspace is missing, it was probably
       // a group workspace whose contents were deleted before the group
       // itself.
-      auto deleteAlg = createChildAlgorithm("DeleteWorkspace", -1, -1, false);
-      deleteAlg->initialize();
-      deleteAlg->setPropertyValue("Workspace", wsName);
-      bool success = deleteAlg->execute();
-      if (!deleteAlg->isExecuted() || !success) {
+      bool success = false;
+      bool executed = false;
+      try {
+        auto deleteAlg = createChildAlgorithm("DeleteWorkspace", -1, -1, false);
+        deleteAlg->initialize();
+        deleteAlg->setPropertyValue("Workspace", wsName);
+        success = deleteAlg->execute();
+        executed = deleteAlg->isExecuted();
+      } catch (std::invalid_argument &e) {
+        std::string const msg = e.what();
+        // Empty group workspaces cannot be deleted, they need to be ungrouped to remove them.
+        if (msg == "Empty group passed as input") {
+          auto unGroupAlg = createChildAlgorithm("UnGroupWorkspace", -1, -1, false);
+          unGroupAlg->initialize();
+          unGroupAlg->setPropertyValue("InputWorkspace", wsName);
+          success = unGroupAlg->execute();
+          executed = unGroupAlg->isExecuted();
+        } else {
+          throw e;
+        }
+      }
+      if (!executed || !success) {
         g_log.error() << "Failed to delete " << wsName << ".\n";
       }
     }
