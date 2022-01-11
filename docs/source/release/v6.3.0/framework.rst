@@ -30,7 +30,6 @@ Improvements
 - :ref:`Rebin <algm-Rebin>` now has an option for binning with reverse logarithmic and inverse power bins.
 - :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` will now fail if the resulting sample shape has a volume of 0.
 - :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
-- Changed :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` to set bin errors and added option to leave them unset.
 - An importance sampling option has been added to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` so that it handles spikes in the structure factor S(Q) better
 - Added parameter to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` to control number of attempts to generate initial scatter point
 
