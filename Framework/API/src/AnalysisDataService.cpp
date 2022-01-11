@@ -162,9 +162,6 @@ void AnalysisDataServiceImpl::remove(const std::string &name) {
     // do nothing - remove will do what's needed
   }
   Kernel::DataService<API::Workspace>::remove(name);
-  if (ws) {
-    ws->setName("");
-  }
 }
 
 /**
