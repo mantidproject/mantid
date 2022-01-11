@@ -53,12 +53,12 @@ public:
     alg.initialize();
     std::string outWSName("LoadDNSEventTest_OutputWS");
     TS_ASSERT_EQUALS(alg.name(), "LoadDNSEvent");
-    TS_ASSERT_THROWS(alg.setProperty("m_chopperChannel", 5), std::invalid_argument);
-    TS_ASSERT_EQUALS(alg.getPropertyValue("m_chopperChannel"), "2");
+    TS_ASSERT_THROWS(alg.setProperty("ChopperChannel", 5), std::invalid_argument);
+    TS_ASSERT_EQUALS(alg.getPropertyValue("ChopperChannel"), "2");
     TS_ASSERT_EQUALS(alg.getPropertyValue("NumberOfTubes"), "128");
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfTubes", "1"));
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("m_chopperChannel", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChopperChannel", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetBinBoundary", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFile", m_fileName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
@@ -67,7 +67,7 @@ public:
   void test_excecutes() {
     alg.initialize();
     std::string outWSName("LoadDNSEventTest_OutputWS");
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("m_chopperChannel", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChopperChannel", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfTubes", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("SetBinBoundary", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFile", m_fileName));
@@ -109,7 +109,7 @@ public:
   void test_use_pre_chopper_no_bin() {
     alg.initialize();
     std::string outWSName("LoadDNSEventTest_OutputWS");
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("m_chopperChannel", "2"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ChopperChannel", "2"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("NumberOfTubes", "1"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputFile", m_fileName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
