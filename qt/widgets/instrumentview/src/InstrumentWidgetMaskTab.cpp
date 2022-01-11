@@ -791,6 +791,10 @@ void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile() { saveMaskingToCalFile
 
 void InstrumentWidgetMaskTab::saveMaskToTable() { saveMaskingToTableWorkspace(false); }
 
+void InstrumentWidgetMaskTab::showMessageBox(const QString &message) {
+  QMessageBox::information(this, "GroupDetectors Error", message, "OK");
+}
+
 /**
  * Extract selected detectors to a new workspace
  */
@@ -813,7 +817,7 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
       alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
       alg->execute();
     } catch (std::exception &e) {
-      QMessageBox::information(this, "GroupDetectors Error", e.what(), "OK");
+      showMessageBox(e.what());
     }
   }
   QApplication::restoreOverrideCursor();
@@ -841,7 +845,7 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
       alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
       alg->execute();
     } catch (std::exception &e) {
-      QMessageBox::information(this, "GroupDetectors Error", e.what(), "OK");
+      showMessageBox(e.what());
     }
   }
   QApplication::restoreOverrideCursor();
