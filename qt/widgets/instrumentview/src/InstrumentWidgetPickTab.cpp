@@ -739,7 +739,7 @@ void InstrumentWidgetPickTab::selectTool(const ToolType tool) {
 }
 
 void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
-  if (canUpdateTouchedDetector()) {
+  if (canUpdateTouchedDetector() && !m_instrWidget->isTabFolded()) {
     m_infoController->displayInfo(pickID);
     m_plotController->setPlotData(pickID);
     m_plotController->updatePlot();
@@ -747,10 +747,12 @@ void InstrumentWidgetPickTab::singleComponentTouched(size_t pickID) {
 }
 
 void InstrumentWidgetPickTab::singleComponentPicked(size_t pickID) {
-  m_infoController->displayInfo(pickID);
-  m_plotController->setPlotData(pickID);
-  m_plotController->zoomOutOnPlot();
-  m_plotController->updatePlot();
+  if (!m_instrWidget->isTabFolded()) {
+    m_infoController->displayInfo(pickID);
+    m_plotController->setPlotData(pickID);
+    m_plotController->zoomOutOnPlot();
+    m_plotController->updatePlot();
+  }
 }
 
 void InstrumentWidgetPickTab::comparePeaks(
@@ -787,7 +789,7 @@ void InstrumentWidgetPickTab::shapeCreated() {
  * selected with drawn shapes.
  */
 void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
-  if (!isVisible())
+  if (!isVisible() || m_instrWidget->isTabFolded())
     return;
   const ProjectionSurface &surface = *getSurface();
   if (surface.hasMasks()) {
@@ -1256,8 +1258,10 @@ void DetectorPlotController::addPeakLabels(const std::vector<size_t> &detIndices
  * Update the miniplot for a selected detector.
  */
 void DetectorPlotController::updatePlot() {
-  m_plot->recalcAxisDivs();
-  m_plot->replot();
+  if (!m_instrWidget->isTabFolded()) {
+    m_plot->recalcAxisDivs();
+    m_plot->replot();
+  }
 }
 
 /**
