@@ -62,6 +62,9 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     def peaks_workspace(self):
         return self.ws
 
+    def get_peaks_workspace_name(self):
+        return self._peaks_ws_name
+
     def clear_peak_representations(self):
         """
         Remove drawn peaks from the view

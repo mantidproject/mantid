@@ -248,7 +248,7 @@ class PeaksViewerCollectionPresenter:
         child_presenters = self._child_presenters
         presenter_to_remove = None
         for child in child_presenters:
-            if child.model._peaks_ws_name == name:
+            if child.model.get_peaks_workspace_name() == name:
                 presenter_to_remove = child
                 child.notify(PeaksViewerPresenter.Event.ClearPeaks)
                 index = self._view.remove_peaksviewer(child.view)
@@ -270,7 +270,7 @@ class PeaksViewerCollectionPresenter:
         """
         names = []
         for presenter in self._child_presenters:
-            names.append(presenter.model._peaks_ws_name)
+            names.append(presenter.model.get_peaks_workspace_name())
 
         return names
 
