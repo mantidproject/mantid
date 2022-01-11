@@ -33,8 +33,6 @@
 #include <Poco/Version.h>
 
 namespace {
-// Track number of attachments to generate a unique channel name
-int ATTACH_COUNT = 0;
 
 int DEFAULT_LINE_COUNT_MAX = 8192;
 const char *PRIORITY_KEY_NAME = "MessageDisplayPriority";
@@ -130,7 +128,6 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   if (logLevel > 0) {
     configSvc.setLogLevel(logLevel, true);
   }
-  ++ATTACH_COUNT;
 }
 
 /**
