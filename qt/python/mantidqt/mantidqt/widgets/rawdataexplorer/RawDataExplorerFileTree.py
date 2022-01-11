@@ -22,10 +22,22 @@ class RawDataExplorerFileTree(QTreeView):
     """
     _FILES_COLUMN = 0
 
+    """
+    Signal emitted when the index currently selected is changed.
+    The arg is the QModelIndex of the new index.
+    """
     sig_new_current = Signal(QModelIndex)
+
+    """
+    Signal emitted when the user starts or stops accumulating workspaces.
+    The arg is whether or not the user is now accumulating.
+    """
+    sig_accumulate_changed = Signal(bool)
 
     def __init__(self, parent=None):
         super(RawDataExplorerFileTree, self).__init__(parent)
+
+        self.is_ctrl_being_pressed = False
 
         file_model = QFileSystemModel()
         file_model.setNameFilters(self._FILE_SYSTEM_FILTERS)
@@ -42,6 +54,9 @@ class RawDataExplorerFileTree(QTreeView):
     def currentChanged(self, current_index, previous_index):
         if current_index.column() != self._FILES_COLUMN:
             current_index = current_index.sibling(current_index.row(), self._FILES_COLUMN)
+
+        if not self.is_ctrl_being_pressed:
+            self.sig_accumulate_changed.emit(False)
 
         self.sig_new_current.emit(current_index)
         super(RawDataExplorerFileTree, self).currentChanged(current_index, previous_index)
@@ -60,3 +75,16 @@ class RawDataExplorerFileTree(QTreeView):
             # but it is not allowed for the user to deselect a line, so we select it back
             for index in deselected.indexes():
                 self.selectionModel().select(index, QItemSelectionModel.Select | QItemSelectionModel.Rows)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.is_ctrl_being_pressed = True
+            self.sig_accumulate_changed.emit(True)
+        else:
+            super(RawDataExplorerFileTree, self).keyPressEvent(event)
+
+    def keyReleaseEvent(self, event):
+        if event.key() == Qt.Key_Control:
+            self.is_ctrl_being_pressed = False
+        else:
+            super(RawDataExplorerFileTree, self).keyReleaseEvent(event)
