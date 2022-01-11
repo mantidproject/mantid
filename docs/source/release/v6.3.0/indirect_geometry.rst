@@ -24,9 +24,9 @@ Improvements
   SimulatedDensityOfStates algorithm) can import force constants data
   from CASTEP or Phonopy calculations, and sample an appropriate
   q-point mesh on-the-fly to create a phonon DOS. This feature
-  requires the Euphonic library to be installed; as it is not
-  currently included in the Mantid release, an installer is provided
-  in the Script Repository.
+  requires the Euphonic library to be installed. This library is
+  included in the Windows package but for other platforms an
+  installer is provided in the Script Repository.
 - In indirect Data analysis the Elwin Tab has had its UI updated to be more user friendly.
 - Based on existing options for AnalysisMode in the VesuvioAnalysis algorithm two new
   options were introduced to allow reduction and analysis of spectra in the TOF domain

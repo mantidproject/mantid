@@ -10,3 +10,9 @@ Indirect Geometry Changes
     improvements, followed by bug fixes.
 
 :ref:`Release 6.4.0 <v6.4.0>`
+
+
+Changes
+#######
+
+- In Indirect Data analysis the button for fitting the currently plotted spectra has been renamed and rescaled to fit the interface.
