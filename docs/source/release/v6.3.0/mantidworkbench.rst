@@ -47,5 +47,19 @@ Bugfixes
 - Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
 - Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
 - The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
+- Fixed a bug where folding the pick tab in the instrument viewer crashed Mantid.
+
+SliceViewer
+-----------
+
+Bugfixes
+########
+- Fix out-of-range error when trying to access the projection matrix in sliceviewer for a workspace with a non-Q axis before other Q axes.
+- For MDHisto workspaces get the projection matrix from the basis vectors on the workspace rather than search for the W_MATRIX log.
+- Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
+- When entering a specific value for the center of the slicepoint of an integrated dimension/axis it will no longer jump to the nearest bin-center (this fix also affects MDEvent workspaces as it was assumed each dimension had 100 bins for the purpose of updating the slider for a integrated dimension/axis).
+- Slicepoint center now set to correct initial value (consistent with position of slider) for MDHisto workspaces.
+
 
 :ref:`Release 6.3.0 <v6.3.0>`
