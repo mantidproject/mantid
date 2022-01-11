@@ -230,7 +230,7 @@ class LRReflectivityOutput(PythonAlgorithm):
             # Calibrated constant term for the resolution
             if mtd[scaled_ws_list[0]].getInstrument().hasParameter("dq-constant"):
                 dq0 = mtd[scaled_ws_list[0]].getInstrument().getNumberParameter("dq-constant")[0]
-            
+
             _dq_over_q = self.compute_resolution(mtd[scaled_ws_list[0]])
             if _dq_over_q:
                 dq_over_q = _dq_over_q
