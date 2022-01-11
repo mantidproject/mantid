@@ -61,14 +61,12 @@ SliceViewer
 
 Bugfixes
 ########
-- Fix out-of-range error when trying to access the projection matrix in sliceviewer for a workspace with a non-Q axis before other Q axes.
-- For MDHisto workspaces get the projection matrix from the basis vectors on the workspace rather than search for the W_MATRIX log.
-- Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
-- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
-- When entering a specific value for the center of the slicepoint of an integrated dimension/axis it will no longer jump to the nearest bin-center (this fix also affects MDEvent workspaces as it was assumed each dimension had 100 bins for the purpose of updating the slider for a integrated dimension/axis).
-- Slicepoint center now set to correct initial value (consistent with position of slider) for MDHisto workspaces.
-- Fixed an issue to plot negative values with logarithm scaling in slice view.
-
-
+- Fixed the ``out-of-range`` error when trying to access the projection matrix for a workspace with a non-Q axis before other Q axes.
+- Fixed an issue to plot negative values with logarithm scaling.
+- Fixed a bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
+- Fixed the issue in ``SNSLiveEventDataListener`` when the instrument doesn't have monitors.
+- When entering a specific value for the center of the slicepoint of an integrated dimension/axis it will no longer jump to the nearest bin-center (this fix also affects ``MDEvent`` workspaces as it was assumed each dimension had 100 bins for the purpose of updating the slider for a integrated dimension/axis).
+- For ``MDHisto`` workspaces the projection matrix will be derived from the basis vectors on the workspace rather than searching for the ``W_MATRIX`` log.
+- Slicepoint center is now set to the correct initial value (consistent with position of slider) for ``MDHisto`` workspaces.
 
 :ref:`Release 6.3.0 <v6.3.0>`
