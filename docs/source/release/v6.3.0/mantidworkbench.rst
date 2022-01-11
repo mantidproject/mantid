@@ -36,23 +36,25 @@ Improvements
 
 Bugfixes
 --------
-- Fixed an issue when save_as a running script leads to crash upon script completion.
-- Fixed arbitrary values not being accepted as the "Start Time" in StartLiveDataDialog.
-- Fixed a bug where the option "SignedInPlaneTwoTheta" in :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` would not give signed results.
-- Fixed a bug where the toggle state of the "Grids on/off" toolbar button was incorrect when opening a 3D surface plot.
-- Fixed issue in DrILL when ASCII output was requested but the logs to save were not defined for that instrument.
-- The "About Mantid" page now appears on a new full release, even if a recent nightly was previously launched.
-- Fixed a bug where copying data from a table displaying a matrix workspace was not working.
-- Fixed plot bins not working on data with numeric X-axis.
-- Fixed a bug with autoscaling of colorfill plots from within the figure options.
-- Fixed an issue to plot negative values with logarithm scaling in slice view.
-- Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
-- Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
-- Workbench will no longer hang if an algorithm was running when workbench was closed.
-- Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form '<optional whitespace>#code_here # inline comment'.
-- Commenting code in the editor using 'ctrl+/' will preserve indenting (i.e. `# ` will be inserted at the position of the first non-whitespace character in the line).
-- The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
-- Fixed a bug where folding the pick tab in the instrument viewer crashed Mantid.
+* Fixed an issue when ``save_as`` of a running script leads to crash upon script completion.
+* Fixed arbitrary values not being accepted as the ``Start Time`` in ``StartLiveDataDialog``.
+* Fixed a bug where the option ``SignedInPlaneTwoTheta`` in :ref:`ConvertSpectrumAxis <algm-ConvertSpectrumAxis-v2>` would not give signed results.
+* A number of plotting bugfixes have been made.
+
+  * Fixed a bug where the toggle state of the ``Grids on/off`` toolbar button was incorrect when opening a 3D surface plot.
+  * Fixed plot bins not working on data with numeric X-axis.
+  * Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
+  * Fixed a bug with autoscaling of colorfill plots from within the figure options.
+  * Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
+  * The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
+
+* Fixed issue in :ref:`DrILL <DrILL-ref>` when ``ASCII`` output was requested but the logs to save were not defined for that instrument.
+* The ``About Mantid`` page now appears on a new full release, even if a recent nightly was previously launched.
+* Fixed a bug where copying data from a table displaying a matrix workspace was not working.
+* Workbench will no longer hang if an algorithm was running when workbench was closed.
+* Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
+* Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``# `` will be inserted at the position of the first non-whitespace character in the line).
+* Fixed a bug where folding the pick tab in the :ref:`InstrumentViewer` crashed Mantid.
 
 SliceViewer
 -----------
@@ -65,6 +67,8 @@ Bugfixes
 - Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
 - When entering a specific value for the center of the slicepoint of an integrated dimension/axis it will no longer jump to the nearest bin-center (this fix also affects MDEvent workspaces as it was assumed each dimension had 100 bins for the purpose of updating the slider for a integrated dimension/axis).
 - Slicepoint center now set to correct initial value (consistent with position of slider) for MDHisto workspaces.
+- Fixed an issue to plot negative values with logarithm scaling in slice view.
+
 
 
 :ref:`Release 6.3.0 <v6.3.0>`
