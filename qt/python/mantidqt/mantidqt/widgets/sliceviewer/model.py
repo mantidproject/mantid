@@ -36,6 +36,8 @@ class SliceViewerModel:
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
         self._ws = ws
+        self.set_ws_name(ws.name())
+
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
@@ -127,9 +129,12 @@ class SliceViewerModel:
         return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
             0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
+    def set_ws_name(self, new_name):
+        self._ws_name = new_name
+
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
-        return self._ws.name()
+        return self._ws_name
 
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
@@ -485,8 +490,7 @@ class SliceViewerModel:
         return help_msg
 
     def workspace_equals(self, ws_name):
-        # TODO put something better here
-        return str(self._get_ws()) == ws_name
+        return self._ws_name == ws_name
 
     # private api
     def _get_ws(self):

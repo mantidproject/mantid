@@ -45,6 +45,7 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
             raise ValueError("Expected a PeaksWorkspace type but found a {}".format(type(peaks_ws)))
 
         super().__init__(peaks_ws)
+        self._peaks_ws_name = peaks_ws.name()
         self._fg_color = fg_color
         self._bg_color = bg_color
         self._representations: List[Painted] = []
@@ -60,6 +61,9 @@ class PeaksViewerModel(TableWorkspaceDisplayModel):
     @property
     def peaks_workspace(self):
         return self.ws
+
+    def get_peaks_workspace_name(self):
+        return self._peaks_ws_name
 
     def clear_peak_representations(self):
         """

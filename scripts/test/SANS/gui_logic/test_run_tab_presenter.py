@@ -222,6 +222,24 @@ class RunTabPresenterTest(unittest.TestCase):
         # Clean up
         self._remove_files(user_file_path=user_file_path, batch_file_path=batch_file_path)
 
+    def test_that_on_batch_file_load(self):
+        for exception in [RuntimeError, ValueError, SyntaxError, IOError, KeyError]:
+            # XXX: This function should be broken up into a model / presenter long-term
+            self.presenter._csv_parser.parse_batch_file = mock.Mock(side_effect=exception)
+            self.presenter.sans_logger = mock.Mock()
+            self.presenter.display_warning_box = mock.Mock()
+
+            with mock.patch.multiple("sans.gui_logic.presenter.run_tab_presenter",
+                                     add_dir_to_datasearch=mock.DEFAULT,
+                                     ConfigService=mock.DEFAULT,
+                                     os=mock.DEFAULT) as mock_datasearch:
+
+                mock_datasearch["add_dir_to_datasearch"].return_value = (mock.Mock(), mock.Mock())
+                self.presenter.on_batch_file_load()
+
+            self.presenter.sans_logger.error.assert_called_once()
+            self.presenter.display_warning_box.assert_called_once()
+
     def test_state_retrieved_from_model(self):
         # Set values which trigger operators, such as divide or parsing, in StateModels
         self._mock_view.q_1d_step = 1.0

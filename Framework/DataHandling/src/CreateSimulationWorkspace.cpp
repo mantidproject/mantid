@@ -117,6 +117,8 @@ void CreateSimulationWorkspace::init() {
       std::make_unique<FileProperty>("DetectorTableFilename", "", FileProperty::OptionalLoad, "", Direction::Input),
       "An optional filename (currently RAW or ISIS NeXus) that "
       "contains UDET & SPEC tables to access hardware grouping");
+
+  declareProperty("SetErrors", false, "Whether to set histogram bin errors to sqrt of intensity.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -167,6 +169,7 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   const auto binBoundaries = createBinBoundaries();
   const size_t xlength = binBoundaries.size();
   const size_t ylength = xlength - 1;
+  const bool setError = getProperty("SetErrors");
 
   m_outputWS = WorkspaceFactory::Instance().create("Workspace2D", nhistograms, xlength, ylength);
   m_outputWS->setInstrument(m_instrument);
@@ -181,6 +184,9 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
   for (int64_t i = 0; i < static_cast<int64_t>(nhistograms); ++i) {
     m_outputWS->setBinEdges(i, binBoundaries);
     m_outputWS->mutableY(i) = 1.0;
+    if (setError) {
+      m_outputWS->mutableE(i).assign(m_outputWS->getNumberBins(i), sqrt(1.0));
+    }
 
     m_progress->report("Setting X values");
   }
