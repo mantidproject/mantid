@@ -37,42 +37,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace {
-template <typename Iterable>
-constexpr std::map<std::remove_reference_t<decltype(*std::declval<decltype(std::declval<Iterable>().cbegin())>())>,
-                   size_t>
-buildSkipTable(const Iterable &iterable) {
-  std::map<std::remove_reference_t<decltype(*std::declval<decltype(std::declval<Iterable>().cbegin())>())>, size_t>
-      skipTable;
-
-  size_t i = iterable.size();
-  for (auto c : iterable) {
-    i--;
-    auto &cPos = skipTable[c];
-    cPos = cPos == 0 ? iterable.size() : cPos;
-    cPos = i == 0 ? static_cast<size_t>(cPos) : i;
-  }
-  return skipTable;
-}
-
-template <typename Iterable> const std::vector<uint8_t> buildSkipTable2(const Iterable &iterable) {
-  std::vector<uint8_t> skipTable(256, static_cast<uint8_t>(iterable.size()));
-
-  size_t i = iterable.size();
-  for (auto c : iterable) {
-    i--;
-    auto &cPos = skipTable[c];
-    cPos = i == 0 ? cPos : static_cast<uint8_t>(i);
-  }
-  return skipTable;
-}
 
 template <typename V1, typename V2> bool startsWith(const V1 &sequence, const V2 &subSequence) {
   return std::equal(std::begin(subSequence), std::end(subSequence), std::begin(sequence));
-}
-
-template <typename V1, typename V2> bool endsWith(const V1 &sequence, const V2 &subSequence) {
-  auto dist = std::distance(std::begin(subSequence), std::end(subSequence));
-  return std::equal(begin(subSequence), end(subSequence), end(sequence) - dist);
 }
 
 } // namespace
@@ -212,8 +179,8 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr &eventWS, EventAc
     PARALLEL_END_INTERUPT_REGION
     oversizedChanelIndexCounterA += oversizedChanelIndexCounter;
     oversizedPosCounterA += oversizedPosCounter;
-    PARALLEL_CHECK_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   if (oversizedChanelIndexCounterA > 0) {
     g_log.warning() << "Bad chanel indices: " << oversizedChanelIndexCounterA << std::endl;
@@ -225,7 +192,6 @@ void LoadDNSEvent::populate_EventWorkspace(EventWorkspace_sptr &eventWS, EventAc
 
 std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
   // using Boyer-Moore String Search:
-  static const auto skipTable = buildSkipTable(header_sep);
 
   // search for header_sep and store actual header:
   std::vector<uint8_t> header;
@@ -236,24 +202,19 @@ std::vector<uint8_t> LoadDNSEvent::parse_Header(FileByteStream &file) {
     if (current_window == header_sep) {
       return header;
     } else {
-      auto iter = skipTable.find(*current_window.rbegin());
-      size_t skip_length = (iter == skipTable.end()) ? header_sep.size() : iter->second;
-
       const auto orig_header_size = header.size();
-      header.resize(header.size() + skip_length);
+      header.resize(header.size() + 1);
       const auto win_data = current_window.data();
-      std::copy(win_data, win_data + skip_length, header.data() + orig_header_size);
-
+      std::copy(win_data, win_data + 1, header.data() + orig_header_size);
       const std::array<uint8_t, header_sep.size()> orig_window = current_window;
-      file.readRaw(current_window, skip_length);
-      std::copy(orig_window.data() + skip_length, orig_window.data() + header_sep.size(), win_data);
+      file.readRaw(current_window, 1);
+      std::copy(orig_window.data() + 1, orig_window.data() + header_sep.size(), win_data);
     }
   }
   return header;
 }
 
 std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file, const unsigned maxChunckCount) {
-  static const auto skipTable = buildSkipTable2(block_sep);
 
   const uint64_t minChunckSize = MAX_BUFFER_BYTES_SIZE;
   const uint64_t chunckSize = std::max(minChunckSize, file.fileSize() / maxChunckCount);
@@ -286,16 +247,12 @@ std::vector<std::vector<uint8_t>> LoadDNSEvent::split_File(FileByteStream &file,
       file.readRaw(current_window[0], windowSize);
 
       while ((*windowAsArray != block_sep) & (!file.eof())) {
-        size_t skip_length = skipTable[current_window[windowSize - 1]];
-
         const auto orig_data_size = data.size();
-        data.resize(orig_data_size + skip_length);
-
+        data.resize(orig_data_size + 1);
         // accomodate for possible relocation of vector...:
         current_window = (&data.back() - windowSize + 1);
-
         windowAsArray = reinterpret_cast<std::array<uint8_t, windowSize> *>(current_window);
-        file.readRaw(current_window[windowSize - skip_length], skip_length);
+        file.readRaw(current_window[windowSize - 1], 1);
       }
     } catch (std::ifstream::failure &) {
       return result;
@@ -326,7 +283,7 @@ LoadDNSEvent::EventAccumulator LoadDNSEvent::parse_File(FileByteStream &file, co
   }
 
   // parse individual file chuncks:
-  PARALLEL_FOR_IF(true)
+  PARALLEL_FOR_NO_WSP_CHECK()
   for (int i = 0; i < static_cast<int>(filechuncks.size()); ++i) {
     auto filechunck = filechuncks[static_cast<size_t>(i)];
     g_log.debug() << "filechunck.size() = " << filechunck.size() << std::endl;
@@ -448,7 +405,6 @@ void LoadDNSEvent::parse_andAddEvent(VectorByteStream &file, const LoadDNSEvent:
   file.read<2>(data1);
   file.read<2>(data2);
   file.read<2>(data3);
-  // file.readSixBitLSB(data);
   // 48 bit event is 3 2-byte MSB words ordered LSB
   data = (uint64_t)data3 << 32 | (uint64_t)data2 << 16 | data1;
   eventId = static_cast<event_id_e>((data >> 47) & 0b1);
