@@ -501,15 +501,15 @@ class SliceViewerTest(unittest.TestCase):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
-        mock_model._ws = "test_name"
-        pres.delete_workspace(mock_model._ws)
+        mock_model.workspace_equals.return_value = True
+        pres.delete_workspace("test_name")
         mock_view.emit_close.assert_called_once()
 
     def test_workspace_not_deleted_with_different_name(self):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
-        mock_model._ws = "test_name"
+        mock_model.workspace_equals.return_value = False
         pres.delete_workspace("different_name")
         mock_view.emit_close.assert_not_called()
 
@@ -541,16 +541,18 @@ class SliceViewerTest(unittest.TestCase):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
-        mock_model._get_ws.return_value = "old_name"
+        mock_model.workspace_equals.return_value = True
         pres.rename_workspace("old_name", "new_name")
+        mock_model.set_ws_name.assert_called_with("new_name")
         mock_view.emit_rename.assert_called_once_with(mock_model.get_title.return_value)
 
     def test_rename_workspace_not_renamed_with_different_name(self):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
         pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
-        mock_model._get_ws.return_value = "different_name"
+        mock_model.workspace_equals.return_value = False
         pres.rename_workspace("old_name", "new_name")
+        mock_model.set_ws_name.assert_not_called()
         mock_view.emit_rename.assert_not_called()
 
     def test_clear_ADS(self):
