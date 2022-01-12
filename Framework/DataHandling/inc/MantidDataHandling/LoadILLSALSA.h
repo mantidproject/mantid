@@ -37,8 +37,8 @@ private:
   void init() override;
   // Execution code
   void exec() override;
-  // move detector
-  void moveDetector(double distance, double angle);
+  // set the instrument
+  void setInstrument(double distance, double angle);
   // Output workspace
   std::shared_ptr<DataObjects::Workspace2D> m_outputWorkspace;
 };

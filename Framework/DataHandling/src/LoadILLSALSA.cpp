@@ -99,20 +99,12 @@ void LoadILLSALSA::exec() {
   m_outputWorkspace = DataObjects::create<DataObjects::Workspace2D>(numberOfRows * numberOfColumns + 1,
                                                                     HistogramData::Points(numberOfScans));
 
-  // create instrument
-  auto loadInst = createChildAlgorithm("LoadInstrument");
-  loadInst->setPropertyValue("InstrumentName", "SALSA");
-  loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
-  loadInst->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
-  loadInst->execute();
-  setProperty("OutputWorkspace", m_outputWorkspace);
-
-  // move detector
+  // set the instrument
   double sampleToDetectorDistance = getProperty("DetectorDistance");
   Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
   theta.load();
   double twoThetaAngle = theta[0] - static_cast<double>(getProperty("ThetaOffset"));
-  moveDetector(sampleToDetectorDistance, twoThetaAngle);
+  setInstrument(sampleToDetectorDistance, twoThetaAngle);
 
   // fill detector data
   int index = 0;
@@ -142,7 +134,15 @@ void LoadILLSALSA::exec() {
   }
 }
 
-void LoadILLSALSA::moveDetector(double distance, double angle) {
+void LoadILLSALSA::setInstrument(double distance, double angle) {
+  // load instrument
+  auto loadInst = createChildAlgorithm("LoadInstrument");
+  loadInst->setPropertyValue("InstrumentName", "SALSA");
+  loadInst->setProperty<API::MatrixWorkspace_sptr>("Workspace", m_outputWorkspace);
+  loadInst->setProperty("RewriteSpectraMap", Kernel::OptionalBool(true));
+  loadInst->execute();
+  setProperty("OutputWorkspace", m_outputWorkspace);
+
   // translation
   double angleRad = angle * M_PI / 180.0;
   double dx = -distance * sin(angleRad);
