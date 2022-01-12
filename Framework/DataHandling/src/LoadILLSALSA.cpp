@@ -107,6 +107,8 @@ void LoadILLSALSA::exec() {
   setInstrument(sampleToDetectorDistance, twoThetaAngle);
 
   fillWorkspaceData(data, scanVariableNames, scanVariables);
+
+  dataRoot.close();
 }
 
 void LoadILLSALSA::setInstrument(double distance, double angle) {
