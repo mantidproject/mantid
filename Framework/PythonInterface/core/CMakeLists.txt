@@ -9,6 +9,7 @@ set(SRC_FILES
     src/NDArray.cpp
     src/ReleaseGlobalInterpreterLock.cpp
     src/UninstallTrace.cpp
+    src/PythonLoggingChannel.cpp
     src/PythonStdoutChannel.cpp
     src/WrapperHelpers.cpp
     src/Converters/CloneToNDArray.cpp
@@ -33,6 +34,7 @@ set(INC_FILES
     inc/MantidPythonInterface/core/IsNone.h
     inc/MantidPythonInterface/core/NDArray.h
     inc/MantidPythonInterface/core/PropertyWithValueExporter.h
+    inc/MantidPythonInterface/core/PythonLoggingChannel.h
     inc/MantidPythonInterface/core/PythonObjectInstantiator.h
     inc/MantidPythonInterface/core/PythonStdoutChannel.h
     inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
