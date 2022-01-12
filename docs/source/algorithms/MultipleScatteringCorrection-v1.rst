@@ -90,6 +90,211 @@ Similarly, the term :math:`A_{2}` is now
 
 where the distance within different material (sample and container) are summed independently.
 
+Example
+-------
+
+The following Python script generate a synthetic data set (instrument and sample) to show case the interface
+
+.. testcode:: SampleOnly
+
+    def make_sample_workspace():
+        # Create a fake workspace with TOF data
+        sample_ws = CreateSampleWorkspace(Function='Powder Diffraction',
+                                        NumBanks=4,
+                                        BankPixelWidth=1,
+                                        XUnit='TOF',
+                                        XMin=1000,
+                                        XMax=10000)
+        # fake instrument
+        EditInstrumentGeometry(sample_ws,
+                            PrimaryFlightPath=5.0,
+                            SpectrumIDs=[1, 2, 3, 4],
+                            L2=[2.0, 2.0, 2.0, 2.0],
+                            Polar=[10.0, 90.0, 170.0, 90.0],
+                            Azimuthal=[0.0, 0.0, 0.0, 45.0],
+                            DetectorIDs=[1, 2, 3, 4],
+                            InstrumentName="Instrument")
+        return sample_ws
+
+    def add_cylinder_sample_to_workspace(
+            ws,
+            material,
+            number_density,
+            mass_density,
+            center_bottom_base=[0.0, 0.0, 0.0],  # x,y,z of bottom base of cylinder
+            height=0.1,  # in meter
+            radius=0.1,  # in meter
+    ):
+        SetSample(
+            ws,
+            Geometry={
+                "Shape": "Cylinder",
+                "centre-of-bottom-base": {
+                    "x": center_bottom_base[0],
+                    "y": center_bottom_base[1],
+                    "z": center_bottom_base[2],
+                },
+                "Height": height,
+                "Radius": radius,
+                "Axis": 1,
+            },
+            Material = {
+                "ChemicalFormula": material,
+                "SampleNumberDensity": number_density,
+                "SampleMassDensity": mass_density,
+            }
+        )
+        return ws
+
+    # use Mutliple scattering correction
+    def correction_multiple_scattering(sample_ws, unit="Wavelength"):
+        ConvertUnits(InputWorkspace=sample_ws,
+                    OutputWorkspace=sample_ws,
+                    Target=unit,
+                    EMode="Elastic")
+        rst = MultipleScatteringCorrection(sample_ws)
+        return rst
+
+    # start
+    ws = make_sample_workspace()
+    ws = add_cylinder_sample_to_workspace(
+        ws,
+        "V",
+        0.07261,
+        6.11,
+        [0.0, -0.0284, 0.0],
+        0.00295,
+        0.0568,
+    )
+    ms_multi = correction_multiple_scattering(ws)
+
+.. testcleanup:: SampleOnly
+
+The following code generates a synthetic data set with instrument, sample and container.
+Notice that the output workspace group now contains ``_containerOnly`` and ``_sampleAndContainer`` workspaces.
+
+.. testcode:: SampleAndContainer
+
+    # Create a fake workspace with TOF data
+    ws = CreateSampleWorkspace(Function='Powder Diffraction',
+                                NumBanks=2,
+                                BankPixelWidth=1,
+                                XUnit='TOF',
+                                XMin=1000,
+                                XMax=1500,)
+    # Fake instrument
+    EditInstrumentGeometry(ws,
+                            PrimaryFlightPath=5.0,
+                            SpectrumIDs=[1, 2],
+                            L2=[2.0, 2.0],
+                            Polar=[10.0, 90.0],
+                            Azimuthal=[0.0, 45.0],
+                            DetectorIDs=[1, 2],
+                            InstrumentName="Instrument")
+    # set sample and container
+    SetSample(
+            ws,
+            Geometry={
+                "Shape": "Cylinder",
+                "Center": [0., 0., 0.],
+                "Height": 1.0,
+                "Radius": 0.2,
+            },
+            Material = {
+                "ChemicalFormula": "La-(B11)5.94-(B10)0.06",
+                "SampleNumberDensity": 0.1,
+            },
+            ContainerMaterial = {
+                "ChemicalFormula": "V",
+                "SampleNumberDensity": 0.0721,
+            },
+            ContainerGeometry = {
+                "Shape": "HollowCylinder",
+                "Height": 1.0,
+                "InnerRadius": 0.2,
+                "OuterRadius": 0.3,
+                "Center": [0., 0., 0.],
+            }
+        )
+    # to wavelength
+    ConvertUnits(InputWorkspace=ws,
+                    OutputWorkspace=ws,
+                    Target="Wavelength",
+                    EMode="Elastic")
+    # Run the multiple scattering correction
+    rst = MultipleScatteringCorrection(
+        InputWorkspace = ws,
+        Method="SampleAndContainer",
+        ElementSize=0.5,  # mm
+    )
+
+.. testcleanup:: SampleAndContainer
+
+The following code demonstrates a workaround to deal with thin container walls where a separate
+element size for container is needed.
+
+.. testcode:: SampleAndContainerWithDifferentContainerElementSize
+
+    # ----------------------- #
+    # make an empty workspace #
+    # ----------------------- #
+    # Create a fake workspace with TOF data
+    ws = CreateSampleWorkspace(Function='Powder Diffraction',
+                                NumBanks=2,
+                                BankPixelWidth=1,
+                                XUnit='TOF',
+                                XMin=1000,
+                                XMax=10000,)
+    # Fake instrument
+    EditInstrumentGeometry(ws,
+                            PrimaryFlightPath=5.0,
+                            SpectrumIDs=[1, 2],
+                            L2=[2.0, 2.0],
+                            Polar=[10.0, 90.0],
+                            Azimuthal=[0.0, 45.0],
+                            DetectorIDs=[1, 2],
+                            InstrumentName="Instrument")
+    # set sample and container
+    SetSample(
+            ws,
+            Geometry={
+                "Shape": "Cylinder",
+                "Center": [0., 0., 0.],
+                "Height": 1.0,  # cm
+                "Radius": 0.3,  # cm
+            },
+            Material = {
+                "ChemicalFormula": "La-(B11)5.94-(B10)0.06",
+                "SampleNumberDensity": 0.1,
+            },
+            ContainerMaterial = {
+                "ChemicalFormula": "V",
+                "SampleNumberDensity": 0.0721,
+            },
+            ContainerGeometry = {
+                "Shape": "HollowCylinder",
+                "Height": 1.0,  # cm
+                "InnerRadius": 0.3,  # cm
+                "OuterRadius": 0.35,  # cm
+                "Center": [0., 0., 0.],
+            }
+        )
+    # to wavelength
+    ConvertUnits(InputWorkspace=ws,
+                    OutputWorkspace=ws,
+                    Target="Wavelength",
+                    EMode="Elastic")
+    # call
+    MultipleScatteringCorrection(
+        InputWorkspace = ws,
+        Method="SampleAndContainer",
+        ElementSize=0.5,
+        ContainerElementSize=0.45,
+        OutputWorkspace="rst",
+    )
+
+.. testcleanup:: SampleAndContainerWithDifferentContainerElementSize
+
 .. categories::
 
 .. sourcelink::
