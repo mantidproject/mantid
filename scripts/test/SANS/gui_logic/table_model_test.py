@@ -26,6 +26,12 @@ class TableModelTest(unittest.TestCase):
         returned_model = table_model.get_row(0)
         self.assertEqual(table_index_model, returned_model)
 
+    def test_get_multiple_rows(self):
+        row_1, row_2 = RowEntries(), RowEntries()
+        instance = TableModel()
+        instance.add_multiple_table_entries([row_1, row_2])
+        self.assertEqual([row_1, row_2], instance.get_multiple_rows([0, 1]))
+
     def test_that_can_set_the_options_column_model(self):
         table_index_model = RowEntries()
         table_index_model.options.set_user_options("WavelengthMin=1, WavelengthMax=3, NotRegister2=1")
@@ -61,6 +67,135 @@ class TableModelTest(unittest.TestCase):
         number_of_rows = table_model.get_number_of_rows()
 
         self.assertEqual(number_of_rows, 2)
+
+    def test_copy_paste_single_appends(self):
+        table_model = TableModel()
+        table_model.append_table_entry(RowEntries(sample_transmission="1"))
+        table_model.append_table_entry(RowEntries(sample_transmission="2"))
+
+        table_model.copy_rows([0])
+        table_model.paste_rows([])
+        self.assertEqual(3, table_model.get_number_of_rows())
+        self.assertEqual(table_model.get_row(0), table_model.get_row(2))
+
+    def test_copy_paste_append_partial(self):
+        table_model = TableModel()
+        for entry_i in range(4):
+            table_model.append_table_entry(RowEntries(sample_transmission=entry_i))
+
+        # When a partial range of rows is selected that doesn't match the copied length
+        # we just append below the lowest entry, as it preserves entries when the user's
+        # intention is ambiguous
+        table_model.copy_rows([0, 1, 2])
+        row_0 = table_model.get_row(0)
+
+        table_model.paste_rows([0, 1])
+
+        # 4 existing rows + 3 copied and pasted
+        self.assertEqual(7, table_model.get_number_of_rows())
+        # Check we haven't trampled row 0
+        self.assertEqual(row_0, table_model.get_row(0))
+        # We've appended underneath row 2 (by len) so index (0, 1) == (2, 3) with the last rows shifted
+        for i in range(2):
+            self.assertEqual(table_model.get_row(i), table_model.get_row(i + 2))
+        self.assertEqual(table_model.get_row(4), table_model.get_row(5))
+
+    def test_copy_paste_append_mixed_selection(self):
+        table_model = TableModel()
+        for entry_i in range(4):
+            table_model.append_table_entry(RowEntries(sample_transmission=entry_i))
+
+        copied_rows = [0, 1, 3]
+        table_model.copy_rows(copied_rows)
+        table_model.paste_rows([])
+
+        # 4 rows + 3 pasted
+        self.assertEqual(7, table_model.get_number_of_rows())
+        for dest_row, original_row in enumerate(copied_rows):
+            self.assertEqual(table_model.get_row(original_row), table_model.get_row(dest_row + 4))
+
+    def test_copy_paste_append_mixed_selection_onto_mixed_selection(self):
+        table_model = TableModel()
+        for entry_i in range(5):
+            table_model.append_table_entry(RowEntries(sample_transmission=entry_i))
+
+        copied_rows = [0, 1, 3, 4]
+        table_model.copy_rows(copied_rows)
+        table_model.paste_rows([0, 2, 3])
+
+        # 5 rows + 4 pasted
+        self.assertEqual(9, table_model.get_number_of_rows())
+        # Row index is +4 as that's one below the point of the last mixed selection
+        self.assertEqual(table_model.get_row(0), table_model.get_row(0 + 4))
+        self.assertEqual(table_model.get_row(1), table_model.get_row(1 + 4))
+        self.assertEqual(table_model.get_row(3), table_model.get_row(2 + 4))
+        # This row has now shifted down despite being copied originally
+        self.assertEqual(table_model.get_row(4 + len(copied_rows)), table_model.get_row(3 + 4))
+
+    def test_copy_paste_overwrite(self):
+        for paste_location in [0, 1]:
+            table_model = TableModel()
+            for entry_i in range(3):
+                table_model.append_table_entry(RowEntries(sample_transmission=entry_i))
+
+            table_model.copy_rows([2])
+            table_model.paste_rows([paste_location])
+            self.assertEqual(table_model.get_row(2), table_model.get_row(paste_location))
+
+    def test_copy_paste_sorts_order(self):
+        # Qt can give is the order a user selected rows in, ensure it's always in the natural order
+        table_model = TableModel()
+        num_rows = 5
+        for entry_i in range(num_rows):
+            table_model.append_table_entry(RowEntries(sample_transmission=entry_i))
+
+        table_model.copy_rows([4, 0, 2])
+        table_model.paste_rows([])
+
+        self.assertEqual(table_model.get_row(0), table_model.get_row(0 + num_rows))
+        self.assertEqual(table_model.get_row(2), table_model.get_row(1 + num_rows))
+        self.assertEqual(table_model.get_row(4), table_model.get_row(2 + num_rows))
+
+    def test_cut_paste_sorts_order(self):
+        # Qt can give is the order a user selected rows in, ensure it's always in the natural order
+        table_model = TableModel()
+        for entry_i in range(5):
+            table_model.append_table_entry(RowEntries(sample_transmission=entry_i))
+
+        input_rows = [4, 0, 2]
+        expected_rows = table_model.get_multiple_rows(sorted(input_rows))
+
+        table_model.cut_rows(input_rows)
+        table_model.paste_rows([])
+
+        for i, row in enumerate(expected_rows):
+            # 5 original rows - 3 cut rows = 2 rows remaining
+            self.assertEqual(row, table_model.get_row(i + 2))
+
+    def test_copy_paste_modify_overwrite(self):
+        # Check we aren't doing a shallow copy, which cause a user to
+        # see two rows get modified at once
+        table_model = TableModel()
+        table_model.append_table_entry(RowEntries(sample_transmission="1"))
+        table_model.append_table_entry(RowEntries(sample_transmission="2"))
+        table_model.copy_rows([0])
+        table_model.paste_rows([1])
+
+        row_1 = table_model.get_row(1)
+        self.assertEqual(table_model.get_row(0), row_1)
+        row_1.sample_transmission = 2
+        self.assertNotEqual(table_model.get_row(0), row_1)
+
+    def test_copy_paste_modify_append(self):
+        table_model = TableModel()
+        table_model.append_table_entry(RowEntries(sample_transmission="1"))
+        table_model.copy_rows([0])
+        table_model.paste_rows([])
+
+        row_1 = table_model.get_row(1)
+        self.assertEqual(table_model.get_row(0), row_1)
+        row_1.sample_transmission = 2
+        self.assertNotEqual(table_model.get_row(0), row_1)
 
     def test_when_table_is_cleared_is_left_with_one_empty_row(self):
         table_model = TableModel()

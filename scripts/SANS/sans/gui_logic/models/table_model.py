@@ -9,6 +9,8 @@
 The main information in the table model are the run numbers and the selected periods. However it also contains
 information regarding the custom output name and the information in the options tab.
 """
+import copy
+from typing import List
 
 from mantid.kernel import Logger
 from sans.common.enums import RowState
@@ -32,6 +34,7 @@ class TableModel(object):
         self._subscriber_list = []
 
         self._table_entries = []
+        self._clipboard: List[RowEntries] = []
         self._default_entry_added = None
         self.clear_table_entries()
 
@@ -41,17 +44,41 @@ class TableModel(object):
         else:
             raise IndexError("The row {} does not exist.".format(row_index))
 
-    def add_multiple_table_entries(self, table_index_model_list):
+    def add_multiple_table_entries(self, table_index_model_list: List[RowEntries]):
         for row in table_index_model_list:
             self._add_single_table_entry(row_entry=row)
 
-    def append_table_entry(self, table_index_model):
+    def append_table_entry(self, table_index_model: RowEntries):
         self._add_single_table_entry(row_entry=table_index_model)
 
-    def get_all_rows(self):
+    def copy_rows(self, row_positions: List[int]):
+        row_positions = sorted(row_positions)
+        self._clipboard = self.get_multiple_rows(row_positions)
+
+    def cut_rows(self, row_positions: List[int]):
+        self.copy_rows(row_positions)
+        self.remove_table_entries(row_positions)
+
+    def paste_rows(self, row_positions: List[int]):
+        if len(row_positions) == len(self._clipboard):
+            # Overwrite entries
+            for pos, entry in zip(row_positions, self._clipboard):
+                self.replace_table_entry(pos, copy.deepcopy(entry))
+        else:
+            # Append below the user selection or at the last row
+            pos = max(row_positions) + 1 if row_positions else self.get_number_of_rows()
+            # Go in reversed order to avoid having to increment the pos
+            # effectively pasting bottom -> top as we go
+            for row in reversed(self._clipboard):
+                self.insert_row_at(row_entry=copy.deepcopy(row), row_index=pos)
+
+    def get_all_rows(self) -> List[RowEntries]:
         return self._table_entries
 
-    def get_row(self, index) -> RowEntries:
+    def get_multiple_rows(self, row_indexes: List[int]) -> List[RowEntries]:
+        return [self._table_entries[i] for i in row_indexes]
+
+    def get_row(self, index: int) -> RowEntries:
         return self._table_entries[index]
 
     def get_row_index(self, row):
