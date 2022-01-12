@@ -44,9 +44,8 @@ void DeleteWorkspaces::exec() {
         success = deleteAlg->execute();
         executed = deleteAlg->isExecuted();
       } catch (std::invalid_argument &e) {
-        std::string const msg = e.what();
         // Empty group workspaces cannot be deleted, they need to be ungrouped to remove them.
-        if (msg == "Empty group passed as input") {
+        if (std::string(e.what()) == "Empty group passed as input") {
           auto unGroupAlg = createChildAlgorithm("UnGroupWorkspace", -1, -1, false);
           unGroupAlg->initialize();
           unGroupAlg->setPropertyValue("InputWorkspace", wsName);
