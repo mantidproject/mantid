@@ -42,12 +42,19 @@ instruments = {
         'max_wavenumber': 1613,  # maximum wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
         'min_wavenumber': 0.0,  # minimal wavenumber in cm^-1 taken into account while creating workspaces (exclusive)
         # Resolution function fitted to incident energy and energy transfer:
-        # sigma = polyval(abs_meV, ɛ) + E_i × ei_dependence + E_i × ɛ × ei_energy_product
-        # (i.e. a quartic polynomial in ɛ, plus linear dependence on Ei and ɛ×Ei)
-        'resolution': {'abs_meV': [-8.41735065e-07,  4.81061749e-04,
-                                   -1.98567658e-02, -1.36760126e+00],
-                       'ei_dependence': 6.90987065e-2,
-                       'ei_energy_product': 7.66507127e-4}
+        # sigma = polyval(abs_meV, ɛ) + polyval(ei_dependence, E_i) + polyval(ei_energy_product, E_i × ɛ)
+        # (Here a quartic polynomial in ɛ, plus quadratic on Ei and cubic on ɛ×Ei)
+        'resolution': {'abs_meV': [1.4819832651359686e-06,
+                                   0.0006472263718719711,
+                                   0.023616411911882462,
+                                   9.776165626074981],
+                       'ei_dependence': [0.0010075660656377956,
+                                         -0.15243694390151533,
+                                         0],
+                       'ei_energy_product': [-2.3477397983667877e-13,
+                                             -8.56972067941707e-09,
+                                             -0.000790753342146401,
+                                             0]}
         },
     'MAPS': {
         'resolution': 'pychop',

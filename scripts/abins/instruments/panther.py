@@ -147,6 +147,6 @@ class PantherInstrument(Instrument):
         frequencies_meV = frequencies / MILLI_EV_TO_WAVENUMBER
 
         return (np.polyval(parameters['abs_meV'], frequencies_meV)
-                + ei_meV * parameters['ei_dependence']
-                + ei_meV * frequencies_meV * parameters['ei_energy_product']
+                + np.polyval(parameters['ei_dependence'], ei_meV)
+                + np.polyval(parameters['ei_energy_product'], ei_meV * frequencies_meV)
                 ) * MILLI_EV_TO_WAVENUMBER
