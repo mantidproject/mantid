@@ -57,6 +57,7 @@ def generate_script(fig, exclude_headers=False):
         axes.set_xlabel and axes.set_ylabel()
         axes.set_xlim() and axes.set_ylim()
         axes.set_xscale() and axes.set_yscale()
+        axes.set_facecolor()
         <Set axes major tick formatters if non-default>
         axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
         <Legend title and label commands if non-default>
