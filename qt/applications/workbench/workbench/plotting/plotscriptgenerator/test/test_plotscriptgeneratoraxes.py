@@ -15,7 +15,8 @@ from matplotlib.ticker import LogFormatterSciNotation, ScalarFormatter
 
 from unittest.mock import Mock
 from workbench.plotting.plotscriptgenerator.axes import (generate_axis_limit_commands,
-                                                         generate_axis_label_commands)
+                                                         generate_axis_label_commands,
+                                                         generate_axis_facecolor_commands)
 from workbench.plotting.plotscriptgenerator import generate_script
 
 
@@ -72,6 +73,23 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         ax.set_ylim([0, 4])
         self.assertEqual(['set_xlim([-5.0, 5.0])', 'set_ylim([0.0, 4.0])'],
                          generate_axis_limit_commands(ax))
+        plt.close()
+        del fig
+
+    def test_generate_axis_facecolor_commands_default(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot([-10, 10], [1, 2])
+        self.assertEqual("set_facecolor((1.0, 1.0, 1.0, 1))", generate_axis_facecolor_commands(ax))
+        plt.close()
+        del fig
+
+    def test_generate_axis_facecolor_commands_custom(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot([-10, 10], [1, 2])
+        ax.set_facecolor("#000000")
+        self.assertEqual("set_facecolor((0.0, 0.0, 0.0, 1.0))", generate_axis_facecolor_commands(ax))
         plt.close()
         del fig
 
