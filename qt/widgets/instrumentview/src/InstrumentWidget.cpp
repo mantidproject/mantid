@@ -306,6 +306,7 @@ void InstrumentWidget::init(bool resetGeometry, bool setDefaultView) {
         defaultView = "CYLINDRICAL_Y";
       }
       setSurfaceType(defaultView);
+      m_renderTab->flipUnwrappedView(m_instrumentActor->getDefaultFlip());
     } else {
       setSurfaceType(m_surfaceType); // This call must come after the
                                      // InstrumentActor is created
@@ -700,7 +701,7 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
   renameWorkspace(newWs);
   // re-create the underlying instrument in the background and reset the autoscale, scales, and default view options to
   // the values that this window was launched with originally
-  resetInstrumentActor(true, m_autoscaling, 0.0, 0.0, false);
+  resetInstrumentActor(true, m_autoscaling, 0.0, 0.0, true);
 
   // update the view and colormap
   auto surface = getSurface();

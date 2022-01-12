@@ -969,7 +969,10 @@ void InstrumentDefinitionParser::readDefaults(Poco::XML::Element *defaults) {
   if (defaultView) {
     m_instrument->setDefaultViewAxis(defaultView->getAttribute("axis-view"));
     if (defaultView->hasAttribute("view")) {
-      m_instrument->setDefaultView(defaultView->getAttribute("view"));
+      bool defaultFlip = false;
+      if (defaultView->hasAttribute("flip-view"))
+        defaultFlip = defaultView->getAttribute("flip-view") == "true";
+      m_instrument->setDefaultView(defaultView->getAttribute("view"), defaultFlip);
     }
   }
 

@@ -1140,6 +1140,8 @@ std::string InstrumentActor::getDefaultAxis() const { return getInstrument()->ge
 
 std::string InstrumentActor::getDefaultView() const { return getInstrument()->getDefaultView(); }
 
+bool InstrumentActor::getDefaultFlip() const { return getInstrument()->getDefaultFlip(); }
+
 std::string InstrumentActor::getInstrumentName() const {
   const auto &compInfo = componentInfo();
   return compInfo.name(compInfo.root());
