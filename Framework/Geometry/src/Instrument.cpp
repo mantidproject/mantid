@@ -60,9 +60,9 @@ Instrument::Instrument(const std::string &name)
  */
 Instrument::Instrument(const std::shared_ptr<const Instrument> &instr, const std::shared_ptr<ParameterMap> &map)
     : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache), m_sampleCache(instr->m_sampleCache),
-      m_defaultView(instr->m_defaultView), m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
-      m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom), m_ValidTo(instr->m_ValidTo),
-      m_referenceFrame(new ReferenceFrame) {
+      m_defaultView(instr->m_defaultView), m_defaultViewAxis(instr->m_defaultViewAxis),
+      m_defaultFlip(instr->m_defaultFlip), m_instr(instr), m_map_nonconst(map), m_ValidFrom(instr->m_ValidFrom),
+      m_ValidTo(instr->m_ValidTo), m_referenceFrame(new ReferenceFrame) {
   // Note that we do not copy m_detectorInfo and m_componentInfo into the
   // parametrized instrument since the ParameterMap will make a copy, if
   // applicable.
@@ -76,7 +76,8 @@ Instrument::Instrument(const std::shared_ptr<const Instrument> &instr, const std
 Instrument::Instrument(const Instrument &instr)
     : CompAssembly(instr), m_sourceCache(nullptr), m_sampleCache(nullptr), /* Should only be temporarily null */
       m_logfileCache(instr.m_logfileCache), m_logfileUnit(instr.m_logfileUnit), m_defaultView(instr.m_defaultView),
-      m_defaultViewAxis(instr.m_defaultViewAxis), m_instr(), m_map_nonconst(), /* Should not be parameterized */
+      m_defaultViewAxis(instr.m_defaultViewAxis), m_defaultFlip(instr.m_defaultFlip), m_instr(),
+      m_map_nonconst(), /* Should not be parameterized */
       m_ValidFrom(instr.m_ValidFrom), m_ValidTo(instr.m_ValidTo), m_referenceFrame(instr.m_referenceFrame) {
   // Note that we do not copy m_detectorInfo and m_componentInfo into the new
   // instrument since they are only non-NULL for the base instrument, which
@@ -1023,12 +1024,17 @@ std::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const {
  *    Caseless. If a wrong value is given logs a warning and sets the view to
  * "3D"
  */
-void Instrument::setDefaultView(const std::string &type) {
+void Instrument::setDefaultView(const std::string &type, bool defaultFlip) {
   std::string typeUC(type);
   std::transform(typeUC.begin(), typeUC.end(), typeUC.begin(), toupper);
   if (typeUC == "3D" || typeUC == "CYLINDRICAL_X" || typeUC == "CYLINDRICAL_Y" || typeUC == "CYLINDRICAL_Z" ||
       typeUC == "SPHERICAL_X" || typeUC == "SPHERICAL_Y" || typeUC == "SPHERICAL_Z") {
     m_defaultView = typeUC;
+
+    // the flip option is only relevant if the default view is not 3D
+    if (typeUC != "3D") {
+      m_defaultFlip = defaultFlip;
+    }
   } else {
     m_defaultView = "3D";
     g_log.warning() << type << " is not allowed as an instrument view type. Default to \"3D\"" << '\n';

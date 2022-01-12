@@ -204,6 +204,7 @@ public:
   QString getParameterInfo(size_t index) const;
   std::string getDefaultAxis() const;
   std::string getDefaultView() const;
+  bool getDefaultFlip() const;
   std::string getInstrumentName() const;
   std::vector<std::string> getStringParameter(const std::string &name, bool recursive = true) const;
   /// Load the state of the actor from a Mantid project file.

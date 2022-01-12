@@ -148,13 +148,16 @@ public:
   /// Set the default type of the instrument view. The possible values are:
   /// 3D, CYLINDRICAL_X, CYLINDRICAL_Y, CYLINDRICAL_Z, SPHERICAL_X, SPHERICAL_Y,
   /// SPHERICAL_Z
-  void setDefaultView(const std::string &type);
+  /// flipHorizontal control the default state of the flip view check box.
+  void setDefaultView(const std::string &type, bool defaultFlip = false);
   /// Retrieves from which side the instrument to be viewed from when the
   /// instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
   std::string getDefaultAxis() const { return m_defaultViewAxis; }
   /// Retrieves from which side the instrument to be viewed from when the
   /// instrument viewer first starts, possibilities are "Z+, Z-, X+, ..."
   void setDefaultViewAxis(const std::string &axis) { m_defaultViewAxis = axis; }
+  /// Retrieves whether the flip checkbox is ticked by default
+  bool getDefaultFlip() const { return m_defaultFlip; }
   // Allow access by index
   using CompAssembly::getChild;
 
@@ -273,6 +276,9 @@ private:
   /// Stores from which side the instrument will be viewed from, initially in
   /// the instrument viewer, possibilities are "Z+, Z-, X+, ..."
   std::string m_defaultViewAxis;
+
+  /// Stores the default state of the Flip View check box
+  bool m_defaultFlip{false};
 
   /// Pointer to the "real" instrument, for parametrized Instrument
   std::shared_ptr<const Instrument> m_instr;
