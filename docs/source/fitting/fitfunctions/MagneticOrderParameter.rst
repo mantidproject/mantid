@@ -11,7 +11,7 @@ Description
 
 A Magentic Order Parameter is defined as:
 
-.. math:: y = A0(1-\frac{x}{Tc}^Alpha)^Beta
+.. math:: y = A0(1-(\frac{x}{Tc})^{Alpha})^{Beta}
 
 where
 

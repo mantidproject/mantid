@@ -83,13 +83,13 @@ New Features
 * Added two Activation fitting functions to ``MuonModelling`` Fit Functions.
 
   * :ref:`ActivationK <func-ActivationK>` can be used for data in Kelvins.
-  * :ref:`ActivationmeV <func-ActivationmeV>`can be used for data in meV.
+  * :ref:`ActivationmeV <func-ActivationmeV>` can be used for data in meV.
 
 * Added a :ref:`Critical peak of relaxation rate <func-CriticalPeakRelaxationRate>` for fitting to ``MuonModelling\Magnetism`` Fit Functions.
 * Added two fitting functions for the decoupling of asymmetry in the ordered state of a powedered magnet for fitting.
 
   * :ref:`DecoupAsymPowderMagLong <func-DecoupAsymPowderMagLong>` can be used for longitudinal polarization.
-  * :ref:`DecoupAsymPowderMagRot <func-DecoupAsymPowderMagRot>`can be used for rotational asymmetry.
+  * :ref:`DecoupAsymPowderMagRot <func-DecoupAsymPowderMagRot>` can be used for rotational asymmetry.
 
 * Added a :ref:`Magentic Order Parameter<func-MagneticOrderParameter>` function to ``MuonModelling\Magentism`` Fit Functions.
 * Added a :ref:`Muonium-style Decoupling Curve <func-MuoniumDecouplingCurve>` function to ``MuonModelling`` Fit Functions.
