@@ -9,11 +9,11 @@ Muon Unscripted Testing: HIFI
 Introduction
 ------------
 
-These tests look at data from the HIFI instrument.
-The first test will introduce deadtime corrections.
+These tests looks at data from the HIFI instrument.
+The first test will introduce dead time corrections.
 When a detector receives a signal, there is small period of time afterwards when it can not record a new signal.
-This is called the deadtime.
-We can model and adjust the data to compensate for the deadtime.
+This is called the dead time.
+We can model and adjust the data to compensate for the dead time.
 When looking at the raw counts, which look like an exponential decay, the correction makes the biggest difference at large count values.
 The second test will use multiple periods, this is when the same data is recorded twice at slightly different time intervals.
 
@@ -30,12 +30,12 @@ HIFI Transverse Field Simultaneous Fitting
 - Change *Instrument* to **HIFI**, found in the *Home* tab
 - In the loading bar enter ``134028-39``
 - Some new data will appear in the plot
-- To see all of the data press the ``XXXXX`` button and select ``134028`` in the pop-up
+- To see all of the data press the ``select plot data`` button and select ``134028`` in the pop-up
 - Keep the pop-up open
 - Go to the **Corrections** tab
 	- Set the plot to ``Counts`` (combobox above the plot), you will now see an exponential decay
-	- Change the deadtime correction to ``None`` and notice that the counts at small times decreases
-	- Change the deadtime correction back to ``From Data File``
+	- Change the dead time correction to ``None`` and notice that the counts at small times decreases
+	- Change the dead time correction back to ``From Data File``
 - Go to the **Grouping** tab
 	- In the Pair table, click **Guess Alpha**
 	- In the resulting dialog, change the run to ``HIFI134034`` to be used for

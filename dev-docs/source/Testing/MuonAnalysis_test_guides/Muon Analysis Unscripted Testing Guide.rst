@@ -82,3 +82,11 @@ You will need the following run:
 
 - MUSR 62260
 
+
+Group 7: Avoided Level Crossing (ALC)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This group tests the Avoided Level Crossing (ALC) GUI.
+Test instructions fcan be found at :ref:`Muon_ALC-ref`.
+This requires a large number or runs (close to 100).
+Therefore, its best to do these test while connected to the data archive.

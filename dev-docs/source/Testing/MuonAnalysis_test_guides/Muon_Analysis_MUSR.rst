@@ -43,7 +43,7 @@ Loading Data Test
 - A plot should appear, the details are not important
 - In the loading bar enter ``62250-1``
 - Some new data will appear in the plot
-- To see all of the data press the ``XXXXX`` button and select all of the rows in the pop-up
+- To see all of the data press the ``select plot data`` button and select all of the rows in the pop-up
 - Keep the pop-up open
 - Tick the ``Co-Add`` option in the loading area
 - The number of options in the pop-up will be reduced from two to one
@@ -124,7 +124,7 @@ Rebin and Fitting
 -----------------
 - In the load bar enter ``62260``
 - On the **home tab** set ``Rebin`` to ``Fixed`` and enter a value of ``10``
-- To see all of the data press the XXXXX button and select all of the rows in the pop-up
+- To see all of the data press the ``select plot data`` button and select all of the rows in the pop-up
 - If you tick the ``Plot raw`` option the data will change
 - Go to the **fitting tab**
 	- Add a ``GuasOsc``
