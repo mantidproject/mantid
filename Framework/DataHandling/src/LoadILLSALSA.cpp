@@ -20,7 +20,6 @@
 #include <H5Cpp.h>
 #include <iterator>
 #include <sstream>
-#include <vector>
 
 namespace Mantid::DataHandling {
 
