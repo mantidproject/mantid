@@ -12,6 +12,8 @@
 #include "MantidNexus/NexusClasses.h"
 
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace DataHandling {
