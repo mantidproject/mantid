@@ -74,4 +74,8 @@ class DrillSettingsPresenter:
         """
         for name in self._initialValues:
             value = self._initialValues[name]
+            try:
+                self._parameters[name].checked.disconnect()
+            except:
+                pass
             self._parameters[name].setValue(value)
