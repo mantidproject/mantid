@@ -31,7 +31,7 @@ const int RUNS_WARNING_LIMIT = 200;
 // must include the "."
 const std::vector<std::string> ADDITIONAL_EXTENSIONS{".nxs", ".nxs_v2", ".bin"};
 
-bool is_decimal(const char character) { return (character == '.') ? true : false; };
+bool is_decimal(const char character) { return (character == '.') ? true : false; }
 } // namespace
 
 using namespace Mantid::Kernel;
