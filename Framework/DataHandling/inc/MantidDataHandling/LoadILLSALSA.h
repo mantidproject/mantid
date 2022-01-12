@@ -39,6 +39,9 @@ private:
   void exec() override;
   // set the instrument
   void setInstrument(double distance, double angle);
+  // fill workspace with detector and monitor counts
+  void fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData, const std::vector<std::string> &scanVariableNames,
+                         const Mantid::NeXus::NXDouble &scanVariables);
   // Output workspace
   std::shared_ptr<DataObjects::Workspace2D> m_outputWorkspace;
   // number of scans in data

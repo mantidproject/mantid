@@ -106,32 +106,7 @@ void LoadILLSALSA::exec() {
   double twoThetaAngle = theta[0] - static_cast<double>(getProperty("ThetaOffset"));
   setInstrument(sampleToDetectorDistance, twoThetaAngle);
 
-  // fill detector data
-  int index = 0;
-  for (int i = 0; i < m_numberOfRows; i++) {
-    for (int j = 0; j < m_numberOfColumns; j++) {
-      auto &spectrum = m_outputWorkspace->mutableY(index);
-      auto &errors = m_outputWorkspace->mutableE(index);
-      auto &axis = m_outputWorkspace->mutableX(index);
-      for (int k = 0; k < m_numberOfScans; k++) {
-        spectrum[k] = data(k, i, j);
-        errors[k] = sqrt(data(k, i, j));
-        axis[k] = k;
-      }
-      index++;
-    }
-  }
-
-  // fill monitor data
-  auto it = std::find(scanVariableNames.cbegin(), scanVariableNames.cend(), "Monitor1");
-  if (it == scanVariableNames.cend())
-    throw std::runtime_error("Monitor was not found in scanned variable. Please check your nexus file.");
-  auto monitorIndex = std::distance(scanVariableNames.cbegin(), it);
-  for (int i = 0; i < m_numberOfScans; i++) {
-    m_outputWorkspace->mutableY(index)[i] = scanVariables((int)monitorIndex, i);
-    m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
-    m_outputWorkspace->mutableX(index)[i] = i;
-  }
+  fillWorkspaceData(data, scanVariableNames, scanVariables);
 }
 
 void LoadILLSALSA::setInstrument(double distance, double angle) {
@@ -163,5 +138,36 @@ void LoadILLSALSA::setInstrument(double distance, double angle) {
   rotateInst->setPropertyValue("Y", "1");
   rotateInst->setProperty<double>("Angle", -angle);
   rotateInst->execute();
+}
+
+void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
+                                     const std::vector<std::string> &scanVariableNames,
+                                     const Mantid::NeXus::NXDouble &scanVariables) {
+  // fill detector data
+  int index = 0;
+  for (int i = 0; i < m_numberOfRows; i++) {
+    for (int j = 0; j < m_numberOfColumns; j++) {
+      auto &spectrum = m_outputWorkspace->mutableY(index);
+      auto &errors = m_outputWorkspace->mutableE(index);
+      auto &axis = m_outputWorkspace->mutableX(index);
+      for (int k = 0; k < m_numberOfScans; k++) {
+        spectrum[k] = detectorData(k, i, j);
+        errors[k] = sqrt(detectorData(k, i, j));
+        axis[k] = k;
+      }
+      index++;
+    }
+  }
+
+  // fill monitor data
+  auto it = std::find(scanVariableNames.cbegin(), scanVariableNames.cend(), "Monitor1");
+  if (it == scanVariableNames.cend())
+    throw std::runtime_error("Monitor was not found in scanned variable. Please check your nexus file.");
+  auto monitorIndex = std::distance(scanVariableNames.cbegin(), it);
+  for (int i = 0; i < m_numberOfScans; i++) {
+    m_outputWorkspace->mutableY(index)[i] = scanVariables((int)monitorIndex, i);
+    m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
+    m_outputWorkspace->mutableX(index)[i] = i;
+  }
 }
 } // namespace Mantid::DataHandling
