@@ -50,8 +50,8 @@ void LoadILLSALSA::init() {
                   "The name to use for the output workspace");
   auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  declareProperty("DetectorDistance", 1.0, mustBePositive, "Distance between the sample and the detector");
-  declareProperty("ThetaOffset", 0.0, "Offset for the 2theta value");
+  declareProperty("DetectorDistance", 1.0, mustBePositive, "Distance between the sample and the detector (meters)");
+  declareProperty("ThetaOffset", 0.0, "Offset for the 2theta value (degrees)");
 }
 
 /**
