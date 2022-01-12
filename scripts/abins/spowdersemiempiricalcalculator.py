@@ -654,6 +654,9 @@ class SPowderSemiEmpiricalCalculator:
                                                             weights=row, density=False)[0]
                                                for row in weights])
 
+                if len(rebinned_s_with_dw) == 1:
+                    rebinned_s_with_dw = rebinned_s_with_dw[0]
+
                 fundamentals_sdata_with_dw.add_dict({atom_label: {'s': {'order_1': rebinned_s_with_dw}}})
 
         return fundamentals_sdata_with_dw

@@ -1,59 +1,27 @@
 from __future__ import (absolute_import, division, print_function)
-import logging
 import math
-from typing import Optional, Tuple, Union
+from typing import Tuple
 
 import numpy as np
-import mantid.kernel
-from mantidqtinterfaces.PyChop import PyChop2
-from mantidqtinterfaces.PyChop import Instruments as pychop_instruments
 
 import abins
-from abins.constants import FLOAT_TYPE, MILLI_EV_TO_WAVENUMBER, WAVENUMBER_TO_INVERSE_A
+from abins.constants import WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
 from .broadening import broaden_spectrum, prebin_required_schemes
 
 
-class PyChopInstrument(Instrument):
-    """Simulated direct-geometry INS with PyChop2
+class PantherInstrument(Instrument):
+    """Simulated direct-geometry INS with ILL-PANTHER
 
-    PyChop is used to compute energy resolution as a function of energy for
-    given instrument settings.
+    Angle range is drawn from parameters file
 
-    The "tthlims" data from PyChop is used to determine sampling angles.
+    Resolution fitting is in progress
     """
-    def __init__(self,
-                 name: str = 'MAPS',
-                 setting: str = '',
-                 chopper_frequency: Optional[int] = None) -> None:
-        self._name = name
+    def __init__(self, setting=''):
+        self._name = 'PANTHER'
         self._e_init = None
-        self._chopper = setting
-        self._chopper_frequency = self._check_chopper_frequency(chopper_frequency)
-
-        self._polyfits = {}
-        self._tthlims = pychop_instruments.Instrument(self._name).detector.tthlims
 
         super().__init__(setting=setting)
-
-    def _check_chopper_frequency(
-            self,
-            chopper_frequency: Union[int, None],
-            logger: Union[logging.Logger, mantid.kernel.Logger, None] = None
-            ) -> int:
-
-        if chopper_frequency is None:
-            parameters = abins.parameters.instruments[self._name]
-            chopper_frequency = parameters['chopper_frequency_default']
-
-            if logger is None:
-                mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
-                logger = mantid_logger
-
-            logger.notice(f'Using default chopper frequency for instrument {self._name}: '
-                          f'{chopper_frequency} Hz')
-
-        return chopper_frequency
 
     def get_abs_q_limits(self, energy: np.ndarray) -> np.ndarray:
         """Get absolute q range accessible for given energy transfer at set incident energy
@@ -67,7 +35,7 @@ class PyChopInstrument(Instrument):
         """
         assert len(energy.shape) == 1
 
-        min_angle, max_angle = np.min(self._tthlims), np.max(self._tthlims)
+        min_angle, max_angle = self.get_angle_range()
 
         # Actual limits depend on |2θ|, so some shuffling is necessary to get
         # absolute values in the right order, spanning the whole range.
@@ -99,14 +67,9 @@ class PyChopInstrument(Instrument):
             q_min = 0
         return (q_min, q_max * (1 + pad))
 
-    def get_angles(self):
+    def get_angle_range(self):
         parameters = abins.parameters.instruments[self._name]
-
-        angle_ranges = [(start, end) for (start, end) in zip(self._tthlims[0::2],
-                                                             self._tthlims[1::2])]
-        angles = np.concatenate([np.linspace(start, end, parameters['angles_per_detector'])
-                                 for (start, end) in angle_ranges])
-        return angles
+        return parameters['angle_range']
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """
@@ -142,9 +105,7 @@ class PyChopInstrument(Instrument):
 
     def convolve_with_resolution_function(self, frequencies=None, bins=None, s_dft=None, scheme='auto'):
         """
-        Convolve discrete frequency spectrum with the resolution function for the TwoDMap instrument.
-
-        - The broadening parameters are set in abins.parameters.instruments['TwoDMap']
+        Convolve discrete frequency spectrum with Panther resolution function
 
         :param frequencies: DFT frequencies for which resolution function should be calculated (frequencies in cm-1)
         :param s_dft:  discrete S calculated directly from DFT
@@ -157,8 +118,7 @@ class PyChopInstrument(Instrument):
             s_dft, _ = np.histogram(frequencies, bins=bins, weights=s_dft, density=False)
             frequencies = (bins[1:] + bins[:-1]) / 2
 
-        sigma = np.full(frequencies.size, self._calculate_sigma(frequencies),
-                        dtype=FLOAT_TYPE)
+        sigma = self._calculate_sigma(frequencies)
 
         points_freq, broadened_spectrum = broaden_spectrum(frequencies, bins, s_dft, sigma,
                                                            scheme=scheme)
@@ -180,24 +140,13 @@ class PyChopInstrument(Instrument):
         Calculates width of Gaussian resolution function.
         :return: width of Gaussian resolution function
         """
-        if self._e_init not in self._polyfits:
-            self._polyfit_resolution()
+        from abins.constants import MILLI_EV_TO_WAVENUMBER
+        parameters = abins.parameters.instruments[self._name]['resolution']
 
-        return np.polyval(self._polyfits[self._e_init], frequencies)
+        ei_meV = self._e_init / MILLI_EV_TO_WAVENUMBER
+        frequencies_meV = frequencies / MILLI_EV_TO_WAVENUMBER
 
-    def _polyfit_resolution(self, n_values=40, order=4):
-        frequencies_invcm = np.linspace(0, self._e_init, n_values, endpoint=False)
-        frequencies_mev = frequencies_invcm / MILLI_EV_TO_WAVENUMBER
-        ei_mev = self._e_init / MILLI_EV_TO_WAVENUMBER
-
-        setting_params = abins.parameters.instruments[self._name]['settings'][self._setting]
-
-        resolution, _ = PyChop2.calculate(inst=self._name,
-                                          package=setting_params['chopper'],
-                                          freq=self._chopper_frequency,
-                                          ei=ei_mev,
-                                          etrans=frequencies_mev.tolist())
-
-        fit = np.polyfit(frequencies_invcm, resolution * MILLI_EV_TO_WAVENUMBER, order)
-
-        self._polyfits[self._e_init] = fit
+        return (np.polyval(parameters['abs_meV'], frequencies_meV)
+                + ei_meV * parameters['ei_dependence']
+                + ei_meV * frequencies_meV * parameters['ei_energy_product']
+                ) * MILLI_EV_TO_WAVENUMBER
