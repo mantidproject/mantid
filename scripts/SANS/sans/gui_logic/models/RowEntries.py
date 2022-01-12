@@ -60,6 +60,10 @@ class _UserEntries(object):
                     other.can_direct_period, other.can_scatter_period, other.can_transmission_period,
                     other.sample_direct, other.sample_scatter_period, other.sample_transmission_period)
 
+    def __hash__(self):
+        # We want to store "duplicate" hashable types
+        return id(self)
+
 
 class RowEntries(_UserEntries):
     _data_vars = vars(_UserEntries())
@@ -82,6 +86,9 @@ class RowEntries(_UserEntries):
         if isinstance(other, RowEntries):
             return (self.tool_tip, self.state) == (other.tool_tip, other.state) \
                    and super().__eq__(other)
+
+    def __hash__(self):
+        return id(self)
 
     @property
     def file_information(self):
