@@ -26,8 +26,6 @@ Powder Diffraction
 - :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` now validates that the IncidentSpectra
   is in units of Wavelength and will output in the same unit as the InputWorkspace. The parameter IncidentSpectra for :ref:`CalculatePlaczekSelfScattering <algm-CalculatePlaczekSelfScattering-v1>` has been
   renamed to fix a typo, which is a breaking change for this algorithm. Note that the addition of 1 to the Placzek correction has been moved out of this algorithm.
-- :ref:`PolDiffILLDiffraction <algm-PolDiffILLDiffraction>` now supports data reduction of D7 Time-of-flight mode, including elastic peak calibration, time-dependent background subtraction, detector-analyser energy efficiency correction, and frame-overlap correction
-- :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` now supports cross-section separation, normalisation and proper unit setting, including conversion to S(Q, w), of D7 Time-of-flight mode data
 
 Improvements
 ############
