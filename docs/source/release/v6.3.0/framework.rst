@@ -82,19 +82,6 @@ MantidWorkbench
 
 See :doc:`mantidworkbench`.
 
-SliceViewer
------------
 
-Improvements
-############
-
-Bugfixes
-########
-- Fix out-of-range error when trying to access the projection matrix in sliceviewer for a workspace with a non-Q axis before other Q axes.
-- For MDHisto workspaces get the projection matrix from the basis vectors on the workspace rather than search for the W_MATRIX log.
-
-
-- Fixed bug in :ref:`Run <Run>` goniometer when using :ref:`algm-Plus`.
-- Fixed issue in SNSLiveEventDataListener when the instrument doesn't have monitors
 
 :ref:`Release 6.3.0 <v6.3.0>`
