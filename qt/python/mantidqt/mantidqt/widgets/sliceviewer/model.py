@@ -595,7 +595,7 @@ def _dimension_limits(workspace,
     :param workspace: MDEvent of MDHisto workspace that is to be binned
     :param slicepoint: ND sequence of either None or float. A float defines the point
                     in that dimension for the slice.
-    :param bin_params: Alist of ndim elements: nbins if a non-integrated dim or thickness if an integrated dim
+    :param bin_params: list of ndim elements: nbins if a non-integrated dim or thickness if an integrated dim
     :param dimension_indices: list of ndim elements: 0/1 corresponding to x/y axis on plot or None for integrated dim
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
@@ -610,7 +610,7 @@ def _dimension_limits(workspace,
             dim_min, dim_max = (slice_pt - half_bin_width, slice_pt + half_bin_width)
         elif limits is not None and dimension_indices[idim] is not None:
             # replace min/max of non-integrated dims with limits from ROI if specified
-            # swap ROI limits from plot back to dim order of ws in model
+            # swap ROI limits from plot back to dim order of ws in model (necessary for transposed data)
             dim_min, dim_max = limits[dimension_indices[idim]]
         # check all limits are over minimum width
         if dim_max - dim_min < MIN_WIDTH:
