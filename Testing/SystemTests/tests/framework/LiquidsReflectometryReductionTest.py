@@ -119,7 +119,7 @@ class LRReflectivityOutputTest(systemtesting.MantidSystemTest):
 
         ws_name = "reflectivity_119814"
         if mtd.doesExist(ws_name):
-                mtd.remove(ws_name)
+            mtd.remove(ws_name)
 
 
 class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
@@ -187,7 +187,7 @@ class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
 
         ws_name = "reflectivity_190367"
         if mtd.doesExist(ws_name):
-                mtd.remove(ws_name)
+            mtd.remove(ws_name)
 
 
 class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):
