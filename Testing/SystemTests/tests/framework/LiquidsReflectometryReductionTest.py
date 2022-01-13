@@ -113,6 +113,15 @@ class LRReflectivityOutputTest(systemtesting.MantidSystemTest):
     def validate(self):
         return self._success
 
+    def cleanup(self):
+        output_path = get_file_path('lr_output.txt')
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+
+        ws_name = "reflectivity_119814"
+        if mtd.doesExist(ws_name):
+                mtd.remove(ws_name)
+
 
 class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
     """
@@ -160,18 +169,26 @@ class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
         self._success = False
         if os.path.isfile(output_path):
             with open(output_path, 'r') as fd:
-                for line in fd.readlines():
+                for line in fd:
                     if line.startswith("# dQ/Q"):
                         toks = line.split('=')
                         dq_over_q = float(toks[1])
                         if abs(dq_over_q - 0.0273679) < 0.00001:
                             self._success = True
-            os.remove(output_path)
         else:
             print("Error: expected output file '{}' not found.".format(output_path))
 
     def validate(self):
         return self._success
+
+    def cleanup(self):
+        output_path = get_file_path('lr_output.txt')
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+
+        ws_name = "reflectivity_190367"
+        if mtd.doesExist(ws_name):
+                mtd.remove(ws_name)
 
 
 class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):
