@@ -34,7 +34,7 @@ An example of when this might be used is for examining the ion dynamics in flour
 
 References
 ----------
-[1] Johnston, B. I., Baker, P. J. & Cussen, S. A. (2021). Ion dynamics in flouride-containing polyatomic anion cathodes by muon spectroscopy. Journal of Physics:Materials, Vol. 4 No. 4, `https://iopscience.iop.org/article/10.1088/2515-7639/ac22ba <https://iopscience.iop.org/article/10.1088/2515-7639/ac22ba>`.
+[1] Johnston, B. I., Baker, P. J. & Cussen, S. A. (2021). Ion dynamics in flouride-containing polyatomic anion cathodes by muon spectroscopy. Journal of Physics:Materials, Vol. 4 No. 4, `https://iopscience.iop.org/article/10.1088/2515-7639/ac22ba <https://iopscience.iop.org/article/10.1088/2515-7639/ac22ba>`_.
 
 .. categories::
 
