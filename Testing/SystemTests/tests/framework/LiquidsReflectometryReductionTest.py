@@ -106,7 +106,6 @@ class LRReflectivityOutputTest(systemtesting.MantidSystemTest):
                 content = fd.read()
                 if content.startswith('# Experiment IPTS-11601 Run 119814'):
                     self._success = True
-            os.remove(output_path)
         else:
             print("Error: expected output file '{}' not found.".format(output_path))
 
