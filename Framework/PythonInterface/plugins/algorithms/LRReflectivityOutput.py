@@ -58,6 +58,7 @@ class LRReflectivityOutput(PythonAlgorithm):
         # We can't compute the resolution if the value of xi is not in the logs.
         # Since it was not always logged, check for it here.
         if not ws.getRun().hasProperty("BL4B:Mot:xi.RBV"):
+            logger.notice("Could not find BL4B:Mot:xi.RBV: using supplied dQ/Q")
             return None
 
         # Xi reference would be the position of xi if the si slit were to be positioned
