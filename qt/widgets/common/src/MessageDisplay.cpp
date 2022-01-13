@@ -33,8 +33,6 @@
 #include <Poco/Version.h>
 
 namespace {
-// Track number of attachments to generate a unique channel name
-int ATTACH_COUNT = 0;
 
 int DEFAULT_LINE_COUNT_MAX = 8192;
 const char *PRIORITY_KEY_NAME = "MessageDisplayPriority";
@@ -98,8 +96,17 @@ MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
 }
 
 MessageDisplay::~MessageDisplay() {
-  // The Channel class is ref counted and will
-  // delete itself when required
+  // We only attach to splitter channels but we may not have been attached...
+  auto rootChannel = Poco::Logger::root().getChannel();
+#if POCO_VERSION > 0x01090400
+  // getChannel changed to return an AutoPtr
+  if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel.get())) {
+#else
+  if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
+#endif
+    splitChannel->removeChannel(m_logChannel);
+  }
+  // The Channel class is ref counted and will delete itself when required
   m_logChannel->release();
   delete m_textDisplay;
 }
@@ -113,7 +120,6 @@ MessageDisplay::~MessageDisplay() {
 void MessageDisplay::attachLoggingChannel(int logLevel) {
   // Setup logging. ConfigService needs to be started
   auto &configSvc = ConfigService::Instance();
-  auto &rootLogger = Poco::Logger::root();
   // The root channel might be a SplitterChannel
   auto rootChannel = Poco::Logger::root().getChannel();
 #if POCO_VERSION > 0x01090400
@@ -124,13 +130,13 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
 #endif
     splitChannel->addChannel(m_logChannel);
   } else {
-    Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
+    throw std::runtime_error("MessageDisplay requires the root logger to be configured with a SplitterChannel.\n"
+                             "Set 'logging.loggers.root.channel.class = SplitterChannel' in properties file.");
   }
   connect(m_logChannel, SIGNAL(messageReceived(const Message &)), this, SLOT(append(const Message &)));
   if (logLevel > 0) {
     configSvc.setLogLevel(logLevel, true);
   }
-  ++ATTACH_COUNT;
 }
 
 /**
