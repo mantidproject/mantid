@@ -1810,9 +1810,9 @@ void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::str
     m_allowedSpectra.remove(oldNameQ);
     m_allowedSpectra.insert(newNameQ, indices);
   }
-  int i = m_workspaceNames.indexOf(oldNameQ);
-  if (i >= 0) {
-    m_workspaceNames.replace(i, newNameQ);
+  int iWorkspace = m_workspaceNames.indexOf(oldNameQ);
+  if (iWorkspace >= 0) {
+    m_workspaceNames.replace(iWorkspace, newNameQ);
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
   workspaceChange(newNameQ);
