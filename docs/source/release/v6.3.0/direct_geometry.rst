@@ -8,6 +8,11 @@ Direct Geometry Changes
 Direct Geometry
 ---------------
 
+New Algorithms
+##############
+
+- :ref:`LoadDNSEvent <algm-LoadDNSEvent>` loads data from DNS PSD detector into EventWorkspace
+
 Improvements
 ############
 - The :ref:`Crystal Field Python interface <Crystal Field Python Interface>` has two new fitting functions, ``two_step_fit`` and ``two_step_fit_sc``, alternating optimization over field parameters and peak parameters. One function is based on the Mantid fitting for both parts, the other uses ``scipy.optimize.minimize`` for the field parameters.
