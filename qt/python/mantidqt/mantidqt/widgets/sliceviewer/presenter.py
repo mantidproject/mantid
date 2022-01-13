@@ -204,7 +204,8 @@ class SliceViewer(ObservingPresenter):
 
         ws_type = self.model.get_ws_type()
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
-            if sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
+            if self.model.get_number_dimensions() > 2 and \
+                    sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
                 # The dimension of the slicepoint has changed
                 self.new_plot(dimensions_changing=True)
             else:
