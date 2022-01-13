@@ -294,12 +294,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         plot([ws], wksp_indices=[0], plot_kwargs=plot_kwargs, fig=fig, overplot=True)
 
         property_browser = self._create_widget(canvas=canvas)
-        property_browser.show()
-
-        try:
-            property_browser.fit()
-        except:
-            self.fail("property_browser.fit failed to succesfully handle bin plot.")
+        self.assertTrue(bool(property_browser._get_allowed_spectra()))
 
     # Private helper functions
     @classmethod
