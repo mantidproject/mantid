@@ -34,6 +34,7 @@ Improvements
 - An importance sampling option has been added to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` so that it handles spikes in the structure factor S(Q) better
 - Added parameter to :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` to control number of attempts to generate initial scatter point
 - Relative error option now enabled for peak table workspaces in :ref:`CompareWorkspaces <algm-CompareWorkspaces>`.
+- Added option to :ref:`CreateSimulationWorkspace <algm-CreateSimulationWorkspace>` to set bin errors.
 
 Bugfixes
 ########
@@ -47,6 +48,7 @@ Bugfixes
 - Fix bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are saved correctly when workspace indices are supplied.
 - Fix bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
   that didn't have any detectors it failed with an error
+- Fixed a bug with algorithm :ref:`CalculatePlaczek <algm-CalculatePlaczek>` for computing Placzek correction factors. There were a few flaws in previously implemented formulation.
 
 Fit Functions
 -------------
