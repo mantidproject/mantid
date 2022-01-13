@@ -31,7 +31,6 @@ Improvements
 - :ref:`SetSample <algm-SetSample>` can now load sample environment XML files from any directory using ``SetSample(ws, Environment={'Name': 'NameOfXMLFile', 'Path':'/path/to/file/'})``.
 - :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>` will now fail if the resulting sample shape has a volume of 0.
 
-
 Bugfixes
 ########
 - Fixed a bug with :ref:`CalculatePlaczek <algm-CalculatePlaczek>` algorithm for computing Placzek correction factors. There were a few flaws in the previously implemented formulation.
@@ -51,26 +50,28 @@ New Features
 - Fixed a bug in :ref:`UserFunction<func-UserFunction>` where the view would not be updated with the parameters in the formula entered.
 
 Geometry
-----------
-- add additional unit test for Rasterize class.
-- fix an issue in CSGObject such that the intercept type is no longer tied to an arbitrary value that make Track returns unstable results.
+---------
+Bugfixes
+########
+- Fixed an issue in ``CSGObject`` such that the intercept type is no longer tied to an arbitrary value that make Track returns unstable results.
 
 Python
 ------
-- `isGroup` can now be used to determine if a workspace/table workspace is a grouped workspace object.
-- `createChildAlgorithm` now accepts property keyword arguments to set the child algorithm's properties during creation:
+New features
+############
+* ``isGroup`` can now be used to determine if a workspace/table workspace is a grouped workspace object.
+* ``createChildAlgorithm`` now accepts property keyword arguments to set the child algorithm's properties during creation:
 
-  -  Existing arguments, such as version, start and end progress...etc. are unaffected by this change.
-  -  E.g. `createChildAlgorithm("CreateSampleWorkspace", version=1, XUnit="Wavelength")`
-- The package on Windows now includes the `euphonic <https://pypi.org/project/euphonic/>`_ package
+  *  Existing arguments, such as ``version``, ``start`` and ``end progress`` etc. are unaffected by this change.
+  *  E.g. ``createChildAlgorithm("CreateSampleWorkspace", version=1, XUnit="Wavelength")``.
+
+* The package on Windows now includes the `euphonic <https://pypi.org/project/euphonic/>`_ package
   for calculating phonon bandstructures.
 
 
 MantidWorkbench
 ---------------
-
 See :doc:`mantidworkbench`.
-
 
 
 :ref:`Release 6.3.0 <v6.3.0>`
