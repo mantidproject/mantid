@@ -162,10 +162,10 @@ class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
             with open(output_path, 'r') as fd:
                 for line in fd.readlines():
                     if line.startswith("# dQ/Q"):
-                    toks = line.split('=')
-                    dq_over_q = float(toks[1])
-                    if abs(dq_over_q - 0.0273679) < 0.00001:
-                        self._success = True
+                        toks = line.split('=')
+                        dq_over_q = float(toks[1])
+                        if abs(dq_over_q - 0.0273679) < 0.00001:
+                            self._success = True
             os.remove(output_path)
         else:
             print("Error: expected output file '{}' not found.".format(output_path))
