@@ -171,14 +171,12 @@ class RawDataExplorerPresenter(QObject):
 
     def on_accumulate_changed(self, is_now_accumulating):
         """
-        Slot triggered by checking the accumulate checkbox.
+        Slot triggered by the user entering or exiting the accumulation mode by pressing Ctrl.
         Manage the file selection mode.
         """
         self._is_accumulating = is_now_accumulating
-        if is_now_accumulating:
-            self.view.fileTree.setSelectionMode(QAbstractItemView.MultiSelection)
-        else:
-            self.view.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
+
+        if not is_now_accumulating:
             self.view.fileTree.selectionModel().clearSelection()
 
     def on_selection_changed(self):
@@ -196,8 +194,10 @@ class RawDataExplorerPresenter(QObject):
                 continue
 
         QGuiApplication.setOverrideCursor(Qt.WaitCursor)
+        self.set_selection_mode(False)
         self.model.modify_preview(last_clicked)
         QGuiApplication.restoreOverrideCursor()
+        self.set_selection_mode(True)
 
     def on_new_preview(self, previewModel):
         """
@@ -273,6 +273,18 @@ class RawDataExplorerPresenter(QObject):
         @return whether or not the user is currently accumulating workspaces.
         """
         return self._is_accumulating
+
+    def set_selection_mode(self, can_select=True):
+        """
+        Set the current selection mode for the widget.
+        @param can_select: True if selection is allowed.
+        """
+        if not can_select:
+            self.view.fileTree.setSelectionMode(QAbstractItemView.NoSelection)
+        elif self.is_accumulating():
+            self.view.fileTree.setSelectionMode(QAbstractItemView.MultiSelection)
+        else:
+            self.view.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
 
 
 class DisplayManager:
