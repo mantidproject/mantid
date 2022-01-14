@@ -40,7 +40,6 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             ReductionType='Powder',
             IncidentEnergy=ei,
             IncidentEnergyCalibration=True,
-            ElasticChannelCalibration=True,
             ElasticChannelIndex=elc,
             SaveOutput=False,
             ClearCache=True,
@@ -58,7 +57,6 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             ReductionType='Powder',
             IncidentEnergy=ei,
             IncidentEnergyCalibration=True,
-            ElasticChannelCalibration=True,
             SaveOutput=False,
             ClearCache=True
         )
