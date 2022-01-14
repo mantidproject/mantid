@@ -19,6 +19,7 @@ instruments = {"lagrange": LagrangeInstrument,
                "twodmap": TwoDMap,
                "maps": (PyChopInstrument, {'name': 'MAPS'}),
                "mari": (PyChopInstrument, {'name': 'MARI'}),
+               "merlin": (PyChopInstrument, {'name': 'MERLIN'}),
                "panther": PantherInstrument}
 
 def get_instrument(name: str, **kwargs) -> Instrument:

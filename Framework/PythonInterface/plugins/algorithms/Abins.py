@@ -301,13 +301,10 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self._scale = self.getProperty("Scale").value
         self._energy_units = self.getProperty("EnergyUnits").value
 
-        # Sampling mesh is determined by
-        # abins.parameters.sampling['min_wavenumber']
-        # abins.parameters.sampling['max_wavenumber']
-        # and abins.parameters.sampling['bin_width']
+        # Establish energy sampling mesh
         step = abins.parameters.sampling['bin_width'] = self._bin_width
-        start = abins.parameters.sampling['min_wavenumber']
-        stop = abins.parameters.sampling['max_wavenumber'] + step
+        start = self.get_instrument().get_min_wavenumber()
+        stop = self.get_instrument().get_max_wavenumber() + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
 
         # Increase max event order if using autoconvolution

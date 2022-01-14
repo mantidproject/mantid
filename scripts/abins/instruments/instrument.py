@@ -10,6 +10,8 @@ from typing import Union
 
 import mantid.kernel
 
+import abins.parameters
+
 Logger = Union[logging.Logger, mantid.kernel.Logger]
 
 
@@ -26,6 +28,18 @@ class Instrument:
 
     def get_setting(self):
         return self._setting
+
+    def get_min_wavenumber(self):
+        if 'min_energy' in abins.parameters.instruments[self._name]:
+            return abins.parameters.instruments[self._name]
+        else:
+            return abins.parameters.sampling['min_wavenumber']
+
+    def get_max_wavenumber(self):
+        if 'max_energy' in abins.parameters.instruments[self._name]:
+            return abins.parameters.instruments[self._name]
+        else:
+            return abins.parameters.sampling['max_wavenumber']
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """

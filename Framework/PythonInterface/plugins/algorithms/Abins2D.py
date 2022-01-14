@@ -262,7 +262,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         """
         Loads all properties to object's attributes.
         """
-        from abins.constants import TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS  # , ENERGY_BIN_PADDING
+        from abins.constants import TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS, FLOAT_TYPE
         self.get_common_properties()
         self._autoconvolution = self.getProperty("Autoconvolution").value
 
@@ -288,16 +288,11 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         #instrument_params['e_init'] = float(self.getProperty("IncidentEnergy").value)
         self._instrument.set_incident_energy(float(self.getProperty("IncidentEnergy").value))
 
-        # Sampling mesh is determined by abins.parameters,
-        # abins.parameters.sampling['min_wavenumber']
-        # abins.parameters.sampling['max_wavenumber'],
-        # while abins.parameters.sampling['bin_width'] is set from user input
-
+        # Establish energy sampling mesh
         step = abins.parameters.sampling['bin_width'] = self._bin_width
-        start = abins.parameters.sampling['min_wavenumber']
-        stop = abins.parameters.sampling['max_wavenumber'] + step
-        # stop = self._instrument._e_init * ENERGY_BIN_PADDING
-        self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
+        start = self.get_instrument().get_min_wavenumber()
+        stop = self.get_instrument().get_max_wavenumber() + step
+        self._bins = np.arange(start=start, stop=stop, step=step, dtype=FLOAT_TYPE)
 
         # Increase max event order if using autoconvolution
         if self._autoconvolution:

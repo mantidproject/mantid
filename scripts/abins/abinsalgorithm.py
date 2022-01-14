@@ -9,7 +9,7 @@
 # another part of AbinsModules.
 import os
 import re
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple, Union
 
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
@@ -18,7 +18,7 @@ from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
 import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ALL_SAMPLE_FORMS, ATOM_PREFIX
-from abins.instruments import get_instrument
+from abins.instruments import get_instrument, Instrument
 
 
 class AbinsAlgorithm:
@@ -53,6 +53,9 @@ class AbinsAlgorithm:
                                               **self._instrument_kwargs)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
+
+    def get_instrument(self) -> Union[Instrument, None]:
+        return self._instrument
 
     def declare_common_properties(self) -> None:
         """Declare properties common to Abins 1D and 2D versions"""
