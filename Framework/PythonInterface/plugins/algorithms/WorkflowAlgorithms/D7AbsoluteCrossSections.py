@@ -7,8 +7,9 @@
 
 from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, Progress, PythonAlgorithm, \
     WorkspaceGroupProperty, WorkspaceGroup
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
-    PropertyCriterion, PropertyManagerProperty, StringListValidator
+from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, \
+    FloatBoundedValidator, PropertyCriterion, PropertyManagerProperty, \
+    RebinParamsValidator, StringListValidator
 
 from mantid.simpleapi import *
 
@@ -20,6 +21,8 @@ import math
 class D7AbsoluteCrossSections(PythonAlgorithm):
 
     _sampleAndEnvironmentProperties = None
+    _mode = None
+    _debug = None
 
     @staticmethod
     def _max_value_per_detector(ws, one_per_detector=True):
@@ -51,13 +54,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return values, errors
 
     @staticmethod
-    def _set_as_distribution(ws):
-        """Wrapper to set distribution flag to all entries in a workspace group."""
-        for entry in mtd[ws]:
-            entry.setDistribution(True)
-        return ws
-
-    @staticmethod
     def _extract_numor(name):
         """Returns a numor contained in the workspace name, assuming the first number in the name is the run number.
         Otherwise it returns the full name to ensure a unique workspace name."""
@@ -80,6 +76,49 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 matched_no = entry_no
                 break
         return matched_no
+
+    @staticmethod
+    def _calculate_uniaxial_separation(cr_section):
+        """Separates measured uniaxial (Z-only) cross-sections into total, nuclear coherent/isotope-incoherent,
+        and spin-incoherent components and returns them separately. Based on DOI:10.1063/1.4819739, Eq. 9,
+        where magnetic contribution is assumed to be 0.
+        Keyword arguments:
+        cr_section -- dictionary with measured cross-sections
+        """
+        total = cr_section['z_nsf'] + cr_section['z_sf']
+        nuclear = cr_section['z_nsf'] - 0.5 * cr_section['z_sf']
+        incoherent = 1.5 * cr_section['z_sf']
+        return total, nuclear, incoherent
+
+    @staticmethod
+    def _find_min_max_q(ws):
+        """Estimate the start and end q bins for a S(Q, w) workspace."""
+        h = physical_constants['Planck constant'][0]  # in m^2 kg / s
+        hbar = h / (2.0 * np.pi)  # in m^2 kg / s
+        neutron_mass = physical_constants['neutron mass'][0]  # in0 kg
+        wavelength = ws.getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
+        Ei = math.pow(h / wavelength, 2) / (2 * neutron_mass)  # in Joules
+        minW = ws.readX(0)[0] * 1e-3 * physical_constants['elementary charge'][0]  # in Joules
+        maxEf = Ei - minW
+        # In Ångströms
+        maxQ = 1e-10 * np.sqrt((2.0 * neutron_mass / (hbar ** 2))
+                               * (Ei + maxEf - 2 * np.sqrt(Ei * maxEf) * -1.0))
+        minQ = 0.0
+        return minQ, maxQ
+
+    @staticmethod
+    def _median_delta_two_theta(ws):
+        """Calculate the median theta spacing for a S(Q, w) workspace."""
+        tmp_ws = '{}_tmp'.format(ws.name())
+        ConvertSpectrumAxis(InputWorkspace=ws,
+                            OutputWorkspace=tmp_ws,
+                            Target='SignedTheta',
+                            OrderAxis=False)
+        Transpose(InputWorkspace=tmp_ws, OutputWorkspace=tmp_ws)
+        thetas = mtd[tmp_ws].getAxis(0).extractValues() * np.pi / 180.0  # in rad
+        dThetas = np.abs(np.diff(thetas))
+        DeleteWorkspace(Workspace=tmp_ws)
+        return np.median(dThetas)
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -108,9 +147,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 issues['NormalisationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
                 issues['CrossSectionSeparationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
 
-            if normalisation_method == 'Paramagnetic' and self.getPropertyValue('CrossSectionSeparationMethod') == 'Uniaxial':
-                issues['NormalisationMethod'] = 'Paramagnetic normalisation is not compatible with uniaxial measurement.'
-                issues['CrossSectionSeparationMethod'] = 'Paramagnetic normalisation is not compatible with uniaxial measurement.'
+            if normalisation_method == 'Paramagnetic' and self.getPropertyValue('CrossSectionSeparationMethod') == 'Z':
+                issues['NormalisationMethod'] = 'Paramagnetic normalisation is not compatible with Z-only measurement.'
+                issues['CrossSectionSeparationMethod'] = 'Paramagnetic normalisation is not compatible with Z-only measurement.'
 
         if normalisation_method != 'None' or self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
@@ -147,7 +186,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
                              doc='The workspace used in 10p method when data is taken as two XYZ'
-                                 +' measurements rotated by 45 degress.')
+                                 ' measurements rotated by 45 degress.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output,
@@ -156,16 +195,17 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="CrossSectionSeparationMethod",
                              defaultValue="None",
-                             validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
+                             validator=StringListValidator(["None", "Z", "XYZ", "10p"]),
                              direction=Direction.Input,
                              doc="What type of cross-section separation to perform.")
 
         self.declareProperty(name="OutputUnits",
-                             defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q", "Qxy"]),
+                             defaultValue="Default",
+                             validator=StringListValidator(["Default", "TwoTheta", "Q", "Qxy", "Qw", "Input"]),
                              direction=Direction.Input,
-                             doc="The choice to display the output either as a function of detector twoTheta,"
-                                 +" or the momentum exchange.")
+                             doc="The choice to display the output as a function of detector twoTheta,"
+                                 " the momentum exchange, the 2D momentum exchange, or as a function of momentum"
+                                 " and energy exchange. Default will provide output appropriate to the technique used.")
 
         self.declareProperty(name="NormalisationMethod",
                              defaultValue="None",
@@ -181,7 +221,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(name="MeasurementTechnique",
                              defaultValue="Powder",
-                             validator=StringListValidator(["Powder", "SingleCrystal"]),
+                             validator=StringListValidator(["Powder", "SingleCrystal", "TOF"]),
                              direction=Direction.Input,
                              doc="What type of measurement technique has been used to collect the data.")
 
@@ -192,9 +232,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              defaultValue=0.5,
                              validator=FloatBoundedValidator(lower=0),
                              direction=Direction.Input,
-                             doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
+                             doc="Scattering angle bin size in degrees used for expressing scan data on a single "
+                                 "TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Merge'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment',
+                                                                               PropertyCriterion.IsEqualTo, 'Merge'))
 
         self.declareProperty(WorkspaceGroupProperty('VanadiumInputWorkspace', '',
                                                     direction=Direction.Input,
@@ -204,6 +246,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self.setPropertySettings('VanadiumInputWorkspace', EnabledWhenProperty('NormalisationMethod',
                                                                                PropertyCriterion.IsEqualTo, 'Vanadium'))
 
+        validRebinParams = RebinParamsValidator(AllowEmpty=True)
+        self.declareProperty(FloatArrayProperty(name="QBinning", validator=validRebinParams),
+                             doc='Manual Q-binning parameters.')
+
+        self.setPropertySettings('QBinning', EnabledWhenProperty('MeasurementTechnique',
+                                                                 PropertyCriterion.IsEqualTo, 'TOF'))
+
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
 
@@ -212,6 +261,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to delete intermediate workspaces.')
+
+        self.declareProperty('DebugMode',
+                             defaultValue=False,
+                             doc="Whether to create and show all intermediate workspaces at each correction step.")
 
     def _data_structure_helper(self, ws):
         """Returns the number of polarisation orientations present in the data and checks against the chosen
@@ -236,7 +289,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             if user_method == 'XYZ':
                 raise RuntimeError(error_msg.format(user_method))
         if nMeasurements not in [2, 6, 10]:
-            raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
+            raise RuntimeError("The analysis options are: Z, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
         return nMeasurements, nComponents
 
@@ -245,11 +298,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
         if 'InitialEnergy' not in self._sampleAndEnvironmentProperties:
-            h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
+            h = physical_constants['Planck constant'][0]  # in m^2 kg / s
             neutron_mass = physical_constants['neutron mass'][0]  # in0 kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
-            self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+            self._sampleAndEnvironmentProperties['InitialEnergy'] = \
+                joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
         if self.getPropertyValue('NormalisationMethod') != 'None' and 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
@@ -263,7 +317,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         ws_to_transpose = mtd[ws][0].name()
         angle_ws = mtd[ws][0].name() + "_tmp_angle"
         conv_to_theta = 0.5  # conversion to half of the scattering angle
-        if self.getPropertyValue('MeasurementTechnique') != 'SingleCrystal':
+        if self._mode != 'SingleCrystal':
             # for single crystal, the spectrum axis is already converted
             ConvertSpectrumAxis(InputWorkspace=mtd[ws][0],
                                 OutputWorkspace=angle_ws,
@@ -280,20 +334,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         CreateWorkspace(OutputWorkspace=cos2_m_sin2_alpha_name, DataX=np.arange(1),
                         DataY=np.subtract(cos2_alpha_arr, sin2_alpha_arr),
                         NSpec=len(alpha))
+        DeleteWorkspace(Workspace=angle_ws)
         return cos2_m_sin2_alpha_name
-
-    @staticmethod
-    def _calculate_uniaxial_separation(cr_section):
-        """Separates measured uniaxial (Z-only) cross-sections into total, nuclear coherent/isotope-incoherent,
-        and spin-incoherent components and returns them separately. Based on DOI:10.1063/1.4819739, Eq. 9,
-        where magnetic contribution is assumed to be 0.
-        Keyword arguments:
-        cr_section -- dictionary with measured cross-sections
-        """
-        total = cr_section['z_nsf'] + cr_section['z_sf']
-        nuclear = cr_section['z_nsf'] - 0.5 * cr_section['z_sf']
-        incoherent = 1.5 * cr_section['z_sf']
-        return total, nuclear, incoherent
 
     def _calculate_XYZ_separation(self, cr_section, cos2_m_sin2_alpha):
         """Separates measured 6-point (XYZ) cross-sections into total, nuclear coherent/isotope-incoherent,
@@ -457,7 +499,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             total_cs = numor + '_Total'
             nuclear_cs = numor + '_Coherent'
             incoherent_cs = numor + '_Incoherent'
-            if nMeasurements == 2:
+            if user_method == 'Z':
                 data_total, data_nuclear, data_incoherent = self._calculate_uniaxial_separation(cross_sections)
                 RenameWorkspace(InputWorkspace=data_total, OutputWorkspace=total_cs)
                 separated_cs.append(total_cs)
@@ -518,6 +560,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                                  cr_section=cross_sections)
                     to_clean = output_data[-1]
                     RenameWorkspace(InputWorkspace=output_data[0], OutputWorkspace=total_cs)
+                    separated_cs.append(total_cs)
                     RenameWorkspace(InputWorkspace=output_data[1], OutputWorkspace=nuclear_cs)
                     separated_cs.append(nuclear_cs)
                     RenameWorkspace(InputWorkspace=output_data[2], OutputWorkspace=incoherent_cs)
@@ -533,6 +576,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=list(to_clean))
         output_name = ws + '_separated_cs'
         GroupWorkspaces(InputWorkspaces=separated_cs, OutputWorkspace=output_name)
+        if self._debug:
+            clone_name = '{}_separated_cs'.format(output_name)
+            CloneWorkspace(InputWorkspace=output_name, OutputWorkspace=clone_name)
         return output_name
 
     def _detector_efficiency_correction(self, cross_section_ws):
@@ -556,8 +602,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             Multiply(LHSWorkspace=cross_section_ws,
                      RHSWorkspace=norm_ws,
                      OutputWorkspace=det_efficiency_ws)
-        elif calibrationType in  ['Paramagnetic', 'Incoherent']:
+        elif calibrationType in ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
+                if self._mode == 'TOF':
+                    raise RuntimeError('Paramagnetic calibration is not valid in the TOF mode.')
                 spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
                 for entry_no, entry in enumerate(mtd[cross_section_ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
@@ -571,7 +619,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     Divide(LHSWorkspace=paramagneticComponent,
                            RHSWorkspace=normalisation_name,
                            OutputWorkspace=ws_name)
-            else: # Incoherent
+            else:  # Incoherent
+                if self._mode == 'TOF':
+                    raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
                 for spectrum_no in range(mtd[cross_section_ws][2].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = self._sampleAndEnvironmentProperties['IncoherentCrossSection'].value
@@ -599,13 +649,15 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if self.getProperty('ClearCache').value and len(to_clean) != 0:
             DeleteWorkspaces(to_clean)
+        if self._debug:
+            clone_name = '{}_det_efficiency'.format(det_efficiency_ws)
+            CloneWorkspace(InputWorkspace=det_efficiency_ws, OutputWorkspace=clone_name)
         return det_efficiency_ws
 
     def _normalise_sample_data(self, sample_ws, det_efficiency_ws, nMeasurements, nComponents):
         """Normalises the sample data using the detector efficiency calibration workspace."""
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        is_single_crystal = self.getPropertyValue('MeasurementTechnique') == 'SingleCrystal'
-        if is_single_crystal and normalisation_method == 'Vanadium' \
+        if normalisation_method == 'Vanadium' and self._mode == 'SingleCrystal' \
                 and mtd[sample_ws][0].getNumberHistograms() == 2 * mtd[det_efficiency_ws][0].getNumberHistograms():
             # the length of the spectrum axis is twice the size of Vanadium, as data comes from two omega scans
             AppendSpectra(InputWorkspace1=det_efficiency_ws, InputWorkspace2=det_efficiency_ws,
@@ -642,13 +694,16 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                    OutputWorkspace=ws_name)
         output_ws = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_ws)
+        if self._debug:
+            clone_name = '{}_absolute_scale'.format(output_ws)
+            CloneWorkspace(InputWorkspace=output_ws, OutputWorkspace=clone_name)
         return output_ws
 
-    def _q_rebin(self, ws):
+    def _qxy_rebin(self, ws):
         """
         Rebins the single crystal omega scan measurement output onto 2D Qx-Qy grid.
         :param ws: Output of the cross-section separation and/or normalisation.
-        :return: WorkspaceGroup containing 2D distributions on a Qx-Qy grid.
+        :return: WorkspaceGroup containing 2D histograms on a Qx-Qy grid.
         """
         DEG_2_RAD = np.pi / 180.0
         fld = self._sampleAndEnvironmentProperties['fld'].value if 'fld' in self._sampleAndEnvironmentProperties else 1
@@ -712,44 +767,136 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=output_names, OutputWorkspace=ws)
         return ws
 
+    def _delta_q(self, ws):
+        """Estimate a q bin width for a S(Q, w) workspace."""
+        deltaTheta = self._median_delta_two_theta(ws)
+        wavelength = ws.run().getLogData('monochromator.wavelength').value
+        return 2.0 * np.pi / wavelength * deltaTheta
+
+    def _get_q_binning(self, ws):
+        """Returns either a user-provided or automatic binning in momentum exchange."""
+        if self.getProperty('QBinning').isDefault:
+            qMin, qMax = self._find_min_max_q(mtd[ws][0])
+            dq = self._delta_q(mtd[ws][0])
+            e = np.ceil(-np.log10(dq)) + 1
+            dq = (5. * ((dq * 10 ** e) // 5 + 1.)) * 10 ** -e
+            q_binning = [qMin, dq, qMax]
+        else:
+            q_binning = self.getProperty('QBinning').value
+            if len(q_binning) == 1:
+                qMin, qMax = self._find_min_max_q(mtd[ws][0])
+                q_binning = [qMin, q_binning[0], qMax]
+        return q_binning
+
+    @staticmethod
+    def _convert_to_2theta(ws_in, ws_out, merged_data):
+        """Converts the relevant axis unit to 2theta."""
+        if merged_data:
+            ConvertAxisByFormula(InputWorkspace=ws_in, OutputWorkspace=ws_out, Axis='X', Formula='-x')
+        else:
+            ConvertSpectrumAxis(InputWorkspace=ws_in, OutputWorkspace=ws_out, Target='SignedTheta', OrderAxis=False)
+            ConvertAxisByFormula(InputWorkspace=ws_out, OutputWorkspace=ws_out, Axis='Y', Formula='-y')
+            Transpose(InputWorkspace=ws_out, OutputWorkspace=ws_out)
+        return ws_out
+
+    def _convert_to_q(self, ws_in, ws_out, merged_data):
+        """Converts the relevant axis unit to momentum exchange."""
+        if merged_data:
+            wavelength = mtd[ws_in][0].getRun().getLogData('monochromator.wavelength').value  # in Angstrom
+            # flips axis sign and converts detector 2theta to momentum exchange
+            formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
+            ConvertAxisByFormula(InputWorkspace=ws_in, OutputWorkspace=ws_out, Axis='X', Formula=formula)
+            # manually set the correct x-axis unit
+            for entry in mtd[ws_out]:
+                entry.getAxis(0).setUnit('MomentumTransfer')
+        else:
+            ConvertSpectrumAxis(InputWorkspace=ws_in, OutputWorkspace=ws_out, Target='ElasticQ',
+                                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+                                OrderAxis=False)
+            Transpose(InputWorkspace=ws_out, OutputWorkspace=ws_out)
+        return ws_out
+
+    def _convert_to_sofqw(self, ws_in, ws_out):
+        """Converts the input workspace and appends a '_qw' suffix to all workspace names."""
+        q_binning = self._get_q_binning(ws_in)
+        tmp_name = '{}_{}'.format(ws_in, 'tmp')
+        SofQWNormalisedPolygon(
+            InputWorkspace=ws_in, OutputWorkspace=tmp_name,
+            EMode='Direct',
+            EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+            QAxisBinning=q_binning
+        )
+        Transpose(InputWorkspace=tmp_name, OutputWorkspace=tmp_name)  # users prefer omega to be the vertical axis
+        original_names = mtd[ws_in].getNames()
+        current_names = mtd[tmp_name].getNames()
+        new_names = []
+        for original_name, current_name in zip(original_names, current_names):
+            new_name = "{}_{}".format(original_name, 'qw')
+            new_names.append(new_name)
+            RenameWorkspace(InputWorkspace=current_name, OutputWorkspace=new_name)
+        UnGroupWorkspace(InputWorkspace=tmp_name)
+        GroupWorkspaces(InputWorkspaces=new_names, OutputWorkspace=ws_out)
+        return ws_out
+
     def _set_units(self, ws, nMeasurements):
         """Sets units for the output workspace."""
+        measurement_technique = self.getPropertyValue('MeasurementTechnique')
+        separation_method = self.getPropertyValue('CrossSectionSeparationMethod')
         output_unit = self.getPropertyValue('OutputUnits')
-        unit_symbol = 'barn / sr / formula unit'
-        unit = r'd$\sigma$/d$\Omega$'
-        self._set_as_distribution(ws)
-        if output_unit == 'TwoTheta':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_data(ws)
-                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
-            else:
-                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
-                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
-                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
-        elif output_unit == 'Q':
-            if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Merge':
-                self._merge_data(ws)
-                wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
-                # flips axis sign and converts detector 2theta to momentum exchange
-                formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
-                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula)
-                # manually set the correct x-axis unit
-                for entry in mtd[ws]:
-                    entry.getAxis(0).setUnit('MomentumTransfer')
-            else:
-                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
-                                    EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
-                                    OrderAxis=False)
-                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
-        elif output_unit == 'Qxy':
-            ws = self._q_rebin(ws)
-
-        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic']:
+        if self.getPropertyValue('NormalisationMethod') in ['Incoherent', 'Paramagnetic'] \
+                or self.getPropertyValue('NormalisationMethod') == 'Vanadium' and separation_method == 'None':
             unit = 'Normalized intensity'
             unit_symbol = ''
+        elif self.getPropertyValue('NormalisationMethod') == 'Vanadium':
+            unit_symbol = 'barn / sr / formula unit'
+            unit = r'd$\sigma$/d$\Omega$'
+            if measurement_technique == 'TOF':
+                unit_symbol_sofqw = '{} / meV'.format(unit_symbol)
+                unit_sofqw = r'{}/dE'.format(unit)
+        else:  # NormalisationMethod == None and OutputUnits == Input
+            unit = 'Corrected intensity'
+            unit_symbol = ''
+
+        perform_merge = mtd[ws].getNumberOfEntries() / nMeasurements > 1 \
+            and self.getPropertyValue('OutputTreatment') == 'Merge'
+        if perform_merge:
+            self._merge_data(ws)
+
+        if output_unit == 'TwoTheta':
+            self._convert_to_2theta(ws_in=ws, ws_out=ws, merged_data=perform_merge)
+        elif output_unit == 'Q' or (output_unit == 'Default' and measurement_technique == 'Powder'):
+            self._convert_to_q(ws_in=ws, ws_out=ws, merged_data=perform_merge)
+        elif output_unit == 'Qxy' or (output_unit == 'Default' and measurement_technique == 'SingleCrystal'):
+            ws = self._qxy_rebin(ws)
+        elif output_unit == 'Qw' or (output_unit == 'Default' and measurement_technique == 'TOF'):
+            group_list = []
+            if output_unit == 'Default':  # provide SofQW, and distributions as a function of Q and 2theta
+                twoTheta_distribution = self._convert_to_2theta(ws_in=ws, ws_out='tthw', merged_data=perform_merge)
+                ws_sofqw = self._convert_to_sofqw(ws_in=ws, ws_out=ws+'_qw')
+                # transpose the results as a function of spectrum number to remain consistent with other workspaces
+                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+                # interleave output names so that SofQW, 2theta, and q distributions for the same input are together:
+                group_list = [ws_name for name_tuple in zip(mtd[ws].getNames(),
+                                                            mtd[twoTheta_distribution].getNames(),
+                                                            mtd[ws_sofqw].getNames())
+                              for ws_name in name_tuple]
+            else:
+                ws = self._convert_to_sofqw(ws_in=ws, ws_out=ws)
+
+            if len(group_list) > 0:
+                UnGroupWorkspace(InputWorkspace='tthw')
+                UnGroupWorkspace(InputWorkspace=ws+'_qw')
+                GroupWorkspaces(InputWorkspaces=group_list, OutputWorkspace=ws)
+
         if isinstance(mtd[ws], WorkspaceGroup):
             for entry in mtd[ws]:
-                entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
+                if measurement_technique == 'TOF' \
+                        and (self.getPropertyValue('NormalisationMethod') != 'None'
+                             and self.getPropertyValue('CrossSectionSeparationMethod') != 'None'
+                             and '_qw' in entry.name()):
+                    entry.setYUnitLabel("{} ({})".format(unit_sofqw, unit_symbol_sofqw))
+                else:
+                    entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         else:
             mtd[ws].setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
@@ -810,22 +957,49 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_output_names(self, output_ws):
         """Renames output workspaces with unique names based on the provided output workspace name
         and the input name."""
-        for entry in mtd[output_ws]:  # renames individual ws to contain the output name
+        input_ws = self.getPropertyValue("InputWorkspace")
+        output_treatment = self.getPropertyValue('OutputTreatment')
+        separation_method = self.getPropertyValue('CrossSectionSeparationMethod')
+        possible_polarisations = ['XPO', 'YPO', 'ZPO']
+        old_names = []
+        new_names = []
+        for entry_no, entry in enumerate(mtd[output_ws]):  # renames individual ws to contain the output name
             entry_name = entry.name()
+            old_names.append(entry_name)
             if entry_name[:2] == "__":
                 entry_name = entry_name[2:]
+            if input_ws in entry_name:
+                entry_name = entry_name[len(input_ws)+1:]  # assuming the verbose input name is at the beginning
+            pol_present = [polarisation in entry_name for polarisation in possible_polarisations]
+            if any(pol_present) and (output_treatment == 'Merge' or separation_method != 'None'):
+                pol_length = len(max(possible_polarisations, key=len))
+                if 'ON' in entry_name:
+                    pol_length += 4  # length of '_ON_'
+                else:  # == 'OFF'
+                    pol_length += 5  # length of '_OFF_'
+                pol_type = np.array(possible_polarisations)[pol_present]
+                pol_pos = entry_name.find(pol_type[0])
+                entry_name = "{}{}".format(entry_name[:pol_pos], entry_name[pol_pos+pol_length:])
             output_name = self.getPropertyValue("OutputWorkspace")
             if output_name not in entry_name:
                 new_name = "{}_{}".format(output_name, entry_name)
-                RenameWorkspace(InputWorkspace=entry, OutputWorkspace=new_name)
+            else:
+                new_name = "{}_{}".format(entry_name, str(entry_no))
+            new_names.append(new_name)
+
+        for old_name, new_name in zip(old_names, new_names):
+            if old_name != new_name:
+                RenameWorkspace(InputWorkspace=old_name, OutputWorkspace=new_name)
 
     def PyExec(self):
         progress = Progress(self, start=0.0, end=1.0, nreports=self._get_number_reports())
         input_ws = self.getPropertyValue('InputWorkspace')
         output_ws = self.getPropertyValue('OutputWorkspace')
+        self._mode = self.getPropertyValue('MeasurementTechnique')
         progress.report('Loading experiment properties')
         self._read_experiment_properties(input_ws)
         nMeasurements, nComponents = self._data_structure_helper(input_ws)
+        self._debug = self.getProperty('DebugMode').value
         to_clean = []
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
@@ -841,7 +1015,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         else:
             progress.report('Separating cross-sections')
             component_ws = self._cross_section_separation(input_ws, nMeasurements)
-            self._set_as_distribution(component_ws)
             if normalisation_method != 'None':
                 if normalisation_method == 'Vanadium':
                     det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
@@ -856,7 +1029,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
         progress.report('Setting units')
         output_ws = self._set_units(output_ws, nMeasurements)
-        self._set_as_distribution(output_ws)
         self._set_output_names(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
         if self.getProperty('ClearCache').value and len(to_clean) != 0:

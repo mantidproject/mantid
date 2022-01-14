@@ -31,6 +31,7 @@ def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, sup
     model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
     model.is_ragged_matrix_plotted.return_value = False
     model.get_dim_limits.return_value = ((-1, 1), (-2, 2))
+    model.get_number_dimensions.return_value = 3
     data_view_mock = view.data_view
     data_view_mock.plot_MDH = mock.Mock()
     presenter = SliceViewer(None, model=model, view=view)
@@ -302,6 +303,23 @@ class SliceViewerTest(unittest.TestCase):
         presenter.data_limits_changed()
 
         new_plot_mock.assert_not_called()
+
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceViewer.new_plot_MDH")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
+    def test_dimensions_changed_when_transpose_2D_MD_workspace(self, mock_sliceinfo_cls, mock_new_plot):
+        presenter, data_view_mock = _create_presenter(self.model,
+                                                      self.view,
+                                                      mock_sliceinfo_cls,
+                                                      enable_nonortho_axes=False,
+                                                      supports_nonortho=False)
+        # stop regression of issue #33241
+        self.model.get_number_dimensions.return_value = 2
+        mock_sliceinfo_cls.slicepoint = [None, None]  # no slicepoint as 2D ws
+        data_view_mock.dimensions.get_previous_states.return_value = [0, 1]  # no None that indicates integrated dim
+
+        presenter.dimensions_changed()
+
+        mock_new_plot.assert_called_with(dimensions_transposing=True)
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(
