@@ -76,20 +76,12 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         plt.close()
         del fig
 
-    def test_generate_axis_facecolor_commands_default(self):
+    def test_generate_axis_facecolor_commands(self):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot([-10, 10], [1, 2])
-        self.assertEqual("set_facecolor((1.0, 1.0, 1.0, 1))", generate_axis_facecolor_commands(ax))
-        plt.close()
-        del fig
-
-    def test_generate_axis_facecolor_commands_custom(self):
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        ax.plot([-10, 10], [1, 2])
-        ax.set_facecolor("#000000")
-        self.assertEqual("set_facecolor((0.0, 0.0, 0.0, 1.0))", generate_axis_facecolor_commands(ax))
+        ax.set_facecolor("#00000000")
+        self.assertEqual("set_facecolor((0.0, 0.0, 0.0, 0.0))", generate_axis_facecolor_commands(ax))
         plt.close()
         del fig
 
