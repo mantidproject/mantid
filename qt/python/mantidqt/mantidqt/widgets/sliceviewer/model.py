@@ -136,6 +136,10 @@ class SliceViewerModel:
         """Return the name of the workspace being viewed"""
         return self._ws_name
 
+    def get_number_dimensions(self):
+        """Return number of dimensions in workspace"""
+        return self._get_ws().getNumDims()
+
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
         return self._ws.getSpecialCoordinateSystem()
