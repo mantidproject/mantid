@@ -144,6 +144,7 @@ class FittingDataModel(object):
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._data_workspaces = FittingWorkspaceRecordContainer()
+        self.inspect_bg_fig = None
 
     def restore_files(self, ws_names):
         self._data_workspaces.add_from_names_dict(ws_names)
@@ -514,6 +515,18 @@ class FittingDataModel(object):
         return ws_bg
 
     def plot_background_figure(self, ws_name):
+        def on_draw(event):
+            axes = event.canvas.figure.get_axes()
+            labels = [line.get_label() for line in axes[0].get_lines()]
+            ibg = labels.index('background')
+            idata = int(not bool(ibg))
+            bg_line = axes[0].get_lines()[ibg]
+            data_line = axes[0].get_lines()[idata]
+            bgsub_line = axes[1].get_lines()[0]
+            bg_line.set_ydata(data_line.get_ydata() - bgsub_line.get_ydata())
+            event.canvas.draw_idle()
+            self._mpl_bg_fig_signal = event.canvas.mpl_connect("draw_event", on_draw)
+
         ws = self._data_workspaces[ws_name].loaded_ws
         ws_bgsub = self._data_workspaces[ws_name].bgsub_ws
         if ws_bgsub:
@@ -522,7 +535,8 @@ class FittingDataModel(object):
             bg = Minus(LHSWorkspace=ws_name, RHSWorkspace=ws_bgsub, StoreInADS=False)
             ax[0].plot(ws, 'x')
             ax[1].plot(ws_bgsub, 'x')
-            ax[0].plot(bg, '-r')
+            ax[0].plot(bg, '-r', label='background')
+            fig.canvas.mpl_connect("draw_event", on_draw)
             fig.show()
 
     def get_last_added(self):
