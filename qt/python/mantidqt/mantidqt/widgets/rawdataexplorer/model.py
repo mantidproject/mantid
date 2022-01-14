@@ -203,7 +203,8 @@ class RawDataExplorerModel(QObject):
             load_alg.setProperty("OutputWorkspace", ws_name)
             load_alg.execute()
             if not load_alg.isExecuted():
-                raise TypeError("Failed to load " + filename)
+                logger.error("Failed to load " + filename)
+                return
 
         self.memory_manager.workspace_interacted_with(ws_name)
 
