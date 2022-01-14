@@ -112,7 +112,7 @@ class Pearl(AbstractInst):
         if self._inst_settings.tt_mode == "custom":
             grouping_file_name = pearl_algs._pearl_get_tt_grouping_file_name(self._inst_settings)
             tt_mode_string += os.path.splitext(os.path.basename(grouping_file_name))[0]
-        args = (run_number_string, self._inst_settings.file_extension, self._inst_settings.tt_mode_string, self._inst_settings.long_mode)
+        args = (run_number_string, self._inst_settings.file_extension, tt_mode_string, self._inst_settings.long_mode)
         if self._inst_settings.filename_override:
             args = (*args, self._inst_settings.filename_override)
         run_number_string_key = self._generate_run_details_fingerprint(*args)
