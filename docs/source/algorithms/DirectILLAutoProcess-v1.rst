@@ -1,0 +1,194 @@
+.. algorithm::
+
+.. summary::
+
+.. relatedalgorithms::
+
+.. properties::
+
+Description
+-----------
+
+This algorithms performs full treatment of :ref:`ILL's time-of-flight <DirectILL>` data recorded with the ILL instruments IN4, IN5, IN6, PANTHER, and SHARP.
+This high level algorithm steers the reduction for each sample type and performs the full set of corrections for a given sample run, or set thereof;
+measured at one initial energy and one or more temperatures.
+
+The sample measurement will be corrected for all the effects the user selects and the input is provided for, such as flat background, empty container subtraction, and vanadium normalisation.
+The output is transformated to :math:`S(q,\omega)` space, and :math:`S(2\theta,\omega)`, and can be stored as .nxs and .nxspe files, if requested.
+
+The algorithm is intended to be run multiple times, for each of the available processes (`Cadmium`, `Empty`, `Vanadium`, `Sample`) and each change of initial energy,
+and sample geometry and material. Multiple temperatures can be reduced together.
+
+After each execution, a report is printed at the notice level. It contains the numor that was reduced, or the first and last in case of a list, which input workspaces
+(from `Cadmium`, `Empty`, `Vanadium`, `MaskWorkspace`) were used, if any, the incident energy, and the sample temperature(s).
+
+ProcessAs
+---------
+Different input properties can be specified depending on the value of **ProcessAs**, as summarized in the table:
+
++------------------+------------------------------+-----------------------------------+
+| ProcessAs        | Input Workspace Properties   | Other Input Properties            |
++==================+==============================+===================================+
+| Cadmium          |                              |                                   |
++------------------+------------------------------+-----------------------------------+
+| Empty            |                              | * FlatBackgroundSource            |
+|                  |                              | * FlatBackgroundScaling           |
+|                  |                              | * FlatBkgAveragingWindow          |
+|                  |                              | * GroupDetHorizontallyBy          |
+|                  |                              | * GroupDetVerticallyBy            |
+|                  |                              | * DetectorGrouping                |
+|                  |                              | * GroupDetBy                      |
++------------------+------------------------------+-----------------------------------+
+| Vanadium         | * CadmiumWorkspace           | * all from Empty, and:            |
+|                  | * EmptyContainerWorkspace    | * AbsorptionCorrection            |
+|                  | * MaskWorkspace              | * SelfAttenuationMethod           |
+|                  |                              | * SampleMaterial                  |
+|                  |                              | * SampleGeometry                  |
+|                  |                              | * ContainerMaterial               |
+|                  |                              | * ContainerGeometry               |
+|                  |                              | * EnergyExchangeBinning           |
+|                  |                              | * MomentumTransferBinning         |
+|                  |                              | * GroupingAngleStep               |
+|                  |                              | * GroupingBehaviour               |
++------------------+------------------------------+-----------------------------------+
+| Sample           | * CadmiumWorkspace           | * same as for Vanadium            |
+|                  | * EmptyContainerWorkspace    |                                   |
+|                  | * VanadiumWorkspace          |                                   |
+|                  | * MaskWorkspace              |                                   |
++------------------+------------------------------+-----------------------------------+
+
+All the input workspace properties above are optional, unless bolded.
+For example, if processing as sample, if an empty container and cadmium absorber inputs are specified, subtraction of these workspaces will be performed,
+while if not, this step will be skipped.
+
+On top of the input properties, there are also switches that control the workflow and which corrections are to be performed. For example, the initial
+energy calibration is performed when `IncidentEnergyCalibration` is switched.
+
+ReductionType
+-------------
+
+There are two supported reduction types available: `Powder` and `SingleCrystal`. The choice impacts the reduction workflow of the `Sample` process, as can
+be seen in the diagrams below. The `SingleCrystal` reduction exists the chain earlier and saves the output to be processed externally to Mantid, while
+`Powder` continues to the call to :ref:`DirectILLReduction <algm-DirectILLReduction>`
+
+
+Caching with ADS
+----------------
+
+This algorithm cleans-up the intermediate workspaces after execution if `ClearCache` property is checked (`True` by default). It is recommended to keep it checked due
+to large memory consumption coming from keeping rawdata.
+
+Default naming schemes are imposed to ensure smooth communication of workspace contents. While user can specify the name for the output :ref:`WorkspaceGroup <WorkspaceGroup>`,
+the names of contents will consist of the name of the group as a prefix, the numor of the rawdata (or first rawdata in case of merging), initial energy, and temperature (when
+`ReductionType` is `Powder`).
+
+
+Saving output
+-------------
+
+When `SaveOutput` property is checked, the output workspaces are saved in the default save directory. Depending on the `ReductionType`, and contents of the workspace saved,
+the output is either a .nxs or a .nxspe file. For `SingleCrystal` reduction type, the output of the rebinning is saved as .nxspe files with the `Psi` parameter coming from
+a sum of the relevant sample log and user-defined `SampleAngleOffset` property. For `Powder`, :math:`S (2\theta, \omega)` output is saved as .nxspe while the rest is saved
+as regular .nxs.
+
+
+
+.. include:: ../usagedata-note.txt
+
+**Example - full treatment of a sample at 2 different temperatures in IN4**
+
+.. testsetup:: ExDirectILLAutoProcessPowder
+
+    config.setFacility('ILL')
+    config.appendDataSearchSubDir('ILL/IN4/')
+
+.. testcode:: ExDirectILLAutoProcessPowder
+
+    vanadium_runs = 'ILL/IN4/085801-085802'
+    sample_runs = {'1p5K': 'ILL/IN4/087294+087295.nxs', '50K': 'ILL/IN4/087283-087290.nxs'}
+    container_runs = {'1p5K': 'ILL/IN4/087306-087309.nxs', '100K': 'ILL/IN4/087311-087314.nxs'}
+
+    vanadium_ws = 'vanadium_auto'
+    container_ws = {'1p5K': 'container_1.5K', '100K': 'container_100K'}
+    sample_ws = {'1p5K': 'sample_1.5K', '50K': 'sample_50K'}
+
+    # Sample self-shielding and container subtraction.
+    geometry = {
+        'Shape': 'HollowCylinder',
+        'Height': 4.0,
+        'InnerRadius': 1.9,
+        'OuterRadius': 2.0,
+        'Center': [0.0, 0.0, 0.0]
+    }
+    material = {
+        'ChemicalFormula': 'Cd S',
+        'SampleNumberDensity': 0.01
+    }
+    Ei = 8.804337831263577
+
+    DirectILLAutoProcess(
+        Runs=vanadium_runs,
+        OutputWorkspace=vanadium_ws,
+        ProcessAs='Vanadium',
+        ReductionType='Powder',
+        FlatBkg = 'Flat Bkg ON',
+        ElasticChannel='Elastic Channel AUTO',
+        EPPCreationMethod='Fit EPP'
+    )
+
+    for key in container_runs:
+        DirectILLAutoProcess(
+            Runs=container_runs[key],
+	    OutputWorkspace=container_ws[key],
+            ProcessAs='Empty',
+            ReductionType='Powder',
+            IncidentEnergyCalibration=True,
+            IncidentEnergy=Ei
+        )
+
+    # Need to interpolate container to 50K
+    T0 = 1.5
+    T1 = 100.0
+    DT = T1 - T0
+    Ts = 50.0 # Target T
+    container_50K = (T1 - Ts) / DT * mtd['container_1.5K'] + (Ts - T0) / DT * mtd['container_100K']
+    container_ws['50K'] = 'container_50K'
+
+    for key in sample_runs:
+        DirectILLAutoProcess(
+            Runs=sample_runs[key],
+            OutputWorkspace=sample_ws[key],
+            ProcessAs='Sample',
+            ReductionType='Powder',
+            VanadiumWorkspace=vanadium_ws,
+            EmptyContainerWorkspace=container_ws[key],
+            IncidentEnergyCalibration=True,
+            IncidentEnergy=Ei,
+            SampleMaterial=material,
+            SampleGeometry=geometry,
+            SaveOutput=False,
+            ClearCache=True,
+        )
+
+    outputs = ['sample_1.5K_SofQW_087294_Ei_9_T_1.5', 'sample_50K_SofQW_087283_Ei_9_T_50.0']
+    for output in outputs:
+        SofQW = mtd[output]
+        qAxis = SofQW.readX(0)  # Vertical axis
+        eAxis = SofQW.getAxis(1)  # Horizontal axis
+        print('{}: Q range: {:.3}...{:.3}A; W range {:.3}...{:.3}meV'.format(
+            output, qAxis[0], qAxis[-1], eAxis.getMin(), eAxis.getMax()))
+
+Output:
+
+.. testoutput:: ExDirectILLAutoProcessPowder
+
+    sample_1.5K_SofQW_087294_Ei_9_T_1.5: Q range: 0.0...9.18A; W range -96.3...7.62meV
+    sample_50K_SofQW_087283_Ei_9_T_50.0: Q range: 0.0...9.18A; W range -96.3...7.62meV
+
+.. testcleanup:: ExDirectILLAutoProcessPowder
+
+    mtd.clear()
+
+.. categories::
+
+.. sourcelink::
