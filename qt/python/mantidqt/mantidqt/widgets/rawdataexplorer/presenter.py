@@ -10,6 +10,7 @@
 import os.path
 from qtpy.QtWidgets import QAbstractItemView
 from qtpy.QtCore import *
+from qtpy.QtGui import QGuiApplication
 
 from mantid.simpleapi import mtd, config
 from mantid.api import PreviewManager, PreviewType
@@ -192,10 +193,9 @@ class RawDataExplorerPresenter(QObject):
             if not os.path.isfile(selected_path):
                 continue
 
-        self.view.fileTree.setCursor(Qt.BusyCursor)
-
+        QGuiApplication.setOverrideCursor(Qt.WaitCursor)
         self.model.modify_preview(last_clicked)
-        self.view.fileTree.unsetCursor()
+        QGuiApplication.restoreOverrideCursor()
 
     def on_new_preview(self, previewModel):
         """
