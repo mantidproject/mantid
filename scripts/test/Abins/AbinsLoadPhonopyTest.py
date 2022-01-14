@@ -31,10 +31,6 @@ class AbinsLoadPhonopyTest(unittest.TestCase, abins.input.Tester):
         with self.assertRaises(TypeError):
             _ = EuphonicLoader(input_ab_initio_filename=1)
 
-    @unittest.skipUnless(euphonic_available(), 'Optional dependency (euphonic) not available')
-    def test_al_phonopy(self):
-        self.check(name="Al_LoadPhonopy", loader=EuphonicLoader, extension="yaml")
-
 
 if __name__ == '__main__':
     unittest.main()
