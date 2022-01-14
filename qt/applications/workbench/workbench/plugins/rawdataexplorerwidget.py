@@ -1,13 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
-#
-#
-# system imports
 
 # third-party library imports
 from qtpy.QtWidgets import QVBoxLayout
@@ -18,7 +15,7 @@ from mantidqt.widgets.rawdataexplorer.presenter import RawDataExplorerPresenter
 
 
 class RawDataExplorer(PluginWidget):
-    """TODO"""
+    """Widget allowing for quick visualization of raw data files."""
 
     def __init__(self, parent):
         super(RawDataExplorer, self).__init__(parent)

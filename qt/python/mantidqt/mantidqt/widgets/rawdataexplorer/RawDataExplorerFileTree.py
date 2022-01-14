@@ -4,8 +4,6 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantidqt package
-#
 
 from qtpy.QtWidgets import QTreeView, QFileSystemModel, QAbstractItemView, QHeaderView
 from qtpy.QtCore import *

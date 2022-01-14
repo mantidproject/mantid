@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantidqt package
-#
 
+from matplotlib import pyplot as plt
 from qtpy.QtWidgets import QFileDialog, QWidget
 from qtpy.QtCore import *
-from matplotlib import pyplot as plt
 
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets.instrumentview.api import *
