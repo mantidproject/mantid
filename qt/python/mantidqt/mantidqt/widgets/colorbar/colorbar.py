@@ -295,7 +295,15 @@ class ColorbarWidget(QWidget):
     def _autoscale_clim(self):
         """Update stored colorbar limits
         The new limits are found from the colobar data """
-        data = self.colorbar.mappable.get_array()
+        data = self.colorbar.mappable.get_array_clipped_to_bounds()
+
+        # If any dimension is zero then we have no data in the display area
+        if any(map(lambda dim: dim == 0, data.shape)):
+            self.cmin_value = 0.
+            self.cmax_value = 0.
+            self.update_clim_text()
+            return
+
         norm = NORM_OPTS[self.norm.currentIndex()]
         try:
             try:
