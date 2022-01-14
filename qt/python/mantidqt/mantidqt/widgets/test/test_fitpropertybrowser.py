@@ -294,7 +294,9 @@ class FitPropertyBrowserTest(unittest.TestCase):
         plot([ws], wksp_indices=[0], plot_kwargs=plot_kwargs, fig=fig, overplot=True)
 
         property_browser = self._create_widget(canvas=canvas)
-        self.assertTrue(bool(property_browser._get_allowed_spectra()))
+
+        #if only 1 spectra is returned, bin spectra has been correctly excluded
+        self.assertEqual(len(property_browser._get_allowed_spectra()),1)
 
     # Private helper functions
     @classmethod
