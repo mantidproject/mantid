@@ -163,6 +163,7 @@ class PlotsSaver(object):
                 "yAxisScale": ax.yaxis.get_scale(),
                 "yLim": ax.get_ylim(),
                 "yAutoScale": ax.get_autoscaley_on(),
+                "facecolor": ax.get_facecolor(),
                 "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines,
                 "tickParams": self.get_dict_from_tick_properties(ax),
                 "spineWidths": self.get_dict_from_spine_widths(ax)}
