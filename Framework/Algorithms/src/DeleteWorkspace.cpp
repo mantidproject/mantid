@@ -34,11 +34,15 @@ void DeleteWorkspace::exec() {
 bool DeleteWorkspace::checkGroups() {
   AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
   const std::string wsName = getProperty("Workspace");
-  auto wsPtr = dataStore.retrieve(wsName);
-  if (wsPtr->isGroup() && !dataStore.retrieveWS<WorkspaceGroup>(wsName)->isEmpty()) {
+  if (dataStore.doesExist(wsName)) {
+    auto wsPtr = dataStore.retrieve(wsName);
+    if (wsPtr->isGroup() && !dataStore.retrieveWS<WorkspaceGroup>(wsName)->isEmpty()) {
+      return Algorithm::checkGroups();
+    }
+    return false;
+  } else {
     return Algorithm::checkGroups();
   }
-  return false;
 }
 
 } // namespace Mantid::Algorithms
