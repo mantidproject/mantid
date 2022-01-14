@@ -25,7 +25,7 @@ digraph Transmission {
   LoadAndMerge -> Divide
   Divide -> Minus
   CadmiumTransmissionWorkspace -> Minus
-  EmptyBeamWorkspace -> Divide
-  Minus -> Divide
-  Divide -> OutputWorkspace
+  Minus -> Divide2
+  EmptyBeamWorkspace -> Divide2
+  Divide2 -> OutputWorkspace
 }

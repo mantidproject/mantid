@@ -236,7 +236,10 @@ class FittingDataModel(object):
         # update log tables
         self.remove_all_log_rows()
         for irow, (ws_name, ws) in enumerate(self._data_workspaces.get_loaded_ws_dict().items()):
-            self.add_log_to_table(ws_name, ws, irow)
+            try:
+                self.add_log_to_table(ws_name, ws, irow)
+            except Exception as e:
+                logger.warning(f"Unable to output log workspaces for workspace {ws_name}: " + str(e))
 
     def add_log_to_table(self, ws_name, ws, irow):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
@@ -245,7 +248,7 @@ class FittingDataModel(object):
             self._log_values[ws_name] = dict()
         # add run info
         run = ws.getRun()
-        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), run.getProperty('bankid').value,
+        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), str(run.getProperty('bankid').value),
                run.getProtonCharge(), ws.getTitle()]
         self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
