@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QAbstractItemView
 from qtpy.QtCore import *
 from qtpy.QtGui import QGuiApplication
 
-from mantid.simpleapi import mtd, config
+from mantid.simpleapi import config
 from mantid.api import PreviewManager, PreviewType
 
 from .model import RawDataExplorerModel
@@ -101,8 +101,6 @@ class RawDataExplorerPresenter(QObject):
 
         self._is_accumulating = False
 
-        self.displays = DisplayManager()
-
         self._set_initial_directory()
         self.preview_manager = PreviewManager.Instance()
 
@@ -147,10 +145,9 @@ class RawDataExplorerPresenter(QObject):
         Change the current working directory and update the tree view
         @param new_working_directory : the path to the new working directory, which exists
         """
-        self.working_dir = new_working_directory
-        self.view.repositoryPath.setText(self.working_dir)
-        self.view.fileTree.model().setRootPath(self.working_dir)
-        self.view.fileTree.setRootIndex(self.view.fileTree.model().index(self.working_dir))
+        self.view.repositoryPath.setText(new_working_directory)
+        self.view.fileTree.model().setRootPath(new_working_directory)
+        self.view.fileTree.setRootIndex(self.view.fileTree.model().index(new_working_directory))
 
     def on_file_dialog_choice(self, new_directory):
         """
@@ -208,66 +205,6 @@ class RawDataExplorerPresenter(QObject):
         PreviewPresenter(self.view, view, self.model, previewModel)
         # self.view.fileTree.grabKeyboard()
 
-    def show_ws(self, ws_to_show):
-        """
-        Decide which view to call the workspace in.
-        @param ws_to_show: the name of the workspace to show
-        """
-        target_type = self.view.get_current_target()
-        preview_type = PreviewType.IVIEW
-
-        if target_type == "New" or not self.displays.get_last_plot(preview_type):
-            if preview_type == PreviewType.IVIEW:
-                iview = self.view.open_new_iview(ws_to_show)
-                self.displays.add_new_display(preview_type, iview, ws_to_show)
-            elif preview_type == PreviewType.PLOT1D:
-                plot = self.view.plot_1D(ws_to_show, None, False)
-                plot.canvas.mpl_connect("close_event", self.displays.on_close_1D)
-                self.displays.add_new_display(preview_type, plot, ws_to_show)
-            elif preview_type == PreviewType.PLOT2D:
-                plot = self.view.plot_2D([ws_to_show])
-                plot.canvas.mpl_connect("close_event", self.displays.on_close_2D)
-                self.displays.add_new_display(preview_type, plot, ws_to_show)
-            elif preview_type == PreviewType.SVIEW:
-                view = self.view.slice_viewer(ws_to_show)
-                view.close_signal.connect(self.displays.on_close_sview)
-                self.displays.add_new_display(preview_type, view, ws_to_show)
-
-        elif target_type == "Same":
-            last_window = self.displays.get_last_plot(preview_type)
-            if preview_type == PreviewType.IVIEW:
-                self.view.replace_old_iview(ws_to_show, last_window)
-                self.displays.replace_ws_in_last(preview_type, ws_to_show)
-            elif preview_type == PreviewType.PLOT1D:
-                self.view.plot_1D(ws_to_show, last_window, True)
-                self.displays.replace_ws_in_last(preview_type, ws_to_show)
-            elif preview_type == PreviewType.PLOT2D:
-                self.view.plot_2D([ws_to_show], last_window)
-                self.displays.replace_ws_in_last(preview_type, ws_to_show)
-            elif preview_type == PreviewType.SVIEW:
-                last_ws = self.displays.get_last_workspaces(preview_type)[-1]
-                last_window.presenter.rename_workspace(last_ws, ws_to_show)
-                last_window.presenter.replace_workspace(last_ws, mtd[ws_to_show])
-                self.displays.replace_ws_in_last(preview_type, ws_to_show)
-
-        # overplotting is an option only for Plot1D
-        elif target_type == "Over":
-            last_window = self.displays.get_last_plot(preview_type)
-            if preview_type == PreviewType.PLOT1D:
-                self.view.plot_1D(ws_to_show, last_window, False)
-                self.displays.add_ws_to_last(preview_type, ws_to_show)
-
-        # Tiling is an option only for Plot1D and Plot2D
-        elif target_type == "Tile":
-            last_window = self.displays.get_last_plot(preview_type)
-            if preview_type == PreviewType.PLOT1D:
-                # TODO add tiling for plot1D
-                pass
-            if preview_type == PreviewType.PLOT2D:
-                self.displays.add_ws_to_last(preview_type, ws_to_show)
-                workspaces_to_show = self.displays.get_last_workspaces(preview_type)
-                self.view.plot_2D(workspaces_to_show, last_window)
-
     def is_accumulating(self):
         """
         @return whether or not the user is currently accumulating workspaces.
@@ -285,157 +222,3 @@ class RawDataExplorerPresenter(QObject):
             self.view.fileTree.setSelectionMode(QAbstractItemView.MultiSelection)
         else:
             self.view.fileTree.setSelectionMode(QAbstractItemView.SingleSelection)
-
-
-class DisplayManager:
-
-    """
-    Object managing the displays currently active.
-    The displays are kept in different lists depending of their type so the last one open of each type is always readily
-    available.
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.instrument_views = []
-        self.plot1D = []
-        self.plot2D = []
-        self.slice_viewer = []
-
-    def get_open_displays_by_preview(self, preview_type):
-        """
-        @param preview_type: a preview type
-        @return the list of displays currently opened for the given preview
-        """
-        if preview_type == PreviewType.IVIEW:
-            return self.instrument_views
-        if preview_type == PreviewType.PLOT1D:
-            return self.plot1D
-        if preview_type == PreviewType.PLOT2D:
-            return self.plot2D
-        if preview_type == PreviewType.SVIEW:
-            return self.slice_viewer
-
-    def get_last_display(self, preview_type):
-        """
-        Get the most recent display opened for this given preview
-        @param preview_type : the preview type the display should be of
-        @return the most recent display if there is one, else None
-        """
-        previews = self.get_open_displays_by_preview(preview_type)
-        if previews:
-            return previews[-1]
-        else:
-            return None
-
-    def get_last_plot(self, preview_type):
-        """
-        Get the plot object currently showing the last display for the given preview.
-        @param preview_type : the preview type the plot should be displaying
-        @return the plot if there is a display else None
-        """
-        display = self.get_last_display(preview_type)
-        return display.plot if display else None
-
-    def get_last_workspaces(self, preview_type):
-        """
-        Get the group of workspaces currently shown in the last display.
-        @return the list of workspaces if there is a display else None
-        """
-        display = self.get_last_display(preview_type)
-        return display.ws if display else None
-
-    def add_new_display(self, preview_type, view, ws_to_add):
-        """
-        Add a new display of the preview_type type in the manager.
-        @param preview_type: the preview type of the target display
-        @param view: the view of this display (i.e. the actual window object)
-        @param ws_to_add: the workspaces currently linked to this view
-        """
-        self.get_open_displays_by_preview(preview_type).append(Display(view, ws_to_add))
-
-    def add_ws_to_last(self, preview_type, ws_to_add):
-        """
-        Add a workspace to the list of workspaces being shown in the last opened display of preview_type type
-        @param preview_type: the preview type of the display the ws is being added to
-        @param ws_to_add: the workspace to add
-        """
-        self.get_last_display(preview_type).add_ws(ws_to_add)
-
-    def replace_ws_in_last(self, preview_type, ws_to_replace_with):
-        """
-        Replace all the workspaces in the last plot by the new one
-        @param preview_type: the preview type of the display the ws should be shown on.
-        @param ws_to_replace_with: the workspace with which to replace the old ones.
-        """
-        self.get_last_display(preview_type).replace_ws_by(ws_to_replace_with)
-
-    def on_close_1D(self, event):
-        """
-        Slot triggered when a 1D plot is closed.
-        @param event: the matplotlib event corresponding to the close
-        """
-        for index, display in enumerate(self.plot1D):
-            if display.plot.canvas == event.canvas:
-                self.plot1D.pop(index)
-                # TODO clean all the involved ws, depending on the final caching policy
-                return
-
-    def on_close_2D(self, event):
-        """
-        Slot triggered when a 2D plot is closed
-        @param event: the matplotlib event corresponding to the close
-        """
-        for index, display in enumerate(self.plot2D):
-            if display.plot.canvas == event.canvas:
-                self.plot2D.pop(index)
-                # TODO clean all the involved ws, depending on the final caching policy
-                return
-
-    def on_close_sview(self):
-        # TODO find a way to catch the slice viewer close signal, and find a way to get the name/object that was closed
-        pass
-
-    def on_close_iview(self):
-        # TODO carry the close signal for the instrument viewer from C++ and find the name of the one that was closed
-        pass
-
-
-class Display:
-    """
-    A Display is a convenience object holding a plot of any type - Plot1D, Plot2D, Iview, Slice Viewer - and the list
-    of the names of the workspaces currently being shown on this plot.
-    """
-
-    def __init__(self, plot, workspace):
-        self.plot = plot
-        self.ws = [workspace]
-
-    def get_last_workspace(self):
-        """
-        @return the last workspace to have been added to the display, or None if there are none.
-        """
-        return self.ws[-1] if self.ws else None
-
-    def pop_last_ws(self):
-        """
-        Pop the last workspace associated to this display
-        @return the last workspace to have been added to the display, or None if there are none.
-        """
-        last_ws = self.ws.pop() if self.ws else None
-        return last_ws
-
-    def add_ws(self, ws_to_add):
-        """
-        Add a workspace to the list of workspaces
-        @param ws_to_add: the workspace to add,as a string
-        """
-        self.ws.append(ws_to_add)
-
-    def replace_ws_by(self, ws_to_replace_with):
-        """
-        Replace all of the currently linked workspaces by a new one
-        @param ws_to_replace_with: the workspace with which to replace the old ones.
-        """
-        self.ws.clear()
-        self.ws.append(ws_to_replace_with)
