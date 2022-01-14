@@ -9,7 +9,7 @@ import DirectILL_common as common
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, \
     MultipleFileProperty, Progress, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, FloatArrayProperty, FloatArrayOrderedPairsValidator, \
-    FloatBoundedValidator, IntBoundedValidator, IntArrayProperty, PropertyManagerProperty, \
+    FloatBoundedValidator, IntArrayProperty, PropertyManagerProperty, \
     RebinParamsValidator, StringListValidator
 from mantid.simpleapi import *
 
@@ -192,7 +192,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     def PyInit(self):
 
         positiveFloat = FloatBoundedValidator(0., exclusive=False)
-        positiveInt = IntBoundedValidator(0, exclusive=False)
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
         orderedPairsValidator = FloatArrayOrderedPairsValidator()
 
@@ -243,12 +242,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(common.PROP_ABSOLUTE_UNITS, False,
                              doc='Enable or disable normalisation to absolute units.')
 
-        self.declareProperty("IncidentEnergyCalibration", True,
-                             doc='Enable or disable incident energy calibration.')
-
-        self.declareProperty("ElasticChannelCalibration", False,
-                             doc='Enable or disable calibration of the elastic channel.')
-
         additional_inputs_group = 'Corrections'
         self.setPropertyGroup('VanadiumWorkspace', additional_inputs_group)
         self.setPropertyGroup('EmptyContainerWorkspace', additional_inputs_group)
@@ -257,28 +250,34 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_FLAT_BKG, additional_inputs_group)
         self.setPropertyGroup(common.PROP_FLAT_BKG_WINDOW, additional_inputs_group)
         self.setPropertyGroup('FlatBackgroundSource', additional_inputs_group)
-        self.setPropertyGroup(common.PROP_FLAT_BKG, additional_inputs_group)
-        self.setPropertyGroup('IncidentEnergyCalibration', additional_inputs_group)
-        self.setPropertyGroup('ElasticChannelCalibration', additional_inputs_group)
+        self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, additional_inputs_group)
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
+
+        self.declareProperty("IncidentEnergyCalibration", True,
+                             doc='Enable or disable incident energy calibration.')
 
         self.declareProperty(name='IncidentEnergy',
                              defaultValue=0.0,
                              validator=positiveFloat,
                              doc='Value for the calibrated incident energy (meV).')
 
+        self.copyProperties('DirectILLCollectData', [common.PROP_ELASTIC_CHANNEL_MODE, common.PROP_EPP_METHOD])
+
         self.declareProperty(name='ElasticChannelIndex',
-                             defaultValue=0,
-                             validator=positiveInt,
-                             doc='Index number for the centre of the elastic peak.')
+                             defaultValue=0.0,
+                             validator=positiveFloat,
+                             doc='Bin index value for the centre of the elastic peak. Can be a float.')
 
         self.declareProperty('SampleAngleOffset', 0.0,
                              doc='Value for the offset parameter in omega scan (degrees).')
 
-        parameters_group = 'Parameters'
-        self.setPropertyGroup('IncidentEnergy', parameters_group)
-        self.setPropertyGroup('ElasticChannelIndex', parameters_group)
-        self.setPropertyGroup('SampleAngleOffset', parameters_group)
+        calibration_group = 'Calibration'
+        self.setPropertyGroup('IncidentEnergyCalibration', calibration_group)
+        self.setPropertyGroup('IncidentEnergy', calibration_group)
+        self.setPropertyGroup('ElasticChannelIndex', calibration_group)
+        self.setPropertyGroup(common.PROP_ELASTIC_CHANNEL_MODE, calibration_group)
+        self.setPropertyGroup(common.PROP_EPP_METHOD, calibration_group)
+        self.setPropertyGroup('SampleAngleOffset', calibration_group)
 
         # The mask workspace replaces MaskWorkspace parameter from PantherSingle and DiagnosticsWorkspace from directred
         self.declareProperty('MaskWorkspace', '',
@@ -475,6 +474,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             kwargs[common.PROP_DET_VER_GROUPING] = self.getProperty(common.PROP_DET_VER_GROUPING).value
         if self.elastic_channel_ws is not None:
             kwargs['ElasticChannelWorkspace'] = self.elastic_channel_ws
+        if not self.getProperty(common.PROP_ELASTIC_CHANNEL_MODE).isDefault:
+            kwargs[common.PROP_ELASTIC_CHANNEL_MODE] = self.getPropertyValue(common.PROP_ELASTIC_CHANNEL_MODE)
+        if not self.getProperty(common.PROP_EPP_METHOD).isDefault:
+            kwargs[common.PROP_EPP_METHOD] = self.getPropertyValue(common.PROP_EPP_METHOD)
         if vanadium:
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
