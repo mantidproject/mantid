@@ -777,7 +777,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         to_remove = [ws]
         numor = ws[:ws.rfind('_')]
         vanadium_diagnostics = '{}_diag'.format(numor)
-        kwargs = dict()
+        kwargs = {'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF'}
         if self.vanadium_epp:
             kwargs[common.PROP_EPP_WS] = self.vanadium_epp
         DirectILLDiagnostics(
