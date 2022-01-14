@@ -31,6 +31,11 @@ void DeleteWorkspace::exec() {
   dataStore.remove(wsName); // Logs if it doesn't exist
 }
 
+/**
+ * We want most of the functionality from checkGroups, but will handle empty groups separately as we still
+ * want to be able to delete them.
+ * @return If the workspace should be processed using processGroups.
+ */
 bool DeleteWorkspace::checkGroups() {
   AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
   const std::string wsName = getProperty("Workspace");
