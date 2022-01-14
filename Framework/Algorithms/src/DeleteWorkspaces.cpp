@@ -7,6 +7,7 @@
 #include "MantidAlgorithms/DeleteWorkspaces.h"
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ArrayProperty.h"
 
 namespace Mantid::Algorithms {
@@ -35,26 +36,11 @@ void DeleteWorkspaces::exec() {
       // properties were set. If a workspace is missing, it was probably
       // a group workspace whose contents were deleted before the group
       // itself.
-      bool success = false;
-      bool executed = false;
-      try {
-        auto deleteAlg = createChildAlgorithm("DeleteWorkspace", -1, -1, false);
-        deleteAlg->initialize();
-        deleteAlg->setPropertyValue("Workspace", wsName);
-        success = deleteAlg->execute();
-        executed = deleteAlg->isExecuted();
-      } catch (std::invalid_argument &e) {
-        // Empty group workspaces cannot be deleted, they need to be ungrouped to remove them.
-        if (std::string(e.what()) == "Empty group passed as input") {
-          auto unGroupAlg = createChildAlgorithm("UnGroupWorkspace", -1, -1, false);
-          unGroupAlg->initialize();
-          unGroupAlg->setPropertyValue("InputWorkspace", wsName);
-          success = unGroupAlg->execute();
-          executed = unGroupAlg->isExecuted();
-        } else {
-          throw e;
-        }
-      }
+      auto deleteAlg = createChildAlgorithm("DeleteWorkspace", -1, -1, false);
+      deleteAlg->initialize();
+      deleteAlg->setPropertyValue("Workspace", wsName);
+      auto success = deleteAlg->execute();
+      auto executed = deleteAlg->isExecuted();
       if (!executed || !success) {
         g_log.error() << "Failed to delete " << wsName << ".\n";
       }
