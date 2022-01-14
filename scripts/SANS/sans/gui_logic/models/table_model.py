@@ -46,10 +46,10 @@ class TableModel(object):
 
     def add_multiple_table_entries(self, table_index_model_list: List[RowEntries]):
         for row in table_index_model_list:
-            self._add_single_table_entry(row_entry=row)
+            self._set_single_table_entry(row_entry=row)
 
     def append_table_entry(self, table_index_model: RowEntries):
-        self._add_single_table_entry(row_entry=table_index_model)
+        self._set_single_table_entry(row_entry=table_index_model)
 
     def copy_rows(self, row_positions: List[int]):
         row_positions = sorted(row_positions)
@@ -59,18 +59,24 @@ class TableModel(object):
         self.copy_rows(row_positions)
         self.remove_table_entries(row_positions)
 
+    def _paste_overwrite(self, row_positions: List[int]):
+        # Only consider the first row position, this means multiple selections...etc.
+        # behaves the same as other spreadsheet tools
+        first_elem = min(row_positions)
+        last_pasted_position = len(self._clipboard) + first_elem
+        paste_positions = range(first_elem, last_pasted_position)
+
+        for pos, entry in zip(paste_positions, self._clipboard):
+            self.replace_table_entry(pos, copy.deepcopy(entry))
+
     def paste_rows(self, row_positions: List[int]):
-        if len(row_positions) == len(self._clipboard):
-            # Overwrite entries
-            for pos, entry in zip(row_positions, self._clipboard):
-                self.replace_table_entry(pos, copy.deepcopy(entry))
+        if row_positions:
+            self._paste_overwrite(row_positions)
         else:
             # Append below the user selection or at the last row
-            pos = max(row_positions) + 1 if row_positions else self.get_number_of_rows()
-            # Go in reversed order to avoid having to increment the pos
-            # effectively pasting bottom -> top as we go
-            for row in reversed(self._clipboard):
-                self.insert_row_at(row_entry=copy.deepcopy(row), row_index=pos)
+            initial_pos = max(row_positions) + 1 if row_positions else self.get_number_of_rows()
+            for i, row in enumerate(self._clipboard):
+                self.insert_row_at(row_entry=copy.deepcopy(row), row_index=i + initial_pos)
 
     def get_all_rows(self) -> List[RowEntries]:
         return self._table_entries
@@ -85,12 +91,14 @@ class TableModel(object):
         return self._table_entries.index(row)
 
     def insert_row_at(self, row_index, row_entry):
-        # Insert a None to effectively bookmark the space
-        self._table_entries.insert(row_index, None)
-        self._add_single_table_entry(row_entry=row_entry, row_index=row_index)
+        # Insert a None to create a new row, so we don't override the old one
+        if row_index <= len(self._table_entries):
+            return self._table_entries.insert(row_index, row_entry)
+        else:
+            self._set_single_table_entry(row_entry=row_entry, row_index=row_index)
 
     def replace_table_entry(self, row_index, row_entry):
-        self._add_single_table_entry(row_index=row_index, row_entry=row_entry)
+        self._set_single_table_entry(row_index=row_index, row_entry=row_entry)
         self.notify_subscribers()
 
     def remove_table_entries(self, row_indices):
@@ -103,7 +111,7 @@ class TableModel(object):
 
         self.notify_subscribers()
 
-    def _add_single_table_entry(self, row_entry, row_index=None):
+    def _set_single_table_entry(self, row_entry, row_index=None):
         assert isinstance(row_entry, RowEntries), \
             "%r is not a RowEntries object" % row_entry
 
@@ -114,8 +122,12 @@ class TableModel(object):
             del self._table_entries[0]
             self._default_entry_added = False
 
-        if row_index is None or row_index == len(self._table_entries):
+        if row_index is None:
             return self._table_entries.append(row_entry)
+        else:
+            while row_index >= len(self._table_entries):
+                # Insert empty row entries between the requested index and the last in our table
+                self._table_entries.append(RowEntries())
 
         self._table_entries[row_index] = row_entry
 
