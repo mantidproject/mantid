@@ -1,21 +1,19 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
 
 import os.path
 from qtpy.QtCore import *
 
-from mantid.simpleapi import config, mtd, Plus, RenameWorkspace, DeleteWorkspace
+from mantid.simpleapi import mtd, Plus, RenameWorkspace
 from mantid.api import AlgorithmManager
 from mantid.kernel import logger
 
-from ...utils.asynchronous import set_interval
-from ..memorywidget.memoryinfo import get_memory_info
 from .PreviewFinder import PreviewFinder, AcquisitionType
+from .memoryManager import MemoryManager
 
 
 class PreviewModel(QObject):
@@ -31,10 +29,13 @@ class PreviewModel(QObject):
     _workspace_name = None
 
     """
-    Sent when the workspace is changed.
+    Signal sent when the workspace is changed.
     """
     sig_workspace_changed = Signal()
 
+    """
+    Signal requesting the preview to close
+    """
     sig_request_close = Signal()
 
     def __init__(self, preview_type, workspace_name):
@@ -65,90 +66,6 @@ class PreviewModel(QObject):
         return self._workspace_name
 
 
-class MemoryManager(QObject):
-    """
-    Gets system memory usage information and manages the caching of the workspaces loaded by the raw data explorer.
-    It keeps track of the loaded workspaces and delete the oldest ones if the memory goes above MEMORY_THRESHOLD percent
-    Update is made every TIME_INTERVAL_MEMORY_USAGE_UPDATE (s) using threading.Timer;
-    """
-
-    TIME_INTERVAL_MEMORY_USAGE_UPDATE = 5.000  # in s
-    MEMORY_THRESHOLD = 80  # in percentage of the total
-
-    sig_free_memory = Signal()
-
-    def __init__(self, rdexp_model):
-        super().__init__()
-
-        self.rdexp_model = rdexp_model
-        self._current_workspaces = []
-
-        self.update_allowed = True
-        self.update_memory_usage()
-        self.thread_stopper = self.update_memory_usage_threaded()
-        self.sig_free_memory.connect(self.on_free_requested)
-
-    def __del__(self):
-        self.cancel_memory_update()
-
-    @set_interval(TIME_INTERVAL_MEMORY_USAGE_UPDATE)
-    def update_memory_usage_threaded(self):
-        """
-        Calls update_memory_usage once every TIME_INTERVAL_MEMORY_USAGE_UPDATE
-        If the memory is too high, ask for workspace deletion.
-        """
-        mem_used_percent = self.update_memory_usage()
-        if mem_used_percent is None:
-            return
-
-        if mem_used_percent > self.MEMORY_THRESHOLD:
-            self.sig_free_memory.emit()
-
-    def update_memory_usage(self):
-        """
-        Gets memory usage information and passes it to the view
-        """
-        if self.update_allowed:
-            mem_used_percent, mem_used, mem_avail = get_memory_info()
-            return mem_used_percent
-
-    def cancel_memory_update(self):
-        """
-        Ensures that the thread will not restart after it finishes next, as well as attempting to cancel it.
-        """
-        self.update_allowed = False
-        self.thread_stopper.set()
-
-    def workspace_interacted_with(self, ws_name):
-        """
-        If a workspace is used for a preview, it is considered interacted with and
-        thus moved at the end of the queue for deletion
-        @param ws_name: the name of the workspace
-        """
-        try:
-            # if the workspace already exists, we remove it
-            self._current_workspaces.remove(ws_name)
-        except ValueError:
-            pass
-        self._current_workspaces.append(ws_name)
-
-    def on_free_requested(self):
-        """
-        Slot called when a workspace needs to be deleted to free memory.
-        It will delete the oldest workspace managed by the raw data explorer that is not currently shown in a preview.
-        """
-        index = 0
-        while index < len(self._current_workspaces):
-            ws_name = self._current_workspaces[index]
-            if self.rdexp_model.can_delete_workspace(ws_name):
-                self._current_workspaces.pop(index)
-                if mtd.doesExist(ws_name):
-                    logger.information("Deleting cached workspace " + ws_name)
-                    DeleteWorkspace(Workspace=ws_name)
-                    break
-            index += 1
-
-
 class RawDataExplorerModel(QObject):
     """
     Model for the RawDataExplorer widget
@@ -176,17 +93,7 @@ class RawDataExplorerModel(QObject):
 
         self._previews = list()
 
-        self.instrument = config["default.instrument"]
-
         self.memory_manager = MemoryManager(self)
-
-    def on_instrument_changed(self, new_instrument):
-        """
-        Slot triggered by changing the instrument
-        @param new_instrument: the name of the instrument, from the instrument selector
-        """
-        self.instrument = new_instrument
-        self.presenter.populate_acquisitions()
 
     def modify_preview(self, filename):
         """
@@ -196,16 +103,13 @@ class RawDataExplorerModel(QObject):
 
         ws_name = os.path.basename(filename)[:-4]
 
+        # load the file if necessary
         if not mtd.doesExist(ws_name):
-            load_alg = AlgorithmManager.create("Load")
-            load_alg.setLogging(True)
-            load_alg.setProperty("Filename", filename)
-            load_alg.setProperty("OutputWorkspace", ws_name)
-            load_alg.execute()
-            if not load_alg.isExecuted():
-                logger.error("Failed to load " + filename)
+            success = self.load_file(ws_name, filename)
+            if not success:
                 return
 
+        # notify the memory manager about this interaction
         self.memory_manager.workspace_interacted_with(ws_name)
 
         # determine the preview given the prepared data
@@ -214,6 +118,8 @@ class RawDataExplorerModel(QObject):
         if preview is None:
             return
 
+        # check the previews currently opened in case one of the correct type already exists and can be replaced.
+        # NB: currently, previews only has one element max at a given time, but that could change so the design stays.
         for current_preview in reversed(self._previews):
             if current_preview.get_preview_type() == preview:
                 if self.presenter.is_accumulating():
@@ -224,15 +130,35 @@ class RawDataExplorerModel(QObject):
                 current_preview.set_workspace_name(ws_name)
                 return
 
+        # create a new preview, since none corresponding were found
         preview_model = PreviewModel(preview, ws_name)
 
+        # close all already existing previews
         previews = [preview for preview in self._previews]
         for preview in previews:
             preview.sig_request_close.emit()
             self.del_preview(preview)
 
+        # add this new preview
         self._previews.append(preview_model)
         self.sig_new_preview.emit(preview_model)
+
+    @staticmethod
+    def load_file(workspace_name, filename):
+        """
+        Load the workspace to the workspace name.
+        @param workspace_name: the name of the workspace to create.
+        @param filename: the path to the file to load.
+        @return whether the loading succeeded.
+        """
+        load_alg = AlgorithmManager.create("Load")
+        load_alg.setLogging(True)
+        load_alg.setProperty("Filename", filename)
+        load_alg.setProperty("OutputWorkspace", workspace_name)
+        load_alg.execute()
+        if not load_alg.isExecuted():
+            logger.error("Failed to load " + filename)
+        return load_alg.isExecuted()
 
     def del_preview(self, previewModel):
         """
@@ -269,8 +195,10 @@ class RawDataExplorerModel(QObject):
                 return
 
             workspace = workspace.getItem(0)
+
         instrument_name = workspace.getInstrument().getName()
         is_acquisition_type_needed = preview_finder.need_acquisition_mode(instrument_name)
+
         if is_acquisition_type_needed:
             acquisition_mode = self.determine_acquisition_mode(workspace)
             return preview_finder.get_preview(instrument_name, acquisition_mode)

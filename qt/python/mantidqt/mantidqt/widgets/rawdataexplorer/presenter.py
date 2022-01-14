@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2021 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench.
-#
 
 import os.path
 from qtpy.QtWidgets import QAbstractItemView
@@ -13,7 +11,7 @@ from qtpy.QtCore import *
 from qtpy.QtGui import QGuiApplication
 
 from mantid.simpleapi import config
-from mantid.api import PreviewManager, PreviewType
+from mantid.api import PreviewType
 
 from .model import RawDataExplorerModel
 from .view import RawDataExplorerView, PreviewView
@@ -67,7 +65,7 @@ class PreviewPresenter:
 
     def close_preview(self):
         """
-        Triggered when the view is closed.
+        Slot triggered when the view is closed.
         """
         self._main_view.del_preview(self._view)
         self._main_model.del_preview(self._model)
@@ -77,7 +75,7 @@ class PreviewPresenter:
 
     def on_workspace_changed(self):
         """
-        Triggered when the workspace in the model is modified.
+        Slot triggered when the workspace in the model is modified.
         """
         ws_name = self._model.get_workspace_name()
         self._view.change_workspace(ws_name)
@@ -102,11 +100,8 @@ class RawDataExplorerPresenter(QObject):
         self._is_accumulating = False
 
         self._set_initial_directory()
-        self.preview_manager = PreviewManager.Instance()
 
         self.setup_connections()
-
-        self.model.sig_new_preview.connect(self.on_new_preview)
 
     def cancel_memory_update(self):
         """
@@ -121,6 +116,7 @@ class RawDataExplorerPresenter(QObject):
         self.view.file_tree_path_changed.connect(self.on_file_dialog_choice)
         self.view.repositoryPath.editingFinished.connect(self.on_qlineedit)
         self.view.fileTree.sig_accumulate_changed.connect(self.on_accumulate_changed)
+        self.model.sig_new_preview.connect(self.on_new_preview)
 
     def _set_initial_directory(self):
         """
