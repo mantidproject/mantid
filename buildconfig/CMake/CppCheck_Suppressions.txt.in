@@ -726,7 +726,7 @@ unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/General/StepScan.cpp
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:115
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:343
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:168
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingPresenter.cpp:308
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingPresenter.cpp:310
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCInterface.cpp:232
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:91
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/OptionDefaults.cpp:18

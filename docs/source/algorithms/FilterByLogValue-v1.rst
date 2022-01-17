@@ -132,7 +132,7 @@ Comparing with GenerateEventsFilter/FilterEvents
 ################################################
 
 The combination of :ref:`GenerateEventsFilter <algm-GenerateEventsFilter>` and :ref:`FilterEvents <algm-FilterEvents>` with proper configuration
-can produce same result as :ref:`FilterByLogValue`.
+can produce same result as :ref:`FilterByLogValue <algm-FilterByLogValue>`.
 
 For sample,
 
