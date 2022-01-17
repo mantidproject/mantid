@@ -378,6 +378,6 @@ private:
     InstrumentWidget::Dependencies deps{std::move(displayMock),    nullptr,      nullptr, std::move(connectMock),
                                         std::move(metaObjectMock), makeMessage()};
 
-    return InstrumentWidget(wsname, nullptr, true, true, 0.0, 0.0, true, std::move(deps), useLoadingThread);
+    return InstrumentWidget(wsname, nullptr, true, true, 0.0, 0.0, true, true, std::move(deps));
   }
 };
