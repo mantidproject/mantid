@@ -8,6 +8,7 @@ import systemtesting
 from mantid.simpleapi import PowderReduceP2D
 
 import sys
+import os
 
 
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
@@ -54,6 +55,10 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self.outputFile + '.p2d', self.reference
+
+    def skipTests(self):
+        # If CONDA_PREFIX is defined skip tests
+        return "CONDA_PREFIX" in os.environ
 
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""

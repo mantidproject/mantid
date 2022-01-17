@@ -100,7 +100,7 @@ Power option
 If a value between 0 (excluded) and 1 (included) is provided in the Power field, the binning will follow an inverse power
 pattern, each bin having a width of
 
-.. math:: w_i = \frac{F}{i^{\mathrm{power}}
+.. math:: w_i = \frac{F}{i^{\mathrm{power}}}
 
 where F is the factor provided between the boundaries.
 Since, even though these series diverge and will reach whatever bounds are given, they might take an exponentially slow time
