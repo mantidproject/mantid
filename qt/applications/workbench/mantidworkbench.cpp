@@ -122,9 +122,9 @@ decltype(boost::this_process::environment()) childEnvironment([[maybe_unused]] c
 
 #if defined(QT_PLUGIN_PATH)
   env["QT_PLUGIN_PATH"] = absolutePath(QT_PLUGIN_PATH, dirOfExe);
-#endif
+#endif // QT_PLUGIN_PATH
 
-#endif
+#endif // NOT_CONDA_ENV
 
   // It was observed on Qt >= 5.12 that the QtWebEngineProcess would fail to
   // load the icudtl.dat resources due to Chromium sandboxing restrictions. It
@@ -152,7 +152,7 @@ int startWorkbench(const fs::path &dirOfExe, int argc, char **argv) {
       std::cerr << arg << " ";
     }
     std::cerr << "\nCaught system_error with code " << exc.code() << " meaning " << exc.what() << "\n";
-    return 1;
+    return exc.code().value();
   }
 }
 
