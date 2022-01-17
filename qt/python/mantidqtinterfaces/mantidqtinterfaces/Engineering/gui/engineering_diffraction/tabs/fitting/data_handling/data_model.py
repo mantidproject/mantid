@@ -13,7 +13,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
-from matplotlib.pyplot import subplots
+from matplotlib.pyplot import subplots, close
 from numpy import full, nan, max, array, vstack, argsort
 from itertools import chain
 from collections import defaultdict, OrderedDict
@@ -517,15 +517,15 @@ class FittingDataModel(object):
     def plot_background_figure(self, ws_name):
         def on_draw(event):
             axes = event.canvas.figure.get_axes()
-            labels = [line.get_label() for line in axes[0].get_lines()]
-            ibg = labels.index('background')
-            idata = int(not bool(ibg))
-            bg_line = axes[0].get_lines()[ibg]
-            data_line = axes[0].get_lines()[idata]
-            bgsub_line = axes[1].get_lines()[0]
-            bg_line.set_ydata(data_line.get_ydata() - bgsub_line.get_ydata())
-            event.canvas.draw_idle()
-            self._mpl_bg_fig_signal = event.canvas.mpl_connect("draw_event", on_draw)
+            data_line = next((line for line in axes[0].get_tracked_artists()), None)
+            bg_line = next((line for line in axes[0].get_lines() if line not in axes[0].get_tracked_artists()), None)
+            bgsub_line = next((line for line in axes[1].get_tracked_artists()), None)
+            if data_line and bg_line and bgsub_line:
+                bg_line.set_ydata(data_line.get_ydata() - bgsub_line.get_ydata())
+                event.canvas.draw_idle()
+            else:
+                logger.warning("Inspect background figure will be closed because it doesn't have the correct curves.")
+                close(event.canvas.figure.number)  # figure.close method doesn't exist - use plt.close
 
         ws = self._data_workspaces[ws_name].loaded_ws
         ws_bgsub = self._data_workspaces[ws_name].bgsub_ws
