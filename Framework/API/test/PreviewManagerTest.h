@@ -73,14 +73,14 @@ public:
     TS_ASSERT_EQUALS(previews[0], "BasicPreview");
   }
   void test_get_preview_by_name() {
-    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "1D", "BasicPreview");
+    auto &preview = PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "BasicPreview");
     TS_ASSERT_EQUALS(preview.name(), "BasicPreview");
     TS_ASSERT_EQUALS(preview.facility(), "TestFacility");
     TS_ASSERT_EQUALS(preview.technique(), "SANS");
     TS_ASSERT_EQUALS(preview.type(), IPreview::PreviewType::SVIEW);
   }
   void test_get_preview_by_non_existent_name() {
-    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "BasicPreview2"),
+    TS_ASSERT_THROWS(PreviewManager::Instance().getPreview("TestFacility", "SANS", "Mono", "BasicPreview2"),
                      const std::runtime_error &)
   }
 };
