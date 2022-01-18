@@ -529,7 +529,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if not self.getProperty(common.PROP_DET_GROUPING_BY).isDefault:
             group_by = self.getProperty(common.PROP_DET_GROUPING_BY).value
             grouping_pattern = \
-                ["{}-{}".format(pixel_id, pixel_id + group_by - 1) for pixel_id in range(0, n_pixels, group_by)]
+                ["{}-{}".format(pixel_id, pixel_id + group_by - 1) for pixel_id in range(0, n_pixels-group_by, group_by)]
         else:
             group_by_x = self.getProperty(common.PROP_DET_HOR_GROUPING).value
             group_by_y = self.getProperty(common.PROP_DET_VER_GROUPING).value
