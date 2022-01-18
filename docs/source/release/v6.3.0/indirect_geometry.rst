@@ -18,7 +18,7 @@ Improvements
   from CASTEP or Phonopy calculations, then sample an appropriate q-point mesh on-the-fly to create a phonon DOS. This feature requires the Euphonic library to be installed. This library is
   included in the Windows package, but for other platforms an installer is provided in the Script Repository.
 - In Inelastic Data Analysis the :ref:`Elwin Tab <Elwin-iqt-ref>` has had its UI updated to be more user friendly.
-- Updated documentation for :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` .
+- Updated documentation for :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>`.
 
 Bugfixes
 --------
@@ -26,5 +26,6 @@ Bugfixes
 - Contour workspaces are now saved when saving in ``Bayes stretch``.
 - Fixed a bug which prevented workspaces being loaded into the :ref:`Elwin Tab <Elwin-iqt-ref>` .
 - Fixed a bug which caused :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` to crash when run with a single element.
+- Fixed a bug in the Symmetrise algorithm where workspaces in different bin widths would sometimes cause exceptions.
 
 :ref:`Release 6.3.0 <v6.3.0>`
