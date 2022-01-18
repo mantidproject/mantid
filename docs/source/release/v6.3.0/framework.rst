@@ -33,15 +33,15 @@ Improvements
 
 Bugfixes
 ########
-- Fixed a bug with :ref:`CalculatePlaczek <algm-CalculatePlaczek>` algorithm for computing Placzek correction factors. There were a few flaws in the previously implemented formulation.
-- Fixed a bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where calculation aborts with an exception due to a floating point rounding error when the track segment is close to vertical. Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect.
+- Fixed a bug with :ref:`CalculatePlaczek <algm-CalculatePlaczek>` algorithm for computing Placzek correction factors that fixed the previously implemented formula for transforming k to e, and the summation for second order Placezek corrections.
+- Fixed a bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where the calculation aborts with an exception due to a floating point rounding error when the track segment is close to vertical. Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect.
 - Fixed a bug in :ref:`Integration <algm-Integration>` when using ``UsePartialBinsOption`` with integration limits that are either equal or close together.
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
 - Fixed a bug in :ref:`LoadAndMerge <algm-LoadAndMerge>` where ``LoaderVersion`` choice was previously ignored.
 - Fixed a bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and to make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fixed a bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
   that didn't have any detectors, it failed with an error.
-- Fixed a bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are saved correctly when workspace indices are supplied.
+- Fixed a bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are now saved correctly when workspace indices are supplied.
 
 Fit Functions
 -------------
