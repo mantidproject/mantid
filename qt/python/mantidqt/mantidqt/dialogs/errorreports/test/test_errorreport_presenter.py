@@ -33,7 +33,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
             self.view, self.exit_code, application=self.app_name)
         self.view.CONTACT_INFO = "ContactInfo"
         self.view.NAME = 'John Smith'
-        self.view.EMAIL = 'john.smith"email.com'
+        self.view.EMAIL = 'john.smith@email.com'
 
     def test_sets_logger_view_and_exit_code_upon_construction(self):
         self.assertEqual(self.error_report_presenter._exit_code, self.exit_code)
