@@ -91,9 +91,9 @@ For a function, :math:`f(\mathbf{p})`, with fit parameters :math:`\mathbf{p}`, t
 
 with :math:`\mathbf{\sigma_f}` defined as,
 
-.. math:: \mathbf{\sigma_f}^2= \chi_{\nu}^2 \sum_{j=0}^{j=n}\sum_{k=0}^{k=n}\frac{\partial f}{\partial p_j}\frac{\partial f}{\partial p_k}\, \mathbf{C}_{jk}
+.. math:: \mathbf{\sigma_f}^2=  \sum_{j=0}^{j=n}\sum_{k=0}^{k=n}\frac{\partial f}{\partial p_j}\frac{\partial f}{\partial p_k}\, \mathbf{C}_{jk}
 
-where :math:`\mathbf{C}_{jk}` is the covriance matrix and :math:`\chi_{\nu}^2` the reduced chi squared value.
+where :math:`\mathbf{C}_{jk}` are elements of the covariance matrix (not scaled by the reduced chi-squared).
 This interval defines the region where there is a 68.3% chance to find the true value of :math:`f(\mathbf{p})`.
 For further details see reference [1].
 
