@@ -44,6 +44,11 @@ additional properties:
 | ErrColumn        | Input       | string    |                         | The name of the error column.                           |
 +------------------+-------------+-----------+-------------------------+---------------------------------------------------------+
 
+Changelog
+#########
+- In mantid v6.0 the errors/confidence-bounds on the fitted curve were determined using the covariance matrix scaled by the reduced chi-squared (i.e. chi-squared divided by the number of degrees of freedom). Previously it had been scaled by chi-squared.
+- In mantid v6.3 the errors/confidence-bounds on the fitted curve were determined using the covariance matrix without scaling (this makes them consistent with the errors on the best fit parameters).
+
 Overview
 ########
 
