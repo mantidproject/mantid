@@ -11,7 +11,8 @@ Introduction
 
 These tests are for the EMU instrument at ISIS.
 This section will show some advance fitting and plotting features of the GUI.
-It would be worth restarting Mantid before doing the second test.
+It would be worth closing the muon GUI and clearing the ADS before doing the second test.
+This is to give a clean state so it is easier to find the correct results table.
 
 -------------------------
 
