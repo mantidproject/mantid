@@ -29,7 +29,7 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         presenter = InstrumentViewPresenter(ws)
 
         mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
-                                          name=str(ws), window_flags=mock.ANY)
+                                          name=str(ws), window_flags=mock.ANY, use_thread=mock.ANY)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
