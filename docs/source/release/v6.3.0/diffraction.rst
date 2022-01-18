@@ -43,7 +43,7 @@ Bugfixes
 - :ref:`LoadPDFgetNFile <algm-LoadPDFgetNFile>` now returns standard units for atomic distance rather than the label.
 - The integration range has been corrected inside :ref:`PDFFourierTransform v2 <algm-PDFFourierTransform-v2>`.
 - :ref:`SaveFocusedXYE <algm-SaveFocusedXYE>` now correctly writes all spectra to a single file when ``SplitFiles`` is ``False``. Previously it wrote only a single spectrum.
-- For processing vanadium run it no longer finds the environment automatically in :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`.
+- Added an option to enable (default on) finding the sample environment automatically using :ref:`SetSampleFromLogs <algm-SetSampleFromLogs>`. This is used to turn off the feature for vanadium measurements when using ``mantid.utils.absorptioncorrutils``.
 - Fixed an issue in :ref:`WANDPowderReduction <algm-WANDPowderReduction>` where in some cases users ended up with zeros as output.
 - Fixed a problem with the ``create_vanadium`` action when running with ``tt_mode=Custom`` in the ISIS PEARL powder diffraction scripts. Created a separate Vanadium file for each different custom grouping file rather than one for all custom runs
 
@@ -56,7 +56,10 @@ Engineering Diffraction
 -----------------------
 New features
 ############
-- Now supports two texture grouping schemes: ``Texture20`` (10 groups per bank, 20 in total) and ``Texture30`` (15 groups per bank, 30 in total) for ``ENGIN-X`` in the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>`. Note this involved changes to the ``bankID`` log values saved with focused data, so this means the UI will not load in previously focused ``.nxs`` files.
+- **Now supports two texture grouping schemes:** ``Texture20`` **(10 groups per bank, 20 in total) and** ``Texture30`` **(15 groups per bank, 30 in total) for** ``ENGIN-X`` **in the** :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` **. Note this involved changes to the** ``bankID`` **log values saved with focused data, so this means the UI will not load in previously focused** ``.nxs``  **files.**
+
+.. image::  ../../images/engggui_texture.png
+    :align: center
 
 Improvements
 ############
@@ -73,7 +76,7 @@ Improvements
   * The tab has been made more tolerant to users deleting or renaming the workspaces in the workbench Workspaces widget.
 
 * Updated the default values for :ref:`EnggEstimateFocussedBackground <algm-EnggEstimateFocussedBackground>` and in the fitting tab table to ``Niter = 50`` and ``XWindow = { 600 for TOF, 0.02 for d-Spacing }``.
-* The file filter in the Focus tab for calibration Region includes ``No Region Filter``, ``North``, ``South`` and now also ``Cropped``, ``Custom``, ``Texture`` and ``Both Banks``. The text for ``No Unit/Region Filter`` are colored grey.
+* The file filter in the Focus tab for calibration Region includes ``No Region Filter``, ``North``, ``South`` and now also ``Cropped``, ``Custom``, ``Texture`` and ``Both Banks``. The text for ``No Unit/Region Filter`` is colored grey.
 
 Bugfixes
 ########
