@@ -440,6 +440,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         plot_kwargs = {'distribution': True, 'autoscale_on_update': False, 'label': label}
         plot_kwargs["marker"] = self._settings.get_marker(workspace_info.workspace_name)
         plot_kwargs["linestyle"] = self._settings.get_linestyle(workspace_info.workspace_name)
+        if isinstance(workspace_info.index, int):
+            """
+            Attempts at replotting the fit line do not work,
+            this is because replot_artist currently only does anything
+            if the data has changed (it has not in our case).
+            So lets manually set the fit lines to be on top
+            (they will always have an index of either 1 or 3 and data
+            will always have an index of 0).
+            """
+            plot_kwargs["zorder"] = workspace_info.index
         return plot_kwargs
 
     def _get_y_axis_autoscale_limits(self, axis):
