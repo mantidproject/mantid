@@ -13,13 +13,13 @@
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
-#                 (mantid repo). Windows Caveat: Only use / for this arguement do
+#                 (mantid repo). Windows Caveat: Only use / for this argument do
 #                 not use \\ or \ in the path.
 #
 # Possible flags:
 #   --build-mantid: build the mantid package using conda-build
-#   --build-qt: build the qt package using conda-build
-#   --build-workbench: build the workbench package using conda-build
+#   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
+#   --build-workbench: build the workbench package using conda-build (this will implicitly build qt and mantid)
 #
 # Possible parameters:
 #   --clobber-yml: clobber the meta yaml files of each package build with conda-build, provide an absolute path to the uteyml file
@@ -27,12 +27,17 @@
 
 # Setup expected variables
 WORKSPACE=$1
+[ -z "$WORKSPACE"] && echo "A workspace argument is required" && exit 1
 shift
 if [[ $OSTYPE == "msys"* ]]; then
-    WORKSPACE=${WORKSPACE////\\}
+    if [[ "$WORKSPACE" == *'\'* ]] then
+        echo "You have \ or \\ in your Workspace path, this is not supported on Windows."
+        exit 1
+    fi
+    WORKSPACE=${WORKSPACE////\\} # Replace // with \
     # Require git settings so that paths can be checked out with longer file names than 260 characters
     if [[ ! $(git config --system --get core.longpaths) == true ]]; then
-        echo "This windows machine is not configured properly, please run this command as an admin: git config --system core.longpaths true"
+        echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
         exit 1
     fi
 fi
@@ -97,7 +102,7 @@ cd $WORKSPACE
 if [[ -d conda-recipes ]]; then
     rm -rf conda-recipes
 fi
-git clone https://github.com/mantidproject/conda-recipes.git
+git clone https://github.com/mantidproject/conda-recipes.git --depth=1
 
 # Run conda build on framework
 cd $RECIPES_DIR/recipes/

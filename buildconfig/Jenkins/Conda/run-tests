@@ -20,8 +20,8 @@ ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
 USE_CORE_DUMPS=$7
 
-# Run only 2 tests at a time because of memory constraints in the system tests
-BUILD_THREADS_SYSTEM_TESTS=2
+# Run only 3 tests at a time because of memory constraints in the system tests
+BUILD_THREADS_SYSTEM_TESTS=3
 XVFB_SERVER_NUM=101
 ULIMIT_CORE_ORIG=$(ulimit -c)
 

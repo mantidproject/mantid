@@ -11,7 +11,7 @@ EXPECTED_MAMBAFORGE_PATH=$1
 EXPECTED_CONDA_PATH=$2
 CLEAN_BUILD=$3
 
-# Only supporting x86 at this time for the build process
+# Only supporting x86_64 at this time for the build process
 if [[ $OSTYPE == 'msys'* ]]; then
     MAMBAFORGE_SCRIPT_NAME=Mambaforge-Windows-x86_64.exe
 else
