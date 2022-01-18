@@ -63,6 +63,7 @@ class InstrumentView(QWidget, ObservingView):
         self.setLayout(layout)
 
         self.close_signal.connect(self._run_close)
+        self.closing.connect(lambda: self.presenter.close(self.presenter.ws_name))
 
     def get_tab(self, tab_index):
         tab_name = [InstrumentWidget.RENDER,
