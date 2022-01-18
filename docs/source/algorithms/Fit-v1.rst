@@ -693,6 +693,118 @@ Output:
     Workspace2 ExpDecay.Height: 8.44
     Workspace2 ExpDecay.Lifetime: 1.40
 
+Comparison with scipy.optimize.curve_fit
+----------------------------------------
+
+The `scipy.optimize.curve_fit` function is a commonly used optimiser for fitting models to data.
+By default the `curve_fit` scaled the covariance matrix from the fit by the reduced chi-squared -
+this is equivalent to scaling the errorbars on the data points such that the reduced chi-squared is unity
+(the expectation value for a "good" fit). This can be useful if a fit is performed with unit weights
+or the weights are only relative. However for absolute weights (such as those calculated from the error on the counts
+using Poisson statistics) this is not valid.
+
+This leads to a discrepancy in the uncertainty on the best fit parameters and the confidence bounds
+on the fitted curve between the default behaviour of `curve_fit` and the mantid `Fit` algorithm (which does not scale
+the covariance matrix since v6.3).
+The scaling of the covariance matrix in `curve_fit` is governed by the `absolute_sigma` parameter
+(by default `absolute_sigma = False`). Here we show that the mantid `Fit` algorithm and `curve_fit` give the same
+results when `absolute_sigma=True`.
+
+.. code-block:: python
+
+    from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
+    import numpy as np
+    from scipy import optimize
+    from scipy.stats import t
+
+    def func(x, c ,m):
+        return m*x + c
+
+    def confidence_band(x, yfit, covar, dfdp, confprob=0.6826):
+       alpha = 1 - confprob
+       prb = 1.0 - alpha/2
+       nparams = pcov_true.shape[0]
+       dof = len(x)-nparams
+       tval = t.ppf(prb, dof)
+       df_sq = np.zeros(x.shape)
+       for j in range(nparams):
+          for k in range(nparams):
+             df_sq  += dfdp[j]*dfdp[k]*covar[j,k]
+       df = np.sqrt(df_sq)
+       delta = tval * df
+       upperband = yfit + delta
+       lowerband = yfit - delta
+       return upperband, lowerband
+
+    # Generate data
+    noise_stdev = 0.1
+    err_scale = 0.5  # 1 => chi-squared ~= 1 (i.e. errorbars will correspond to stdev of simulated noise)
+    m0 = 1
+    c0 = 0.5
+    x = np.linspace(0,1,20)
+    np.random.seed(1)
+    y = np.random.normal(func(x, c0, m0), noise_stdev)
+    e = err_scale*noise_stdev*np.ones(x.shape)
+    ws = CreateWorkspace(DataX=x,DataY=y, DataE=e, EnableLogging=False)
+
+    # initial guess
+    p0 = [1,2]  # c, m
+
+    # scipy
+    popt, pcov_false = optimize.curve_fit(func, x, y, p0, sigma=e,
+        absolute_sigma=False)
+    perr_false = np.sqrt(np.diag(pcov_false))
+    _, pcov_true = optimize.curve_fit(func, x, y, p0, sigma=e,
+        absolute_sigma=True)  # popt does not depend on absolute_sigma
+    perr_true = np.sqrt(np.diag(pcov_true))
+    chisq = np.sum(((y - func(x, *popt))/e)**2)
+    red_chisq = chisq/(len(x) - len(popt))
+    # calc confidence limits
+    dfdp = [1, x]  # d(func)/dparam = [dy/dc, dy/dm]
+    upper_true, lower_true = confidence_band(x, func(x, *popt), pcov_true, dfdp)
+    upper_false, lower_false = confidence_band(x, func(x, *popt), pcov_false, dfdp)
+
+    # mantid
+    fit = Fit(Function='name=LinearBackground,A0={0},A1={1}'.format(*p0),
+        InputWorkspace='ws', IgnoreInvalidData=True, Output='ws', OutputCompositeMembers=True)
+
+    popt_mtd = [fit.Function.function.getParameterValue(iparam) for
+        iparam in range(fit.Function.function.nParams())]
+    perr_mtd = [fit.Function.function.getError(iparam) for
+        iparam in range(fit.Function.function.nParams())]
+    red_chisq_mtd = fit.OutputChi2overDoF
+
+    # compare mantid and scipy
+
+    print('### scipy curve_fit ###')
+    print("red chisq = ", red_chisq)
+    print("popt = ", popt)
+    print('abs_sigma=False:\t perr = ', perr_false)
+    print('abs_sigma=True:\t perr = ', perr_true)
+    print('### mantid ###')
+    print("red chisq = ", red_chisq_mtd)
+    print("popt = ", popt_mtd)
+    print('perr =', perr_mtd)
+
+    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+    ax.errorbar(x, y, yerr=e, color = 'k',
+        marker='o', markersize=3, capsize=2, ls='', label = 'data')
+    ax.plot(ax.get_xlim(), func(np.array(ax.get_xlim()), c0, m0), '-k', label = 'model')
+    ax.plot(x, func(x, *popt), '-b', label = 'scipy curve_fit')
+    ax.plot(x, upper_true, ':b', label = '68.3% bound (scipy cov abs_sig=True)')
+    ax.plot(x, lower_true, ':b')
+    ax.plot(x, upper_false, ':c', label = '68.3% bound (scipy cov abs_sig=False)')
+    ax.plot(x, lower_false, ':c')
+    ax.errorbar(fit.OutputWorkspace, wkspIndex=1,
+        color = 'r', ls ='--', capsize=2, label='mtd fit')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+    ax.legend(fontsize=8.0).set_draggable(True).legend
+    fig.show()
+
+.. figure:: /images/ScipyCurveFit_Mantid_comparison_LinearFit.png
+
 References
 ----------
 
