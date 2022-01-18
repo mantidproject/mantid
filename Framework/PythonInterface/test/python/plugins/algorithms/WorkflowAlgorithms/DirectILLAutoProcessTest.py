@@ -87,7 +87,7 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             ClearCache=True,
             SaveOutput=False
         )
-        self._check_output(mtd[sample_name][0], 95, 36864, False, "Energy transfer", "DeltaE", "Spectrum", "Label")
+        self._check_output(mtd[sample_name][0], 95, 36863, False, "Energy transfer", "DeltaE", "Spectrum", "Label")
 
     def _check_output(self, ws, blocksize, spectra, isDistribution, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
