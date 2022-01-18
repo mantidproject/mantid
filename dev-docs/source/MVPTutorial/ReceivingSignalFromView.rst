@@ -24,7 +24,7 @@ pressed. First we will start with the view:
         doSomethingSignal = QtCore.Signal()
 
         def __init__(self, parent=None):
-            super(view, self).__init__(parent)
+            super().__init__(parent)
 
             self.button = QtWidgets.QPushButton('Hi', self)
             self.button.setStyleSheet("background-color:lightgrey")
@@ -90,7 +90,7 @@ The main is now:
     """
     class Demo(QtWidgets.QMainWindow):
         def __init__(self, parent=None):
-            super(Demo, self).__init__(parent)
+            super().__init__(parent)
 
             self.window = QtWidgets.QMainWindow()
             my_view = view.View(self)

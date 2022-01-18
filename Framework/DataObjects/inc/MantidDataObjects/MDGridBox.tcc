@@ -1189,12 +1189,12 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform, cons
 
   // OK, we've done counting all the vertices.
   // Now let's go through and check each box.
-  for (size_t i = 0; i < numBoxes; ++i) {
-    API::IMDNode *box = m_Children[i];
+  for (size_t boxIndex = 0; boxIndex < numBoxes; ++boxIndex) {
+    API::IMDNode *box = m_Children[boxIndex];
 
     // First, check if we have reached the base case where the box is completely
     // enveloped by the peak
-    if (verticesContained[i] >= maxVertices) {
+    if (verticesContained[boxIndex] >= maxVertices) {
       // Use the integrated sum of signal in the box
       signal += box->getSignal();
       errorSquared += box->getErrorSquared();
@@ -1203,7 +1203,7 @@ TMDE(void MDGridBox)::integrateSphere(API::CoordTransform &radiusTransform, cons
 
     // Second, check if there is at least one vertex in the integration volume,
     // and kick off recursive search until we reach the base case
-    if (verticesContained[i] > 0) {
+    if (verticesContained[boxIndex] > 0) {
       box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared, innerRadiusSquared,
                            useOnePercentBackgroundCorrection);
       continue;

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
+from datetime import datetime
 from mantid.api import AnalysisDataService as ads, WorkspaceFactory
 from mantid.kernel import FloatTimeSeriesProperty
 from enum import Enum
@@ -145,8 +146,7 @@ class ResultsTabModel(object):
                 WORKSPACE_NAME_COL: fit_parameters.parameter_workspace_name
             }
             row_dict = self._add_logs_to_table(row_dict, fit, log_selection)
-            results_table.addRow(
-                self._add_parameters_to_table(row_dict, fit_parameters))
+            results_table.addRow(self._add_parameters_to_table(row_dict, fit_parameters))
 
         ads.Instance().addOrReplace(self.results_table_name(), results_table)
         self._results_context.add_result_table(self.results_table_name())
@@ -160,12 +160,21 @@ class ResultsTabModel(object):
         :param log_selection: The current selection of logs as a list of names
         :return: The updated row values dict
         """
+        def format_values_for_time_parameters(value: str) -> str:
+            value = value.split(' to')[0]
+            val = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S')
+            return (val - datetime(1970, 1, 1)).total_seconds()
+
         if not log_selection:
             return row_dict
 
         for log_name in log_selection:
-            row_dict.update({log_name: fit.log_value(log_name)})
-
+            values = fit.log_value_and_error(log_name)
+            row_dict.update({log_name: values[0]})
+            if values[1]!="":
+                row_dict.update({_error_column_name(log_name): values[1]})
+            if log_name in ['run_start', 'run_end']:
+                row_dict.update({log_name+'_seconds': format_values_for_time_parameters(fit.log_value(log_name))})
         return row_dict
 
     def _add_parameters_to_table(self, row_dict, fit_parameters):
@@ -267,10 +276,16 @@ class ResultsTabModel(object):
 
         for log_name in log_selection:
             wksp_name = all_fits[0].input_workspaces[0]
-            if float_log(wksp_name, log_name):
-                table.addColumn('float', log_name, TableColumnType.X.value)
-            else:
+            if log_name in ['run_start', 'run_end']:
                 table.addColumn('str', log_name, TableColumnType.X.value)
+                table.addColumn('float', log_name+'_seconds', TableColumnType.X.value)
+            else:
+                if float_log(wksp_name, log_name):
+                    table.addColumn('float', log_name, TableColumnType.X.value)
+                    # only add the errors column if the value is numerical
+                    table.addColumn('float', _error_column_name(log_name), TableColumnType.XErr.value)
+                else:
+                    table.addColumn('str', log_name, TableColumnType.X.value)
         # assume all fit functions are the same in fit_selection and take
         # the parameter names from the first fit.
         parameters = self._find_parameters_for_table(results_selection)

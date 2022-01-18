@@ -28,7 +28,11 @@
 
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
-}
+// must include the "."
+const std::vector<std::string> ADDITIONAL_EXTENSIONS{".nxs", ".nxs_v2", ".bin"};
+
+bool is_decimal(const char character) { return character == '.'; }
+} // namespace
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -53,6 +57,8 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(autoAddToggledSignal(bool)), SLOT(startWatching(bool)));
   connect(m_view, SIGNAL(periodInfoClicked()), SLOT(handlePeriodInfoClicked()));
   connect(&m_watcher, SIGNAL(directoryChanged(const QString &)), SLOT(updateDirectoryChangedFlag(const QString &)));
+
+  m_view->setFileExtensions(ADDITIONAL_EXTENSIONS);
 }
 
 void ALCDataLoadingPresenter::handleRunsEditing() {
@@ -271,10 +277,10 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   try //... to load the first run
   {
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadMuonNexus");
+    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
     loadAlg->setChild(true); // Don't want workspaces in the ADS
 
-    // We need logs only but we have to use LoadMuonNexus
+    // We need logs only but we have to use Load
     // (can't use LoadMuonLogs as not all the logs would be
     // loaded), so we load the minimum amount of data, i.e., one spectrum
     loadAlg->setProperty("Filename", m_view->getFirstFile());
@@ -415,7 +421,8 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
  * @returns :: True if grouping OK, false if bad
  */
 std::string ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group, bool &isValid) {
-  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha)) {
+  if (!std::isdigit(group[0]) || std::any_of(std::begin(group), std::end(group), ::isalpha) ||
+      std::any_of(std::begin(group), std::end(group), is_decimal)) {
     isValid = false;
     return "";
   }

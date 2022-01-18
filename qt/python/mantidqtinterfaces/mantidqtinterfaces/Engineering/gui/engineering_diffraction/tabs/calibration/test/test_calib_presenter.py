@@ -8,8 +8,9 @@ import unittest
 
 from unittest.mock import patch, MagicMock
 from unittest import mock
+from Engineering.EnggUtils import GROUP
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration import model, view, presenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 tab_path = 'mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.calibration'
 
@@ -22,51 +23,89 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.presenter = presenter.CalibrationPresenter(self.model, self.view)
         self.presenter.cropping_widget = MagicMock()
 
-    @patch(tab_path + ".presenter.set_setting")
-    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_started_with_right_params(self, worker_method, setting):
+    def test_update_calibration_from_view_no_cropping(self):
+        self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = False
-        self.view.get_sample_filename.return_value = "305738"
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = False
+        self.presenter.instrument = "ENGINX"
+        self.view.get_sample_filename.return_value = "193749"
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
 
-        self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("305738", True, None)
+        self.presenter.update_calibration_from_view()
 
-    @patch(tab_path + ".presenter.set_setting")
-    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_started_with_right_params_crop_bank(self, worker_method, setting):
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_group.assert_called_once_with(GROUP.BOTH)
+        self.presenter.current_calibration.set_cal_file.assert_not_called()
+        self.presenter.current_calibration.set_spectra_list.assert_not_called()
+
+    def test_update_calibration_from_view_cropped_to_bank(self):
+        self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
-        self.view.get_sample_filename.return_value = "305738"
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = False
-        self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
-        self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = False
-        self.presenter.cropping_widget.get_bank.return_value = "bank"
-        self.presenter.cropping_widget.get_custom_calfile.return_value = None
+        self.presenter.cropping_widget.get_group.return_value = GROUP.NORTH
+        self.presenter.instrument = "ENGINX"
+        self.view.get_sample_filename.return_value = "193749"
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
 
-        self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("305738", True, None, bank="bank")
+        self.presenter.update_calibration_from_view()
 
-    @patch(tab_path + ".presenter.set_setting")
-    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_started_with_right_params_crop_spec_nums(self, worker_method, setting):
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
+        self.presenter.current_calibration.set_cal_file.assert_not_called()
+        self.presenter.current_calibration.set_spectra_list.assert_not_called()
+
+    def test_update_calibration_from_view_cropped_to_texture30(self):
+        self.view.get_load_checked.return_value = False
         self.view.get_crop_checked.return_value = True
-        self.view.get_sample_filename.return_value = "305738"
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = False
-        self.presenter.cropping_widget.get_custom_calfile_enabled.return_value = False
-        self.presenter.cropping_widget.get_custom_spectra_enabled.return_value = True
-        self.presenter.cropping_widget.get_custom_spectra.return_value = "1-56,401-809"
+        self.presenter.cropping_widget.get_group.return_value = GROUP.TEXTURE30
+        self.presenter.instrument = "ENGINX"
+        self.view.get_sample_filename.return_value = "193749"
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
 
-        self.presenter.on_calibrate_clicked()
-        worker_method.assert_called_with("305738", True, None,
-                                         spectrum_numbers="1-56,401-809")
+        self.presenter.update_calibration_from_view()
 
-    @patch(tab_path + ".presenter.set_setting")
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
+        self.presenter.current_calibration.set_cal_file.assert_not_called()
+        self.presenter.current_calibration.set_spectra_list.assert_not_called()
+
+    def test_update_calibration_from_view_cropped_to_spectra(self):
+        self.view.get_load_checked.return_value = False
+        self.view.get_crop_checked.return_value = True
+        self.presenter.cropping_widget.get_group.return_value = GROUP.CROPPED
+        self.presenter.cropping_widget.get_custom_spectra.return_value = "1"
+        self.presenter.instrument = "ENGINX"
+        self.view.get_sample_filename.return_value = "193749"
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration.group = self.presenter.cropping_widget.get_group()
+
+        self.presenter.update_calibration_from_view()
+
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
+        self.presenter.current_calibration.set_cal_file.assert_not_called()
+        self.presenter.current_calibration.set_spectra_list.assert_called_once_with(self.presenter.cropping_widget.
+                                                                                    get_custom_spectra())
+
+    def test_update_calibration_from_view_custom_calfile(self):
+        self.view.get_load_checked.return_value = False
+        self.view.get_crop_checked.return_value = True
+        self.presenter.cropping_widget.get_group.return_value = GROUP.CUSTOM
+        self.presenter.cropping_widget.get_custom_calfile.return_value = "cal"
+        self.presenter.instrument = "ENGINX"
+        self.view.get_sample_filename.return_value = "193749"
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+        self.presenter.current_calibration.group = self.presenter.cropping_widget.get_group()
+
+        self.presenter.update_calibration_from_view()
+
+        self.presenter.current_calibration.set_calibration_paths.assert_called_once_with("ENGINX", "193749")
+        self.presenter.current_calibration.set_group.assert_called_once_with(self.presenter.cropping_widget.get_group())
+        self.presenter.current_calibration.set_cal_file.assert_called_once_with(self.presenter.cropping_widget.
+                                                                                    get_custom_calfile())
+        self.presenter.current_calibration.set_spectra_list.assert_not_called()
+
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_not_started_while_finder_is_searching(self, worker_method, err_msg, setting):
+    def test_worker_not_started_while_finder_is_searching(self, worker_method, err_msg):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.get_load_checked.return_value = False
@@ -76,10 +115,9 @@ class CalibrationPresenterTest(unittest.TestCase):
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
 
-    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_not_started_when_run_numbers_invalid(self, worker_method, err_msg, setting):
+    def test_worker_not_started_when_run_numbers_invalid(self, worker_method, err_msg):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
@@ -87,21 +125,24 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.get_sample_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
+
         worker_method.assert_not_called()
         self.assertEqual(err_msg.call_count, 1)
 
-    @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.create_error_message")
     @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
-    def test_worker_not_started_when_cropping_invalid(self, worker_method, err_msg, setting):
+    def test_worker_not_started_when_cropping_invalid(self, worker_method, err_msg):
         self.view.get_sample_filename.return_value = "305738"
         self.view.get_plot_output.return_value = True
         self.view.is_searching.return_value = False
+        self.view.get_new_checked.return_value = True
         self.view.get_load_checked.return_value = False
         self.presenter.cropping_widget.is_spectra_valid.return_value = False
 
         self.presenter.on_calibrate_clicked()
-        worker_method.assert_not_called()
+
+        self.model.load_existing_calibration_files.assert_not_called()  # called if loaded calibration
+        worker_method.assert_not_called()  # called if created new one
         self.assertEqual(err_msg.call_count, 1)
 
     def test_controls_disabled_disables_both(self):
@@ -136,62 +177,64 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.view.set_instrument_override.assert_called_with("IMAT")
         self.assertEqual(self.presenter.instrument, "IMAT")
 
-    def test_set_current_calibration(self):
-        self.presenter.calibration_notifier = MagicMock()
-        pending = CalibrationInfo(sample_path="test/set/path/2",
-                                  instrument="TEST_INS")
-        pendcpy = CalibrationInfo(sample_path="test/set/path/2",
-                                  instrument="TEST_INS")
-        self.presenter.pending_calibration = pending
-        current = CalibrationInfo(sample_path="old/cera",
-                                  instrument="ENGINX")
-        blank = CalibrationInfo()
-        self.presenter.current_calibration = current
-
-        self.presenter.set_current_calibration()
-
-        self.check_calibration_equal(self.presenter.current_calibration, pendcpy)
-        self.check_calibration_equal(self.presenter.pending_calibration, blank)
-        self.assertEqual(self.presenter.calibration_notifier.notify_subscribers.call_count, 1)
-
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_path")
-    def test_calibrate_clicked_load_valid_path(self, path, setting):
+    def test_calibrate_clicked_load_valid_path(self, mock_valid_path, mock_setting):
         self.presenter.calibration_notifier = MagicMock()
         self.view.get_new_checked.return_value = False
         self.view.get_load_checked.return_value = True
-
-        path.return_value = True
-        instrument, cer, grp_ws, roi, banks = ("test_ins", "test_cer", "test_grpws", "test_roi",
-                                                    ['test'])
-        self.model.load_existing_calibration_files.return_value = instrument, cer, grp_ws, roi, banks
-        current = CalibrationInfo(sample_path="old/cera",
-                                  instrument="ENGINX")
-        new = CalibrationInfo(sample_path=cer, instrument=instrument)
-        new.set_roi_info_load(banks, grp_ws, roi)
-        self.presenter.current_calibration = current
+        prm_filepath = "path/to/prm.prm"
+        self.view.get_path_filename.return_value = prm_filepath
+        mock_valid_path.return_value = True
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
 
         self.presenter.on_calibrate_clicked()
 
-        self.assertEqual(self.presenter.current_calibration.get_sample(), new.get_sample())
-        self.assertEqual(self.presenter.current_calibration.get_instrument(), new.get_instrument())
-        self.assertEqual(self.presenter.calibration_notifier.notify_subscribers.call_count, 1)
+        self.model.load_existing_calibration_files.assert_called_with(self.presenter.current_calibration)
+        self.presenter.current_calibration.set_calibration_from_prm_fname.assert_called_with(prm_filepath)
+        self.presenter.calibration_notifier.notify_subscribers.assert_called_once()
+        mock_setting.assert_called_once()
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.CalibrationPresenter.validate_path")
-    def test_calibrate_clicked_load_invalid_path(self, path, setting):
+    def test_calibrate_clicked_load_invalid_path(self, mock_valid_path, mock_setting):
         self.presenter.calibration_notifier = MagicMock()
         self.view.get_new_checked.return_value = False
         self.view.get_load_checked.return_value = True
-        path.return_value = False
-        current = CalibrationInfo(sample_path="old/cera",
-                                  instrument="ENGINX")
-        self.presenter.current_calibration = current
+        mock_valid_path.return_value = False
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
 
         self.presenter.on_calibrate_clicked()
 
-        self.assertEqual(self.presenter.current_calibration, current)
-        self.assertEqual(self.presenter.calibration_notifier.notify_subscribers.call_count, 0)
+        self.presenter.current_calibration.set_calibration_from_prm_fname.assert_not_called()
+        self.presenter.calibration_notifier.notify_subscribers.assert_not_called()
+        mock_setting.assert_not_called()
+
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    @patch(tab_path + ".presenter.CalibrationPresenter._validate")
+    def test_calibrate_clicked_new_valid_calibration_with_plotting(self, mock_validate, mock_start_worker):
+        self.view.get_new_checked.return_value = True
+        self.view.get_plot_output.return_value = True
+        mock_validate.return_value = True
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+
+        self.presenter.on_calibrate_clicked()
+
+        mock_start_worker.assert_called_once_with(mock_validate())
+
+    @patch(tab_path + ".presenter.CalibrationPresenter.start_calibration_worker")
+    @patch(tab_path + ".presenter.CalibrationPresenter._validate")
+    def test_calibrate_clicked_new_invalid_calibration(self, mock_validate, mock_start_worker):
+        self.view.get_new_checked.return_value = True
+        self.view.get_plot_output.return_value = True
+        self.view.get_load_checked.return_value = False
+        mock_validate.return_value = False
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo())
+
+        self.presenter.on_calibrate_clicked()
+
+        mock_start_worker.assert_not_called()  # called if created new one
+        self.model.load_existing_calibration_files.assert_not_called()  # called if loaded calibration
 
     def test_create_new_enabled_true(self):
         self.presenter.set_create_new_enabled(True)
@@ -222,19 +265,6 @@ class CalibrationPresenterTest(unittest.TestCase):
         self.assertEqual(self.view.set_path_enabled.call_count, 1)
         self.view.set_path_enabled.assert_called_with(False)
         self.assertEqual(self.view.set_calibrate_button_text.call_count, 0)
-
-    @patch(tab_path + ".presenter.AsyncTask")
-    def test_start_calibration_worker(self, task):
-        instrument, cer = ("test_ins", "test_cer")
-        old_pending = CalibrationInfo(sample_path=None, instrument=None)
-        self.presenter.pending_calibration = old_pending
-        expected_pending = CalibrationInfo(sample_path=cer,
-                                           instrument=instrument)
-        self.presenter.instrument = instrument
-
-        self.presenter.start_calibration_worker(cer, False, None)
-
-        self.check_calibration_equal(self.presenter.pending_calibration, expected_pending)
 
     def test_cropping_disabled_when_loading_calib(self):
         self.presenter.set_load_existing_enabled(True)

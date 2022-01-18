@@ -1510,6 +1510,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   fit->setProperty("MaxIterations", m_fitIterations); // magic number
   fit->setProperty("StartX", peak_range.first);
   fit->setProperty("EndX", peak_range.second);
+  fit->setProperty("IgnoreInvalidData", true);
 
   if (m_constrainPeaksPosition) {
     // set up a constraint on peak position
@@ -1590,6 +1591,7 @@ double FitPeaks::fitFunctionMD(API::IFunction_sptr fit_function, const API::Matr
   fit->setProperty("StartX_1", vec_xmin.second);
   fit->setProperty("EndX_1", vec_xmax.second);
   fit->setProperty("MaxIterations", m_fitIterations);
+  fit->setProperty("IgnoreInvalidData", true);
 
   // Execute
   fit->execute();

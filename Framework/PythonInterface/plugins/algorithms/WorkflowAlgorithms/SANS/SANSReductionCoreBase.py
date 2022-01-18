@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name
 
 """A base class to share functionality between SANSReductionCore algorithms."""
+import json
 import os
 from typing import Tuple, Dict
 
@@ -22,7 +23,7 @@ from sans.algorithm_detail.move_sans_instrument_component import move_component,
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace
 from sans.algorithm_detail.slice_sans_event import slice_sans_event
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, DataType)
+from sans.common.enums import (DetectorType, DataType, RebinType)
 from sans.common.general_functions import (create_child_algorithm, append_to_sans_file_tag)
 from sans.state.Serializer import Serializer
 from sans.state.StateObjects.wavelength_interval import WavRange
@@ -160,22 +161,21 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
 
     def _convert_to_wavelength(self, workspace, wavelength_state) -> WsList:
         wavelength_name = "SANSConvertToWavelengthAndRebin"
+        selected_ranges = wavelength_state.wavelength_interval.selected_ranges
+        assert(len(selected_ranges) > 0)
+        wavelength_options = {"InputWorkspace": workspace,
+                              "OutputWorkspace": EMPTY_NAME,
+                              "WavelengthPairs": json.dumps(selected_ranges),
+                              "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
+                              "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
+                              # No option for interpolating data is available
+                              "RebinMode": RebinType.REBIN.value}
 
-        processed = {}
-        assert(len(wavelength_state.wavelength_interval.selected_ranges) > 0)
-        for wav_range in wavelength_state.wavelength_interval.selected_ranges:
-            wavelength_options = {"InputWorkspace": workspace,
-                                  "OutputWorkspace": EMPTY_NAME,
-                                  "WavelengthLow": wav_range[0],
-                                  "WavelengthHigh": wav_range[1],
-                                  "WavelengthStep": wavelength_state.wavelength_interval.wavelength_step,
-                                  "WavelengthStepType": wavelength_state.wavelength_step_type_lin_log.value,
-                                  "RebinMode": wavelength_state.rebin_type.value}
-
-            wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
-            wavelength_alg.execute()
-            # The JSON serialiser will convert tuples->lists which are unhashable, so cast back
-            processed[tuple(wav_range)] = wavelength_alg.getProperty("OutputWorkspace").value
+        wavelength_alg = create_child_algorithm(self, wavelength_name, **wavelength_options)
+        wavelength_alg.execute()
+        grouped_ws = wavelength_alg.getProperty("OutputWorkspace").value
+        assert(len(grouped_ws) == len(selected_ranges))
+        processed = {tuple(wav_range): ws for wav_range, ws in zip(selected_ranges, grouped_ws)}
         return processed
 
     def _scale(self, state, ws_list: WsList):
@@ -198,7 +198,7 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
             direct_workspace = self._move(state=state, workspace=direct_workspace, component=component_as_string,
                                           is_transmission=True)
 
-        alg = CreateSANSAdjustmentWorkspaces(state_adjustment=state.adjustment,
+        alg = CreateSANSAdjustmentWorkspaces(state=state,
                                              component=component_as_string, data_type=data_type)
 
         adjustments = {}

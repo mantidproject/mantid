@@ -351,7 +351,9 @@ bool Integrate3DEvents::correctForDetectorEdges(std::tuple<double, double, doubl
   if (E1Vecs.empty())
     return true;
 
-  auto &r1 = std::get<0>(radii), r2 = std::get<1>(radii), r3 = std::get<2>(radii);
+  const auto &r1 = std::get<0>(radii);
+  auto &r2 = std::get<1>(radii);
+  auto &r3 = std::get<2>(radii);
   auto h3 = 1.0 - detectorQ(E1Vecs, peak_q, bkgOuterRadii);
   // scaled from area of circle minus segment when r normalized to 1
   auto m3 = std::sqrt(1.0 - (std::acos(1.0 - h3) - (1.0 - h3) * std::sqrt(2.0 * h3 - h3 * h3)) / M_PI);
@@ -425,7 +427,7 @@ Integrate3DEvents::ellipseIntegrateEvents(const std::vector<V3D> &E1Vec, V3D con
     return std::make_shared<NoShape>();
   ;
 
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events = pos->second;
+  const std::vector<std::pair<std::pair<double, double>, V3D>> &some_events = pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -477,7 +479,7 @@ Integrate3DEvents::ellipseIntegrateModEvents(const std::vector<V3D> &E1Vec, V3D 
     return std::make_shared<NoShape>();
   ;
 
-  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events = pos->second;
+  const std::vector<std::pair<std::pair<double, double>, V3D>> &some_events = pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -1143,7 +1145,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D QLabFrame, const std::vector<double> &r) {
+double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec, const V3D &QLabFrame, const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {
     V3D distv = QLabFrame - E1 * (QLabFrame.scalar_prod(E1)); // distance to the trajectory as a vector

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_view import CroppingView
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.cropping.cropping_model import CroppingModel
+from Engineering.EnggUtils import GROUP
 
 
 class CroppingPresenter(object):
@@ -14,7 +15,7 @@ class CroppingPresenter(object):
         self.model = model if model else CroppingModel()
         self.view = view if view else CroppingView(parent)
 
-        self.bank = 0
+        self.group = None  # default if no cropping requested
         self.custom_spectra_enabled = False
         self.custom_spectra = None
         self.spectra_valid = True
@@ -33,25 +34,35 @@ class CroppingPresenter(object):
 
     def on_combo_changed(self, index):
         if index == 0:  # custom calfile
-            self.bank = 0
+            self.group = GROUP.CUSTOM
             self.custom_calfile_enabled = True
             self.custom_spectra_enabled = False
             self.set_custom_widgets_visibility(True, False)
         elif index == 1:  # north
-            self.bank = 1
+            self.group = GROUP.NORTH
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = False
             self.set_custom_widgets_visibility(False, False)
         elif index == 2:  # south
-            self.bank = 2
+            self.group = GROUP.SOUTH
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = False
             self.set_custom_widgets_visibility(False, False)
-        else:  # cropped
-            self.bank = 0
+        elif index == 3:  # cropped
+            self.group = GROUP.CROPPED
             self.custom_calfile_enabled = False
             self.custom_spectra_enabled = True
             self.set_custom_widgets_visibility(False, True)
+        elif index ==4:  # texture 20 grouping
+            self.group = GROUP.TEXTURE20
+            self.custom_calfile_enabled = False
+            self.custom_spectra_enabled = False
+            self.set_custom_widgets_visibility(False, False)
+        else:
+            self.group = GROUP.TEXTURE30
+            self.custom_calfile_enabled = False
+            self.custom_spectra_enabled = False
+            self.set_custom_widgets_visibility(False, False)
 
     def on_calfile_changed(self):
         valid = self.view.finder_custom.isValid()
@@ -83,8 +94,8 @@ class CroppingPresenter(object):
     def get_custom_spectra_enabled(self):
         return self.custom_spectra_enabled
 
-    def get_bank(self):
-        return self.bank
+    def get_group(self):
+        return self.group
 
     def is_calfile_valid(self):
         return self.calfile_valid

@@ -24,7 +24,7 @@ namespace ISISReflectometry {
 class IBatchPresenterFactory;
 class IMainWindowView;
 class IFileHandler;
-class IMessageHandler;
+class IReflMessageHandler;
 class IOptionsDialogView;
 class IEncoder;
 class IDecoder;
@@ -39,7 +39,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL MainWindowPresenter : public MainWindowSubs
                                                            public OptionsDialogPresenterSubscriber {
 public:
   /// Constructor
-  MainWindowPresenter(IMainWindowView *view, IMessageHandler *messageHandler, IFileHandler *fileHandler,
+  MainWindowPresenter(IMainWindowView *view, IReflMessageHandler *messageHandler, IFileHandler *fileHandler,
                       std::unique_ptr<IEncoder> encoder, std::unique_ptr<IDecoder> decoder,
                       std::unique_ptr<MantidWidgets::ISlitCalculator> slitCalculator,
                       std::unique_ptr<IOptionsDialogPresenter> optionsDialogPresenter,
@@ -63,6 +63,7 @@ public:
   void notifyAnyBatchReductionResumed() override;
   void notifyAnyBatchReductionPaused() override;
   void notifyChangeInstrumentRequested(std::string const &instrumentName) override;
+  void notifyCloseEvent() override;
   void notifyUpdateInstrumentRequested() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
@@ -82,7 +83,7 @@ public:
 
 protected:
   IMainWindowView *m_view;
-  IMessageHandler *m_messageHandler;
+  IReflMessageHandler *m_messageHandler;
   IFileHandler *m_fileHandler;
   std::vector<std::unique_ptr<IBatchPresenter>> m_batchPresenters;
   Mantid::Geometry::Instrument_const_sptr m_instrument;

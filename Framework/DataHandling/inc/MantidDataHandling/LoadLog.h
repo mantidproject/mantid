@@ -109,7 +109,7 @@ private:
   std::string extractLogName(const std::vector<std::string> &logName);
 
   /// Check for SNS-style text file
-  bool SNSTextFormatColumns(const std::string &str, std::vector<double> &out) const;
+  bool SNSTextFormatColumns(const std::string &input, std::vector<double> &out) const;
 
   /// Create timeseries property from .log file and adds that to sample object
   void loadThreeColumnLogFile(std::ifstream &logFileStream, const std::string &logFileName, API::Run &run);

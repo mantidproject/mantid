@@ -120,6 +120,7 @@ class MuonGroupPairContext(object):
         self._selected_pairs = []
         self._selected_groups = []
         self._selected_diffs = []
+        self.alpha_precision = 6
 
         self.message_notifier = MessageNotifier(self)
 

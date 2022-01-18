@@ -40,7 +40,7 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  template <typename MDE, size_t nd> void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd> void doClone(const typename DataObjects::MDEventWorkspace<MDE, nd>::sptr &ws);
 };
 
 } // namespace MDAlgorithms

@@ -48,6 +48,16 @@
          <string>Crop to Spectra</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>Texture (20 spec)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Texture (30 spec)</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item row="2" column="0" colspan="3">

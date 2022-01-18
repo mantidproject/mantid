@@ -29,31 +29,33 @@ from the parent).
 
     class View(QtWidgets.QWidget):
 
-    def __init__(self, parent=None):
-        super(view, self).__init__(parent)
+        def __init__(self, parent=None):
+            super().__init__(parent)
 
 Next we create a layout and add a button to it
 
 .. code-block:: python
+    :dedent: 4
 
-    grid = QtGui.QGridLayout()
-    self.button = QtWidgets.QPushButton('Hi', self)
-    self.button.setStyleSheet("background-color:lightgrey")
+                grid = QtWidgets.QGridLayout()
+                self.button = QtWidgets.QPushButton('Hi', self)
+                self.button.setStyleSheet("background-color:lightgrey")
 
-    # connect button to signal
-    self.button.clicked.connect(self.btn_click)
-    # add button to layout
-    grid.addWidget(self.button)
-    # set the layout for the view widget
-    self.setLayout(grid)
+                # connect button to signal
+                self.button.clicked.connect(self.btn_click)
+                # add button to layout
+                grid.addWidget(self.button)
+                # set the layout for the view widget
+                self.setLayout(grid)
 
 The above connect statement means that when the button is pressed, the
 function ``btn_click`` is called:
 
 .. code-block:: python
+    :dedent: 4
 
-    def btn_click(self):
-        print("Hello world")
+            def btn_click(self):
+                print("Hello world")
 
 The Main
 ########
@@ -74,7 +76,7 @@ all been saved in ``view.py``, the ``main.py`` will contain:
     """
     class Demo(QtWidgets.QMainWindow):
         def __init__(self,parent=None):
-            super(Demo,self).__init__(parent)
+            super().__init__(parent)
 
             self.window=QtWidgets.QMainWindow()
             my_view = view.View()

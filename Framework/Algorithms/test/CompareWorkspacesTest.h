@@ -22,13 +22,13 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidFrameworkTestHelpers/InstrumentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/InstrumentCreationHelper.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -122,6 +122,26 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<Workspace>(lpws)));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<Workspace>(lpws)));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
+  void test_RelativeErrorInPeaksWorkspace() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    const double tol = checker.getProperty("Tolerance");
+    auto pws1 = std::make_shared<LeanElasticPeaksWorkspace>();
+    auto pws2 = std::make_shared<LeanElasticPeaksWorkspace>();
+    LeanElasticPeak pk1(V3D(4.0, 0.0, 0.0));
+    pws1->addPeak(pk1);
+    LeanElasticPeak pk2(V3D(4.0 + 2.0 * tol, 0.0, 0.0));
+    pws2->addPeak(pk2);
+
+    // check matches with relative error
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", std::dynamic_pointer_cast<Workspace>(pws1)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", std::dynamic_pointer_cast<Workspace>(pws2)));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
   }

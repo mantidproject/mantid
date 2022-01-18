@@ -45,6 +45,11 @@ shape <HowToDefineGeometricShape>` to a :ref:`Run <Run>` property called
 (and the sample) is integrated, because this is all the detector can
 'see'. The full sample is still used for the neutron paths.
 
+It is worth pointing out that the parameter ``ContainerElementSize`` has very
+limited impact on the final absorption correction factor, therefore it is generally
+safe to use the same element size for both sample and container regardless of
+the actual geometry difference when running this algorithm.
+
 Usage
 -----
 
@@ -76,8 +81,8 @@ Output:
 
     ass  0.1298(θ=10) 0.1708(θ=90) 0.2119(θ=170) 0.1332(θ=90,φ=45)
     assc 0.1253(θ=10) 0.1650(θ=90) 0.2048(θ=170) 0.1280(θ=90,φ=45)
-    acc  0.9495(θ=10) 0.9464(θ=90) 0.9499(θ=170) 0.9354(θ=90,φ=45)
-    acsc 0.2623(θ=10) 0.4155(θ=90) 0.5307(θ=170) 0.4003(θ=90,φ=45)
+    acc  0.9418(θ=10) 0.9416(θ=90) 0.9422(θ=170) 0.9311(θ=90,φ=45)
+    acsc 0.3258(θ=10) 0.4221(θ=90) 0.5782(θ=170) 0.4014(θ=90,φ=45)
 
 .. categories::
 

@@ -7,7 +7,7 @@
 from mantid.api import AnalysisDataService, WorkspaceFactory
 from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import (AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply,
-                              PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
+                              MultipleScatteringCorrection, PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD,
                               RenameWorkspace, SaveNexusProcessed, UnGroupWorkspace, mtd)
 import mantid.simpleapi
 import numpy as np
@@ -48,16 +48,27 @@ def __get_instrument_name(wksp):
     return mantid.kernel.ConfigService.getInstrument(ws.getInstrument().getName()).shortName()
 
 
-def __get_cache_name(meta_wksp_name, abs_method, cache_dirs=[], prefix_name=""):
+def __get_cache_name(
+    meta_wksp_name,
+    abs_method,
+    cache_dirs=[],
+    prefix_name="",
+    ms_method="",
+):
     """generate candidate cachefile names (full paths) and associated ascii hash
 
     :param meta_wksp_name: name of workspace contains relevant meta data for hashing
-    :param abs_method: method used to perform the absorption calculation
+    :param abs_method: method used to perform the absorption calculation (mandatory)
     :param cache_dirs: cache directories to scan/load cache data
     :param prefix_name: prefix to add to wkspname for caching
+    :param ms_method: method used to perform multiple scattering correction (optional)
 
     return cache_filenames: full paths to candidate cache files
            ascii_hash: MD5 value based on selected property
+
+    IMPORTANT:
+        multiple scattering correction is optional whereas absorption
+        correction mandatory.
     """
     # grab the workspace
     if meta_wksp_name in mtd:
@@ -81,6 +92,7 @@ def __get_cache_name(meta_wksp_name, abs_method, cache_dirs=[], prefix_name=""):
                 "height": ws.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue(),
                 "sample_container": ws.run()['SampleContainer'].lastValue().replace(" ", ""),
                 "abs_method": abs_method,
+                "ms_method": ms_method,
             }.items()
         ]
 
@@ -160,8 +172,8 @@ def __load_cached_data(cache_files, sha1, abs_method="", prefix_name=""):
 #  In order to use the decorator, we must have consistent naming
 #  or kwargs as this is probably the most reliable way to get
 #  the desired data piped in multiple location
-#  -- bare minimum signaure of the function
-#    func(wksp_name: str, abs_method:str, cache_dir="")
+#  -- bare minimum signature of the function
+#    func(wksp_name: str, abs_method:str, cache_dir="", prefix_name="", ms_method="")
 def abs_cache(func):
     """decorator to make the caching process easier
 
@@ -190,6 +202,7 @@ def abs_cache(func):
         abs_method = args[1]
         cache_dirs = kwargs.get("cache_dirs", [])
         prefix_name = kwargs.get("prefix_name", "")
+        ms_method = kwargs.get("ms_method", "")
 
         # prompt return if no cache_dirs specified
         if len(cache_dirs) == 0:
@@ -203,7 +216,9 @@ def abs_cache(func):
             wksp_name,
             abs_method,
             cache_dirs=cache_dirs,
-            prefix_name=cache_prefix)
+            prefix_name=cache_prefix,
+            ms_method=ms_method,
+            )
 
         # step_2: try load the cached data from disk
         found_sample, found_container, abs_wksp_sample, abs_wksp_container, cache_filename = __load_cached_data(
@@ -215,7 +230,6 @@ def abs_cache(func):
 
         # step_3: calculation
         if (abs_method == "SampleOnly") and found_sample:
-            # Chen: why is this blowing things up?
             return abs_wksp_sample, ""
         else:
             if found_sample and found_container:
@@ -255,12 +269,14 @@ def calculate_absorption_correction(
     props,
     sample_formula,
     mass_density,
+    sample_geometry={},
     number_density=Property.EMPTY_DBL,
     container_shape="PAC06",
     num_wl_bins=1000,
     element_size=1,
     metaws=None,
     cache_dirs=[],
+    ms_method="",
 ):
     """The absorption correction is applied by (I_s - I_c*k*A_csc/A_cc)/A_ssc for pull Paalman-Ping
 
@@ -292,6 +308,7 @@ def calculate_absorption_correction(
     :param props: PropertyManager of run characterizations, obtained from PDDetermineCharacterizations
     :param sample_formula: Sample formula to specify the Material for absorption correction
     :param mass_density: Mass density of the sample to specify the Material for absorption correction
+    :param sample_geometry: Dictionary to specify the sample geometry for absorption correction
     :param number_density: Optional number density of sample to be added to the Material for absorption correction
     :param container_shape: Shape definition of container, such as PAC06.
     :param num_wl_bins: Number of bins for calculating wavelength
@@ -299,6 +316,7 @@ def calculate_absorption_correction(
     :param metaws: Optional workspace containing metadata to use instead of reading from filename
     :param cache_dirs: list of cache directories for storing cached absorption correction workspace
     :param prefix: How the prefix of cache file is determined - FILENAME to use file, or SHA prefix
+    :param ms_method: Method to use for multiple scattering correction
 
     :return:
         Two workspaces (A_s, A_c) names
@@ -320,6 +338,7 @@ def calculate_absorption_correction(
                                       props,
                                       num_wl_bins,
                                       material=material,
+                                      geometry=sample_geometry,
                                       environment=environment,
                                       metaws=metaws)
 
@@ -352,7 +371,9 @@ def calculate_absorption_correction(
                                            abs_method,
                                            element_size,
                                            prefix_name=absName,
-                                           cache_dirs=cache_dirs)
+                                           cache_dirs=cache_dirs,
+                                           ms_method=ms_method,
+                                           )
 
 
 @abs_cache
@@ -362,6 +383,65 @@ def calc_absorption_corr_using_wksp(
     element_size=1,
     prefix_name="",
     cache_dirs=[],
+    ms_method="",
+):
+    # warn about caching
+    log = Logger('CalcAbsorptionCorrUsingWksp')
+    if cache_dirs:
+        log.warning("Empty cache dir found.")
+    # 1. calculate first order absorption correction
+    abs_s, abs_c = calc_1st_absorption_corr_using_wksp(donor_wksp, abs_method, element_size, prefix_name)
+    # 2. calculate 2nd order absorption correction
+    if ms_method in ["", None, "None"]:
+        log.information("Skip multiple scattering correction as instructed.")
+    else:
+        MultipleScatteringCorrection(
+            InputWorkspace=donor_wksp,
+            ElementSize=element_size,
+            method=ms_method,
+            OutputWorkspace="ms_tmp",
+        )
+        if ms_method == "SampleOnly":
+            ms_sampleOnly = mtd["ms_tmp_sampleOnly"]
+            ms_sampleOnly = 1 - ms_sampleOnly
+            # abs_s now point to the effective absorption correction
+            # A = A / (1 - ms_s)
+            Divide(
+                LHSWorkspace=abs_s,  # str
+                RHSWorkspace=ms_sampleOnly,  # workspace
+                OutputWorkspace=abs_s,  # str
+                )
+            # nothing need to be done for container
+            # cleanup
+            mtd.remove("ms_tmp_sampleOnly")
+        elif ms_method == "SampleAndContainer":
+            ms_sampleAndContainer = mtd["ms_tmp_sampleAndContainer"]
+            ms_sampleAndContainer = 1 - ms_sampleAndContainer
+            Divide(
+                LHSWorkspace=abs_s,  # str
+                RHSWorkspace=ms_sampleAndContainer,  # workspace
+                OutputWorkspace=abs_s,  # str
+            )
+            mtd.remove("ms_tmp_sampleAndContainer")
+            ms_containerOnly = mtd["ms_tmp_containerOnly"]
+            ms_containerOnly = 1 - ms_containerOnly
+            Divide(
+                LHSWorkspace=abs_c,  # str
+                RHSWorkspace=ms_containerOnly,  # workspace
+                OutputWorkspace=abs_c,  # str
+            )
+            mtd.remove("ms_tmp_containerOnly")
+        else:
+            log.warning(f"Multiple scattering method {ms_method} not supported, skipping.")
+
+    return abs_s, abs_c
+
+
+def calc_1st_absorption_corr_using_wksp(
+    donor_wksp,
+    abs_method,
+    element_size=1,
+    prefix_name="",
 ):
     """
     Calculates absorption correction on the specified donor workspace. See the documentation
@@ -371,7 +451,6 @@ def calc_absorption_corr_using_wksp(
     :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
     :param element_size: Size of one side of the integration element cube in mm
     :param prefix_name: Optional prefix of the output workspaces, default is the donor_wksp name.
-    :param cache_dirs: List of candidate cache directories to store cached abs workspace.
 
     :return: Two workspaces (A_s, A_c), the first for the sample and the second for the container
     """

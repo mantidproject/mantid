@@ -56,10 +56,10 @@ SETTINGS_DICT = {
     "sort_ascending": False  # this is changed to false to show a deviation from the default
 }
 
-ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2, 'data_loaded_workspaces': [TEST_WS],
+ENCODED_DICT = {'encoder_version': IO_VERSION, 'current_tab': 2,
+                'data_workspaces': {TEST_WS : [TEST_WS + "_bgsub", [True, 70, 4000, True]]},
                 'plotted_workspaces': [TEST_WS + 'bgsub'], 'fit_properties': FIT_DICT, 'plot_diff': 'True',
-                'fit_results': FIT_RESULTS, 'settings_dict': SETTINGS_DICT,
-                'background_params': {TEST_WS: [True, 70, 4000, True]}}
+                'fit_results': FIT_RESULTS, 'settings_dict': SETTINGS_DICT}
 
 
 def _create_fit_workspace():
@@ -111,7 +111,7 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.presenter.fitting_presenter.plot_widget.view = fitting_plot_view
 
     def create_test_settings_presenter(self):
-        settings_model = SettingsModel()
+        settings_model = mock.create_autospec(SettingsModel)
         settings_view = mock.create_autospec(SettingsView)
         settings_presenter = SettingsPresenter(settings_model, settings_view)
         self.presenter.settings_presenter = settings_presenter
@@ -128,20 +128,18 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
         self.fitprop_browser.read_current_fitprop.return_value = None
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_workspaces': {TEST_WS: [None, []]},
                           'plotted_workspaces': [], 'fit_properties': None, 'fit_results': {},
-                          'settings_dict': SETTINGS_DICT,
-                          'background_params': {'ENGINX_277208_focused_bank_2': []}}, test_dic)
+                          'settings_dict': SETTINGS_DICT}, test_dic)
 
     def test_background_params_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
         self.fitprop_browser.read_current_fitprop.return_value = None
-        self.presenter.fitting_presenter.data_widget.model._bg_params = {TEST_WS: [True, 70, 4000, True]}
+        self.presenter.fitting_presenter.data_widget.model._data_workspaces[TEST_WS].bg_params = [True, 70, 4000, True]
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_workspaces': {TEST_WS: [None, [True, 70, 4000, True]]},
                           'plotted_workspaces': [], 'fit_properties': None, 'fit_results': {},
-                          'settings_dict': SETTINGS_DICT,
-                          'background_params': {TEST_WS: [True, 70, 4000, True]}}, test_dic)
+                          'settings_dict': SETTINGS_DICT}, test_dic)
 
     def test_fits_encode(self):
         self.presenter.fitting_presenter.data_widget.presenter.model.load_files(TEST_FILE)
@@ -150,10 +148,9 @@ class EngineeringDiffractionEncoderTest(unittest.TestCase):
         self.fitprop_browser.plotDiff.return_value = True
         self.presenter.fitting_presenter.data_widget.presenter.plotted = {FIT_WS}
         test_dic = self.encoder.encode(self.mock_view)
-        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_loaded_workspaces': [TEST_WS],
+        self.assertEqual({'encoder_version': IO_VERSION, 'current_tab': 0, 'data_workspaces': {TEST_WS: [None, []]},
                           'plotted_workspaces': [FIT_WS], 'fit_properties': FIT_DICT, 'fit_results': FIT_RESULTS,
-                          'plot_diff': 'True', 'settings_dict': SETTINGS_DICT,
-                          'background_params': {'ENGINX_277208_focused_bank_2': []}}, test_dic)
+                          'plot_diff': 'True', 'settings_dict': SETTINGS_DICT}, test_dic)
 
 
 @start_qapplication
@@ -166,7 +163,8 @@ class EngineeringDiffractionDecoderTest(unittest.TestCase):
         _create_fit_workspace()
 
     def tearDown(self):
-        self.gui.close()
+        if hasattr(self, 'gui'):
+            self.gui.close()
 
     def test_blank_gui_decodes(self):
         blank_dict = {'encoder_version': IO_VERSION, 'current_tab': 0, 'settings_dict': SETTINGS_DICT}

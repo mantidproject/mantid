@@ -11,12 +11,16 @@ import os.path
 import math
 from collections import OrderedDict
 
+import scipy.constants
+
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as s_api
 
-from dos.load_phonon import parse_phonon_file
 from dos.load_castep import parse_castep_file
+from dos.load_euphonic import euphonic_available, get_data_with_euphonic
+from dos.load_phonon import parse_phonon_file
+
 
 PEAK_WIDTH_ENERGY_FLAG = 'energy'
 
@@ -52,6 +56,13 @@ class SimulatedDensityOfStates(PythonAlgorithm):
                                           action=FileAction.OptionalLoad,
                                           extensions = ["phonon"]),
                              doc='Filename of the PHONON file.')
+
+        self.declareProperty(FileProperty('ForceConstantsFile', '',
+                                          action=FileAction.OptionalLoad,
+                                          extensions = [".castep_bin", ".json", ".yaml"]))
+
+        self.declareProperty(name='ForceConstantsSampling', defaultValue=20.,
+                             doc='Real-space cutoff in Angstrom for Brillouin zone sampling.')
 
         self.declareProperty(name='Function',defaultValue='Gaussian',
                              validator=StringListValidator(['Gaussian', 'Lorentzian']),
@@ -106,11 +117,15 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         castep_filename = self.getPropertyValue('CASTEPFile')
         phonon_filename = self.getPropertyValue('PHONONFile')
+        euphonic_filename = self.getPropertyValue('ForceConstantsFile')
 
-        if castep_filename == '' and phonon_filename == '':
+        pdos_available = bool(phonon_filename or euphonic_filename)
+
+        if not any((castep_filename, phonon_filename, euphonic_filename)):
             msg = 'Must have at least one input file'
             issues['CASTEPFile'] = msg
             issues['PHONONFile'] = msg
+            issues['ForceConstantsFile'] = msg
 
         spec_type = self.getPropertyValue('SpectrumType')
         sum_contributions = self.getProperty('SumContributions').value
@@ -119,8 +134,14 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         ions = self.getProperty('Ions').value
         calc_partial = len(ions) > 0
 
-        if spec_type == 'IonTable' and phonon_filename == '':
-            issues['SpectrumType'] = 'Require a .phonon file for ion table output'
+        if euphonic_filename and not euphonic_available():
+            issues['ForceConstantsFile'] = ('Cannot import the Euphonic library for force constants import. '
+                                            'This will be included in a future version of Mantid. '
+                                            'Until then, it can be installed using users/AdamJackson/install_euphonic.py '
+                                            'from the Script Repository.')
+
+        if spec_type == 'IonTable' and not pdos_available:
+            issues['SpectrumType'] = 'Cannot produce ion table when only .castep file is provided'
 
         if spec_type == 'BondAnalysis' and phonon_filename == '' and castep_filename == '':
             issues['SpectrumType'] = 'Require both a .phonon and .castep file for bond analysis'
@@ -134,8 +155,8 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         if spec_type != 'DOS' and scale_by_cross_section:
             issues['ScaleByCrossSection'] = 'Cannot scale contributions by cross sections when using %s' % spec_type
 
-        if phonon_filename == '' and scale_by_cross_section:
-            issues['ScaleByCrossSection'] = 'Must supply a PHONON file when scaling by cross sections'
+        if scale_by_cross_section and not pdos_available:
+            issues['ScaleByCrossSection'] = 'Cannot scale by cross sections when only .castep file is provided'
 
         if not calc_partial and sum_contributions:
             issues['SumContributions'] = 'Cannot sum contributions when not calculating partial density of states'
@@ -240,11 +261,24 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         """
         castep_filename = self.getPropertyValue('CASTEPFile')
         phonon_filename = self.getPropertyValue('PHONONFile')
+        euphonic_filename = self.getPropertyValue('ForceConstantsFile')
 
-        if phonon_filename != '' and self._spec_type != 'BondTable':
+        if phonon_filename and self._spec_type != 'BondTable':
             return self._read_data_from_file(phonon_filename)
-        elif castep_filename != '':
+        elif castep_filename:
             return self._read_data_from_file(castep_filename)
+        elif euphonic_filename:
+            if euphonic_available():
+                file_data, self._element_isotope = get_data_with_euphonic(
+                    euphonic_filename,
+                    cutoff=float(self.getPropertyValue('ForceConstantsSampling')),
+                    acoustic_sum_rule=None)
+            else:
+                raise ValueError("Could not load file using Euphonic: you may need to install this library.")
+
+            self._num_ions = file_data['num_ions']
+            return file_data
+
         else:
             raise RuntimeError('No valid data file')
 
@@ -464,7 +498,6 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         # Output each contribution to it's own workspace
         for ion_name, ions in partial_ions.items():
             partial_ws_name = self._out_ws_name + '_'
-
             partial_ws = self._compute_partial(ions, frequencies, eigenvectors, weights)
 
             # Set correct units on partial workspace
@@ -744,8 +777,4 @@ class SimulatedDensityOfStates(PythonAlgorithm):
         return file_data
 
 
-try:
-    import scipy.constants
-    AlgorithmFactory.subscribe(SimulatedDensityOfStates)
-except ImportError:
-    logger.debug('Failed to subscribe algorithm SimulatedDensityOfStates; The python package scipy may be missing.')
+AlgorithmFactory.subscribe(SimulatedDensityOfStates)

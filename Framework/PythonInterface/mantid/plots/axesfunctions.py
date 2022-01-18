@@ -113,6 +113,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
             workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
+            # get_bin returns the bin *without the monitor data*
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
             vertical_axis = workspace.getAxis(1)
             if isinstance(vertical_axis, mantid.api.NumericAxis):
@@ -121,7 +122,8 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                 if isinstance(vertical_axis, mantid.api.BinEdgeAxis):
                     # for bin edge axis we have one more edge than content
                     values = (values[0:-1] + values[1:])/2.
-                x = values
+                # only take spectra not associated with a monitor
+                x = [values[i] for i in x]
             if isinstance(vertical_axis, mantid.api.SpectraAxis):
                 spectrum_numbers = workspace.getSpectrumNumbers()
                 x = [spectrum_numbers[i] for i in x]
@@ -813,11 +815,12 @@ def tricontourf(axes, workspace, *args, **kwargs):
     return axes.tricontourf(x, y, z, *args, **kwargs)
 
 
-def update_colorplot_datalimits(axes, mappables):
+def update_colorplot_datalimits(axes, mappables, axis='both'):
     """
-    For an colorplot (imshow, pcolor*) plots update the data limits on the axes
+    For a colorplot (imshow, pcolor*) plots update the data limits on the axes
     to circumvent bugs in matplotlib
     :param mappables: An iterable of mappable for this axes
+    :param axis: {'both', 'x', 'y'} which axis to operate on.
     """
     # ax.relim in matplotlib < 2.2 doesn't take into account of images
     # and it doesn't support collections at all as of verison 3 so we'll take
@@ -829,11 +832,14 @@ def update_colorplot_datalimits(axes, mappables):
         xmin, xmax, ymin, ymax = get_colorplot_extents(mappable)
         xmin_all, xmax_all = min(xmin_all, xmin), max(xmax_all, xmax)
         ymin_all, ymax_all = min(ymin_all, ymin), max(ymax_all, ymax)
-    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)))
-    axes.autoscale()
-    if axes._autoscaleXon:
+
+    update_x = axis in ['x', 'both']
+    update_y = axis in ['y', 'both']
+    axes.update_datalim(((xmin_all, ymin_all), (xmax_all, ymax_all)), update_x, update_y)
+    axes.autoscale(axis=axis)
+    if axes.get_autoscalex_on():
         axes.set_xlim((xmin_all, xmax_all), auto=None)
-    if axes._autoscaleYon:
+    if axes.get_autoscaley_on():
         axes.set_ylim((ymin_all, ymax_all), auto=None)
 
 

@@ -71,7 +71,8 @@ set(SRC_FILES
     src/SortHKL.cpp
     src/SortPeaksWorkspace.cpp
     src/StatisticsOfPeaksWorkspace.cpp
-    src/TransformHKL.cpp)
+    src/TransformHKL.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES)
 set(INC_FILES
@@ -150,7 +151,8 @@ set(INC_FILES
     inc/MantidCrystal/SortHKL.h
     inc/MantidCrystal/SortPeaksWorkspace.h
     inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
-    inc/MantidCrystal/TransformHKL.h)
+    inc/MantidCrystal/TransformHKL.h
+)
 
 set(TEST_FILES
     AddPeakHKLTest.h
@@ -204,6 +206,7 @@ set(TEST_FILES
     PredictPeaksTest.h
     PredictSatellitePeaksTest.h
     SCDCalibratePanels2Test.h
+    SCDCalibratePanels2ObjFuncTest.h
     SCDCalibratePanelsTest.h
     SaveHKLTest.h
     SaveIsawPeaksTest.h
@@ -220,7 +223,8 @@ set(TEST_FILES
     SortHKLTest.h
     SortPeaksWorkspaceTest.h
     StatisticsOfPeaksWorkspaceTest.h
-    TransformHKLTest.h)
+    TransformHKLTest.h
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -229,9 +233,7 @@ endif(UNITY_BUILD)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -242,20 +244,16 @@ enable_precompiled_headers(inc/MantidCrystal/PrecompiledHeader.h SRC_FILES)
 add_library(Crystal ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Crystal ALIAS Crystal)
 
-target_include_directories(Crystal PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Crystal PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 
 # Set the name of the generated library
 set_target_properties(Crystal PROPERTIES OUTPUT_NAME MantidCrystal)
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(Crystal
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS/")
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS/")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(Crystal
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(Crystal PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
@@ -263,25 +261,24 @@ set_property(TARGET Crystal PROPERTY FOLDER "MantidFramework")
 
 include_directories(inc)
 
-target_link_libraries(Crystal PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem)
+target_link_libraries(
+  Crystal
+  PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel
+  PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(Crystal PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Crystal>
-  $<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  Crystal PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/Crystal> $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(Crystal FALSE)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS Crystal PLUGIN_LIB)
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS Crystal PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    Crystal
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS Crystal INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()

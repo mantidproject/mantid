@@ -235,9 +235,16 @@ void EventWorkspaceCollection::setTitle(const std::string &title) {
   }
 }
 
-void EventWorkspaceCollection::applyFilter(const boost::function<void(MatrixWorkspace_sptr)> &func) {
+void EventWorkspaceCollection::applyFilterInPlace(const boost::function<void(MatrixWorkspace_sptr)> &func) {
   for (auto &ws : m_WsVec) {
     func(ws);
+  }
+}
+
+void EventWorkspaceCollection::applyFilter(
+    const boost::function<DataObjects::EventWorkspace_sptr(DataObjects::EventWorkspace_sptr)> &func) {
+  for (auto &ws : m_WsVec) {
+    ws = func(ws);
   }
 }
 

@@ -38,7 +38,7 @@ public:
   std::unique_ptr<SplittersWorkspace> cloneEmpty() const { return std::unique_ptr<SplittersWorkspace>(doCloneEmpty()); }
 
   SplittersWorkspace &operator=(const SplittersWorkspace &other) = delete;
-  void addSplitter(Kernel::SplittingInterval splitter) override;
+  void addSplitter(const Kernel::SplittingInterval &splitter) override;
 
   Kernel::SplittingInterval getSplitter(size_t index) override;
 

@@ -113,10 +113,10 @@ void FFTDerivative::execComplexFFT() {
 
 void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in, HistogramData::HistogramX &symX,
                                        HistogramData::HistogramY &symY, const size_t nx, const size_t ny) {
-  auto &inX = in.x();
-  auto &inY = in.y();
+  const auto &inX = in.x();
+  const auto &inY = in.y();
 
-  double xx = 2 * inX[0];
+  const double xx = 2 * inX[0];
 
   symX[ny] = inX[0];
   symY[ny] = inY[0];
@@ -132,7 +132,7 @@ void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in, Histo
   symX[0] = 2 * symX[1] - symX[2];
   symY[0] = inY.back();
 
-  bool isHist = (nx != ny);
+  const bool isHist = (nx != ny);
 
   if (isHist) {
     symX[symY.size()] = inX[ny];
@@ -147,7 +147,7 @@ void FFTDerivative::symmetriseSpectrum(const HistogramData::Histogram &in, Histo
  * @param &re :: complete real Y  of input histogram
  * @param &im :: complete imaginary Y of input histogram
  */
-void FFTDerivative::multiplyTransform(HistogramX &nu, HistogramY &re, HistogramY &im) {
+void FFTDerivative::multiplyTransform(const HistogramX &nu, HistogramY &re, HistogramY &im) {
   int dn = getProperty("Order");
   bool swap_re_im = dn % 2 != 0;
   int sign_re = 1;

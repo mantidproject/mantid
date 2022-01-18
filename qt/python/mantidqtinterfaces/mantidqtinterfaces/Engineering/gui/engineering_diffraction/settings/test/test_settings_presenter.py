@@ -9,7 +9,10 @@ import unittest
 from os import path
 
 from unittest import mock
+from unittest.mock import patch
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings import settings_model, settings_view, settings_presenter
+
+dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_presenter"
 
 
 class SettingsPresenterTest(unittest.TestCase):
@@ -26,7 +29,9 @@ class SettingsPresenterTest(unittest.TestCase):
                          "default_peak": "BackToBackExponential"
                          }
 
-    def test_load_existing_settings(self):
+    @patch(dir_path + ".path.isfile")
+    def test_load_existing_settings(self, mock_isfile):
+        mock_isfile.return_value = True
         self.model.get_settings_dict.return_value = self.settings.copy()
 
         self.presenter.load_settings_from_file_or_default()
@@ -75,7 +80,9 @@ class SettingsPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.settings, expected_dict)
         self.model.set_settings_dict.assert_called_once()  # called to replace invalid settings
 
-    def test_save_new_settings(self):
+    @patch(dir_path + ".path.isfile")
+    def test_save_new_settings(self, mock_isfile):
+        mock_isfile.return_value = True
         self.view.get_save_location.return_value = self.settings['save_location'][:]
         self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
         self.view.get_checked_logs.return_value = self.settings['logs'][:]
@@ -91,7 +98,9 @@ class SettingsPresenterTest(unittest.TestCase):
         self.model.set_settings_dict.assert_called_with(self.settings)
         self.assertEqual(self.presenter.savedir_notifier.notify_subscribers.call_count, 1)
 
-    def test_show(self):
+    @patch(dir_path + ".path.isfile")
+    def test_show(self, mock_isfile):
+        mock_isfile.return_value = True
         self.presenter.settings = self.settings.copy()
 
         self.presenter.show()
@@ -104,7 +113,9 @@ class SettingsPresenterTest(unittest.TestCase):
         self.view.set_ascending_checked.assert_called_with(self.settings["sort_ascending"])
         self.view.set_peak_function.assert_called_with(self.settings["default_peak"])
 
-    def test_save_settings_and_close(self):
+    @patch(dir_path + ".path.isfile")
+    def test_save_settings_and_close(self, mock_isfile):
+        mock_isfile.return_value = True
         self.view.get_save_location.return_value = self.settings['save_location'][:]
         self.view.get_full_calibration.return_value = self.settings['full_calibration'][:]
         self.view.get_checked_logs.return_value = self.settings['logs'][:]

@@ -12,9 +12,9 @@
 
 #include "MantidAPI/EnabledWhenWorkspaceIsType.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

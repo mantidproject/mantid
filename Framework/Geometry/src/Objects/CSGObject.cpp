@@ -215,7 +215,7 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre, co
 
 /**
  * Get the solid angle of a cuboid defined by 4 points. Simple use of triangle
- * based soild angle
+ * based solid angle
  * calculation. Should work for parallel-piped as well.
  * @param observer :: point from which solid angle required
  * @param vectors :: vector of V3D - the values are the 4 points used to defined
@@ -383,7 +383,7 @@ namespace {
 Kernel::Logger logger("CSGObject");
 }
 /**
- *  Default constuctor
+ *  Default constructor
  */
 CSGObject::CSGObject() : CSGObject("") {}
 
@@ -487,7 +487,7 @@ int CSGObject::setObject(const int objName, const std::string &lineStr) {
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
  * @return Cell String (from m_topRule)
- * @todo Break infinite recusion
+ * @todo Break infinite recursion
  */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
 
@@ -499,7 +499,7 @@ void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
  * @return Cell String (from m_topRule)
- * @todo Break infinite recusion
+ * @todo Break infinite recursion
  */
 std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
   std::string TopStr = this->topRule()->display();
@@ -515,7 +515,7 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
       auto vc = MList.find(cN);
       if (vc == MList.end())
         throw Kernel::Exception::NotFoundError("Not found in the list of indexable hulls (Object::cellStr)", cN);
-      // Not the recusion :: This will cause no end of problems
+      // Not the recursion :: This will cause no end of problems
       // if there is an infinite loop.
       cx << vc->second.cellStr(MList);
       cx << ") ";
@@ -529,7 +529,7 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
 }
 
 /*
- * Calcluate if there are any complementary components in
+ * Calculate if there are any complementary components in
  * the object. That is lines with #(....)
  * @throw ColErr::ExBase :: Error with processing
  * @param lineStr :: Input string must:  ID Mat {Density}  {rules}
@@ -573,7 +573,6 @@ int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
   }
 
   throw std::runtime_error("Object::complement :: " + Part);
-  return 0;
 }
 
 /**
@@ -1078,26 +1077,48 @@ int CSGObject::procString(const std::string &lineStr) {
  * @return Number of segments added
  */
 int CSGObject::interceptSurface(Geometry::Track &track) const {
-  int originalCount = track.count(); // Number of intersections original track
-  // Loop over all the surfaces.
+  // Number of intersections original track
+  int originalCount = track.count();
+
+  // Loop over all the surfaces to get the intercepts, i.e. populating
+  // points into LI
   LineIntersectVisit LI(track.startPoint(), track.direction());
+
   for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
-  const auto &IPoints(LI.getPoints());
-  const auto &dPoints(LI.getDistance());
 
-  auto ditr = dPoints.begin();
-  auto itrEnd = IPoints.end();
-  for (auto iitr = IPoints.begin(); iitr != itrEnd; ++iitr, ++ditr) {
-    if (*ditr > 0.0) // only interested in forward going points
-    {
-      // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, track.direction());
-      if (flag != TrackDirection::INVALID)
-        track.addPoint(flag, *iitr, *this);
+  // Call the pruner so that we don't have to worry about the duplicates and
+  // the order
+  LI.sortAndRemoveDuplicates();
+
+  // IPoints: std::vector<Geometry::V3D>
+  const auto &IPoints(LI.getPoints());
+  // dPoints: std::vector<double>, distance to the start point for each point
+  const auto &dPoints(LI.getDistance());
+  // nPoints: size_t, total number of points, for most shape, this number should
+  //          be a single digit number
+  const size_t nPoints(IPoints.size());
+
+  // Loop over all the points and add them to the track
+  for (size_t i = 0; i < nPoints; i++) {
+    // skip over the points that are before the starting points
+    if (dPoints[i] < 0)
+      continue;
+
+    //
+    const auto &currentPt(IPoints[i]);
+    const auto &prePt((i == 0 || dPoints[i - 1] <= 0) ? track.startPoint() : IPoints[i - 1]);
+    const auto &nextPt(i + 1 < nPoints ? IPoints[i + 1] : currentPt + currentPt - prePt);
+
+    // get the intercept type
+    const TrackDirection trackType = calcValidTypeBy3Points(prePt, currentPt, nextPt);
+    // only record the intercepts that is interacting with the shape directly
+    if (trackType != TrackDirection::INVALID) {
+      track.addPoint(trackType, currentPt, *this);
     }
   }
+
   track.buildLink();
   // Return number of track segments added
   return (track.count() - originalCount);
@@ -1114,6 +1135,7 @@ double CSGObject::distance(const Geometry::Track &track) const {
   for (auto &surface : m_surList) {
     surface->acceptVisitor(LI);
   }
+  LI.sortAndRemoveDuplicates();
   const auto &distances(LI.getDistance());
   if (!distances.empty()) {
     return std::abs(*std::min_element(std::begin(distances), std::end(distances)));
@@ -1134,6 +1156,9 @@ double CSGObject::distance(const Geometry::Track &track) const {
  * @retval -1 :: Exit Point
  */
 TrackDirection CSGObject::calcValidType(const Kernel::V3D &point, const Kernel::V3D &uVec) const {
+  // NOTE: This method is sensitive to the geometry dimension, and will lead to
+  //       incorrect identification due to the value of VALID_INTERCEPT_POINT_SHIFT
+  //       being either too large or too small.
   const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
   const int flagA = isValid(point - shift);
   const int flagB = isValid(point + shift);
@@ -1143,11 +1168,50 @@ TrackDirection CSGObject::calcValidType(const Kernel::V3D &point, const Kernel::
 }
 
 /**
- * Find soild angle of object wrt the observer. This interface routine calls
- * either
- * getTriangleSoldiAngle or getRayTraceSolidAngle. Choice made on number of
- * triangles
- * in the discete surface representation.
+ * Check if an intercept is guiding the ray into the shape or leaving the shape
+ * @param prePt :: the previous point on the Line
+ * @param curPt :: the current point on the Line
+ * @param nxtPt :: Unit vector of the track
+ * @retval 1 :: Entry point
+ * @retval -1 :: Exit Point
+ * @retval 0 :: Not valid / double valid
+ */
+TrackDirection CSGObject::calcValidTypeBy3Points(const Kernel::V3D &prePt, const Kernel::V3D &curPt,
+                                                 const Kernel::V3D &nxtPt) const {
+  // upstream point
+  const auto upstreamPt = (prePt + curPt) * 0.5;
+  const auto upstreamPtInsideShape = isValid(upstreamPt);
+  // downstream point
+  const auto downstreamPt = (curPt + nxtPt) * 0.5;
+  const auto downstreamPtInsideShape = isValid(downstreamPt);
+  // NOTE:
+  // When the track is parallel to the shape, it can still intersect with its
+  // component (infinite) surface.
+  // __Legends__
+  //  o-->: track
+  //  o:    track starting point
+  //  m:    upstreamPt
+  //  x:    currentPt
+  //  d:    downstreamPt
+  //              |                    |               o
+  //              |                    |               |
+  //     ---------|--------------------|---------------x------
+  //              |       SHAPE        |               |
+  //       o--m---x-d---->     o---m---x-d---->        v Invalid
+  //              |   Entering         |    Leaving
+  //     ---------|--------------------|----------------------
+  //              |                    |
+  if (!(upstreamPtInsideShape ^ downstreamPtInsideShape))
+    return Geometry::TrackDirection::INVALID;
+  else
+    return (upstreamPtInsideShape) ? Geometry::TrackDirection::LEAVING : Geometry::TrackDirection::ENTERING;
+}
+
+/**
+ * Find solid angle of object wrt the observer.
+ * This interface routine calls either getTriangleSolidAngle or
+ * getRayTraceSolidAngle.
+ * Choice made on number of triangles in the discrete surface representation.
  * @param observer :: point to measure solid angle from
  * @return :: estimate of solid angle of object. Accuracy depends on object
  * shape.
@@ -1177,7 +1241,7 @@ double CSGObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &sca
  */
 double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
   // Calculation of solid angle as numerical double integral over all angles.
-  // This could be optimised further e.g. by using a light weight version of
+  // This could be optimized further e.g. by using a light weight version of
   // the interceptSurface method - this does more work than is necessary in this
   // application.
   // Accuracy is of the order of 1% for objects with an accurate bounding box,
@@ -1288,7 +1352,7 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
 
 /**
  * Find solid angle of object from point "observer" using the
- * OC triangluation of the object, if it exists
+ * OC triangulation of the object, if it exists
  *
  * @param observer :: Point from which solid angle is required
  * @return the solid angle
@@ -1369,7 +1433,7 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
 }
 /**
  * Find solid angle of object from point "observer" using the
- * OC triangluation of the object, if it exists. This method expects a
+ * OC triangulation of the object, if it exists. This method expects a
  * scaling vector scaleFactor that scales the three axes.
  *
  * @param observer :: Point from which solid angle is required.
@@ -1408,8 +1472,8 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer, const V3D &scaleFa
     this->GetObjectGeom(type, vectors, innerRadius, radius, height);
     switch (type) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
-      for (auto &vector : vectors)
-        vector *= scaleFactor;
+      std::transform(vectors.begin(), vectors.end(), vectors.begin(),
+                     [scaleFactor](const V3D &v) { return v * scaleFactor; });
       return cuboidSolidAngle(observer, vectors);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:

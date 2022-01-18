@@ -71,7 +71,3 @@ class SANSBeamCentreFinderTest(unittest.TestCase):
         expected_mismatched = (y_data_1[1] ** 2) + (y_data_2[1] ** 2)
         squared_expected = expected_matched + expected_mismatched
         self.assertEqual(squared_expected, result.total_residual)
-
-
-if __name__ == '__main__':
-    unittest.main()

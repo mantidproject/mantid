@@ -16,8 +16,6 @@ from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 import numpy as np
 
 from .roi import extract_cuts_matrix, extract_roi_matrix
-from .sliceinfo import SliceInfo
-from .transform import NonOrthogonalTransform
 
 # Constants
 PROJ_MATRIX_LOG_NAME = "W_MATRIX"
@@ -38,6 +36,8 @@ class SliceViewerModel:
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
         self._ws = ws
+        self.set_ws_name(ws.name())
+
         if isinstance(ws, MatrixWorkspace):
             if ws.getNumberHistograms() < 2:
                 raise ValueError("workspace must contain at least 2 spectrum")
@@ -78,6 +78,9 @@ class SliceViewerModel:
             self.export_roi_to_workspace = self.export_roi_to_workspace_matrix
             self.export_cuts_to_workspace = self.export_cuts_to_workspace_matrix
             self.export_pixel_cut_to_workspace = self.export_pixel_cut_to_workspace_matrix
+
+        # calculate angles between viewing axes using lattice if present
+        self._axes_angles = self._calculate_axes_angles()
 
     def can_normalize_workspace(self) -> bool:
         if self.get_ws_type() == WS_TYPE.MATRIX and not self._get_ws().isDistribution():
@@ -126,9 +129,16 @@ class SliceViewerModel:
         return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
             0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
 
+    def set_ws_name(self, new_name):
+        self._ws_name = new_name
+
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
-        return self._ws.name()
+        return self._ws_name
+
+    def get_number_dimensions(self):
+        """Return number of dimensions in workspace"""
+        return self._get_ws().getNumDims()
 
     def get_frame(self) -> SpecialCoordinateSystem:
         """Return the coordinate system of the workspace"""
@@ -252,28 +262,15 @@ class SliceViewerModel:
             "supports_peaks_overlays": self.can_support_peaks_overlays()
         }
 
-    def create_nonorthogonal_transform(self, slice_info: SliceInfo):
+    def get_axes_angles(self, force_orthogonal: bool = False) -> Optional[np.ndarray]:
         """
-        Calculate the transform object for nonorthogonal axes.
-        :param slice_info: SliceInfoType object giving information on the slice
-        :raises: RuntimeError if model does not support nonorthogonal axes
+        :param force_orthogonal: return angles for orthogonal lattice (necessary when non-ortho mode off)
+        :return: if transform can be supported then return matrix of angles between axes (otherwise None)
         """
-        if not self.can_support_nonorthogonal_axes():
-            raise RuntimeError("Workspace cannot support non-orthogonal axes view")
-
-        expt_info = self._get_ws().getExperimentInfo(0)
-        lattice = expt_info.sample().getOrientedLattice()
-        try:
-            proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
-            proj_matrix = proj_matrix.reshape(3, 3)
-        except (AttributeError, KeyError):  # run can be None so no .get()
-            # assume orthogonal projection
-            proj_matrix = np.eye(3)
-        display_indices = list(range(0, proj_matrix.shape[0]))
-        display_indices.pop(slice_info.z_index)
-        return NonOrthogonalTransform.from_lattice(lattice,
-                                                   x_proj=proj_matrix[:, display_indices[0]],
-                                                   y_proj=proj_matrix[:, display_indices[1]])
+        if isinstance(self._axes_angles, np.ndarray) and force_orthogonal:
+            return np.full(self._axes_angles.shape, np.radians(90))
+        else:
+            return self._axes_angles
 
     def export_roi_to_workspace_mdevent(self, slicepoint: Sequence[Optional[float]],
                                         bin_params: Sequence[float], limits: tuple,
@@ -351,14 +348,11 @@ class SliceViewerModel:
         :param transpose: If true then the limits are transposed w.r.t to the data
         """
         workspace = self._get_ws()
-        if transpose:
-            # swap back to model order
-            limits = limits[1], limits[0]
-        xindex, yindex = _display_indices(slicepoint)
-        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
         # Construct parameters to integrate everything first and override per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
 
+        xindex, yindex = _display_indices(slicepoint)
         xdim_min, xdim_max = dim_limits[xindex]
         ydim_min, ydim_max = dim_limits[yindex]
         params['OutputWorkspace'] = self._roi_name
@@ -384,10 +378,8 @@ class SliceViewerModel:
         :param cut: A string denoting which type to export. Options=c,x,y.
         """
         workspace = self._get_ws()
-        if transpose:
-            # swap back to model order
-            limits = limits[1], limits[0]
-        dim_limits = _dimension_limits(workspace, slicepoint, limits)
+        dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
+
         # Construct paramters to integrate everything first and overrid per cut
         params = {f'P{n + 1}Bin': [*dim_limits[n]] for n in range(workspace.getNumDims())}
         xindex, yindex = _display_indices(slicepoint, transpose)
@@ -497,11 +489,47 @@ class SliceViewerModel:
         return help_msg
 
     def workspace_equals(self, ws_name):
-        return str(self._get_ws()) == ws_name
+        return self._ws_name == ws_name
 
     # private api
     def _get_ws(self):
         return self._ws
+
+    def _calculate_axes_angles(self) -> Optional[np.ndarray]:
+        """
+        Calculate angles between all combination of display axes
+        """
+        if self.can_support_nonorthogonal_axes():
+            expt_info = self._get_ws().getExperimentInfo(0)
+            lattice = expt_info.sample().getOrientedLattice()
+            if self.get_ws_type() == WS_TYPE.MDH:
+                ws = self._get_ws()
+                proj_matrix = np.zeros((3, 3))
+                icol = 0
+                for ivec in range(ws.getNumDims()):
+                    Qvec = list(ws.getBasisVector(ivec))[0:3] # first 3 components of basis vector always Q
+                    if any(Qvec):
+                        proj_matrix[:, icol] = Qvec
+                        icol += 1
+            else:
+                # for event try to find axes from log
+                try:
+                    proj_matrix = np.array(expt_info.run().get(PROJ_MATRIX_LOG_NAME).value, dtype=float)
+                    proj_matrix = proj_matrix.reshape(3, 3)
+                except (AttributeError, KeyError):  # run can be None so no .get()
+                    # assume orthogonal projection if no log exists
+                    proj_matrix = np.eye(3)
+
+            # calculate angles for all combinations of axes
+            angles_matrix = np.zeros((3, 3))
+            for ix in range(1, 3):
+                for iy in range(0, 2):
+                    if ix != iy:
+                        angles_matrix[ix, iy] = np.radians(lattice.recAngle(*proj_matrix[:, ix], *proj_matrix[:, iy]))
+                        angles_matrix[iy, ix] = angles_matrix[ix, iy]
+            return angles_matrix
+        else:
+            return None
 
     def _cut_names(self, cut: str):
         """
@@ -534,13 +562,13 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     :param workspace: MDEventWorkspace that is to be binned
     :param slicepoint: ND sequence of either None or float. A float defines the point
                     in that dimension for the slice.
-    :param bin_params: A list of binning paramaters for each dimension or thickness for slicing dimensions
+    :param bin_params: A list ndims long each element is nbins if a non-integrated dim or thickness if an integrated dim
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     :return: 3-tuple (binmd parameters, index of X dimension, index of Y dimension)
     """
     xindex, yindex = _display_indices(slicepoint)
-    dim_limits = _dimension_limits(workspace, dimension_indices, limits)
+    dim_limits = _dimension_limits(workspace, slicepoint, bin_params, dimension_indices, limits)
     ndims = workspace.getNumDims()
     ws_basis = np.eye(ndims)
     output_extents, output_bins = [], []
@@ -550,15 +578,11 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     for n in range(ndims):
         dimension = workspace.getDimension(n)
         basis_vec_n = _to_str(ws_basis[:, n])
-        slice_pt = slicepoint[n]
+        dim_min, dim_max = dim_limits[n]
         nbins = bin_params[n] if bin_params is not None else dimension.getNBins()
-        if slice_pt is None:
-            dim_min, dim_max = dim_limits[n]
-        else:
-            dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
+        slice_pt = slicepoint[n]
+        if slice_pt is not None:
             nbins = 1
-        if dim_max - dim_min < MIN_WIDTH:
-            dim_max = dim_min + MIN_WIDTH
         params[f'BasisVector{n}'] = f'{dimension.name},{dimension.getUnits()},{basis_vec_n}'
         output_extents.append(dim_min)
         output_extents.append(dim_max)
@@ -570,24 +594,36 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
 
 
 def _dimension_limits(workspace,
+                      slicepoint: Sequence[Optional[float]],
+                      bin_params: Optional[Sequence[float]],
                       dimension_indices: Optional[tuple],
                       limits: Optional[Sequence[tuple]] = None) -> Sequence[tuple]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
-    :param workspace: MDEventWorkspace that is to be binned
+    :param workspace: MDEvent of MDHisto workspace that is to be binned
     :param slicepoint: ND sequence of either None or float. A float defines the point
                     in that dimension for the slice.
+    :param bin_params: list of ndim elements: nbins if a non-integrated dim or thickness if an integrated dim
+    :param dimension_indices: list of ndim elements: 0/1 corresponding to x/y axis on plot or None for integrated dim
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
     dim_limits = [(dim.getMinimum(), dim.getMaximum())
                   for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
-    if limits is not None:
-        # Match the view limits to the dimension they're for.
-        for dim, axis in enumerate(dimension_indices):
-            if axis is not None:
-                dim_limits[dim] = limits[axis]
-
+    for idim, (dim_min, dim_max) in enumerate(dim_limits):
+        slice_pt = slicepoint[idim]
+        if slice_pt is not None:
+            # replace extents with integration limits (calc from bin width in bin_params)
+            half_bin_width = bin_params[idim]/2
+            dim_min, dim_max = (slice_pt - half_bin_width, slice_pt + half_bin_width)
+        elif limits is not None and dimension_indices[idim] is not None:
+            # replace min/max of non-integrated dims with limits from ROI if specified
+            # swap ROI limits from plot back to dim order of ws in model (necessary for transposed data)
+            dim_min, dim_max = limits[dimension_indices[idim]]
+        # check all limits are over minimum width
+        if dim_max - dim_min < MIN_WIDTH:
+            dim_max = dim_min + MIN_WIDTH
+        dim_limits[idim] = (dim_min, dim_max)
     return dim_limits
 
 

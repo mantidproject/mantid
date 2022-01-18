@@ -9,9 +9,9 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/MDNormDirectSC.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MDAlgorithms::MDNormDirectSC;
 using namespace Mantid::API;

@@ -29,7 +29,7 @@ public:
 class Corners {
 public:
   Corners() {}
-  Corners(V3D bottomLeft, V3D bottomRight, V3D topRight, V3D topLeft)
+  Corners(const V3D &bottomLeft, const V3D &bottomRight, const V3D &topRight, const V3D &topLeft)
       : m_bottomLeft(bottomLeft), m_bottomRight(bottomRight), m_topRight(topRight), m_topLeft(topLeft) {}
 
   void translate(const Mantid::Kernel::V3D &position) {
@@ -432,8 +432,8 @@ void renderStructuredBank(const Mantid::Geometry::ComponentInfo &compInfo, size_
   setBankNormal(baseShapeInfo.points()[1], baseShapeInfo.points()[3], basePos);
 
   for (size_t x = 0; x < colWidth; x += 3) {
-    auto index = x / 3;
-    const auto &column = compInfo.children(columns[index]);
+    auto columnIndex = x / 3;
+    const auto &column = compInfo.children(columns[columnIndex]);
     for (auto y : column) {
       extractHexahedron(compInfo.shape(y), hex);
       auto rot = compInfo.rotation(y);

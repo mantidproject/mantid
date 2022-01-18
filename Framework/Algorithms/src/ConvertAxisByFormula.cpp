@@ -235,7 +235,7 @@ void ConvertAxisByFormula::exec() {
   }
 }
 
-void ConvertAxisByFormula::setAxisValue(const double &value, std::vector<Variable_ptr> &variables) {
+void ConvertAxisByFormula::setAxisValue(const double value, const std::vector<Variable_ptr> &variables) {
   for (const auto &variable : variables) {
     if (!variable->isGeometric) {
       variable->value = value;
@@ -252,7 +252,7 @@ void ConvertAxisByFormula::calculateValues(mu::Parser &p, MantidVec &vec, std::v
 }
 
 void ConvertAxisByFormula::setGeometryValues(const API::SpectrumInfo &specInfo, const size_t index,
-                                             std::vector<Variable_ptr> &variables) {
+                                             const std::vector<Variable_ptr> &variables) {
   for (const auto &variable : variables) {
     if (variable->isGeometric) {
       if (variable->name == "twotheta") {

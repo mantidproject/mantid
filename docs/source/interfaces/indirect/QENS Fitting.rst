@@ -29,8 +29,10 @@ Input
 The input section for QENSFitting tabs consists of, a table along with two buttons 'Add Workspace' and 'Remove'.
 Clicking 'Add Workspace' will allow you to add a new data-set to the fit (this will bring up a menu allowing you
 to select a file/workspace and the spectra to load). Once the data has been loaded, it will be displayed in the table.
-Highlighting data in the table and selecting 'Remove' will allow you to remove data from the fit. Above the preview
-plots there is a drop-down menu with which can be used to select the active data-set, which will be shown in the plots.
+Highlighting data in the table and selecting 'Remove' will allow you to remove data from the fit. The `Unify Range`
+button changes the startX and endX values for all selected spectra in the table to be the same as the first spectra
+selected. Above the preview plots there is a drop-down menu with which can be used to select the active data-set, which
+will be shown in the plots.
 
 Sequential and Simultaneous fits
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

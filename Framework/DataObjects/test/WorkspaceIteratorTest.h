@@ -14,7 +14,7 @@
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVec;
 using namespace Mantid::DataObjects;

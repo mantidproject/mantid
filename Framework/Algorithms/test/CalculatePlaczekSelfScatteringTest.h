@@ -19,8 +19,8 @@
 #include "MantidAlgorithms/CalculatePlaczekSelfScattering.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using Mantid::MantidVec;
@@ -90,6 +90,7 @@ public:
     alg->setProperty("DataX", x);
     alg->setProperty("DataY", y);
     alg->setProperty("NSpec", 2);
+    alg->setProperty("UnitX", "Wavelength");
     alg->execute();
     // retreve output workspace from ADS
     MatrixWorkspace_sptr outWs =
@@ -123,37 +124,37 @@ public:
   }
 
   void testCalculatePlaczekSelfScatteringExecutes() {
-    MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
+    MatrixWorkspace_sptr IncidentSpectra = generateIncidentSpectrum();
     auto alg = makeAlgorithm();
     Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 100, 380);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace", InputWorkspace);
     addSampleMaterialToWorkspace();
-    alg->setProperty("IncidentSpecta", IncidentSpecta);
+    alg->setProperty("IncidentSpectra", IncidentSpectra);
     alg->setProperty("InputWorkspace", "InputWorkspace");
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
   }
 
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoDetectors() {
-    MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
+    MatrixWorkspace_sptr IncidentSpectra = generateIncidentSpectrum();
     Mantid::DataObjects::Workspace2D_sptr InputWorkspace = WorkspaceCreationHelper::create2DWorkspace(30, 381);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace", InputWorkspace);
     addSampleMaterialToWorkspace();
     auto alg = makeAlgorithm();
-    alg->setProperty("IncidentSpecta", IncidentSpecta);
+    alg->setProperty("IncidentSpectra", IncidentSpectra);
     alg->setProperty("InputWorkspace", InputWorkspace);
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)
   }
 
   void testCalculatePlaczekSelfScatteringDoesNotRunWithNoSample() {
-    MatrixWorkspace_sptr IncidentSpecta = generateIncidentSpectrum();
+    MatrixWorkspace_sptr IncidentSpectra = generateIncidentSpectrum();
     Mantid::DataObjects::Workspace2D_sptr InputWorkspace =
         WorkspaceCreationHelper::create2DWorkspaceWithRectangularInstrument(5, 100, 380);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("InputWorkspace", InputWorkspace);
     auto alg = makeAlgorithm();
-    alg->setProperty("IncidentSpecta", IncidentSpecta);
+    alg->setProperty("IncidentSpectra", IncidentSpectra);
     alg->setProperty("InputWorkspace", InputWorkspace);
     alg->setProperty("OutputWorkspace", "correction_ws");
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &)

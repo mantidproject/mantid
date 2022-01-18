@@ -45,7 +45,7 @@ using file_holder_type = std::unique_ptr<Mantid::DataObjects::BoxControllerNeXus
 
 namespace Mantid::MDAlgorithms {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -61,15 +61,15 @@ LoadMD::LoadMD()
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMD::confidence(Kernel::NexusDescriptor &descriptor) const {
-  int confidence(0);
-  const auto &rootPathNameType = descriptor.firstEntryNameType();
-  if (rootPathNameType.second != "NXentry")
-    return 0;
-  if (descriptor.pathExists("/MDEventWorkspace") || descriptor.pathExists("/MDHistoWorkspace")) {
-    return 95;
-  } else
-    return 0;
+int LoadMD::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+  int confidence = 0;
+  const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
+  if (allEntries.count("NXentry") == 1) {
+    if (descriptor.isEntry("/MDEventWorkspace") || descriptor.isEntry("/MDHistoWorkspace")) {
+      confidence = 95;
+    }
+  }
+
   return confidence;
 }
 
@@ -109,7 +109,7 @@ void LoadMD::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadMD::exec() {
+void LoadMD::execLoader() {
   m_filename = getPropertyValue("Filename");
   convention = Kernel::ConfigService::Instance().getString("Q.convention");
   // Start loading
@@ -139,21 +139,20 @@ void LoadMD::exec() {
     throw Kernel::Exception::FileError("Can not open file " + for_access, m_filename);
 
   // The main entry
-  std::map<std::string, std::string> entries;
-  m_file->getEntries(entries);
+  const std::shared_ptr<Mantid::Kernel::NexusHDF5Descriptor> fileInfo = getFileInfo();
 
   std::string entryName;
-  if (entries.find("MDEventWorkspace") != entries.end())
+  if (fileInfo->isEntry("/MDEventWorkspace", "NXentry")) {
     entryName = "MDEventWorkspace";
-  else if (entries.find("MDHistoWorkspace") != entries.end())
+  } else if (fileInfo->isEntry("/MDHistoWorkspace", "NXentry")) {
     entryName = "MDHistoWorkspace";
-  else
+  } else {
     throw std::runtime_error("Unexpected NXentry name. Expected "
                              "'MDEventWorkspace' or 'MDHistoWorkspace'.");
+  }
 
   // Open the entry
   m_file->openGroup(entryName, "NXentry");
-  const std::map<std::string, std::string> levelEntries = m_file->getEntries();
 
   // Check is SaveMD version 2 was used
   m_saveMDVersion = 0;
@@ -169,8 +168,8 @@ void LoadMD::exec() {
     if (vecDims.empty())
       throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
     m_numDims = vecDims[0];
-    if (m_numDims <= 0)
-      throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+    if (m_numDims == 0)
+      throw std::runtime_error("LoadMD:: number of dimensions == 0.");
 
     // Now load all the dimension xml
     this->loadDimensions();
@@ -183,7 +182,7 @@ void LoadMD::exec() {
   this->loadQConvention();
 
   // Display normalization settting
-  if (levelEntries.find(VISUAL_NORMALIZATION_KEY) != levelEntries.end()) {
+  if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY)) {
     this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY, m_visualNormalization);
   }
 
@@ -192,7 +191,7 @@ void LoadMD::exec() {
     std::string eventType;
     m_file->getAttr("event_type", eventType);
 
-    if (levelEntries.find(VISUAL_NORMALIZATION_KEY_HISTO) != levelEntries.end()) {
+    if (fileInfo->isEntry("/" + entryName + "/" + VISUAL_NORMALIZATION_KEY_HISTO)) {
       this->loadVisualNormalization(VISUAL_NORMALIZATION_KEY_HISTO, m_visualNormalizationHisto);
     }
 
@@ -207,7 +206,7 @@ void LoadMD::exec() {
 
     // Now the ExperimentInfo
     bool lazyLoadExpt = fileBacked;
-    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, lazyLoadExpt);
+    MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws, *fileInfo.get(), "MDEventWorkspace", lazyLoadExpt);
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->doLoad, ws);
@@ -542,6 +541,7 @@ template <typename MDE, size_t nd> void LoadMD::doLoad(typename MDEventWorkspace
 
     const std::vector<uint64_t> &BoxEventIndex = FlatBoxTree.getEventIndex();
     prog->setNumSteps(numBoxes);
+    std::vector<coord_t> boxTemp;
 
     for (size_t i = 0; i < numBoxes; i++) {
       prog->report();
@@ -552,7 +552,8 @@ template <typename MDE, size_t nd> void LoadMD::doLoad(typename MDEventWorkspace
       if (BoxEventIndex[2 * i + 1] > 0) // Load in memory NOT using the file as the back-end,
       {
         boxTree[i]->reserveMemoryForLoad(BoxEventIndex[2 * i + 1]);
-        boxTree[i]->loadAndAddFrom(loader.get(), BoxEventIndex[2 * i], static_cast<size_t>(BoxEventIndex[2 * i + 1]));
+        boxTree[i]->loadAndAddFrom(loader.get(), BoxEventIndex[2 * i], static_cast<size_t>(BoxEventIndex[2 * i + 1]),
+                                   boxTemp);
       }
     }
     loader->closeFile();

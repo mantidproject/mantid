@@ -109,7 +109,7 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 
   Poco::Glob glob(globExpression);
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   const auto names = ads.topLevelItems();
   for (const auto &name : names) {
     if (glob.match(name.first)) {
@@ -124,7 +124,7 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
  */
 void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
 
-  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
   for (const auto &name : names) {
     auto workspace = ads.retrieve(name);
     addToGroup(workspace);

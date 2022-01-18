@@ -29,40 +29,32 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder
-    : public QObject {
+class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW InstrumentWidgetDecoder : public QObject {
   Q_OBJECT
 public:
   InstrumentWidgetDecoder();
-  void decode(const QMap<QString, QVariant> &map, InstrumentWidget &obj,
-              const QString &projectPath, const bool loadMask = true);
+  void decode(const QMap<QString, QVariant> &map, InstrumentWidget &obj, const QString &projectPath,
+              const bool loadMask = true);
 
 signals:
   void shapeCreated();
 
 private:
-  void decodeTabs(const QMap<QString, QVariant> &map, InstrumentWidget &obj);
+  void decodeTabs(const QMap<QString, QVariant> &map, const InstrumentWidget &obj);
 
-  void decodeMaskTab(const QMap<QString, QVariant> &map,
-                     InstrumentWidgetMaskTab *obj);
+  void decodeMaskTab(const QMap<QString, QVariant> &map, InstrumentWidgetMaskTab *obj);
 
-  void decodeRenderTab(const QMap<QString, QVariant> &map,
-                       InstrumentWidgetRenderTab *obj);
+  void decodeRenderTab(const QMap<QString, QVariant> &map, InstrumentWidgetRenderTab *obj);
   void decodeColorBar(const QMap<QString, QVariant> &map, ColorBar *bar);
 
-  void decodeTreeTab(const QMap<QString, QVariant> &map,
-                     InstrumentWidgetTreeTab *obj);
+  void decodeTreeTab(const QMap<QString, QVariant> &map, InstrumentWidgetTreeTab *obj);
 
-  void decodePickTab(const QMap<QString, QVariant> &map,
-                     InstrumentWidgetPickTab *obj);
+  void decodePickTab(const QMap<QString, QVariant> &map, InstrumentWidgetPickTab *obj);
 
-  void decodeActor(const QMap<QString, QVariant> &map,
-                   std::unique_ptr<InstrumentActor> &obj);
+  void decodeActor(const QMap<QString, QVariant> &map, std::unique_ptr<InstrumentActor> &obj);
   void decodeBinMasks(const QList<QVariant> &list, MaskBinsData &obj);
-  void decodeSurface(const QMap<QString, QVariant> &map,
-                     std::shared_ptr<ProjectionSurface> obj);
-  void decodeProjection3D(const QMap<QString, QVariant> &map,
-                          Projection3D &obj);
+  void decodeSurface(const QMap<QString, QVariant> &map, std::shared_ptr<ProjectionSurface> obj);
+  void decodeProjection3D(const QMap<QString, QVariant> &map, Projection3D &obj);
   void decodeViewPort(const QMap<QString, QVariant> &map, Viewport &obj);
   void decodeMaskShapes(const QList<QVariant> &list, Shape2DCollection &obj);
 
@@ -73,8 +65,7 @@ private:
   Shape2D *decodeSector(const QMap<QString, QVariant> &map);
   Shape2D *decodeFree(const QMap<QString, QVariant> &map);
 
-  void decodeAlignmentInfo(const QList<QVariant> &list,
-                           std::shared_ptr<ProjectionSurface> &obj);
+  void decodeAlignmentInfo(const QList<QVariant> &list, const std::shared_ptr<ProjectionSurface> &obj);
 
   QString m_projectPath;
   QString m_workspaceName;

@@ -11,7 +11,7 @@ from mantid.simpleapi import *
 
 class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-        return 8000
+        return 9500
 
     def runTest(self):
         LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
@@ -69,7 +69,7 @@ class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):
 
 class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
-        return 8000
+        return 9500
 
     def runTest(self):
         LoadMD('HB3A_data.nxs', OutputWorkspace='ConvertWANDSCDtoQ_HB3ATest_data')
@@ -116,3 +116,54 @@ class ConvertWANDSCDtoQ_HB3A_Test(systemtesting.MantidSystemTest):
         signal = ConvertWANDSCDtoQTest_HKL.getSignalArray()
         # peak should be roughly the center of the volume
         np.testing.assert_array_equal(np.unravel_index(np.nanargmax(signal), signal.shape), (50, 51, 53))
+
+
+class ConvertWANDSCDtoQ_Rotate_Test(systemtesting.MantidSystemTest):
+    def requiredMemoryMB(self):
+        return 9500
+
+    def runTest(self):
+        angleOffset = 45
+        # ---
+        LoadMD('HB2C_WANDSCD_data.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_data')
+        SetGoniometer('ConvertWANDSCDtoQTest_data', Axis0='s1,0,1,0,1', Average=False)
+        LoadMD('HB2C_WANDSCD_norm.nxs', OutputWorkspace='ConvertWANDSCDtoQTest_norm')
+
+        Q = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
+                              NormalisationWorkspace='ConvertWANDSCDtoQTest_norm')
+        Qrot = ConvertWANDSCDtoQ(InputWorkspace='ConvertWANDSCDtoQTest_data',
+                                 NormalisationWorkspace='ConvertWANDSCDtoQTest_norm',
+                                 S1Offset=angleOffset)
+
+        tableQ = FindPeaksMD(InputWorkspace=Q, PeakDistanceThreshold=2,
+                             CalculateGoniometerForCW=True, Wavelength=1.488,
+                             MaxPeaks=10)
+
+        tableQrot = FindPeaksMD(InputWorkspace=Qrot, PeakDistanceThreshold=2,
+                                CalculateGoniometerForCW=True, Wavelength=1.488,
+                                MaxPeaks=10)
+
+        peak = tableQ.getPeak(0)
+        # determine angle from origin (x,y) plane only
+        angle = np.degrees(np.arctan2(peak.getQSampleFrame().Z(),peak.getQSampleFrame().X()))
+        hypotenuse =  np.hypot(peak.getQSampleFrame().Z(), peak.getQSampleFrame().X())
+
+        print("Angle {} :: Hypotenuse :: {}".format(angle, hypotenuse))
+        # add offset degrees to determine new possible location, recalc coords
+        newX = np.cos(np.radians(angle + angleOffset)) * hypotenuse
+        newZ = np.sin(np.radians(angle + angleOffset)) * hypotenuse
+
+        print("X: {} :: New X {}".format(peak.getQSampleFrame().X(), newX))
+        print("Z: {} :: New Z {}".format(peak.getQSampleFrame().Z(), newZ))
+
+        # look for coords in rotated table
+        peakStillExists = False
+        for i in range(tableQrot.getNumberPeaks()):
+            rotatedPeak = tableQrot.getPeak(i)
+            print("X: {} vs {}".format(rotatedPeak.getQSampleFrame().X(), newX))
+            print("Z: {} vs {}".format(rotatedPeak.getQSampleFrame().Z(), newZ))
+            if(np.isclose(rotatedPeak.getQSampleFrame().X(), newX, rtol=1e-2)
+               and np.isclose(rotatedPeak.getQSampleFrame().Z(), newZ, rtol=1e-2)):
+                peakStillExists = True
+
+        self.assertTrue(peakStillExists)

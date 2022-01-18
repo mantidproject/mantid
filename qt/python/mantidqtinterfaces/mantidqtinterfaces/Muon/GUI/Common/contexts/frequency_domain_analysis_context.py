@@ -13,12 +13,13 @@ FREQUENCY_DOMAIN_ANALYSIS_DEFAULT_Y_RANGE = [0.0, 1000.0]
 
 class FrequencyDomainAnalysisContext(MuonContext):
     def __init__(self, muon_data_context=None, muon_gui_context=None, muon_group_context=None, corrections_context=None,
-                 fitting_context=None, results_context=None, muon_phase_context=None, plot_panes_context=None,
+                 fitting_context=None, results_context=None, model_fitting_context=None, muon_phase_context=None, plot_panes_context=None,
                  frequency_context=None):
         super().__init__(muon_data_context=muon_data_context, muon_gui_context=muon_gui_context,
                          muon_group_context=muon_group_context, corrections_context=corrections_context,
                          plot_panes_context=plot_panes_context, fitting_context=fitting_context,
-                         results_context=results_context, muon_phase_context=muon_phase_context)
+                         results_context=results_context, model_fitting_context=model_fitting_context,
+                         muon_phase_context=muon_phase_context)
         self.workspace_suffix = ' FD'
         self.base_directory = 'Frequency Domain'
         self._frequency_context = frequency_context
@@ -57,7 +58,7 @@ class FrequencyDomainAnalysisContext(MuonContext):
         for group_pair in group_and_pair:
             group, pair = self.get_group_and_pair(group_pair)
             names += self._frequency_context.get_frequency_workspace_names(
-                run_list, group, pair, frequency_type)
+                run_list, group, pair, frequency_type, self._frequency_context.x_label)
 
         # Remove duplicates from the list
         return list(dict.fromkeys(names))

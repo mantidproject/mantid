@@ -10,7 +10,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CalculatePlaczek.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -94,8 +94,8 @@ public:
     // NOTE: we are using fake incident flux, so these values here are not physically meaningful
     Mantid::API::MatrixWorkspace_sptr outputWS =
         std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("outws"));
-    TS_ASSERT_DELTA(outputWS->readY(0)[0], 10.0001512625, 1e-8);
-    TS_ASSERT_DELTA(outputWS->readY(0)[1], 10.0002058857, 1e-8);
+    TS_ASSERT_DELTA(outputWS->readY(0)[0], 10.0000352275, 1e-8);
+    TS_ASSERT_DELTA(outputWS->readY(0)[1], 10.0000479592, 1e-8);
   }
 
 private:

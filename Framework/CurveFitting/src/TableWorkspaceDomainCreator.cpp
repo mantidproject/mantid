@@ -156,8 +156,6 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(const std::string &su
   m_errorColumnPropertyName = "ErrColumn" + suffix;
 
   if (addProp) {
-    auto mustBePositive = std::make_shared<BoundedValidator<int>>();
-    mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<double>(m_startXPropertyName, EMPTY_DBL()),
                     "A value of x in, or on the low x boundary of, the first bin to "
                     "include in\n"
@@ -168,6 +166,7 @@ void TableWorkspaceDomainCreator::declareDatasetProperties(const std::string &su
                     "(default the highest value of x)");
     if (m_domainType != Simple && !m_manager->existsProperty(m_maxSizePropertyName)) {
       auto mustBePositive = std::make_shared<BoundedValidator<int>>();
+      mustBePositive->setLower(0);
       declareProperty(new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
                       "The maximum number of values per a simple domain.");
     }
@@ -335,7 +334,7 @@ std::shared_ptr<API::Workspace> TableWorkspaceDomainCreator::createOutputWorkspa
   }
 
   // Set the difference spectrum
-  auto &Ycal = ws->mutableY(1);
+  const auto &Ycal = ws->y(1);
   auto &Diff = ws->mutableY(2);
   const size_t nData = values->size();
   for (size_t i = 0; i < nData; ++i) {

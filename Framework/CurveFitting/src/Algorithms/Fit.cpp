@@ -125,7 +125,7 @@ void Fit::initializeMinimizer(size_t maxIterations) {
  * @param minimizer :: The minimizer to copy from.
  */
 void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
-  auto &properties = minimizer.getProperties();
+  const auto &properties = minimizer.getProperties();
   for (auto property : properties) {
     if ((*property).direction() == Kernel::Direction::Output && (*property).isValid().empty()) {
       auto clonedProperty = std::unique_ptr<Kernel::Property>((*property).clone());

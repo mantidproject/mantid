@@ -1,288 +1,277 @@
-set(
-        SRC_FILES
-        AbsorptionCorrections.cpp
-        ApplyAbsorptionCorrections.cpp
-        CalculatePaalmanPings.cpp
-        ContainerSubtraction.cpp
-        CorrectionsTab.cpp
-        ConvFitAddWorkspaceDialog.cpp
-        ConvFitDataPresenter.cpp
-        ConvFitDataView.cpp
-        ConvFitModel.cpp
-        DensityOfStates.cpp
-        FitStatusWidget.cpp
-        FqFitAddWorkspaceDialog.cpp
-        FqFitDataPresenter.cpp
-        FqFitDataView.cpp
-        FqFitModel.cpp
-        FunctionTemplateBrowser.cpp
-        IDAFunctionParameterEstimation.cpp
-        ILLEnergyTransfer.cpp
-        ISISCalibration.cpp
-        ISISDiagnostics.cpp
-        ISISEnergyTransfer.cpp
-        IndirectAddWorkspaceDialog.cpp
-        IndirectBayes.cpp
-        IndirectBayesTab.cpp
-        IndirectCorrections.cpp
-        IndirectDataAnalysis.cpp
-        IndirectDataAnalysisConvFitTab.cpp
-        IndirectDataAnalysisElwinTab.cpp
-        IndirectDataAnalysisFqFitTab.cpp
-        IndirectDataAnalysisIqtTab.cpp
-        IndirectDataAnalysisIqtFitTab.cpp
-        IndirectDataAnalysisMSDFitTab.cpp
-        IndirectDataAnalysisTab.cpp
-        IndirectDataReduction.cpp
-        IndirectDataReductionTab.cpp
-        IndirectDataValidationHelper.cpp
-        IndirectDiffractionReduction.cpp
-        IndirectDockWidgetArea.cpp
-        IndirectEditResultsDialog.cpp
-        IndirectFitAnalysisTab.cpp
-        IndirectFitData.cpp
-        IndirectFitDataModel.cpp
-        IndirectFitDataPresenter.cpp
-        IndirectFitDataView.cpp
-        IndirectFitOutputOptionsModel.cpp
-        IndirectFitOutputOptionsPresenter.cpp
-        IndirectFitOutputOptionsView.cpp
-        IndirectFitPlotModel.cpp
-        IndirectFitPlotPresenter.cpp
-        IndirectFitPlotView.cpp
-        IndirectFitPropertyBrowser.cpp
-        IndirectFittingModel.cpp
-        IndirectFitOutputModel.cpp
-        IndirectFunctionBrowser/ConvTypes.cpp
-        IndirectFunctionBrowser/ConvFunctionModel.cpp
-        IndirectFunctionBrowser/ConvTemplateBrowser.cpp
-        IndirectFunctionBrowser/ConvTemplatePresenter.cpp
-        IndirectFunctionBrowser/IqtFunctionModel.cpp
-        IndirectFunctionBrowser/IqtTemplateBrowser.cpp
-        IndirectFunctionBrowser/IqtTemplatePresenter.cpp
-        IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
-        IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
-        IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
-        IndirectInstrumentConfig.cpp
-        IndirectInterface.cpp
-        IndirectLoadILL.cpp
-        IndirectMolDyn.cpp
-        IndirectMoments.cpp
-        IndirectPlotOptionsModel.cpp
-        IndirectPlotOptionsPresenter.cpp
-        IndirectPlotOptionsView.cpp
-        IndirectSassena.cpp
-        IndirectSettings.cpp
-        IndirectSettingsHelper.cpp
-        IndirectSettingsModel.cpp
-        IndirectSettingsPresenter.cpp
-        IndirectSettingsView.cpp
-        IndirectSimulation.cpp
-        IndirectSimulationTab.cpp
-        IndirectSqw.cpp
-        IndirectSymmetrise.cpp
-        IndirectTab.cpp
-        IndirectTools.cpp
-        IndirectToolsTab.cpp
-        IndirectTransmission.cpp
-        IndirectTransmissionCalc.cpp
-        IqtFitModel.cpp
-        MSDFitModel.cpp
-        Quasi.cpp
-        ResNorm.cpp
-        Stretch.cpp
+set(SRC_FILES
+    AbsorptionCorrections.cpp
+    ApplyAbsorptionCorrections.cpp
+    CalculatePaalmanPings.cpp
+    ContainerSubtraction.cpp
+    CorrectionsTab.cpp
+    ConvFitAddWorkspaceDialog.cpp
+    ConvFitDataPresenter.cpp
+    ConvFitDataView.cpp
+    ConvFitModel.cpp
+    DensityOfStates.cpp
+    FitStatusWidget.cpp
+    FqFitAddWorkspaceDialog.cpp
+    FqFitDataPresenter.cpp
+    FqFitDataView.cpp
+    FqFitModel.cpp
+    FunctionTemplateBrowser.cpp
+    IDAFunctionParameterEstimation.cpp
+    ILLEnergyTransfer.cpp
+    ISISCalibration.cpp
+    ISISDiagnostics.cpp
+    ISISEnergyTransfer.cpp
+    IndirectAddWorkspaceDialog.cpp
+    IndirectBayes.cpp
+    IndirectBayesTab.cpp
+    IndirectCorrections.cpp
+    IndirectDataAnalysis.cpp
+    IndirectDataAnalysisConvFitTab.cpp
+    IndirectDataAnalysisElwinTab.cpp
+    IndirectDataAnalysisFqFitTab.cpp
+    IndirectDataAnalysisIqtTab.cpp
+    IndirectDataAnalysisIqtFitTab.cpp
+    IndirectDataAnalysisMSDFitTab.cpp
+    IndirectDataAnalysisTab.cpp
+    IndirectDataReduction.cpp
+    IndirectDataReductionTab.cpp
+    IndirectDataValidationHelper.cpp
+    IndirectDiffractionReduction.cpp
+    IndirectDockWidgetArea.cpp
+    IndirectEditResultsDialog.cpp
+    IndirectFitAnalysisTab.cpp
+    IndirectFitData.cpp
+    IndirectFitDataModel.cpp
+    IndirectFitDataPresenter.cpp
+    IndirectFitDataView.cpp
+    IndirectFitOutputOptionsModel.cpp
+    IndirectFitOutputOptionsPresenter.cpp
+    IndirectFitOutputOptionsView.cpp
+    IndirectFitPlotModel.cpp
+    IndirectFitPlotPresenter.cpp
+    IndirectFitPlotView.cpp
+    IndirectFitPropertyBrowser.cpp
+    IndirectFittingModel.cpp
+    IndirectFitOutput.cpp
+    IndirectFunctionBrowser/ConvTypes.cpp
+    IndirectFunctionBrowser/ConvFunctionModel.cpp
+    IndirectFunctionBrowser/ConvTemplateBrowser.cpp
+    IndirectFunctionBrowser/ConvTemplatePresenter.cpp
+    IndirectFunctionBrowser/IqtFunctionModel.cpp
+    IndirectFunctionBrowser/IqtTemplateBrowser.cpp
+    IndirectFunctionBrowser/IqtTemplatePresenter.cpp
+    IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
+    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
+    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
+    IndirectInstrumentConfig.cpp
+    IndirectInterface.cpp
+    IndirectLoadILL.cpp
+    IndirectMolDyn.cpp
+    IndirectMoments.cpp
+    IndirectPlotOptionsModel.cpp
+    IndirectPlotOptionsPresenter.cpp
+    IndirectPlotOptionsView.cpp
+    IndirectSassena.cpp
+    IndirectSettings.cpp
+    IndirectSettingsHelper.cpp
+    IndirectSettingsModel.cpp
+    IndirectSettingsPresenter.cpp
+    IndirectSettingsView.cpp
+    IndirectSimulation.cpp
+    IndirectSimulationTab.cpp
+    IndirectSqw.cpp
+    IndirectSymmetrise.cpp
+    IndirectTab.cpp
+    IndirectTools.cpp
+    IndirectToolsTab.cpp
+    IndirectTransmission.cpp
+    IndirectTransmissionCalc.cpp
+    IqtFitModel.cpp
+    MSDFitModel.cpp
+    Quasi.cpp
+    ResNorm.cpp
+    Stretch.cpp
 )
 
-set(
-        MOC_FILES
-        AbsorptionCorrections.h
-        ApplyAbsorptionCorrections.h
-        CalculatePaalmanPings.h
-        ContainerSubtraction.h
-        ConvFitAddWorkspaceDialog.h
-        ConvFitDataPresenter.h
-        ConvFitDataView.h
-        CorrectionsTab.h
-        DensityOfStates.h
-        FqFitAddWorkspaceDialog.h
-        FqFitDataPresenter.h
-        FqFitDataView.h
-        FunctionTemplateBrowser.h
-        IAddWorkspaceDialog.h
-        IIndirectFitDataModel.h
-        IIndirectFitDataView.h
-        IIndirectFitOutputOptionsView.h
-        IIndirectFitPlotView.h
-        IIndirectSettingsView.h
-        ILLEnergyTransfer.h
-        IndirectAddWorkspaceDialog.h
-        IndirectBayes.h
-        IndirectBayesTab.h
-        IndirectCorrections.h
-        IndirectDataAnalysis.h
-        IndirectDataAnalysisConvFitTab.h
-        IndirectDataAnalysisElwinTab.h
-        IndirectDataAnalysisFqFitTab.h
-        IndirectDataAnalysisIqtFitTab.h
-        IndirectDataAnalysisIqtTab.h
-        IndirectDataAnalysisMSDFitTab.h
-        IndirectDataAnalysisTab.h
-        IndirectDataReduction.h
-        IndirectDataReductionTab.h
-        IndirectDockWidgetArea.h
-        IndirectDiffractionReduction.h
-        IndirectEditResultsDialog.h
-        IndirectFitAnalysisTab.h
-        IndirectFitDataModel.h
-        IndirectFitDataPresenter.h
-        IndirectFitDataView.h
-        IndirectFitOutputOptionsPresenter.h
-        IndirectFitOutputOptionsView.h
-        IndirectFitPlotPresenter.h
-        IndirectFitPlotView.h
-        IndirectFunctionBrowser/ConvTemplateBrowser.h
-        IndirectFunctionBrowser/ConvTemplatePresenter.h
-        IndirectFunctionBrowser/IqtTemplateBrowser.h
-        IndirectFunctionBrowser/IqtTemplatePresenter.h
-        IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
-        IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
-        IndirectInstrumentConfig.h
-        IndirectInterface.h
-        IndirectLoadILL.h
-        IndirectMolDyn.h
-        IndirectMoments.h
-        IndirectPlotOptionsPresenter.h
-        IndirectPlotOptionsView.h
-        IndirectSassena.h
-        IndirectSettings.h
-        IndirectSettingsPresenter.h
-        IndirectSettingsView.h
-        IndirectSimulation.h
-        IndirectSimulationTab.h
-        IndirectSqw.h
-        IndirectSymmetrise.h
-        IndirectTab.h
-        IndirectTools.h
-        IndirectToolsTab.h
-        IndirectTransmissionCalc.h
-        IndirectTransmission.h
-        IndirectFitPropertyBrowser.h
-        ISISCalibration.h
-        ISISDiagnostics.h
-        ISISEnergyTransfer.h
-        LazyAsyncRunner.h
-        Quasi.h
-        ResNorm.h
-        Stretch.h
-        FitStatusWidget.h
+set(MOC_FILES
+    AbsorptionCorrections.h
+    ApplyAbsorptionCorrections.h
+    CalculatePaalmanPings.h
+    ContainerSubtraction.h
+    ConvFitAddWorkspaceDialog.h
+    ConvFitDataPresenter.h
+    ConvFitDataView.h
+    CorrectionsTab.h
+    DensityOfStates.h
+    FqFitAddWorkspaceDialog.h
+    FqFitDataPresenter.h
+    FqFitDataView.h
+    FunctionTemplateBrowser.h
+    IAddWorkspaceDialog.h
+    IIndirectFitDataModel.h
+    IIndirectFitDataView.h
+    IIndirectFitOutputOptionsView.h
+    IIndirectFitPlotView.h
+    IIndirectSettingsView.h
+    ILLEnergyTransfer.h
+    IndirectAddWorkspaceDialog.h
+    IndirectBayes.h
+    IndirectBayesTab.h
+    IndirectCorrections.h
+    IndirectDataAnalysis.h
+    IndirectDataAnalysisConvFitTab.h
+    IndirectDataAnalysisElwinTab.h
+    IndirectDataAnalysisFqFitTab.h
+    IndirectDataAnalysisIqtFitTab.h
+    IndirectDataAnalysisIqtTab.h
+    IndirectDataAnalysisMSDFitTab.h
+    IndirectDataAnalysisTab.h
+    IndirectDataReduction.h
+    IndirectDataReductionTab.h
+    IndirectDockWidgetArea.h
+    IndirectDiffractionReduction.h
+    IndirectEditResultsDialog.h
+    IndirectFitAnalysisTab.h
+    IndirectFitDataModel.h
+    IndirectFitDataPresenter.h
+    IndirectFitDataView.h
+    IndirectFitOutputOptionsPresenter.h
+    IndirectFitOutputOptionsView.h
+    IndirectFitPlotPresenter.h
+    IndirectFitPlotView.h
+    IndirectFunctionBrowser/ConvTemplateBrowser.h
+    IndirectFunctionBrowser/ConvTemplatePresenter.h
+    IndirectFunctionBrowser/IqtTemplateBrowser.h
+    IndirectFunctionBrowser/IqtTemplatePresenter.h
+    IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
+    IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
+    IndirectInstrumentConfig.h
+    IndirectInterface.h
+    IndirectLoadILL.h
+    IndirectMolDyn.h
+    IndirectMoments.h
+    IndirectPlotOptionsPresenter.h
+    IndirectPlotOptionsView.h
+    IndirectSassena.h
+    IndirectSettings.h
+    IndirectSettingsPresenter.h
+    IndirectSettingsView.h
+    IndirectSimulation.h
+    IndirectSimulationTab.h
+    IndirectSqw.h
+    IndirectSymmetrise.h
+    IndirectTab.h
+    IndirectTools.h
+    IndirectToolsTab.h
+    IndirectTransmissionCalc.h
+    IndirectTransmission.h
+    IndirectFitPropertyBrowser.h
+    ISISCalibration.h
+    ISISDiagnostics.h
+    ISISEnergyTransfer.h
+    LazyAsyncRunner.h
+    Quasi.h
+    ResNorm.h
+    Stretch.h
+    FitStatusWidget.h
 )
 
-set(
-        INC_FILES
-        ConvFitModel.h
-        FqFitModel.h
-        IndirectDataValidationHelper.h
-        IndirectFitData.h
-        IndirectFitOutputOptionsModel.h
-        IndirectFitPlotModel.h
-        IndirectFitPlotPresenter.h
-        IndirectFittingModel.h
-        IndirectFitOutputModel.h
-        IndirectFunctionBrowser/ConvFunctionModel.h
-        IndirectPlotOptionsModel.h
-        IndirectSettingsHelper.h
-        IqtFitModel.h
-        MSDFitModel.h
-        Notifier.h
-        IFQFitObserver.h
+set(INC_FILES
+    ConvFitModel.h
+    FqFitModel.h
+    IndirectDataValidationHelper.h
+    IndirectFitData.h
+    IndirectFitOutputOptionsModel.h
+    IndirectFitPlotModel.h
+    IndirectFitPlotPresenter.h
+    IndirectFittingModel.h
+    IndirectFitOutput.h
+    IndirectFunctionBrowser/ConvFunctionModel.h
+    IndirectPlotOptionsModel.h
+    IndirectSettingsHelper.h
+    IqtFitModel.h
+    MSDFitModel.h
+    Notifier.h
+    IFQFitObserver.h
 )
 
-set(
-        UI_FILES
-        AbsorptionCorrections.ui
-        ApplyAbsorptionCorrections.ui
-        CalculatePaalmanPings.ui
-        ContainerSubtraction.ui
-        ConvFitAddWorkspaceDialog.ui
-        DensityOfStates.ui
-        FqFitAddWorkspaceDialog.ui
-        ILLEnergyTransfer.ui
-        ISISCalibration.ui
-        ISISDiagnostics.ui
-        ISISEnergyTransfer.ui
-        IndirectAddWorkspaceDialog.ui
-        IndirectBayes.ui
-        IndirectCorrections.ui
-        IndirectDataAnalysis.ui
-        IndirectDataAnalysisElwinTab.ui
-        IndirectDataReduction.ui
-        IndirectDiffractionReduction.ui
-        IndirectEditResultsDialog.ui
-        IndirectFitDataView.ui
-        IndirectFitOutputOptions.ui
-        IndirectFitPreviewPlot.ui
-        IndirectFitTab.ui
-        IndirectInstrumentConfig.ui
-        IndirectInterfaceSettings.ui
-        IndirectLoadILL.ui
-        IndirectMolDyn.ui
-        IndirectMoments.ui
-        IndirectPlotOptions.ui
-        IndirectSassena.ui
-        IndirectSettings.ui
-        IndirectSimulation.ui
-        IndirectSpectrumSelector.ui
-        IndirectSqw.ui
-        IndirectSymmetrise.ui
-        IndirectTools.ui
-        IndirectTransmission.ui
-        IndirectTransmissionCalc.ui
-        IndirectDataAnalysisIqtTab.ui
-        Quasi.ui
-        ResNorm.ui
-        Stretch.ui
+set(UI_FILES
+    AbsorptionCorrections.ui
+    ApplyAbsorptionCorrections.ui
+    CalculatePaalmanPings.ui
+    ContainerSubtraction.ui
+    ConvFitAddWorkspaceDialog.ui
+    DensityOfStates.ui
+    FqFitAddWorkspaceDialog.ui
+    ILLEnergyTransfer.ui
+    ISISCalibration.ui
+    ISISDiagnostics.ui
+    ISISEnergyTransfer.ui
+    IndirectAddWorkspaceDialog.ui
+    IndirectBayes.ui
+    IndirectCorrections.ui
+    IndirectDataAnalysis.ui
+    IndirectDataAnalysisElwinTab.ui
+    IndirectDataReduction.ui
+    IndirectDiffractionReduction.ui
+    IndirectEditResultsDialog.ui
+    IndirectFitDataView.ui
+    IndirectFitOutputOptions.ui
+    IndirectFitPreviewPlot.ui
+    IndirectFitTab.ui
+    IndirectInstrumentConfig.ui
+    IndirectInterfaceSettings.ui
+    IndirectLoadILL.ui
+    IndirectMolDyn.ui
+    IndirectMoments.ui
+    IndirectPlotOptions.ui
+    IndirectSassena.ui
+    IndirectSettings.ui
+    IndirectSimulation.ui
+    IndirectSpectrumSelector.ui
+    IndirectSqw.ui
+    IndirectSymmetrise.ui
+    IndirectTools.ui
+    IndirectTransmission.ui
+    IndirectTransmissionCalc.ui
+    IndirectDataAnalysisIqtTab.ui
+    Quasi.ui
+    ResNorm.ui
+    Stretch.ui
 )
 
 set(RES_FILES IndirectInterfaceResources.qrc)
-if (ENABLE_WORKBENCH)
-    # XML is required to parse the settings file
-    find_package(Qt5 COMPONENTS Concurrent Xml REQUIRED)
-endif ()
+
+# XML is required to parse the settings file
+find_package(
+  Qt5
+  COMPONENTS Concurrent Xml
+  REQUIRED
+)
 
 mtd_add_qt_library(
-        TARGET_NAME MantidScientificInterfacesIndirect
-        QT_VERSION 5
-        SRC ${SRC_FILES}
-        MOC ${MOC_FILES}
-        NOMOC ${INC_FILES}
-        UI ${UI_FILES}
-        RES ${RES_FILES}
-        DEFS
-        IN_MANTIDQT_INDIRECT
-        PRECOMPILED
-        PrecompiledHeader.h
-        INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-        LINK_LIBS
-        ${CORE_MANTIDLIBS}
-        PythonInterfaceCore
-        ${POCO_LIBRARIES}
-        ${Boost_LIBRARIES}
-        Python::Python
-        Qt5::Concurrent
-        Qt5::Xml
-        MTD_QT_LINK_LIBS
-        MantidQtWidgetsCommon
-        MantidQtWidgetsPlotting
-        MantidQtWidgetsMplCpp
-        MantidQtIcons
-        INSTALL_DIR_BASE
-        ${WORKBENCH_PLUGINS_DIR}
-        OSX_INSTALL_RPATH
-        @loader_path/../../Contents/MacOS
-        @loader_path/../../Contents/Frameworks
-        @loader_path/../../plugins/qt5
-        LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
+  TARGET_NAME MantidScientificInterfacesIndirect
+  QT_VERSION 5
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
+  UI ${UI_FILES}
+  RES ${RES_FILES}
+  DEFS IN_MANTIDQT_INDIRECT PRECOMPILED PrecompiledHeader.h
+  INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+  LINK_LIBS ${CORE_MANTIDLIBS}
+            Mantid::PythonInterfaceCore
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            Python::Python
+            Qt5::Concurrent
+            Qt5::Xml
+  MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
+  INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
+  OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
+  LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"
 )
 
 # Testing target
-add_subdirectory(test)
+if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
+  add_subdirectory(test)
+endif()

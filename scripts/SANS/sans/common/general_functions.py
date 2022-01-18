@@ -7,12 +7,12 @@
 """ The elements of this module contain various general-purpose functions for the SANS reduction framework."""
 
 # pylint: disable=invalid-name
-
+import copy
 from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
 import json
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
@@ -641,6 +641,14 @@ def get_ranges_for_rebin_array(rebin_array):
 def get_wav_range_from_ws(workspace) -> Tuple[float, float]:
     range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
     return range_str.split('-')
+
+
+def wav_ranges_to_str(wav_ranges: List[Tuple[float, float]], *, remove_full_range: bool = False) -> str:
+    ranges = copy.deepcopy(wav_ranges)
+    if remove_full_range:
+        min_value, max_value = min(wav_ranges, key=lambda t: t[0])[0], max(wav_ranges, key=lambda t: t[1])[1]
+        ranges.remove((min_value, max_value))
+    return ", ".join(wav_range_to_str(i) for i in ranges)
 
 
 def wav_range_to_str(wav_range: Tuple[float, float]) -> str:

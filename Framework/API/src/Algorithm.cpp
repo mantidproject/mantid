@@ -613,11 +613,10 @@ bool Algorithm::executeInternal() {
       // Throw because something was invalid
       if (numErrors > 0) {
         std::stringstream msg;
-        msg << "Some invalid Properties found: [ ";
+        msg << "Some invalid Properties found: ";
         for (auto &error : errors) {
-          msg << error.first << " ";
+          msg << "\n " << error.first << ": " << error.second;
         }
-        msg << "]";
         notificationCenter().postNotification(new ErrorNotification(this, "Some invalid Properties found"));
         throw std::runtime_error(msg.str());
       }
@@ -747,15 +746,17 @@ bool Algorithm::executeInternal() {
     throw;
   }
 
-  this->unlockWorkspaces();
-
   m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
       (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
   if (algIsExecuted) {
     setResultState(ResultState::Success);
   }
+
   // Only gets to here if algorithm ended normally
   notificationCenter().postNotification(new FinishedNotification(this, isExecuted()));
+
+  // Unlock the workspaces once the notification has been sent, to prevent too early deletion
+  this->unlockWorkspaces();
 
   return isExecuted();
 }
@@ -2047,6 +2048,14 @@ Property *Algorithm::getPointerToPropertyOrdinal(const int &index) const {
  *  @return A vector holding pointers to the list of properties
  */
 const std::vector<Property *> &Algorithm::getProperties() const { return m_properties.getProperties(); }
+
+/**
+ * Return the list of declared property names.
+ * @return A vector holding strings of property names
+ */
+std::vector<std::string> Algorithm::getDeclaredPropertyNames() const noexcept {
+  return m_properties.getDeclaredPropertyNames();
+}
 
 /** Get the value of a property. Allows you to assign directly to a variable of
  *the property's type

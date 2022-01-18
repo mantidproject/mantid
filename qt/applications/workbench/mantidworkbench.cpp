@@ -8,10 +8,13 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/process/detail/traits/wchar_t.hpp>
 #include <boost/process/env.hpp>
+#include <boost/process/search_path.hpp>
 #include <boost/process/system.hpp>
 
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -38,6 +41,17 @@ using ExeArgs = std::vector<std::string>;
 namespace {
 
 /**
+ * Return the path to the Python executable
+ * @param base Directory to serve as base for absolute paths
+ */
+#if defined(CONDA_ENV)
+inline std::string pythonExecutable(const fs::path &) {
+  // We assume the conda environement is activated and python will be found
+  // on the PATH
+  return bp::search_path(PYTHON_EXECUTABLE_PATH).generic_string();
+}
+#else
+/**
  * Check the given path and make it absolute if it is relative. The base
  * is taken as the directory given
  * @param path A filesystem path as a string
@@ -51,11 +65,8 @@ inline std::string absolutePath(const char *path, const fs::path &base) {
   return abspath.generic_string();
 }
 
-/**
- * Return the absolute path to the Python executable
- * @param base Directory to serve as base for absolute paths
- */
 inline std::string pythonExecutable(const fs::path &dirOfExe) { return absolutePath(PYTHON_EXECUTABLE_PATH, dirOfExe); }
+#endif
 
 /**
  * Given a list of existing executable/arguments append those
@@ -71,7 +82,7 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
     return;
 
   const auto startupArgsSize{exeArgs->size()};
-#if defined(__APPLE__)
+#if defined(__APPLE__) && !defined(CONDA_ENV)
   // On first launch of quarantined apps launchd passes a command line parameter
   // of the form -psn_0_XXXXXX to the application. We discard this otherwise
   // workbench's argparse will choke on it.
@@ -96,9 +107,10 @@ void appendArguments(ExeArgs *exeArgs, int argc, char **argv) {
  * @return A boost::process::environment type to pass to
  * boost::process::system
  */
-decltype(boost::this_process::environment()) childEnvironment(const fs::path &dirOfExe) {
+decltype(boost::this_process::environment()) childEnvironment([[maybe_unused]] const fs::path &dirOfExe) {
   auto env = boost::this_process::environment();
 
+#if !defined(CONDA_ENV)
   auto insertAtFront = [&env](const auto &name, const auto &value) {
     const auto existingValue = env[name];
     env[name] = value;
@@ -110,7 +122,10 @@ decltype(boost::this_process::environment()) childEnvironment(const fs::path &di
 
 #if defined(QT_PLUGIN_PATH)
   env["QT_PLUGIN_PATH"] = absolutePath(QT_PLUGIN_PATH, dirOfExe);
-#endif
+#endif // QT_PLUGIN_PATH
+
+#endif // NOT_CONDA_ENV
+
   // It was observed on Qt >= 5.12 that the QtWebEngineProcess would fail to
   // load the icudtl.dat resources due to Chromium sandboxing restrictions. It
   // would appear there is no more fine-grained way to control the restrictions:
@@ -129,7 +144,16 @@ decltype(boost::this_process::environment()) childEnvironment(const fs::path &di
 int startWorkbench(const fs::path &dirOfExe, int argc, char **argv) {
   ExeArgs startupWorkbench{"-m", WORKBENCH_MAIN};
   appendArguments(&startupWorkbench, argc, argv);
-  return bp::system(pythonExecutable(dirOfExe), startupWorkbench, childEnvironment(dirOfExe));
+  try {
+    return bp::system(pythonExecutable(dirOfExe), startupWorkbench, childEnvironment(dirOfExe));
+  } catch (const bp::process_error &exc) {
+    std::cerr << "Running " << pythonExecutable(dirOfExe) << " ";
+    for (const auto &arg : startupWorkbench) {
+      std::cerr << arg << " ";
+    }
+    std::cerr << "\nCaught system_error with code " << exc.code() << " meaning " << exc.what() << "\n";
+    return exc.code().value();
+  }
 }
 
 /**
@@ -146,7 +170,15 @@ void showErrorReporter(const fs::path &dirOfExe, const int workbenchExitCode) {
       "--application", ERRORREPORTS_APP_NAME,
       "--exitcode", std::to_string(workbenchExitCode)};
   // clang-format on
-  bp::system(pythonExecutable(dirOfExe), startErrorReporter);
+  try {
+    bp::system(pythonExecutable(dirOfExe), startErrorReporter);
+  } catch (const bp::process_error &exc) {
+    std::cerr << "Running " << pythonExecutable(dirOfExe) << " ";
+    for (const auto &arg : startErrorReporter) {
+      std::cerr << arg << " ";
+    }
+    std::cerr << "\nCaught system_error with code " << exc.code() << " meaning " << exc.what() << "\n";
+  }
 }
 
 } // namespace

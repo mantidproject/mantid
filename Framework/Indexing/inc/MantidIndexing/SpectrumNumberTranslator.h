@@ -32,7 +32,7 @@ namespace Indexing {
 class MANTID_INDEXING_DLL SpectrumNumberTranslator {
 public:
   SpectrumNumberTranslator(std::vector<SpectrumNumber> spectrumNumbers, const Partitioner &partitioner,
-                           const PartitionIndex &partition);
+                           const PartitionIndex &partitionIndex);
   SpectrumNumberTranslator(const std::vector<SpectrumNumber> &spectrumNumbers, const SpectrumNumberTranslator &parent);
   SpectrumNumberTranslator(const std::vector<GlobalSpectrumIndex> &globalIndices,
                            const SpectrumNumberTranslator &parent);

@@ -122,6 +122,7 @@ class DrillPresenter:
             ("10+20,100", 2)          -> "12+22,102"
             ("Sample_1,Sample10", 2)  -> "Sample_3,Sample12"
             ("Sample,sample10", 1)    -> "Sample,sample11"
+            ("Sample_01", 1)          -> "Sample_02"
 
             Args:
                 value (str): a string to increment
@@ -161,10 +162,10 @@ class DrillPresenter:
             suffix = re.search(r"\d+$", value)
             if suffix:
                 n = suffix.group(0)
-                ni = int(n) + i
-                if ni < 0:
-                    ni = 0
-                return value[0:-len(n)] + str(ni)
+                ni = str(int(n) + i).zfill(len(n))
+                if int(ni) < 0:
+                    ni = "0".zfill(len(n))
+                return value[0:-len(n)] + ni
 
             return value
 

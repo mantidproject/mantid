@@ -19,8 +19,8 @@
 #include "MantidParallel/StorageMode.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/ParallelRunner.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace API;
@@ -478,7 +478,8 @@ public:
     // so we must make sure to use fewer threads than detectors here:
     int n_thread = 3;
     ParallelRunner runner(n_thread);
-    runner.run(run_create_partitioned_with_instrument, m_instrument);
+    runner.runSerial(run_create_partitioned_with_instrument, m_instrument);
+    runner.runParallel(run_create_partitioned_with_instrument, m_instrument);
   }
 
   void test_indexInfo_legacy_compatibility_partitioned_workspace_failure() {
@@ -490,7 +491,8 @@ public:
     // so we must make sure to use fewer threads than detectors here:
     int n_thread = 3;
     ParallelRunner runner(n_thread);
-    runner.run(run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
+    runner.runSerial(run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
+    runner.runParallel(run_indexInfo_legacy_compatibility_partitioned_workspace_failure);
   }
 
 private:

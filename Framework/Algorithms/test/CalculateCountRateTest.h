@@ -16,7 +16,7 @@
 #include "MantidAlgorithms/CalculateCountRate.h"
 #include "MantidHistogramData/HistogramX.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <numeric>
 
 using namespace Mantid;

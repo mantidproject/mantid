@@ -9,6 +9,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
 #include <boost/python/operators.hpp> // Also provides self
+#include <cstddef>
 #include <memory>
 #include <numpy/arrayobject.h>
 #include <numpy/arrayscalars.h>
@@ -70,7 +71,7 @@ void export_DateAndTime() {
       .def(self - self);
 }
 
-long time_duration_total_nanoseconds(time_duration &self) {
+int64_t time_duration_total_nanoseconds(time_duration &self) {
   PyErr_Warn(PyExc_DeprecationWarning, ".total_nanoseconds() is deprecated. Use .totalNanoseconds() instead.");
   return self.total_nanoseconds();
 }

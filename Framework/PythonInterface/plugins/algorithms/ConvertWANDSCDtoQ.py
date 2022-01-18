@@ -227,9 +227,10 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             chars=['H','K','L']
             names = ['['+','.join(char_dict.get(j, '{0}{1}')
                                   .format(j,chars[np.argmax(np.abs(W[:,i]))]) for j in W[:,i])+']' for i in range(3)]
-            units = 'in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1'.format(ol.qFromHKL(W[0]).norm(),
-                                                                          ol.qFromHKL(W[1]).norm(),
-                                                                          ol.qFromHKL(W[2]).norm())
+            # Slicing because we want the column vector and not the row vector
+            units = 'in {:.3f} A^-1,in {:.3f} A^-1,in {:.3f} A^-1'.format(ol.qFromHKL(W[:,0]).norm(),
+                                                                          ol.qFromHKL(W[:,1]).norm(),
+                                                                          ol.qFromHKL(W[:,2]).norm())
             frames = 'HKL,HKL,HKL'
             k = 1/self.getProperty("Wavelength").value # Not 2pi/wavelength to save dividing by 2pi later
         else:
@@ -291,8 +292,14 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
         assert not data_array[:,:,0].ravel('F').flags.owndata
         assert data_array[:,:,0].flags.fnc
 
+        s1offset = np.deg2rad(self.getProperty("S1Offset").value)
+        s1offset = np.array([[ np.cos(s1offset), 0, np.sin(s1offset)],
+                             [             0,    1,                0],
+                             [-np.sin(s1offset), 0, np.cos(s1offset)]])
+
         for n in range(number_of_runs):
             R = inWS.getExperimentInfo(0).run().getGoniometer(n).getR()
+            R = np.dot(s1offset, R)
             RUBW = np.dot(R,UBW)
             q = np.round(np.dot(np.linalg.inv(RUBW),qlab.T)/bin_size-offset).astype(np.int)
             q_index = np.ravel_multi_index(q, (dim0_bins+2, dim1_bins+2, dim2_bins+2), mode='clip')

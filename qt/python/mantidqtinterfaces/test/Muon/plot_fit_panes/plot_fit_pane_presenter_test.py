@@ -33,7 +33,7 @@ class PlotFitPanePresenterTest(unittest.TestCase):
         self.view = mock.Mock(spec=BasePaneView)
         self.view.warning_popup = mock.MagicMock()
         self.figure_presenter = mock.Mock(spec=PlottingCanvasPresenterInterface)
-
+        self.figure_presenter.force_autoscale = mock.Mock()
         self.presenter = PlotFitPanePresenter(view=self.view, model=self.model, context=self.context,
                                               fitting_context=self.context.fitting_context,
                                               figure_presenter=self.figure_presenter)

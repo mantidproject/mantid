@@ -21,7 +21,7 @@
 
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::API;

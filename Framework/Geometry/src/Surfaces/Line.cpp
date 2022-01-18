@@ -197,32 +197,38 @@ added. It does not check the points for validity.
   return 1;
 }
 
-int Line::intersect(PType &PntOut, const Cylinder &Cyl) const
+int Line::intersect(PType &PntOut, const Cylinder &cylinder) const
 /**
 For the line that intersects the cylinder generate
 add the point to the VecOut, return number of points
 added. It does not check the points for validity.
 
 @param PntOut :: Vector of points found by the line/cylinder intersection
-@param Cyl :: Cylinder to intersect line with
+@param cylinder :: Cylinder to intersect line with
 @return Number of points found by intersection
 */
 {
-  const Kernel::V3D Cent = Cyl.getCentre();
-  const Kernel::V3D Ax = m_origin - Cent;
-  const Kernel::V3D N = Cyl.getNormal();
-  const double R = Cyl.getRadius();
-  const double vDn = N.scalar_prod(m_direction);
-  const double vDA = N.scalar_prod(Ax);
-  // First solve the equation of intersection
-  double C[3];
-  C[0] = 1.0 - (vDn * vDn);
-  C[1] = 2.0 * (Ax.scalar_prod(m_direction) - vDA * vDn);
-  C[2] = Ax.scalar_prod(Ax) - (R * R + vDA * vDA);
-  std::pair<std::complex<double>, std::complex<double>> SQ;
-  const int ix = solveQuadratic(C, SQ);
+  const Kernel::V3D center = m_origin - cylinder.getCentre();
+  const Kernel::V3D cylinder_axis = cylinder.getNormal();
+  const double radius = cylinder.getRadius();
+  const double vDn = cylinder_axis.scalar_prod(m_direction);
+  const double vDA = cylinder_axis.scalar_prod(center);
+
+  // this is param[0] * x^2 + param[1] * x + param[0]
+  // NOTE: Check the documentation page (concept::GeometryofShape) to learn the
+  //       detailed derivation of the following formula.
+  double quadratic_params[3];
+  quadratic_params[0] = 1.0 - (vDn * vDn);
+  quadratic_params[1] = 2.0 * (center.scalar_prod(m_direction) - vDA * vDn);
+  // norm is the distance from the origin to the center of the cylinder
+  quadratic_params[2] = center.norm2() - (radius * radius + vDA * vDA);
+
+  // output parameter
+  std::pair<std::complex<double>, std::complex<double>> roots;
+  // solve the equation of intersection
+  const int num_solutions = solveQuadratic(quadratic_params, roots);
   // This takes the centre displacement into account:
-  return lambdaPair(ix, SQ, PntOut);
+  return lambdaPair(num_solutions, roots, PntOut);
 }
 
 int Line::intersect(PType &PntOut, const Sphere &Sph) const

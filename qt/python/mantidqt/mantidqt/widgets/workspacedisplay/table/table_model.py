@@ -9,6 +9,7 @@
 from qtpy.QtCore import Qt, QAbstractTableModel, QModelIndex
 
 from mantid.kernel import V3D
+from numpy import ndarray
 
 BATCH_SIZE = 3000
 MINIMUM_BATCH_SIZE_ROWS = 100
@@ -102,7 +103,7 @@ class TableModel(QAbstractTableModel):
             return None
         if role in (Qt.DisplayRole, Qt.EditRole):
             data = self._data_model.get_cell(index.row(), index.column())
-            return str(data) if isinstance(data, V3D) else data
+            return str(data) if isinstance(data, (V3D, ndarray)) else data
         return None
 
     def load_data(self, data_model):

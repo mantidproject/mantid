@@ -127,7 +127,6 @@ set(SRC_FILES
     src/PropertyWithValue.cpp
     src/RawCountValidator.cpp
     src/RefAxis.cpp
-    src/RemoteJobManagerFactory.cpp
     src/ResizeRectangularDetectorHelper.cpp
     src/Run.cpp
     src/Sample.cpp
@@ -155,7 +154,8 @@ set(SRC_FILES
     src/WorkspaceNearestNeighbours.cpp
     src/WorkspaceOpOverloads.cpp
     src/WorkspaceProperty.cpp
-    src/WorkspaceUnitValidator.cpp)
+    src/WorkspaceUnitValidator.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES
     src/CompositeFunction.cpp
@@ -272,7 +272,6 @@ set(INC_FILES
     inc/MantidAPI/IPeaksWorkspace_fwd.h
     inc/MantidAPI/IPowderDiffPeakFunction.h
     inc/MantidAPI/IPreview.h
-    inc/MantidAPI/IRemoteJobManager.h
     inc/MantidAPI/ISpectrum.h
     inc/MantidAPI/ISplittersWorkspace.h
     inc/MantidAPI/ITableWorkspace.h
@@ -331,7 +330,6 @@ set(INC_FILES
     inc/MantidAPI/Projection.h
     inc/MantidAPI/RawCountValidator.h
     inc/MantidAPI/RefAxis.h
-    inc/MantidAPI/RemoteJobManagerFactory.h
     inc/MantidAPI/ResizeRectangularDetectorHelper.h
     inc/MantidAPI/Run.h
     inc/MantidAPI/Sample.h
@@ -368,13 +366,12 @@ set(INC_FILES
     inc/MantidAPI/WorkspaceProperty.h
     inc/MantidAPI/WorkspaceProperty.tcc
     inc/MantidAPI/WorkspaceUnitValidator.h
-    inc/MantidAPI/Workspace_fwd.h)
+    inc/MantidAPI/Workspace_fwd.h
+)
 
 option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
 if(PROFILE_ALGORITHM_LINUX)
-  set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecuteProfile.cpp"
-                "src/AlgoTimeRegister.cpp"
-  )
+  set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecuteProfile.cpp" "src/AlgoTimeRegister.cpp")
   set(INC_FILES "${INC_FILES}" "inc/MantidAPI/AlgoTimeRegister.h")
 else()
   set(SRC_FILES "${SRC_FILES}" "src/AlgorithmExecute.cpp")
@@ -469,7 +466,6 @@ set(TEST_FILES
     ProgressTest.h
     ProjectionTest.h
     RawCountValidatorTest.h
-    RemoteJobManagerFactoryTest.h
     ResizeRectangularDetectorHelperTest.h
     RunTest.h
     SampleShapeValidatorTest.h
@@ -494,19 +490,14 @@ set(TEST_FILES
     WorkspaceNearestNeighboursTest.h
     WorkspaceOpOverloadsTest.h
     WorkspacePropertyTest.h
-    WorkspaceUnitValidatorTest.h)
-
-set(GMOCK_TEST_FILES
-    ImplicitFunctionFactoryTest.h ImplicitFunctionParameterParserFactoryTest.h
-    MatrixWorkspaceTest.h
+    WorkspaceUnitValidatorTest.h
 )
+
+set(GMOCK_TEST_FILES ImplicitFunctionFactoryTest.h ImplicitFunctionParameterParserFactoryTest.h MatrixWorkspaceTest.h)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(
-      GLOBAL APPEND PROPERTY COVERAGE_SRCS
-                             "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}"
-    )
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -527,20 +518,14 @@ enable_precompiled_headers(inc/MantidAPI/PrecompiledHeader.h SRC_FILES)
 add_library(API ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::API ALIAS API)
 
-target_include_directories(API PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  API PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(
-  API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API
-)
+set_target_properties(API PROPERTIES OUTPUT_NAME MantidAPI COMPILE_DEFINITIONS IN_MANTID_API)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(
-    API PROPERTIES INSTALL_RPATH
-                   "@loader_path/../MacOS;@loader_path/../Frameworks"
-  )
+  set_target_properties(API PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(API PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
@@ -550,35 +535,29 @@ set_property(TARGET API PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(
   API
-  PUBLIC
-  Mantid::HistogramData
-  Mantid::Types
-  Mantid::Kernel
-  Mantid::Geometry
-  Mantid::Indexing
-  Mantid::Parallel
-  Nexus::nexus
-  PRIVATE
-  ${WINSOCK}
-  ${BCRYPT}
-  Mantid::Beamline
-  Mantid::Json
+  PUBLIC Mantid::HistogramData
+         Mantid::Types
+         Mantid::Kernel
+         Mantid::Geometry
+         Mantid::Indexing
+         Mantid::Parallel
+         Nexus::nexus
+  PRIVATE ${WINSOCK} ${BCRYPT} Mantid::Beamline Mantid::Json
 )
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Auto-generate exports header
-target_include_directories(API PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/API>
-  $<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  API PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/API> $<INSTALL_INTERFACE:include/Mantid>
 )
 generate_mantid_export_header(API TRUE)
 
 # Installation settings
-if (CONDA_BUILD)
-set(TARGET_EXPORT_NAME "MantidAPITargets")
-mtd_install_framework_lib(TARGETS API INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
+if(CONDA_ENV)
+  set(TARGET_EXPORT_NAME "MantidAPITargets")
+  mtd_install_framework_lib(TARGETS API INSTALL_EXPORT_FILE EXPORT_NAME ${TARGET_EXPORT_NAME})
 else()
-mtd_install_targets(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
+  mtd_install_targets(TARGETS API INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 endif()

@@ -4,64 +4,62 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import GroupWorkspaces
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import check_if_workspace_exist
+from mantid.api import AnalysisDataService
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_run_number_from_workspace_name
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import make_group
 
 
-# A singleton metaclass, required for the WorkspaceGroupDefinition class.
-class Singleton(type):
-    """
-    A singleton metaclass, required for the WorkspaceGroupDefinition class.
-    """
-    _instances = {}
-
-    def __call__(cls, *args, **kwargs):
-        if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
-        return cls._instances[cls]
+def check_not_in_group(groups, ws):
+    for group in groups:
+        if ws in group.getNames():
+            return False
+    return True
 
 
-class WorkspaceGroupDefinition(metaclass=Singleton):
-    """
-    This class can have a context manager attached to it, which prevents the grouping algorithm from running
-    until the desired groups and workspaces names have been added to the instance.
-    The grouping algorithm will then be executed on the contents of the grouping dict.
-    The grouping dict contains: {workspace_group_name: [workspaces in that group]}
-    """
+def safe_to_add_to_group(ws, instrument, groups, extension):
+    if ws.isGroup():
+        return False
+    return instrument in ws.name() and extension in ws.name() and check_not_in_group(groups, ws.name())
 
-    def __init__(self):
-        self.__saveState = False
-        self.grouping = {}
 
-    def execute_grouping(self):
-        if not self.__saveState:
-            self._remove_non_existing_workspaces()
-            for group_name, workspace_set in self.grouping.items():
-                workspace_list = list(workspace_set)
-                if len(workspace_list) > 0:
-                    GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace=group_name)
+def add_list_to_group(ws_names, group):
+    for ws_name in ws_names:
+        group.add(ws_name)
 
-    def new_workspace_group(self, group_name):
-        if group_name not in self.grouping:
-            self.grouping[group_name] = set()
 
-    def add_workspaces_to_group(self, group_name, workspace_names):
-        self.new_workspace_group(group_name)
-        for workspace_name in workspace_names:
-            self.grouping[group_name].add(workspace_name)
+def add_to_group(instrument, extension):
+    str_names = AnalysisDataService.getObjectNames()
+    # only group things for the current instrument
+    ws_list =  AnalysisDataService.retrieveWorkspaces(str_names)
 
-    def _remove_non_existing_workspaces(self):
-        for group_name, workspace_set in self.grouping.items():
-            for workspace_name in list(workspace_set):
-                if not check_if_workspace_exist(workspace_name):
-                    self.grouping[group_name].remove(workspace_name)
+    #just the groups
+    groups = [ws for ws in ws_list if ws.isGroup()]
 
-    def __enter__(self):
-        self.__saveState = True
-        self.grouping.clear()
-        return self
+    # just the workspaces
+    def string_name(ws):
+        if isinstance(ws, str):
+            return ws
+        return ws.name()
 
-    def __exit__(self, type, value, traceback):
-        self.__saveState = False
-        self.execute_grouping()
-        self.grouping.clear()
+    names = [string_name(ws) for ws in ws_list if safe_to_add_to_group(ws, instrument, groups, extension)]
+    # make sure we include the groups that we already have in the ADS
+    group_names = {key.name():[] for key in groups}
+    # put ws into groups
+    for name in names:
+        run = get_run_number_from_workspace_name(name, instrument)
+        tmp = instrument+run
+        # check the names are not already group workspaces
+        if tmp in list(group_names.keys()):
+            group_names[tmp] += [name]
+        else:
+            group_names[tmp] = [name]
+
+    # add to the groups that already exist
+    for group in groups:
+        if group.name() in group_names.keys():
+            add_list_to_group(group_names[group.name()], group)
+
+    # create new groups
+    for group in group_names.keys():
+        if group not in [group.name() for group in groups] :
+            make_group(group_names[group], group)

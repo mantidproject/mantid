@@ -10,12 +10,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/MDGeometry/HKL.h"
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidQtWidgets/Common/NonOrthogonal.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 class NonOrthogonalTest : public CxxTest::TestSuite {

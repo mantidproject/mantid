@@ -13,11 +13,11 @@
 #include "MantidKernel/CompositeValidator.h"
 
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
+#include "MantidFrameworkTestHelpers/ParallelAlgorithmCreation.h"
+#include "MantidFrameworkTestHelpers/ParallelRunner.h"
 #include "MantidKernel/Property.h"
 #include "MantidParallel/Communicator.h"
-#include "MantidTestHelpers/FakeObjects.h"
-#include "MantidTestHelpers/ParallelAlgorithmCreation.h"
-#include "MantidTestHelpers/ParallelRunner.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;

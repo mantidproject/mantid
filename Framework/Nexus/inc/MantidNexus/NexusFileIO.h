@@ -62,7 +62,7 @@ public:
   int writeNexusSampleLogs(const Mantid::API::Run &runProperties) const;
   /// write the workspace data
   int writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr &localworkspace, const bool &uniformSpectra,
-                                const std::vector<int> &spec, const char *group_name, bool write2Ddata) const;
+                                const std::vector<int> &indices, const char *group_name, bool write2Ddata) const;
 
   /// write table workspace
   int writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr &itableworkspace, const char *group_name) const;
@@ -334,7 +334,7 @@ template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSerie
   std::vector<double> times;
   Types::Core::DateAndTime t0;
   bool first = true;
-  for (typename std::map<Types::Core::DateAndTime, T>::const_iterator dv = dV.begin(); dv != dV.end(); dv++) {
+  for (typename std::map<Types::Core::DateAndTime, T>::const_iterator dv = dV.begin(); dv != dV.end(); ++dv) {
     T val = dv->second;
     Types::Core::DateAndTime time = dv->first;
     values.emplace_back(val);
@@ -349,7 +349,7 @@ template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSerie
   if (status == NX_ERROR)
     return;
 
-  status = NXopengroup(fileID, logName.c_str(), "NXlog");
+  NXopengroup(fileID, logName.c_str(), "NXlog");
   // write log data
   std::vector<std::string> attributes, avalues;
   attributes.emplace_back("type");
@@ -362,7 +362,7 @@ template <class T> void NexusFileIO::writeNumericTimeLog(const Kernel::TimeSerie
   avalues.emplace_back(t0.toISO8601String());
 
   writeNxFloatArray("time", times, attributes, avalues);
-  status = NXclosegroup(fileID);
+  NXclosegroup(fileID);
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.

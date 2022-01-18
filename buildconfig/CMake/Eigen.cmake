@@ -1,24 +1,44 @@
-include(ExternalProject)
-
-option(USE_SYSTEM_EIGEN "Use the system installed Eigen - v${eigen_version}?" OFF)
-
-if ( WIN32 )
-  # Installed by 3rd party dependencies bundle
-  set ( USE_SYSTEM_EIGEN ON )
-endif ()
-
-if(USE_SYSTEM_EIGEN)
-  message(STATUS "Using system Eigen")
+if(CONDA_ENV)
+  find_package(Eigen3 3.4 REQUIRED)
 else()
-  message(STATUS "Using Eigen in ExternalProject")
+  # Manually grab Eigen
+  cmake_minimum_required(VERSION 3.14) # For FetchContent_MakeAvailable
+  include(FetchContent)
+  fetchcontent_declare(
+    Eigen
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG 3.4.0
+    GIT_SHALLOW TRUE
+    GIT_PROGRESS TRUE
+  )
 
-  # Download and unpack Eigen at configure time
-  configure_file(${CMAKE_SOURCE_DIR}/buildconfig/CMake/Eigen.in ${CMAKE_BINARY_DIR}/extern-eigen/CMakeLists.txt)
+  option(EIGEN_BUILD_DOC OFF)
+  option(BUILD_TESTING OFF)
+  option(EIGEN_LEAVE_TEST_IN_ALL_TARGET OFF)
+  option(EIGEN_BUILD_PKGCONFIG OFF)
+  option(EIGEN_TEST_NOQT ON) # Only used in demos and tests
 
-  execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" -DCMAKE_SYSTEM_VERSION=${CMAKE_SYSTEM_VERSION} . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
-  execute_process(COMMAND ${CMAKE_COMMAND} --build . WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/extern-eigen )
+  # Preserve shared attrs
+  set(CMAKE_INSTALL_PREFIX_OLD ${CMAKE_INSTALL_PREFIX})
+  set(CMAKE_BUILD_TYPE_OLD ${CMAKE_BUILD_TYPE})
 
-  set(Eigen3_DIR "${CMAKE_BINARY_DIR}/extern-eigen/install/share/eigen3/cmake" CACHE PATH "")
+  # Install to build/_deps/eigen-install
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/_deps/eigen-install")
+  set(CMAKE_BUILD_TYPE Release)
+
+  fetchcontent_makeavailable(Eigen)
+
+  # Mark target as a system include
+  get_target_property(EIGEN_INC_DIRS eigen INTERFACE_INCLUDE_DIRECTORIES)
+  set_target_properties(eigen PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${EIGEN_INC_DIRS}")
+
+  # Restore shared attrs to not affect main mantid project
+  set(CMAKE_INSTALL_PREFIX
+      ${CMAKE_INSTALL_PREFIX_OLD}
+      CACHE STRING "Install path" FORCE
+  )
+  set(CMAKE_BUILD_TYPE
+      ${CMAKE_BUILD_TYPE_OLD}
+      CACHE STRING "Choose the type of build" FORCE
+  )
 endif()
-
-find_package(Eigen3 3.2 REQUIRED)

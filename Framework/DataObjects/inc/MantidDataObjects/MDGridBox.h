@@ -74,6 +74,13 @@ public:
    * the file IO. */
   void saveAt(API::IBoxControllerIO *const, uint64_t /*position*/) const override { /*Not saveable */
   }
+
+  /**Load the box data of specified size from the disk location provided using
+   * the class, responsible for the file IO. Overload that allows passing temporary memory */
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/, size_t /* Size */,
+                      std::vector<coord_t> & /*memory*/) override { /*Not directly loadable */
+  }
+
   /**Load the box data of specified size from the disk location provided using
    * the class, respoinsible for the file IO. */
   void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/,

@@ -30,7 +30,7 @@ template <typename T> struct DescriptorSetter {
   void apply(std::shared_ptr<NexusFileLoader> & /*unused*/, std::shared_ptr<T> & /*unused*/) {}
 };
 template <> struct DescriptorSetter<Kernel::NexusHDF5Descriptor> {
-  void apply(std::shared_ptr<NexusFileLoader> &loader, std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor) {
+  void apply(std::shared_ptr<NexusFileLoader> &loader, const std::shared_ptr<Kernel::NexusHDF5Descriptor> &descriptor) {
     loader->setFileInfo(descriptor);
   }
 };

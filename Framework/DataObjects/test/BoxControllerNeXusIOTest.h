@@ -8,7 +8,7 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
 
 #include <map>
 #include <memory>

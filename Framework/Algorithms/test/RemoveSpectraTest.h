@@ -14,8 +14,8 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/RemoveSpectra.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;

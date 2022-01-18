@@ -12,9 +12,9 @@
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/SofQW.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 class SofQCommonTest : public CxxTest::TestSuite {
 public:

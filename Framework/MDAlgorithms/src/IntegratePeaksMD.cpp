@@ -575,7 +575,7 @@ template <typename MDE, size_t nd> void IntegratePeaksMD::integrate(typename MDE
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-bool IntegratePeaksMD::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
+bool IntegratePeaksMD::detectorQ(const Mantid::Kernel::V3D &QLabFrame, double r) {
   bool in = true;
   const int nAngles = 8;
   double dAngles = static_cast<coord_t>(nAngles);

@@ -8,7 +8,7 @@ from functools import wraps
 import sys
 from qtpy import QtWidgets, QtCore
 from mantidqt.utils.qt.line_edit_double_validator import LineEditDoubleValidator
-
+from qtpy.QtWidgets import QLineEdit, QStyledItemDelegate
 """
 This module contains the methods for
 adding information to tables.
@@ -127,12 +127,12 @@ def addComboToTable(table,row,options,col=1):
     return combo
 
 
-def addDoubleToTable(table, value, row, col=1, minimum=0.0):
+def addDoubleToTable(table, value, row, col=1, minimum=None, decimals=3):
     number_widget = QtWidgets.QLineEdit(str(value))
     validator = LineEditDoubleValidator(number_widget, float(value))
-    validator.setBottom(minimum)
+    validator.setBottom(minimum if minimum is not None else -sys.float_info.max)
     validator.setTop(sys.float_info.max)
-    validator.setDecimals(3)
+    validator.setDecimals(decimals)
     number_widget.setValidator(validator)
     table.setCellWidget(row, col, number_widget)
     return number_widget, validator
@@ -195,3 +195,30 @@ def setTableHeaders(table):
         table.setStyleSheet(styleSheet)
         return styleSheet
     return
+
+
+class DoubleItemDelegate(QStyledItemDelegate):
+    """
+    An item delegate that has a QDoubleValidator. The __init__ is the default QStyledItemDelegate __init__.
+    """
+
+    def createEditor(self, parent, option, index):
+        line_edit = QLineEdit(parent)
+        validator = LineEditDoubleValidator(line_edit, float(0.0))
+        validator.setBottom(-sys.float_info.max)
+        validator.setTop(sys.float_info.max)
+        line_edit.setValidator(validator)
+        return line_edit
+
+    @staticmethod
+    def convert_for_display(number):
+        """need to convert to a float then
+        back to a string to make sure it
+        always has scientific notation"""
+        return str(float(number))
+
+    def setEditorData(self, editor, index):
+        editor.setText(self.convert_for_display(index.data()))
+
+    def setModelData(self, editor, model, index):
+        model.setData(index, self.convert_for_display(editor.text()), QtCore.Qt.EditRole)

@@ -29,7 +29,7 @@ QtBatchView::QtBatchView(QWidget *parent) : QWidget(parent), m_batchAlgoRunner(t
   connectBatchAlgoRunnerSlots();
 }
 
-void QtBatchView::subscribe(BatchViewSubscriber *notifyee) { m_notifyee = notifyee; }
+void QtBatchView::subscribe(JobRunnerSubscriber *notifyee) { m_notifyees.push_back(notifyee); }
 
 void QtBatchView::initLayout() {
   m_ui.setupUi(this);
@@ -90,20 +90,34 @@ void QtBatchView::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(
 
 void QtBatchView::cancelAlgorithmQueue() { m_batchAlgoRunner.cancelBatch(); }
 
-void QtBatchView::onBatchComplete(bool error) { m_notifyee->notifyBatchComplete(error); }
+void QtBatchView::onBatchComplete(bool error) {
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyBatchComplete(error);
+  }
+}
 
-void QtBatchView::onBatchCancelled() { m_notifyee->notifyBatchCancelled(); }
+void QtBatchView::onBatchCancelled() {
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyBatchCancelled();
+  }
+}
 
 void QtBatchView::onAlgorithmStarted(API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmStarted(std::move(algorithm));
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyAlgorithmStarted(algorithm);
+  }
 }
 
 void QtBatchView::onAlgorithmComplete(API::IConfiguredAlgorithm_sptr algorithm) {
-  m_notifyee->notifyAlgorithmComplete(std::move(algorithm));
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyAlgorithmComplete(algorithm);
+  }
 }
 
 void QtBatchView::onAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, const std::string &message) {
-  m_notifyee->notifyAlgorithmError(std::move(algorithm), message);
+  for (auto notifyee : m_notifyees) {
+    notifyee->notifyAlgorithmError(algorithm, message);
+  }
 }
 
 std::unique_ptr<QtRunsView> QtBatchView::createRunsTab() {

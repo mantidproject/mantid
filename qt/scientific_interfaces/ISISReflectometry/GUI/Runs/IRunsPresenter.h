@@ -35,6 +35,7 @@ public:
   virtual void notifyRowStateChanged(boost::optional<Item const &> item) = 0;
   virtual void notifyRowOutputsChanged(boost::optional<Item const &> item) = 0;
   virtual void notifyRowOutputsChanged() = 0;
+  virtual void notifyBatchLoaded() = 0;
 
   virtual void notifyReductionPaused() = 0;
   virtual void notifyReductionResumed() = 0;

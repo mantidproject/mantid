@@ -130,11 +130,14 @@ public:
    * inout
    *  @throw Exception::ExistsError if a property with the given name already
    * exists
-   *  @throw std::invalid_argument  if the name argument is empty
+   *  @throw std::invalid_argument if the name argument is empty
+   *  @throw std::invalid_argument if value is a nullptr
    */
   void declareProperty(const std::string &name, const char *value,
                        IValidator_sptr validator = std::make_shared<NullValidator>(),
                        const std::string &doc = std::string(), const unsigned int direction = Direction::Input) {
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
     // Simply call templated method, converting character array to a string
     declareProperty(name, std::string(value), std::move(validator), doc, direction);
   }
@@ -150,15 +153,20 @@ public:
    *  @param doc :: The (optional) documentation string
    *  @param validator :: Pointer to the (optional) validator. Ownership will be
    * taken over.
+   *
+   *
    *  @param direction :: The (optional) direction of the property, in, out or
    * inout
    *  @throw Exception::ExistsError if a property with the given name already
    * exists
-   *  @throw std::invalid_argument  if the name argument is empty
+   *  @throw std::invalid_argument if the name argument is empty
+   *  @throw std::invalid_argument if value is a nullptr
    */
   void declareProperty(const std::string &name, const char *value, const std::string &doc,
                        IValidator_sptr validator = std::make_shared<NullValidator>(),
                        const unsigned int direction = Direction::Input) {
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
     // Simply call templated method, converting character array to a string
     declareProperty(name, std::string(value), std::move(validator), doc, direction);
   }
@@ -245,6 +253,9 @@ public:
   /// Get the list of managed properties.
   virtual const std::vector<Property *> &getProperties() const = 0;
 
+  /// Get the list of managed property names.
+  virtual std::vector<std::string> getDeclaredPropertyNames() const noexcept = 0;
+
   /** Templated method to set the value of a PropertyWithValue
    *  @param name :: The name of the property (case insensitive)
    *  @param value :: The value to assign to the property
@@ -275,11 +286,13 @@ public:
    *  @param value :: The value to assign to the property
    *  @throw Exception::NotFoundError If the named property is unknown
    *  @throw std::invalid_argument If an attempt is made to assign to a property
+   *  @throw std::invalid_argument If value is a nullptr
    * of different type
    */
   IPropertyManager *setProperty(const std::string &name, const char *value) {
-    this->setPropertyValue(name, std::string(value));
-    return this;
+    if (value == nullptr)
+      throw std::invalid_argument("Attempted to set " + name + " to nullptr");
+    return setProperty(name, std::string(value));
   }
 
   /** Specialised version of setProperty template method to handle std::string

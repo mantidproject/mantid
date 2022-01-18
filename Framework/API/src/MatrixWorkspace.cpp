@@ -477,18 +477,26 @@ bool MatrixWorkspace::hasGroupedDetectors() const {
  *    KEY is the DetectorID (pixel ID)
  *    VALUE is the Workspace Index
  *  @param throwIfMultipleDets :: set to true to make the algorithm throw an
- * error
- *         if there is more than one detector for a specific workspace index.
+ * error if there is more than one detector for a specific workspace index.
+ *  @param ignoreIfNoValidDets :: set to true to exclude spectra that do not
+ * include any valid detector IDs. Note that if any valid detector IDs exist
+ * then all of the detector IDs (including the invalid ones) will be returned.
  *  @throw runtime_error if there is more than one detector per spectrum (if
  * throwIfMultipleDets is true)
  *  @return Index to Index Map object. THE CALLER TAKES OWNERSHIP OF THE MAP AND
  * IS RESPONSIBLE FOR ITS DELETION.
  */
-detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets) const {
+detid2index_map MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(bool throwIfMultipleDets,
+                                                                  bool ignoreIfNoValidDets) const {
   detid2index_map map;
+  const auto &specInfo = spectrumInfo();
 
   // Loop through the workspace index
   for (size_t workspaceIndex = 0; workspaceIndex < this->getNumberHistograms(); ++workspaceIndex) {
+    // Workspaces can contain invalid detector IDs. hasDetectors will silently ignore them until this is fixed.
+    if (ignoreIfNoValidDets && !specInfo.hasDetectors(workspaceIndex)) {
+      continue;
+    }
     auto detList = getSpectrum(workspaceIndex).getDetectorIDs();
 
     if (throwIfMultipleDets) {
@@ -726,6 +734,9 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
                                            const bool entireRange) const {
   out.resize(this->getNumberHistograms(), 0.0);
 
+  // offset for histogram data, because the x axis is not the same size for histogram and point data.
+  const size_t histogramOffset = this->isHistogramData() ? 1 : 0;
+
   // Run in parallel if the implementation is threadsafe
   PARALLEL_FOR_IF(this->threadSafe())
   for (int wksp_index = 0; wksp_index < static_cast<int>(this->getNumberHistograms()); wksp_index++) {
@@ -733,21 +744,21 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out, const doubl
     const Mantid::MantidVec &x = this->readX(wksp_index);
     const auto &y = this->y(wksp_index);
     // If it is a 1D workspace, no need to integrate
-    if ((x.size() <= 2) && (!y.empty())) {
+    if ((x.size() <= 1 + histogramOffset) && (!y.empty())) {
       out[wksp_index] = y[0];
     } else {
       // Iterators for limits - whole range by default
       Mantid::MantidVec::const_iterator lowit, highit;
       lowit = x.begin();
-      highit = x.end() - 1;
+      highit = x.end() - histogramOffset;
 
       // But maybe we don't want the entire range?
       if (!entireRange) {
         // If the first element is lower that the xmin then search for new lowit
         if ((*lowit) < minX)
           lowit = std::lower_bound(x.begin(), x.end(), minX);
-        // If the last element is higher that the xmax then search for new lowit
-        if ((*highit) > maxX)
+        // If the last element is higher that the xmax then search for new highit
+        if (*(highit - 1 + histogramOffset) > maxX)
           highit = std::upper_bound(lowit, x.end(), maxX);
       }
 
@@ -1089,6 +1100,23 @@ bool MatrixWorkspace::isCommonBins() const {
     }
   }
   return m_isCommonBinsFlag;
+}
+
+/**
+ * Whether the workspace's bins are integers - and common.
+ * @return Whether the workspace's bins are integers - and common.
+ **/
+bool MatrixWorkspace::isIntegerBins() const {
+  if (!this->isCommonBins())
+    return false;
+
+  const HistogramData::HistogramX bins = x(0);
+
+  for (size_t i = 0; i < bins.size(); ++i) {
+    if (std::trunc(bins[i]) != bins[i])
+      return false;
+  }
+  return true;
 }
 
 /** Called by the algorithm MaskBins to mask a single bin for the first time,

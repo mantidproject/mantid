@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 from unittest.mock import patch
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus import model, view, presenter
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+from Engineering.common.calibration_info  import CalibrationInfo
 
 tab_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.focus"
 
@@ -19,48 +19,32 @@ class FocusPresenterTest(unittest.TestCase):
         self.view = mock.create_autospec(view.FocusView)
         self.model = mock.create_autospec(model.FocusModel)
         self.presenter = presenter.FocusPresenter(self.model, self.view)
-        self.presenter.current_calibration.set_roi_info(None, None, None)
+        self.presenter.current_calibration = mock.create_autospec(CalibrationInfo)
 
     @patch(tab_path + ".presenter.set_setting")
     @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
-    def test_worker_started_with_correct_params(self, worker, setting):
-        self.presenter.current_calibration = CalibrationInfo(sample_path="Fake/Path",
-                                                             instrument="ENGINX")
-        self.view.get_focus_filenames.return_value = "305738"
-        self.view.get_vanadium_filename.return_value = "307521"
-        # testing south bank roi info is correctly propagated
-        self.presenter.current_calibration.set_roi_info('2', None, None)
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = False
-
-        self.presenter.on_focus_clicked()
-        grp_dict_south = {'bank_2': 'SouthBank_grouping'}
-        worker.assert_called_with("305738", "307521", True, None, grp_dict_south)
-        self.assertEqual(1, setting.call_count)
-
-    @patch(tab_path + ".presenter.set_setting")
-    @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
-    def test_worker_started_with_correct_params_custom_crop(self, worker, setting):
-        self.presenter.current_calibration = CalibrationInfo(sample_path="Fake/Path",
-                                                             instrument="ENGINX")
-        self.view.get_focus_filenames.return_value = "305738"
-        self.view.get_vanadium_filename.return_value = "307521"
-        self.presenter.current_calibration.set_roi_info(None, None, "2-45")
-        self.view.get_plot_output.return_value = True
-        self.view.is_searching.return_value = False
-        rp_dict_cropped = {'Cropped': 'Custom_spectra_grouping'}
-
-        self.presenter.on_focus_clicked()
-        worker.assert_called_with("305738", "307521", True, None, rp_dict_cropped)
-        self.assertEqual(1, setting.call_count)
-
     @patch(tab_path + ".presenter.FocusPresenter._validate")
-    @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
-    def test_worker_not_started_validate_fails(self, worker, valid):
-        valid.return_value = False
+    def test_worker_started_with_correct_params(self, mock_validate, mock_worker, mock_setting):
+        self.view.get_focus_filenames.return_value = "305738"
+        self.view.get_vanadium_filename.return_value = "307521"
+        self.view.get_plot_output.return_value = True
+        mock_validate.return_value = True
 
         self.presenter.on_focus_clicked()
-        worker.assert_not_called()
+
+        mock_worker.assert_called_with("305738", "307521", True, None, self.presenter.current_calibration)
+        self.assertEqual(1, mock_setting.call_count)
+
+    @patch(tab_path + ".presenter.set_setting")
+    @patch(tab_path + ".presenter.FocusPresenter.start_focus_worker")
+    @patch(tab_path + ".presenter.FocusPresenter._validate")
+    def test_worker_not_started_when_validate_fails(self, mock_validate, mock_worker, mock_setting):
+        mock_validate.return_value = False
+
+        self.presenter.on_focus_clicked()
+
+        mock_worker.assert_not_called()
+        mock_setting.assert_not_called()
 
     def test_controls_disabled_disables_both(self):
         self.presenter.set_focus_controls_enabled(False)
@@ -98,23 +82,22 @@ class FocusPresenterTest(unittest.TestCase):
 
     @patch(tab_path + ".presenter.create_error_message")
     def test_validate_with_invalid_calibration(self, create_error):
-        self.presenter.current_calibration = CalibrationInfo(sample_path=None,
-                                                             instrument=None)
+        self.presenter.current_calibration.is_valid.return_value = False
         self.view.is_searching.return_value = False
 
-        self.presenter._validate()
+        self.assertFalse(self.presenter._validate())
         create_error.assert_called_with(
             self.presenter.view,
             "Create or Load a calibration via the Calibration tab before focusing.")
 
     @patch(tab_path + ".presenter.create_error_message")
     def test_validate_while_searching(self, create_error):
-        self.presenter.current_calibration = CalibrationInfo(sample_path="Fake/Path",
-                                                             instrument="ENGINX")
         self.view.is_searching.return_value = True
 
-        self.assertEqual(False, self.presenter._validate())
-        self.assertEqual(1, create_error.call_count)
+        self.assertFalse(self.presenter._validate())
+        create_error.assert_called_with(
+            self.presenter.view,
+            "Mantid is searching for data files. Please wait.")
 
 
 if __name__ == '__main__':

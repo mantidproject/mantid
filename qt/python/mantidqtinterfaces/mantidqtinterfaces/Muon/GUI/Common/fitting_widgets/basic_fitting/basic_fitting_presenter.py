@@ -9,6 +9,9 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqt.widgets.fitscriptgenerator import (FittingMode, FitScriptGeneratorModel, FitScriptGeneratorPresenter,
                                                  FitScriptGeneratorView)
 
+from mantidqtinterfaces.Muon.GUI.Common.contexts.fitting_contexts.basic_fitting_context import (X_FROM_FIT_RANGE,
+                                                                                                X_FROM_DATA_RANGE,
+                                                                                                X_FROM_CUSTOM)
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_model import BasicFittingModel
 from mantidqtinterfaces.Muon.GUI.Common.fitting_widgets.basic_fitting.basic_fitting_view import BasicFittingView
 from mantidqtinterfaces.Muon.GUI.Common.thread_model import ThreadModel
@@ -77,6 +80,10 @@ class BasicFittingPresenter:
         self.view.set_slot_for_exclude_end_x_updated(self.handle_exclude_end_x_updated)
         self.view.set_slot_for_minimizer_changed(self.handle_minimizer_changed)
         self.view.set_slot_for_evaluation_type_changed(self.handle_evaluation_type_changed)
+        self.view.set_slot_for_plot_guess_type_changed(self.handle_plot_guess_type_changed)
+        self.view.set_slot_for_plot_guess_points_updated(self.handle_plot_guess_points_changed)
+        self.view.set_slot_for_plot_guess_start_x_updated(self.handle_plot_guess_start_x_changed)
+        self.view.set_slot_for_plot_guess_end_x_updated(self.handle_plot_guess_end_x_changed)
         self.view.set_slot_for_use_raw_changed(self.handle_use_rebin_changed)
 
     def initialize_model_options(self) -> None:
@@ -130,6 +137,7 @@ class BasicFittingPresenter:
     def handle_plot_guess_changed(self) -> None:
         """Handle when plot guess is ticked or un-ticked."""
         self.model.plot_guess = self.view.plot_guess
+        self.update_guess_parameters()
         self.update_plot_guess()
 
     def handle_undo_fit_clicked(self) -> None:
@@ -212,6 +220,7 @@ class BasicFittingPresenter:
         self.update_start_and_end_x_in_view_from_model()
 
         self.update_plot_fit()
+        self.update_guess_parameters()
         self.update_plot_guess()
 
     def handle_covariance_matrix_clicked(self) -> None:
@@ -233,13 +242,46 @@ class BasicFittingPresenter:
         """Handle when the evaluation type is changed."""
         self.model.evaluation_type = self.view.evaluation_type
 
+    def handle_plot_guess_type_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_type = self.view.plot_guess_type
+        if self.model.plot_guess_type == X_FROM_FIT_RANGE:
+            self.view.show_plot_guess_points(False)
+            self.view.show_plot_guess_start_x(False)
+            self.view.show_plot_guess_end_x(False)
+        elif self.model.plot_guess_type == X_FROM_DATA_RANGE:
+            self.view.show_plot_guess_points(True)
+            self.view.show_plot_guess_start_x(False)
+            self.view.show_plot_guess_end_x(False)
+        elif self.model.plot_guess_type == X_FROM_CUSTOM:
+            self.view.show_plot_guess_points(True)
+            self.view.show_plot_guess_start_x(True)
+            self.view.show_plot_guess_end_x(True)
+
+        self.update_plot_guess()
+
+    def handle_plot_guess_points_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_points = self.view.plot_guess_points
+        self.update_plot_guess()
+
+    def handle_plot_guess_start_x_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_start_x = self.view.plot_guess_start_x
+        self.update_plot_guess()
+
+    def handle_plot_guess_end_x_changed(self) -> None:
+        """Handle when the evaluation type is changed."""
+        self.model.plot_guess_end_x = self.view.plot_guess_end_x
+        self.update_plot_guess()
+
     def handle_function_structure_changed(self) -> None:
         """Handle when the function structure is changed."""
         self.update_fit_functions_in_model_from_view()
         self.automatically_update_function_name()
+        self.clear_undo_data()
 
         if self.model.get_active_fit_function() is None:
-            self.clear_undo_data()
             self.update_plot_fit()
 
         self.reset_fit_status_and_chi_squared_information()
@@ -331,6 +373,9 @@ class BasicFittingPresenter:
         # Triggers handle_dataset_name_changed which updates the model
         self.view.current_dataset_name = dataset_name
 
+    def current_dataset(self) -> str:
+        return self.view.current_dataset_name
+
     def set_current_dataset_index(self, dataset_index: int) -> None:
         """Set the current dataset index in the model and view."""
         self.model.current_dataset_index = dataset_index
@@ -390,6 +435,8 @@ class BasicFittingPresenter:
         """Updates the start and end x in the view using the current values in the model."""
         self.view.start_x = self.model.current_start_x
         self.view.end_x = self.model.current_end_x
+        self.view.plot_guess_start_x = self.model.current_start_x
+        self.view.plot_guess_end_x = self.model.current_end_x
         self.view.exclude_start_x = self.model.current_exclude_start_x
         self.view.exclude_end_x = self.model.current_exclude_end_x
 
@@ -410,6 +457,13 @@ class BasicFittingPresenter:
         self.remove_plot_guess_notifier.notify_subscribers()
         self.model.update_plot_guess()
         self.update_plot_guess_notifier.notify_subscribers()
+
+    def update_guess_parameters(self) -> None:
+        """Update the parameters for the guess plot"""
+        self.model.plot_guess_type = self.view.plot_guess_type
+        self.model.plot_guess_points = self.view.plot_guess_points
+        self.model.plot_guess_start_x = self.view.plot_guess_start_x
+        self.model.plot_guess_end_x = self.view.plot_guess_end_x
 
     def update_plot_fit(self) -> None:
         """Updates the fit results on the plot using the currently active fit results."""

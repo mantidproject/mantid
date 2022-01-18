@@ -14,6 +14,7 @@
 #include "MantidKernel/Strings.h"
 #include <Poco/File.h>
 
+#include <algorithm>
 #include <utility>
 
 using file_holder_type = std::unique_ptr<::NeXus::File>;
@@ -22,6 +23,38 @@ namespace Mantid::DataObjects {
 namespace {
 /// static logger
 Kernel::Logger g_log("MDBoxFlatTree");
+
+void EmplaceExperimentBlockNum(const std::string &name, std::list<uint16_t> &experimentBlockNum) {
+  if (boost::starts_with(name, "experiment")) {
+    try {
+      auto num = boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
+      if (num < std::numeric_limits<uint16_t>::max() - 1) {
+        // dublicated experiment info names are impossible due to the
+        // structure of the nexus file but missing -- can be found.
+        experimentBlockNum.emplace_back(num);
+      }
+    } catch (boost::bad_lexical_cast &) { /* ignore */
+    }
+  }
+}
+
+// check if all subsequent experiment infos numbers are present
+void CheckExperimentBlockNum(const std::list<uint16_t> &experimentBlockNum) {
+
+  auto itr = experimentBlockNum.begin();
+  size_t ic = 0;
+  for (; itr != experimentBlockNum.end(); itr++) {
+    if (*itr != ic) {
+      for (size_t i = ic + 1; i < *itr; i++) {
+        const std::string groupName = "experiment" + Kernel::Strings::toString(i);
+        g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName
+                        << ". Workspace will be missing ExperimentInfo.\n";
+      }
+    }
+    ic++;
+  }
+}
+
 } // namespace
 
 MDBoxFlatTree::MDBoxFlatTree() : m_nDim(-1) {}
@@ -377,6 +410,65 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file, const API::IM
   }
 }
 
+void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+                                        std::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
+                                        const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                        const std::string &currentGroup, bool lazy) {
+
+  // First, find how many experimentX blocks there are
+  const auto &allEntries = fileInfo.getAllEntries();
+  auto itNXgroup = allEntries.find("NXgroup");
+  const std::set<std::string> &nxGroupEntries =
+      (itNXgroup != allEntries.end()) ? itNXgroup->second : std::set<std::string>{};
+
+  std::list<uint16_t> experimentBlockNum;
+  for (const std::string &entry : nxGroupEntries) {
+    if (std::count(entry.begin(), entry.end(), '/') != 2) {
+      continue;
+    }
+    if (!boost::starts_with(entry, "/" + currentGroup + "/experiment")) {
+      continue;
+    }
+
+    const std::string name = entry.substr(entry.find("experiment"));
+    EmplaceExperimentBlockNum(name, experimentBlockNum);
+  }
+
+  experimentBlockNum.sort();
+  CheckExperimentBlockNum(experimentBlockNum);
+
+  // Now go through in order, loading and adding
+  auto itr = experimentBlockNum.begin();
+  for (; itr != experimentBlockNum.end(); itr++) {
+    std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
+    if (lazy) {
+      auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);
+      // And add it to the mutliple experiment info.
+      mei->addExperimentInfo(ei);
+    } else {
+      auto ei = std::make_shared<API::ExperimentInfo>();
+      file->openGroup(groupName, "NXgroup");
+      std::string parameterStr;
+      try {
+        // Get the sample, logs, instrument
+        ei->loadExperimentInfoNexus(filename, file, parameterStr, fileInfo, file->getPath());
+        // Now do the parameter map
+        if (parameterStr.empty()) {
+          ei->populateInstrumentParameters();
+        } else {
+          ei->readParameterMap(parameterStr);
+        }
+        // And add it to the mutliple experiment info.
+        mei->addExperimentInfo(ei);
+      } catch (std::exception &e) {
+        g_log.information("Error loading section '" + groupName + "' of nxs file.");
+        g_log.information(e.what());
+      }
+      file->closeGroup();
+    }
+  }
+}
+
 //----------------------------------------------------------------------------------------------
 /** Load the ExperimentInfo blocks, if any, in the NXS file
  *
@@ -394,41 +486,18 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
-  std::list<uint16_t> ExperimentBlockNum;
+
+  std::list<uint16_t> experimentBlockNum;
   for (auto &entry : entries) {
     const std::string &name = entry.first;
-    if (boost::starts_with(name, "experiment")) {
-      try {
-        auto num = boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
-        if (num < std::numeric_limits<uint16_t>::max() - 1) {
-          // dublicated experiment info names are impossible due to the
-          // structure of the nexus file but missing -- can be found.
-          ExperimentBlockNum.emplace_back(num);
-        }
-      } catch (boost::bad_lexical_cast &) { /* ignore */
-      }
-    }
+    EmplaceExperimentBlockNum(name, experimentBlockNum);
   }
 
-  ExperimentBlockNum.sort();
-
-  // check if all subsequent experiment infos numbers are present
-  auto itr = ExperimentBlockNum.begin();
-  size_t ic = 0;
-  for (; itr != ExperimentBlockNum.end(); itr++) {
-    if (*itr != ic) {
-      for (size_t i = ic + 1; i < *itr; i++) {
-        std::string groupName = "experiment" + Kernel::Strings::toString(i);
-        g_log.warning() << "NXS file is missing a ExperimentInfo block " << groupName
-                        << ". Workspace will be missing ExperimentInfo.\n";
-      }
-    }
-    ic++;
-  }
-
+  experimentBlockNum.sort();
+  CheckExperimentBlockNum(experimentBlockNum);
   // Now go through in order, loading and adding
-  itr = ExperimentBlockNum.begin();
-  for (; itr != ExperimentBlockNum.end(); itr++) {
+  auto itr = experimentBlockNum.begin();
+  for (; itr != experimentBlockNum.end(); itr++) {
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
     if (lazy) {
       auto ei = std::make_shared<API::FileBackedExperimentInfo>(filename, file->getPath() + "/" + groupName);

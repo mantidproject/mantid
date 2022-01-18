@@ -74,12 +74,15 @@ class VesuvioAnalysis(PythonAlgorithm):
             "AnalysisMode",
             "LoadReduceAnalyse",
             doc="In the first case, all the algorithm is run. In the second case, the data are not re-loaded, and only"
-            " the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run.",
+            " the TOF and y-scaling bits are run. In the third case, only the y-scaling final analysis is run. In the"
+            " fourth case, the data is re-loaded and the TOF bits are run. In the fifth case, only the TOF bits are run.",
             validator=StringListValidator(
                 [
                     "LoadReduceAnalyse",
                     "ReduceAnalyse",
-                    "Analyse"]))
+                    "Analyse",
+                    "LoadReduce",
+                    "Reduce"]))
         self.declareProperty(
             FileProperty(
                 "IPFile",
@@ -109,20 +112,22 @@ class VesuvioAnalysis(PythonAlgorithm):
         self.declareProperty(ITableWorkspaceProperty("ComptonProfile",
                                                      "",
                                                      direction=Direction.Input),doc="Table for Compton profiles")
-        self.declareProperty(IntArrayProperty("ConstraintsProfileNumbers", [0,1]))
-        self.declareProperty(
-            "ConstraintsProfileScatteringCrossSection",
-            "2.*82.03/5.551",
-            doc="The ratio of the first to second intensities, each equal to atom stoichiometry times bound scattering"
-            "cross section. Simple arithmetic can be included but the result may be rounded.")
-        self.declareProperty("ConstraintsProfileState", "eq", validator=StringListValidator(["eq","ineq"]))
+        self.declareProperty(ITableWorkspaceProperty("ConstraintsProfile",
+                                                     "",
+                                                     Direction.Input, PropertyMode.Optional),
+                                                     doc="Table with LHS and RHS element of constraint on "
+                                              "intensities of element peaks. A constraint can only be set when there are at least two "
+                                              "elements in the ComptonProfile. For each constraint the ratio of the first to second "
+                                              "intensities, each equal to atom stoichiometry times bound scattering "
+                                              "cross section is defined in the column ScatteringCrossSection. Simple arithmetic can be "
+                                              "included but the result may be rounded. The column State allows the values 'eq' and 'ineq'.")
         self.declareProperty(IntArrayProperty("SpectraToBeMasked", []))#173,174,181
         self.declareProperty("SubtractResonancesFunction", "", doc="Function for resonance subtraction. Empty means no subtraction.")
         self.declareProperty("YSpaceFitFunctionTies", "",doc="The TOF spectra are subtracted by all the fitted profiles"
                              " about the first element specified in the elements string. Then such spectra are converted to the Y space"
                              " of the first element (using the ConvertToYSPace algorithm). The spectra are summed together and"
-                             " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermte function up to the sixth"
-                             "order.")
+                             " symmetrised. A fit on the resulting spectrum is performed using a Gauss Hermite function up to the sixth"
+                             " order.")
 
     def validateInputs(self):
         tableCols = [
@@ -137,8 +142,13 @@ class VesuvioAnalysis(PythonAlgorithm):
             "Centre lower limit",
             "Centre value",
             "Centre upper limit"]
+        constraintCols = [
+            "LHS element",
+            "RHS element",
+            "ScatteringCrossSection",
+            "State"]
         issues = dict()
-        table = self.getProperty("ComptonProfile").value
+        table: TableWorkspace = self.getProperty("ComptonProfile").value
         if(not table):
             issues["ComptonProfile"] = "An elements table should be provided."
         elif(table.columnCount()!= len(tableCols) or sorted(cleanNames(tableCols))!=sorted(cleanNames(table.getColumnNames())) ):
@@ -148,14 +158,24 @@ class VesuvioAnalysis(PythonAlgorithm):
         TOF = self.getProperty("TOFRangeVector").value
         if len(TOF) != 3:
             issues["TOFRangeVector"] = "TOFRangeVector should have length 3 (lower, binning, upper)."
-        constraints = self.getProperty("ConstraintsProfileNumbers").value
-        if len(constraints)!=2:
-            issues["ConstraintsProfileNumbers"] = "ConstraintsProfileNumbers should only contain 2 numbers."
-        #check aritmatic is safe
-        cross_section = self.getProperty("ConstraintsProfileScatteringCrossSection").value
-        for ch in cross_section:
-            if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
-                issues["ConstraintsProfileScatteringCrossSection"]= "Must be a valid mathmatical expression. "+ch
+        constraints: TableWorkspace = self.getProperty("ConstraintsProfile").value
+        if constraints and constraints.rowCount() > 0:
+            if constraints.columnCount()!= len(constraintCols) or \
+                    sorted(cleanNames(constraintCols))!=sorted(cleanNames(constraints.getColumnNames())):
+                issues["ConstraintsProfile"] = "The constraints table should be of the form: "
+                for name in constraintCols:
+                    issues["ConstraintsProfile"] += name + ", "
+            else:
+                #check arithmetic is safe
+                cross_section = constraints.column('ScatteringCrossSection')
+                for section in cross_section:
+                    for ch in section:
+                        if ch not in ["+","-","*","/",".","(",")"] and not ch.isdigit():
+                            issues["ConstraintsProfile"]= "ScatteringCrossSection must be a valid mathmatical expression. "+ch
+                state = constraints.column('State')
+                for f in [flag for flag in state]:
+                    if f not in ["eq", "ineq"]:
+                        issues["ConstraintsProfile"]= "State can only have the values ['eq','ineq']"+f
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
@@ -192,14 +212,7 @@ class VesuvioAnalysis(PythonAlgorithm):
         elements = generate_elements(self.getProperty("ComptonProfile").value)
 
         # constraint on the intensities of element peaks
-        #provide LHS element, RHS element, mult. factor, flag
-        # if flag=True inequality; if flag = False equality
-        constraints_profile_num = self.getProperty("ConstraintsProfileNumbers").value
-        # check this is valid in the validate inputs
-        cross_section = evaluate(self.getProperty("ConstraintsProfileScatteringCrossSection").value)
-        state = self.getProperty("ConstraintsProfileState").value
-        C1 = constraint( constraints_profile_num[0], constraints_profile_num[1], cross_section ,state)
-        constraints = [C1]
+        constraints = generate_constraints(self.getProperty("ConstraintsProfile").value)
 
         # spectra to be masked
         spectra_to_be_masked = self.getProperty("SpectraToBeMasked").value
@@ -292,24 +305,25 @@ class VesuvioAnalysis(PythonAlgorithm):
                         Minus(LHSWorkspace=ws_name+"_cor_residuals",RHSWorkspace=ws_name+"_fitted_resonances",
                               OutputWorkspace=ws_name+"_cor_residuals" )
                 else:
-                    if fit_hydrogen_in_Y_space:
+                    if fit_hydrogen_in_Y_space and "Analyse" in analysisMode:
                         hydrogen_ws = subtract_other_masses(ws_name+"_cor", widths, intensities, centres, spectra, masses,IPFile,g_log)
                         RenameWorkspace(hydrogen_ws, ws_name+'_H')
                         SumSpectra(InputWorkspace=ws_name+'_H', OutputWorkspace=ws_name+'_H_sum')
                         calculate_mantid_resolutions(ws_name, masses[0])
 
             # Fit of the summed and symmetrised hydrogen neutron Compton profile in its Y space using MANTID.
-            if fit_hydrogen_in_Y_space:
-                #calculate_mantid_resolutions(ws_name, masses[0])
-                #max_Y
-                _ = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
-                # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!!
-                constraints = "   sigma1=3.0,c4=0.0, c6=0.0,A=0.08, B0=0.00, ties = {}".format(y_fit_ties)
-                correct_for_offsets = True
-                y_range = (-20., 20.)
-                final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses, g_log)
-            elif "Analyse" in analysisMode:
-                g_log.notice("Did not compute analysis. The YSpaceFitFunctionTies must be stated.")
+            if "Analyse" in analysisMode:
+                if fit_hydrogen_in_Y_space:
+                    #calculate_mantid_resolutions(ws_name, masses[0])
+                    #max_Y
+                    _ = convert_to_y_space_and_symmetrise(ws_name+"_H",masses[0])
+                    # IT WOULD BE GOOD TO HAVE THE TIES DEFINED IN THE USER SECTION!!!
+                    constraints = "   sigma1=3.0,c4=0.0, c6=0.0,A=0.08, B0=0.00, ties = {}".format(y_fit_ties)
+                    correct_for_offsets = True
+                    y_range = (-20., 20.)
+                    final_fit(ws_name+'_H_JoY_sym', constraints, y_range,correct_for_offsets, masses, g_log)
+                else:
+                    g_log.notice("Did not compute analysis. The YSpaceFitFunctionTies must be stated.")
 
 
 AlgorithmFactory.subscribe(VesuvioAnalysis)

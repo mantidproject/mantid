@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import INSTRUMENT_DICT, create_error_message, \
-    CalibrationObserver, output_settings
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.calibration_info import CalibrationInfo
+    CalibrationObserver
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import get_setting, set_setting
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
+from Engineering.common.calibration_info import CalibrationInfo
 from mantidqt.utils.asynchronous import AsyncTask
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantid.kernel import logger
@@ -46,16 +47,17 @@ class FocusPresenter(object):
     def on_focus_clicked(self):
         if not self._validate():
             return
-        regions_dict = self.current_calibration.create_focus_roi_dictionary()
         focus_paths = self.view.get_focus_filenames()
         van_path = self.view.get_vanadium_filename()
         if self._number_of_files_warning(focus_paths):
-            self.start_focus_worker(focus_paths, van_path, self.view.get_plot_output(), self.rb_num, regions_dict)
+            self.start_focus_worker(focus_paths, van_path, self.view.get_plot_output(), self.rb_num,
+                                    self.current_calibration)
         van_run = self.view.get_vanadium_run()
         set_setting(output_settings.INTERFACES_SETTINGS_GROUP, output_settings.ENGINEERING_PREFIX,
                     "last_vanadium_run", van_run)
 
-    def start_focus_worker(self, focus_paths: list, van_path: str, plot_output: bool, rb_num: str, regions_dict: dict) -> None:
+    def start_focus_worker(self, focus_paths: list, van_path: str, plot_output: bool, rb_num: str,
+                           calibration: CalibrationInfo) -> None:
         """
         Focus data in a separate thread to stop the main GUI from hanging.
         :param focus_paths: List of paths to the files containing the data to focus.
@@ -64,7 +66,7 @@ class FocusPresenter(object):
         :param regions_dict: Dictionary containing the regions to focus over, mapping region_name -> grouping_ws_name
         """
         self.worker = AsyncTask(self.model.focus_run,
-                                (focus_paths, van_path, plot_output, self.instrument, rb_num, regions_dict),
+                                (focus_paths, van_path, plot_output, rb_num, calibration),
                                 error_cb=self._on_worker_error,
                                 finished_cb=self._on_worker_success)
         self.set_focus_controls_enabled(False)
@@ -135,5 +137,5 @@ class FocusPresenter(object):
         :param calibration: The new current calibration.
         """
         self.current_calibration = calibration
-        region_text = calibration.get_roi_text()
+        region_text = calibration.get_group_description()
         self.view.set_region_display_text(region_text)

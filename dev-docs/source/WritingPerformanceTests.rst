@@ -140,12 +140,12 @@ Jobs that monitor performance
 There is a job in Jenkins (our continuous integration system) that runs
 the performance test suite and generates output that enables us to
 easily monitor timings. The job runs a set of `performance tests on the
-master branch of
-Mantid <http://builds.mantidproject.org/job/master_performancetests2/>`__.
+main branch of
+Mantid <http://builds.mantidproject.org/job/main_performancetests2/>`__.
 This job runs on a machine at the ESS, everytime that changes are merged
 into the Mantid master branch, and stores the timing information in a
 database, also generating HTML output via a `set of python
-scripts <https://github.com/mantidproject/mantid/tree/master/Testing/PerformanceTests>`__.
+scripts <https://github.com/mantidproject/mantid/tree/main/Testing/PerformanceTests>`__.
 
 The timing output of these jobs are typically monitored manually on a
 weekly basis to pick up any notable performance degradation. Although

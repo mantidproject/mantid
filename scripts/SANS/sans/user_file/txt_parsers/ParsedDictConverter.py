@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
-import collections
 
 from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge
 from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, \
@@ -722,14 +721,10 @@ class ParsedDictConverter(IStateParser):
             # Should the user have chosen several values, then the last element is selected
             monitor_n_shift = monitor_n_shift[-1]
 
-            # Determine if the object has the set_monitor_X_offset method
-            set_monitor_4_offset = getattr(state_builder, "set_monitor_4_offset", dict())
-            set_monitor_5_offset = getattr(state_builder, "set_monitor_5_offset", dict())
-
-            if spec_num == 4 and isinstance(set_monitor_4_offset, collections.Callable):
-                state_builder.set_monitor_4_offset(_convert_mm_to_m(monitor_n_shift))
-            elif spec_num == 5 and isinstance(set_monitor_5_offset, collections.Callable):
-                state_builder.set_monitor_5_offset(_convert_mm_to_m(monitor_n_shift))
+            if spec_num == 4:  # All detectors have "M4"
+                state_builder.state.monitor_4_offset = _convert_mm_to_m(monitor_n_shift)
+            elif spec_num == 5 and hasattr(state_builder.state, "monitor_5_offset"):
+                state_builder.state.monitor_5_offset = _convert_mm_to_m(monitor_n_shift)
 
         if TransId.SPEC_4_SHIFT in self._input_dict:
             parse_shift(key_to_parse=TransId.SPEC_4_SHIFT, spec_num=4)
@@ -795,9 +790,6 @@ class ParsedDictConverter(IStateParser):
 
         # The monitor-specific background settings
         _set_background_tof_monitor(state, self._input_dict)
-
-        # Get the wavelength rebin settings
-        _set_wavelength_limits(state, self._input_dict)
         return builder.build()
 
     # We have taken the implementation originally provided, so we can't help the complexity

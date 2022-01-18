@@ -16,8 +16,8 @@
 #include "MantidAlgorithms/CalculatePlaczekSelfScattering2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVec;
 using Mantid::Algorithms::CalculatePlaczekSelfScattering2;

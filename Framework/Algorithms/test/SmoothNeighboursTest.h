@@ -8,7 +8,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/SmoothNeighbours.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rasterize.h"
 #include "MantidKernel/V3D.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <numeric>
 
@@ -133,8 +133,33 @@ public:
     const auto raster = Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
-    constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
+    size_t NUM_ELEMENTS = 0;
+    const double dR = (CYLINDER_RADIUS - CYLINDER_INNER_RADIUS) / static_cast<double>(NUM_ANNULLI);
+    size_t Ni = static_cast<size_t>(CYLINDER_INNER_RADIUS / dR) * 6;
+    for (size_t i = 0; i < NUM_ANNULLI; i++) {
+      Ni += 6;
+      NUM_ELEMENTS += Ni;
+    }
+    NUM_ELEMENTS *= NUM_SLICE;
     simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
+
+    // check to ensure that all points are within the shell of the hollow cylinder
+    // NOTE:
+    // For a centered hollow cylinder, the element_i should have
+    // * x^2 + z^2 < CYLINDER_RADIUS^2
+    // * x^2 + z^2 > CYLINDER_INNER_RADIUS^2
+    // * |y| < 0.5 * CYLINDER_HEIGHT
+    // where (x, y, z) is the element position vector
+    const double Rsquared = CYLINDER_RADIUS * CYLINDER_RADIUS;
+    const double Risquared = CYLINDER_INNER_RADIUS * CYLINDER_INNER_RADIUS;
+    double r, h;
+    for (const auto &pos : raster.position) {
+      r = pos[0] * pos[0] + pos[2] * pos[2];
+      h = std::abs(pos[1]);
+      TS_ASSERT_LESS_THAN_EQUALS(r, Rsquared);
+      TS_ASSERT_LESS_THAN_EQUALS(Risquared, r);
+      TS_ASSERT_LESS_THAN_EQUALS(h, 0.5 * CYLINDER_HEIGHT);
+    }
   }
 
   void test_calculateOffsetCylinder() {
@@ -157,8 +182,65 @@ public:
     const auto raster = Rasterize::calculateHollowCylinder(V3D(0., 0., 1.), hollowCylinder, NUM_SLICE, NUM_ANNULLI);
 
     // all the vector lengths should match
-    constexpr size_t NUM_ELEMENTS = NUM_SLICE * NUM_ANNULLI * (NUM_ANNULLI + 1) * 3;
+    size_t NUM_ELEMENTS = 0;
+    const double dR = (CYLINDER_RADIUS - CYLINDER_INNER_RADIUS) / static_cast<double>(NUM_ANNULLI);
+    size_t Ni = static_cast<size_t>(CYLINDER_INNER_RADIUS / dR) * 6;
+    for (size_t i = 0; i < NUM_ANNULLI; i++) {
+      Ni += 6;
+      NUM_ELEMENTS += Ni;
+    }
+    NUM_ELEMENTS *= NUM_SLICE;
     simpleRasterChecks(raster, hollowCylinder, NUM_ELEMENTS, HOLLOW_CYLINDER_VOLUME);
+  }
+
+  void test_calculateHollowCylinderShell() {
+    // tests a hollow cylinder with a shell of one element size
+    constexpr double ELEMENT_SIZE{5.0e-4}; // 0.5 mm element size
+    constexpr double HEIGHT{1.0};
+    constexpr V3D BASE{0.0, -0.5 * HEIGHT, 0.0};
+    constexpr V3D AXIS{0.0, 1.0, 0.0}; // sym along +Y
+    constexpr double RADIUS{0.3};
+
+    std::shared_ptr<CSGObject> hollowCylinder =
+        ComponentCreationHelper::createHollowCylinder(RADIUS - ELEMENT_SIZE, RADIUS, HEIGHT, BASE, AXIS, "shape");
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, ELEMENT_SIZE);
+
+    const double vol = M_PI * HEIGHT * (RADIUS * RADIUS - (RADIUS - ELEMENT_SIZE) * (RADIUS - ELEMENT_SIZE));
+    simpleRasterChecks(raster, *hollowCylinder, raster.l1.size(), vol);
+  }
+
+  void test_calculateHollowCylinderSingleElement() {
+    // tests a hollow cylinder with one slice and annuli
+    constexpr double ELEMENT_SIZE{5.0e-4}; // 0.5 mm element size
+    constexpr double HEIGHT{1.0};
+    constexpr V3D BASE{0.0, -0.5 * ELEMENT_SIZE, 0.0};
+    constexpr V3D AXIS{0.0, 1.0, 0.0}; // sym along +Y
+    constexpr double RADIUS{0.3};
+
+    std::shared_ptr<CSGObject> hollowCylinder =
+        ComponentCreationHelper::createHollowCylinder(RADIUS - ELEMENT_SIZE, RADIUS, HEIGHT, BASE, AXIS, "shape");
+    // test using the generic calculate function
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, ELEMENT_SIZE);
+
+    const double vol = M_PI * HEIGHT * (RADIUS * RADIUS - (RADIUS - ELEMENT_SIZE) * (RADIUS - ELEMENT_SIZE));
+    simpleRasterChecks(raster, *hollowCylinder, raster.l1.size(), vol);
+  }
+
+  void test_calculateHollowCylinderManyElements() {
+    // tests a hollow cylinder with more slices and annuli
+    constexpr double ELEMENT_SIZE{0.005};
+    constexpr double HEIGHT{0.1};
+    constexpr V3D BASE{0.0, -0.5 * HEIGHT, 0.0};
+    constexpr V3D AXIS{0.0, 1.0, 0.0}; // sym along +Y
+    constexpr double INNER_RADIUS{0.2};
+    constexpr double OUTER_RADIUS{0.3};
+
+    std::shared_ptr<CSGObject> hollowCylinder =
+        ComponentCreationHelper::createHollowCylinder(INNER_RADIUS, OUTER_RADIUS, HEIGHT, BASE, AXIS, "shape");
+    const auto raster = Rasterize::calculate(V3D(0., 0., 1.), *hollowCylinder, ELEMENT_SIZE);
+
+    const double vol = M_PI * HEIGHT * (OUTER_RADIUS * OUTER_RADIUS - INNER_RADIUS * INNER_RADIUS);
+    simpleRasterChecks(raster, *hollowCylinder, raster.l1.size(), vol);
   }
 
   void test_calculateCylinderOnSphere() {

@@ -11,8 +11,8 @@
 #include "MantidAlgorithms/FilterByTime2.h"
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;

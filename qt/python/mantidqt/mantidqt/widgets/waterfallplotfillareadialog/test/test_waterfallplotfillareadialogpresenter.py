@@ -8,54 +8,55 @@
 
 import unittest
 
-from matplotlib.collections import PolyCollection
-from matplotlib.pyplot import figure
-
-from mantid.plots import datafunctions
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from mantidqt.widgets.waterfallplotfillareadialog.presenter import WaterfallPlotFillAreaDialogPresenter
 
 
 class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        self.fig = figure()
-        self.ax = self.fig.add_subplot(111, projection='mantid')
-        self.ax.plot([0, 0], [1, 1])
-        self.ax.plot([0, 1], [1, 2])
+        self.fig = Mock()
+        self.ax = Mock()
 
-        self.ax.set_waterfall(True)
+        self.fig.get_axes.return_value = [self.ax]
 
         view = Mock()
-        self.presenter = WaterfallPlotFillAreaDialogPresenter(fig=self.fig, view=view)
+        with patch("mantidqt.widgets.waterfallplotfillareadialog"
+                   ".presenter.WaterfallPlotFillAreaDialogPresenter.init_view"):
+            self.presenter = WaterfallPlotFillAreaDialogPresenter(fig=self.fig, view=view)
 
-    def test_opening_dialog_calls_init_view(self):
-        self.presenter.init_view = Mock()
-        self.presenter.init_view.assert_called_once()
+    @patch("mantidqt.widgets.waterfallplotfillareadialog"
+                   ".presenter.WaterfallPlotFillAreaDialogPresenter.init_view")
+    def test_opening_dialog_calls_init_view(self, patched_init):
+        self.presenter = WaterfallPlotFillAreaDialogPresenter(fig=self.fig, view=Mock())
+        patched_init.assert_called_once()
 
-    def test_enabling_fill_with_line_colour_creates_fills_that_match_line_colour(self):
+    @patch("mantidqt.widgets.waterfallplotfillareadialog.presenter.datafunctions")
+    def test_enabling_fill_with_line_colour_creates_fills_that_match_line_colour(self, patched_data_func):
         self.presenter.view.enable_fill_group_box.isChecked.return_value = True
         self.presenter.view.use_line_colour_radio_button.isChecked.return_value = True
         self.presenter.set_fill_enabled()
 
-        self.assertTrue(datafunctions.waterfall_fill_is_line_colour(self.ax))
+        patched_data_func.line_colour_fill.assert_called_once_with(self.ax)
 
-    def test_enabling_fill_with_solid_colour_creates_fills_with_one_colour(self):
+    @patch("mantidqt.widgets.waterfallplotfillareadialog.presenter.datafunctions")
+    def test_enabling_fill_with_solid_colour_creates_fills_with_one_colour(self, patched_data_func):
         self.presenter.view.enable_fill_group_box.isChecked.return_value = True
         self.presenter.view.use_line_colour_radio_button.isChecked.return_value = False
-        self.presenter.view.colour_selector_widget.get_color.return_value = "#ff9900"
+        color = "#ff9900"
+        self.presenter.view.colour_selector_widget.get_color.return_value = color
         self.presenter.set_fill_enabled()
 
-        fills = [collection for collection in self.ax.collections if isinstance(collection, PolyCollection)]
-
-        self.assertTrue(fill.get_facecolor() == "#ff9900" for fill in fills)
+        patched_data_func.solid_colour_fill.assert_called_once_with(self.ax, color)
 
     def test_disabling_fill_removes_fill(self):
         self.ax.set_waterfall_fill(True)
+        self.ax.set_waterfall_fill.assert_called_once_with(True)
         self.presenter.view.enable_fill_group_box.isChecked.return_value = False
-        self.presenter.set_fill_enabled()
 
-        self.assertFalse(self.ax.waterfall_has_fill())
+        self.ax.set_waterfall_fill.reset_mock()
+        self.presenter.set_fill_enabled()
+        self.ax.set_waterfall_fill.assert_called_once_with(False)
 
 
 if __name__ == '__main__':

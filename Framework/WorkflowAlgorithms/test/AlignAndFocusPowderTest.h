@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Axis.h"
@@ -119,12 +119,12 @@ public:
     AnalysisDataService::Instance().remove(m_inputWS);
 
     // Test the output
-    // [465] 1934.8418434567402, 3086.0
-    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1934.8418, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[465], 3086.0);
-    // [976] 15079.01917808858: 55032.0
-    TS_ASSERT_DELTA(m_outWS->x(0)[976], 15079.019178, 0.0001);
-    TS_ASSERT_EQUALS(m_outWS->y(0)[976], 55032.0);
+    // [465] 1942.1284, 2498.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1942.1284, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[465], 2498.0);
+    // [974] 15076.563461: 59802.0
+    TS_ASSERT_DELTA(m_outWS->x(0)[974], 15076.563461, 0.0001);
+    TS_ASSERT_EQUALS(m_outWS->y(0)[974], 59802.0);
     AnalysisDataService::Instance().remove(m_outputWS);
   }
 
@@ -171,12 +171,12 @@ public:
     docheckEventInputWksp();
 
     // Test the output
-    // [465] 1934.8418434567402, 3086.0
-    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1934.8418, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[465], 2699.3, 0.1);
-    // [976] 15079.01917808858: 55032.0
-    TS_ASSERT_DELTA(m_outWS->x(0)[976], 15079.019178, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[976], 55549.5, 0.1);
+    // [465] 1942.1284, 2415.9
+    TS_ASSERT_DELTA(m_outWS->x(0)[465], 1942.1284, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[465], 2415.9, 0.1);
+    // [974] 15076.563463: 60043.5
+    TS_ASSERT_DELTA(m_outWS->x(0)[974], 15076.563463, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[974], 60043.5, 0.1);
     AnalysisDataService::Instance().remove(m_outputWS);
   }
 
@@ -637,16 +637,16 @@ public:
     TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 1);
 
     // Maximum of peak near TOF approx. equal to 22,000 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[333], 21990.0502, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[333], 770.2515, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[333], 22011.6726, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[333], 743.4881, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 25,800 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25750.3113, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[398], 1522.3778, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[398], 25780.5763, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[398], 1584.2907, 0.0001);
 
     // Maximum of peak near TOF approx. equal to 42,000 (micro-seconds)
-    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42056.6091, 0.0001);
-    TS_ASSERT_DELTA(m_outWS->y(0)[600], 7283.29652, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->x(0)[600], 42131.1493, 0.0001);
+    TS_ASSERT_DELTA(m_outWS->y(0)[600], 7343.1294, 0.0001);
 
     AnalysisDataService::Instance().remove(m_outputWS);
   }

@@ -26,11 +26,6 @@ Deprecation plans
   ``abins.parameters.sampling`` are no longer in use and should be
   removed in a future release.
 
-- The "SingleCrystal" modules and objects support non-existent
-  functionality and should be removed. They may return when that
-  functionality is added, but it is likely that their interfaces will
-  change in the process.
-
 - The *frequencies_threshold* parameter in
   ``abins.parameters.sampling`` is currently non-functional and should
   be removed until it *is* functional.

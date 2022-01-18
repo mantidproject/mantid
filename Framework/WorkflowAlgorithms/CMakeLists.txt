@@ -36,7 +36,8 @@ set(SRC_FILES
     src/SetupHFIRReduction.cpp
     src/SofTwoThetaTOF.cpp
     src/StepScan.cpp
-    src/WorkflowAlgorithmHelpers.cpp)
+    src/WorkflowAlgorithmHelpers.cpp
+)
 
 set(SRC_UNITY_IGNORE_FILES)
 
@@ -78,7 +79,8 @@ set(INC_FILES
     inc/MantidWorkflowAlgorithms/SetupHFIRReduction.h
     inc/MantidWorkflowAlgorithms/SofTwoThetaTOF.h
     inc/MantidWorkflowAlgorithms/StepScan.h
-    inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h)
+    inc/MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h
+)
 
 set(TEST_FILES
     AlignAndFocusPowderTest.h
@@ -89,17 +91,14 @@ set(TEST_FILES
     ProcessIndirectFitParametersTest.h
     SANSSolidAngleCorrectionTest.h
     SofTwoThetaTOFTest.h
-    StepScanTest.h)
+    StepScanTest.h
+)
 
-set(TEST_PY_FILES
-    EQSANSQ2DTest.py
-    SANSBeamFluxCorrectionTest.py)
+set(TEST_PY_FILES EQSANSQ2DTest.py SANSBeamFluxCorrectionTest.py)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})
-    set_property(GLOBAL APPEND
-                 PROPERTY COVERAGE_SRCS
-                          "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
 
@@ -109,46 +108,39 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
-enable_precompiled_headers(inc/MantidWorkflowAlgorithms/PrecompiledHeader.h
-                           SRC_FILES)
+enable_precompiled_headers(inc/MantidWorkflowAlgorithms/PrecompiledHeader.h SRC_FILES)
 
 # Add the target for this directory
 add_library(WorkflowAlgorithms ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::WorkflowAlgorithms ALIAS WorkflowAlgorithms)
 
-target_include_directories(WorkflowAlgorithms PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc>
-		$<INSTALL_INTERFACE:include/Mantid>
+target_include_directories(
+  WorkflowAlgorithms PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/inc> $<INSTALL_INTERFACE:include/Mantid>
 )
 # Set the name of the generated library
-set_target_properties(WorkflowAlgorithms
-                      PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms)
+set_target_properties(WorkflowAlgorithms PROPERTIES OUTPUT_NAME MantidWorkflowAlgorithms)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-  set_target_properties(WorkflowAlgorithms
-                        PROPERTIES INSTALL_RPATH
-                                   "@loader_path/../Contents/MacOS")
+  set_target_properties(WorkflowAlgorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  set_target_properties(WorkflowAlgorithms
-                        PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
+  set_target_properties(WorkflowAlgorithms PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
 
 # Add to the 'Framework' group in VS
 set_property(TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework")
 
-
-target_link_libraries(WorkflowAlgorithms PUBLIC Mantid::Nexus Mantid::API Mantid::DataObjects PRIVATE Mantid::Kernel Boost::filesystem)
+target_link_libraries(
+  WorkflowAlgorithms
+  PUBLIC Mantid::Nexus Mantid::API Mantid::DataObjects
+  PRIVATE Mantid::Kernel Boost::filesystem
+)
 
 # Add the unit tests directory
 add_subdirectory(test)
 
 # Installation settings
-if (CONDA_BUILD)
-mtd_install_framework_lib(TARGETS WorkflowAlgorithms PLUGIN_LIB)
+if(CONDA_ENV)
+  mtd_install_framework_lib(TARGETS WorkflowAlgorithms PLUGIN_LIB)
 else()
-mtd_install_targets(TARGETS
-                    WorkflowAlgorithms
-                    INSTALL_DIRS
-                    ${PLUGINS_DIR}
-                    ${WORKBENCH_PLUGINS_DIR})
+  mtd_install_targets(TARGETS WorkflowAlgorithms INSTALL_DIRS ${PLUGINS_DIR} ${WORKBENCH_PLUGINS_DIR})
 endif()

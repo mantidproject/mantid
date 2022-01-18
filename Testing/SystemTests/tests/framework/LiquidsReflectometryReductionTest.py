@@ -106,12 +106,88 @@ class LRReflectivityOutputTest(systemtesting.MantidSystemTest):
                 content = fd.read()
                 if content.startswith('# Experiment IPTS-11601 Run 119814'):
                     self._success = True
-            os.remove(output_path)
         else:
             print("Error: expected output file '{}' not found.".format(output_path))
 
     def validate(self):
         return self._success
+
+    def cleanup(self):
+        output_path = get_file_path('lr_output.txt')
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+
+        ws_name = "reflectivity_119814"
+        if mtd.doesExist(ws_name):
+            mtd.remove(ws_name)
+
+
+class LRReflectivityOutputResolutionTest(systemtesting.MantidSystemTest):
+    """
+        Test the reflectivity output algorithm with resolution calculation
+    """
+    def runTest(self):
+        LiquidsReflectometryReduction(RunNumbers=[190367],
+                                      NormalizationRunNumber=0,
+                                      SignalPeakPixelRange=[142, 152],
+                                      SubtractSignalBackground=True,
+                                      SignalBackgroundPixelRange=[139, 155],
+                                      NormFlag=False,
+                                      NormPeakPixelRange=[142, 151],
+                                      NormBackgroundPixelRange=[139, 154],
+                                      SubtractNormBackground=True,
+                                      LowResDataAxisPixelRangeFlag=True,
+                                      LowResDataAxisPixelRange=[70, 178],
+                                      LowResNormAxisPixelRangeFlag=True,
+                                      LowResNormAxisPixelRange=[70, 178],
+                                      TOFRange=[51978.9, 65266.7],
+                                      IncidentMediumSelected='air',
+                                      GeometryCorrectionFlag=False,
+                                      QMin=0.005,
+                                      QStep=0.02,
+                                      AngleOffset=0.01,
+                                      AngleOffsetError=0.001,
+                                      ApplyScalingFactor=False,
+                                      ScalingFactorFile='',
+                                      SlitsWidthFlag=True,
+                                      CropFirstAndLastPoints=False,
+                                      ApplyPrimaryFraction=False,
+                                      OutputWorkspace='reflectivity_190367')
+
+        output_path = get_file_path('lr_output.txt')
+
+        # Remove the output file if it exists
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+
+        LRReflectivityOutput(ReducedWorkspaces=["reflectivity_190367"],
+                             ComputeDQ=True,
+                             OutputFilename=output_path)
+
+        # Find the dQ/Q value in the output file to determine success
+        self._success = False
+        if os.path.isfile(output_path):
+            with open(output_path, 'r') as fd:
+                for line in fd:
+                    if line.startswith("# dQ/Q"):
+                        toks = line.split('=')
+                        dq_over_q = float(toks[1])
+                        if abs(dq_over_q - 0.0273679) < 0.00001:
+                            self._success = True
+        else:
+            print("Error: expected output file '{}' not found.".format(output_path))
+
+    def validate(self):
+        return self._success
+
+    def cleanup(self):
+        output_path = get_file_path('lr_output.txt')
+        if os.path.isfile(output_path):
+            os.remove(output_path)
+
+        ws_name = "reflectivity_190367"
+        if mtd.doesExist(ws_name):
+            mtd.remove(ws_name)
 
 
 class LiquidsReflectometryReductionSimpleErrorTest(systemtesting.MantidSystemTest):

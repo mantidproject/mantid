@@ -21,10 +21,10 @@
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DiffSphere.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::CurveFitting;
 using namespace Mantid::CurveFitting::Algorithms;

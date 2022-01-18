@@ -94,14 +94,6 @@ class ReductionGUI(QMainWindow):
         # Current file name
         self._filename = None
 
-        # Cluster credentials and options
-        self._cluster_details_set = False
-        self._number_of_nodes = 1
-        self._cores_per_node = 16
-        self._compute_resources = ['Fermi']
-        if CAN_REDUCE and hasattr(ConfigService.Instance().getFacility(), "computeResources"):
-            self._compute_resources = ConfigService.Instance().getFacility().computeResources()
-
         # Internal flag for clearing all settings and restarting the application
         self._clear_and_restart = False
 
@@ -382,30 +374,6 @@ class ReductionGUI(QMainWindow):
         self.interface_chk.setEnabled(True)
         self.file_menu.setEnabled(True)
         self.tools_menu.setEnabled(True)
-
-    def cluster_clicked(self):
-        """
-            Submit for parallel reduction
-        """
-        if not self._cluster_details_set:
-            self._cluster_details_dialog()
-
-        if self._interface is not None \
-                and self.general_settings.cluster_user is not None \
-                and self.general_settings.cluster_pass is not None:
-            # Chose a name for the job
-            if self._filename is not None:
-                job_name = os.path.basename(self._filename).strip()
-                toks = os.path.splitext(job_name)
-                job_name = toks[0]
-            else:
-                job_name = ''
-            self._interface.cluster_submit(self.general_settings.cluster_user,
-                                           self.general_settings.cluster_pass,
-                                           resource=self.general_settings.compute_resource,
-                                           nodes=self._number_of_nodes,
-                                           cores_per_node=self._cores_per_node,
-                                           job_name=job_name)
 
     def open_file(self, file_path=None):
         """

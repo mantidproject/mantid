@@ -1,19 +1,22 @@
-###########################################################################
+# ######################################################################################################################
 # Set installation variables
-###########################################################################
-set ( BIN_DIR bin )
-set ( ETC_DIR etc )
-set ( LIB_DIR lib )
-set ( SITE_PACKAGES ${LIB_DIR} )
-set ( PLUGINS_DIR plugins )
+# ######################################################################################################################
+set(BIN_DIR bin)
+set(ETC_DIR etc)
+set(LIB_DIR lib)
+set(SITE_PACKAGES ${LIB_DIR})
+set(PLUGINS_DIR plugins)
 
-set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
-set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
-set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
-set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
+set(WORKBENCH_BIN_DIR ${BIN_DIR})
+set(WORKBENCH_LIB_DIR ${LIB_DIR})
+set(WORKBENCH_SITE_PACKAGES
+    ${LIB_DIR}
+    CACHE PATH "Location of site packages"
+)
+set(WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR})
 
 # Determine the version of macOS that we are running
-# ##############################################################################
+# ######################################################################################################################
 
 # Set the system name (and remove the space)
 execute_process(
@@ -25,10 +28,7 @@ execute_process(
 string(STRIP ${MACOS_VERSION} MACOS_VERSION)
 
 if(MACOS_VERSION VERSION_LESS 10.13)
-  message(
-    FATAL_ERROR
-      "The minimum supported version of Mac OS X is 10.13 (High Sierra)."
-  )
+  message(FATAL_ERROR "The minimum supported version of Mac OS X is 10.13 (High Sierra).")
 endif()
 
 if(MACOS_VERSION VERSION_GREATER 10.13 OR MACOS_VERSION VERSION_EQUAL 10.13)
@@ -49,12 +49,9 @@ set(MACOS_CODENAME
     CACHE INTERNAL ""
 )
 
-message(
-  STATUS "Operating System: Mac OS X ${MACOS_VERSION} (${MACOS_CODENAME})"
-)
+message(STATUS "Operating System: Mac OS X ${MACOS_VERSION} (${MACOS_CODENAME})")
 
-# Enable the use of the -isystem flag to mark headers in Third_Party as system
-# headers
+# Enable the use of the -isystem flag to mark headers in Third_Party as system headers
 set(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 
 # Guess at Qt5 dir according to homebrew locations, unless already specified
@@ -89,26 +86,18 @@ set(DL_ORIGIN_TAG @loader_path)
 if(NOT TARGET mantidpython)
   # TODO path needs to be removed from appropriate script
   configure_file(
-    ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in
-    ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY
+    ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY
   )
 
   add_custom_target(
     mantidpython ALL
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython
             ${PROJECT_BINARY_DIR}/bin/${CMAKE_CFG_INTDIR}/mantidpython
     COMMENT "Generating mantidpython"
   )
-  # Configure install script at the same time. Doing it later causes a warning
-  # from ninja.
-  set(PYTHONHOME
-      "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}"
-  )
-  configure_file(
-    ${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in
-    ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY
-  )
+  # Configure install script at the same time. Doing it later causes a warning from ninja.
+  set(PYTHONHOME "\${INSTALLDIR}/Frameworks/Python.framework/Versions/${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}")
+  configure_file(${CMAKE_MODULE_PATH}/Packaging/osx/mantidpython.in ${CMAKE_BINARY_DIR}/mantidpython_osx_install @ONLY)
   unset(PYTHONHOME)
 endif()
 
@@ -120,27 +109,28 @@ set(LIB_DIR lib)
 set(SITE_PACKAGES lib)
 set(PLUGINS_DIR plugins)
 
-# ##############################################################################
+# ######################################################################################################################
 # Mac-specific installation setup
-# ##############################################################################
+# ######################################################################################################################
 # use homebrew OpenSSL package
 if(NOT OpenSSL_ROOT)
   set(OpenSSL_ROOT /usr/local/opt/openssl)
 endif()
 
 if(NOT HDF5_ROOT)
-    set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!
+  set(HDF5_ROOT /usr/local/opt/hdf5) # Only for homebrew!
 endif()
 
-if(ENABLE_WORKBENCH)
+if(ENABLE_WORKBENCH AND NOT CONDA_BUILD)
   set(CPACK_GENERATOR DragNDrop)
-  set(CMAKE_INSTALL_PREFIX "")
+  set(CMAKE_INSTALL_PREFIX
+      ""
+      CACHE PATH ""
+  )
   # Replace hdiutil command to retry on detach failure
   set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CMAKE_MACOSX_RPATH 1)
-  set(CPACK_DMG_BACKGROUND_IMAGE
-      ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png
-  )
+  set(CPACK_DMG_BACKGROUND_IMAGE ${CMAKE_SOURCE_DIR}/images/osx-bundle-background.png)
   string(REPLACE " " "" CPACK_SYSTEM_NAME ${MACOS_CODENAME})
 
   set(WORKBENCH_BUNDLE MantidWorkbench.app/Contents/)
@@ -151,19 +141,23 @@ if(ENABLE_WORKBENCH)
   set(WORKBENCH_SITE_PACKAGES ${WORKBENCH_BUNDLE}MacOS)
   set(WORKBENCH_PLUGINS_DIR ${WORKBENCH_BUNDLE}PlugIns)
 
-  install(
-    PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
-    DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
-    RENAME mantidpython
-  )
+  if(NOT CONDA_ENV)
+    install(
+      PROGRAMS ${CMAKE_BINARY_DIR}/mantidpython_osx_install
+      DESTINATION ${WORKBENCH_BUNDLE}/MacOS/
+      RENAME mantidpython
+    )
+  endif()
   install(
     FILES ${CMAKE_SOURCE_DIR}/images/mantid_workbench${CPACK_PACKAGE_SUFFIX}.icns
     DESTINATION ${WORKBENCH_BUNDLE}Resources/
+    COMPONENT Runtime
   )
   set(BUNDLES ${INBUNDLE} ${WORKBENCH_BUNDLE})
 
   # Produce script to move icons in finder window to the correct locations
-  configure_file(${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt.in
-                 ${CMAKE_BINARY_DIR}/DMGSetup.scpt @ONLY)
+  configure_file(
+    ${CMAKE_SOURCE_DIR}/installers/MacInstaller/CMakeDMGSetup.scpt.in ${CMAKE_BINARY_DIR}/DMGSetup.scpt @ONLY
+  )
   set(CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_BINARY_DIR}/DMGSetup.scpt)
 endif()

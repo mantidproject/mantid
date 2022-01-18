@@ -10,9 +10,9 @@
 
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SampleValidator.h"
+#include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/Material.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid::Kernel;
 using Mantid::API::SampleValidator;

@@ -40,7 +40,8 @@ public:
 
   void testTwoWildcardRowsIsInvalid() {
     auto table = Table({emptyRow(), emptyRow()});
-    runTestInvalidThetas(table, ThetaValuesValidationError::MultipleWildcards, expectedErrors({0, 1}, {0}));
+    runTestInvalidThetas(table, ThetaValuesValidationError::MultipleWildcards,
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
   void testOneAngleRow() {
@@ -63,12 +64,13 @@ public:
 
   void testTwoNonUniqueAngleRowsIsInvalid() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5"})});
-    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta, expectedErrors({0, 1}, {0}));
+    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta,
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
   void testInvalidAngle() {
     auto table = Table({Cells({"bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {0}));
+    runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::THETA}));
   }
 
   void testValidTransmissionRuns() {
@@ -96,7 +98,7 @@ public:
 
   void testInvalidTransmissionProcessingInstructions() {
     auto table = Table({Cells({"", "", "", "bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {3}));
+    runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::TRANS_SPECTRA}));
   }
 
   void testValidQRange() {
@@ -108,7 +110,8 @@ public:
 
   void testInvalidQRange() {
     auto table = Table({Cells({"", "", "", "", "bad", "bad", "bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {4, 5, 6}));
+    runTestInvalidCells(
+        table, expectedErrors({0}, {LookupRow::Column::QMIN, LookupRow::Column::QMAX, LookupRow::Column::QSTEP}));
   }
 
   void testValidScaleFactor() {
@@ -120,7 +123,7 @@ public:
 
   void testInvalidScaleFactor() {
     auto table = Table({Cells({"", "", "", "", "", "", "", "bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {7}));
+    runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::SCALE}));
   }
 
   void testValidProcessingInstructions() {
@@ -133,7 +136,7 @@ public:
 
   void testInvalidProcessingInstructions() {
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {8}));
+    runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::RUN_SPECTRA}));
   }
 
   void testValidBackgroundProcessingInstructions() {
@@ -146,7 +149,7 @@ public:
 
   void testInvalidBackgroundProcessingInstructions() {
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "bad"})});
-    runTestInvalidCells(table, expectedErrors({0}, {9}));
+    runTestInvalidCells(table, expectedErrors({0}, {LookupRow::Column::BACKGROUND_SPECTRA}));
   }
 
   void testAnglesThatDifferByTolerance() {
@@ -161,7 +164,8 @@ public:
 
   void testAnglesThatDifferByLessThanTolerance() {
     auto table = Table({Cells({"0.5"}), Cells({"0.5009"})});
-    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta, expectedErrors({0, 1}, {0}));
+    runTestInvalidThetas(table, ThetaValuesValidationError::NonUniqueTheta,
+                         expectedErrors({0, 1}, {LookupRow::Column::THETA}));
   }
 
   void testCorrectRowMarkedAsInvalidInMultiRowTable() {

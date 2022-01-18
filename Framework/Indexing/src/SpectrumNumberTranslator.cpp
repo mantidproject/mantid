@@ -44,8 +44,8 @@ template <class MapT, class KeyT> void checkPartitionContainsValue(const MapT &m
 } // namespace
 
 SpectrumNumberTranslator::SpectrumNumberTranslator(std::vector<SpectrumNumber> spectrumNumbers,
-                                                   const Partitioner &partitioner, const PartitionIndex &partition)
-    : m_partition(partition), m_globalSpectrumNumbers(std::move(spectrumNumbers)) {
+                                                   const Partitioner &partitioner, const PartitionIndex &partitionIndex)
+    : m_partition(partitionIndex), m_globalSpectrumNumbers(std::move(spectrumNumbers)) {
   partitioner.checkValid(m_partition);
 
   size_t currentIndex = 0;

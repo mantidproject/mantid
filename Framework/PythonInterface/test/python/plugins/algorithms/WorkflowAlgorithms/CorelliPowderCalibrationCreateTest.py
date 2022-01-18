@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from numpy.testing import assert_allclose
 import unittest
 
 from mantid.api import mtd

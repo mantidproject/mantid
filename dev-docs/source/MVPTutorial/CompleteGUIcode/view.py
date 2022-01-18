@@ -12,7 +12,7 @@ class View(QtWidgets.QWidget):
     plotSignal = QtCore.Signal()
 
     def __init__(self, parent=None):
-        super(View, self).__init__(parent)
+        super().__init__(parent)
 
         grid = QtWidgets.QVBoxLayout(self)
 

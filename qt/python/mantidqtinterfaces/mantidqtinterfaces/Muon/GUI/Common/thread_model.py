@@ -7,6 +7,7 @@
 from qtpy import QtWidgets, QtCore
 from qtpy.QtCore import Signal
 from qtpy.QtCore import Slot
+from mantidqt.utils.async_qt_adaptor import AsyncTaskQtAdaptor
 from mantidqtinterfaces.Muon.GUI.Common.message_box import warning
 
 
@@ -66,12 +67,7 @@ class ThreadModel(QtWidgets.QWidget):
     def __init__(self, model):
         super(ThreadModel, self).__init__()
         self.model = model
-
-        # The ThreadModelWorker wrapping the code to be executed
-        self._worker = ThreadModelWorker(self.model)
-        # The QThread instance on which the execution of the code will be performed
-        self._thread = QtCore.QThread(self)
-
+        self.worker = None
         # callbacks for the .started() and .finished() signals of the worker
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
@@ -80,25 +76,19 @@ class ThreadModel(QtWidgets.QWidget):
         self.check_model_has_correct_attributes()
 
     def check_model_has_correct_attributes(self):
-        if hasattr(self.model, "execute") and hasattr(self.model, "output"):
+        if hasattr(self.model, "execute"):
             return
         raise AttributeError("Please ensure the model passed to ThreadModel has implemented"
-                             " execute() and output() methods")
+                             " execute() method")
 
     def setup_thread_and_start(self):
-        # create the ThreadModelWorker and connect its signals up
-        self._worker.signals.start.connect(self._worker.run)
-        self._worker.signals.started.connect(self.start_slot)
-        self._worker.signals.finished.connect(self.end_slot)
-        self._worker.signals.finished.connect(self.threadWrapperTearDown)
-        self._worker.signals.error.connect(self.warning)
+        # Construct the Async thread
+        self.worker = AsyncTaskQtAdaptor(target=self.model.execute, error_cb=self.warning,
+                                         finished_cb=self.threadWrapperTearDown)
+        self.worker.start()
 
-        # Create the thread and pass it the worker
-        self._thread.start()
-        self._worker.moveToThread(self._thread)
-
-        # start the worker code inside the thread
-        self._worker.signals.start.emit()
+        # trigger the slot for the start of the process
+        self.start_slot()
 
     def start(self):
         # keep this method to maintain consistency with older usages of the ThreadModel
@@ -142,12 +132,7 @@ class ThreadModel(QtWidgets.QWidget):
             self._exception_callback = self._default_exception_callback
 
     def threadWrapperTearDown(self):
-        self._thread.wait()
-        self._thread = QtCore.QThread(self)
-        self._worker.signals.started.disconnect(self.start_slot)
-        self._worker.signals.finished.disconnect(self.end_slot)
-        self._worker.signals.finished.disconnect(self.threadWrapperTearDown)
-        self._worker.signals.error.disconnect(self.warning)
+        self.end_slot()
         self.start_slot = lambda: 0
         self.end_slot = lambda: 0
 

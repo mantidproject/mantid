@@ -138,6 +138,8 @@ protected:
   QColor getShapeFillColor() const;
   /// Add a double property to the shape property browser
   QtProperty *addDoubleProperty(const QString &name) const;
+  /// Show a modal message box
+  virtual void showMessageBox(const QString &message);
 
 private:
   /// Save masks applied to the view but not to the workspace
@@ -153,7 +155,7 @@ protected:
   Activity m_activity;
   /// True if there is a mask not applied to the data workspace
   bool m_hasMaskToApply;
-  QList<Mantid::detid_t> m_detectorsToGroup;
+  std::vector<Mantid::detid_t> m_detectorsToGroup;
 
   QRadioButton *m_masking_on;
   QRadioButton *m_grouping_on;

@@ -1,0 +1,5 @@
+Bugfixes
+########
+
+- FFT's now have y units of intensity.
+- Maxent's now have y units of probability.

@@ -536,6 +536,7 @@ public:
     void loadFunction(QString funStr);
     void saveFunction(const QString &fnName);
     void executeCustomSetupRemove(const QString &name);
+    bool ignoreInvalidData();
     double startX() const;
     void setStartX(double start);
     double endX() const;
@@ -591,7 +592,7 @@ SIP_PYOBJECT defaultBackgroundType();
     double getPeakHeightOf(QString);
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
-    void setPeakFwhmOf(QString, double);
+    void setPeakFwhmOf(QString, double) throw (std::invalid_argument);
     std::string getWidthParameterNameOf(QString);
     std::string getCentreParameterNameOf(QString);
     bool isParameterExplicitlySetOf(QString, std::string);

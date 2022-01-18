@@ -20,6 +20,8 @@ from qtpy.QtGui import QDoubleValidator, QIcon
 from qtpy.QtWidgets import QDialog, QWidget
 
 TREAT_LOG_NEGATIVE_VALUES = 'clip'
+DECIMAL_FORMAT = 'Decimal Format'
+SCIENTIFIC_FORMAT = 'Scientific Format'
 
 
 class PropertiesEditorBase(QDialog):
@@ -155,8 +157,8 @@ class AxisEditor(PropertiesEditorBase):
         if figure_type(canvas.figure) in [FigureType.Surface, FigureType.Wireframe, FigureType.Mesh]:
             self.ui.logBox.hide()
             self.ui.gridBox.hide()
-        self.ui.editor_format.addItem('Decimal Format')
-        self.ui.editor_format.addItem('Scientific Format')
+        self.ui.editor_format.addItem(DECIMAL_FORMAT)
+        self.ui.editor_format.addItem(SCIENTIFIC_FORMAT)
         self.axes = axes
         self.axis_id = axis_id
         self.lim_getter = getattr(axes, 'get_{}lim'.format(axis_id))
@@ -168,8 +170,9 @@ class AxisEditor(PropertiesEditorBase):
 
         self.scale_setter = getattr(axes, 'set_{}scale'.format(axis_id))
         self.nonposkw = 'nonpos' + axis_id
-        # Grid has no direct accessor from the axes
-        self.axis = axes.xaxis if axis_id == 'x' else axes.yaxis
+        # Store the axis for attributes that can't be directly accessed
+        # from axes object (e.g. grid and tick parameters).
+        self.axis = getattr(axes, '{}axis'.format(axis_id))
 
     def create_model(self):
         memento = AxisEditorModel()
@@ -178,9 +181,9 @@ class AxisEditor(PropertiesEditorBase):
         memento.log = getattr(self.axes, 'get_{}scale'.format(self.axis_id))() != 'linear'
         memento.grid = self.axis.grid_on() if hasattr(self.axis, 'grid_on') else self.axis._major_tick_kw.get('gridOn', False)
         if type(self.axis.get_major_formatter()) is ScalarFormatter:
-            memento.formatter = 'Decimal Format'
+            memento.formatter = DECIMAL_FORMAT
         elif type(self.axis.get_major_formatter()) is LogFormatterSciNotation:
-            memento.formatter = 'Scientific Format'
+            memento.formatter = SCIENTIFIC_FORMAT
         self._fill(memento)
 
     def changes_accepted(self):
@@ -226,11 +229,11 @@ class AxisEditor(PropertiesEditorBase):
 
     def _set_tick_format(self):
         formatter = self.ui.editor_format.currentText()
-        if formatter == 'Decimal Format':
+        if formatter == DECIMAL_FORMAT:
             fmt = ScalarFormatter(useOffset=True)
-        elif formatter == 'Scientific Format':
+        elif formatter == SCIENTIFIC_FORMAT:
             fmt = LogFormatterSciNotation()
-        getattr(self.axes, 'get_{}axis'.format(self.axis_id))().set_major_formatter(fmt)
+        getattr(self.axes, '{}axis'.format(self.axis_id)).set_major_formatter(fmt)
         return
 
 

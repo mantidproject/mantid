@@ -207,28 +207,6 @@ std::string QtInstrumentView::getText(QLineEdit const &lineEdit) const { return 
 
 std::string QtInstrumentView::getText(QComboBox const &box) const { return box.currentText().toStdString(); }
 
-QString QtInstrumentView::messageFor(InstrumentParameterTypeMissmatch const &typeError) const {
-  return QString::fromStdString(typeError.parameterName()) + " should hold an " +
-         QString::fromStdString(typeError.expectedType()) + " value but does not.\n";
-}
-
-template <typename T, typename StringConverter>
-std::string toCsv(std::vector<T> const &values, StringConverter toString) {
-  std::vector<std::string> valuesAsStrings;
-  valuesAsStrings.reserve(values.size());
-  std::transform(values.cbegin(), values.cend(), std::back_inserter(valuesAsStrings), toString);
-  return boost::algorithm::join(valuesAsStrings, ", ");
-}
-
-QString QtInstrumentView::messageFor(std::vector<MissingInstrumentParameterValue> const &missingValues) const {
-  auto missingNamesCsv = toCsv(missingValues, [](const MissingInstrumentParameterValue &missingValue) -> std::string {
-    return missingValue.parameterName();
-  });
-
-  return QString::fromStdString(missingNamesCsv) + QString(missingValues.size() == 1 ? " is" : " are") +
-         " not set in the instrument parameter file but should be.\n";
-}
-
 int QtInstrumentView::getMonitorIndex() const { return m_ui.I0MonitorIndex->value(); }
 
 void QtInstrumentView::setMonitorIndex(int value) { m_ui.I0MonitorIndex->setValue(value); }

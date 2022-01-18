@@ -422,32 +422,32 @@ void InstrumentWidgetMaskTab::setActivity() {
     m_activeTool->setText("Tool: Navigation");
   } else if (m_pointer->isChecked()) {
     m_activity = Select;
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Shape editing. " + whatIsBeingSelected);
   } else if (m_ellipse->isChecked()) {
     m_activity = DrawEllipse;
     m_instrWidget->getSurface()->startCreatingShape2D("ellipse", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Ellipse. " + whatIsBeingSelected);
   } else if (m_rectangle->isChecked()) {
     m_activity = DrawRectangle;
     m_instrWidget->getSurface()->startCreatingShape2D("rectangle", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Rectangle. " + whatIsBeingSelected);
   } else if (m_ring_ellipse->isChecked()) {
     m_activity = DrawEllipticalRing;
     m_instrWidget->getSurface()->startCreatingShape2D("ring ellipse", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Elliptical ring. " + whatIsBeingSelected);
   } else if (m_ring_rectangle->isChecked()) {
     m_activity = DrawRectangularRing;
     m_instrWidget->getSurface()->startCreatingShape2D("ring rectangle", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Rectangular ring. " + whatIsBeingSelected);
   } else if (m_sector->isChecked()) {
     m_activity = DrawSector;
     m_instrWidget->getSurface()->startCreatingShape2D("sector", borderColor, fillColor);
-    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::DrawRegularMode);
+    m_instrWidget->getSurface()->setInteractionMode(ProjectionSurface::EditShapeMode);
     m_activeTool->setText("Tool: Sector. " + whatIsBeingSelected);
 
   } else if (m_free_draw->isChecked()) {
@@ -498,7 +498,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
     if (m_pixel->isChecked()) {
       Mantid::detid_t detId = actor.getDetID(pickID);
       m_detectorsToGroup.clear();
-      m_detectorsToGroup.append(detId);
+      m_detectorsToGroup.push_back(detId);
     } else if (m_tube->isChecked()) {
       if (!componentInfo.hasParent(pickID)) {
         return;
@@ -506,8 +506,7 @@ void InstrumentWidgetMaskTab::singlePixelPicked(size_t pickID) {
       parent = componentInfo.parent(pickID);
       const auto dets = actor.getDetIDs(componentInfo.detectorsInSubtree(parent));
       m_detectorsToGroup.clear();
-      for (auto det : dets)
-        m_detectorsToGroup.append(det);
+      std::copy(dets.cbegin(), dets.cend(), std::back_inserter(m_detectorsToGroup));
     }
   }
 
@@ -792,6 +791,10 @@ void InstrumentWidgetMaskTab::saveInvertedMaskToCalFile() { saveMaskingToCalFile
 
 void InstrumentWidgetMaskTab::saveMaskToTable() { saveMaskingToTableWorkspace(false); }
 
+void InstrumentWidgetMaskTab::showMessageBox(const QString &message) {
+  QMessageBox::information(this, "GroupDetectors Error", message, "OK");
+}
+
 /**
  * Extract selected detectors to a new workspace
  */
@@ -800,18 +803,22 @@ void InstrumentWidgetMaskTab::extractDetsToWorkspace() {
   std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
   const auto &actor = m_instrWidget->getInstrumentActor();
-  QList<int> detectorIDs = actor.getDetIDs(dets);
+  auto detectorIDs = actor.getDetIDs(dets);
   if (m_pixel->isChecked() || m_tube->isChecked())
-    detectorIDs.append(m_detectorsToGroup);
+    detectorIDs.insert(detectorIDs.end(), m_detectorsToGroup.cbegin(), m_detectorsToGroup.cend());
   DetXMLFile mapFile(detectorIDs);
   std::string fname = mapFile();
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
     auto alg = AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", workspaceName);
-    alg->setPropertyValue("MapFile", fname);
-    alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
-    alg->execute();
+    try {
+      alg->setPropertyValue("InputWorkspace", workspaceName);
+      alg->setPropertyValue("MapFile", fname);
+      alg->setPropertyValue("OutputWorkspace", workspaceName + "_selection");
+      alg->execute();
+    } catch (std::exception &e) {
+      showMessageBox(e.what());
+    }
   }
   QApplication::restoreOverrideCursor();
 }
@@ -823,19 +830,23 @@ void InstrumentWidgetMaskTab::sumDetsToWorkspace() {
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
   std::vector<size_t> dets;
   m_instrWidget->getSurface()->getMaskedDetectors(dets);
-  QList<int> detectorIDs = m_instrWidget->getInstrumentActor().getDetIDs(dets);
+  auto detectorIDs = m_instrWidget->getInstrumentActor().getDetIDs(dets);
   if (m_pixel->isChecked() || m_tube->isChecked())
-    detectorIDs.append(m_detectorsToGroup);
+    detectorIDs.insert(detectorIDs.end(), m_detectorsToGroup.cbegin(), m_detectorsToGroup.cend());
   DetXMLFile mapFile(detectorIDs, DetXMLFile::Sum);
   std::string fname = mapFile();
 
   if (!fname.empty()) {
     std::string workspaceName = m_instrWidget->getWorkspaceName().toStdString();
     auto alg = AlgorithmManager::Instance().create("GroupDetectors");
-    alg->setPropertyValue("InputWorkspace", workspaceName);
-    alg->setPropertyValue("MapFile", fname);
-    alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
-    alg->execute();
+    try {
+      alg->setPropertyValue("InputWorkspace", workspaceName);
+      alg->setPropertyValue("MapFile", fname);
+      alg->setPropertyValue("OutputWorkspace", workspaceName + "_sum");
+      alg->execute();
+    } catch (std::exception &e) {
+      showMessageBox(e.what());
+    }
   }
   QApplication::restoreOverrideCursor();
 }

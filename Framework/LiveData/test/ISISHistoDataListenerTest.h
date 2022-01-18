@@ -13,10 +13,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidLiveData/ISIS/FakeISISHistoDAE.h"
 #include "MantidLiveData/ISIS/ISISHistoDataListener.h"
-#include "MantidTestHelpers/FacilityHelper.h"
 
 #include <cxxtest/TestSuite.h>
 

@@ -101,8 +101,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter._on_worker_success("info")
 
         self.assertEqual(1, self.view.remove_all.call_count)
-        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100, 1000, True)
-        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 100, 0.05, True)
+        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 50, 600, True)
+        self.view.add_table_row.assert_any_call("bankOrRunNumber", "bankOrRunNumber", False, False, 50, 0.02, True)
 
     @patch(dir_path + ".data_presenter.logger")
     def test_worker_success_invalid_filename(self, mock_logger):
@@ -116,7 +116,7 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.view.remove_all.call_count)
         self.assertEqual(2, self.view.add_table_row.call_count)
-        self.view.add_table_row.assert_any_call("invalid", "N/A", False, False, 100, 1000, True)
+        self.view.add_table_row.assert_any_call("invalid", "N/A", False, False, 50, 600, True)
         self.assertEqual(2, mock_logger.warning.call_count)
 
     @patch(dir_path + ".data_presenter.logger")
@@ -131,22 +131,23 @@ class FittingDataPresenterTest(unittest.TestCase):
 
         self.assertEqual(1, self.view.remove_all.call_count)
         self.assertEqual(2, self.view.add_table_row.call_count)
-        self.view.add_table_row.assert_any_call("10", "2", False, False, 100, 1000, True)
-        self.view.add_table_row.assert_any_call("20", "1", False, False, 100, 1000, True)
+        self.view.add_table_row.assert_any_call("10", "2", False, False, 50, 600, True)
+        self.view.add_table_row.assert_any_call("20", "1", False, False, 50, 600, True)
         self.assertEqual(2, mock_logger.notice.call_count)
 
     def test_remove_workspace_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.remove_workspace.side_effect = model_dict.pop("name1")
+        self.model.get_all_workspace_names.return_value = ["name1", "name2"]
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.plot_removed_notifier = mock.MagicMock()
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.remove_workspace("name1")
 
-        self.assertEqual({"name2": self.ws2}, model_dict)
+        self.model.remove_workspace.assert_called_once_with("name1")
         self.assertEqual({"name2": 0}, self.presenter.row_numbers)
-        self.assertEqual(1, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
 
     def test_remove_workspace_not_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
@@ -161,18 +162,21 @@ class FittingDataPresenterTest(unittest.TestCase):
     def test_rename_workspace_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.get_all_workspace_names.return_value = ["name1", "name2", "new"] # just return all so has no effect
         # lambda function to replace dict with new key and same ordering as before
-        self.model.update_workspace_name = lambda old, new: model_dict.update(
+        self.model.update_workspace_name.side_effect = lambda old, new: model_dict.update(
             {(key if key != old else new): val for key, val in (list(model_dict.items()), model_dict.clear())[0]})
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.rename_workspace("name1", "new")
+        # ADS rename always accompanied by replace so call that as well here
+        self.presenter.replace_workspace("new", self.ws1)
         self.assertEqual({"new": self.ws1, "name2": self.ws2}, model_dict)
         self.assertTrue("new" in self.presenter.row_numbers)
         self.assertFalse("name1" == self.presenter.row_numbers)
         self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
-        self.model.update_log_workspace_group.assert_called_once()
+        self.model.update_workspace_name.assert_called_once()
 
     def test_rename_workspace_not_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
@@ -191,29 +195,27 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.model.update_log_workspace_group.assert_not_called()
 
     def test_remove_all_tracked_workspaces(self):
-        model_dict = {"name1": self.ws1, "name2": self.ws2}
-        self.model.get_loaded_workspaces.return_value = model_dict
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter._remove_all_tracked_workspaces()
 
-        self.assertEqual({}, model_dict)
         self.assertEqual({}, self.presenter.row_numbers)
         self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
-        self.model.clear_logs.assert_called_once()
+        self.model.delete_workspaces.assert_called_once()
 
     def test_replace_workspace_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
         self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.get_all_workspace_names.return_value = ["name1", "name2"]
         self.presenter.row_numbers = {"name1": 0, "name2": 1}
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter.replace_workspace("name1", self.ws3)
 
-        self.assertEqual({"name1": self.ws3, "name2": self.ws2}, model_dict)
         self.assertTrue("name1" in self.presenter.row_numbers)
         self.assertTrue("name2" in self.presenter.row_numbers)
+        self.model.replace_workspace.assert_called_once_with("name1", self.ws3)
 
     def test_replace_workspace_not_tracked(self):
         model_dict = {"name1": self.ws1, "name2": self.ws2}
@@ -226,38 +228,43 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.assertEqual({"name1": 0, "name2": 1}, self.presenter.row_numbers)
 
     def test_removing_selected_rows(self):
+        def removeWorkspaceIfPresent(loaded_ws_name):
+            model_dict.pop(loaded_ws_name, "")
+            return model_dict.values()
+
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
         self.presenter.row_numbers["name1"] = 0
         self.presenter.row_numbers["name2"] = 1
         self.presenter.row_numbers["name3"] = 2
         model_dict = {"name1": self.ws1, "name2": self.ws2, "name3": self.ws3}
         self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.delete_workspace.side_effect = removeWorkspaceIfPresent
+        self.model.delete_workspace.return_value = ["name1", "name2"]
         self.view.remove_selected.return_value = [0, 2]
         self.presenter.plot_removed_notifier = mock.MagicMock()
         self.presenter.plot_added_notifier = mock.MagicMock()
         self.presenter.all_plots_removed_notifier = mock.MagicMock()
 
         self.presenter._remove_selected_tracked_workspaces()
+        self.presenter._handle_table_cell_changed(0, 2)
 
         self.assertEqual(1, self.view.remove_selected.call_count)
         test_dict = data_presenter.TwoWayRowDict()
         test_dict["name2"] = 0
         self.assertEqual(self.presenter.row_numbers, test_dict)
-        self.assertEqual(model_dict, {"name2": self.ws2})
-        self.assertEqual(2, self.presenter.plot_removed_notifier.notify_subscribers.call_count)
+        self.assertEqual(self.model.delete_workspace.call_count,2)
+        self.assertEqual(1, self.presenter.all_plots_removed_notifier.notify_subscribers.call_count)
         self.assertEqual(1, self.presenter.plot_added_notifier.notify_subscribers.call_count)
-        self.model.remove_log_rows.assert_called_once_with(self.view.remove_selected())
 
     def test_handle_table_cell_changed_checkbox_ticked(self):
         mocked_table_item = mock.MagicMock()
         self.view.get_item_checked.side_effect = _get_item_checked_mock
-        mocked_table_item.checkState.return_value = 2
         self.view.get_table_item.return_value = mocked_table_item
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
         self.presenter.row_numbers["name1"] = 0
         self.presenter.row_numbers["name2"] = 1
-        model_dict = {"name1": self.ws1, "name2": self.ws2}
-        self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.get_active_ws.return_value = self.ws1
+        self.model.get_active_ws_name.return_value = "name1"
         self.presenter.plot_added_notifier = mock.MagicMock()
         self.presenter.plot_removed_notifier = mock.MagicMock()
 
@@ -272,8 +279,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
         self.presenter.row_numbers["name1"] = 0
         self.presenter.row_numbers["name2"] = 1
-        model_dict = {"name1": self.ws1, "name2": self.ws2}
-        self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.get_active_ws.return_value = self.ws1
+        self.model.get_active_ws_name.return_value = "name1"
         self.presenter.plot_added_notifier = mock.MagicMock()
         self.presenter.plot_removed_notifier = mock.MagicMock()
 
@@ -290,8 +297,8 @@ class FittingDataPresenterTest(unittest.TestCase):
         self.presenter.row_numbers = data_presenter.TwoWayRowDict()
         self.presenter.row_numbers["name1"] = 0
         self.presenter.row_numbers["name2"] = 1
-        model_dict = {"name1": self.ws1, "name2": self.ws2}
-        self.model.get_loaded_workspaces.return_value = model_dict
+        self.model.get_active_ws.return_value = self.ws1
+        self.model.get_active_ws_name.return_value = "name1"
         self.presenter.plot_added_notifier = mock.MagicMock()
         self.presenter.plot_removed_notifier = mock.MagicMock()
 

@@ -7,10 +7,12 @@
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
 from mantid.api import IFunction1D, FunctionFactory
+from mantid.kernel import PhysicalConstants
+
+import numpy as np
 
 
 class Redfield(IFunction1D):
-
     def category(self):
         return "Muon\\MuonModelling"
 
@@ -24,8 +26,8 @@ class Redfield(IFunction1D):
         A0 = self.getParameterValue("A0")
         Hloc = self.getParameterValue("Hloc")
         tau = self.getParameterValue("Tau")
-        gmu = 0.01355342
-        return A0 * 2 * (gmu * Hloc) ** 2 * tau / (1 + (gmu * x * tau) ** 2)
+        gmu = PhysicalConstants.MuonGyromagneticRatio
+        return A0 * 2 * np.power((gmu * Hloc), 2) * tau / (1 + np.power((gmu * x * tau), 2))
 
 
 FunctionFactory.subscribe(Redfield)

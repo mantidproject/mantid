@@ -203,6 +203,20 @@ public:
       newInstrumentWindowName The new title of the window
 %End
 
+  bool isThreadRunning();
+%Docstring
+  bool isThreadRunning()
+  ----------------------
+  Return whether the instrument loading thread is still executing.
+%End
+
+  void waitForThread() /ReleaseGIL/;
+%Docstring
+  void waitForThread()
+  --------------------
+  Blocks until the instrument loading thread is finished.
+%End
+
 };
 
 class InstrumentWidgetEncoder {

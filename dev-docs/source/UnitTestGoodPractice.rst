@@ -153,7 +153,7 @@ How do I get a workspace filled with data?
     Firstly you want to think about how much data you really need, unit
     tests need to be fast so you don't want too much data.
     Secondly you should use and extend helper classes (like
-    `1 <https://github.com/mantidproject/mantid/blob/master/Framework/TestHelpers/inc/MantidTestHelpers/WorkspaceCreationHelper.h>`__)
+    `1 <https://github.com/mantidproject/mantid/blob/main/Framework/TestHelpers/inc/MantidTestHelpers/WorkspaceCreationHelper.h>`__)
     to provide the workspaces for you. Keep things as generic as you can
     and it will help you and others for other tests.
     More details of this will be provided at `Testing Utilities <TestingUtilities>`__.
@@ -171,7 +171,7 @@ What if it **really** needs a file
     file.
     Do not use a relative path to a file
     Used the `Scoped
-    File <https://github.com/mantidproject/mantid/blob/master/Framework/TestHelpers/inc/MantidTestHelpers/ScopedFileHelper.h>`__
+    File <https://github.com/mantidproject/mantid/blob/main/Framework/TestHelpers/inc/MantidTestHelpers/ScopedFileHelper.h>`__
     helper, to ensure that resources are cleaned-up in an exception safe
     manner.
 

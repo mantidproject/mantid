@@ -102,10 +102,10 @@ class PeaksViewerPresenter:
             logger.warning("PeaksViewer: Unknown event detected: {}".format(event))
 
     def add_peak(self, pos):
-        self.model.add_peak(pos, self._view.sliceinfo.frame)
+        self.model.add_peak(pos, self._view.frame)
 
     def delete_peak(self, pos):
-        self.model.delete_peak(pos, self._view.sliceinfo.frame)
+        self.model.delete_peak(pos, self._view.frame)
 
     def _clear_peaks(self):
         """Clear all peaks from this view"""
@@ -120,7 +120,7 @@ class PeaksViewerPresenter:
           - Draw overlays.
         """
         self._clear_peaks()
-        self.model.draw_peaks(self._view.sliceinfo, self._view.painter)
+        self.model.draw_peaks(self._view.sliceinfo, self._view.painter, self._view.frame)
 
     def _peak_selected(self):
         """
@@ -133,7 +133,7 @@ class PeaksViewerPresenter:
         # Two step:
         #   - first update slice point so we are in the correct plane
         #   - find and set limits required to "zoom" to the selected peak
-        self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo))
+        self._view.set_slicepoint(self.model.slicepoint(selected_index, self._view.sliceinfo, self._view.frame))
         self._view.set_axes_limits(*self.model.viewlimits(selected_index), auto_transform=False)
 
     def _peaks_list_changed(self):
@@ -248,12 +248,20 @@ class PeaksViewerCollectionPresenter:
         child_presenters = self._child_presenters
         presenter_to_remove = None
         for child in child_presenters:
-            if child.model.peaks_workspace.name() == name:
+            if child.model.get_peaks_workspace_name() == name:
                 presenter_to_remove = child
                 child.notify(PeaksViewerPresenter.Event.ClearPeaks)
                 index = self._view.remove_peaksviewer(child.view)
 
         child_presenters.remove(presenter_to_remove)
+
+        # update combo box for add/remove peak actions
+        self._actions_view.set_peaksworkspace(self.workspace_names())
+
+        # hide if no peak tables remain
+        if not child_presenters:
+            self._view.hide()
+
         return index
 
     def workspace_names(self):
@@ -262,7 +270,7 @@ class PeaksViewerCollectionPresenter:
         """
         names = []
         for presenter in self._child_presenters:
-            names.append(presenter.model.peaks_workspace.name())
+            names.append(presenter.model.get_peaks_workspace_name())
 
         return names
 

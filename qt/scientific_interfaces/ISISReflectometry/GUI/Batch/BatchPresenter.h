@@ -7,15 +7,15 @@
 #pragma once
 
 #include "Common/DllConfig.h"
+#include "GUI/Common/IJobRunner.h"
 #include "GUI/Event/IEventPresenter.h"
 #include "GUI/Experiment/IExperimentPresenter.h"
 #include "GUI/Instrument/IInstrumentPresenter.h"
 #include "GUI/Preview/IPreviewPresenter.h"
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Save/ISavePresenter.h"
-#include "IBatchJobRunner.h"
+#include "IBatchJobManager.h"
 #include "IBatchPresenter.h"
-#include "IBatchView.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
@@ -31,12 +31,12 @@ class IBatchView;
     functionality defined by the interface IBatchPresenter.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL BatchPresenter : public IBatchPresenter,
-                                                      public BatchViewSubscriber,
+                                                      public JobRunnerSubscriber,
                                                       public MantidQt::API::WorkspaceObserver {
 public:
   /// Constructor
-  BatchPresenter(IBatchView *view, Batch model, std::unique_ptr<IRunsPresenter> runsPresenter,
-                 std::unique_ptr<IEventPresenter> eventPresenter,
+  BatchPresenter(IBatchView *view, std::unique_ptr<Batch> model, IJobRunner *jobRunner,
+                 std::unique_ptr<IRunsPresenter> runsPresenter, std::unique_ptr<IEventPresenter> eventPresenter,
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter, std::unique_ptr<IPreviewPresenter> previewPresenter);
@@ -45,11 +45,11 @@ public:
   BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
   BatchPresenter &operator=(BatchPresenter &&rhs) = delete;
 
-  // BatchViewSubscriber overrides
+  // JobRunnerSubscriber overrides
   void notifyBatchComplete(bool error) override;
   void notifyBatchCancelled() override;
-  void notifyAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
-  void notifyAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr algorithm) override;
+  void notifyAlgorithmStarted(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm) override;
+  void notifyAlgorithmComplete(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm) override;
   void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) override;
 
   // IBatchPresenter overrides
@@ -71,6 +71,7 @@ public:
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyReductionPaused() override;
+  void notifyBatchLoaded() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
@@ -84,7 +85,7 @@ public:
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
-  AlgorithmRuntimeProps rowProcessingProperties() const override;
+  std::unique_ptr<MantidQt::API::IAlgorithmRuntimeProps> rowProcessingProperties() const override;
 
   // WorkspaceObserver overrides
   void postDeleteHandle(const std::string &wsName) override;
@@ -104,6 +105,7 @@ private:
   void settingsChanged();
 
   IBatchView *m_view;
+  std::unique_ptr<Batch> m_model;
   IMainWindowPresenter *m_mainPresenter;
   std::unique_ptr<IRunsPresenter> m_runsPresenter;
   std::unique_ptr<IEventPresenter> m_eventPresenter;
@@ -112,13 +114,14 @@ private:
   std::unique_ptr<ISavePresenter> m_savePresenter;
   std::unique_ptr<IPreviewPresenter> m_previewPresenter;
   bool m_unsavedBatchFlag;
+  IJobRunner *m_jobRunner;
 
   friend class Encoder;
   friend class Decoder;
   friend class CoderCommonTester;
 
 protected:
-  std::unique_ptr<IBatchJobRunner> m_jobRunner;
+  std::unique_ptr<IBatchJobManager> m_jobManager;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -7,9 +7,10 @@
 import mantid.simpleapi as mantid
 
 from mantidqtinterfaces.Muon.GUI.Common import thread_model
-from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, convert_to_field, \
+from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_PaddingAndApodization, run_FFT, \
     extract_single_spec
 from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, get_fft_workspace_group_name, \
     get_group_or_pair_from_name
 import re
@@ -181,14 +182,18 @@ class FFTPresenter(object):
 
         fft_parameters = self.get_fft_inputs(real_workspace_input, imaginary_workspace_input, imaginary_workspace_index)
 
-        frequency_domain_workspace = convert_to_field(run_FFT(fft_parameters))
+        frequency_domain_workspace = run_FFT(fft_parameters)
         self.add_fft_workspace_to_ADS(real_workspace_padding_parameters['InputWorkspace'],
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
                                       frequency_domain_workspace)
+        # clean up
+        remove_ws(frequency_domain_workspace)
+        remove_ws(real_workspace_input)
 
     def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace_label):
         run = re.search('[0-9]+', input_workspace).group()
         fft_workspace = mantid.AnalysisDataService.retrieve(fft_workspace_label)
+        fft_workspace.setYUnitLabel("Intensity")
         Im_run = ""
         if imaginary_input_workspace != "":
             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
@@ -203,15 +208,16 @@ class FFTPresenter(object):
 
         for spec_type in list(spectra.keys()):
             extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type], fft_workspace_name + spec_type)
-
             self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im)
 
             muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws)
             muon_workspace_wrapper.show(directory + fft_workspace_name + spec_type)
+            # clean up
+            remove_ws(fft_workspace_name)
 
         # This is a small hack to get the output name to a location where it can be part of the calculation finished
         # signal.
-        self._output_workspace_name = fft_workspace_name + '_mod'
+        self._output_workspace_name = self.load._frequency_context.get_ws_name(fft_workspace_name + '_mod')
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

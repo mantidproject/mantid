@@ -238,6 +238,13 @@ public:
     verifyAndClearExpectations();
   }
 
+  void testNotifyBatchLoaded() {
+    auto presenter = makePresenter(m_view, twoGroupsWithMixedRowsModel());
+    EXPECT_CALL(m_view, jobs()).Times(1);
+    presenter.notifyBatchLoaded();
+    verifyAndClearExpectations();
+  }
+
 private:
   ReductionJobs oneGroupWithTwoRowsWithSrcAndDestTransRuns() {
     auto reductionJobs = ReductionJobs();

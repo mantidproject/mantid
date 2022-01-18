@@ -52,6 +52,9 @@ def _bin_dirs():
     # conda layout
     yield os.path.dirname(sys.executable)
 
+    # conda windows layout
+    yield os.path.join(os.path.dirname(sys.executable), 'Library', 'bin')
+
     # iterate over the PYTHONPATH, to scan all possible bin dirs
     for path in sys.path:
         yield path
@@ -111,7 +114,8 @@ from mantid import dataobjects as _dataobjects  # noqa: F401, E402
 from mantid.kernel._aliases import *  # noqa: F401, E402
 from mantid.api._aliases import *  # noqa: F401, E402
 
-# Make the version string accessible in the standard way
+# Make the version string and info accessible in the standard way
 from mantid.kernel import version_str as _version_str  # noqa: E402
+from mantid.kernel import version    # noqa: F401, E402
 
 __version__ = _version_str()

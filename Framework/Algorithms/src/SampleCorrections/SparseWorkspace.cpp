@@ -137,9 +137,8 @@ SparseWorkspace::SparseWorkspace(const API::MatrixWorkspace &modelWS, const size
   }
 }
 
-SparseWorkspace::SparseWorkspace(const SparseWorkspace &other) : Workspace2D(other) {
-  m_gridDef = std::make_unique<Algorithms::DetectorGridDefinition>(*other.m_gridDef);
-}
+SparseWorkspace::SparseWorkspace(const SparseWorkspace &other)
+    : Workspace2D(other), m_gridDef(std::make_unique<Algorithms::DetectorGridDefinition>(*other.m_gridDef)) {}
 
 /** Find the latitude and longitude intervals the detectors
  *  of the given workspace span as seen from the sample.
@@ -149,25 +148,26 @@ SparseWorkspace::SparseWorkspace(const SparseWorkspace &other) : Workspace2D(oth
  */
 std::tuple<double, double, double, double> SparseWorkspace::extremeAngles(const API::MatrixWorkspace &ws) {
   const auto &spectrumInfo = ws.spectrumInfo();
-  const auto refFrame = ws.getInstrument()->getReferenceFrame();
   double minLat = std::numeric_limits<double>::max();
   double maxLat = std::numeric_limits<double>::lowest();
   double minLong = std::numeric_limits<double>::max();
   double maxLong = std::numeric_limits<double>::lowest();
   for (size_t i = 0; i < ws.getNumberHistograms(); ++i) {
-    double lat, lon;
-    std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
-    if (lat < minLat) {
-      minLat = lat;
-    }
-    if (lat > maxLat) {
-      maxLat = lat;
-    }
-    if (lon < minLong) {
-      minLong = lon;
-    }
-    if (lon > maxLong) {
-      maxLong = lon;
+    if (spectrumInfo.hasDetectors(i)) {
+      double lat, lon;
+      std::tie(lat, lon) = spectrumInfo.geographicalAngles(i);
+      if (lat < minLat) {
+        minLat = lat;
+      }
+      if (lat > maxLat) {
+        maxLat = lat;
+      }
+      if (lon < minLong) {
+        minLong = lon;
+      }
+      if (lon > maxLong) {
+        maxLong = lon;
+      }
     }
   }
   return std::make_tuple(minLat, maxLat, minLong, maxLong);
@@ -318,7 +318,6 @@ HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const doub
 
   auto h = histogram(0);
 
-  const auto refFrame = getInstrument()->getReferenceFrame();
   std::array<double, 4> distances;
   for (size_t i = 0; i < 4; ++i) {
     double detLat, detLong;
@@ -342,14 +341,13 @@ HistogramData::Histogram SparseWorkspace::interpolateFromDetectorGrid(const doub
  */
 HistogramData::HistogramE SparseWorkspace::esq(const HistogramData::HistogramE &e) const { return e * e; }
 
-/** Square the error values in a histogram
+/** Square root the error values in a histogram
  *  @param e A HistgramE object
  *  @return A HistogramE object containing the square root values
  */
 HistogramData::HistogramE SparseWorkspace::esqrt(HistogramData::HistogramE e) const {
-  auto &derived = e;
   std::transform(e.cbegin(), e.cend(), e.begin(), [](double f) -> double { return sqrt(f); });
-  return derived;
+  return e;
 }
 
 /** Spatially interpolate a single histogram from nearby detectors using

@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisElwinTab.h"
+#include "MantidQtWidgets/Common/AlgorithmRuntimeProps.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -156,9 +157,9 @@ IndirectDataAnalysisElwinTab::IndirectDataAnalysisElwinTab(QWidget *parent)
   connect(m_uiForm.inputChoice, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
 
   // data selected changes
-  connect(m_uiForm.page, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
+  connect(m_uiForm.file, SIGNAL(filesFoundChanged()), this, SLOT(handleFileInput()));
 
-  connect(m_uiForm.page_2, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
+  connect(m_uiForm.workspace, SIGNAL(currentIndexChanged(int)), this, SLOT(handleWorkspaceInput()));
 
   connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
   connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(removeSelectedData()));
@@ -317,11 +318,11 @@ void IndirectDataAnalysisElwinTab::runFileInput() {
   // Group input workspaces
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
-  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
+  auto runTimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  runTimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runTimeProps));
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
@@ -346,10 +347,10 @@ void IndirectDataAnalysisElwinTab::runFileInput() {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
-  elwinInputProps["InputWorkspaces"] = inputGroupWsName;
+  auto elwinInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  elwinInputProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
+  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(elwinInputProps));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -379,11 +380,11 @@ void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
   // Group input workspaces
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
   groupWsAlg->initialize();
-  API::BatchAlgorithmRunner::AlgorithmRuntimeProps runTimeProps;
-  runTimeProps["InputWorkspaces"] = inputWorkspacesString;
+  auto runTimeProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  runTimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
   groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(groupWsAlg, runTimeProps);
+  m_batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runTimeProps));
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
@@ -408,10 +409,10 @@ void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
     elwinMultAlg->setProperty("OutputELT", eltWorkspace);
   }
 
-  BatchAlgorithmRunner::AlgorithmRuntimeProps elwinInputProps;
-  elwinInputProps["InputWorkspaces"] = inputGroupWsName;
+  auto elwinInputProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  elwinInputProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
 
-  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, elwinInputProps);
+  m_batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(elwinInputProps));
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(unGroupInput(bool)));
   m_batchAlgoRunner->executeBatchAsync();
@@ -420,25 +421,6 @@ void IndirectDataAnalysisElwinTab::runWorkspaceInput() {
   m_pythonExportWsName = qSquaredWorkspace;
 }
 
-/**
- * Handles when the view changes between workspace and file selection
- *
- * @param index :: The index the stacked widget has been switched too.
- */
-void IndirectDataAnalysisElwinTab::handleViewChanged(int index) {
-  // Index indicates which view is visible.
-  m_uiForm.stackedInputWidget->setCurrentIndex(index);
-
-  // 0 is always file view
-  switch (index) {
-  case 0:
-    emit fileViewVisible();
-    break;
-  case 1:
-    emit workspaceViewVisible();
-    break;
-  }
-}
 /**
  * Ungroups the output after the execution of the algorithm
  */
@@ -789,9 +771,43 @@ void IndirectDataAnalysisElwinTab::closeDialog() {
   m_addWorkspaceDialog = nullptr;
 }
 
-void IndirectDataAnalysisElwinTab::addData() { addData(m_addWorkspaceDialog.get()); }
+void IndirectDataAnalysisElwinTab::addData() { checkData(m_addWorkspaceDialog.get()); }
+
+/** This method checks whether a Workspace or a File is being uploaded through the AddWorkspaceDialog
+ * A File requiresd additional checks to ensure a file of the correct type is being loaded. The Workspace list is
+ * already filtered.
+ */
+void IndirectDataAnalysisElwinTab::checkData(IAddWorkspaceDialog const *dialog) {
+  try {
+    const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
+    if (indirectDialog) {
+      // getFileName will be empty if the addWorkspaceDialog is set to Workspace instead of File.
+      if (indirectDialog->getFileName().empty()) {
+        addData(dialog);
+      } else
+        addDataFromFile(dialog);
+    } else
+      (throw std::invalid_argument("Unable to access IndirectAddWorkspaceDialog"));
+
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
 
 void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
+  try {
+    addDataToModel(dialog);
+    updateTableFromModel();
+    emit dataAdded();
+    emit dataChanged();
+    newInputFilesFromDialog(dialog);
+    plotInput();
+  } catch (const std::runtime_error &ex) {
+    displayWarning(ex.what());
+  }
+}
+
+void IndirectDataAnalysisElwinTab::addDataFromFile(IAddWorkspaceDialog const *dialog) {
   try {
     UserInputValidator uiv;
     const auto indirectDialog = dynamic_cast<IndirectAddWorkspaceDialog const *>(dialog);
@@ -807,12 +823,7 @@ void IndirectDataAnalysisElwinTab::addData(IAddWorkspaceDialog const *dialog) {
     showMessageBox(error);
 
     if (error.isEmpty()) {
-      addDataToModel(dialog);
-      updateTableFromModel();
-      emit dataAdded();
-      emit dataChanged();
-      newInputFilesFromDialog(dialog);
-      plotInput();
+      addData(dialog);
     }
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
@@ -863,11 +874,7 @@ void IndirectDataAnalysisElwinTab::setHorizontalHeaders(const QStringList &heade
   m_dataTable->setHorizontalHeaderLabels(headers);
 
   auto header = m_dataTable->horizontalHeader();
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  header->setResizeMode(0, QHeaderView::Stretch);
-#elif QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
   header->setSectionResizeMode(0, QHeaderView::Stretch);
-#endif
 }
 
 void IndirectDataAnalysisElwinTab::removeSelectedData() {

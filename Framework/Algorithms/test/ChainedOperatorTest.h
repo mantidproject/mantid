@@ -15,7 +15,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAlgorithms/Minus.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

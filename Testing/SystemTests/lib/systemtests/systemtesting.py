@@ -167,6 +167,16 @@ class MantidSystemTest(unittest.TestCase):
         '''Override this to perform more than 1 iteration of the implemented test.'''
         return 1
 
+    def temporary_directory(self):
+        '''Creates a temporary directory and registers a cleanup function to remove it
+        at the end of the test and returns the path to the directory'''
+        tempdir = tempfile.mkdtemp()
+        def rm_tempdir():
+            shutil.rmtree(tempdir, ignore_errors=True)
+
+        self.addCleanup(rm_tempdir)
+        return tempdir
+
     def reportResult(self, name, value):
         '''
         Send a result to be stored as a name,value pair
@@ -241,9 +251,9 @@ class MantidSystemTest(unittest.TestCase):
         if self.excludeInPullRequests():
             sys.exit(TestRunner.SKIP_TEST)
 
-        self.setUp()
-
         try:
+            self.setUp()
+
             # Start timer
             start = time.time()
             countmax = self.maxIterations() + 1
@@ -256,7 +266,10 @@ class MantidSystemTest(unittest.TestCase):
             # Finish
             self.reportResult('time_taken', '%.2f' % delta_t)
         finally:
-            self.tearDown()
+            try:
+                self.tearDown()
+            finally:
+                self.doCleanups()
 
     def __prepASCIIFile(self, filename):
         """Prepare an ascii file for comparison using difflib."""
@@ -549,6 +562,7 @@ class ResultReporter(object):
         '''Initialize a class instance, e.g. connect to a database'''
         self._total_number_of_tests = total_number_of_tests
         self._maximum_name_length = maximum_name_length
+        self._show_skipped = False
 
     @property
     def total_number_of_tests(self):
@@ -692,7 +706,7 @@ class TestRunner(object):
         try:
             write_to_dual_stdout = redirect_stdout(dual_stdout)
             with write_to_dual_stdout:
-                exec(script.asString(self._clean, call_exit=False), exec_globals, exec_locals)
+                exec(script.asString(self._clean), exec_globals, exec_locals)
             exitcode = exec_locals['exitcode']
             dump = dual_stdout.dump.getvalue()
             return exitcode, dump
@@ -700,14 +714,13 @@ class TestRunner(object):
             error_class = e.__class__.__name__
             detail = e.args[0]
             line_number = e.lineno
+            print(f"{error_class} at line {line_number} of SystemTest for {script._modname}.{script._test_cls_name}: "
+                  f"{detail}")
         except Exception as ex:
             import traceback
-            error_class = ex.__class__.__name__
-            detail = ex.args[0]
-            cl, exc, tb = sys.exc_info()
-            line_number = traceback.extract_tb(tb)[-1][1]
-        print(f"{error_class} at line {line_number} of SystemTest for {script._modname}.{script._test_cls_name}: "
-              f"{detail}")
+            traceback.print_exc()
+        except SystemExit as ex: # catch sys.exit
+            exitcode=ex.args[0]
         if exitcode is None:
             if "exitcode" in exec_locals:
                 exitcode = exec_locals['exitcode']
@@ -732,7 +745,7 @@ class TestScript(object):
         self._test_cls_name = test_cls_name
         self._exclude_in_pr_builds = not exclude_in_pr_builds
 
-    def asString(self, clean=False, call_exit=True):
+    def asString(self, clean=False):
         code = f"""
 import sys
 for p in ('{TESTING_FRAMEWORK_DIR}', '{FRAMEWORK_PYTHONINTERFACE_TEST_DIR}', '{self._test_dir}'):
@@ -752,8 +765,7 @@ if {self._exclude_in_pr_builds}:
         else:
             code += "exitcode = 0\n"
         code += "systest.cleanup()\n"
-        if call_exit:
-            code += "sys.exit(exitcode)\n"
+        code += "sys.exit(exitcode)\n"
         return code
 
 
@@ -828,7 +840,7 @@ class TestSuite(object):
             status = 'unknown'
 
         # Check return code and add result
-        self._result.status = status
+        self._result.status = status if status in ["success","skipped"] else "failed"
         self._result.addItem(['status', status])
         # Dump std out so we know what happened
         if isinstance(output, bytes):

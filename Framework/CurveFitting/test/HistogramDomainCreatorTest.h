@@ -20,8 +20,8 @@
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidCurveFitting/Functions/Lorentzian.h"
 #include "MantidCurveFitting/GSLJacobian.h"
+#include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidTestHelpers/FakeObjects.h"
 
 #include <algorithm>
 #include <math.h>

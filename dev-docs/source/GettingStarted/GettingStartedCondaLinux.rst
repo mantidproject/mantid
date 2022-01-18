@@ -22,6 +22,17 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 * Run your downloaded script from the terminal using ``bash Mambaforge-Linux-x86_64.sh``. If it asks whether or not you want to initialise conda with conda init, choose to do so.
 * Restart your terminal.
 
+(ILL) Setup proxy
+-----------------
+* Open ~/.condarc.
+* Add the following lines :
+
+.. code-block:: text
+
+  proxy_servers:
+    http: http://proxy.ill.fr:8888
+    https: http://proxy.ill.fr:8888
+
 Setup the mantid conda environment
 ----------------------------------
 * With your restarted terminal.
@@ -41,3 +52,28 @@ How to build
 * Navigate to the build directory.
 * To build Mantid Workbench use: ``ninja``
 * To build Unit Tests use: ``ninja AllTests``
+
+Building with CLion
+-------------------
+CLion will fail to find the build targets if the conda environment is not enabled:
+
+* Open a terminal and run ``conda activate mantid-developer``
+* Launch CLion through that terminal (``<CLION_INSTALL>/bin/clion.sh``)
+
+It is also useful to have your terminals in CLion also run with this environment:
+
+* In your ``home`` directory create a file named ``.clionrc`` and open in your favourite text editor, adding these lines:
+
+.. code-block:: text
+
+    source ~/.bashrc
+    source ~/mambaforge/bin/activate mantid-developer
+
+* Start CLion using the above steps
+* Navigate to ``File > Settings > Tools > Terminal``.
+* To the end of the ``Shell path`` option, add: ``--rcfile ~/.clionrc``.
+
+CMake Conda variables
+-----------------------
+There are two Conda specific CMake options `CONDA_ENV` and `CONDA_BUILD`. The former should be used whenever you are building within a Conda environment, as it ensures our finders (e.g FindNexus.cmake) look in the correct locations for libraries.
+The CONDA_BUILD parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. These options can be passed to CMake on the command line using -DCONDA_ENV=True for example.
