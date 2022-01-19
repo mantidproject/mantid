@@ -1,14 +1,14 @@
 # Set the version number here for MantidVersion and the package filenames This follows Semantic Versioning
 # https://semver.org
 if(CONDA_BUILD)
-  set(CONDA_PACKAGE_VERSION $ENV{PKG_VERSION})
-  string(REPLACE "." ";" CONDA_PACKAGE_LIST ${CONDA_PACKAGE_VERSION})
+  set(_conda_package_version $ENV{PKG_VERSION})
+  string(REPLACE "." ";" _conda_package_list ${_conda_package_version})
 
-  list(GET CONDA_PACKAGE_VERSION 0 VERSION_MAJOR)
-  list(GET CONDA_PACKAGE_VERSION 1 VERSION_MINOR)
-  list(SUBLIST ${CONDA_PACKAGE_LIST} 2 -1 VERSION_PATCH_LIST)
+  list(GET _conda_package_version 0 VERSION_MAJOR)
+  list(GET _conda_package_version 1 VERSION_MINOR)
+  list(SUBLIST _conda_package_list 2 -1 _version_patch_list)
   set(VERSION_PATCH)
-  string(REPLACE ";" "" VERSION_PATCH "${VERSION_PATCH_LIST}")
+  string(REPLACE ";" "" VERSION_PATCH "${_version_patch_list}")
   message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 else()
   set(VERSION_MAJOR 6)
