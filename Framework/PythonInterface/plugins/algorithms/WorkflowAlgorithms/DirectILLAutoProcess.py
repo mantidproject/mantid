@@ -599,7 +599,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if mask != str():
             mask = self.getPropertyValue('MaskWorkspace')
             if mask not in mtd:
-                LoadMask(Instrument=self.instrument, InputFile=mask, OutputWorkspace=mask)
+                if '.nxs' in mask:
+                    LoadNexus(Filename=mask, OutputWorkspace=mask)
+                else:
+                    LoadMask(Instrument=self.instrument, InputFile=mask, OutputWorkspace=mask)
             existing_masks.append(mask)
         mask_tubes = self.getPropertyValue('MaskedTubes')
         if mask_tubes != str():
