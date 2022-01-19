@@ -26,6 +26,5 @@ Bugfixes
 - Contour workspaces are now saved when saving in ``Bayes stretch``.
 - Fixed a bug which prevented workspaces being loaded into the :ref:`Elwin Tab <Elwin-iqt-ref>` .
 - Fixed a bug which caused :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` to crash when run with a single element.
-- Fixed a bug in the Symmetrise algorithm where workspaces in different bin widths would sometimes cause exceptions.
 
 :ref:`Release 6.3.0 <v6.3.0>`
