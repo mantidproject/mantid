@@ -39,8 +39,8 @@ BugFixes
 - Prevented an exception when generating script from plot created via script.
 - Added legends for recoil lines and Bragg peaks on slice plots.
 - Fixed a bug that caused exceptions when scaling a workspace.
-- Added an error message when attempting to load a file by path on the data loading tab
-- Fixed a bug that caused infinitely repeating energy unit conversions when changing the default energy unit
+- Added an error message when attempting to load a file by path on the data loading tab.
+- Fixed a bug that caused infinitely repeating energy unit conversions when changing the default energy unit.
 - When closing the dialog for adding a Bragg peak from a ``CIF`` file without selecting a ``CIF`` file, the corresponding menu entry now remains unselected.
 
 

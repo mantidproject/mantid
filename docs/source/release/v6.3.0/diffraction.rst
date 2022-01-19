@@ -33,7 +33,7 @@ Improvements
 * PEARL powder diffraction scripts now cope if ``absorption correction`` workspace is a different size to the ``Vanadium`` workspace without generating ``NaN`` values.
 * Improved the ``tt_mode=Custom`` in the ISIS PEARL powder diffraction scripts. Specifically ``tt_mode=Custom`` now supports all the different ``focus_modes`` if the grouping file contains 14 groups.
 * :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` no longer fit masked bins (bins with zero error).
-* :ref:`PolDiffILLDiffraction <algm-PolDiffILLDiffraction>` now supports data reduction of D7 Time-of-flight mode, including elastic peak calibration, time-dependent background subtraction, detector-analyser energy efficiency correction, and frame-overlap correction.
+* :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` now supports data reduction of D7 Time-of-flight mode, including elastic peak calibration, time-dependent background subtraction, detector-analyser energy efficiency correction, and frame-overlap correction.
 * :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now has an option to manually specify sample geometry for absorption correction.
 * :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` now groups the correction by detector bank in ``MomentumTransfer`` (rather than ``TOF``).
 

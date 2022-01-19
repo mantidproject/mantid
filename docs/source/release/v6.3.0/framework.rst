@@ -16,7 +16,7 @@ New Features
 ############
 - Introduced a naming convention for ``algorithms``, and ``deprecated aliases`` as the preferred method for renaming a C++ or Python algorithms.
 - Enabled deprecation of Python algorithms; instructions on how to deprecate a C++ or Python algorithm are available in the developer documentation.
-- Improvement for the Liquids Reflectometer at SNS. Added functionality to the `LRReflectivityOutput` algorithm to automatically compute the Q resolution from the data. An option has been added to the `LRAutoReduction` algorithm to switch this feature on and off.
+- Improvement for the Liquids Reflectometer at SNS. Added functionality to the :ref:`LRReflectivityOutput <algm-LRReflectivityOutput>` algorithm to automatically compute the Q resolution from the data. An option has been added to the :ref:`LRAutoReduction <algm-LRAutoReduction>` algorithm to switch this feature on and off.
 - Added a :ref:`Power Law <func-PowerLaw>` function to General Fit Functions.
 
 Improvements

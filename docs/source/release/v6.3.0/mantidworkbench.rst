@@ -10,9 +10,9 @@ New features
 * The :ref:`InstrumentViewer` has several new features.
 
   * **In the pick tab, a new panel allowing for direct rebinning of the workspace now exists.**
-   .. figure:: ../../images/iview_insitu_rebin.png
-      :width: 500px
-      :align: center
+  .. figure:: ../../images/iview_insitu_rebin.png
+     :width: 500px
+     :align: center
   * The ability to rotate Ellipse and Rectangle shapes has been added.
   * The integration slider now supports discrete steps when the axis has discrete values.
 
@@ -46,9 +46,9 @@ Bugfixes
   * Fixed plot bins not working on data with numeric X-axis.
   * Fixed a bug where the z-axis editor dialog was being initialised from the y-axis for a 3D plot.
   * Fixed a bug with autoscaling of colorfill plots from within the figure options.
-  * Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
+  * Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>`, when plotting a guess or fit result in the fit browser of a figure, correctly ignores invalid data when requested.
   * The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
-  * The Z Axis limits of 3D plots can now be set on linux machines.
+  * The Z-axis limits of 3D plots can now be set on linux machines.
   * The colour of the canvas is now preserved when generating a script from a plot.
 
 * Fixed issue in :ref:`DrILL <DrILL-ref>` when ``ASCII`` output was requested but the logs to save were not defined for that instrument.
@@ -76,7 +76,7 @@ Bugfixes
 - :ref:`SliceViewer` now closes when the underlying workspace is deleted.
 - Removed the peak table from peak viewer when the table is deleted in ADS (and now closes peak viewer if there are no more peak tables overlaid).
 - The peak actions combobox is updated when an overlain peak table is deleted.
-- Users are now able to export x/y cuts and 2D slices from the region of interest tool for MDHisto workspaces.
-- Transposing data (i.e. swapping x and y axes) of 2D MD workspace, now works without error.
+- Users are now able to export x/y cuts and 2D slices from the region of interest tool for ``MDHisto`` workspaces.
+- Transposing data (i.e. swapping x and y axes) of ``2D MD`` workspace, now works without error.
 
 :ref:`Release 6.3.0 <v6.3.0>`
