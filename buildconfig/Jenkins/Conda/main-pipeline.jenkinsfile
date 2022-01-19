@@ -1,6 +1,6 @@
 def git_clone(){
     git url: 'https://github.com/mantidproject/mantid.git',
-        branch: 'main_pipeline_prototype'
+        branch: "release-next"
 }
 
 def build_and_test_linux() {
