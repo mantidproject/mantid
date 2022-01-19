@@ -14,7 +14,7 @@ import builtins
 import os
 
 from mantid.api import FrameworkManager, AlgorithmManager
-from mantid.kernel import ConfigService, logger
+from mantid.kernel import (ConfigService, logger, UsageService, FeatureType)
 from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
@@ -711,6 +711,7 @@ class MainWindow(QMainWindow):
         self.interface_manager.showConceptHelp('')
 
     def open_mantid_help(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature.Interface, ["Mantid Help"], False)
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):
