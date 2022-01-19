@@ -11,6 +11,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataHandling/H5Util.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -108,6 +109,8 @@ void LoadILLSALSA::exec() {
   fillWorkspaceData(data, scanVariableNames, scanVariables);
 
   dataRoot.close();
+
+  fillWorkspaceMetadata(filename);
 }
 
 void LoadILLSALSA::setInstrument(double distance, double angle) {
@@ -170,5 +173,14 @@ void LoadILLSALSA::fillWorkspaceData(const Mantid::NeXus::NXInt &detectorData,
     m_outputWorkspace->mutableE(index)[i] = sqrt(scanVariables((int)monitorIndex, i));
     m_outputWorkspace->mutableX(index)[i] = i;
   }
+}
+
+void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
+  API::Run &runDetails = m_outputWorkspace->mutableRun();
+  NXhandle nxHandle;
+  NXopen(filename.c_str(), NXACC_READ, &nxHandle);
+  DataHandling::LoadHelper loadHelper;
+  loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
+  NXclose(&nxHandle);
 }
 } // namespace Mantid::DataHandling
