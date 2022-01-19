@@ -33,6 +33,7 @@ Improvements
 * Cells containing vector data in a table workspace can now be viewed in the table workspace display.
 * The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path).
 * The font in python editor and IPython console are ensured to be monospace. It also ensures monospace on KDE Neon distributions too.
+* There is now a warning in the settings to say that changes to project recovery settings are only applied after restarting workbench.
 
 Bugfixes
 --------
@@ -47,6 +48,8 @@ Bugfixes
   * Fixed a bug with autoscaling of colorfill plots from within the figure options.
   * Calls to :ref:`EvaluateFunction <algm-EvaluateFunction>` when plotting a guess or fit result in the fit browser of a figure correctly ignores invalid data when requested.
   * The axes limits of Waterfall plots will now scale correctly upon initial plotting and overplotting.
+  * The Z Axis limits of 3D plots can now be set on linux machines.
+  * The colour of the canvas is now preserved when generating a script from a plot.
 
 * Fixed issue in :ref:`DrILL <DrILL-ref>` when ``ASCII`` output was requested but the logs to save were not defined for that instrument.
 * The ``About Mantid`` page now appears on a new full release, even if a recent nightly was previously launched.
@@ -55,6 +58,8 @@ Bugfixes
 * Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
 * Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``# `` will be inserted at the position of the first non-whitespace character in the line).
 * Fixed a bug where folding the pick tab in the :ref:`InstrumentViewer` crashed Mantid.
+* Empty group workspaces can now be deleted rather than needing to be ungrouped.
+* Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` of the :ref:`InstrumentViewer` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
 
 SliceViewer
 -----------
@@ -68,5 +73,10 @@ Bugfixes
 - When entering a specific value for the center of the slicepoint of an integrated dimension/axis it will no longer jump to the nearest bin-center (this fix also affects ``MDEvent`` workspaces as it was assumed each dimension had 100 bins for the purpose of updating the slider for a integrated dimension/axis).
 - For ``MDHisto`` workspaces the projection matrix will be derived from the basis vectors on the workspace rather than searching for the ``W_MATRIX`` log.
 - Slicepoint center is now set to the correct initial value (consistent with position of slider) for ``MDHisto`` workspaces.
+- :ref:`SliceViewer` now closes when the underlying workspace is deleted.
+- Removed the peak table from peak viewer when the table is deleted in ADS (and now closes peak viewer if there are no more peak tables overlaid).
+- The peak actions combobox is updated when an overlain peak table is deleted.
+- Users are now able to export x/y cuts and 2D slices from the region of interest tool for MDHisto workspaces.
+- Transposing data (i.e. swapping x and y axes) of 2D MD workspace, now works without error.
 
 :ref:`Release 6.3.0 <v6.3.0>`
