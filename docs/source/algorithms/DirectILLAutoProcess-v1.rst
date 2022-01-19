@@ -142,7 +142,7 @@ as regular .nxs.
 	    OutputWorkspace=container_ws[key],
             ProcessAs='Empty',
             ReductionType='Powder',
-            IncidentEnergyCalibration=True,
+            IncidentEnergyCalibration="Energy Calibration ON",
             IncidentEnergy=Ei
         )
 
@@ -162,7 +162,7 @@ as regular .nxs.
             ReductionType='Powder',
             VanadiumWorkspace=vanadium_ws,
             EmptyContainerWorkspace=container_ws[key],
-            IncidentEnergyCalibration=True,
+            IncidentEnergyCalibration="Energy Calibration ON",
             IncidentEnergy=Ei,
             SampleMaterial=material,
             SampleGeometry=geometry,

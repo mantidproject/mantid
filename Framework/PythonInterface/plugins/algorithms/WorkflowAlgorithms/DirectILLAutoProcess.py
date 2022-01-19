@@ -53,7 +53,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     process = None
     reduction_type = None
     incident_energy = None
-    incident_energy_calibration = None
     incident_energy_ws = None
     elastic_channel_ws = None
     masking = None
@@ -157,8 +156,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.process = self.getPropertyValue('ProcessAs')
         self.reduction_type = self.getPropertyValue('ReductionType')
         self.to_clean = []
-        if self.getProperty('IncidentEnergyCalibration').value:
-            self.incident_energy_calibration = 'Energy Calibration ON'
         if not self.getProperty('IncidentEnergy').isDefault:
             self.incident_energy = self.getProperty('IncidentEnergy').value
             self.incident_energy_ws = 'incident_energy_ws'
@@ -179,12 +176,13 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if not self.getProperty('CadmiumWorkspace').isDefault:
             self.cadmium = self.getPropertyValue('CadmiumWorkspace')
         self.flat_bkg_scaling = self.getProperty(common.PROP_FLAT_BKG_SCALING).value
-        self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.empty = self.getPropertyValue('EmptyContainerWorkspace')
         self.vanadium = self.getPropertyValue('VanadiumWorkspace')
         if self.vanadium != str():
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
         self.flat_background = self.getPropertyValue('FlatBackgroundSource')
+        if not self.getProperty('EnergyExchangeBinning').isDefault:
+            self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.save_output = self.getProperty('SaveOutput').value
         self.clear_cache = self.getProperty('ClearCache').value
         self.temperatures = set()
@@ -253,8 +251,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup(common.PROP_FLAT_BKG_SCALING, additional_inputs_group)
         self.setPropertyGroup(common.PROP_ABSOLUTE_UNITS, additional_inputs_group)
 
-        self.declareProperty("IncidentEnergyCalibration", True,
-                             doc='Enable or disable incident energy calibration.')
+        self.copyProperties('DirectILLCollectData', common.PROP_INCIDENT_ENERGY_CALIBRATION)
 
         self.declareProperty(name='IncidentEnergy',
                              defaultValue=0.0,
@@ -272,7 +269,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                              doc='Value for the offset parameter in omega scan (degrees).')
 
         calibration_group = 'Calibration'
-        self.setPropertyGroup('IncidentEnergyCalibration', calibration_group)
+        self.setPropertyGroup(common.PROP_INCIDENT_ENERGY_CALIBRATION, calibration_group)
         self.setPropertyGroup('IncidentEnergy', calibration_group)
         self.setPropertyGroup('ElasticChannelIndex', calibration_group)
         self.setPropertyGroup(common.PROP_ELASTIC_CHANNEL_MODE, calibration_group)
@@ -478,14 +475,17 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             kwargs[common.PROP_ELASTIC_CHANNEL_MODE] = self.getPropertyValue(common.PROP_ELASTIC_CHANNEL_MODE)
         if not self.getProperty(common.PROP_EPP_METHOD).isDefault:
             kwargs[common.PROP_EPP_METHOD] = self.getPropertyValue(common.PROP_EPP_METHOD)
+        if not self.getProperty(common.PROP_INCIDENT_ENERGY_CALIBRATION).isDefault:
+            kwargs[common.PROP_INCIDENT_ENERGY_CALIBRATION] = \
+                self.getPropertyValue(common.PROP_INCIDENT_ENERGY_CALIBRATION)
         if vanadium:
             self.vanadium_epp = "{}_epp".format(ws)
             kwargs['OutputEPPWorkspace'] = self.vanadium_epp
             self.to_clean.append(self.vanadium_epp)
+
         DirectILLCollectData(
             Run=sample,
             OutputWorkspace=ws,
-            IncidentEnergyCalibration=self.incident_energy_calibration,
             IncidentEnergyWorkspace=self.incident_energy_ws,
             **kwargs
         )

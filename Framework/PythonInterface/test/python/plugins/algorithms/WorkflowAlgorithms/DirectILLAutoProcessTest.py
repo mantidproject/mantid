@@ -39,7 +39,7 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             ProcessAs='Empty',
             ReductionType='Powder',
             IncidentEnergy=ei,
-            IncidentEnergyCalibration=True,
+            IncidentEnergyCalibration="Energy Calibration ON",
             ElasticChannelIndex=elc,
             SaveOutput=False,
             ClearCache=True,
@@ -56,7 +56,7 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             ProcessAs='Vanadium',
             ReductionType='Powder',
             IncidentEnergy=ei,
-            IncidentEnergyCalibration=True,
+            IncidentEnergyCalibration="Energy Calibration ON",
             SaveOutput=False,
             ClearCache=True
         )
@@ -77,7 +77,7 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             OutputWorkspace=sample_name,
             ProcessAs='Sample',
             ReductionType='SingleCrystal',
-            IncidentEnergyCalibration=True,
+            IncidentEnergyCalibration="Energy Calibration ON",
             IncidentEnergy=ei,
             ElasticChannelIndex=elp,
             EnergyExchangeBinning=eBins,
