@@ -18,7 +18,7 @@ Improvements
   from CASTEP or Phonopy calculations, then sample an appropriate q-point mesh on-the-fly to create a phonon DOS. This feature requires the Euphonic library to be installed. This library is
   included in the Windows package, but for other platforms an installer is provided in the Script Repository.
 - In Inelastic Data Analysis the :ref:`Elwin Tab <Elwin-iqt-ref>` has had its UI updated to be more user friendly.
-- Updated documentation for :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>`.
+- Updated documentation for :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` .
 
 Bugfixes
 --------
