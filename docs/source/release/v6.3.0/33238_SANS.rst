@@ -1,4 +1,0 @@
-Bugfixes
---------
-
-- Loading a CSV file with a missing column now shows an error box explaining the problem. Previously, it showed an uncaught exception.
