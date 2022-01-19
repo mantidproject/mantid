@@ -782,6 +782,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         """Processes vanadium and creates workspaces with diagnostics, integrated vanadium, and reduced vanadium."""
         to_remove = [ws]
         numor = ws[:ws.rfind('_')]
+        if self.masking:
+            ws = self._apply_mask(ws)
+
         vanadium_diagnostics = '{}_diag'.format(numor)
         kwargs = {'BeamStopDiagnostics': 'Beam Stop Diagnostics OFF'}
         if self.vanadium_epp:
@@ -822,7 +825,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             InputWorkspace=ws,
             OutputWorkspace=sofq_output,
             OutputSofThetaEnergyWorkspace=softw_output,
-            IntegratedVanadiumWorkspace=vanadium_integral,
             DiagnosticsWorkspace=vanadium_diagnostics,
             **optional_parameters
         )
