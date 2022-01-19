@@ -2,13 +2,14 @@
 # https://semver.org
 if(CONDA_BUILD)
   set(_conda_package_version $ENV{PKG_VERSION})
-  string(REPLACE "." ";" _conda_package_list ${_conda_package_version})
+  string(REPLACE "." ";" _conda_package_version ${_conda_package_version})
+  set(_conda_package_list ${_conda_package_version})
 
   list(GET _conda_package_version 0 VERSION_MAJOR)
   list(GET _conda_package_version 1 VERSION_MINOR)
-  list(SUBLIST _conda_package_list 2 -1 _version_patch_list)
+  list(SUBLIST _conda_package_list 2 2 _version_patch_list)
   set(VERSION_PATCH)
-  string(REPLACE ";" "" VERSION_PATCH "${_version_patch_list}")
+  string(REPLACE ";" "." VERSION_PATCH "${_version_patch_list}")
   message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 else()
   set(VERSION_MAJOR 6)
