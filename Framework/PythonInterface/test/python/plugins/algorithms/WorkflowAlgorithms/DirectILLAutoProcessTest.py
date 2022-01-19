@@ -80,7 +80,7 @@ class DirectILLAutoProcessTest(unittest.TestCase):
             IncidentEnergyCalibration="Energy Calibration ON",
             IncidentEnergy=ei,
             ElasticChannelIndex=elp,
-            EnergyExchangeBinning=eBins,
+            EnergyRebinningParams=eBins,
             GroupDetBy=2,
             MaskThresholdMin=0,
             MaskThresholdMax=20,

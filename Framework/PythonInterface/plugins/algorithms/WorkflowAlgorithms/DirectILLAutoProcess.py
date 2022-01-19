@@ -57,7 +57,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     elastic_channel_ws = None
     masking = None
     mask_ws = None
-    ebinning_params = None  # energy binning
     output = None
     vanadium = None
     vanadium_epp = None
@@ -181,8 +180,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         if self.vanadium != str():
             self.vanadium_diagnostics, self.vanadium_integral = get_vanadium_corrections(self.vanadium)
         self.flat_background = self.getPropertyValue('FlatBackgroundSource')
-        if not self.getProperty('EnergyExchangeBinning').isDefault:
-            self.ebinning_params = self.getProperty('EnergyExchangeBinning').value
         self.save_output = self.getProperty('SaveOutput').value
         self.clear_cache = self.getProperty('ClearCache').value
         self.temperatures = set()
@@ -303,16 +300,15 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('MaskedAngles', masking_group_name)
         self.setPropertyGroup('MaskWithVanadium', masking_group_name)
 
-        self.declareProperty(FloatArrayProperty(name='EnergyExchangeBinning',
-                                                validator=validRebinParams),
-                             doc='Energy exchange binning parameters.')
+        self.copyProperties('DirectILLReduction', [common.PROP_REBINNING_W, common.PROP_REBINNING_PARAMS_W])
 
         self.declareProperty(FloatArrayProperty(name='MomentumTransferBinning',
                                                 validator=validRebinParams),
                              doc='Momentum transfer binning parameters.')
 
         rebinning_group = 'Binning parameters'
-        self.setPropertyGroup('EnergyExchangeBinning', rebinning_group)
+        self.setPropertyGroup(common.PROP_REBINNING_W, rebinning_group)
+        self.setPropertyGroup(common.PROP_REBINNING_PARAMS_W, rebinning_group)
         self.setPropertyGroup('MomentumTransferBinning', rebinning_group)
 
         self.declareProperty(name='AbsorptionCorrection',
@@ -740,8 +736,12 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
 
             # rebin in energy or momentum transfer
             processed_sample = '{}_reb'.format(numor)
-            if self.ebinning_params != list():
-                Rebin(InputWorkspace=corrected_ws, Params=self.ebinning_params, OutputWorkspace=processed_sample)
+            if not self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
+                Rebin(
+                    InputWorkspace=corrected_ws,
+                    OutputWorkspace=processed_sample,
+                    Params=self.getPropertyValue(common.PROP_REBINNING_PARAMS_W)
+                    )
             else:
                 RenameWorkspace(InputWorkspace=corrected_ws, OutputWorkspace=processed_sample)
                 to_remove.pop()
@@ -755,10 +755,13 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             optional_parameters = dict()
             if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
                 optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
-            if not self.getProperty('EnergyExchangeBinning').isDefault:
-                optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+            if not self.getProperty(common.PROP_REBINNING_W).isDefault:
+                optional_parameters[common.PROP_REBINNING_W] = self.getProperty(common.PROP_REBINNING_W).value
+            if not self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
+                optional_parameters[common.PROP_REBINNING_PARAMS_W] = \
+                    self.getProperty(common.PROP_REBINNING_PARAMS_W).value
             if not self.getProperty('MomentumTransferBinning').isDefault:
-                optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
+                optional_parameters['QBinningParams'] = self.getProperty('MomentumTransferBinning').value
             DirectILLReduction(
                 InputWorkspace=ws,
                 OutputWorkspace=processed_sample,
@@ -796,17 +799,22 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             EPPWorkspace=self.vanadium_epp
         )
         if self.getPropertyValue('AbsorptionCorrection') != 'None':
-            self._correct_self_attenuation(ws, sample_no)
+            self._correct_self_attenuation(ws, 0)
 
         sofq_output = '{}_SofQ'.format(numor)
         softw_output = '{}_SofTW'.format(numor)
         optional_parameters = dict()
         if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
             optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
-        if not self.getProperty('EnergyExchangeBinning').isDefault:
-            optional_parameters['EnergyRebinningParams'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+        if not self.getProperty(common.PROP_GROUPING_ANGLE_STEP).isDefault:
+            optional_parameters['GroupingAngleStep'] = self.getProperty(common.PROP_GROUPING_ANGLE_STEP).value
+        if not self.getProperty(common.PROP_REBINNING_W).isDefault:
+            optional_parameters[common.PROP_REBINNING_W] = self.getProperty(common.PROP_REBINNING_W).value
+        if not self.getProperty(common.PROP_REBINNING_PARAMS_W).isDefault:
+            optional_parameters[common.PROP_REBINNING_PARAMS_W] = \
+                self.getProperty(common.PROP_REBINNING_PARAMS_W).value
         if not self.getProperty('MomentumTransferBinning').isDefault:
-            optional_parameters['QBinningParams'] = self.getProperty(MomentumTransferBinning).value
+            optional_parameters['QBinningParams'] = self.getProperty('MomentumTransferBinning').value
         DirectILLReduction(
             InputWorkspace=ws,
             OutputWorkspace=sofq_output,
