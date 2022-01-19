@@ -1,9 +1,14 @@
 # ######################################################################################################################
 # Configure required dependencies if necessary
 # ######################################################################################################################
+# Find git for everything
+if(WIN32)
+  set(_git_requires 1.9.5)
+endif()
+find_package(Git ${_git_requires})
+
 if(MSVC AND NOT CONDA_ENV)
   # Git LFS does not work properly with <= 1.9
-  find_package(Git 1.9.5 REQUIRED)
   find_package(GitLFS REQUIRED)
 
   # Use ExternalProject functionality as it already knows how to do clone/update
@@ -116,7 +121,6 @@ else()
     # Homebrew adds qt4 here and we require it to be unlinked from /usr/local to avoid qt4/qt5 cross talk
     list(APPEND CMAKE_PREFIX_PATH /usr/local/opt/qt@4)
   endif()
-  find_package(Git)
 endif()
 
 # Clean out python variables set from a previous build so they can be rediscovered again

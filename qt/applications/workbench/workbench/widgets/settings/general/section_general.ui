@@ -351,6 +351,16 @@
               </item>
              </layout>
             </item>
+            <item>
+             <widget class="QLabel" name="restart_warning_label">
+              <property name="styleSheet">
+               <string notr="true">color : #CC0000</string>
+              </property>
+              <property name="text">
+               <string>(Workbench must be restarted for any changes to Project Recovery settings to take effect!)</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>

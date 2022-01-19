@@ -11,11 +11,19 @@ EXPECTED_MAMBAFORGE_PATH=$1
 EXPECTED_CONDA_PATH=$2
 CLEAN_BUILD=$3
 
-MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-$(uname -m).sh
+# Only supporting x86_64 at this time for the build process
+if [[ $OSTYPE == 'msys'* ]]; then
+    MAMBAFORGE_SCRIPT_NAME=Mambaforge-Windows-x86_64.exe
+else
+    MAMBAFORGE_SCRIPT_NAME=Mambaforge-$(uname)-x86_64.sh
+fi
 URL=https://github.com/conda-forge/miniforge/releases/latest/download/$MAMBAFORGE_SCRIPT_NAME
 
 if [[ $CLEAN_BUILD  == true ]]; then
     rm -rf $EXPECTED_MAMBAFORGE_PATH
+    if [[ -f $MAMBAFORGE_SCRIPT_NAME ]]; then
+        rm $MAMBAFORGE_SCRIPT_NAME
+    fi
 fi
 
 # Ensure conda is installed
@@ -31,6 +39,11 @@ if [[ ! -f $EXPECTED_CONDA_PATH ]]; then
             exit 1
         fi
     fi
-    bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH
+    if [[ $OSTYPE == 'msys'* ]]; then
+        # Replace all / with \ for windows batch support before passing in $EXPECTED_MAMBAFORGE_PATH
+        cmd.exe /C "START /wait "" $MAMBAFORGE_SCRIPT_NAME /InstallationType=JustMe /RegisterPython=0 /S /D=${EXPECTED_MAMBAFORGE_PATH////\\}"
+    else
+        bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH
+    fi
     rm $MAMBAFORGE_SCRIPT_NAME
 fi

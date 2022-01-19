@@ -40,6 +40,8 @@ private:
 
   const std::string workspaceMethodName() const override { return "delete"; }
   const std::string workspaceMethodInputProperty() const override { return "Workspace"; }
+
+  bool checkGroups() override;
 };
 
 } // namespace Algorithms
