@@ -243,7 +243,7 @@ class Symmetrise(PythonAlgorithm):
         """
         # Find array index of the first negative XMin
         negative_min_diff = sample_x + self._x_min
-        self._negative_min_index = np.where(negative_min_diff < 0)[0][-1]
+        self._negative_min_index = np.where(negative_min_diff > 0)[0][0]
         self._check_bounds(self._negative_min_index, sample_array_len, label='Negative')
 
         # Find array index of the first positive XMin, that is smaller than the required
