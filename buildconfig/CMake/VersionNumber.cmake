@@ -1,7 +1,18 @@
 # Set the version number here for MantidVersion and the package filenames This follows Semantic Versioning
 # https://semver.org
-set(VERSION_MAJOR 6)
-set(VERSION_MINOR 2)
+if(CONDA_BUILD)
+  set(CONDA_PACKAGE_VERSION $ENV{PKG_VERSION})
+  string(REPLACE " " ";" CONDA_PACKAGE_LIST ${CONDA_PACKAGE_VERSION})
+
+  list(GET ${CONDA_PACKAGE_VERSION} 0 ${VERSION_MAJOR})
+  list(GET ${CONDA_PACKAGE_VERSION} 2 ${VERSION_MINOR})
+  list(SUBLIST ${CONDA_PACKAGE_VERSION} 3 -1 ${VERSION_PATCH_LIST})
+  string(REPLACE ";" "\n" ${VERSION_PATCH} "${VERSION_PATCH_LIST}")
+  message(STATUS "Version: ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+else(0)
+  set(VERSION_MAJOR 6)
+  set(VERSION_MINOR 2)
+endif()
 
 # UNCOMMENT the next 'set' line to 'force' the patch version number to a value (instead of using the count coming out of
 # 'git describe') DO NOT COMMIT THIS TO MASTER UNCOMMENTED, ONLY TO A RELEASE BRANCH
