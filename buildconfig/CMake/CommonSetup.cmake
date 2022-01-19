@@ -254,11 +254,11 @@ endif()
 
 mark_as_advanced(MtdVersion_WC_LAST_CHANGED_DATE MtdVersion_WC_LAST_CHANGED_DATETIME)
 
-if(NOT NOT_GIT_REPO) # i.e This is a git repository!
-                     # #################################################################################################
-                     # Create the file containing the patch version number for use by cpack The patch number make have
-                     # been overridden by VersionNumber so create the file used by cpack here
-                     # #################################################################################################
+if(NOT NOT_GIT_REPO AND NOT CONDA_BUILD) # i.e This is a git repository!
+  # ####################################################################################################################
+  # Create the file containing the patch version number for use by cpack The patch number make have been overridden by
+  # VersionNumber so create the file used by cpack here
+  # ####################################################################################################################
   configure_file(
     ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake.in
     ${GIT_TOP_LEVEL}/buildconfig/CMake/PatchVersionNumber.cmake
