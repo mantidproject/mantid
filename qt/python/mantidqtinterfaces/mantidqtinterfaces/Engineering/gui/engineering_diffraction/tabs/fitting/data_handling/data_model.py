@@ -13,7 +13,7 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common impo
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
-from matplotlib.pyplot import subplots, close
+from matplotlib.pyplot import subplots
 from numpy import full, nan, max, array, vstack, argsort
 from itertools import chain
 from collections import defaultdict, OrderedDict
@@ -144,7 +144,6 @@ class FittingDataModel(object):
         self._fit_workspaces = None
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._data_workspaces = FittingWorkspaceRecordContainer()
-        self.inspect_bg_fig = None
 
     def restore_files(self, ws_names):
         self._data_workspaces.add_from_names_dict(ws_names)
@@ -524,8 +523,10 @@ class FittingDataModel(object):
                 bg_line.set_ydata(data_line.get_ydata() - bgsub_line.get_ydata())
                 event.canvas.draw_idle()
             else:
-                logger.warning("Inspect background figure will be closed because it doesn't have the correct curves.")
-                close(event.canvas.figure.number)  # figure.close method doesn't exist - use plt.close
+                # would like to close the figure at this point but this interferes with the mantid ADS observers when
+                # any of the tracked workspaces are deleted and causes mantid to hard crash - so just print warning
+                logger.warning(f"Inspect background figure {event.canvas.figure.number} has been invalidated - the "
+                               f"background curve will no longer be updated.")
 
         ws = self._data_workspaces[ws_name].loaded_ws
         ws_bgsub = self._data_workspaces[ws_name].bgsub_ws
