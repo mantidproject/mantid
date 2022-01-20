@@ -84,8 +84,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         if not isinstance(float(self.getProperty("IncidentEnergy").value), numbers.Real):
             issues["IncidentEnergy"] = "Incident energy must be a real number"
 
-        if 'max_energy' in abins.parameters.instruments[instrument_name]:
-            max_energy = abins.parameters.instruments[instrument_name]
+        if 'max_wavenumber' in abins.parameters.instruments[instrument_name]:
+            max_energy = abins.parameters.instruments[instrument_name]['max_wavenumber']
         else:
             max_energy = abins.parameters.sampling['max_wavenumber']
         if float(self.getProperty("IncidentEnergy").value) > max_energy:

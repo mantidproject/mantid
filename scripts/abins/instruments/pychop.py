@@ -7,7 +7,6 @@ import mantid.kernel
 from mantidqtinterfaces.PyChop import PyChop2
 from mantidqtinterfaces.PyChop import Instruments as pychop_instruments
 
-import abins
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 from .directinstrument import DirectInstrument
 
@@ -40,8 +39,7 @@ class PyChopInstrument(DirectInstrument):
             ) -> int:
 
         if chopper_frequency is None:
-            parameters = abins.parameters.instruments[self._name]
-            chopper_frequency = parameters['chopper_frequency_default']
+            chopper_frequency = self.get_parameter('chopper_frequency_default')
 
             if logger is None:
                 mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
@@ -70,10 +68,8 @@ class PyChopInstrument(DirectInstrument):
         frequencies_mev = frequencies_invcm / MILLI_EV_TO_WAVENUMBER
         ei_mev = self._e_init / MILLI_EV_TO_WAVENUMBER
 
-        setting_params = abins.parameters.instruments[self._name]['settings'][self._setting]
-
         resolution, _ = PyChop2.calculate(inst=self._name,
-                                          package=setting_params['chopper'],
+                                          package=self.get_parameter('chopper'),
                                           freq=self._chopper_frequency,
                                           ei=ei_mev,
                                           etrans=frequencies_mev.tolist())

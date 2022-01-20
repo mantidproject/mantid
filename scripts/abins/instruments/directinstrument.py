@@ -31,6 +31,15 @@ class DirectInstrument(Instrument):
         """
         self._e_init = float(e_init)
 
+    def get_incident_energy(self) -> float:
+        return self._e_init
+
+    def get_max_wavenumber(self):
+        return self.get_incident_energy()
+
+    def get_min_wavenumber(self):
+        return 0.
+
     def get_angle_range(self):
         raise NotImplementedError()
 
@@ -71,7 +80,7 @@ class DirectInstrument(Instrument):
             pad: Additional fraction of maximum value to use as padding
 
         """
-        energy_samples = np.linspace(0, self._e_init, 10)
+        energy_samples = np.linspace(0, self.get_incident_energy(), 10)
         q_values = self.get_abs_q_limits(energy_samples).flatten()
         q_min, q_max = np.min(q_values), np.max(q_values)
         if q_min - (pad * q_max) < 0:
@@ -100,10 +109,12 @@ class DirectInstrument(Instrument):
         k2_f = np.zeros_like(input_data)
         k2_i = np.zeros_like(input_data)
 
-        conservation_indx = self._e_init > input_data
+        e_init = self.get_incident_energy()
 
-        k2_f[conservation_indx] = (self._e_init - input_data[conservation_indx]) * WAVENUMBER_TO_INVERSE_A
-        k2_i[conservation_indx] = self._e_init * WAVENUMBER_TO_INVERSE_A
+        conservation_indx = e_init > input_data
+
+        k2_f[conservation_indx] = (e_init - input_data[conservation_indx]) * WAVENUMBER_TO_INVERSE_A
+        k2_i[conservation_indx] = e_init * WAVENUMBER_TO_INVERSE_A
 
         cos_angle = math.cos(math.radians(angle))
         result = k2_i + k2_f - 2 * cos_angle * (k2_i * k2_f) ** 0.5

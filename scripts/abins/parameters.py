@@ -29,7 +29,9 @@ instruments = {
         'e_init': 4100.0,  # Incident energies in cm-1
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'}},
-        'chopper_allowed_frequencies': list(range(50, 601, 50))
+        'chopper_allowed_frequencies': list(range(50, 601, 50)),
+        'min_wavenumber': 0.,
+        'max_wavenumber': 4100.0
         },
     'PANTHER' : {
         'q_size': 100,
@@ -39,8 +41,8 @@ instruments = {
         'angle_range': (5, 140),
         'chopper_frequency_default': 400,
         'chopper_allowed_frequencies': list(range(50, 601, 50)),
-        'max_wavenumber': 150 * MILLI_EV_TO_WAVENUMBER,
         'min_wavenumber': 0.0,
+        'max_wavenumber': 150 * MILLI_EV_TO_WAVENUMBER,
         # Resolution function fitted to incident energy and energy transfer:
         # sigma = polyval(abs_meV, ɛ) + polyval(ei_dependence, E_i) + polyval(ei_energy_product, E_i × ɛ)
         # (Here a quartic polynomial in ɛ, plus quadratic on Ei and cubic on ɛ×Ei)
@@ -59,7 +61,7 @@ instruments = {
     'MAPS': {
         'resolution': 'pychop',
         'q_size': 100,
-        'e_init': 400 * MILLI_EV_TO_WAVENUMBER,
+        'e_init': 500 * MILLI_EV_TO_WAVENUMBER,
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'},
                      'S': {'chopper': 'S'},

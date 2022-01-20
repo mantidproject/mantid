@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # noinspection PyPep8Naming
 import logging
-from typing import Union
+from typing import Any, Dict, Union
 
 import mantid.kernel
 
@@ -26,20 +26,56 @@ class Instrument:
         """Get a list of detector angles to sample"""
         raise NotImplementedError()
 
+    def get_parameter(self, key: str, default: Any = None) -> Any:
+        """Get a named instrument parameter from abins.parameters
+
+        Setting parameters will be checked first and take priority over
+        higher-level instrument parameters.
+
+        e.g. if abins.parameters includes::
+
+            instruments = {
+                'THIS_INSTRUMENT': {'param': 'value-1',
+                                    'settings': {'SETTING':
+                                                 {'param': 'value-2'}}}
+            }
+
+        Then self.get_parameter('param') will return 'value-1' unless the
+        setting is 'SETTING', in which case it will return 'value-2'.
+
+        Args:
+            key: key to be searched in instrument parameters
+            default: Value to be returned if key is not found.
+        """
+        setting_parameters = self.get_setting_parameters()
+        if key in setting_parameters:
+            return setting_parameters[key]
+        else:
+            return self.get_parameters().get(key, default)
+
+    def get_parameters(self) -> Dict[str, Any]:
+        """Get parameters for this instrument from abins.parameters"""
+        return abins.parameters.instruments.get(self.get_name())
+
     def get_setting(self):
         return self._setting
 
-    def get_min_wavenumber(self):
-        if 'min_energy' in abins.parameters.instruments[self._name]:
-            return abins.parameters.instruments[self._name]
+    def get_setting_parameters(self) -> Dict[str, Any]:
+        """Get instrument parameters associated with the current setting"""
+        all_settings_data = self.get_parameters().get('settings')
+
+        if all_settings_data:
+            return all_settings_data.get(
+                self._check_setting(self.get_setting()))
+
         else:
-            return abins.parameters.sampling['min_wavenumber']
+            return {}
+
+    def get_min_wavenumber(self):
+        return self.get_parameter('min_wavenumber', default=abins.parameters.sampling['min_wavenumber'])
 
     def get_max_wavenumber(self):
-        if 'max_energy' in abins.parameters.instruments[self._name]:
-            return abins.parameters.instruments[self._name]
-        else:
-            return abins.parameters.sampling['max_wavenumber']
+        return self.get_parameter('max_wavenumber', default=abins.parameters.sampling['max_wavenumber'])
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """
