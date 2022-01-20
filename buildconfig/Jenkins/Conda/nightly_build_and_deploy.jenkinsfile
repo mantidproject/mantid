@@ -1,6 +1,6 @@
 def git_clone(){
     git url: 'https://github.com/mantidproject/mantid.git',
-        branch: ${env.GIT_BRANCH}
+        branch: env.GIT_BRANCH
 }
 
 def build_and_test_linux() {
