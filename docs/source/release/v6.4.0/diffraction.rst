@@ -15,6 +15,8 @@ Powder Diffraction
 Engineering Diffraction
 -----------------------
 
+Add a parent to an instance of the engineering diffraction interface created by loading a project so that it's a child of the main window. This also resolves an occasional crash when loading a project containing a workspace that was plotted on the Fitting tab
+
 Single Crystal Diffraction
 --------------------------
 
