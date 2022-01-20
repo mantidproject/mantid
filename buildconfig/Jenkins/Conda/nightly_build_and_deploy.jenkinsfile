@@ -1,6 +1,8 @@
 def git_clone(){
-    git url: 'https://github.com/mantidproject/mantid.git',
-        branch: env.GIT_BRANCH
+    // git url: 'https://github.com/mantidproject/mantid.git',
+    //     branch: env.GIT_BRANCH
+    bash "git clone https://github.com/mantidproject/mantid.git"
+    bash "git checkout $GIT_BRANCH"
     bash "echo THIS IS WHERE WE ECHO AFTER THE GIT CLONE PLEASE SEE ME !?!?!??!?!?!?!?!##########################################"
 }
 
