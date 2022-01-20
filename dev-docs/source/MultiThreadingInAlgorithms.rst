@@ -81,3 +81,37 @@ call will cause the array to be copied, which will invalidate the
 reference obtained to the input data in the previous line. The solution
 is to make sure the non-const calls come before the const ones (in this
 case by reversing the two lines).
+
+Python
+------
+
+Tasks in python can be run outside of the main GUI thread by using the classes and functions defined in
+`asynchronous.py <https://github.com/mantidproject/mantid/blob/main/qt/python/mantidqt/mantidqt/utils/asynchronous.py>`__
+
+The simplest and most commonly used one is ``AsyncTask``:
+
+.. code:: python
+
+    self.worker = AsyncTask(self.to_be_run, (param_1, param_2),
+                            error_cb=self._on_worker_error,
+                            finished_cb=self._on_worker_success)
+    self.worker.start()
+
+For more OpenMP style multithreading, there is the functionality inside
+`async_qt_adaptor.py <https://github.com/mantidproject/mantid/blob/main/qt/python/mantidqt/mantidqt/utils/async_qt_adaptor.py>`__
+
+The methods you wish to run asynchronously must be inside a class that inherits from ``IQtAsync``.
+You can then overwrite any of the relevant callbacks and annotate async methods with the ``@qt_async_task`` decorator.
+
+.. code:: python
+
+    class DoesAsyncThings(IQtAsync):
+        def __init__(self):
+            super().__init__()
+
+        def finished_cb_slot(self) -> None:
+            self.task_finished()
+
+        @qt_async_task
+        def do_async(self):
+            self.do_task()
