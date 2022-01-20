@@ -2,17 +2,20 @@
 Multithreading in Algorithms
 ============================
 
-Mantid uses `OpenMP <http://openmp.org/wp/about-openmp/>`__ to improve
+C++
+---
+
+Mantid uses `OpenMP <http://openmp.org/wp/about-openmp/>`__ in C++ to improve
 performance within algorithms by parallelizing ``for`` loops. A tutorial
-devoted to the technology can be found `here <https://computing.llnl.gov/tutorials/openMP/>`__.
+devoted to the technology can be found `here <https://hpc-tutorials.llnl.gov/openmp/>`__.
 
 Access to the OpenMP API is via a set of macros defined in
-`MultiThreading.h <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/MultiThreaded.h>`__.
+`MultiThreaded.h <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/MultiThreaded.h>`__.
 This accomplishes seamless fall-back to single-threaded behaviour for
 compilers that don't have OpenMP available, as well as providing
 protection against multithreading when non-thread-safe workspaces are in use.
 
-The canonical way to use OpenMP in an algorithm loop (typically
+The recommended way to use OpenMP in an algorithm loop (typically
 one over the spectra in a workspace) is as follows:
 
 .. code:: cpp
@@ -32,17 +35,32 @@ one over the spectra in a workspace) is as follows:
 The main work is in the first statement, which contains the
 instruction invoking OpenMP, but only if the workspaces given are
 thread-safe. Analogous macros are available for zero, 2 or 3 workspaces.
-Any workspace that is accessed within the loop should be included. There
-is then also a set of slightly verbose interrupt instructions, which
+Any workspace that is accessed within the loop should be included.
+
+There is then also a set of slightly verbose interrupt instructions, which
 prevent exceptions escaping from a parallel region (which would
 otherwise cause program termination) - this includes dealing with
 algorithm cancellation.
 
 Ensuring thread-safety
-----------------------
+######################
 
 The first rule is this: **Don't write to shared variables.** Or, if you
 do, protect the write with PARALLEL\_CRITICAL or PARALLEL\_ATOMIC calls.
+
+.. code:: cpp
+
+     // Can only be used on simple operations, uses atomic access from machine hardware.
+     PARALLEL_ATOMIC
+     a++
+
+     // Can be used anywhere, but has a higher overhead.
+     // Can be named if two critical sections can be accessed simultaneously.
+     PARALLEL_CRITICAL("C1")
+     if(a > 4) {
+         b.update()
+     }
+
 Note that a write to a workspace data spectrum selected by the loop
 index is not typically a shared write (though see below).
 
@@ -56,7 +74,7 @@ workspace data. Here's an example:
    auto& xOut = outputWS->mutableX(i);
 
 This can cause problems in the case where the input and output
-workspaces are the same. Although the call to ``outputWS->x()`` to get a
+workspaces are the same. Although the call to ``outputWS->mutableX()`` to get a
 reference to the output data may look innocuous, in the case where
 different spectra are pointing to the same underlying data array this
 call will cause the array to be copied, which will invalidate the
