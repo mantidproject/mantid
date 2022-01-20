@@ -102,7 +102,7 @@ class ModestImage(MantidImage):
         x1 = max(int(np.floor(ind1[0] + 0.5)) + 1, 0)
 
         # Clip the data to the extents
-        data = self._full_res[y0:y1:1, x0:x1:1]
+        data = self._full_res[y0:y1, x0:x1]
         data = cbook.safe_masked_invalid(data)
         return data
 
