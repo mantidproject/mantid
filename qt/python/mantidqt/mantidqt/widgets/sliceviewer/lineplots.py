@@ -316,7 +316,7 @@ class RectangleSelectorMtd(RectangleSelector):
     def onmove(self, event):
         """
         Only process event if inside the axes with which the selector was init
-        This fixes bug #33264 where the x/y of the event originated form the line plot axes not the colorfill axes
+        This fixes bug where the x/y of the event originated from the line plot axes not the colorfill axes
         """
         if event.inaxes is None or self.ax == event.inaxes.axes:
             super(RectangleSelectorMtd, self).onmove(event)
