@@ -29,8 +29,10 @@ class InstrumentViewPresenter(ObservingPresenter):
 
         self.container = view
         if not self.container:
+            ws.readLock()
             self.container = InstrumentView(parent=parent, presenter=self,
                                             name=self.ws_name, window_flags=window_flags)
+            ws.unlock()
 
         if ads_observer:
             self.ads_observer = ads_observer
