@@ -45,7 +45,7 @@ class ResultsTabPresenter(QObject):
         else:
             self.view.set_output_results_button_no_warning()
 
-    def on_new_fit_performed(self, fit_info):
+    def on_new_fit_performed(self, fit_info=None):
         """React to a new fit created in the fitting tab"""
         # It's possible that this call can come in on a thread that
         # is different to the one that the view lives on.
@@ -53,11 +53,13 @@ class ResultsTabPresenter(QObject):
         # that 'self' lives on the same thread as the view and Qt forces
         # the call to the chose method to be done on the thread the
         # view lives on. This avoids errors from painting on non-gui threads.
-        new_fit_name = fit_info.output_workspace_names()
-        if new_fit_name and len(new_fit_name)>0:
-            QMetaObject.invokeMethod(self, "_on_new_fit_performed_impl", Q_ARG(str, new_fit_name[0]))
-        else:
-            QMetaObject.invokeMethod(self, "_on_new_fit_performed_impl")
+
+        new_fit_name = ";"
+        if fit_info:
+            new_fit_list = fit_info.output_workspace_names()
+            if new_fit_list and len(new_fit_list)>0:
+                new_fit_name = new_fit_list[0]
+        QMetaObject.invokeMethod(self, "_on_new_fit_performed_impl", Q_ARG(str, new_fit_name))
 
     def on_output_results_request(self):
         """React to the output results table request"""
