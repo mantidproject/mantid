@@ -1,4 +1,0 @@
-Bugfixes
---------
-
-- The ISIS SANS row copy, cut and paste has been overhauled fixing numerous edge-cases. These include: the paste order being reversed, unexpected rows appearing or clearing whilst pasting and blank rows appearing randomly.
