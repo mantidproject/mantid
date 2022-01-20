@@ -107,6 +107,7 @@ pipeline {
         }
     }
     post {
+        agent any
         cleanup{
             deleteDir()
         }
