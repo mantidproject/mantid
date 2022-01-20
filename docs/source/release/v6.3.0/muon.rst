@@ -16,7 +16,7 @@ New Features
 Bugfixes
 ########
 - Fixed a bug that prevented the frequency spectra from being plotted when data was binned.
-- When plotting transformations, FFT's now have y-units of ``intensity`` and Maxent's now have y-units of ``probability``.
+- When plotting transformations, FFTs now have y-units of ``intensity`` and Maxents now have y-units of ``probability``.
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -34,7 +34,7 @@ New Features
 Improvements
 ############
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
-- The :ref:`Results Tab <muon_results_tab-ref>` will now dispay a warning (red text and a tooltip) if the results table already exists.
+- The :ref:`Results Tab <muon_results_tab-ref>` will now display a warning (red text and a tooltip) if the results table already exists.
 - The results table now produces errors for log values (when they are available).
 - The plots no longer use scientific notation for the axis values.
 - On resizing the GUI, priority is given to plotting.

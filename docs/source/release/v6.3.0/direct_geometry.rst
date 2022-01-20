@@ -19,12 +19,17 @@ Bugfixes
 ########
 - Updated instrument created by :ref:`LoadNXSPE <algm-LoadNXSPE>` is viewable in instrument 3D view.
 
+Interfaces
+----------
+Improvements
+############
+- The :ref:`PyChop <PyChop>` GUI now has the ability to handle multiple independently phased choppers.
+
 CrystalField
 ------------
 Improvements
 ############
 - The :ref:`Crystal Field Python interface <Crystal Field Python Interface>` has two new fitting functions, ``two_step_fit`` and ``two_step_fit_sc``, alternating optimization over field parameters and peak parameters. One function is based on the Mantid fitting for both parts, the other uses ``scipy.optimize.minimize`` for the field parameters.
-- The :ref:`PyChop <PyChop>` GUI now has the ability to handle multiple independently phased choppers.
 
 MSlice
 ------

@@ -27,7 +27,7 @@ Improvements
 
   * The parameter ``IncidentSpectra`` has been renamed to fix a typo, which is a breaking change for this algorithm.
   * The algorithm now validates that the ``IncidentSpectra`` is in units of Wavelength and will output in the same unit as the ``InputWorkspace``.
-  * the addition of 1 to the Placzek correction has been moved out of this algorithm and into :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` .
+  * The addition of 1 to the Placzek correction has been moved out of this algorithm and into :ref:`TotScatCalculateSelfScattering <algm-TotScatCalculateSelfScattering>` .
 
 * :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` now supports cross-section separation, normalisation and proper unit setting, including conversion to S(Q, w), of D7 Time-of-flight mode data.
 * PEARL powder diffraction scripts now cope if ``absorption correction`` workspace is a different size to the ``Vanadium`` workspace without generating ``NaN`` values.
