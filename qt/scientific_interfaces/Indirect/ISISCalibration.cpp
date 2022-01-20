@@ -670,8 +670,8 @@ IAlgorithm_sptr ISISCalibration::calibrationAlgorithm(const QString &inputFiles)
   calibrationAlg->setProperty("BackgroundRange", backgroundRangeString().toStdString());
   calibrationAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
 
-  if (m_uiForm.ckScale->isChecked())
-    calibrationAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+  calibrationAlg->setProperty("ScaleByFactor", m_uiForm.ckScale->isChecked());
+  calibrationAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
   return calibrationAlg;
 }
 
