@@ -107,38 +107,33 @@ class ProjectRecovery(object):
         """
         self.saver.stop_recovery_thread()
 
-    def _remove_empty_folders_from_dir(self, directory):
+    def _remove_empty_folders_from_dir(self, directory: str):
         """
-        Will remove all empty directories in the passed directory
+        Will remove all empty directories in the given directory
         :param directory: String; A path to a directory
         """
         folders = glob(os.path.join(directory, "*", ""))
         for folder in folders:
-            try:
-                if len(os.listdir(folder)) == 0:
-                    self._remove_directory_and_directory_trees(folder)
-            except OSError:
-                # Fail silently as expected for all folders
-                pass
+            if len(os.listdir(folder)) == 0:
+                self._remove_directory_and_directory_trees(folder, ignore_errors=True)
 
-    def _remove_directory_and_directory_trees(self, directory):
+    def _remove_directory_and_directory_trees(self, directory: str, *, ignore_errors: bool = False):
         """
         Will remove the file/directory passed as directory if somewhere below the self.recovery_directory directory
         :param directory: String; A path to a directory/file
-        :return:
+        :param ignore_errors: If True all OSErrors raised are swallowed, else the exceptions are propagated to the
+        caller
+        :return: None
         """
         if directory is None or not os.path.exists(directory):
             return
 
         # Only allow deleting in subdirectories of workbench-recovery
         if self.recovery_directory not in directory:
-            raise RuntimeError("Project Recovery: Only allowed to delete trees in the recovery directory")
-
-        try:
-            shutil.rmtree(directory)
-        except FileNotFoundError:
-            # Doesn't matter if the file is deleted by another process as we are trying to do that anyway
+            logger.warning("Project Recovery: Only allowed to delete trees in the recovery directory")
             return
+
+        shutil.rmtree(directory, ignore_errors)
 
     @staticmethod
     def sort_by_last_modified(paths):
@@ -192,11 +187,13 @@ class ProjectRecovery(object):
         except OSError:
             return []
 
-    def remove_current_pid_folder(self):
+    def remove_current_pid_folder(self, ignore_errors=False):
         """
         Removes the current open PID folder
+        :param ignore_errors: If true then all errors are swallowed, else OSErrors
+        will be raised
         """
-        self._remove_directory_and_directory_trees(self.recovery_directory_pid)
+        self._remove_directory_and_directory_trees(self.recovery_directory_pid, ignore_errors=ignore_errors)
 
     ######################################################
     #  Saving
@@ -290,7 +287,7 @@ class ProjectRecovery(object):
 
     def remove_oldest_checkpoints(self):
         """
-        Removes the oldest checkpoint in the currently running programs directory if it has hit the max number of
+        Removes the oldest checkpoint in the currently running programs' directory if it has hit the max number of
         checkpoints
         """
         paths = self.listdir_fullpath(self.recovery_directory_pid)
@@ -299,7 +296,10 @@ class ProjectRecovery(object):
             # Order paths in reverse and remove the last folder
             paths.sort(reverse=True)
             for ii in range(self.maximum_num_checkpoints, len(paths)):
-                self._remove_directory_and_directory_trees(paths[ii])
+                try:
+                    self._remove_directory_and_directory_trees(paths[ii])
+                except OSError as exc:
+                    logger.warning(f"Unable to remove project recovery checkpoint '{paths[ii]}': {str(exc)}")
 
     def clear_all_unused_checkpoints(self, pid_dir=None):
         """
@@ -318,14 +318,7 @@ class ProjectRecovery(object):
         else:
             path = pid_dir
         if os.path.exists(path):
-            try:
-                self._remove_directory_and_directory_trees(path)
-            except Exception as e:
-                if isinstance(e, KeyboardInterrupt):
-                    raise
-                else:
-                    # Fail silently because it is just over diligent calls to clear checkpoints
-                    pass
+            self._remove_directory_and_directory_trees(path, ignore_errors=True)
 
     def repair_checkpoints(self):
         """
@@ -339,7 +332,7 @@ class ProjectRecovery(object):
         dirs_to_delete += self._find_checkpoints_which_are_locked(pid_dirs)
 
         for directory in dirs_to_delete:
-            self._remove_directory_and_directory_trees(directory)
+            self._remove_directory_and_directory_trees(directory, ignore_errors=True)
 
         # Now the checkpoints have been deleted we may have PID directories with no checkpoints present so delete them
         self._remove_empty_folders_from_dir(self.recovery_directory_hostname)
