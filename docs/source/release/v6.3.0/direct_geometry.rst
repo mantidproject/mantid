@@ -48,4 +48,5 @@ BugFixes
 - Fixed a bug that caused infinitely repeating energy unit conversions when changing the default energy unit.
 - When closing the dialog for adding a Bragg peak from a ``CIF`` file without selecting a ``CIF`` file, the corresponding menu entry now remains unselected.
 
+
 :ref:`Release 6.3.0 <v6.3.0>`
