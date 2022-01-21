@@ -563,6 +563,13 @@ class SliceViewerModelTest(unittest.TestCase):
                                                 has_original_workspace=True,
                                                 original_ws_ndims=4)
 
+    def test_mdhistoworkspace_does_not_support_dynamic_rebinning_if_altered(self):
+        self._assert_supports_dynamic_rebinning(False,
+                                                IMDHistoWorkspace,
+                                                has_original_workspace=True,
+                                                original_ws_ndims=3,
+                                                mdhisto_was_modified=True)
+
     def test_matrixworkspace_does_not_dynamic_rebinning(self):
         self._assert_supports_dynamic_rebinning(False, MatrixWorkspace)
 
@@ -977,7 +984,7 @@ class SliceViewerModelTest(unittest.TestCase):
         self.assertEqual(expectation, model.can_support_peaks_overlays())
 
     def _assert_supports_dynamic_rebinning(self, expectation, ws_type, ndims=3, has_original_workspace=None,
-                                           original_ws_ndims=None):
+                                           original_ws_ndims=None, mdhisto_was_modified=False):
         ws = _create_mock_workspace(ws_type,
                                     coords=SpecialCoordinateSystem.QLab,
                                     has_oriented_lattice=False,
@@ -993,6 +1000,16 @@ class SliceViewerModelTest(unittest.TestCase):
                                              has_oriented_lattice=False,
                                              ndims=original_ws_ndims)
             ws.getOriginalWorkspace.side_effect = lambda index: orig_ws
+
+        if ws_type == IMDHistoWorkspace:
+            if mdhisto_was_modified:
+                ws.getNumExperimentInfo.return_value = 1
+                mock_run = MagicMock()
+                mock_run.hasProperty.return_value = True  # run.hasProperty("mdhisto_was_modified")
+                mock_run.get.return_value = MagicMock(value='1')  # run.get("mdhisto_was_modified").value == '1'
+                ws.getExperimentInfo.return_value = MagicMock(return_value=mock_run)
+            else:
+                ws.getNumExperimentInfo.return_value = 0
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_dynamic_rebinning())
 
