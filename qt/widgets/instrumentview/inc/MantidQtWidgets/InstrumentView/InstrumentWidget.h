@@ -194,6 +194,9 @@ public:
   /// Whether the window has been fully initialized
   bool isFinished() const;
 
+  /// Whether the side tab is currently visible or is folded
+  bool isTabFolded() const;
+
 signals:
   void enableLighting(bool /*_t1*/);
   void plot1D(const QString & /*_t1*/, const std::set<int> & /*_t2*/, bool /*_t3*/);
@@ -298,6 +301,7 @@ protected:
 
   // GUI elements
   QLabel *mInteractionInfo;
+
   QTabWidget *mControlsTab;
   /// Control tabs
   QList<InstrumentWidgetTab *> m_tabs;

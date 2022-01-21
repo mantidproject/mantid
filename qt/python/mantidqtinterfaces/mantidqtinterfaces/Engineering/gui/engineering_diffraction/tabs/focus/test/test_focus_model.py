@@ -115,7 +115,37 @@ class FocusModelTest(unittest.TestCase):
         sample_foc_ws.name.return_value = "foc_name"
         mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
         mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
-        self.calibration.group = GROUP.TEXTURE
+        self.calibration.group = GROUP.TEXTURE20
+
+        # plotting focused runs
+        self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,
+                             calibration=self.calibration, save_dir='dir')
+
+        self.assertEqual(mock_save_out.call_count, 2)  # once for dSpacing and once for TOF
+        save_calls = 2 * [call([path.join('dir', 'User', rb_num, 'Focus')],
+                               sample_foc_ws, self.calibration, van_run, rb_num)]
+        mock_save_out.assert_has_calls(save_calls)
+
+    @patch(enggutils_path + '.mantid.DeleteWorkspace')
+    @patch(enggutils_path + '.mantid.ConvertUnits')
+    @patch(enggutils_path + '._save_output_files')
+    @patch(enggutils_path + '._apply_vanadium_norm')
+    @patch(enggutils_path + '._focus_run_and_apply_roi_calibration')
+    @patch(enggutils_path + '._load_run_and_convert_to_dSpacing')
+    @patch(enggutils_path + '.process_vanadium')
+    @patch(file_path + '.load_full_instrument_calibration')
+    def test_save_directories_texture30_with_RBnum(self, mock_load_inst_cal, mock_proc_van, mock_load_run,
+                                                   mock_foc_run, mock_apply_van, mock_save_out, mock_conv_units,
+                                                   mock_del_ws):
+        rb_num = "1"
+        van_run = "123456"
+        mock_proc_van.return_value = ("van_ws_foc", van_run)
+        mock_load_run.return_value = MagicMock()
+        sample_foc_ws = MagicMock()
+        sample_foc_ws.name.return_value = "foc_name"
+        mock_apply_van.return_value = sample_foc_ws  # xunit = dSpacing
+        mock_conv_units.return_value = sample_foc_ws  # xunit = TOF
+        self.calibration.group = GROUP.TEXTURE30
 
         # plotting focused runs
         self.model.focus_run(["305761"], "fake/van/path", plot_output=False, rb_num=rb_num,

@@ -43,7 +43,7 @@ private:
 
   void loadData();
   void loadMetaData();
-  void sortPolarisations();
+  API::WorkspaceGroup_sptr sortPolarisations();
   void loadInstrument(const API::MatrixWorkspace_sptr &, const std::string &);
   std::vector<double> loadTwoThetaDetectors(const API::MatrixWorkspace_sptr &, const NeXus::NXEntry &, const int);
   std::vector<double> loadBankParameters(const API::MatrixWorkspace_sptr &, const int);
@@ -62,8 +62,8 @@ private:
 
   double m_wavelength; // wavelength value is read from the YIG IPF
 
-  LoadHelper m_loadHelper;                         ///< a helper for metadata
-  API::WorkspaceGroup_sptr m_outputWorkspaceGroup; ///< output workspace
+  LoadHelper m_loadHelper;                                       ///< a helper for metadata
+  std::vector<API::MatrixWorkspace_sptr> m_outputWorkspaceGroup; ///< vector with output workspaces
 };
 
 } // namespace DataHandling

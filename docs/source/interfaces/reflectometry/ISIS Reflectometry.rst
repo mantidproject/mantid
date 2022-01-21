@@ -764,6 +764,8 @@ The four slicing options are described in more detail below:
 Workspaces will be named with a suffix providing information about the slice, e.g
 ``IvsQ_13460_slice_50_75``, ``IvsQ_13460_slice_75_100``, etc.
 
+.. _refl_exp_instrument_settings:
+
 Experiment and Instrument Settings Tabs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

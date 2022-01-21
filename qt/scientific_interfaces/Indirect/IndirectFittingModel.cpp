@@ -295,7 +295,11 @@ void IndirectFittingModel::addDefaultParameters() {
   m_defaultParameters.emplace_back(createDefaultParameters(WorkspaceID{0}));
 }
 
-void IndirectFittingModel::removeDefaultParameters() { m_defaultParameters.remove(WorkspaceID{0}); }
+void IndirectFittingModel::removeDefaultParameters() {
+  if (m_fitDataModel->getNumberOfWorkspaces() < m_defaultParameters.size()) {
+    m_defaultParameters.remove(WorkspaceID{0});
+  }
+}
 
 void IndirectFittingModel::clearWorkspaces() {
   m_fitOutput->clear();

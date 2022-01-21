@@ -18,6 +18,7 @@ BASE_AXIS_LABEL_COMMAND = "set_{}label({})"
 BASE_AXIS_LIM_COMMAND = "set_{}lim({})"
 BASE_SET_TITLE_COMMAND = "set_title({})"
 BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}')"
+BASE_SET_FACECOLOR_COMMAND = "set_facecolor({})"
 
 TICK_FORMATTER_CLASSES = {
     "NullFormatter": NullFormatter,
@@ -69,6 +70,10 @@ def generate_axis_scale_commands(ax):
         if scale != 'linear':
             commands.append(BASE_AXIS_SCALE_COMMAND.format(axis, scale))
     return commands
+
+
+def generate_axis_facecolor_commands(ax):
+    return BASE_SET_FACECOLOR_COMMAND.format(ax.get_facecolor())
 
 
 def generate_tick_params_kwargs(axis, tick_type="major"):

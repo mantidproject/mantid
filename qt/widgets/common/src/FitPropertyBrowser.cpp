@@ -1802,18 +1802,26 @@ void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
 }
 
 void FitPropertyBrowser::renameHandle(const std::string &oldName, const std::string &newName) {
-  int i = m_workspaceNames.indexOf(QString(oldName.c_str()));
-  if (i >= 0) {
-    m_workspaceNames.replace(i, QString::fromStdString(newName));
+  QString oldNameQ = QString::fromStdString(oldName);
+  QString newNameQ = QString::fromStdString(newName);
+  auto it = m_allowedSpectra.find(oldNameQ);
+  if (it != m_allowedSpectra.end()) {
+    auto indices = m_allowedSpectra.value(oldNameQ);
+    m_allowedSpectra.remove(oldNameQ);
+    m_allowedSpectra.insert(newNameQ, indices);
+  }
+  int iWorkspace = m_workspaceNames.indexOf(oldNameQ);
+  if (iWorkspace >= 0) {
+    m_workspaceNames.replace(iWorkspace, newNameQ);
     m_enumManager->setEnumNames(m_workspace, m_workspaceNames);
   }
-  workspaceChange(QString::fromStdString(newName));
+  workspaceChange(newNameQ);
 
   for (auto i = 0; i < m_wsListWidget->count(); ++i) {
     auto item = m_wsListWidget->item(i);
     if (item->text().toStdString() == oldName) {
       m_wsListWidget->takeItem(m_wsListWidget->row(item));
-      m_wsListWidget->insertItem(m_wsListWidget->row(item), QString::fromStdString(newName));
+      m_wsListWidget->insertItem(m_wsListWidget->row(item), newNameQ);
     }
   }
 }

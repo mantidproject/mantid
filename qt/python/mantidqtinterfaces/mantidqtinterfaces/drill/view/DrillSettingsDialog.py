@@ -157,6 +157,11 @@ class DrillSettingsDialog(QDialog):
 
     valueChanged = Signal(str)  # setting name
 
+    """
+    Sent when the apply button is clicked.
+    """
+    applied = Signal()
+
     def __init__(self, presenter, parent=None):
         """
         Initialize ths dialog. Connect the static buttons.
@@ -169,7 +174,7 @@ class DrillSettingsDialog(QDialog):
         self.okButton.clicked.connect(self.accept)
         self.cancelButton.clicked.connect(self.reject)
         self.applyButton.clicked.connect(
-                lambda : self.accepted.emit()
+                lambda : self.applied.emit()
                 )
 
         # widgets

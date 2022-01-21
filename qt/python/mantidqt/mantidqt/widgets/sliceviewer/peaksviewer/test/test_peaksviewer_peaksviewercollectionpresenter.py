@@ -72,7 +72,19 @@ class PeaksViewerCollectionPresenterTest(unittest.TestCase):
 
         presenter.remove_peaksworkspace(names[1])
 
+        presenter._actions_view.set_peaksworkspace.assert_called_with([names[0], names[2]])
         self.assertEqual([names[0], names[2]], presenter.workspace_names())
+        presenter._view.hide.assert_not_called()
+
+    def test_hides_view_when_last_named_workspace_removed(self, mock_create_model):
+        names = ["peaks1"]
+        presenter = PeaksViewerCollectionPresenter(MagicMock())
+        presenter.append_peaksworkspace(names[0])
+
+        presenter.remove_peaksworkspace(names[0])
+
+        presenter._actions_view.set_peaksworkspace.assert_called_with([])
+        presenter._view.hide.assert_called()
 
     def test_notify_called_for_each_subpresenter(self, mock_create_model):
         presenter = PeaksViewerCollectionPresenter(MagicMock())

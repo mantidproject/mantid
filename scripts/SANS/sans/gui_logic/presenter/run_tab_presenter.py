@@ -465,7 +465,7 @@ class RunTabPresenter(PresenterCommon):
             # 4. Set the batch file path in the model
             self._model.batch_file = batch_file_path
 
-        except (RuntimeError, ValueError, SyntaxError) as e:
+        except (RuntimeError, ValueError, SyntaxError, IOError, KeyError) as e:
             self.sans_logger.error("Loading of the batch file failed. {}".format(str(e)))
             self.display_warning_box('Warning', 'Loading of the batch file failed', str(e))
 

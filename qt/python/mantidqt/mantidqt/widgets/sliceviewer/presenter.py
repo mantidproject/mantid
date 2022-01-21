@@ -204,7 +204,8 @@ class SliceViewer(ObservingPresenter):
 
         ws_type = self.model.get_ws_type()
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
-            if sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
+            if self.model.get_number_dimensions() > 2 and \
+                    sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
                 # The dimension of the slicepoint has changed
                 self.new_plot(dimensions_changing=True)
             else:
@@ -438,11 +439,12 @@ class SliceViewer(ObservingPresenter):
             ws.unlock()
 
     def rename_workspace(self, old_name, new_name):
-        if str(self.model._get_ws()) == old_name:
+        if self.model.workspace_equals(old_name):
+            self.model.set_ws_name(new_name)
             self.view.emit_rename(self.model.get_title(new_name))
 
     def delete_workspace(self, ws_name):
-        if ws_name == str(self.model._ws):
+        if self.model.workspace_equals(ws_name):
             self.view.emit_close()
 
     def ADS_cleared(self):
