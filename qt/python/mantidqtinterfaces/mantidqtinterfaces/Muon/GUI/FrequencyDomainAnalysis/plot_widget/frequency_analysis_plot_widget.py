@@ -98,6 +98,7 @@ class FrequencyAnalysisPlotWidget(MuonAnalysisPlotWidget):
                                                          self.plotting_canvas_widgets[name].presenter)
         self._panes.append(self.modes[MAXENT])
         self.maxent_mode.update_freq_units.add_subscriber(self.fit_mode.update_fit_pane_observer)
+        self.fit_mode.update_maxent_plot.add_subscriber(self.maxent_mode.update_x_label_observer)
 
     @property
     def maxent_index(self):

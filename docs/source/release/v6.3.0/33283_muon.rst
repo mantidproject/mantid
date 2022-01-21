@@ -1,7 +1,0 @@
-ALC
----
-
-Bugfixes
-########
-
-- Fixed a bug that allowed decimal values for custom groupings.

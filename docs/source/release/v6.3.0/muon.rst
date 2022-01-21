@@ -11,13 +11,12 @@ Frequency Domain Analysis
 
 New Features
 ############
-
 - Users can now select the unit for the frequency spectra (MHz or Gauss) in plotting, by picking either ``Frequency`` or ``Field`` respectively after a transform has been calculated.
 
 Bugfixes
 ########
-
 - Fixed a bug that prevented the frequency spectra from being plotted when data was binned.
+- When plotting transformations, FFTs now have y-units of ``intensity`` and Maxents now have y-units of ``probability``.
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -25,7 +24,6 @@ Muon Analysis and Frequency Domain Analysis
 
 New Features
 ############
-
 - **Instead of plotting the confidence interval of a fit as an error bar, it is now represented by a shaded region.**
 
 .. image::  ../../images/Muon_error_shading.png
@@ -35,9 +33,8 @@ New Features
 
 Improvements
 ############
-
 - Changes have been made to improve the speed of Muon Analysis and Frequency Domain Analysis.
-- The :ref:`Results Tab <muon_results_tab-ref>` will now dispay a warning (red text and a tooltip) if the results table already exists.
+- The :ref:`Results Tab <muon_results_tab-ref>` will now display a warning (red text and a tooltip) if the results table already exists.
 - The results table now produces errors for log values (when they are available).
 - The plots no longer use scientific notation for the axis values.
 - On resizing the GUI, priority is given to plotting.
@@ -49,8 +46,6 @@ Improvements
 
 Bugfixes
 ########
-
-
 - Detaching tabs in Muon Analysis or Frequency Domain Analysis GUIs and then closing Mantid no longer causes a crash.
 - Dragging tabs in Muon Analysis or Frequency Domain Analysis GUIs no longer shows a translucent preview that does nothing.
 - Mantid no longer crashes when changing tabs in either Muon Analysis or Frequency Domain Analysis on MacOS.
@@ -63,16 +58,17 @@ ALC
 
 New Features
 ############
-
 - Can now read ``nxs_v2`` files.
 
+Bugfixes
+########
+- Fixed a bug that allowed decimal values for custom groupings.
 
 Algorithms
 ----------
 
 Improvements
 ############
-
 - :ref:`LoadPSIMuonBin <algm-LoadPSIMuonBin>` can now load a subset of the spectra.
 
 
