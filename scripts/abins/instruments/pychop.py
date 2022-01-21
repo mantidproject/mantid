@@ -4,7 +4,6 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import mantid.kernel
-from mantidqtinterfaces.PyChop import PyChop2
 from mantidqtinterfaces.PyChop import Instruments as pychop_instruments
 
 from abins.constants import MILLI_EV_TO_WAVENUMBER
@@ -30,7 +29,10 @@ class PyChopInstrument(DirectInstrument):
         self._chopper_frequency = self._check_chopper_frequency(chopper_frequency)
 
         self._polyfits = {}
-        self._tthlims = pychop_instruments.Instrument(self._name).detector.tthlims
+
+        self._pychop_instrument = pychop_instruments.Instrument(
+                self._name, chopper=setting, freq=chopper_frequency)
+        self._tthlims = self._pychop_instrument.detector.tthlims
 
     def _check_chopper_frequency(
             self,
@@ -68,11 +70,8 @@ class PyChopInstrument(DirectInstrument):
         frequencies_mev = frequencies_invcm / MILLI_EV_TO_WAVENUMBER
         ei_mev = self._e_init / MILLI_EV_TO_WAVENUMBER
 
-        resolution, _ = PyChop2.calculate(inst=self._name,
-                                          package=self.get_parameter('chopper'),
-                                          freq=self._chopper_frequency,
-                                          ei=ei_mev,
-                                          etrans=frequencies_mev.tolist())
+        resolution = self._pychop_instrument.getResolution(Ei_in=ei_mev,
+                                                           Etrans=frequencies_mev.tolist())
 
         fit = np.polyfit(frequencies_invcm, resolution * MILLI_EV_TO_WAVENUMBER, order)
 
