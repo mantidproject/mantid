@@ -9,12 +9,16 @@ from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, Gener
 from mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQ, FIELD, GAUSS, MHz
 
 
+FREQ_X_LABEL = f'Maxent ({MHz}) and Counts'
+FIELD_X_LABEL =  f'Maxent ({GAUSS}) and Counts'
+
+
 class DualPlotMaxentPanePresenter(BasePanePresenter):
 
     def __init__(self, view, model, context, figure_presenter):
         super().__init__(view, model, context, figure_presenter)
         # view set up
-        self._data_type = [f'Maxent ({MHz}) and Counts', f'Maxent ({GAUSS}) and Counts']
+        self._data_type = [FREQ_X_LABEL, FIELD_X_LABEL]
         self._sort_by = ["Maxent + Groups/detectors"]
         self.update_view()
         self._view.enable_plot_type_combo()
@@ -37,6 +41,7 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
             self.handle_reconstructed_data_updated)
         self.instrument_observer = GenericObserver(self.clear)
         self.update_freq_units = GenericObservable()
+        self.update_x_label_observer = GenericObserver(self._update_pane)
 
     def change_time_plot(self, method):
         self._model.set_if_groups(method=="Groups")
@@ -96,3 +101,12 @@ class DualPlotMaxentPanePresenter(BasePanePresenter):
         # update plot -> will update range too
         self.handle_maxent_data_updated(self.context._frequency_context.switch_units_in_name(self._maxent_ws_name))
         self.update_freq_units.notify_subscribers()
+
+    def _update_pane(self):
+        if self.context.frequency_context.unit() == GAUSS:
+            self._view.set_plot_type(FIELD_X_LABEL)
+        else:
+            self._view.set_plot_type(FREQ_X_LABEL)
+        self._figure_presenter.set_plot_range(self.context.frequency_context.range())
+        new_ws_name = self.context._frequency_context.switch_units_in_name(self._maxent_ws_name)
+        self.handle_maxent_data_updated(new_ws_name)
