@@ -7,33 +7,18 @@ Mantid Workbench Changes
 
 New features
 ------------
-* The :ref:`InstrumentViewer` has several new features.
-
-  * **In the pick tab, a new panel allowing for direct rebinning of the workspace now exists.**
-  .. figure:: ../../images/iview_insitu_rebin.png
-     :width: 500px
-     :align: center
-  * The ability to rotate Ellipse and Rectangle shapes has been added.
-  * The integration slider now supports discrete steps when the axis has discrete values.
-
-* Table workspaces can now have read-only columns added to them (``ws.addReadOnlyColumn(<TYPE>, <NAME>)``). Existing columns can also be set to be read-only (``ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)``).
-* **The Error Reporter can now remember and prefill the user's name and email.**
+- Table workspaces can now have read-only columns added to them (``ws.addReadOnlyColumn(<TYPE>, <NAME>)``). Existing columns can also be set to be read-only (``ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)``).
+- **The Error Reporter can now remember and prefill the user's name and email.**
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
 
 Improvements
 ------------
-* The :ref:`InstrumentViewer` has also been improved in several ways
-
-  * In the pick tab integration is now by default over the entire detector unless some other curve is requested (such as by drawing a shape or picking a detector).
-  * The instrument is now loaded in a background thread when opening the :ref:`InstrumentViewer` which prevents running scripts from hanging.
-  * The Y-position of the HKL labels on the miniplot is now fixed in Axes coordinates so that the label remains visible as the zoom level changes.
-
-* The algorithm browser has been tidied to reduce the number of single algorithm categories.
-* Cells containing vector data in a table workspace can now be viewed in the table workspace display.
-* The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path).
-* The font in python editor and IPython console are ensured to be monospace. It also ensures monospace on KDE Neon distributions too.
-* There is now a warning in the settings to say that changes to project recovery settings are only applied after restarting workbench.
+- The algorithm browser has been tidied to reduce the number of single algorithm categories.
+- Cells containing vector data in a table workspace can now be viewed in the table workspace display.
+- The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path).
+- The font in python editor and IPython console are ensured to be monospace. It also ensures monospace on KDE Neon distributions too.
+- There is now a warning in the settings to say that changes to :ref:`Project Recovery<Project Recovery>` settings are only applied after restarting workbench.
 
 Bugfixes
 --------
@@ -53,13 +38,36 @@ Bugfixes
 
 * Fixed issue in :ref:`DrILL <DrILL-ref>` when ``ASCII`` output was requested but the logs to save were not defined for that instrument.
 * The ``About Mantid`` page now appears on a new full release, even if a recent nightly was previously launched.
+* The instrument and facility combo-boxes are now always appropriately sized on the ``About Mantid`` page on macOS.
 * Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 * Workbench will no longer hang if an algorithm was running when workbench was closed.
 * Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
 * Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``# `` will be inserted at the position of the first non-whitespace character in the line).
-* Fixed a bug where folding the pick tab in the :ref:`InstrumentViewer` crashed Mantid.
 * Empty group workspaces can now be deleted rather than needing to be ungrouped.
-* Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` of the :ref:`InstrumentViewer` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
+* Fixed a bug in :ref:`Project Recovery<Project Recovery>` when attempting to remove non-empty directories and raising the error reporter.
+
+InstrumentViewer
+----------------
+New features
+############
+- **In the pick tab, a new panel allowing for direct rebinning of the workspace now exists.**
+.. figure:: ../../images/iview_insitu_rebin.png
+     :width: 500px
+     :align: center
+- The ability to rotate Ellipse and Rectangle shapes has been added.
+- The integration slider now supports discrete steps when the axis has discrete values.
+
+Improvements
+############
+- In the :ref:`Pick Tab<instrumentviewer_pick_tab>` integration is now by default over the entire detector unless some other curve is requested (such as by drawing a shape or picking a detector).
+- The instrument is now loaded in a background thread when opening the :ref:`InstrumentViewer` which prevents running scripts from hanging.
+- The Y-position of the HKL labels on the miniplot is now fixed in Axes coordinates so that the label remains visible as the zoom level changes.
+
+Bugfixes
+########
+- Fixed a bug where folding the :ref:`Pick Tab<instrumentviewer_pick_tab>` crashed Mantid.
+- Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
+- Getter for the :ref:`InstrumentViewer` will return a fully constructed instance to avoid segmentation fault.
 
 SliceViewer
 -----------
@@ -78,5 +86,6 @@ Bugfixes
 - The peak actions combobox is updated when an overlain peak table is deleted.
 - Users are now able to export x/y cuts and 2D slices from the region of interest tool for ``MDHisto`` workspaces.
 - Transposing data (i.e. swapping x and y axes) of ``2D MD`` workspace, now works without error.
+- Fixed issues with the colorbar autoscale not updating correctly on zoom.
 
 :ref:`Release 6.3.0 <v6.3.0>`
