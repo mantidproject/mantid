@@ -122,12 +122,13 @@ class SliceViewerModel:
         return False
 
     def can_rebin_original_workspace(self):
+        ws = self._get_ws()
         if self.get_ws_type() == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(0):
-            has_same_dims = self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims()
-            # check if mdhisto altered (e.g. scaled) since original ws BinMD - then not valid to rebin original
-            run = self._get_ws().getExperimentInfo(0).run()
-            mdhisto_has_been_altered = False if not run.hasProperty("mdhisto_was_modified") else bool(
-                int(run.get("mdhisto_was_modified").value))
+            has_same_dims = ws.getOriginalWorkspace(0).getNumDims() == ws.getNumDims()
+            # check if mdhisto altered since original ws BinMD - then not valid to rebin original
+            mdhisto_has_been_altered = False
+            if ws.getNumExperimentInfo() > 0 and ws.getExperimentInfo(0).run().hasProperty("mdhisto_was_modified"):
+                mdhisto_has_been_altered = bool(int(ws.getExperimentInfo(0).run().get("mdhisto_was_modified").value))
             return has_same_dims and not mdhisto_has_been_altered
         else:
             return False
