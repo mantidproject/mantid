@@ -194,6 +194,68 @@ class SliceviewerDataViewTest(unittest.TestCase):
                                                     norm=self.view.colorbar.get_norm(),
                                                     extent=original_image.get_extent())
 
+    def test_draw_plot_clears_title(self):
+        self.view.ax = mock.Mock()
+
+        self.view.draw_plot()
+
+        self.view.ax.set_title.assert_called_once_with('')
+
+    def test_draw_plot_draws_canvas(self):
+        self.view.ax = mock.Mock()
+        self.view.canvas = mock.Mock()
+
+        self.view.draw_plot()
+
+        self.view.canvas.draw.assert_called_once()
+
+    def test_draw_plot_updates_toolbar(self):
+        self.view.ax = mock.Mock()
+
+        self.view.draw_plot()
+
+        self.view.mpl_toolbar.update.assert_called_once()
+
+    def test_draw_plot_updates_colorbar(self):
+        self.view.ax = mock.Mock()
+        self.view.image = mock.NonCallableMock()
+
+        self.view.draw_plot()
+
+        self.view.colorbar.set_mappable.assert_called_once_with(self.view.image)
+        self.view.colorbar.update_clim.assert_called_once()
+
+    def test_draw_plot_does_not_update_colorbar_if_image_is_none(self):
+        self.view.ax = mock.Mock()
+        self.view.image = None
+
+        self.view.draw_plot()
+
+        self.view.colorbar.set_mappable.assert_not_called()
+        self.view.colorbar.update_clim.assert_not_called()
+
+    def test_draw_plot_updates_line_plots_if_active(self):
+        self.view.ax = mock.Mock()
+        self.view.image = mock.NonCallableMock()
+        self.view._line_plots = mock.Mock()
+        self.view.line_plots_active = True
+
+        self.view.draw_plot()
+
+        self.view._line_plots.plotter.delete_line_plot_lines.assert_called_once()
+        self.view._line_plots.plotter.update_line_plot_labels.assert_called_once()
+
+    def test_draw_plot_does_not_update_line_plots_if_inactive(self):
+        self.view.ax = mock.Mock()
+        self.view.image = mock.NonCallableMock()
+        self.view._line_plots = mock.Mock()
+        self.view.line_plots_active = False
+
+        self.view.draw_plot()
+
+        self.view._line_plots.plotter.delete_line_plot_lines.assert_not_called()
+        self.view._line_plots.plotter.update_line_plot_labels.assert_not_called()
+
 
 if __name__ == '__main__':
     unittest.main()
