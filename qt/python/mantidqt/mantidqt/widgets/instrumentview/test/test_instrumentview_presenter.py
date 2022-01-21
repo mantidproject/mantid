@@ -10,6 +10,7 @@ import unittest
 from unittest import mock
 
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from testhelpers import assertRaisesNothing
 
 
 class InstrumentViewPresenterTest(unittest.TestCase):
@@ -20,13 +21,29 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         self.ws = mock.NonCallableMock()
         self.presenter = InstrumentViewPresenter(ws=self.ws, view=self.mock_view)
 
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
-    def test_ws_name_passed_in_constructor(self, mock_view):
+    def test_ws_name_passed_in_constructor(self, mock_view, mock_ads):
+        mock_ads.retrieve.return_value = mock.NonCallableMock()
+
         ws = mock.NonCallableMock()
         presenter = InstrumentViewPresenter(ws)
 
         mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
                                           name=str(ws), window_flags=mock.ANY)
+
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
+    def test_constructor_works_with_ws_name(self, mock_view, mock_ads):
+        """
+        Check that the InstrumentViewPresenter constructs correctly when passing the name
+        of the workspace rather than the workspace object.
+        """
+        mock_ads.retrieve.return_value = mock.NonCallableMock()
+        ws_name = "my_workspace"
+        presenter = assertRaisesNothing(self, InstrumentViewPresenter, ws_name)
+        mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
+                                          name=ws_name, window_flags=mock.ANY)
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentViewManager")
     def test_constructor_registers_with_inst_view_manager(self, mock_manager):
