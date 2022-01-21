@@ -16,6 +16,7 @@ Bugfixes
 
 - The :ref:`ISIS SANS Interface <ISIS_Sans_interface_contents>` will now generate and display a range of wavelength bins
   specified in TOML files. This previously showed an empty field, despite correctly using the input from the TOML file.
+- Loading a ``CSV`` file with a missing column now shows an error box explaining the problem. Previously, it showed an uncaught exception.
 
 
 :ref:`Release 6.3.0 <v6.3.0>`

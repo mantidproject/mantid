@@ -77,6 +77,8 @@ The text box below the tool bar show textual information about selected detector
 Documentation will be updated as additional features are added.
 
 
+.. _instrumentviewer_draw_tab:
+
 Draw Tab
 --------
 The Draw tab contains tools for creating and editing geometrical shapes which can be used for selecting regions of interest (ROI), masking or grouping detectors.
