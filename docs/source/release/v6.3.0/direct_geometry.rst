@@ -18,7 +18,6 @@ Improvements
 Bugfixes
 ########
 - Updated instrument created by :ref:`LoadNXSPE <algm-LoadNXSPE>` is viewable in instrument 3D view.
-- :ref:`DirectILLReduction <algm-DirectILLReduction>` is fixed to handle the absolute unit normalisation option.
 
 Interfaces
 ----------
