@@ -537,8 +537,8 @@ class FittingDataModel(object):
             ax[0].plot(ws, 'x')
             ax[1].plot(ws_bgsub, 'x', label='background subtracted data')
             ax[0].plot(bg, '-r', label='background')
-            ax[0].legend(fontsize=8.0).set_draggable(True).legend
-            ax[1].legend(fontsize=8.0).set_draggable(True).legend
+            ax[0].legend(fontsize=8.0)
+            ax[1].legend(fontsize=8.0)
             fig.canvas.mpl_connect("draw_event", on_draw)
             fig.show()
 
