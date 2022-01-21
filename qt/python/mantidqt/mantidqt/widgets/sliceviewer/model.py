@@ -121,13 +121,23 @@ class SliceViewerModel:
 
         return False
 
+    def can_rebin_original_workspace(self):
+        if self.get_ws_type() == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(0):
+            has_same_dims = self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims()
+            # check if mdhisto altered (e.g. scaled) since original ws BinMD - then not valid to rebin original
+            run = self._get_ws().getExperimentInfo(0).run()
+            mdhisto_has_been_altered = False if not run.hasProperty("mdhisto_was_modified") else bool(
+                int(run.get("mdhisto_was_modified").value))
+            return has_same_dims and not mdhisto_has_been_altered
+        else:
+            return False
+
     def can_support_dynamic_rebinning(self) -> bool:
         """
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = self.get_ws_type()
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self._get_ws().hasOriginalWorkspace(
-            0) and self._get_ws().getOriginalWorkspace(0).getNumDims() == self._get_ws().getNumDims())
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and self.can_rebin_original_workspace())
 
     def set_ws_name(self, new_name):
         self._ws_name = new_name
