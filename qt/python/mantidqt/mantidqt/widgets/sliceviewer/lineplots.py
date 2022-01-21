@@ -11,7 +11,6 @@ from functools import lru_cache
 from typing import Any, Optional, Tuple
 
 # 3rd party imports
-from matplotlib.artist import setp as set_artist_property
 from matplotlib.axes import Axes
 from matplotlib.image import AxesImage
 from matplotlib.gridspec import GridSpec
@@ -162,8 +161,8 @@ class LinePlots:
         # Create a new GridSpec and reposition the existing image Axes
         gs = GridSpec(2, 2, width_ratios=[1, 4], height_ratios=[4, 1], wspace=0.0, hspace=0.0)
         image_axes.set_position(gs[1].get_position(self._fig))
-        set_artist_property(image_axes.get_xticklabels(), visible=False)
-        set_artist_property(image_axes.get_yticklabels(), visible=False)
+        image_axes.get_xaxis().set_visible(False)
+        image_axes.get_yaxis().set_visible(False)
         self._axx = self._fig.add_subplot(gs[3], sharex=image_axes)
         self._axx.yaxis.tick_right()
         self._axy = self._fig.add_subplot(gs[0], sharey=image_axes)
@@ -189,6 +188,8 @@ class LinePlots:
 
         gs = GridSpec(1, 1)
         image_axes.set_position(gs[0].get_position(self._fig))
+        image_axes.get_xaxis().set_visible(True)
+        image_axes.get_yaxis().set_visible(True)
         image_axes.xaxis.tick_bottom()
         image_axes.yaxis.tick_left()
         self._axx, self._axy = None, None
