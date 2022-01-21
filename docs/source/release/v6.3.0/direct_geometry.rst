@@ -33,7 +33,6 @@ Improvements
 
 MSlice
 ------
-
 BugFixes
 ########
 - Fixed a bug that caused empty plot windows and crashes when running scripts generated from plot windows.
