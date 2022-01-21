@@ -10,7 +10,7 @@ def build_and_test_linux() {
 
 def build_and_test_macos() {
     git_clone()
-    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE osx-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE osx --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
 }
 
 def build_and_test_win(){
