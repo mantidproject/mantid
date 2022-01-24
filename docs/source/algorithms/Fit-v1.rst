@@ -697,18 +697,16 @@ Comparison with scipy.optimize.curve_fit
 ----------------------------------------
 
 The `scipy.optimize.curve_fit` function is a commonly used optimiser for fitting models to data.
-By default the `curve_fit` scaled the covariance matrix from the fit by the reduced chi-squared -
+By default `curve_fit` scales the covariance matrix from the fit by the reduced chi-squared statistic -
 this is equivalent to scaling the errorbars on the data points such that the reduced chi-squared is unity
-(the expectation value for a "good" fit). This can be useful if a fit is performed with unit weights
-or the weights are only relative. However for absolute weights (such as those calculated from the error on the counts
-using Poisson statistics) this is not valid.
+(the expectation value for a "good" fit). This can be desirable if a fit is performed with unit weights
+or the weights are only to be interpreted as relative.
 
-This leads to a discrepancy in the uncertainty on the best fit parameters and the confidence bounds
-on the fitted curve between the default behaviour of `curve_fit` and the mantid `Fit` algorithm (which does not scale
-the covariance matrix since v6.3).
-The scaling of the covariance matrix in `curve_fit` is governed by the `absolute_sigma` parameter
-(by default `absolute_sigma = False`). Here we show that the mantid `Fit` algorithm and `curve_fit` give the same
-results when `absolute_sigma=True`.
+In mantid the weights are typically calculated from the error on a number of counts using Poisson statistics and
+should be interpreted as absolute. Therefore, the mantid `Fit` algorithm does not scale the covariance matrix by the
+reduced chi-squared (since v6.3). The scaling of the covariance matrix in `curve_fit` is governed by the
+`absolute_sigma` parameter (by default `absolute_sigma = False`). Here we show that the mantid `Fit` algorithm and
+`curve_fit` give the same result when `absolute_sigma=True`.
 
 .. code-block:: python
 
@@ -739,7 +737,7 @@ results when `absolute_sigma=True`.
 
     # Generate data
     noise_stdev = 0.1
-    err_scale = 0.5  # 1 => chi-squared ~= 1 (i.e. errorbars will correspond to stdev of simulated noise)
+    err_scale = 0.5  # 1 => chi-squared ~ 1 (i.e. errorbars will correspond to stdev of simulated noise)
     m0 = 1
     c0 = 0.5
     x = np.linspace(0,1,20)
@@ -761,7 +759,7 @@ results when `absolute_sigma=True`.
     chisq = np.sum(((y - func(x, *popt))/e)**2)
     red_chisq = chisq/(len(x) - len(popt))
     # calc confidence limits
-    dfdp = [1, x]  # d(func)/dparam = [dy/dc, dy/dm]
+    dfdp = [1, x]  # dy/dparam = [dy/dc, dy/dm]
     upper_true, lower_true = confidence_band(x, func(x, *popt), pcov_true, dfdp)
     upper_false, lower_false = confidence_band(x, func(x, *popt), pcov_false, dfdp)
 
