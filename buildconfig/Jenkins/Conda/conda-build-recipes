@@ -27,10 +27,13 @@
 
 # Setup expected variables
 WORKSPACE=$1
-[ -z "$WORKSPACE"] && echo "A workspace argument is required" && exit 1
+if [[ -z "$WORKSPACE" ]]; then
+    echo "A workspace argument is required"
+    exit 1
+fi
 shift
 if [[ $OSTYPE == "msys"* ]]; then
-    if [[ "$WORKSPACE" == *'\'* ]] then
+    if [[ "$WORKSPACE" == *'\'* ]]; then
         echo "You have \ or \\ in your Workspace path, this is not supported on Windows."
         exit 1
     fi
