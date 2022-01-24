@@ -11,8 +11,7 @@ from numpy import isclose
 from matplotlib.ticker import NullLocator
 from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation
 
-from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.utility import get_autoscale_limits
+from mantid.plots.utility import convert_color_to_hex, get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
 
 BASE_AXIS_LABEL_COMMAND = "set_{}label({})"
