@@ -8,6 +8,7 @@
 
 from numpy import isclose
 
+from matplotlib import rcParams
 from matplotlib.ticker import NullLocator
 from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation
 
@@ -36,6 +37,8 @@ DEFAULT_TICK_FORMATTERS = {
     "linear": {"major": ScalarFormatter, "minor": NullFormatter},
     "log": {"major": LogFormatterSciNotation, "minor": LogFormatterSciNotation}
 }
+
+DEFAULT_FACECOLOR = rcParams['axes.facecolor']
 
 
 def generate_axis_limit_commands(ax):
@@ -73,7 +76,11 @@ def generate_axis_scale_commands(ax):
 
 
 def generate_axis_facecolor_commands(ax):
-    return BASE_SET_FACECOLOR_COMMAND.format(convert_color_to_hex(ax.get_facecolor()))
+    # Check that the colour is different to default, otherwise return None.
+    colour = convert_color_to_hex(ax.get_facecolor()).lower()
+    if colour != convert_color_to_hex(DEFAULT_FACECOLOR).lower():
+        return BASE_SET_FACECOLOR_COMMAND.format(colour)
+    return None
 
 
 def generate_tick_params_kwargs(axis, tick_type="major"):
