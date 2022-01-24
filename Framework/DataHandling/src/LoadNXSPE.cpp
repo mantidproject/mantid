@@ -273,7 +273,7 @@ void LoadNXSPE::exec() {
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
-  const auto shape = Geometry::ShapeFactory().createSphere(V3D(0, 0, 0), 0.01);
+  constexpr double deg2rad = M_PI / 180.0;
 
   for (std::size_t i = 0; i < numSpectra; ++i) {
     double r = 1.0;
@@ -283,6 +283,9 @@ void LoadNXSPE::exec() {
 
     Kernel::V3D pos;
     pos.spherical(r, polar.at(i), azimuthal.at(i));
+    // Define the size of the detector using the minimum of the polar or azimuthal width
+    double rr = r * sin(std::min(polar_width.at(i), azimuthal_width.at(i)) * deg2rad / 2);
+    const auto shape = Geometry::ShapeFactory().createSphere(V3D(0, 0, 0), rr);
 
     Geometry::Detector *det = new Geometry::Detector("pixel", static_cast<int>(i + 1), sample);
     det->setPos(pos);
