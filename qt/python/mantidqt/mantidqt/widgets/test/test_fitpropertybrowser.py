@@ -295,8 +295,14 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         property_browser = self._create_widget(canvas=canvas)
 
-        #if only 1 spectra is returned, bin spectra has been correctly excluded
+        #if only 1 spectra is returned, bin spectra has been correctly excluded, spectra correctly included
         self.assertEqual(len(property_browser._get_allowed_spectra()),1)
+
+        #remove valid spectra plot, leaving a single bin plot
+        fig.axes[0].lines[0].remove()
+
+        #check no spectra is now returned.
+        self.assertFalse(property_browser._get_allowed_spectra())
 
     # Private helper functions
     @classmethod
