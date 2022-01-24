@@ -76,7 +76,7 @@ SAMPLE_SCRIPT_WITH_FIT = ("from mantid.simpleapi import Fit\n"
                           "axes[1].plot(...)\n"
                           "axes[1].set_xlim(...)\n"
                           "axes[1].set_ylim(...)\n"
-                          "axes[1].set_facecolor('#8a9aff'')\n"
+                          "axes[1].set_facecolor('#8a9aff')\n"
 
                           "\n"
                           "plt.show()"
