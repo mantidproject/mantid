@@ -299,7 +299,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(len(property_browser._get_allowed_spectra()),1)
 
         #remove valid spectra plot, leaving a single bin plot
-        fig.axes[0].lines[0].remove()
+        fig.get_axes()[0].remove_artists_if(lambda artist: artist.get_label() == 'ws_name: spec 1')
 
         #check no spectra is now returned.
         self.assertFalse(property_browser._get_allowed_spectra())
