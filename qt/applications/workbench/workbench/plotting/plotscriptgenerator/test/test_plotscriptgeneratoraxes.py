@@ -80,8 +80,8 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot([-10, 10], [1, 2])
-        ax.set_facecolor("#00000000")
-        self.assertEqual("set_facecolor((0.0, 0.0, 0.0, 0.0))", generate_axis_facecolor_commands(ax))
+        ax.set_facecolor("#8a9aff")
+        self.assertEqual("set_facecolor('#8a9aff')", generate_axis_facecolor_commands(ax))
         plt.close()
         del fig
 

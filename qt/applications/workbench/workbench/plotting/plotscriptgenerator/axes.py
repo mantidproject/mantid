@@ -11,6 +11,7 @@ from numpy import isclose
 from matplotlib.ticker import NullLocator
 from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation
 
+from mantid.plots.legend import convert_color_to_hex
 from mantid.plots.utility import get_autoscale_limits
 from workbench.plotting.plotscriptgenerator.utils import convert_value_to_arg_string
 
@@ -18,7 +19,7 @@ BASE_AXIS_LABEL_COMMAND = "set_{}label({})"
 BASE_AXIS_LIM_COMMAND = "set_{}lim({})"
 BASE_SET_TITLE_COMMAND = "set_title({})"
 BASE_AXIS_SCALE_COMMAND = "set_{}scale('{}')"
-BASE_SET_FACECOLOR_COMMAND = "set_facecolor({})"
+BASE_SET_FACECOLOR_COMMAND = "set_facecolor('{}')"
 
 TICK_FORMATTER_CLASSES = {
     "NullFormatter": NullFormatter,
@@ -73,7 +74,7 @@ def generate_axis_scale_commands(ax):
 
 
 def generate_axis_facecolor_commands(ax):
-    return BASE_SET_FACECOLOR_COMMAND.format(ax.get_facecolor())
+    return BASE_SET_FACECOLOR_COMMAND.format(convert_color_to_hex(ax.get_facecolor()))
 
 
 def generate_tick_params_kwargs(axis, tick_type="major"):
