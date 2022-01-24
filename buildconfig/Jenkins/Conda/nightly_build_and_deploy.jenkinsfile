@@ -1,16 +1,16 @@
 def git_clone(){
     git url: 'https://github.com/mantidproject/mantid.git',
-        branch: 'main_pipeline_prototype'
+        branch: "release-next"
 }
 
 def build_and_test_linux() {
     git_clone()
-    bash "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE linux-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE linux-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
 }
 
 def build_and_test_macos() {
     git_clone()
-    bash "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE osx-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE osx --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
 }
 
 def build_and_test_win(){
@@ -19,7 +19,7 @@ def build_and_test_win(){
 }
 
 def conda_build_UNIX(){
-    bash "$WORKSPACE/buildconfig/Jenkins/Conda/conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-workbench"
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-workbench"
 }
 
 def conda_build_linux() {
@@ -104,11 +104,6 @@ pipeline {
                 copyArtifacts filter: 'mantid*.tar.bz2', fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
                 sh "$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $WORKSPACE/mantid-*.tar.bz2 $WORKSPACE/mantidqt-*.tar.bz2 $WORKSPACE/mantidworkbench-*.tar.bz2"
             }
-        }
-    }
-    post {
-        cleanup{
-            deleteDir()
         }
     }
 }

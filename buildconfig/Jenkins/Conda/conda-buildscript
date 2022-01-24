@@ -51,7 +51,7 @@ fi
 
 CONDA_ENV_NAME="mantid-developer"
 
-if [-z "$BUILD_THREADS" ]; then
+if [[ -z "$BUILD_THREADS" ]]; then
     if [[ $OSTYPE == 'darwin'* ]]; then
         BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
     else
