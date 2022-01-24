@@ -368,8 +368,26 @@ void ISISCalibration::setDefaultInstDetails(QMap<QString, QString> const &instru
 
   // Set peak and background ranges
   const auto ranges = getRangesFromInstrument();
-  setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
-  setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+
+  QFileInfo fi(m_lastCalPlotFilename);
+  QString wsname = fi.baseName();
+
+  if (Mantid::API::AnalysisDataService::Instance().doesExist(wsname.toStdString())) {
+    const auto input =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsname.toStdString()));
+    const auto &dataX = input->x(0);
+    if (dataX.back() <= getValueOr(ranges, "peak-end-tof", 0.0) ||
+        dataX.front() >= getValueOr(ranges, "peak-start-tof", 0.0)) {
+      setPeakRange((3.0 * dataX.front() + dataX.back()) / 4.0, (dataX.front() + 3.0 * dataX.back()) / 4.0);
+      setBackgroundRange(dataX.front(), (7.0 * dataX.front() + dataX.back()) / 8.0);
+    } else {
+      setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
+      setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+    }
+  } else {
+    setPeakRange(getValueOr(ranges, "peak-start-tof", 0.0), getValueOr(ranges, "peak-end-tof", 0.0));
+    setBackgroundRange(getValueOr(ranges, "back-start-tof", 0.0), getValueOr(ranges, "back-end-tof", 0.0));
+  }
 
   auto const hasResolution = hasInstrumentDetail(instrumentDetails, "resolution");
   m_uiForm.ckCreateResolution->setEnabled(hasResolution);
@@ -487,13 +505,15 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
 
       const auto energyRange = getXRangeFromWorkspace(ws);
       // Set default rebinning bounds
-      QPair<double, double> peakERange(-res * 10, res * 10);
+      QPair<double, double> peakERange(-res * 10 + (energyRange.second + energyRange.first) / 2.0,
+                                       res * 10 + (energyRange.second + energyRange.first) / 2.0);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
       setPlotPropertyRange(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], energyRange);
       setRangeSelector(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], peakERange);
 
       // Set default background bounds
-      QPair<double, double> backgroundERange(-res * 9, -res * 8);
+      QPair<double, double> backgroundERange(-res * 20 + (energyRange.second + energyRange.first) / 2.0,
+                                             -res * 15 + (energyRange.second + energyRange.first) / 2.0);
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
     }
