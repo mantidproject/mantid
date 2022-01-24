@@ -18,7 +18,6 @@ Improvements
 Bugfixes
 ########
 - Updated instrument created by :ref:`LoadNXSPE <algm-LoadNXSPE>` is viewable in instrument 3D view.
-- :ref:`LoadNXSPE <algm-LoadNXSPE>` now creates workspaces with the correct detector sizes, which was previously causing aliasing issues in `SofQWNormalisePolygon <algm-SofQWNormalisePolygon` for small q-bin sizes.
 
 Interfaces
 ----------
