@@ -284,8 +284,8 @@ void LoadNXSPE::exec() {
     Kernel::V3D pos;
     pos.spherical(r, polar.at(i), azimuthal.at(i));
     // Define the size of the detector using the minimum of the polar or azimuthal width
-    double rr = r * sin(std::min(polar_width.at(i), azimuthal_width.at(i)) * deg2rad / 2);
-    const auto shape = Geometry::ShapeFactory().createSphere(V3D(0, 0, 0), rr);
+    double rr = r * sin(std::min(abs(polar_width.at(i)), abs(azimuthal_width.at(i))) * deg2rad / 2);
+    const auto shape = Geometry::ShapeFactory().createSphere(V3D(0, 0, 0), std::max(rr, 0.01));
 
     Geometry::Detector *det = new Geometry::Detector("pixel", static_cast<int>(i + 1), sample);
     det->setPos(pos);
