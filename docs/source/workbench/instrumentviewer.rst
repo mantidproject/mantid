@@ -64,6 +64,8 @@ Clicking and dragging the upper half of the bar changes the maximum while the lo
 Mantid comes with a number of color map files and these can be loaded by selecting the "Display Settings"->"Color Map".
 
 
+.. _instrumentviewer_pick_tab:
+
 Pick Tab
 --------
 Pick Tab is for displaying information about detectors of an instruments and data collected by them. The parameters defined for each component may be hidden if the attribute 'visible' is specified as false. You can also manipulate the peak markers in this tab.
