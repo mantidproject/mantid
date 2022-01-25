@@ -42,6 +42,20 @@ prevent exceptions escaping from a parallel region (which would
 otherwise cause program termination) - this includes dealing with
 algorithm cancellation.
 
+If you need to use OpenMP in a way that is not covered by any of the specific macros in
+`MultiThreaded.h <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/MultiThreaded.h>`__
+, you can make use of the general purpose ``PRAGMA_OMP`` macro. This is essentially the same as using ``#pragma omp``
+directly. Ideally, this should only be used if what you want to do is not already covered by the other macros.
+
+.. code:: cpp
+
+    // Dynamic scheduling allows x to be split into chunks of size 1 processed by each thread,
+    // but assigned to threads in no particular order.
+    PRAGMA_OMP(parallel for schedule(dynamic, 1))
+    for (int i = 0; i < x.size(); ++i) {
+        doThing(x[i])
+    }
+
 Ensuring thread-safety
 ######################
 
