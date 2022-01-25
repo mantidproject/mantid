@@ -930,7 +930,7 @@ void IFunction::Attribute::setName(const std::string &name) const { m_name = nam
 void IFunction::Attribute::setValidator(const Kernel::IValidator_sptr &validator) const { m_validator = validator; }
 
 /**
- *  Evaluates the validator associated with this attribute. Returns error as a string.
+ *  Evaluates the validator associated with this attribute.
  */
 void IFunction::Attribute::evaluateValidator() const {
   std::string dataTypeName;
@@ -959,8 +959,7 @@ void IFunction::Attribute::evaluateValidator() const {
 
 /**
  *  Evaluates the validator associated with this attribute.
- *  @param name :: T
- *  @param subjectValue :: The value to be validated by the validator.
+ *  @param inputData :: the data to be evaluated against the associated validator.
  */
 template <typename T> void IFunction::Attribute::evaluateValidator(T &inputData) const {
   std::string error;
