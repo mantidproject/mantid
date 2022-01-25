@@ -25,6 +25,9 @@ Bugfixes
 - The :ref:`Abins Algorithm <algm-Abins>` can also import force constants data from CASTEP or Phonopy calculations, using the Euphonic library. (See above.)
 - Contour workspaces are now saved when saving in ``Bayes stretch``.
 - Fixed a bug which prevented workspaces being loaded into the :ref:`Elwin Tab <Elwin-iqt-ref>` .
+- Fixed a bug that caused :ref:`ISIS Calibration <interface-indirect-isis-calibration>` to ignore ``ScaleFactor`` if set to 1.0.
+- Fixed a bug in the :ref:`Symmetrise<algm-Symmetrise>` algorithm where workspaces in different bin widths would sometimes cause exceptions.
 - Fixed a bug which caused :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` to crash when run with a single element.
+
 
 :ref:`Release 6.3.0 <v6.3.0>`
