@@ -129,3 +129,7 @@ You can then overwrite any of the relevant callbacks and annotate async methods 
         @qt_async_task
         def do_async(self):
             self.do_task()
+
+Note: These methods are only useful for stopping mantid from hanging while something else is processing.
+Due to the nature of the Global Interpreter Lock (GIL), it is not possible to run concurrent threads in python.
+For heavy lifting that would require multithreading you should use C++ instead.
