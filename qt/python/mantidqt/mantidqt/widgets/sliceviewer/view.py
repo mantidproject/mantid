@@ -24,7 +24,7 @@ from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayo
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from .dimensionwidget import DimensionWidget
+from mantidqt.widgets.sliceviewer.dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
 from .lineplots import LinePlots
 from .toolbar import SliceViewerNavigationToolbar, ToolItemText
@@ -177,11 +177,7 @@ class SliceViewerDataView(QWidget):
         self.nonortho_transform = None
         self.ax = self.fig.add_subplot(111, projection='mantid')
         self.enable_zoom_on_mouse_scroll(redraw_on_zoom)
-        if self.grid_on:
-            self.ax.grid(self.grid_on)
-        if self.line_plots_active:
-            self.add_line_plots()
-
+        self.ax.grid(self.grid_on)
         self.plot_MDH = self.plot_MDH_orthogonal
 
         self.canvas.draw_idle()
@@ -342,6 +338,7 @@ class SliceViewerDataView(QWidget):
         """Removes everything from the figure"""
         if self.line_plots_active:
             self._line_plots.plotter.close()
+            self.line_plots_active = False
         self.image = None
         self.canvas.disable_zoom_on_scroll()
         self.fig.clf()
@@ -349,6 +346,7 @@ class SliceViewerDataView(QWidget):
 
     def draw_plot(self):
         self.ax.set_title('')
+        self.canvas.draw()
         if self.image:
             self.colorbar.set_mappable(self.image)
             self.colorbar.update_clim()
@@ -356,8 +354,6 @@ class SliceViewerDataView(QWidget):
         if self.line_plots_active:
             self._line_plots.plotter.delete_line_plot_lines()
             self._line_plots.plotter.update_line_plot_labels()
-
-        self.canvas.draw()
 
     def export_region(self, limits, cut):
         """
@@ -495,9 +491,8 @@ class SliceViewerDataView(QWidget):
         """
         If not visible sets the grid visibility
         """
-        if not self._grid_on:
-            self._grid_on = True
-            self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
+        self._grid_on = True
+        self.mpl_toolbar.set_action_checked(ToolItemText.GRID, state=self._grid_on)
 
     def set_nonorthogonal_transform(self, transform):
         """
@@ -658,6 +653,10 @@ class SliceViewerView(QWidget, ObservingView):
         :return: The PeaksViewerCollectionView
         """
         self.peaks_view.set_visible(on)
+
+    def close(self):
+        self.presenter.notify_close()
+        super().close()
 
     def _run_close(self):
         # handles the signal emitted from ObservingView.emit_close

@@ -61,6 +61,18 @@ public:
     TS_ASSERT_EQUALS(root["exitCode"].asString(), "0");
   }
 
+  void test_stackTraceWithQuotes() {
+    const std::string appName = "My testing application name";
+    const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
+    const std::string stackTrace = "File \" C :\\file\\path\\file.py\", line 194, in broken_function";
+    TestableErrorReporter reporter(appName, upTime, "0", true, "name", "email", "textBox", stackTrace);
+    const std::string message = reporter.generateErrorMessage();
+
+    ::Json::Value root;
+    Mantid::JsonHelpers::parse(message, &root);
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), stackTrace);
+  }
+
   void test_errorMessageWithShare() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);

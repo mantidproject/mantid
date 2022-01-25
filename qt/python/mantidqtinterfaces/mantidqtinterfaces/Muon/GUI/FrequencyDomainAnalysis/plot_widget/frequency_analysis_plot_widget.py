@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantidqtinterfaces.Muon.GUI.MuonAnalysis.plot_widget.muon_analysis_plot_widget import MuonAnalysisPlotWidget, FIT, RAW
-#, MODEL, DATA - commented out as they are not used in this file at present
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.main_plot_widget_view import MainPlotWidgetView
 from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_widget import PlottingCanvasWidget
 
@@ -56,6 +55,9 @@ class FrequencyAnalysisPlotWidget(MuonAnalysisPlotWidget):
         self.presenter.hide(old_plot_mode)
         self.presenter.show(self._current_plot_mode)
 
+    def update_freq_units_add_subscriber(self, subscriber):
+        self.fit_mode.update_freq_units.add_subscriber(subscriber)
+
     """ Fit (and transform) pane """
     def create_fit_pane(self):
         self.fit_model = PlotFreqFitPaneModel(self._context)
@@ -95,6 +97,8 @@ class FrequencyAnalysisPlotWidget(MuonAnalysisPlotWidget):
                                                          self._context,
                                                          self.plotting_canvas_widgets[name].presenter)
         self._panes.append(self.modes[MAXENT])
+        self.maxent_mode.update_freq_units.add_subscriber(self.fit_mode.update_fit_pane_observer)
+        self.fit_mode.update_maxent_plot.add_subscriber(self.maxent_mode.update_x_label_observer)
 
     @property
     def maxent_index(self):

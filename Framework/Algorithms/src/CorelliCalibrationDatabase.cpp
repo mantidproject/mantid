@@ -140,7 +140,7 @@ bool CalibrationTableHandler::isValidCalibrationTableWorkspace(const DataObjects
  * @param pos: location and orientation of the component
  */
 void CalibrationTableHandler::appendCalibration(const DataObjects::TableWorkspace_sptr &tablews,
-                                                const std::string &datestamp, ComponentPosition &pos) {
+                                                const std::string &datestamp, const ComponentPosition &pos) {
   // check
   if (tablews->columnCount() != calibrationTableColumnNames.size()) {
     throw std::runtime_error("Single component calibration table workspace is not correct.");

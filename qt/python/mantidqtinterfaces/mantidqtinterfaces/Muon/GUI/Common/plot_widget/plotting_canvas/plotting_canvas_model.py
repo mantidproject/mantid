@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import NamedTuple, List
+from typing import List
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_convert_to_points, run_convert_to_histogram
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 
@@ -12,13 +12,21 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 FIT_FUNCTION_GUESS_LABEL = "Fit function guess"
 
 
-class WorkspacePlotInformation(NamedTuple):
-    workspace_name: str
-    index: int
-    axis: int
-    normalised: bool
-    errors: bool
-    label: str
+class WorkspacePlotInformation(object):
+
+    def __init__(self,
+                 workspace_name: str,
+                 index: int,
+                 axis: int,
+                 normalised: bool,
+                 errors: bool,
+                 label: str):
+        self.workspace_name = workspace_name
+        self.index = index
+        self.axis = axis
+        self.normalised = normalised
+        self.errors = errors
+        self.label = label
 
     # equal only checks for workspace, axis, and spec num, as the user could have changed the other states
     def __eq__(self, other):

@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.settings.settings_helper import set_setting, get_setting
-
 from qtpy.QtCore import QSettings, QCoreApplication
 
 from shutil import rmtree

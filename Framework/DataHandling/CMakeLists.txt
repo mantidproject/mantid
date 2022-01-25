@@ -48,6 +48,7 @@ set(SRC_FILES
     src/LoadDetectorInfo.cpp
     src/LoadDetectorsGroupingFile.cpp
     src/LoadDiffCal.cpp
+    src/LoadDNSEvent.cpp
     src/LoadDspacemap.cpp
     src/LoadEMU.cpp
     src/LoadEmptyInstrument.cpp
@@ -215,6 +216,7 @@ set(SRC_FILES
 set(INC_FILES
     inc/MantidDataHandling/ApplyDiffCal.h
     inc/MantidDataHandling/BankPulseTimes.h
+    inc/MantidDataHandling/BitStream.h
     inc/MantidDataHandling/CheckMantidVersion.h
     inc/MantidDataHandling/CompressEvents.h
     inc/MantidDataHandling/CreateChunkingFromInstrument.h
@@ -263,6 +265,7 @@ set(INC_FILES
     inc/MantidDataHandling/LoadDetectorInfo.h
     inc/MantidDataHandling/LoadDetectorsGroupingFile.h
     inc/MantidDataHandling/LoadDiffCal.h
+    inc/MantidDataHandling/LoadDNSEvent.h
     inc/MantidDataHandling/LoadDspacemap.h
     inc/MantidDataHandling/LoadEMU.h
     inc/MantidDataHandling/LoadEmptyInstrument.h
@@ -472,6 +475,7 @@ set(TEST_FILES
     LoadDetectorInfoTest.h
     LoadDetectorsGroupingFileTest.h
     LoadDiffCalTest.h
+    LoadDNSEventTest.h
     LoadDspacemapTest.h
     LoadEMUauTest.h
     LoadEmptyInstrumentTest.h

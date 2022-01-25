@@ -54,7 +54,8 @@ set(SRC_FILES
     src/FuncMinimizers/TrustRegionMinimizer.cpp
     src/FunctionDomain1DSpectrumCreator.cpp
     src/Functions/Abragam.cpp
-    src/Functions/Activation.cpp
+    src/Functions/ActivationK.cpp
+    src/Functions/ActivationmeV.cpp
     src/Functions/BSpline.cpp
     src/Functions/BackToBackExponential.cpp
     src/Functions/BackgroundFunction.cpp
@@ -66,6 +67,7 @@ set(SRC_FILES
     src/Functions/ComptonProfile.cpp
     src/Functions/ComptonScatteringCountRate.cpp
     src/Functions/Convolution.cpp
+    src/Functions/CriticalPeakRelaxationRate.cpp
     src/Functions/CrystalElectricField.cpp
     src/Functions/CrystalFieldControl.cpp
     src/Functions/CrystalFieldFunction.cpp
@@ -84,6 +86,8 @@ set(SRC_FILES
     src/Functions/CrystalFieldSpectrum.cpp
     src/Functions/CrystalFieldSusceptibility.cpp
     src/Functions/CubicSpline.cpp
+    src/Functions/DecoupAsymPowderMagLong.cpp
+    src/Functions/DecoupAsymPowderMagRot.cpp
     src/Functions/DeltaFunction.cpp
     src/Functions/DiffRotDiscreteCircle.cpp
     src/Functions/DiffSphere.cpp
@@ -161,6 +165,7 @@ set(SRC_FILES
     src/LatticeFunction.cpp
     src/MSVesuvioHelpers.cpp
     src/MultiDomainCreator.cpp
+    src/MuonHelpers.cpp
     src/ParDomain.cpp
     src/ParameterEstimator.cpp
     src/RalNlls/TrustRegion.cpp
@@ -232,7 +237,8 @@ set(INC_FILES
     inc/MantidCurveFitting/FuncMinimizers/TrustRegionMinimizer.h
     inc/MantidCurveFitting/FunctionDomain1DSpectrumCreator.h
     inc/MantidCurveFitting/Functions/Abragam.h
-    inc/MantidCurveFitting/Functions/Activation.h
+    inc/MantidCurveFitting/Functions/ActivationK.h
+    inc/MantidCurveFitting/Functions/ActivationmeV.h
     inc/MantidCurveFitting/Functions/BSpline.h
     inc/MantidCurveFitting/Functions/BackToBackExponential.h
     inc/MantidCurveFitting/Functions/BackgroundFunction.h
@@ -244,6 +250,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/ComptonProfile.h
     inc/MantidCurveFitting/Functions/ComptonScatteringCountRate.h
     inc/MantidCurveFitting/Functions/Convolution.h
+    inc/MantidCurveFitting/Functions/CriticalPeakRelaxationRate.h
     inc/MantidCurveFitting/Functions/CrystalElectricField.h
     inc/MantidCurveFitting/Functions/CrystalFieldControl.h
     inc/MantidCurveFitting/Functions/CrystalFieldFunction.h
@@ -257,6 +264,8 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/CrystalFieldSpectrum.h
     inc/MantidCurveFitting/Functions/CrystalFieldSusceptibility.h
     inc/MantidCurveFitting/Functions/CubicSpline.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagLong.h
+    inc/MantidCurveFitting/Functions/DecoupAsymPowderMagRot.h
     inc/MantidCurveFitting/Functions/DeltaFunction.h
     inc/MantidCurveFitting/Functions/DiffRotDiscreteCircle.h
     inc/MantidCurveFitting/Functions/DiffSphere.h
@@ -337,6 +346,7 @@ set(INC_FILES
     inc/MantidCurveFitting/LatticeFunction.h
     inc/MantidCurveFitting/MSVesuvioHelpers.h
     inc/MantidCurveFitting/MultiDomainCreator.h
+    inc/MantidCurveFitting/MuonHelpers.h
     inc/MantidCurveFitting/ParDomain.h
     inc/MantidCurveFitting/ParameterEstimator.h
     inc/MantidCurveFitting/RalNlls/TrustRegion.h
@@ -402,7 +412,8 @@ set(TEST_FILES
     FunctionFactoryConstraintTest.h
     FunctionParameterDecoratorFitTest.h
     Functions/AbragamTest.h
-    Functions/ActivationTest.h
+    Functions/ActivationKTest.h
+    Functions/ActivationmeVTest.h
     Functions/BSplineTest.h
     Functions/BackToBackExponentialTest.h
     Functions/BivariateNormalTest.h
@@ -413,6 +424,7 @@ set(TEST_FILES
     Functions/ComptonProfileTest.h
     Functions/ComptonScatteringCountRateTest.h
     Functions/ConvolutionTest.h
+    Functions/CriticalPeakRelaxationRateTest.h
     Functions/CrystalFieldControlTest.h
     Functions/CrystalFieldEnergiesTest.h
     Functions/CrystalFieldFunctionTest.h
@@ -425,6 +437,8 @@ set(TEST_FILES
     Functions/CrystalFieldSusceptibilityTest.h
     Functions/CrystalFieldTest.h
     Functions/CubicSplineTest.h
+    Functions/DecoupAsymPowderMagLongTest.h
+    Functions/DecoupAsymPowderMagRotTest.h
     Functions/DeltaFunctionTest.h
     Functions/DiffRotDiscreteCircleTest.h
     Functions/DiffSphereTest.h
@@ -497,6 +511,7 @@ set(TEST_FILES
     LatticeFunctionTest.h
     MultiDomainCreatorTest.h
     MultiDomainFunctionTest.h
+    MuonHelperTest.h
     ParameterEstimatorTest.h
     RalNlls/NLLSTest.h
     SpecialFunctionSupportTest.h

@@ -8,6 +8,7 @@ import systemtesting
 from mantid.simpleapi import PowderReduceP2D
 
 import sys
+import os
 
 
 class PowderReduceP2DTest(systemtesting.MantidSystemTest):
@@ -54,6 +55,10 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         return self.outputFile + '.p2d', self.reference
+
+    def skipTests(self):
+        # If CONDA_PREFIX is defined skip tests
+        return "CONDA_PREFIX" in os.environ
 
     def _sampleEventData(self):
         """path to sample event data used for testing the algorithm"""
@@ -124,10 +129,6 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         return 4
 
     def _loadReference(self):
-        # NOTE: In PR32971, the surface intersection type determination bug is fixed,
-        #       and it affected the all calcuation related to CSGObject.
-        #       The reference file for Linux is updated in the PR, but the windows one
-        #       is not as we do not have a working windwos dev environment here.
         suffix = "" if sys.platform != 'win32' else "_msvc"
         return f'PowderReduceP2D_reference{suffix}.p2d'
 

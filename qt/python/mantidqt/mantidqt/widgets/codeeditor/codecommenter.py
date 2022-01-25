@@ -62,8 +62,10 @@ class CodeCommenter:
         return True
 
     def _comment_lines(self, lines):
+        # find least indented code in selection
+        istart = min(re.match(r"\s*", line).end() for line in lines)  # use of * means will return 0 if no leading \s
         for i in range(len(lines)):
-            lines[i] = '# ' + lines[i]
+            lines[i] = lines[i][:istart] + '# ' + lines[i][istart:]
         return lines
 
     def _uncomment_lines(self, lines):

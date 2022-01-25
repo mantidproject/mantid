@@ -215,12 +215,12 @@ private:
   }
   /// find method to get the index of cellstd::string  value in a table
   /// workspace
-  void find(std::string /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(const std::string & /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
   /// find method to get the index of  Mantid::Kernel::V3D cell value in a table
   /// workspace
-  void find(Mantid::Kernel::V3D /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
+  void find(const Mantid::Kernel::V3D & /*value*/, size_t & /*row*/, const size_t & /*col*/) override {
     throw Mantid::Kernel::Exception::NotImplementedError("PeaksWorkspace::find() not implemented.");
   }
 

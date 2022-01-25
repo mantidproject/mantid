@@ -100,7 +100,7 @@ Development Process
    Overview of the role of the technical steering committee.
 
 :doc:`DesignDocumentGuides`
-   How to write a good design document.
+   When and how to write a good design document.
 
 
 =====
@@ -209,6 +209,9 @@ GUI Development
 
 :doc:`QtDesignerForPython`
    Describes how to use the Qt designer to produce GUI views.
+
+:doc:`BalsamiqWireframes`
+   An introduction to mockups with Balsamiq Wireframes.
 
 :doc:`MantidUsedIconsTable`
    The currently used Icons in Mantid and what they are used for.

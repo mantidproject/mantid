@@ -31,6 +31,7 @@ set(SRC_FILES
     src/InstrumentWidgetTreeTab.cpp
     src/GLDisplay.cpp
     src/MaskBinsData.cpp
+    src/MiniPlotMpl.cpp
     src/OpenGLError.cpp
     src/PanelsSurface.cpp
     src/PeakMarker2D.cpp
@@ -54,10 +55,6 @@ set(SRC_FILES
     src/XIntegrationControl.cpp
 )
 
-set(QT4_SRC_FILES src/MiniPlotQwt.cpp)
-
-set(QT5_SRC_FILES src/MiniPlotMpl.cpp)
-
 set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/BinDialog.h
     inc/MantidQtWidgets/InstrumentView/BaseCustomInstrumentPresenter.h
@@ -74,6 +71,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h
     inc/MantidQtWidgets/InstrumentView/GLDisplay.h
+    inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h
     inc/MantidQtWidgets/InstrumentView/PeakOverlay.h
     inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPaneView.h
     inc/MantidQtWidgets/InstrumentView/PlotFitAnalysisPanePresenter.h
@@ -84,10 +82,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/UnwrappedSurface.h
     inc/MantidQtWidgets/InstrumentView/XIntegrationControl.h
 )
-
-set(QT4_MOC_FILES inc/MantidQtWidgets/InstrumentView/MiniPlotQwt.h)
-
-set(QT5_MOC_FILES inc/MantidQtWidgets/InstrumentView/MiniPlotMpl.h)
 
 set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
@@ -155,9 +149,9 @@ set(UI_FILES inc/MantidQtWidgets/InstrumentView/UCorrectionDialog.ui)
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsInstrumentView
   QT_VERSION 5
-  SRC ${SRC_FILES} ${QT5_SRC_FILES}
-  MOC ${MOC_FILES} ${QT5_MOC_FILES}
-  NOMOC ${INC_FILES} ${QT5_INC_FILES}
+  SRC ${SRC_FILES}
+  MOC ${MOC_FILES}
+  NOMOC ${INC_FILES}
   UI ${UI_FILES}
   RES ../../../images/instrumentview.qrc
   DEFS IN_MANTIDQT_INSTRUMENTVIEW

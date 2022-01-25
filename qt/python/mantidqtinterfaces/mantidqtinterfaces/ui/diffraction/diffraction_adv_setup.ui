@@ -1039,6 +1039,9 @@
             <item row="1" column="6">
              <widget class="QLineEdit" name="massdensity_edit"/>
             </item>
+            <item row="3" column="6">
+             <widget class="QLineEdit" name="sampleheight_edit"/>
+            </item>
             <item row="2" column="5">
              <widget class="QLabel" name="label_14">
               <property name="text">
@@ -1112,6 +1115,13 @@
              <widget class="QLabel" name="label_9">
               <property name="text">
                <string>Measured Mass Density (g/cc)</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="5">
+             <widget class="QLabel" name="label_sh">
+              <property name="text">
+               <string>Sample Height</string>
               </property>
              </widget>
             </item>

@@ -48,7 +48,7 @@ private:
   void loadExperimentDetails(NeXus::NXEntry &entry);
 
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
-  void maskDetectors(NeXus::NXEntry &entry);
+  void maskDetectors(const NeXus::NXEntry &entry);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
 
   void runLoadInstrument();

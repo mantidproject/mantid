@@ -87,6 +87,25 @@ class ModestImage(MantidImage):
         """Override to return the full-resolution array"""
         return self._full_res
 
+    def get_array_clipped_to_bounds(self):
+        # Get the extents of the axes and transform to pixel coordinates
+        xlim, ylim = self.axes.get_xlim(), self.axes.get_ylim()
+        transform=self._world2pixel
+        ind0 = transform.transform([min(xlim), min(ylim)])
+        ind1 = transform.transform([max(xlim), max(ylim)])
+
+        # Add 0.5 to get the edge of the pixel. Also add 1 to the max values which need to be one past the end
+        # for when we slice.
+        y0 = max(int(np.floor(ind0[1] + 0.5)), 0)
+        y1 = max(int(np.floor(ind1[1] + 0.5)) + 1, 0)
+        x0 = max(int(np.floor(ind0[0] + 0.5)), 0)
+        x1 = max(int(np.floor(ind1[0] + 0.5)) + 1, 0)
+
+        # Clip the data to the extents
+        data = self._full_res[y0:y1, x0:x1]
+        data = cbook.safe_masked_invalid(data)
+        return data
+
     @property
     def _pixel2world(self):
 

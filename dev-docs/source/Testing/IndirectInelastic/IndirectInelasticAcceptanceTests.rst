@@ -108,7 +108,10 @@ Data analysis MSD
 
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``MSD fit`` tab
-#. Load the file that you saved in the previous test
+#. Click ``Add Workspace``
+#. With the combo box set to ``File`` click browse and select the file that you saved in the previous test
+#. Check ``All Spectra``
+#. Click ``Add`` and close the dialogue.
 #. Set ``Fit type`` to Gaussian
 #. Click ``Run``
 #. This should produce a plot of the fitted function in the interface
@@ -116,38 +119,6 @@ Data analysis MSD
 #. Click ``Run``
 #. Repeat the previous steps with ``Peters`` and ``Yi`` functions
 #. Try run fits using the different ``Minimizer`` options (except FABADA), each time change the ``End X`` value either + or - 0.1
-
-Data analysis Conv Fit
-----------------------
-
-*Preparation*
-
--  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
-
-**Time required 3 - 5 minutes**
-
---------------
-
-#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
-#. Go to the ``Conv Fit`` tab
-#. Load the ``irs26176_graphite002_red.nxs`` file from the sample data
-#. Load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
-#. Set ``Fit spectra`` to 0 - 5
-#. Set ``Lorentzians`` to 2
-#. Set ``Max iterations`` to 400
-#. Click ``Run``
-#. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
-#. In the ``Fit`` tab, change ``Fit spectra`` to String and enter 3
-#. Click ``Run`` the plot should update and new workspaces are created in the main Mantid GUI
-#. Set ``Fit spectra`` to String 3-4
-#. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
-#. Try the various ``Plot`` options in the interface
-
-   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 4 separate plots
-   (b)  ``Plot Current Preview`` - should result in a plot with three datasets
-   (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
-
-#. Change the ``Fit type`` to different functions and run fits
 
 Data analysis I(Q, T)
 ----------------------
@@ -183,14 +154,73 @@ Data analysis I(Q, T) Fit
 
 #. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
 #. Go to the ``I(Q, T) Fit`` tab
-#. Load the ``_iqt`` workspace from the previous test
+#. Click ``Add Workspace``
+#. With the combo box set to ``Workspace`` select the ``_iqt`` workspace from the previous test
+#. Check ``All Spectra``
+#. Click ``Add`` and close the dialogue.
 #. Set ``Exponential`` to 1
 #. Set ``EndX`` to 0.14
 #. Click ``Run``
 #. This should produce a fit and a difference plot in the window
 #. Click ``Plot current preview`` this should open a plot with three datasets plotted
-#. Change ``Range`` to 0 - 5
+#. Select the runs 6 - 50 and click ``Remove``
 #. Click ``Run``
 #. Select Lifetime from the ``Output`` drop-down
 #. Click ``Plot`` this should open a new plot with the lifetimes plotted
 
+Data analysis Conv Fit
+----------------------
+
+*Preparation*
+
+-  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
+
+**Time required 3 - 5 minutes**
+
+--------------
+
+#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to the ``Conv Fit`` tab
+#. Click ``Add Workspace``
+#. With the combo box's set to ``File``
+#. Click browse and load the ``irs26176_graphite002_red.nxs`` file from the sample data
+#. Click browse and load the resolution file ``irs26173_graphite002_res.nxs`` from the sample data
+#. In Workspace Indices enter ``0-5``
+#. Click ``Add`` and close the dialogue.
+#. Set ``Lorentzians`` to 2
+#. Set ``Max iterations`` to 400
+#. Click ``Run``
+#. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
+#. In the ``Mini plots`` widget, change ``Plot Spectrum`` to 3
+#. Click ``Fit Single Spectrum`` the plot should update and new workspaces are created in the main Mantid GUI
+#. Remove spectra 0-2, then remove spectra 5. do these as separate removals.
+#. Click ``Run``; the plot should update and new workspaces are created in the main Mantid GUI
+#. Try the various ``Plot`` options in the interface
+
+   (a)  ``Output`` drop-down set to All and click ``Plot`` - should give 4 separate plots
+   (b)  ``Plot Current Preview`` - should result in a plot with three datasets
+   (c)  Enable the ``Plot Guess`` checkbox - should not change anything, but should not break anything either!
+
+#. Change the ``Fit type`` to different functions and run fits
+
+Data analysis F(Q) Fit
+----------------------
+
+*Preparation*
+
+-  ISIS Sample data set, `available here <http://download.mantidproject.org/>`_
+
+**Time required 3 - 5 minutes**
+
+--------------
+
+#. Go to ``Interfaces`` > ``Indirect`` > ``Data Analysis``
+#. Go to the ``F(Q) Fit`` tab
+#. Click ``Add Workspace``
+#. With the combo box set to ``Workspace`` select the ``0-5__Result`` workspace from the previous test
+#. In Parameter Name select ``f1.f0.FWHM``
+#. Click ``Add`` and close the dialogue.
+#. Under ``Fit Type`` select ``TeixeiraWater``
+#. Click ``Run``
+#. Three new workspaces should be created in the main GUI - ``Parameters``, ``Result`` and ``Workspaces``
+#. Change the ``Fit type`` to different functions and run fits

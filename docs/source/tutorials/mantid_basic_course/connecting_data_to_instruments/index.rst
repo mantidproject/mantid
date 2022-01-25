@@ -1,13 +1,13 @@
-.. _connecting_data_to_instruments: 
+.. _connecting_data_to_instruments:
 
 ==============================
-Connecting Data To Instruments 
+Connecting Data To Instruments
 ==============================
 
-.. toctree:: 
-   :hidden: 
-   :glob: 
-   :maxdepth: 1 
+.. toctree::
+   :hidden:
+   :glob:
+   :maxdepth: 1
 
    01_introduction
    02_displaying_and_navigating

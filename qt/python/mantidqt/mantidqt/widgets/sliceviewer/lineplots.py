@@ -312,6 +312,16 @@ class PixelLinePlot(CursorTracker, KeyHandler):
             self.exporter.export_pixel_cut(self._cursor_pos, key)
 
 
+class RectangleSelectorMtd(RectangleSelector):
+    def onmove(self, event):
+        """
+        Only process event if inside the axes with which the selector was init
+        This fixes bug where the x/y of the event originated from the line plot axes not the colorfill axes
+        """
+        if event.inaxes is None or self.ax == event.inaxes.axes:
+            super(RectangleSelectorMtd, self).onmove(event)
+
+
 class RectangleSelectionLinePlot(KeyHandler):
     """
     Draws X/Y line plots from a rectangular selection by summing across
@@ -328,7 +338,7 @@ class RectangleSelectionLinePlot(KeyHandler):
         super().__init__(plotter, exporter)
 
         ax = plotter.image_axes
-        self._selector = RectangleSelector(
+        self._selector = RectangleSelectorMtd(
             ax,
             self._on_rectangle_selected,
             drawtype='box',

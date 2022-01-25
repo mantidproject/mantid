@@ -58,7 +58,7 @@ private:
   void tieApplication(const size_t &parameterIndex, GSLVector &newParameters, double &newValue);
   /// Given the new chi2, next position is calculated and updated.
   /// m_changes[ParameterIndex] updated too
-  void algorithmDisplacement(const size_t &parameterIndex, const double &chi2New, GSLVector &newParameters);
+  void algorithmDisplacement(const size_t &parameterIndex, const double &chi2New, const GSLVector &newParameters);
   /// Updates the ParameterIndex-th parameter jump if appropriate
   void jumpUpdate(const size_t &parameterIndex);
   /// Check for convergence (including Overexploration convergence), updates

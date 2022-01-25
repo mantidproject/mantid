@@ -113,7 +113,7 @@ class FittingWorkspaceRecordContainer:
     def rename(self, old_ws_name, new_ws_name):
         ws_loaded = self.dict.get(old_ws_name, None)
         if ws_loaded:
-            self.dict[new_ws_name]= self.pop(old_ws_name)
+            self.dict[new_ws_name] = self.pop(old_ws_name)
         else:
             ws_loaded_name = self.get_loaded_workspace_name_from_bgsub(old_ws_name)
             if ws_loaded_name:
@@ -236,7 +236,10 @@ class FittingDataModel(object):
         # update log tables
         self.remove_all_log_rows()
         for irow, (ws_name, ws) in enumerate(self._data_workspaces.get_loaded_ws_dict().items()):
-            self.add_log_to_table(ws_name, ws, irow)
+            try:
+                self.add_log_to_table(ws_name, ws, irow)
+            except Exception as e:
+                logger.warning(f"Unable to output log workspaces for workspace {ws_name}: " + str(e))
 
     def add_log_to_table(self, ws_name, ws, irow):
         # both ws and name needed in event a ws is renamed and ws.name() is no longer correct
@@ -245,7 +248,7 @@ class FittingDataModel(object):
             self._log_values[ws_name] = dict()
         # add run info
         run = ws.getRun()
-        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), run.getProperty('bankid').value,
+        row = [ws.getInstrument().getFullName(), ws.getRunNumber(), str(run.getProperty('bankid').value),
                run.getProtonCharge(), ws.getTitle()]
         self.write_table_row(ADS.retrieve("run_info"), row, irow)
         # add log data - loop over existing log workspaces not logs in settings as these might have changed
@@ -375,10 +378,7 @@ class FittingDataModel(object):
             ws = CreateWorkspace(OutputWorkspace=param, DataX=ipeak, DataY=ipeak, NSpec=nruns)
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
-            for iws, wsname in enumerate(self.get_loaded_ws_list()):
-                wsname_bgsub = wsname + "_bgsub"
-                if wsname_bgsub in self._fit_results:
-                    wsname = wsname_bgsub
+            for iws, wsname in enumerate(self.get_active_ws_name_list()):
                 if wsname in self._fit_results and param in self._fit_results[wsname]['results']:
                     fitvals = array(self._fit_results[wsname]['results'][param])
                     data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
@@ -396,7 +396,7 @@ class FittingDataModel(object):
         model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
         model.addColumn(type="str", name="status")
         model.addColumn(type="str", name="Model")
-        for iws, wsname in enumerate(self.get_loaded_ws_list()):
+        for iws, wsname in enumerate(self.get_active_ws_name_list()):
             if wsname in self._fit_results:
                 row = [wsname, self._fit_results[wsname]['costFunction'],
                        self._fit_results[wsname]['status'], self._fit_results[wsname]['model']]

@@ -20,6 +20,7 @@ from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
 
+
 NEW_TAB_TITLE = 'New'
 MODIFIED_MARKER = '*'
 
@@ -32,15 +33,14 @@ class MultiPythonFileInterpreter(QWidget):
     sig_current_tab_changed = Signal(str)
     sig_tab_closed = Signal(str)
 
-    def __init__(self, font=None, default_content=None, parent=None):
+    def __init__(self, font=None, default_content=None, parent=None, completion_enabled=True):
         """
-
         :param font: An optional font to override the default editor font
         :param default_content: str, if provided this will populate any new editor that is created
         :param parent: An optional parent widget
+        :param completion_enabled: Optional parameter to control code auto-completion suggestions
         """
         super(MultiPythonFileInterpreter, self).__init__(parent)
-
         # attributes
         self.default_content = default_content
         self.default_font = font
@@ -57,6 +57,8 @@ class MultiPythonFileInterpreter(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.zoom_level = 0
+
+        self.completion_enabled = completion_enabled
 
         # add a single editor by default
         self.append_new_editor()
@@ -91,6 +93,8 @@ class MultiPythonFileInterpreter(QWidget):
 
     def load_settings_from_config(self, config):
         self.confirm_on_save = config.get('project', 'prompt_save_editor_modified')
+        self.completion_enabled = config.get('Editors', 'completion_enabled')
+        self.on_completion_change()
 
     @property
     def editor_count(self):
@@ -131,7 +135,7 @@ class MultiPythonFileInterpreter(QWidget):
             current_zoom = self.zoom_level
 
         interpreter = PythonFileInterpreter(font, content, filename=filename,
-                                            parent=self)
+                                            parent=self, completion_enabled=self.completion_enabled)
 
         interpreter.editor.zoomTo(current_zoom)
 
@@ -228,6 +232,7 @@ class MultiPythonFileInterpreter(QWidget):
             self.sig_current_tab_changed.emit("")
         else:
             self.sig_current_tab_changed.emit(self.current_tab_filename)
+            self.editor_at(index).setCompletion(self.completion_enabled)
 
     def _emit_code_exec_start(self):
         """Emit signal that code execution has started"""
@@ -339,7 +344,6 @@ class MultiPythonFileInterpreter(QWidget):
         previous_filename = self.current_editor().filename
         saved, filename = self.current_editor().save_as()
         if saved:
-            self.current_editor().close()
             self.open_file_in_new_tab(filename)
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
@@ -383,3 +387,7 @@ class MultiPythonFileInterpreter(QWidget):
                 continue
 
             self.editor_at(i).editor.zoomOut()
+
+    def on_completion_change(self):
+        for idx in range(self.editor_count):
+            self.editor_at(idx).setCompletion(self.completion_enabled)

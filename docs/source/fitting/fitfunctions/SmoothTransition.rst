@@ -34,9 +34,9 @@ The logistic function has been used in modelling Covid-19 infection trajectory[1
 
 References
 ----------
-[1]Lee, Se Yoon et al. (2020) “Estimation of COVID-19 spread curves integrating global data and borrowing information.” PloS one vol. 15,7  `doi:10.1371/journal.pone.0236860 <https://doi.org/10.1371/journal.pone.0236860>`
+[1]Lee, Se Yoon et al. (2020) “Estimation of COVID-19 spread curves integrating global data and borrowing information.” PloS one vol. 15,7  `doi:10.1371/journal.pone.0236860 <https://doi.org/10.1371/journal.pone.0236860>`_.
 
-[2] Gil, J.M et al (1999). Novel Muonium State in CdS. Phys. Rev. Lett., Vol 83 Issue 25, 5294-5297 `doi: 10.1103/PhysRevLett.83.5294 <https://doi.org/10.1103/PhysRevLett.83.5294>`.
+[2] Gil, J.M et al (1999). Novel Muonium State in CdS. Phys. Rev. Lett., Vol 83 Issue 25, 5294-5297 `doi: 10.1103/PhysRevLett.83.5294 <https://doi.org/10.1103/PhysRevLett.83.5294>`_.
 
 .. categories::
 

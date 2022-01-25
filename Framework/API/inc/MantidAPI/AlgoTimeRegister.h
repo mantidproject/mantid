@@ -6,13 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/Timer.h"
 #include <mutex>
 #include <thread>
 #include <vector>
 
 #include "MantidAPI/DllConfig.h"
-
-class timespec;
 
 namespace Mantid {
 namespace Instrumentation {
@@ -23,20 +22,21 @@ namespace Instrumentation {
 class AlgoTimeRegister {
 public:
   static AlgoTimeRegister globalAlgoTimeRegister;
-  static timespec diff(timespec start, timespec end);
   struct Info {
     std::string m_name;
     std::thread::id m_threadId;
-    timespec m_begin;
-    timespec m_end;
+    Kernel::time_point_ns m_begin;
+    Kernel::time_point_ns m_end;
 
-    Info(const std::string &nm, const std::thread::id &id, const timespec &be, const timespec &en)
+    Info(const std::string &nm, const std::thread::id &id, const Kernel::time_point_ns &be,
+         const Kernel::time_point_ns &en)
         : m_name(nm), m_threadId(id), m_begin(be), m_end(en) {}
   };
 
   class Dump {
     AlgoTimeRegister &m_algoTimeRegister;
-    timespec m_regStart;
+    Kernel::time_point_ns m_regStart_chrono;
+
     const std::string m_name;
 
   public:
@@ -44,14 +44,16 @@ public:
     ~Dump();
   };
 
+  void addTime(const std::string &name, const std::thread::id thread_id, const Kernel::time_point_ns &begin,
+               const Kernel::time_point_ns &end);
+  void addTime(const std::string &name, const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end);
   AlgoTimeRegister();
   ~AlgoTimeRegister();
 
 private:
   std::mutex m_mutex;
   std::vector<Info> m_info;
-  timespec m_hstart;
-  std::chrono::high_resolution_clock::time_point m_start;
+  Kernel::time_point_ns m_start;
 };
 
 } // namespace Instrumentation

@@ -8,7 +8,7 @@ dependencies:
   - boost=1.75.* # Also pulls in boost-cpp
   - cmake>=3.20.*
   - doxygen>=1.9.*
-  - eigen=3.3.*
+  - eigen=3.4.*
   - euphonic=0.6.*
   - graphviz>=2.47.0
   - gsl=2.6 # Keep gsl a specific version to reduce changes in our fitting
@@ -26,7 +26,7 @@ dependencies:
   - pip>=21.0.1
   - poco=1.10.*
   - psutil>=5.8.0
-  - pycifrw>=4.4.1
+  - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
   - pyqt>=5.12.3,<6
   - python-dateutil>=2.8.1
   - python=3.8.*
@@ -51,7 +51,7 @@ dependencies:
   - mesa-libgl-cos7-x86_64>=18.3.4
 
   # Linux only
-  - gxx_linux-64==9.3.*
+  - gxx_linux-64==10.3.*
   - libglu>=9.0.0
 
   # Needed for test suite on Linux

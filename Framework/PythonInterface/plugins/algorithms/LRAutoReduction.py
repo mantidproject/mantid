@@ -77,6 +77,8 @@ class LRAutoReduction(PythonAlgorithm):
                              "Force the sequence number value if it's not available")
         self.declareProperty("OrderDirectBeamsByRunNumber", False,
                              "Force the sequence of direct beam files to be ordered by run number")
+        self.declareProperty("ComputeResolution", True,
+                             "If True, the Q resolution will be computed")
         self.declareProperty(FileProperty('OutputFilename', '', action=FileAction.OptionalSave, extensions=["txt"]),
                              doc='Name of the reflectivity file output')
         self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory))
@@ -578,10 +580,11 @@ class LRAutoReduction(PythonAlgorithm):
         output_binning = [data_set.q_min, -abs(data_set.q_step), 2.0]
         dQ_constant = data_set.fourth_column_dq0
         dQ_slope = data_set.fourth_column_dq_over_q
-
+        compute_resolution = self.getProperty("ComputeResolution").value
         LRReflectivityOutput(ReducedWorkspaces=input_ws_list, ScaleToUnity=scale_to_unity,
                              ScalingWavelengthCutoff=wl_cutoff, OutputBinning=output_binning,
-                             DQConstant=dQ_constant, DQSlope=dQ_slope, OutputFilename=file_path)
+                             DQConstant=dQ_constant, DQSlope=dQ_slope,
+                             ComputeDQ=compute_resolution, OutputFilename=file_path)
         for ws in input_ws_list:
             AnalysisDataService.remove(str(ws))
 
