@@ -55,7 +55,7 @@ When *Normalisation* is set to :literal:`'Normalisation Time'`, the data is divi
 Flat background subtraction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A flat time-independent background for subtraction can be given by *FlatBkgWorkspace*. If this input property is not specified, flat background will be calculated from the detector spectra by :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` using the :literal:`Moving Average` mode. The *FlatBkgAveragingWindow* property is passed directly to :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` as *AveragingWindowWidth*.
+A flat time-independent background for subtraction can be given by *FlatBkgWorkspace*. If this input property is not specified, flat background will be calculated from the detector spectra by :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` using the :literal:`Moving Average` mode. The *FlatBkgAveragingWindow* property is passed directly to :ref:`CalculateFlatBackground <algm-CalculateFlatBackground>` as *AveragingWindowWidth*. Should the available statistics be found insufficient, there is an option to improve it by reducing granularity of the detector by defining :literal:`GroupDetHorizontallyBy` and :literal:`GroupDetVerticallyBy`. The former allows averaging of pixels horizontally in an instrument, i.e. between neighbouring tubes, while the latter steers averaging pixels inside a common tube.
 
 Before subtraction, the background workspace is multiplied by *FlatBkgScaling*.
 
