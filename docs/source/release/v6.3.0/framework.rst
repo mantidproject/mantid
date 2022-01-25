@@ -35,6 +35,7 @@ Improvements
 Bugfixes
 ########
 - Fixed a bug with :ref:`CalculatePlaczek <algm-CalculatePlaczek>` algorithm for computing Placzek correction factors that fixed the previously implemented formula for transforming k to e, and the summation for second order Placezek corrections.
+- :ref:`ConvertAxesToRealSpace <algm-ConvertAxesToRealSpace>` no longer crashes Mantid if using an invalid file.
 - Fixed a bug in :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection>` where the calculation aborts with an exception due to a floating point rounding error when the track segment is close to vertical. Also fixed bug in calculation of track direction after scatter if pre-scatter track was pointing exactly down - sign of z component of new direction was incorrect.
 - Fixed a bug in :ref:`Integration <algm-Integration>` when using ``UsePartialBinsOption`` with integration limits that are either equal or close together.
 - The :ref:`Load <algm-Load>` algorithm now reports the correct history.
