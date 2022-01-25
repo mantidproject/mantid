@@ -515,18 +515,25 @@ class FittingDataModel(object):
 
     def plot_background_figure(self, ws_name):
         def on_draw(event):
-            axes = event.canvas.figure.get_axes()
-            data_line = next((line for line in axes[0].get_tracked_artists()), None)
-            bg_line = next((line for line in axes[0].get_lines() if line not in axes[0].get_tracked_artists()), None)
-            bgsub_line = next((line for line in axes[1].get_tracked_artists()), None)
-            if data_line and bg_line and bgsub_line:
-                bg_line.set_ydata(data_line.get_ydata() - bgsub_line.get_ydata())
-                event.canvas.draw_idle()
+            if event.canvas.signalsBlocked():
+                # This stops infinite loop as draw() is called within this handle (and set signalsBlocked == True)
+                # Resets signalsBlocked to False (default value)
+                event.canvas.blockSignals(False)
             else:
-                # would like to close the figure at this point but this interferes with the mantid ADS observers when
-                # any of the tracked workspaces are deleted and causes mantid to hard crash - so just print warning
-                logger.warning(f"Inspect background figure {event.canvas.figure.number} has been invalidated - the "
-                               f"background curve will no longer be updated.")
+                axes = event.canvas.figure.get_axes()
+                data_line = next((line for line in axes[0].get_tracked_artists()), None)
+                bg_line = next((line for line in axes[0].get_lines() if line not in axes[0].get_tracked_artists()),
+                               None)
+                bgsub_line = next((line for line in axes[1].get_tracked_artists()), None)
+                if data_line and bg_line and bgsub_line:
+                    event.canvas.blockSignals(True)  # this doesn't stop this handle being called again on canvas.draw()
+                    bg_line.set_ydata(data_line.get_ydata() - bgsub_line.get_ydata())
+                    event.canvas.draw()
+                else:
+                    # would like to close the fig at this point but this interferes with the mantid ADS observers when
+                    # any of the tracked workspaces are deleted and causes mantid to hard crash - so just print warning
+                    logger.warning(f"Inspect background figure {event.canvas.figure.number} has been invalidated - the "
+                                   f"background curve will no longer be updated.")
 
         ws = self._data_workspaces[ws_name].loaded_ws
         ws_bgsub = self._data_workspaces[ws_name].bgsub_ws
