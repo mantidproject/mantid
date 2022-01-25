@@ -192,6 +192,16 @@ class ConfigServiceTest(unittest.TestCase):
         if len(undocumented) > 0:
             raise AssertionError('{} undocumented properties: {}'.format(len(undocumented), undocumented))
 
+    def test_contains(self):
+        assert 'docs.html.root' in ConfigService
+        # verify check against None
+        self.assertFalse(None in ConfigService)
+        # verify check against things that bool to False
+        self.assertFalse('' in ConfigService)
+        self.assertFalse(0 in ConfigService)
+        # verify check for converting checked value to string
+        self.assertFalse(1 in ConfigService)
+
     def _setup_test_areas(self):
         """Create a new data search path string
         """
