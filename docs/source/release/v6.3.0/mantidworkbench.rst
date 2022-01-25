@@ -67,7 +67,7 @@ Bugfixes
 ########
 - Fixed a bug where folding the :ref:`Pick Tab<instrumentviewer_pick_tab>` crashed Mantid.
 - Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
-- Getter for the :ref:`InstrumentViewer` will return a fully constructed instance to avoid segmentation fault.
+- Getter for the :ref:`InstrumentViewer` will return a fully constructed instance to avoid a segmentation fault.
 
 SliceViewer
 -----------
