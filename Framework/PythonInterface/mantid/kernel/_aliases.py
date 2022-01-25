@@ -86,8 +86,8 @@ def lazy_instance_access(cls, key_as_str=False):
 
 UsageService = lazy_instance_access(UsageServiceImpl)
 ConfigService = lazy_instance_access(ConfigServiceImpl, key_as_str=True)
-PropertyManagerDataService = lazy_instance_access(PropertyManagerDataServiceImpl, key_as_str=True)
-UnitFactory = lazy_instance_access(UnitFactoryImpl, key_as_str=True)
+PropertyManagerDataService = lazy_instance_access(PropertyManagerDataServiceImpl)
+UnitFactory = lazy_instance_access(UnitFactoryImpl)
 
 config = ConfigService
 pmds = PropertyManagerDataService
