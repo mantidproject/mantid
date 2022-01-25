@@ -24,12 +24,12 @@ from mantid.kernel._aliases import lazy_instance_access
 # If you see a segfault late in a python process related to the GIL
 # it is likely an exit handler is missing.
 AnalysisDataService = lazy_instance_access(AnalysisDataServiceImpl, key_as_str=True)
-AlgorithmFactory = lazy_instance_access(AlgorithmFactoryImpl, key_as_str=True)
+AlgorithmFactory = lazy_instance_access(AlgorithmFactoryImpl)
 AlgorithmManager = lazy_instance_access(AlgorithmManagerImpl)
 FileFinder = lazy_instance_access(FileFinderImpl)
 FileLoaderRegistry = lazy_instance_access(FileLoaderRegistryImpl)
 FrameworkManager = lazy_instance_access(FrameworkManagerImpl)
-FunctionFactory = lazy_instance_access(FunctionFactoryImpl, key_as_str=True)
+FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
 
