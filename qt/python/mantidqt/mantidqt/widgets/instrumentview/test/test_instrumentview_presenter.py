@@ -10,7 +10,6 @@ import unittest
 from unittest import mock
 
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
-from testhelpers import assertRaisesNothing
 
 
 class InstrumentViewPresenterTest(unittest.TestCase):
@@ -41,9 +40,22 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         """
         mock_ads.retrieve.return_value = mock.NonCallableMock()
         ws_name = "my_workspace"
-        presenter = assertRaisesNothing(self, InstrumentViewPresenter, ws_name)
+        presenter = InstrumentViewPresenter(ws_name)
         mock_view.assert_called_once_with(parent=mock.ANY, presenter=presenter,
                                           name=ws_name, window_flags=mock.ANY)
+
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
+    def test_ws_is_readlocked(self, mock_view, mock_ads):
+        """
+        Verify that a readlock is acquired on the workspace to prevent crashes when a
+        workspace is being written to while the instrument viewer is loading.
+        """
+        ws = mock.NonCallableMock()
+        mock_ads.retrieve.return_value = ws
+        InstrumentViewPresenter(ws)
+        ws.readLock.assert_called_once()
+        ws.unlock.assert_called_once()
 
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentViewManager")
     def test_constructor_registers_with_inst_view_manager(self, mock_manager):
