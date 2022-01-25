@@ -821,7 +821,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
     @staticmethod
     def _ungroup_detectors(input_ws, ws_to_match, grouping_pattern):
         """Assigns Y-axis values of grouped detectors back to the original (ungrouped) detectors."""
-        output_ws = f'{input_ws}_ungrouped'
+        output_ws = f'{input_ws}ungrouped'
         CreateWorkspace(
             DataX=ws_to_match.readX(0)[0]*ws_to_match.getNumberHistograms(),
             DataY=numpy.full(shape=(ws_to_match.getNumberHistograms()), fill_value=0.0, dtype='float64'),
@@ -836,7 +836,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             for det_no in det_list:
                 mtd[output_ws].setY(det_no, det_grouped_val)
 
-        return output_ws
+        return mtd[output_ws]
 
     def _inputWS(self):
         """Return the raw input workspace."""
