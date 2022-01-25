@@ -43,7 +43,7 @@ Improvements
 - The numerical values in the ``run info`` box on the :ref:`Home Tab <muon_home_tab-ref>` are now rounded to either 4 significant figures or a whole number, whichever is more precise.
 - The Sequentially Fit all button is now visible for 4K displays.
 - The :ref:`Results Tab <muon_results_tab-ref>` will now preserve the workspace selection after a fit. However, it will reselect a fit that has been recalculated.
-
+- When using ``Browse`` to load data from a different instrument, a warning is now shown saying that the data has not been loaded.
 
 
 Bugfixes
