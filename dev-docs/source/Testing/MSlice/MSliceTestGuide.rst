@@ -10,6 +10,8 @@ Introduction
 ------------
 MSlice is a tool for visualizing cuts and slices of inelastic neutron scattering data. This version uses Mantid to process the data and plots it using matplotlib. It includes both a GUI and a commandline interface with a script generator.
 
+See here for the current MSlice documentation: http://mantidproject.github.io/mslice
+
 Set Up
 ------
 
@@ -33,20 +35,20 @@ Taking Slices
 #. Double-click on elements of the original slice plot and modify settings
 #. Ensure that the slice plot changes accordingly
 
-2. Generate a script
-####################
-
-#. Navigate to the ``File`` menu on the slice plot
-#. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
-#. Run the script and check that the same slice plot is displayed
-
-3. Overplot recoil lines and Bragg peaks
+2. Overplot recoil lines and Bragg peaks
 ########################################
 
 #. Navigate to the ``Information`` menu on the slice plot
 #. Select ``Hydrogen`` from the submenu for ``Recoil lines``. A blue line should appear on the slice plot.
 #. Select two or three materials from the submenu for ``Bragg peaks`` and ensure that Bragg peaks in different colours per material are plotted on the slice plot.
 #. Make sure that when deselecting one of the materials only the respective Bragg peaks are removed from the slice plot but the ones still selected remain.
+
+3. Generate a script
+####################
+
+#. Navigate to the ``File`` menu on the slice plot
+#. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
+#. Run the script and check that the same slice plot is displayed
 
 Taking Cuts
 -----------
@@ -59,6 +61,13 @@ Taking Cuts
 #. In the row labelled ``along``, set the ``from`` value to ``0`` and the ``to`` value to ``10``
 #. In the row labelled ``over``, set the ``from`` value to ``-5`` and the ``to`` value to ``5``
 #. Click ``Plot``. A new window with a cut plot should open.
+
+.. figure:: ../../../../docs/source/images/cut_q.png
+   :alt: cut_q.png
+   :align: center
+   :width: 80%
+
+#. Check that the menu item 'Intensity' is disabled as well as the item 'Recoil lines' within the menu item 'Information'.
 #. On the cut plot, click ``Keep``
 #. Modify the step size on the ``Cut`` tab and click ``Plot Over``. A second cut should appear on the cut plot in a different colour.
 #. Click on ``Plot Options`` on the cut plot and modify settings
@@ -73,17 +82,22 @@ Taking Cuts
 #. Use the cursor to select a rectangular region in the slice plot. A second window with a cut plot should open.
 #. Change the rectangle by changing its size or dragging it to a different area of the slice plot. The cut plot should update accordingly.
 
-3. Generate a script
-####################
+.. figure:: ../../../../docs/source/images/interactive_cuts.png
+   :alt: interactive_cuts.png
+   :align: center
+   :width: 80%
 
-#. Navigate to the ``File`` menu on the cut plot
-#. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
-#. Run the script and check that the same slice plot is displayed
-
-4. Overplot Bragg peaks
+3. Overplot Bragg peaks
 #######################
 
 #. Navigate to the ``Information`` menu on the cut plot
 #. Select ``Aluminium`` from the submenu for ``Bragg peaks``. Green lines should appear on the cut plot with a respective legend entry.
 #. Deselect ``Aluminium`` form the submenu for ``Bragg peaks``. Both green lines and the respective legend entry should disappear.
+
+4. Generate a script
+####################
+
+#. Navigate to the ``File`` menu on the cut plot
+#. Select ``Generate Script to Clipboard`` and paste the script into the Mantid editor. Please note that on Linux ``Ctrl + V`` might not work as expected. Use ``shift insert`` instead in this case.
+#. Run the script and check that the same slice plot is displayed
 
