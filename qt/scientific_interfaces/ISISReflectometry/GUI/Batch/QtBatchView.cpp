@@ -48,10 +48,6 @@ void QtBatchView::initLayout() {
 
   m_preview = std::make_unique<QtPreviewView>(this);
   m_ui.batchTabs->addTab(m_preview.get(), "Reduction Preview");
-#ifdef NDEBUG
-  // Preview disabled in Release mode to prevent users "finding" it in the nightly
-  m_ui.batchTabs->removeTab(m_ui.batchTabs->indexOf(m_preview.get()));
-#endif // NDEBUG
 
   m_save = createSaveTab();
   m_ui.batchTabs->addTab(m_save.get(), "Save ASCII");
