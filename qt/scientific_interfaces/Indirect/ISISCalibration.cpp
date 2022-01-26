@@ -505,15 +505,14 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
 
       const auto energyRange = getXRangeFromWorkspace(ws);
       // Set default rebinning bounds
-      QPair<double, double> peakERange(-res * 10 + (energyRange.second + energyRange.first) / 2.0,
-                                       res * 10 + (energyRange.second + energyRange.first) / 2.0);
+      const auto energyRangeMid = (energyRange.second + energyRange.first) / 2.0;
+      QPair<double, double> peakERange(-res * 10 + energyRangeMid, res * 10 + energyRangeMid);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
       setPlotPropertyRange(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], energyRange);
       setRangeSelector(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], peakERange);
 
       // Set default background bounds
-      QPair<double, double> backgroundERange(-res * 20 + (energyRange.second + energyRange.first) / 2.0,
-                                             -res * 15 + (energyRange.second + energyRange.first) / 2.0);
+      QPair<double, double> backgroundERange(-res * 20 + energyRangeMid, -res * 15 + energyRangeMid);
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
     }
