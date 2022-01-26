@@ -68,7 +68,7 @@ sed -i '/  sha256: /c\  sha256: '$SHA256'' ./meta.yaml
 
 cd ../..
 git config user.name ${GITHUB_USER_NAME}
-git config user.email ${GITHUB_USER_NAME}@hosting.com
+git config user.email ${GITHUB_USER_NAME}@mantidproject.org
 git add recipes/*/meta.yaml
 git commit -m "Update version and git sha" --no-verify --signoff
 git pull --ff
