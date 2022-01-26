@@ -68,6 +68,7 @@ been integrated.
    :width: 75%
    :align: center
 
+.. _sliceviewer_peak_actions:
 Adding or removing peaks
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -92,7 +93,7 @@ defined on it, one can be copied from the data workspace with
 When removing peaks, the closest peak to the position selected will be
 removed from the peaks workspace, regardless of whether it is plotted
 or not.
-
+.. _sliceviewer_nonortho:
 Non-Orthogonal Axes View
 ------------------------
 
@@ -112,6 +113,7 @@ angles encoded by the UB matrix:
    :width: 75%
    :align: center
 
+.. _sliceviewer_roi:
 ROI Preview & Extraction
 ------------------------
 

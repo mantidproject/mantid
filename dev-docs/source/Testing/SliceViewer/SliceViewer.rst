@@ -13,6 +13,114 @@ The Sliceviewer in Workbench has the joint functionality of the SpectrumViewer a
 
 See here for a brief overview of the :ref:`sliceviewer`.
 
+.. _sliceviewer_testing_matrixws:
+MatrixWorkspace
+---------------
+Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and a Workspace2D (e.g. ``MAR11060.raw``) from the `TrainingCourseData <https://download.mantidproject.org/>`_.
+- Load the workspace and open in sliceviewer.
+- Check the toolbar buttons:
+    - Pan and Zoom (use mouse scroll and magnifying glass tool) and Home
+        - As you zoom check the color scale changes in autoscale enabled in checkbox below colorbar).
+    - Toggle grid lines on/off
+    - Enable line plots
+        - Confirm the curves update with the cursor position correctly
+        - Export cuts to workspaces in ADS using keys `x`,`y`,`c`
+            - This should produce workspaces in the ADS with suffix `_cut_x` and `_cut_y`
+            - Plot these in workjbench check they agree with sliceviewer plots
+    - Disable line plots and Enable :ref:`ROI tool<mantid:sliceviewer_roi>`
+        - The line plot button should be automatically enabled
+        - Draw, move and resize the rectangle
+        - Move it off the axes (it should just clip itself to be contained within the axes).
+        - Disabling the ROI tool should automatically disable the line plot tool and the axes will be removed.
+        - Export the cuts with keys - in addition the ROI can be exported by pressing `r`
+            - This should produce another workspace with suffix `_roi`
+            - Open it in sliceviewer and check the data and limits agree with the ROI drawn.
+    - :ref`Peak overlay<mantid:sliceviewer_roi>` and :ref`Nonorthogonal view<mantid:sliceviewer_nonortho>` buttons should be disabled (greyed out).
+    - Try saving the figure (with and without ROI/lineplots).
+- Test the colorbar and colorscale
+    - Change normalisation
+        - The color limits should only change if autoscale is enabled.
+    - Change the scale type to e.g. Log
+        - In Log scale pixels with 0 counts shoudl appear white
+        - When you zoom to a region with no data it will set the color axis limits to (0,0) and force the scale ot be linear
+    - Change colormap
+    - Reverse colormap
+- Test the :ref:`Cursor Information Widget<mantid:sliceviewer_cursor>` (table at top of sliceviewer window with TOF, spectrum, DetID etc.)
+    - Confirm it tracks with the cursor when Track Cursor is unchecked
+    - Uncheck the track cursor and confirm it updates when the cursor is clicked.
+- Test transposing axes
+    - Click the Y button to the right of the Time-of-flight label (top left corner) - the image should transposed and the axes labels updated.
+    - Repeat the test for the cursor info table.
+
+MD Workspaces
+-------------
+MD workspaces are hold multi-dimensional data (typically 2-4D) and come in two forms: :ref:`MDEventWorkspace <MDWorkspace>`, :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+In terms of sliceviewer functionality, the key difference is that MDHistoWorkspace have binned the events onto a regular grid and cannot be dynamically rebinned unless the original MDWorkspace
+(that holds the events) exists in the ADS (and the MDHistoWorkspace has not been altered by a binary operation).
+
+MDWorkspace (with events)
+#########################
+- Create a 4D MDWorkspace with some data
+
+.. code-block:: python
+
+	from mantid.simpleapi import *
+    md_4D = CreateMDWorkspace(Dimensions=4, Extents=[-0.5,0.5,-1,1,-1.5,1.5,-2,2], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
+    FakeMDEventData(InputWorkspace=md_4D, UniformParams='1e6') # 4D data
+    tmp = CreateMDWorkspace(Dimensions=4, Extents=[-0.25,0.25,-1,0.5,-1.5,1,-2,1], Names="H,K,L,E", Frames='HKL,HKL,HKL,General Frame',Units='r.l.u.,r.l.u.,r.l.u.,meV')
+    FakeMDEventData(InputWorkspace=tmp, UniformParams='1e6') # 4D data
+    md_4D += tmp
+    DeleteWorkspace(tmp)
+
+    expt_info = CreateSampleWorkspace()
+    md_4D.addExperimentInfo(expt_info)
+
+    # Add a non-orthogonal UB
+    SetUB(Workspace='md_4D', c=2, gamma=120)
+    # Creat a peaks workspace
+    CreatePeaksWorkspace(InstrumentWorkspace='md_4D', NumberOfPeaks=0, OutputWorkspace='peaks')
+    CopySample(InputWorkspace='md_4D', OutputWorkspace='peaks', CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
+    AddPeakHKL(Workspace='peaks', HKL='0,0,1')
+
+- Test the toolbar buttons pan, zoom, line plots, ROI as in :ref:`MatrixWorkspace<mantid:sliceviewer_testing_matrixws>`.
+    - This workspace should be dynamically rebinned - i.e. the number of bins within the view limits along each axis should be preserved when zooming.
+- Change the number of bins along one of the viewing axes (easier to pick a small number e.g. 2)
+- Change the integration width along the non-viewed axes.
+    - Increasing the width should improve the stats on the uniform background and the color limit should increase (event counts are summed not averaged).
+- Change the slicepoint along one of the non-viewed axes
+    - Confirm the slider moves when the spinbox value is updated.
+    - Confirm moving the slider updates the spinbox.
+- Test the :ref`Nonorthogonal view<mantid:sliceviewer_nonortho>`
+    - Enable nonorthogonal view
+        - This should disable ROI and lineplot buttons in the toolbar
+        - This should automatically turn on grid-lines
+        - When H and K are the viewing axes the grid-lines should not be perpendicular to each other
+        - The features in the data should align with the grid lines
+        - Zoom and pan
+        - Confirm the autoscaling of the colorbar works in non-orthogonal view
+        - Change one of the viewing axes to be L (e.g. click `X` button next to L in top left of window)
+            - Gridlines should now appear to be orthogonal
+        - Change one of the viewing axes to be 'E' (e.g. click `Y` button next to E in top left of window)
+            - Nonorthogonal view should be disabled (only enabled for momentum axes)
+            - Line plots and ROI should be enabled
+        -Change the viewing axis presently selected as `E` to be a momentum axis (e.g. `H`)
+            - The nonorthogonal view should be automatically re-enabled.
+- Test the :ref`Peak Overlay<mantid:liceviewer_peaks_overlay>`
+    - Click to peak overlay button in the toolbar
+    - Check the `Overlay?` box next to peaks
+    - This should open a table on the RHS of the window - it should have a single row corresponding to a peak at HKL = (0,0,1).
+    - Double click the row
+        - It should change the slicepoint along the integrated momentum axis and zoom into the peak - e.g. in (X,Y) = (H,K) then the slicepoint along L will be set to 1 and there will be a cross at (0,0).
+        - The cross should be plotted at all E (obviously a Bragg peak will only be on the elastic line but the peak object has no elastic/inelastic logic and the sliceviewer only knows that `E` is not a momentum axis, it could be temperature etc.).
+
+
+
+
+
+
+
+
+
 
 Data
 ----
