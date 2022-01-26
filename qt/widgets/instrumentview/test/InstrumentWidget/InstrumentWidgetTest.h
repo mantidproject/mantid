@@ -69,7 +69,7 @@ public:
       auto qtMock = makeQtDisplay();
       auto glMock = makeGL();
 
-      auto instance = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto instance = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = instance.getInstrumentActor();
@@ -85,7 +85,7 @@ public:
       setGl(false);
       auto qtMock = makeQtDisplay();
       auto glMock = makeGL();
-      auto instance = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto instance = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = instance.getInstrumentActor();
@@ -105,7 +105,7 @@ public:
       auto glMock = makeGL();
       EXPECT_CALL(*glMock, saveToFile(expectedName)).Times(1);
 
-      auto widget = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto widget = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -127,7 +127,7 @@ public:
       auto glMock = makeGL();
       EXPECT_CALL(*qtMock, saveToFile(expectedName)).Times(1);
 
-      auto widget = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", makeDisplay(), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -147,7 +147,7 @@ public:
       EXPECT_CALL(*glMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -167,7 +167,7 @@ public:
       auto displayMock = makeDisplay();
       EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 22, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -191,7 +191,7 @@ public:
       EXPECT_CALL(*glMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(glMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 25, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -213,7 +213,7 @@ public:
       EXPECT_CALL(*qtMock, updateDetectors()).Times(1);
       EXPECT_CALL(*displayMock, currentWidget()).Times(1).WillOnce(Return(qtMock.get()));
 
-      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 24, useLoadingThread);
+      auto widget = construct("test_ws", std::move(displayMock), qtMock.get(), glMock.get(), 23, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
@@ -253,7 +253,7 @@ public:
       auto glMock = makeGL();
       auto displayMock = makeDisplay();
 
-      auto widget = construct(wsname, std::move(displayMock), qtMock.get(), glMock.get(), 46, useLoadingThread);
+      auto widget = construct(wsname, std::move(displayMock), qtMock.get(), glMock.get(), 47, useLoadingThread);
 
       if (useLoadingThread) {
         InstrumentActor &actor = widget.getInstrumentActor();
