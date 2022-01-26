@@ -80,8 +80,39 @@ class PlotGeneratorAxisTest(unittest.TestCase):
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot([-10, 10], [1, 2])
-        ax.set_facecolor("#00000000")
-        self.assertEqual("set_facecolor((0.0, 0.0, 0.0, 0.0))", generate_axis_facecolor_commands(ax))
+        ax.set_facecolor("#8a9aff")
+        self.assertEqual("set_facecolor('#8a9aff')", generate_axis_facecolor_commands(ax))
+        plt.close()
+        del fig
+
+    def test_facecolor_command_not_present_if_default_colour(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot([-10, 10], [1, 2])
+        # We didn't change the facecolor from default, so no commands should be returned.
+        self.assertFalse(generate_axis_facecolor_commands(ax))
+        plt.close()
+        del fig
+
+    def test_facecolor_commands_for_tiled_plot(self):
+        """
+        Set a canvas colour (facecolor) for only one of the subplots in a tiled plot and check
+        that commands are generated for only that one.
+        """
+        fig, axes = plt.subplots(ncols=2, nrows=2, subplot_kw={'projection': 'mantid'})
+        for ax in fig.get_axes():
+            ax.plot([-10, 10], [1, 2])
+        # Only set the facecolor on one subplot.
+        axes[1][0].set_facecolor('#c0ffee')
+        script = generate_script(fig)
+        # Should be axes[i][j].set_facecolor for multiple subplots.
+        self.assertNotIn("axes.set_facecolor", script)
+        # These subplots have default canvas colour so should've have the facecolor command.
+        self.assertNotIn("axes[0][0].set_facecolor", script)
+        self.assertNotIn("axes[0][1].set_facecolor", script)
+        self.assertNotIn("axes[1][1].set_facecolor", script)
+        # This subplot should have our new colour.
+        self.assertIn("axes[1][0].set_facecolor('#c0ffee')", script)
         plt.close()
         del fig
 

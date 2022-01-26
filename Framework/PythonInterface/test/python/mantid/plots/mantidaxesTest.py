@@ -16,8 +16,7 @@ import unittest
 
 from mantid.kernel import config
 from mantid.plots import datafunctions
-from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 from mantid.plots.axesfunctions import get_colorplot_extents
 from unittest.mock import Mock, patch
 from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWorkspace,
