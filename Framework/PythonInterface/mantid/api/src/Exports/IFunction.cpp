@@ -79,6 +79,16 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType1_Overloads, getError, 1, 1)
 using getErrorType2 = double (IFunction::*)(const std::string &) const;
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType2_Overloads, getError, 1, 1)
 
+// declareAttribute(name, defaultValue)
+using declareAttributeType1 = double (IFunction::*)(const std::string &name,
+                                                    const API::IFunction::Attribute &defaultValue) const;
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declareAttributeType1_Overloads, declareAttribute, 2, 2)
+// declareAttribute(name, defaultValue, validator)
+using declareAttributeType2 = double (IFunction::*)(const std::string &name,
+                                                    const API::IFunction::Attribute &defaultValue,
+                                                    const Kernel::IValidator &validator) const;
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declareAttributeType2_Overloads, declareAttribute, 3, 3)
+
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addTies_Overloads, addTies, 1, 2)
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(addConstraints_Overloads, addConstraints, 1, 2)
@@ -177,12 +187,13 @@ void export_IFunction() {
            setParameterType2_Overloads((arg("self"), arg("name"), arg("value"), arg("explicitlySet")),
                                        "Sets the value of the named parameter"))
 
-      .def("declareAttribute", &IFunctionAdapter::declareAttribute, (arg("self"), arg("name"), arg("default_value")),
-           "Declare an attribute with an initial value")
+      .def("declareAttribute", (declareAttributeType1)&IFunctionAdapter::declareAttribute,
+           declareAttributeType1_Overloads((arg("self"), arg("name"), arg("default_value")),
+                                           "Declare an attribute with an initial value"))
 
-      .def("declareAttribute", &IFunctionAdapter::declareAttribute,
-           (arg("self"), arg("name"), arg("default_value"), arg("validator")),
-           "Declare an attribute with an initial value, with a validator")
+      .def("declareAttribute", (declareAttributeType2)&IFunctionAdapter::declareAttribute,
+           declareAttributeType2_Overloads((arg("self"), arg("name"), arg("default_value"), arg("validator")),
+                                           "Declare an attribute with an initial value, with a validator"))
 
       .def("getAttributeValue",
            (PyObject * (*)(const IFunction &, const std::string &)) IFunctionAdapter::getAttributeValue,
