@@ -1,7 +1,0 @@
-Muon Analysis and Frequency Domain Analysis
--------------------------------------------
-
-Improvements
-############
-
-- When using browse to load data from a different instrument, a warning is now shown saying that the data has not been loaded.

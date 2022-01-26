@@ -18,7 +18,7 @@ Improvements
 - Cells containing vector data in a table workspace can now be viewed in the table workspace display.
 - The browse dialog in the file finder widget now opens at the path specified in the widget's edit box (if the edit box contains a full path).
 - The font in python editor and IPython console are ensured to be monospace. It also ensures monospace on KDE Neon distributions too.
-- There is now a warning in the settings to say that changes to :ref:`Project Recovery<Project Recovery>` settings are only applied after restarting workbench.
+- There is now a warning in the settings to say that changes to :ref:`Project Recovery<Project Recovery>` settings are only applied after restarting Workbench.
 
 Bugfixes
 --------
@@ -40,11 +40,12 @@ Bugfixes
 * The ``About Mantid`` page now appears on a new full release, even if a recent nightly was previously launched.
 * The instrument and facility combo-boxes are now always appropriately sized on the ``About Mantid`` page on macOS.
 * Fixed a bug where copying data from a table displaying a matrix workspace was not working.
-* Workbench will no longer hang if an algorithm was running when workbench was closed.
+* Workbench will no longer hang if an algorithm was running when Workbench was closed.
 * Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
 * Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``# `` will be inserted at the position of the first non-whitespace character in the line).
 * Empty group workspaces can now be deleted rather than needing to be ungrouped.
 * Fixed a bug in :ref:`Project Recovery<Project Recovery>` when attempting to remove non-empty directories and raising the error reporter.
+* Users are no longer able to add a peak to the Fit Property Browser by clicking with the interactive tool outside of the axes (which would cause an error).
 
 InstrumentViewer
 ----------------
@@ -87,5 +88,6 @@ Bugfixes
 - Users are now able to export x/y cuts and 2D slices from the region of interest tool for ``MDHisto`` workspaces.
 - Transposing data (i.e. swapping x and y axes) of ``2D MD`` workspace, now works without error.
 - Fixed issues with the colorbar autoscale not updating correctly on zoom.
+- Stopped the ROI rectangle selection extents jumping discontinuously when the user tries to resize beyond the extent of the colorfill axes towards the line plot axes.
 
 :ref:`Release 6.3.0 <v6.3.0>`
