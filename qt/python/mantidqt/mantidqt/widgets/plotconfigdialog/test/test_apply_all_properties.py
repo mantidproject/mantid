@@ -18,8 +18,8 @@ from matplotlib.patches import BoxStyle
 from matplotlib.pyplot import figure
 
 from mantid.plots.legend import LegendProperties
+from mantid.plots.utility import convert_color_to_hex
 from unittest.mock import Mock, patch
-from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 from mantidqt.widgets.plotconfigdialog.axestabwidget import AxProperties
 from mantidqt.widgets.plotconfigdialog.axestabwidget.presenter import AxesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.imagestabwidget import ImageProperties
