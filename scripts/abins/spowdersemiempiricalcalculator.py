@@ -206,13 +206,20 @@ class SPowderSemiEmpiricalCalculator:
     def calculate_data(self) -> SData:
         """
         Calculates dynamical structure factor S.
+
+        2-D writing is currently slow compared to 2-D calculation, so only 1-D
+        results will be cached.
+
         :returns: object of type SData and dictionary with total S.
         """
+        from abins.constants import ONE_DIMENSIONAL_INSTRUMENTS
+
         data = self._calculate_s()
-        self._clerk.add_file_attributes()
-        self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
-        self._clerk.add_data("data", data.extract())
-        #  self._clerk.save()  # This is really slow, disable while developing...
+        if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            self._clerk.add_file_attributes()
+            self._clerk.add_attribute(name="order_of_quantum_events", value=self._quantum_order_num)
+            self._clerk.add_data("data", data.extract())
+            self._clerk.save()
         return data
 
     @property
@@ -398,26 +405,6 @@ class SPowderSemiEmpiricalCalculator:
                                                          broadening_scheme=broadening_scheme)
 
         sdata.update(fundamentals_sdata_with_dw)
-
-        # import matplotlib.pyplot as plt
-        # from matplotlib.image import NonUniformImage
-        # from matplotlib.colors import Normalize
-        # fig, ax = plt.subplots()
-        # plt.plot(self._bin_centres, sdata_1d.get_total_intensity().T)
-        # plt.show(fig)
-
-        # fig, ax = plt.subplots()
-        # image = NonUniformImage(ax,
-        #                         extent=(min(self._q_bins), max(self._q_bins),
-        #                                 min(self._bins), max(self._bins)))
-        # image.set_norm(Normalize(0, 0.1))
-        # image.set_data(self._q_bin_centres, self._bin_centres,
-        #                sdata.get_total_intensity().T)
-        # ax.images.append(image)
-        # ax.set_xlim(min(self._q_bins), max(self._q_bins))
-        # ax.set_ylim(min(self._bins), max(self._bins))
-        # plt.show(fig)
-
         return sdata
 
     def _calculate_s_powder_over_k(self, *, angle: float,
