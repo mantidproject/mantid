@@ -180,6 +180,10 @@ void export_IFunction() {
       .def("declareAttribute", &IFunctionAdapter::declareAttribute, (arg("self"), arg("name"), arg("default_value")),
            "Declare an attribute with an initial value")
 
+      .def("declareAttribute", &IFunctionAdapter::declareAttribute,
+           (arg("self"), arg("name"), arg("default_value"), arg("validator")),
+           "Declare an attribute with an initial value, with a validator")
+
       .def("getAttributeValue",
            (PyObject * (*)(const IFunction &, const std::string &)) IFunctionAdapter::getAttributeValue,
            (arg("self"), arg("name")), "Return the value of the named attribute")
