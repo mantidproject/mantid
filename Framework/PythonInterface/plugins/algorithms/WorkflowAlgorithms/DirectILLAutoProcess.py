@@ -426,7 +426,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             if self.save_output:
                 self._save_output(current_output)
 
-        progress.report("Wrapping up")
+        progress.report("Grouping outputs")
         GroupWorkspaces(InputWorkspaces=output_samples,
                         OutputWorkspace=self.output)
         if self.clear_cache:  # final clean up
