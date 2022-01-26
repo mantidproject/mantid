@@ -5,8 +5,10 @@
 #
 # Expected args:
 #   1. GITHUB_ACCESS_TOKEN: The token required to push to a https cloned mantidproject/conda-recipes repository
+#   2. GITHUB_USER_NAME: The user name of the mantidproject/conda-recipes repository for committing and pushing
 
 GITHUB_ACCESS_TOKEN=$1
+GITHUB_USER_NAME=$2
 
 # Generate the latest version number
 LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
@@ -49,7 +51,7 @@ echo $SHA256
 rm -rf $SOURCE_FILE
 
 # Clone conda-recipes
-git clone https://mantid-builder:${GITHUB_ACCESS_TOKEN}@github.com:mantidproject/conda-recipes.git
+git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git
 
 cd conda-recipes/recipes/mantid
 sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' ./meta.yaml
@@ -65,8 +67,8 @@ sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' ./meta.yaml
 sed -i '/  sha256: /c\  sha256: '$SHA256'' ./meta.yaml
 
 cd ../..
-git config user.name 'mantid-builder'
-git config user.email 'mantid-builder@hosting.com'
+git config user.name ${GITHUB_USER_NAME}
+git config user.email ${GITHUB_USER_NAME}@hosting.com
 git add recipes/*/meta.yaml
 git commit -m "Update version and git sha" --no-verify --signoff
 git pull --ff
