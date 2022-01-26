@@ -18,6 +18,10 @@ def build_and_test_win(){
     bat "\"C:\\Program Files\\git\\bin\\bash.exe\" -c \"C:/Jenkins/workspace/$JOB_NAME/buildconfig/Jenkins/Conda/conda-buildscript C:/Jenkins/workspace/$JOB_NAME win --enable-systemtests --clean-build --clean-external-projects\""
 }
 
+def update_conda_recipes(){
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes $GITHUB_ACCESS_TOKEN"
+}
+
 def conda_build_UNIX(){
     sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-workbench"
 }
@@ -69,6 +73,12 @@ pipeline {
                         build_and_test_macos()
                     }
                 }
+            }
+        }
+        stage('Update conda-recipes repository') {
+            agent { label 'master' }
+            steps {
+                update_conda_recipes()
             }
         }
         stage('Package and Test') {
