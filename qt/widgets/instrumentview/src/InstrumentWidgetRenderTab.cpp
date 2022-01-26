@@ -592,15 +592,23 @@ void InstrumentWidgetRenderTab::showEvent(QShowEvent * /*unused*/) {
   getSurface()->requestRedraw();
 }
 
-void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
+/**
+ * @brief InstrumentWidgetRenderTab::flipUnwrappedView
+ * If needed, flips an unwrapped surface.
+ * @param flipped : whether the surface should be flipped wrt the default view
+ */
+void InstrumentWidgetRenderTab::flipUnwrappedView(bool flipped) {
   auto surface = std::dynamic_pointer_cast<UnwrappedSurface>(m_instrWidget->getSurface());
   if (!surface)
     return;
-  surface->setFlippedView(on);
+  if (surface->isFlippedView() == flipped)
+    return;
+
+  surface->setFlippedView(flipped);
   m_instrWidget->updateInstrumentView();
   // Sync checkbox
   m_flipCheckBox->blockSignals(true);
-  m_flipCheckBox->setChecked(on);
+  m_flipCheckBox->setChecked(flipped);
   m_flipCheckBox->blockSignals(false);
 }
 
