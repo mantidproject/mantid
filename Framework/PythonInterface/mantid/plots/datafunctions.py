@@ -22,8 +22,7 @@ import mantid.api
 import mantid.kernel
 from mantid.api import MultipleExperimentInfos, MatrixWorkspace
 from mantid.dataobjects import EventWorkspace, MDHistoWorkspace, Workspace2D
-from mantid.plots.legend import convert_color_to_hex
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import convert_color_to_hex, MantidAxType
 
 
 # Helper functions for data extraction from a Mantid workspace and plot functionality

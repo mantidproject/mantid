@@ -160,8 +160,11 @@ def get_axis_scale_cmds(ax, ax_object_var):
 
 
 def get_axis_facecolor_cmds(ax, ax_object_var):
-    """Get command ax.set_facecolor"""
-    return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=generate_axis_facecolor_commands(ax))]
+    """Get command ax.set_facecolor. Returns an empty list if the facecolor is default."""
+    command = generate_axis_facecolor_commands(ax)
+    if command is not None:
+        return ["{ax_obj}.{cmd}".format(ax_obj=ax_object_var, cmd=command)]
+    return []
 
 
 def get_title_cmds(ax, ax_object_var):
