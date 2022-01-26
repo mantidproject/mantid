@@ -51,22 +51,21 @@ echo $SHA256
 rm -rf $SOURCE_FILE
 
 # Clone conda-recipes
+if [ -d "conda-recipes" ]; then rm -rf conda-recipes; fi
 git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git
 
-cd conda-recipes/recipes/mantid
-sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' ./meta.yaml
-sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' ./meta.yaml
-sed -i '/  sha256: /c\  sha256: '$SHA256'' ./meta.yaml
-cd ../mantidqt
-sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' ./meta.yaml
-sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' ./meta.yaml
-sed -i '/  sha256: /c\  sha256: '$SHA256'' ./meta.yaml
-cd ../mantidworkbench
-sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' ./meta.yaml
-sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' ./meta.yaml
-sed -i '/  sha256: /c\  sha256: '$SHA256'' ./meta.yaml
+cd conda-recipes
 
-cd ../..
+function input_data(){
+    sed -i '/{% set git_commit =/c\{% set git_commit = "'$LATEST_GIT_SHA'" %}' $1
+    sed -i '/{% set version =/c\{% set version = "'$VERSION'" %}' $1
+    sed -i '/  sha256: /c\  sha256: '$SHA256'' $1
+}
+
+input_data recipes/mantid/meta.yaml
+input_data recipes/mantidqt/meta.yaml
+input_data recipes/mantidworkbench/meta.yaml
+
 git config user.name ${GITHUB_USER_NAME}
 git config user.email ${GITHUB_USER_NAME}@mantidproject.org
 git add recipes/*/meta.yaml
