@@ -76,7 +76,7 @@ pipeline {
             }
         }
         stage('Update conda-recipes repository') {
-            agent { label 'master' }
+            agent { label 'conda-build-linux' }
             steps {
                 update_conda_recipes()
             }
