@@ -119,7 +119,7 @@ class SPowderSemiEmpiricalCalculator:
         if self._autoconvolution:
             self._fine_bin_factor = abins.parameters.autoconvolution['fine_bin_factor']
             self._fine_bins = np.arange(start=self._instrument.get_min_wavenumber(),
-                                        stop=(self._instrument.get_min_wavenumber() + bin_width),
+                                        stop=(self._instrument.get_max_wavenumber() + bin_width),
                                         step=(bin_width / self._fine_bin_factor),
                                         dtype=FLOAT_TYPE)
             self._fine_bin_centres = self._fine_bins[:-1] + (bin_width / self._fine_bin_factor / 2)
