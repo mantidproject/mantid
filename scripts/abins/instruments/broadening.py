@@ -528,13 +528,13 @@ def interpolated_broadening(sigma=None, points=None, bins=None,
     log_bases = {'2': 2, 'sqrt2': np.sqrt(2)}
     log_base = log_bases[spacing]
 
-    # Sample on appropriate log scale: log_b(x) = log(x) / lob(b)
-    n_kernels = int(np.ceil(np.log(max(sigma) / min(sigma)) / np.log(log_base)))
+    # Sample on appropriate log scale: log_b(x) = log(x) / log(b)
+    n_kernels = int(np.ceil(np.log(max(sigma) / min(sigma)) / np.log(log_base))) + 1
 
-    if n_kernels == 1:
+    if n_kernels == 1:  # Special case: same width everywhere, only need one kernel
         sigma_samples = np.array([min(sigma)])
     else:
-        sigma_samples = log_base**np.arange(n_kernels + 1) * min(sigma)
+        sigma_samples = log_base**np.arange(n_kernels) * min(sigma)
 
     bin_width = bins[1] - bins[0]
 
