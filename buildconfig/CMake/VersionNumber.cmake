@@ -1,6 +1,9 @@
 # Set the version number here for MantidVersion and the package filenames This follows Semantic Versioning
 # https://semver.org
 if(CONDA_BUILD)
+  # If inside of conda-build assume the version number is set by the version number in the recipe.
+  # The conda recipe version number is set either manually in https://github.com/mantidproject/conda-recipes.git and
+  # Automatically set by the nightly pipeline that handles conda-build.
   set(_conda_package_version $ENV{PKG_VERSION})
   string(REPLACE "." ";" _conda_package_version ${_conda_package_version})
   set(_conda_package_list ${_conda_package_version})
