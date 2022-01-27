@@ -27,8 +27,8 @@ class Times2(IFunction1D):
     def init(self):
         self.declareAttribute("IntAtt", 1)
         self.declareAttribute("DoubleAtt", 3.4)
-        self.declareAttribute("StringAtt", "filename", StringListValidator("filename","test"))
-        self.declareAttribute("StringAtt1", "test", StringListValidator("filename","test"))
+        self.declareAttribute("StringAtt", "filename", StringListValidator(["filename","test"]))
+        self.declareAttribute("StringAtt1", "test", StringListValidator(["filename","test"]))
         self.declareAttribute("BoolAtt", True)
         self.declareAttribute("ListAtt", [1, 2, 3])
 
