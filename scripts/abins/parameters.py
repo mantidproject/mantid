@@ -62,6 +62,7 @@ instruments = {
         'resolution': 'pychop',
         'q_size': 100,
         'e_init': 500 * MILLI_EV_TO_WAVENUMBER,
+        'max_wavenumber': 2000 * MILLI_EV_TO_WAVENUMBER,
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'},
                      'S': {'chopper': 'S'},

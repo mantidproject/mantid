@@ -13,7 +13,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import ConvertUnits, GroupWorkspaces, Load
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -63,12 +63,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
 
         self.declareProperty(name="Scale", defaultValue=1.0,
                              doc='Scale the intensity by the given factor. Default is no scaling.')
-
-        self.declareProperty(name="EnergyUnits",
-                             defaultValue="cm-1",
-                             direction=Direction.Input,
-                             validator=StringListValidator(["cm-1", "meV"]),
-                             doc="Energy units for output workspace and experimental file")
 
         # Declare Instrument-related properties
         self.declare_instrument_properties(
@@ -299,7 +293,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self._autoconvolution = self.getProperty("Autoconvolution").value
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value
-        self._energy_units = self.getProperty("EnergyUnits").value
 
         # Establish energy sampling mesh
         step = abins.parameters.sampling['bin_width'] = self._bin_width

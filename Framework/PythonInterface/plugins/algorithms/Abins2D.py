@@ -14,7 +14,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 from mantid.kernel import logger
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import GroupWorkspaces
+from mantid.simpleapi import ConvertUnits, GroupWorkspaces
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -37,6 +37,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
     _num_quantum_order_events = None
     _autoconvolution = None
     _q_bins = None
+    _energy_units = None
 
     def category(self) -> str:
         return "Simulation"
@@ -57,7 +58,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         self.declare_instrument_properties(
             default="TwoDMap", choices=TWO_DIMENSIONAL_INSTRUMENTS,
             multiple_choice_settings=[('Chopper', 'settings', 'Chopper package')],
-            freeform_settings=[('IncidentEnergy', '4100', 'Incident energy in wavenumber'),
+            freeform_settings=[('IncidentEnergy', '4100', 'Incident energy in EnergyUnits'),
                                ('ChopperFrequency', '', 'Chopper frequency in Hz')])
 
     def validateInputs(self) -> Dict[str,str]:
@@ -152,7 +153,12 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
             self.create_total_workspace(workspaces)
             prog_reporter.report("Workspace with total S has been constructed.")
 
-        GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+        gws = GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+
+        # 7) Convert units
+        if self._energy_units == 'meV':
+            # Ok, EMode isn't really Indirect but that enables Mantid to do the conversion
+            ConvertUnits(InputWorkspace=gws, OutputWorkspace=gws, EMode='Indirect', Target='DeltaE')
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
@@ -281,12 +287,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         self.set_instrument()
 
-        # instrument_params = abins.parameters.instruments[self._instrument.get_name()]
-
-        # Incident energy currently handled differently, but this should be changed to an
-        # instrument parameter as well
-        #instrument_params['e_init'] = float(self.getProperty("IncidentEnergy").value)
-        self._instrument.set_incident_energy(float(self.getProperty("IncidentEnergy").value))
+        self._instrument.set_incident_energy(float(self.getProperty("IncidentEnergy").value),
+                                             units=self._energy_units)
 
         # Establish energy sampling mesh
         step = abins.parameters.sampling['bin_width'] = self._bin_width

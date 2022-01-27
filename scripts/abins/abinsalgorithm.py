@@ -39,9 +39,10 @@ class AbinsAlgorithm:
         self._save_ascii = self.getProperty("SaveAscii").value
         self._scale_by_cross_section = self.getPropertyValue('ScaleByCrossSection')
 
+        self._energy_units = self.getProperty("EnergyUnits").value
+
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
-
         self._max_event_order = self._num_quantum_order_events # This default can be replaced in child class
 
     def set_instrument(self) -> None:
@@ -111,6 +112,12 @@ class AbinsAlgorithm:
                              validator=StringListValidator(['1', '2']),
                              doc="Number of quantum order effects included in the calculation "
                                  "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
+
+        self.declareProperty(name="EnergyUnits",
+                             defaultValue="cm-1",
+                             direction=Direction.Input,
+                             validator=StringListValidator(["cm-1", "meV"]),
+                             doc="Energy units for output workspace and experimental file")
 
     def declare_instrument_properties(
             self, default: str = "TOSCA",

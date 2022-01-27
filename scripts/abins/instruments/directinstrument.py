@@ -4,7 +4,8 @@ from typing import Tuple
 
 import numpy as np
 
-from abins.constants import FLOAT_TYPE, WAVENUMBER_TO_INVERSE_A
+from abins.constants import (FLOAT_TYPE, MILLI_EV_TO_WAVENUMBER,
+                             WAVENUMBER_TO_INVERSE_A)
 from .instrument import Instrument
 from .broadening import broaden_spectrum, prebin_required_schemes
 
@@ -24,12 +25,20 @@ class DirectInstrument(Instrument):
 
         super().__init__(setting=setting)
 
-    def set_incident_energy(self, e_init: float):
+    def set_incident_energy(self, e_init: float, units: str = 'cm-1'):
         """
         Setter for incident energy.
+
         :param e_init: new incident energy
+        :param units: units of input e_init: 'cm-1' or 'meV'.
         """
-        self._e_init = float(e_init)
+        if units == 'cm-1':
+            self._e_init = e_init
+        elif units == 'meV':
+            self._e_init = e_init * MILLI_EV_TO_WAVENUMBER
+        else:
+            raise ValueError("Unknown unit: incident energy should be given "
+                             "in 'cm-1' or 'meV'.")
 
     def get_incident_energy(self) -> float:
         return self._e_init
