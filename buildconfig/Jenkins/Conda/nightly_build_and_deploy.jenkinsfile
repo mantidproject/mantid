@@ -10,12 +10,16 @@ def build_and_test_linux() {
 
 def build_and_test_macos() {
     git_clone()
-    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE osx --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE osx-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
 }
 
 def build_and_test_win(){
     git_clone()
     bat "\"C:\\Program Files\\git\\bin\\bash.exe\" -c \"C:/Jenkins/workspace/$JOB_NAME/buildconfig/Jenkins/Conda/conda-buildscript C:/Jenkins/workspace/$JOB_NAME win --enable-systemtests --clean-build --clean-external-projects\""
+}
+
+def update_conda_recipes(){
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN"
 }
 
 def conda_build_UNIX(){
@@ -69,6 +73,12 @@ pipeline {
                         build_and_test_macos()
                     }
                 }
+            }
+        }
+        stage('Update conda-recipes repository') {
+            agent { label 'conda-build-linux' }
+            steps {
+                update_conda_recipes()
             }
         }
         stage('Package and Test') {
