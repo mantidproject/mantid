@@ -110,7 +110,7 @@ void IFunctionAdapter::init() { callMethodNoCheck<void>(getSelf(), "init"); }
  * @param name :: The name of the new attribute
  * @param defaultValue :: The default value for the attribute
  */
-void IFunctionAdapter::declareAttribute(const std::string &name, const object &defaultValue) {
+void IFunctionAdapter::declareAttribute(const std::string &name, const boost::python::object &defaultValue) {
   auto attr = IFunction::hasAttribute(name) ? IFunction::getAttribute(name) : Attribute();
   attr = createAttributeFromPythonValue(attr, defaultValue);
   IFunction::declareAttribute(name, attr);
@@ -127,7 +127,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const object &d
  * @param defaultValue :: The default value for the attribute
  * @param validator :: The validator used to restrict the attribute values
  */
-void IFunctionAdapter::declareAttribute(const std::string &name, const object &defaultValue,
+void IFunctionAdapter::declareAttribute(const std::string &name, const boost::python::object &defaultValue,
                                         const boost::python::object &validator) {
   auto attr = IFunction::hasAttribute(name) ? IFunction::getAttribute(name) : Attribute();
   try {
