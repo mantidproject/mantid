@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import IFunction1D, IFunction, FunctionFactory
-from mantid.kernel import ListValidator
+from mantid.kernel import StringListValidator
 import numpy as np
 
 
@@ -27,8 +27,8 @@ class Times2(IFunction1D):
     def init(self):
         self.declareAttribute("IntAtt", 1)
         self.declareAttribute("DoubleAtt", 3.4)
-        self.declareAttribute("StringAtt", "filename", ListValidator("filename","test"))
-        self.declareAttribute("StringAtt1", "test", ListValidator("filename","test"))
+        self.declareAttribute("StringAtt", "filename", StringListValidator("filename","test"))
+        self.declareAttribute("StringAtt1", "test", StringListValidator("filename","test"))
         self.declareAttribute("BoolAtt", True)
         self.declareAttribute("ListAtt", [1, 2, 3])
 
