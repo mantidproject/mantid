@@ -21,6 +21,8 @@ class ILLLagrange(DataProcessorAlgorithm):
 
     INCIDENT_ENERGY = 4.5
 
+    use_incident_energy = False
+
     # max difference between two identical points, two points closer than that will be merged in the merge algorithm
     EPSILON = 1e-2
 
@@ -48,6 +50,9 @@ class ILLLagrange(DataProcessorAlgorithm):
     def name():
         return 'ILLLagrange'
 
+    def setup(self):
+        self.use_incident_energy = self.getProperty('IncidentEnergy').value
+
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('SampleRuns', action=FileAction.Load, extensions=['']),
                              doc='Sample run(s).')
@@ -57,11 +62,14 @@ class ILLLagrange(DataProcessorAlgorithm):
                              doc='Correction reference file.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output workspace containing reduced data.')
+        self.declareProperty(name='IncidentEnergy', defaultValue=False,
+                             doc='Show the energies as incident energies, not transfer ones.')
 
         # the list of all the intermediate workspaces to group at the end
         self.intermediate_workspaces = []
 
     def PyExec(self):
+        self.setup()
 
         correction_file = self.getPropertyValue('CorrectionFile')
         self.output_ws_name = self.getPropertyValue('OutputWorkspace')
@@ -202,9 +210,11 @@ class ILLLagrange(DataProcessorAlgorithm):
         detector_counts = [0]*len(data)
         errors = [0]*len(data)
 
+        # if the user wants to see transfer energy, we offset by 4.5
+        offset = 0 if self.use_incident_energy else self.INCIDENT_ENERGY
+
         for index, line in enumerate(data):
-            # we offset by the incident energy
-            energy[index] = line[0] - self.INCIDENT_ENERGY
+            energy[index] = line[0] - offset
 
             detector_counts[index] = line[2] / line[1]
             errors[index] = np.sqrt(line[2]) / line[1]
