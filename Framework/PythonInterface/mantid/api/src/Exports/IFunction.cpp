@@ -81,12 +81,12 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getErrorType2_Overloads, getError, 1, 1)
 
 // declareAttribute(name, defaultValue)
 using declareAttributeType1 = void (IFunctionAdapter::*)(const std::string &name,
-                                                         const boost::python::object &defaultValue) const;
+                                                         const boost::python::object &defaultValue);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declareAttributeType1_Overloads, declareAttribute, 2, 2)
 // declareAttribute(name, defaultValue, validator)
 using declareAttributeType2 = void (IFunctionAdapter::*)(const std::string &name,
                                                          const boost::python::object &defaultValue,
-                                                         const boost::python::object &validator) const;
+                                                         const boost::python::object &validator);
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(declareAttributeType2_Overloads, declareAttribute, 3, 3)
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(tie_Overloads, tie, 2, 3)
