@@ -22,6 +22,10 @@ from mantid import logger
 # the fortran modules with f2py. It must match the version of
 # the numpy ABI at runtime.
 F2PY_MODULES_REQUIRED_C_ABI = 0x01000009
+BAYES_PACKAGE_NAME = 'quasielasticbayes'
+UNSUPPORTED_PLATFORM_MESSAGE = """Functionality not currently available on your platform.
+Please try installing the extra package: python -m pip install --user quasielasticbayes
+"""
 
 
 def import_mantidplot():
@@ -52,22 +56,16 @@ def _os_env():
 
 def is_pip_version_of_libs():
     """
-    If we are using a pip version of the libs we can import them from the quasielasticbayes package
-    import quasielasticbayes
-    # imports quasielasticbayes.QLdata ect., i.e. the libraries are usable with:
-    quasielasticbayes.QLdata.qldata(....)
+    If we are using a pip version of the libs we can import them from the BAYES_PACKAGE_NAME package
+    import BAYES_PACKAGE_NAME
+    # imports BAYES_PACKAGE_NAME.QLdata ect., i.e. the libraries are usable with:
+    BAYES_PACKAGE_NAME.QLdata.qldata(....)
     ...
     Which will import the binaries from the python path,
     most likely the site-packages folder
     """
-    # Test if one of the fortran libs is importable
-    name = 'Quest'
-    # Early version of library placed extensions in sitepackages, so importable through the extension name
-    if importlib.util.find_spec(name) is not None:
-        return True, ""
-    # now they are nested in mantidindirect.bayes.
-    elif importlib.util.find_spec("quasielasticbayes") is not None:
-        return True, "quasielasticbayes."
+    if importlib.util.find_spec(BAYES_PACKAGE_NAME) is not None:
+        return True, BAYES_PACKAGE_NAME + '.'
     else:
         return False, ""
 
@@ -108,7 +106,7 @@ def _numpy_abi_ver():
 
 
 def unsupported_message():
-    logger.error('F2Py functionality not currently available on your platform.')
+    logger.error(UNSUPPORTED_PLATFORM_MESSAGE)
     sys.exit()
 
 
@@ -165,4 +163,4 @@ def run_f2py_compatibility_test():
     the F2Py libraries on an incompatible platform.
     """
     if not is_supported_f2py_platform():
-        raise RuntimeError("F2Py programs NOT available on this platform.")
+        raise RuntimeError(UNSUPPORTED_PLATFORM_MESSAGE)
