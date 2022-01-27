@@ -19,7 +19,7 @@ def build_and_test_win(){
 }
 
 def update_conda_recipes(){
-    sh "$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN mantid-builder"
+    sh "$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME"
 }
 
 def conda_build_UNIX(){
