@@ -138,7 +138,7 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const boost::py
     throw std::invalid_argument("Cannot extract Validator from object ");
   }
   attr = createAttributeFromPythonValue(attr, defaultValue);
-  IFunction::declareAttribute(name, attr, c_validator);
+  IFunction::declareAttribute(name, attr, *c_validator);
   try {
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name, defaultValue);
   } catch (UndefinedAttributeError &) {
