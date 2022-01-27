@@ -22,6 +22,7 @@ class ILLLagrange(DataProcessorAlgorithm):
     INCIDENT_ENERGY = 4.5
 
     use_incident_energy = False
+    convert_to_wavenumber = False
 
     # max difference between two identical points, two points closer than that will be merged in the merge algorithm
     EPSILON = 1e-2
@@ -52,6 +53,7 @@ class ILLLagrange(DataProcessorAlgorithm):
 
     def setup(self):
         self.use_incident_energy = self.getProperty('IncidentEnergy').value
+        self.convert_to_wavenumber = self.getProperty('ConvertToWaveNumber').value
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty('SampleRuns', action=FileAction.Load, extensions=['']),
@@ -64,6 +66,8 @@ class ILLLagrange(DataProcessorAlgorithm):
                              doc='The output workspace containing reduced data.')
         self.declareProperty(name='IncidentEnergy', defaultValue=False,
                              doc='Show the energies as incident energies, not transfer ones.')
+        self.declareProperty(name='ConvertToWaveNumber', defaultValue=False,
+                             doc='Convert axis unit to energy in wave number (cm-1)')
 
         # the list of all the intermediate workspaces to group at the end
         self.intermediate_workspaces = []
@@ -134,6 +138,10 @@ class ILLLagrange(DataProcessorAlgorithm):
         # correct by empty cell if there is any
         if self.empty_cell_ws is not None:
             self.subtract_empty_cell()
+
+        if self.convert_to_wavenumber:
+            ConvertUnits(InputWorkspace=self.output_ws_name, OutputWorkspace=self.output_ws_name,
+                         Target='Energy_inWavenumber')
 
         # set the properties and group the hidden workspaces
         self.setProperty('OutputWorkspace', self.output_ws_name)
