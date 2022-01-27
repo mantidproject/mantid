@@ -180,13 +180,13 @@ void ApplyAbsorptionCorrections::run() {
   setRunIsRunning(true);
 
   // Create / Initialize algorithm
-  auto absCorProps = std::make_unique<MantidQt::API::AlgorithmRuntimeProps>();
+  auto absCorProps = std::unique_ptr<MantidQt::API::AlgorithmRuntimeProps>();
   IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
   applyCorrAlg->initialize();
 
   // get Sample Workspace
   auto const sampleWs = getADSWorkspace(m_sampleWorkspaceName);
-  absCorProps->setProperty("SampleWorkspace", sampleWs);
+  absCorProps->setPropertyValue("SampleWorkspace", m_sampleWorkspaceName);
 
   const bool useCan = m_uiForm.ckUseCan->isChecked();
   // Get Can and Clone
