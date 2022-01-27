@@ -57,6 +57,18 @@ class InstrumentViewPresenterTest(unittest.TestCase):
         ws.readLock.assert_called_once()
         ws.unlock.assert_called_once()
 
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.AnalysisDataService")
+    @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentView")
+    def test_ws_unlocks_if_instrument_view_throws_exception(self, mock_view, mock_ads):
+        ws = mock.NonCallableMock()
+        mock_ads.retrieve.return_value = ws
+        # Get our mock InstrumentView to throw an exception.
+        mock_view.side_effect = KeyError('instrument view threw an exception')
+        with self.assertRaises(KeyError):
+            InstrumentViewPresenter(ws)
+        # Make sure workspace is unlocked if exception is thrown.
+        ws.unlock.assert_called_once()
+
     @mock.patch("mantidqt.widgets.instrumentview.presenter.InstrumentViewManager")
     def test_constructor_registers_with_inst_view_manager(self, mock_manager):
         ws = mock.NonCallableMock()

@@ -35,9 +35,11 @@ class InstrumentViewPresenter(ObservingPresenter):
         if not self.container:
             workspace = AnalysisDataService.retrieve(self.ws_name)
             workspace.readLock()
-            self.container = InstrumentView(parent=parent, presenter=self,
-                                            name=self.ws_name, window_flags=window_flags)
-            workspace.unlock()
+            try:
+                self.container = InstrumentView(parent=parent, presenter=self,
+                                                name=self.ws_name, window_flags=window_flags)
+            finally:
+                workspace.unlock()
 
         if ads_observer:
             self.ads_observer = ads_observer
