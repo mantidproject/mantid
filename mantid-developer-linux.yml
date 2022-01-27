@@ -64,7 +64,7 @@ dependencies:
   - xorg-libxtst>=1.2.3
 
   # Development tooling
-  - cppcheck>=2.4.1
+  - cppcheck==2.5
   - gcovr>=4.2
   - pre-commit>=2.12.0
   - pip:
