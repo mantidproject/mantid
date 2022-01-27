@@ -52,10 +52,10 @@ def _os_env():
 
 def is_pip_version_of_libs():
     """
-    If we are using a pip version of the libs we can import them from the bayesfitting package
-    import bayesfitting
-    # imports bayesfitting.QLdata ect., i.e. the libraries are usable with:
-    bayesfitting.QLdata.qldata(....)
+    If we are using a pip version of the libs we can import them from the quasielasticbayes package
+    import quasielasticbayes
+    # imports quasielasticbayes.QLdata ect., i.e. the libraries are usable with:
+    quasielasticbayes.QLdata.qldata(....)
     ...
     Which will import the binaries from the python path,
     most likely the site-packages folder
@@ -66,8 +66,8 @@ def is_pip_version_of_libs():
     if importlib.util.find_spec(name) is not None:
         return True, ""
     # now they are nested in mantidindirect.bayes.
-    elif importlib.util.find_spec("bayesfitting") is not None:
-        return True, "bayesfitting."
+    elif importlib.util.find_spec("quasielasticbayes") is not None:
+        return True, "quasielasticbayes."
     else:
         return False, ""
 
