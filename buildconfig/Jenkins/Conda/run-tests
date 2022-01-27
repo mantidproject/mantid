@@ -85,7 +85,7 @@ fi
 # Run unit tests
 cd $WORKSPACE/build
 if [[ $ENABLE_UNIT_TESTS == true ]]; then
-    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
+    run_with_xvfb ctest -j$BUILD_THREADS --no-compress-output -T Test --schedule-random --output-on-failure --repeat until-pass:3 $WINDOWS_TEST_OPTIONS $WINDOWS_UNITTEST_TIMEOUT_OPTIONS
     terminate_xvfb_sessions
 fi
 

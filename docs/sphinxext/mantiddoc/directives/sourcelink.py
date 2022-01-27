@@ -91,9 +91,9 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 # prepend the base framework directory
                 fname = os.path.join(self.source_root, file_paths[extension])
                 file_paths[extension] = fname
-                if not os.path.exists(file_paths[extension][0]):
+                if not os.path.exists(file_paths[extension]):
                     error_string += "Cannot find {} file at {}\n".format(
-                        extension, file_paths[extension][0])
+                        extension, file_paths[extension])
 
         # throw accumulated errors now if you have any
         if error_string != "":
