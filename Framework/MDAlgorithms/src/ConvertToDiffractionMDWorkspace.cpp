@@ -493,11 +493,11 @@ void ConvertToDiffractionMDWorkspace::exec() {
     // 2. Process next chunk of spectra (threaded)
     PARALLEL_FOR_IF(Kernel::threadSafe(*m_inWS))
     for (int i = start; i < static_cast<int>(wi); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       this->convertSpectrum(specInfo, static_cast<int>(i));
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // 3. Split boxes
     if (DODEBUG) {

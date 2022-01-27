@@ -117,7 +117,7 @@ void AddAbsorptionWeightedPathLengths::exec() {
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS))
   for (int i = 0; i < npeaks; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     Peak &peak = inputWS->getPeak(i);
     auto peakWavelength = peak.getWavelength();
 
@@ -157,9 +157,9 @@ void AddAbsorptionWeightedPathLengths::exec() {
     peak.setAbsorptionWeightedPathLength(absWeightedPathLength * 100);                  // cm
 
     prog.report(reportMsg);
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 }
 
 /**

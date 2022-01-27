@@ -485,7 +485,7 @@ bool CompareWorkspaces::compareEventWorkspaces(const DataObjects::EventWorkspace
   std::vector<int> vec_mismatchedwsindex;
   PARALLEL_FOR_IF(m_parallelComparison && ews1.threadSafe() && ews2.threadSafe())
   for (int i = 0; i < static_cast<int>(ews1.getNumberHistograms()); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_progress->report("EventLists");
     if (!mismatchedEvent || checkallspectra) // This guard will avoid checking unnecessarily
     {
@@ -534,9 +534,9 @@ bool CompareWorkspaces::compareEventWorkspaces(const DataObjects::EventWorkspace
 
       } // If elist 1 is not equal to elist 2
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   bool wsmatch;
   if (mismatchedEvent) {
@@ -610,7 +610,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
   // Now check the data itself
   PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() && ws2->threadSafe())
   for (long i = 0; i < static_cast<long>(numHists); ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     m_progress->report("Histograms");
 
     if (resultBool || checkAllData) // Avoid checking unnecessarily
@@ -650,9 +650,9 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
         resultBool = false;
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   if (!resultBool)
     recordMismatch("Data mismatch");

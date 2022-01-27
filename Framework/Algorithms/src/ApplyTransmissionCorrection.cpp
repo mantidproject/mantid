@@ -124,7 +124,7 @@ void ApplyTransmissionCorrection::exec() {
     // Loop through the spectra and apply correction
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *corrWS))
     for (int i = 0; i < numHists; i++) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       if (!spectrumInfo.hasDetectors(i)) {
         g_log.warning() << "Workspace index " << i << " has no detector assigned to it - discarding'\n";
@@ -149,9 +149,9 @@ void ApplyTransmissionCorrection::exec() {
       }
 
       progress.report("Calculating transmission correction");
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // apply the correction
     MatrixWorkspace_sptr outputWS = inputWS * corrWS;

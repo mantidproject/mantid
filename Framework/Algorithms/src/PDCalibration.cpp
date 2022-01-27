@@ -546,7 +546,7 @@ void PDCalibration::exec() {
 
    PRAGMA_OMP(parallel for schedule(dynamic, 1))
    for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
-     PARALLEL_START_INTERUPT_REGION
+     PARALLEL_START_INTERRUPT_REGION
      if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) || !spectrumInfo.hasDetectors(wkspIndex) ||
          spectrumInfo.isMonitor(wkspIndex)) {
        prog.report();
@@ -687,9 +687,9 @@ void PDCalibration::exec() {
      }
      prog.report();
 
-     PARALLEL_END_INTERUPT_REGION
+     PARALLEL_END_INTERRUPT_REGION
    }
-   PARALLEL_CHECK_INTERUPT_REGION
+   PARALLEL_CHECK_INTERRUPT_REGION
 
    // sort the calibration tables by increasing detector ID
    m_calibrationTable = sortTableWorkspace(m_calibrationTable);
@@ -1357,7 +1357,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
 
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int64_t iws = 0; iws < static_cast<int64_t>(NUM_HIST); ++iws) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     // calculatePositionWindowInTOF
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     // toTof is a function that converts from d-spacing to TOF for a particular
@@ -1369,9 +1369,9 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
     peak_window_ws->setPoints(iws, peaks.inTofWindows);
     prog.report();
 
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return std::make_pair(peak_pos_ws, peak_window_ws);
 }
