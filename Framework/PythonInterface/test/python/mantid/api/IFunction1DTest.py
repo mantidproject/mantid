@@ -68,7 +68,7 @@ class IFunction1DTest(unittest.TestCase):
     def test_declareAttribute_only_accepts_known_types(self):
         func = Times2()
         func.initialize() # Contains known types
-        self.assertEqual(5, func.nAttributes()) # Make sure initialize ran
+        self.assertEqual(6, func.nAttributes()) # Make sure initialize ran
         self.assertRaises(ValueError, func.declareAttribute, "DictAtt", {1,2,3})
 
     def test_correct_attribute_values_are_returned_when_asked(self):
