@@ -103,7 +103,7 @@ void LoadILLSALSA::exec() {
   double sampleToDetectorDistance = getProperty("DetectorDistance");
   Mantid::NeXus::NXFloat theta = dataFirstEntry.openNXFloat("/instrument/2theta/value");
   theta.load();
-  double twoThetaAngle = theta[0] - static_cast<double>(getProperty("ThetaOffset"));
+  double twoThetaAngle = theta[0] + static_cast<double>(getProperty("ThetaOffset"));
   setInstrument(sampleToDetectorDistance, twoThetaAngle);
 
   fillWorkspaceData(data, scanVariableNames, scanVariables);
