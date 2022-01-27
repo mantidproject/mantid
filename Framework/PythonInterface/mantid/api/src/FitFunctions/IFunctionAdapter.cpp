@@ -130,8 +130,15 @@ void IFunctionAdapter::declareAttribute(const std::string &name, const object &d
 void IFunctionAdapter::declareAttribute(const std::string &name, const object &defaultValue,
                                         const boost::python::object &validator) {
   auto attr = IFunction::hasAttribute(name) ? IFunction::getAttribute(name) : Attribute();
+  try {
+    auto c_validator = boost::python::extract<Mantid::Kernel::IValidator_sptr>(validator);
+  } catch (boost::python::error_already_set &) {
+    std::stringstream os;
+    os << "Cannot extract Validator from object " << i;
+    throw std::invalid_argument(os.str());
+  }
   attr = createAttributeFromPythonValue(attr, defaultValue);
-  IFunction::declareAttribute(name, attr, validator);
+  IFunction::declareAttribute(name, attr, c_validator);
   try {
     callMethod<void, std::string, object>(getSelf(), "setAttributeValue", name, defaultValue);
   } catch (UndefinedAttributeError &) {
