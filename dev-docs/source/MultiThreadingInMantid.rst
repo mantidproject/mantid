@@ -1,13 +1,13 @@
-============================
-Multithreading in Algorithms
-============================
+========================
+Multithreading in Mantid
+========================
 
 C++
 ---
 
 Mantid uses `OpenMP <http://openmp.org/wp/about-openmp/>`__ in C++ to improve
-performance within algorithms by parallelizing ``for`` loops. A tutorial
-devoted to the technology can be found `here <https://hpc-tutorials.llnl.gov/openmp/>`__.
+performance by parallelizing ``for`` loops. A tutorial devoted to the technology can be found
+`here <https://hpc-tutorials.llnl.gov/openmp/>`__.
 
 Access to the OpenMP API is via a set of macros defined in
 `MultiThreaded.h <https://github.com/mantidproject/mantid/blob/main/Framework/Kernel/inc/MantidKernel/MultiThreaded.h>`__.
@@ -55,6 +55,8 @@ directly. Ideally, this should only be used if what you want to do is not alread
     for (int i = 0; i < x.size(); ++i) {
         doThing(x[i])
     }
+
+Note: The set of ``INTERRUPT`` macros can only be used in Mantid algorithms. The rest can be used anywhere.
 
 Ensuring thread-safety
 ######################
