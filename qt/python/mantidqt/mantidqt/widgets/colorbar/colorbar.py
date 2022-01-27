@@ -295,7 +295,12 @@ class ColorbarWidget(QWidget):
     def _autoscale_clim(self):
         """Update stored colorbar limits
         The new limits are found from the colobar data """
-        data = self.colorbar.mappable.get_array_clipped_to_bounds()
+        if hasattr(self.colorbar.mappable, "get_array_clipped_to_bounds"):
+            data = self.colorbar.mappable.get_array_clipped_to_bounds()
+        else:
+            # in nonorthog view get passed a QuadMesh that doesn't have the above method
+            # however the data from get_array for MDEvent ws is already clipped (not for MDHisto)
+            data = self.colorbar.mappable.get_array()
         norm = NORM_OPTS[self.norm.currentIndex()]
         try:
             try:
