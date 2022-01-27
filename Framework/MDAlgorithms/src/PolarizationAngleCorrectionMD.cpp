@@ -155,7 +155,7 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
 
   PRAGMA_OMP( parallel for if (!ws->isFileBacked()))
   for (int i = 0; i < numBoxes; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
     if (box && !box->getIsMasked()) {
       // get the MEEvents from box
@@ -201,9 +201,9 @@ void PolarizationAngleCorrectionMD::applyPolarizationAngleCorrection(
       }
     }
     box->releaseEvents();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   return;
 }

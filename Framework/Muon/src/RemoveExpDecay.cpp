@@ -82,21 +82,21 @@ void MuonRemoveExpDecay::exec() {
     // Copy all the Y and E data
     PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
     for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
       const auto index = static_cast<size_t>(i);
       outputWS->setSharedY(index, inputWS->sharedY(index));
       outputWS->setSharedE(index, inputWS->sharedE(index));
       prog.report();
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
   }
 
   // Do the specified spectra only
   auto specLength = static_cast<int>(spectra.size());
   PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *outputWS))
   for (int i = 0; i < specLength; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     const auto specNum = static_cast<size_t>(spectra[i]);
     if (spectra[i] > numSpectra) {
       g_log.error("Spectra size greater than the number of spectra!");
@@ -120,9 +120,9 @@ void MuonRemoveExpDecay::exec() {
     }
 
     prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Update Y axis units
   outputWS->setYUnit("Asymmetry");

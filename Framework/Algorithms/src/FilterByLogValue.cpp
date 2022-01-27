@@ -168,7 +168,7 @@ void FilterByLogValue::exec() {
     // -------------------------------------------------------------
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       // this is the input event list
       EventList &input_el = inputWS->getSpectrum(i);
@@ -177,9 +177,9 @@ void FilterByLogValue::exec() {
       input_el.filterInPlace(splitter);
 
       prog.report();
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // To split/filter the runs, first you make a vector with just the one
     // output run
@@ -199,7 +199,7 @@ void FilterByLogValue::exec() {
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i) {
-      PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERRUPT_REGION
 
       // Get the output event list (should be empty)
       std::vector<EventList *> outputs{&outputWS->getSpectrum(i)};
@@ -212,9 +212,9 @@ void FilterByLogValue::exec() {
       input_el.splitByTime(splitter, outputs);
 
       prog.report();
-      PARALLEL_END_INTERUPT_REGION
+      PARALLEL_END_INTERRUPT_REGION
     }
-    PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERRUPT_REGION
 
     // To split/filter the runs, first you make a vector with just the one
     // output run

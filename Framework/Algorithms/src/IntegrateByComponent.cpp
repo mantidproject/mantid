@@ -80,7 +80,7 @@ void IntegrateByComponent::exec() {
 
       PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
 
         if (spectrumInfo.isMonitor(hists[i]))
           continue;
@@ -99,9 +99,9 @@ void IntegrateByComponent::exec() {
           averageEInput.emplace_back(eValue * eValue);
         }
 
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
 
       double averageY, averageE;
       if (averageYInput.empty()) {
@@ -115,7 +115,7 @@ void IntegrateByComponent::exec() {
 
       PARALLEL_FOR_IF(Kernel::threadSafe(*integratedWS))
       for (int i = 0; i < static_cast<int>(hists.size()); ++i) { // NOLINT
-        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERRUPT_REGION
         if (spectrumInfo.isMonitor(hists[i]))
           continue;
         if (spectrumInfo.isMasked(hists[i]))
@@ -132,9 +132,9 @@ void IntegrateByComponent::exec() {
           integratedWS->dataE(hists[i])[0] = averageE;
         }
 
-        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERRUPT_REGION
       }
-      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERRUPT_REGION
     }
   }
   // Assign it to the output workspace property

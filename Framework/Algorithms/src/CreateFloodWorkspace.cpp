@@ -193,7 +193,7 @@ API::MatrixWorkspace_sptr CreateFloodWorkspace::removeBackground(API::MatrixWork
   auto const nHisto = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws, *bkgWS))
   for (int i = 0; i < nHisto; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto const xVal = x[i];
     if (isExcludedSpectrum(xVal)) {
       ws->mutableY(i)[0] = VERY_BIG_VALUE;
@@ -210,9 +210,9 @@ API::MatrixWorkspace_sptr CreateFloodWorkspace::removeBackground(API::MatrixWork
       ws->mutableY(i)[0] = 1.0;
       ws->mutableE(i)[0] = 0.0;
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
 
   // Remove the logs
   ws->setSharedRun(make_cow<Run>());
@@ -240,7 +240,7 @@ MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_s
   double const endX = isDefault(Prop::END_X) ? sa->getMax() : getProperty(Prop::END_X);
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < nHisto; ++i) {
-    PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERRUPT_REGION
     auto const spec = ws->getSpectrum(i).getSpectrumNo();
     if (isExcludedSpectrum(spec)) {
       ws->mutableY(i)[0] = VERY_BIG_VALUE;
@@ -252,9 +252,9 @@ MatrixWorkspace_sptr CreateFloodWorkspace::scaleToCentralPixel(MatrixWorkspace_s
       ws->mutableY(i)[0] = 1.0;
       ws->mutableE(i)[0] = 0.0;
     }
-    PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERRUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERRUPT_REGION
   return ws;
 }
 
