@@ -93,7 +93,7 @@ class ILLLagrange(DataProcessorAlgorithm):
                             DataX=energy,
                             DataY=detector_counts,
                             DataE=errors,
-                            UnitX="meV")
+                            UnitX="Energy")
 
             self.intermediate_workspaces.append(self.empty_cell_ws)
 
@@ -115,7 +115,7 @@ class ILLLagrange(DataProcessorAlgorithm):
                         DataX=energy,
                         DataY=detector_counts,
                         DataE=errors,
-                        UnitX="meV")
+                        UnitX="Energy")
 
         self.intermediate_workspaces.append(raw_sample_ws)
 
@@ -135,7 +135,7 @@ class ILLLagrange(DataProcessorAlgorithm):
         if self.empty_cell_ws is not None:
             self.subtract_empty_cell()
 
-        # set the properties and group the hidden workspace
+        # set the properties and group the hidden workspaces
         self.setProperty('OutputWorkspace', self.output_ws_name)
         GroupWorkspaces(OutputWorkspace='__' + self.output_ws_name, InputWorkspaces=self.intermediate_workspaces)
 
@@ -271,7 +271,8 @@ class ILLLagrange(DataProcessorAlgorithm):
 
         CreateWorkspace(OutputWorkspace="__interp_water" + self.output_ws_name,
                         DataX=energy,
-                        DataY=interpolated_corr)
+                        DataY=interpolated_corr,
+                        UnitX='Energy')
 
         Multiply(LHSWorkspace=ws_to_correct,
                  RHSWorkspace="__interp_water" + self.output_ws_name,
