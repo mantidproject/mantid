@@ -56,7 +56,7 @@ class CreateCacheFilename(PythonAlgorithm):
         issues = dict()
 
         manager = self.getPropertyValue('PropertyManager').strip()
-        if len(manager) > 0 and not mantid.PropertyManagerDataService.doesExist(manager):
+        if manager not in mantid.PropertyManagerDataService:
             issues['PropertyManager'] = 'Does not exist'
         elif len(manager) <= 0 and not self.getProperty('OtherProperties').value:
             message = "Either PropertyManager or OtherProperties should be supplied"
@@ -71,7 +71,7 @@ class CreateCacheFilename(PythonAlgorithm):
         # Inputs
         prop_manager = self.getPropertyValue("PropertyManager").strip()
         if len(prop_manager) > 0:
-            prop_manager = mantid.PropertyManagerDataService.retrieve(prop_manager)
+            prop_manager = mantid.PropertyManagerDataService[prop_manager]
         else:
             prop_manager = None
 
