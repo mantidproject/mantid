@@ -151,7 +151,7 @@ class IN5(systemtesting.MantidSystemTest):
         mtd['cropped'].mutableRun().addProperty('run_title', '', True)
 
     def validate(self):
-        self.tolerance = 1e-7
+        self.tolerance = 1e-6
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument', 'Sample']
         return ['cropped', 'ILL_IN5_SofQW.nxs']
@@ -230,7 +230,7 @@ class IN5_Tube_Background(systemtesting.MantidSystemTest):
 class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
 
     def validate(self):
-        self.tolerance = 1e-7
+        self.tolerance = 1e-6
         self.tolerance_is_rel_err = True
         self.disableChecking = ['Instrument', 'Sample']
         return ['red', 'ILL_IN5_Tweak_sqw.nxs']
