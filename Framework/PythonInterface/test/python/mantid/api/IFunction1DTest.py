@@ -29,7 +29,6 @@ class Times2(IFunction1D):
         self.declareAttribute("DoubleAtt", 3.4)
         self.declareAttribute("StringAtt", "filename", ListValidator("filename","test"))
         self.declareAttribute("StringAtt1", "test", ListValidator("filename","test"))
-        self.declareAttribute("StringAtt2", "error", ListValidator("filename","test"))
         self.declareAttribute("BoolAtt", True)
         self.declareAttribute("ListAtt", [1, 2, 3])
 
