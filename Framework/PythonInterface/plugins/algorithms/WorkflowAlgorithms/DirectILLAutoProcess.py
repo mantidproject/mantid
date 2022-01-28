@@ -568,13 +568,16 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                                Behaviour=self.getPropertyValue('GroupingBehaviour'))
 
     def _normalise_sample(self, sample_ws, sample_no, numor):
-        """
-        Normalises sample using vanadium integral, if it has been provided.
-        :param sample_ws: sample being processed
-        :return: Either normalised sample or the input, if vanadium is not provided
+        """Normalises sample using vanadium integral, if it has been provided. Returns either a normalised sample
+         or the input, if vanadium is not provided.
+
+        Keyword arguments:
+        sample_ws -- sample being processed
+        sample_no -- index of the sample workspace in the group to be normalised
+        numor -- numor string of the input sample workspace
         """
         normalised_ws = '{}_norm'.format(numor)
-        if self.vanadium_integral and self.vanadium_integral != list():
+        if self.vanadium_integral is not None and self.vanadium_integral != list():
             nintegrals = len(self.vanadium_integral)
             vanadium_no = sample_no
             if nintegrals == 1:
