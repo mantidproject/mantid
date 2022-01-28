@@ -15,7 +15,7 @@ def _warning_no_source(msg, *_, **__):
 
 
 warnings.formatwarning = _warning_no_source
-warnings.simplefilter('always', UserWarning)
+warnings.simplefilter('always', UserWarning) # changed to warnings.simplefilter('default') by unittest runner
 
 
 class InstrumentSettings(object):

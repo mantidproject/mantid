@@ -91,7 +91,7 @@ class Pearl(AbstractInst):
     def _apply_temporary_inst_settings(self, kwargs, run):
 
         self._inst_settings.update_attributes(kwargs=kwargs)
-        self._switch_long_mode_inst_settings(kwargs.get("long_mode"))
+        self._switch_long_mode_inst_settings(self._inst_settings.long_mode)
 
         yield
         # reset instrument settings
