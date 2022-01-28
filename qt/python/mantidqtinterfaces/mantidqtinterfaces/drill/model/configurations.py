@@ -221,7 +221,7 @@ class RundexSettings(object):
                 "SaveNexusProcessed": True,
                 "SaveAscii": False,
                 "SaveFocussedXYE": False,
-                "SaveNXSPE": True
+                "SaveNXSPE": False
                 }
             }
 
