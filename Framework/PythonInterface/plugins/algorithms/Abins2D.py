@@ -20,24 +20,10 @@ from abins.abinsalgorithm import AbinsAlgorithm
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
-class Abins2D(PythonAlgorithm, AbinsAlgorithm):
-    _ab_initio_program = None
-    _vibrational_or_phonon_data_file = None
-    _temperature = None
-    _bin_width = None
-    _sample_form = None
-    _instrument_name = None
-    _setting = None
-    _atoms = None
-    _sum_contributions = None
-    _save_ascii = None
-    _scale_by_cross_section = None
-    _calc_partial = None
-    _out_ws_name = None
-    _num_quantum_order_events = None
-    _autoconvolution = None
-    _q_bins = None
-    _energy_units = None
+class Abins2D(AbinsAlgorithm, PythonAlgorithm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._q_bins = None
 
     def category(self) -> str:
         return "Simulation"
@@ -50,9 +36,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         # Declare properties for all Abins Algorithms
         self.declare_common_properties()
 
-        # Declare additional properties
-        self.declareProperty(name="Autoconvolution", defaultValue=False,
-                             doc="Estimate higher quantum orders by convolution with fundamental spectrum.")
+        # Declare Abins2D-specific properties
+        # ... (there aren't any at the moment!)
 
         # Declare instrument properties
         self.declare_instrument_properties(

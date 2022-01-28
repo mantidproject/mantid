@@ -19,26 +19,13 @@ from abins.abinsalgorithm import AbinsAlgorithm
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
-class Abins(PythonAlgorithm, AbinsAlgorithm):
-    _ab_initio_program = None
-    _vibrational_or_phonon_data_file = None
-    _experimental_file = None
-    _temperature = None
-    _bin_width = None
-    _scale = None
-    _sample_form = None
-    _instrument_name = None
-    _setting = None
-    _atoms = None
-    _sum_contributions = None
-    _save_ascii = None
-    _scale_by_cross_section = None
-    _calc_partial = None
-    _out_ws_name = None
-    _num_quantum_order_events = None
-    _max_event_order = None
-    _energy_units = None
-    _autoconvolution = None
+class Abins(AbinsAlgorithm, PythonAlgorithm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self._experimental_file = None
+        self._scale = None
+        self._setting = None
 
     def category(self) -> str:
         return "Simulation"
@@ -52,9 +39,6 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         self.declare_common_properties()
 
         # Declare properties specific to 1D
-        self.declareProperty(name="Autoconvolution", defaultValue=False,
-                             doc="Estimate higher quantum orders by convolution with fundamental spectrum.")
-
         self.declareProperty(FileProperty("ExperimentalFile", "",
                                           action=FileAction.OptionalLoad,
                                           direction=Direction.Input,

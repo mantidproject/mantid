@@ -23,6 +23,29 @@ from abins.instruments import get_instrument, Instrument
 
 class AbinsAlgorithm:
     """Class providing shared utility for multiple inheritence by 1D, 2D implementations"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)  # i.e. forward everything to PythonAlgorithm
+
+        # User input private properties
+        self._instrument_name = None
+
+        self._vibrational_or_phonon_data_file = None
+        self._ab_initio_program = None
+        self._out_ws_name = None
+        self._temperature = None
+        self._bin_width = None
+        self._sample_form = None
+        self._atoms = None
+        self._sum_contributions = None
+        self._save_ascii = None
+        self._scale_by_cross_section = None
+
+        self._num_quantum_order_events = None
+        self._autoconvolution = None
+        self._energy_units = None
+
+        # Interally-used private properties
+        self._max_event_order = None
 
     def get_common_properties(self) -> None:
         """From user input, set properties common to Abins 1D and 2D versions"""
@@ -112,6 +135,9 @@ class AbinsAlgorithm:
                              validator=StringListValidator(['1', '2']),
                              doc="Number of quantum order effects included in the calculation "
                                  "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
+
+        self.declareProperty(name="Autoconvolution", defaultValue=False,
+                             doc="Estimate higher quantum orders by convolution with fundamental spectrum.")
 
         self.declareProperty(name="EnergyUnits",
                              defaultValue="cm-1",
