@@ -79,7 +79,7 @@ pipeline {
         stage('Update conda-recipes repository') {
             agent { label 'conda-build-linux' }
             environment {
-                GITHUB_ACCESS_TOKEN = credentials(env.GITHUB_TOKEN_CREDENTIAL_ID)
+                GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
             }
             steps {
                 sh "$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME"
@@ -109,8 +109,7 @@ pipeline {
         }
         stage ('Deploy packages'){
             environment {
-                ANACONDA_TOKEN = credentials(env.ANACONDA_TOKEN_CREDENTIAL_ID)
-                ANACONDA_CHANNEL = env.ANACONDA_CHANNEL
+                ANACONDA_TOKEN = credentials("${env.ANACONDA_TOKEN_CREDENTIAL_ID}")
             }
             agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
             steps{
