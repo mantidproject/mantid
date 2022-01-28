@@ -82,7 +82,7 @@ pipeline {
                 GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
             }
             steps {
-                sh "$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME"
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
             }
         }
         stage('Package and Test') {
