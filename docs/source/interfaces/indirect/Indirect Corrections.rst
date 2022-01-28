@@ -414,6 +414,8 @@ Container Radius
 Sample Height
   Height of the sample in :math:`cm`.
 
+.. _indirect_apply_absorp_correct:
+
 Apply Absorption Corrections
 ----------------------------
 
