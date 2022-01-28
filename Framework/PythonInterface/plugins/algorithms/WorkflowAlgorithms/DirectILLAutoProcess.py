@@ -637,9 +637,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         sample_geometry = self.getProperty('SampleGeometry').value
         sample_material = self.getProperty('SampleMaterial').value
         container_geometry = self.getProperty('ContainerGeometry').value \
-            if not self.getProperty('SampleGeometry').isDefault else ""
+            if not self.getProperty('ContainerGeometry').isDefault else ""
         container_material = self.getProperty('ContainerMaterial').value \
             if not self.getProperty('ContainerMaterial').isDefault else ""
+
         self.absorption_corr = "{}_abs_corr".format(ws)
         self.to_clean.append(self.absorption_corr)
         SetSample(
