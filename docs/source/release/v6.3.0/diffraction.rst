@@ -23,7 +23,7 @@ Improvements
   * the algorithm has been extended to evaluate the attenuation by more absorbing spherical samples (but with muR < 9).
   * the algorithm will now take the radius of a spherical sample from the workspace if the radius isn't specified. If the sample is not a sphere this will produce an error.
 
-* A number of improvements have been made to the :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` algorithm
+* A number of improvements have been made to the :ref:`CalculatePlaczekSelfScattering v1 <algm-CalculatePlaczekSelfScattering-v1>` algorithm.
 
   * The parameter ``IncidentSpectra`` has been renamed to fix a typo, which is a breaking change for this algorithm.
   * The algorithm now validates that the ``IncidentSpectra`` is in units of Wavelength and will output in the same unit as the ``InputWorkspace``.
