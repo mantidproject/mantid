@@ -20,11 +20,9 @@ HOUR=${LATEST_GIT_SHA_DATE:11:2}
 MINS=${LATEST_GIT_SHA_DATE:14:2}
 PATCH_VERSION=$YEAR$MONTH$DAY.$HOUR$MINS
 echo $PATCH_VERSION
-VERSION_MAJOR_STRING=$(command grep "set(VERSION_MAJOR" ./buildconfig/CMake/VersionNumber.cmake)
-MAJOR_VERSION=${VERSION_MAJOR_STRING:20:1} # Only valid for 1 digit
+MAJOR_VERSION=$(command perl -n -e '/set\(VERSION_MAJOR\s+(\d+)\)/ && print $1' < buildconfig/CMake/VersionNumber.cmake)
 echo $MAJOR_VERSION
-VERSION_MINOR_STRING=$(command grep "set(VERSION_MINOR" ./buildconfig/CMake/VersionNumber.cmake)
-MINOR_VERSION=${VERSION_MINOR_STRING:20:1} # Or a Minor version number?
+MINOR_VERSION=$(command perl -n -e '/set\(VERSION_MINOR\s+(\d+)\)/ && print $1' < buildconfig/CMake/VersionNumber.cmake)
 echo $MINOR_VERSION
 VERSION=$MAJOR_VERSION.$MINOR_VERSION.$PATCH_VERSION
 echo $VERSION
