@@ -40,34 +40,34 @@ def conda_build_win(){
 pipeline {
     agent none
     stages {
-        stage('Build and Test'){
-            parallel {
-                stage('Build and Test on Ubuntu'){
-                    agent { label 'ubuntu-18.04-build' }
-                    steps {
-                        build_and_test_linux()
-                    }
-                }
-                stage('Build and Test on RHEL7') {
-                    agent { label 'rhel7-build' }
-                    steps {
-                        build_and_test_linux()
-                    }
-                }
-                stage('Build and Test on Windows') {
-                    agent { label 'win-build' }
-                    steps {
-                        build_and_test_win()
-                    }
-                }
-                stage('Build and Test on MacOS') {
-                    agent { label 'osx-10.13-build' }
-                    steps {
-                        build_and_test_macos()
-                    }
-                }
-            }
-        }
+        // stage('Build and Test'){
+        //     parallel {
+        //         stage('Build and Test on Ubuntu'){
+        //             agent { label 'ubuntu-18.04-build' }
+        //             steps {
+        //                 build_and_test_linux()
+        //             }
+        //         }
+        //         stage('Build and Test on RHEL7') {
+        //             agent { label 'rhel7-build' }
+        //             steps {
+        //                 build_and_test_linux()
+        //             }
+        //         }
+        //         stage('Build and Test on Windows') {
+        //             agent { label 'win-build' }
+        //             steps {
+        //                 build_and_test_win()
+        //             }
+        //         }
+        //         stage('Build and Test on MacOS') {
+        //             agent { label 'osx-10.13-build' }
+        //             steps {
+        //                 build_and_test_macos()
+        //             }
+        //         }
+        //     }
+        // }
         stage('Update conda-recipes repository') {
             agent { label 'conda-build-linux' }
             environment {
