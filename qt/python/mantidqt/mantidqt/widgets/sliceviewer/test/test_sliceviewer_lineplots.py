@@ -27,6 +27,17 @@ class LinePlotsTest(unittest.TestCase):
         self.mock_colorbar.get_colorbar_scale = MagicMock()
         self.mock_colorbar.get_colorbar_scale.return_value = [1.0, {}]
 
+    def test_remove_line_plot_axes_sets_label_visibility(self):
+        plotter = LinePlots(self.image_axes, self.mock_colorbar)
+
+        plotter._remove_line_plots()
+
+        # check has removed third and second axes in that order
+        expected_calls = [call(2), call().remove(), call(1), call().remove()]
+        self.image_axes.figure.axes.__getitem__.assert_has_calls(expected_calls, any_order=False)
+        for mock_axis in [self.image_axes.get_xaxis(), self.image_axes.get_yaxis()]:
+            mock_axis.set_visible.assert_called_with(True)
+
     @patch('mantidqt.widgets.sliceviewer.lineplots.GridSpec')
     def test_construction_adds_line_plots_to_axes(self, mock_gridspec):
         gs = mock_gridspec()
@@ -40,6 +51,8 @@ class LinePlotsTest(unittest.TestCase):
         gs.__getitem__.assert_has_calls((call(0), call(1), call(3)), any_order=True)
         self.assertTrue('sharey' in fig.add_subplot.call_args_list[0][1] or 'sharey' in fig.add_subplot.call_args_list[1][1])
         self.assertTrue('sharex' in fig.add_subplot.call_args_list[0][1] or 'sharex' in fig.add_subplot.call_args_list[1][1])
+        for mock_axis in [self.image_axes.get_xaxis(), self.image_axes.get_yaxis()]:
+            mock_axis.set_visible.assert_called_once_with(False)
 
     def test_delete_plot_lines_handles_empty_plots(self):
         plotter = LinePlots(self.image_axes, self.mock_colorbar)
@@ -149,6 +162,8 @@ def _create_mock_axes():
     image_axes.get_ylim.return_value = (-3, 3)
     image_axes.get_xlabel.return_value = 'x'
     image_axes.get_ylabel.return_value = 'y'
+    image_axes.get_xaxis.return_value = MagicMock()
+    image_axes.get_yaxis.return_value = MagicMock()
     return image_axes
 
 
