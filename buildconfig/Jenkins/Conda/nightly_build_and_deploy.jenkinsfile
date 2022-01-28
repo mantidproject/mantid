@@ -101,7 +101,7 @@ pipeline {
         }
         stage ('Deploy packages'){
             environment {
-                ANACONDA_TOKEN = credentials("${env.ANACONDA_TOKEN_CREDENTIAL_ID}")
+                ANACONDA_TOKEN = credentials("${ANACONDA_TOKEN_CREDENTIAL_ID}")
             }
             agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
             steps{
