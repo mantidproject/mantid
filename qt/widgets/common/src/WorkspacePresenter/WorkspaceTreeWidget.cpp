@@ -136,7 +136,6 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_workspaceFilter->setToolTip("Type here to filter the workspaces");
 
   auto *layout = new QVBoxLayout();
-  layout->setSpacing(0);
   layout->setMargin(0);
   layout->addLayout(buttonLayout);
   layout->addWidget(m_workspaceFilter);
