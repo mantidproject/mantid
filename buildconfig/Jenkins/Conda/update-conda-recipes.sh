@@ -52,7 +52,7 @@ rm -rf $SOURCE_FILE
 
 # Clone conda-recipes
 if [ -d "conda-recipes" ]; then rm -rf conda-recipes; fi
-git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git -b release-next
+git clone https://${GITHUB_USER_NAME}:${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/conda-recipes.git
 
 cd conda-recipes
 
