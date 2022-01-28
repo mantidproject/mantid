@@ -700,3 +700,81 @@ class ILL_SANS_D33_VTOF_TEST(systemtesting.MantidSystemTest):
 
         # I(Q)
         SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.02,-0.1,1', OutputWorkspace='iq')
+
+
+class ILL_SANS_D33_LTOF_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a equidistant binning TOF reduction with v2 of the algorithm and data from the D33.
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D33_LTOF_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['iq', 'ILL_SANS_D33_LTOF.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D33_mask.nxs',
+                           OutputWorkspace='mask')
+
+        # Beam
+        SANSILLReduction(Runs='093411',
+                         ProcessAs='EmptyBeam',
+                         NormaliseBy='Time',
+                         OutputWorkspace='beam',
+                         OutputFluxWorkspace='flux')
+
+        # Container Transmission
+        SANSILLReduction(Runs='093412',
+                         NormaliseBy='Time',
+                         ProcessAs='Transmission',
+                         FluxWorkspace='flux',
+                         OutputWorkspace='ctr')
+
+        # Container
+        SANSILLReduction(Runs='093414',
+                         NormaliseBy='Time',
+                         ProcessAs='EmptyContainer',
+                         EmptyBeamWorkspace='beam',
+                         TransmissionWorkspace='ctr',
+                         OutputWorkspace='can')
+
+        # Sample Transmission
+        SANSILLReduction(Runs='093413',
+                         NormaliseBy='Time',
+                         ProcessAs='Transmission',
+                         FluxWorkspace='flux',
+                         OutputWorkspace='str')
+
+        # Sample
+        SANSILLReduction(Runs='093415',
+                         NormaliseBy='Time',
+                         ProcessAs='Sample',
+                         EmptyBeamWorkspace='beam',
+                         TransmissionWorkspace='str',
+                         EmptyContainerWorkspace='can',
+                         MaskWorkspace='mask',
+                         OutputWorkspace='sample',
+                         FluxWorkspace='flux')
+
+        # I(Q)
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.02,-0.1,1', OutputWorkspace='iq')
