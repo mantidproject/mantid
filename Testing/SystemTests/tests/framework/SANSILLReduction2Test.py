@@ -444,7 +444,7 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
 
     def setUp(self):
         config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11'
+        config['default.instrument'] = 'D22'
         config.appendDataSearchSubDir('ILL/D22B/')
 
     def cleanup(self):
@@ -460,8 +460,8 @@ class ILL_SANS_D22B_MONO_TEST(systemtesting.MantidSystemTest):
         return ['out', 'ILL_SANS_D22B_MONO.nxs']
 
     def runTest(self):
-        Load(Filename='bs_mask.nxs', OutputWorkspace='bs_mask')
-        Load(Filename='edge_mask.nxs', OutputWorkspace='edge_mask')
+        Load(Filename='D22B_bs_mask.nxs', OutputWorkspace='bs_mask')
+        Load(Filename='D22B_edge_mask.nxs', OutputWorkspace='edge_mask')
 
         SANSILLReduction(Runs='51690+51704',
                          ProcessAs='DarkCurrent',
@@ -540,7 +540,7 @@ class ILL_SANS_D33_MONO_TEST(systemtesting.MantidSystemTest):
 
     def setUp(self):
         config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11'
+        config['default.instrument'] = 'D33'
         config.appendDataSearchSubDir('ILL/D33/')
 
     def cleanup(self):
@@ -622,3 +622,81 @@ class ILL_SANS_D33_MONO_TEST(systemtesting.MantidSystemTest):
                          OutputWorkspace='sample')
 
         Q1DWeighted('sample', '0.01,-0.01,0.655', NumberOfWedges=0, OutputWorkspace='iq')
+
+
+class ILL_SANS_D33_VTOF_TEST(systemtesting.MantidSystemTest):
+    '''
+    Tests a variable binning TOF reduction with v2 of the algorithm and data from the D33.
+    '''
+
+    def __init__(self):
+        super(ILL_SANS_D33_VTOF_TEST, self).__init__()
+        self.setUp()
+        self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
+        self.directories = config['datasearch.directories']
+
+    def setUp(self):
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D33'
+        config.appendDataSearchSubDir('ILL/D33/')
+
+    def cleanup(self):
+        mtd.clear()
+        config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
+        config['datasearch.directories'] = self.directories
+
+    def validate(self):
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        self.disableChecking = ['Instrument']
+        return ['iq', 'ILL_SANS_D33_VTOF.nxs']
+
+    def runTest(self):
+        # Load the mask
+        LoadNexusProcessed(Filename='D33_mask.nxs',
+                           OutputWorkspace='mask')
+
+        # Beam
+        SANSILLReduction(Runs='093406',
+                         NormaliseBy='Time',
+                         ProcessAs='EmptyBeam',
+                         OutputWorkspace='beam',
+                         OutputFluxWorkspace='flux')
+
+        # Container Transmission
+        SANSILLReduction(Runs='093407',
+                         NormaliseBy='Time',
+                         ProcessAs='Transmission',
+                         FluxWorkspace='flux',
+                         OutputWorkspace='ctr')
+
+        # Container
+        SANSILLReduction(Runs='093409',
+                         NormaliseBy='Time',
+                         ProcessAs='EmptyContainer',
+                         EmptyBeamWorkspace='beam',
+                         TransmissionWorkspace='ctr',
+                         OutputWorkspace='can')
+
+        # Sample transmission
+        SANSILLReduction(Runs='093408',
+                         NormaliseBy='Time',
+                         ProcessAs='Transmission',
+                         FluxWorkspace='flux',
+                         OutputWorkspace='str')
+
+        # Sample
+        SANSILLReduction(Runs='093410',
+                         ProcessAs='Sample',
+                         NormaliseBy='Time',
+                         EmptyBeamWorkspace='beam',
+                         TransmissionWorkspace='str',
+                         EmptyContainerWorkspace='can',
+                         MaskWorkspace='mask',
+                         OutputWorkspace='sample',
+                         FluxWorkspace='flux')
+
+        # I(Q)
+        SANSILLIntegration(InputWorkspace='sample', OutputBinning='0.02,-0.1,1', OutputWorkspace='iq')
