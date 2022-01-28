@@ -843,7 +843,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         for name in ws_list:
             run = mtd[name].getRun()
             ei = run.getLogData('Ei').value
-            new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, name, ei)
+            ws_name = name
+            if 'raw' in name:  # remove 'raw' from the output name
+                ws_name = '{}{}'.format(name[:name.find('raw')-1], name[name.find('raw')+4:])
+            new_name = '{}_{}_Ei_{:.0f}'.format(output_group_name, ws_name, ei)
             temp = run.getLogData(temp_log_name).value
             if isinstance(temp, np.ndarray):
                 for t in temp:
