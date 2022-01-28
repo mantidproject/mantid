@@ -14,7 +14,7 @@ import builtins
 import os
 
 from mantid.api import FrameworkManager, AlgorithmManager
-from mantid.kernel import ConfigService, logger
+from mantid.kernel import (ConfigService, logger, UsageService, FeatureType)
 from workbench.config import SAVE_STATE_VERSION
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
@@ -600,7 +600,6 @@ class MainWindow(QMainWindow):
             if self.project_recovery is not None:
                 self.project_recovery.stop_recovery_thread()
                 self.project_recovery.closing_workbench = True
-                self.project_recovery.remove_current_pid_folder()
 
             # Cancel memory widget thread
             if self.memorywidget is not None:
@@ -611,6 +610,18 @@ class MainWindow(QMainWindow):
 
             if self.workspacecalculator is not None:
                 self.workspacecalculator.view.closeEvent(event)
+
+            if self.project_recovery is not None:
+                # Do not merge this block with the above block that
+                # starts with the same check.
+                # We deliberately split the call to stop the recovery
+                # thread and removal of the checkpoints folder to
+                # allow for the maximum amount of time for the recovery
+                # thread to finish. Any errors here are ignored as exceptions
+                # on shutdown cannot be handled in a meaningful way.
+                # Future runs of project recovery will clean any stale points
+                # after a month
+                self.project_recovery.remove_current_pid_folder(ignore_errors=True)
 
             event.accept()
         else:
@@ -711,6 +722,7 @@ class MainWindow(QMainWindow):
         self.interface_manager.showConceptHelp('')
 
     def open_mantid_help(self):
+        UsageService.registerFeatureUsage(FeatureType.Feature.Interface, ["Mantid Help"], False)
         self.interface_manager.showHelpPage('')
 
     def open_mantid_homepage(self):

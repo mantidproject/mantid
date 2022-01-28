@@ -46,11 +46,11 @@ if(APPLE OR WIN32)
   add_executable(MantidWorkbenchInstalled WIN32 mantidworkbench.cpp)
   if(WIN32)
     set(_py_exe "pythonw.exe")
-    set(_qt_plugins "..\\\\plugins\\\\qt5")
+    set(_qt_plugins_standalone "..\\\\plugins\\\\qt5")
     set(PACKAGE_EXECUTABLE MantidWorkbench)
   else()
     set(_py_exe "python")
-    set(_qt_plugins "../PlugIns")
+    set(_qt_plugins_standalone "../PlugIns")
     # appears in the unified menu bar and helps distiguish from other packages
     set(PACKAGE_EXECUTABLE MantidWorkbench${CPACK_PACKAGE_SUFFIX_CAMELCASE})
   endif()
@@ -58,9 +58,15 @@ if(APPLE OR WIN32)
     MantidWorkbenchInstalled PROPERTIES OUTPUT_NAME ${PACKAGE_EXECUTABLE} RUNTIME_OUTPUT_DIRECTORY
                                                                           ${CMAKE_CURRENT_BINARY_DIR}
   )
-  target_compile_definitions(
-    MantidWorkbenchInstalled PRIVATE -DPYTHON_EXECUTABLE_PATH="${_py_exe}" -DQT_PLUGIN_PATH="${_qt_plugins}"
-  )
+  if(CONDA_ENV)
+    target_compile_definitions(MantidWorkbenchInstalled PRIVATE -DPYTHON_EXECUTABLE_PATH="${_py_exe}" -DCONDA_ENV=1)
+  else()
+    target_compile_definitions(
+      MantidWorkbenchInstalled PRIVATE -DPYTHON_EXECUTABLE_PATH="${_py_exe}"
+                                       -DQT_PLUGIN_PATH="${_qt_plugins_standalone}"
+    )
+  endif()
+
   target_link_libraries(MantidWorkbenchInstalled PRIVATE Boost::filesystem)
   if(WIN32)
     target_link_libraries(MantidWorkbenchInstalled PRIVATE Qt5::WinMain)
@@ -183,6 +189,12 @@ if(APPLE AND NOT CONDA_BUILD)
 
   # We can't do this in a conda_env as it looks for homebrew packages
   if(NOT CONDA_ENV)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      # This is a horrible hack to remove the directories that eigen installs as it does not seem possible to change the
+      # location without editing the install command within the eigen source. This will not be an issue when we stop
+      # using eigen as an external project.
+      install(CODE "file(REMOVE_RECURSE \${CMAKE_INSTALL_PREFIX}/include \${CMAKE_INSTALL_PREFIX}/share)")
+    endif()
     install(
       CODE "
       execute_process(COMMAND ${CMAKE_SOURCE_DIR}/installers/MacInstaller/make_package.rb
@@ -194,6 +206,7 @@ if(APPLE AND NOT CONDA_BUILD)
       endif()
   "
     )
+
   else()
     include(BundleOSXConda)
   endif()

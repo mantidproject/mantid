@@ -14,9 +14,10 @@ The Decoupling of asymmetry in the ordered state of a powdered magnet fit functi
 .. math:: y = a*A_z({\frac{x}{B0}})
 
 where:
+
 - :math:`a` - a scaling parameter for the overall asymmetry
 - :math:`B0` - the characteristic field
-- .. math:: A_z(b) = {\frac{3}{4}} - {\frac{1}{4b^2}} + {\frac{(b^2-1)^2}{8b^3}}log\abs{{\frac{b+1}{b-1}}}
+- :math:`A_z(b) = {\frac{3}{4}} - {\frac{1}{4b^2}} + {\frac{(b^2-1)^2}{8b^3}}log|{{\frac{b+1}{b-1}}}|`
 
 
 For a rotating asymmetry use :ref:`DecoupAsymPowderMagRot<func-DecoupAsymPowderMagRot>` .

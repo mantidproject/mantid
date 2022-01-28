@@ -12,6 +12,7 @@ from enum import Enum
 from distutils.version import LooseVersion
 
 # 3rd party imports
+from matplotlib import colors
 from matplotlib.legend import Legend
 from matplotlib import cm, __version__ as mpl_version_str
 from matplotlib.container import ErrorbarContainer
@@ -253,3 +254,12 @@ def colormap_as_plot_color(number_colors: int, colormap_name: str = 'viridis', c
 
     for i in range(number_colors):
         yield cmap(float(i) / number_colors)
+
+
+def convert_color_to_hex(color):
+    """Convert a matplotlib color to its hex form"""
+    try:
+        return colors.cnames[color]
+    except (KeyError, TypeError):
+        rgb = colors.colorConverter.to_rgb(color)
+        return colors.rgb2hex(rgb)

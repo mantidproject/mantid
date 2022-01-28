@@ -107,12 +107,18 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.assertTrue(not os.path.exists(empty))
 
-    def test_remove_empty_dir_throws_outside_of_workbench_directory(self):
+    @mock.patch('workbench.projectrecovery.projectrecovery.logger')
+    def test_remove_empty_dir_logs_outside_of_workbench_directory(self, logger_mock):
         os.mkdir(os.path.join(self.working_directory, "temp"))
-        self.assertRaises(RuntimeError, self.pr._remove_empty_folders_from_dir, self.working_directory)
+        self.pr._remove_empty_folders_from_dir(self.working_directory)
 
-    def test_remove_all_folders_from_dir_raises_outside_of_mantid_dir(self):
-        self.assertRaises(RuntimeError, self.pr._remove_directory_and_directory_trees, self.working_directory)
+        logger_mock.warning.assert_called_once()
+
+    @mock.patch('workbench.projectrecovery.projectrecovery.logger')
+    def test_remove_all_folders_from_dir_outside_of_mantid_dir_logs_warning(self, logger_mock):
+        self.pr._remove_directory_and_directory_trees(self.working_directory)
+
+        logger_mock.warning.assert_called_once()
 
     def test_remove_all_folders_from_dir_doesnt_raise_inside_of_mantid_dir(self):
         temp_dir = os.path.join(self.pr.recovery_directory, "tempDir")
@@ -189,7 +195,7 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.assertTrue(self.pr.check_for_recover_checkpoint())
 
-    def test_remove_oldest_checkpoints(self):
+    def test_remove_oldest_checkpoints_when_no_errors_present(self):
         self.pr._recovery_directory_pid = self.working_directory
         self.pr._remove_directory_and_directory_trees = mock.MagicMock()
 
@@ -202,13 +208,29 @@ class ProjectRecoveryTest(unittest.TestCase):
         # Now should have had a call made to delete working_directory + dir0
         self.pr._remove_directory_and_directory_trees.assert_called_with(os.path.join(self.working_directory, "dir0"))
 
+    @mock.patch('workbench.projectrecovery.projectrecovery.logger')
+    def test_remove_oldest_checkpoints_logs_when_directory_not_removable(self, logger_mock):
+        self.pr._recovery_directory_pid = self.working_directory
+        self.pr._remove_directory_and_directory_trees = mock.MagicMock(side_effect=OSError("Error removing directory"))
+
+        for ii in range(0, self.pr.maximum_num_checkpoints+1):
+            os.mkdir(os.path.join(self.working_directory, "dir"+str(ii)))
+            time.sleep(0.01)
+
+        self.pr.remove_oldest_checkpoints()
+
+        # Now should have had a call made to delete working_directory + dir0
+        self.pr._remove_directory_and_directory_trees.assert_called_with(os.path.join(self.working_directory, "dir0"))
+        logger_mock.warning.assert_called_once()
+
     def test_clear_all_unused_checkpoints_called_with_none_and_only_one_user(self):
         self.pr._remove_directory_and_directory_trees = mock.MagicMock()
         os.makedirs(self.pr.recovery_directory_hostname)
 
         self.pr.clear_all_unused_checkpoints()
 
-        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname)
+        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname,
+                                                                         ignore_errors=True)
 
     def test_clear_all_unused_checkpoints_called_with_none_and_multiple_users(self):
         self.pr._remove_directory_and_directory_trees = mock.MagicMock()
@@ -220,7 +242,8 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.pr.clear_all_unused_checkpoints()
 
-        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname)
+        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname,
+                                                                         ignore_errors=True)
 
     def test_clear_all_unused_checkpoints_called_with_not_none(self):
         self.pr._remove_directory_and_directory_trees = mock.MagicMock()
@@ -228,7 +251,8 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         self.pr.clear_all_unused_checkpoints(pid_dir=self.pr.recovery_directory_hostname)
 
-        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname)
+        self.pr._remove_directory_and_directory_trees.assert_called_with(self.pr.recovery_directory_hostname,
+                                                                         ignore_errors=True)
 
     def _repair_checkpoint_checkpoints_setup(self, checkpoint1, checkpoint2, pid, pid2):
         if os.path.exists(pid):
@@ -248,8 +272,10 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     def _repair_checkpoints_assertions(self, checkpoint1, checkpoint2, pid, pid2):
         # None of the checkpoints should exist after the call. Thus the PID folder should be deleted and thus ignored.
-        directory_removal_calls = [mock.call(os.path.join(self.pr.recovery_directory_hostname, '200000')),
-                                   mock.call(os.path.join(self.pr.recovery_directory_hostname, "1000000", "check1"))]
+        directory_removal_calls = [mock.call(os.path.join(self.pr.recovery_directory_hostname, '200000'),
+                                             ignore_errors=True),
+                                   mock.call(os.path.join(self.pr.recovery_directory_hostname, "1000000", "check1"),
+                                             ignore_errors=True)]
 
         self.pr._remove_directory_and_directory_trees.assert_has_calls(directory_removal_calls)
 

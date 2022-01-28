@@ -6,36 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 from reduction_workflow.command_interface import AppendDataFile, Reduce1D
 
-import os
-
-
-def do_cleanup():
-    Files = ["BioSANS_test_data_reduction.log",
-             "BioSANS_test_data_Iq.xml",
-             "BioSANS_test_data_Iq.txt",
-             "BioSANS_test_data_Iqxy.dat"]
-    for filename in Files:
-        absfile = FileFinder.getFullPath(filename)
-        if os.path.exists(absfile):
-            os.remove(absfile)
-    return True
-
 
 class HFIRTrans1(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -56,14 +41,14 @@ class HFIRTrans1(systemtesting.MantidSystemTest):
 
 class HFIRTrans2(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -83,14 +68,14 @@ class HFIRTrans2(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionDarkCurrent(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -112,14 +97,14 @@ class HFIRTransmissionDarkCurrent(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionDirectBeamCenter(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -141,14 +126,14 @@ class HFIRTransmissionDirectBeamCenter(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionBeamCenter(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -171,14 +156,14 @@ class HFIRTransmissionBeamCenter(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionBeamSpreader(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -203,14 +188,14 @@ class HFIRTransmissionBeamSpreader(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionBeamSpreaderDC(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -236,14 +221,14 @@ class HFIRTransmissionBeamSpreaderDC(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionBeamSpreaderDBC(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
@@ -269,14 +254,14 @@ class HFIRTransmissionBeamSpreaderDBC(systemtesting.MantidSystemTest):
 
 class HFIRTransmissionBeamSpreaderBC(systemtesting.MantidSystemTest):
 
-    def cleanup(self):
-        do_cleanup()
-        return True
+    def setUp(self):
+        self._work_dir = self.temporary_directory()
 
     def runTest(self):
         configI = ConfigService.Instance()
         configI["facilityName"]='HFIR'
         GPSANS()
+        DataPath(self._work_dir)
         SetSampleDetectorDistance(6000)
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()

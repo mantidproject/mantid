@@ -38,10 +38,13 @@ class StateMachine(object):
         """
         Respond to mouse release event.
         """
-        if self.tool.toolbar_manager.is_tool_active():
-            return
-        self.state.button_release_callback(event)
-        self.state = self.state.transition()
+        if not self.tool.toolbar_manager.is_tool_active():
+            if (event.xdata is None or event.ydata is None) and isinstance(self.state, AddPeakState):
+                # cursor off the axes - reset cursor state to behave as if just clicked Add Peak when cursor next moved
+                self.state.reset_cursor()
+                return
+            self.state.button_release_callback(event)
+            self.state = self.state.transition()
 
     def transition_to(self, state_name):
         """
@@ -94,6 +97,9 @@ class AddPeakState(object):
     def __init__(self, machine):
         self.machine = machine
         self.tool = machine.tool
+        self.cursor = None
+
+    def reset_cursor(self):
         self.cursor = None
 
     def button_press_callback(self, event):

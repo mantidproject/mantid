@@ -295,7 +295,7 @@ class ColorbarWidget(QWidget):
     def _autoscale_clim(self):
         """Update stored colorbar limits
         The new limits are found from the colobar data """
-        data = self.colorbar.mappable.get_array()
+        data = self.colorbar.mappable.get_array_clipped_to_bounds()
         norm = NORM_OPTS[self.norm.currentIndex()]
         try:
             try:
@@ -303,8 +303,12 @@ class ColorbarWidget(QWidget):
                 # use the smallest positive value as vmin when using log scale,
                 # matplotlib will take care of the data skipping part.
                 masked_data = masked_data[masked_data > 0] if norm == "Log" else masked_data
-                self.cmin_value = masked_data.min()
-                self.cmax_value = masked_data.max()
+
+                # If any dimension is zero then we have no data in the display area
+                data_is_empty = any(map(lambda dim: dim == 0, masked_data.shape))
+
+                self.cmin_value = 0. if data_is_empty else masked_data.min()
+                self.cmax_value = 0. if data_is_empty else masked_data.max()
             except (AttributeError, IndexError):
                 data = data[np.nonzero(data)] if norm == "Log" else data
                 self.cmin_value = np.nanmin(data)

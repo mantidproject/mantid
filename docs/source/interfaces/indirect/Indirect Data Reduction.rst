@@ -352,6 +352,9 @@ Sum/Interpolate
   Default behaviour is Sum. Interpolation is done using cubic (or linear for 2 measured values only) splines.
   If interpolation is requested, x-axis will be sorted automatically.
 
+
+.. _interface-indirect-isis-calibration:
+
 ISIS Calibration
 ----------------
 

@@ -11,7 +11,8 @@
 # buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
 #
 # Expected args:
-#   1. WORKSPACE: path to the workspace/source code that this should run inside
+#   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
+#                 this arguement do not use \\ or \ in the path.
 #   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
 #
 # Possible flags:
@@ -40,10 +41,24 @@ WORKSPACE=$1
 shift
 CMAKE_PRESET=$1
 shift
+
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
-EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/conda
+if [[ $OSTYPE == "msys" ]]; then
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
+else
+    EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/bin/mamba
+fi
+
 CONDA_ENV_NAME="mantid-developer"
-BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
+
+if [[ -z "$BUILD_THREADS" ]]; then
+    if [[ $OSTYPE == 'darwin'* ]]; then
+        BUILD_THREADS="$(sysctl -n hw.logicalcpu)"
+    else
+        BUILD_THREADS="$(grep -c ^processor /proc/cpuinfo)" # Not physical but logical cores, includes hyper threaded.
+    fi
+fi
+
 XVFB_SERVER_NUM=101
 BUILD_DIR=$WORKSPACE/build
 
@@ -98,6 +113,7 @@ $SCRIPT_DIR/setup-conda-env $WORKSPACE $EXPECTED_CONDA_PATH $CONDA_ENV_NAME
 conda activate $CONDA_ENV_NAME
 
 # Clean the source tree to remove stale configured files ignoring the build directory
+cd $WORKSPACE
 git clean -d -x --force --exclude=build --exclude=mambaforge --exclude=".Xauthority-*"
 
 # Clean up build folder
@@ -116,7 +132,7 @@ if [[ ${CLEAN_EXTERNAL_PROJECTS} == true ]]; then
 fi
 
 # Clean up artifacts from previous builds
-rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
+rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 
 # Should we even build the code?
 if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then

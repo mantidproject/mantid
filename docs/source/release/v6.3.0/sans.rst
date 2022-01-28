@@ -5,31 +5,18 @@ SANS Changes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-New
----
-
-- SANS reduction suite has been refactored, providing up to 2 orders of magnitude of speed-up for monochromatic and kinetic modes. The new algorithm :ref:`SANSILLMultiProcess <algm-SANSILLMultiProcess>` steers the reduction of the whole experiments, using the new version of the :ref:`SANSILLReduction <algm-SANSILLReduction-v2>`.
-
 Improvements
 ------------
 
-- Added missing logs to save in the header of ASCII files by DrILL for D11lr and D22lr ILL instruments
-- The ISIS SANS reduction algorithm now converts to wavelength once, instead of n times for each wavelength pair specified. This reduces the runtime by up to 50%.
+- Added missing logs to save in the header of ASCII files by :ref:`DrILL <DrILL-ref>` for D11lr and D22lr ILL instruments.
+- ISIS SANS data reduction now converts to wavelength once, instead of n times for each wavelength pair specified. This reduces the runtime by up to 50%.
 
 Bugfixes
 --------
 
 - The :ref:`ISIS SANS Interface <ISIS_Sans_interface_contents>` will now generate and display a range of wavelength bins
   specified in TOML files. This previously showed an empty field, despite correctly using the input from the TOML file.
+- Loading a ``CSV`` file with a missing column now shows an error box explaining the problem. Previously, it showed an uncaught exception.
 
-Bugfixes
---------
-
-- The :ref:`ISIS SANS Interface <ISIS_Sans_interface_contents>` will now generate and display a range of wavelength bins
-  specified in TOML files. This previously showed an empty field, despite correctly using the input from the TOML file.
 
 :ref:`Release 6.3.0 <v6.3.0>`
