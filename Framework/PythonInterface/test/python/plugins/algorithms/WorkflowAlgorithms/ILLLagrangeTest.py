@@ -5,67 +5,89 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import mtd, config, ILLLagrange
+from mantid.api import mtd
+from mantid.simpleapi import config, ILLLagrange
 import unittest
 
 
 class ILLLagrangeTest(unittest.TestCase):
 
+    _facility = None
+    _data_search_dirs = None
+
     @classmethod
     def setUpClass(cls):
-        cls._facility = config["default.facility"]
-        cls._instrument = config["default.instrument"]
-        cls._dirs = config["datasearch.directories"]
-        config.appendDataSearchSubDir("ILL/IN1/")
-        config["default.facility"] = "ILL"
+        cls._facility = config['default.facility']
+        cls._data_search_dirs = config.getDataSearchDirs()
+        config.appendDataSearchSubDir('ILL/LAGRANGE/')
+        config.setFacility("ILL")
 
     @classmethod
     def tearDownClass(cls):
-        config["default.facility"] = cls._facility
-        config["default.instrument"] = cls._instrument
-        config["datasearch.directories"] = cls._dirs
-
-    def tearDown(self):
+        config.setFacility(cls._facility)
+        config.setDataSearchDirs(cls._data_search_dirs)
         mtd.clear()
 
-    def test_simple_reduction(self):
-        sample_file = '012882'
-        ILLLagrange(OutputWorkspace="out",
-                    SampleRuns=sample_file)
+    def test_only_one_run(self):
+        result = ILLLagrange(SampleRuns='012869')
+        self.check_result(result, "Energy", 150, 21.4992, 96.019)
 
-        ws = mtd["out"]
+        self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
 
+    def test_multiple_runs(self):
+        result = ILLLagrange(SampleRuns='012869:012871')
+
+        self.check_result(result, "Energy", 276, 21.4992, 446.5527)
+
+        self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
+
+    def test_water_correction(self):
+        result = ILLLagrange(SampleRuns='012869:012871', ContainerRuns='012882:012884')
+        self.check_result(result, "Energy", 276, 21.4992, 446.5527)
+
+        self.assertAlmostEqual(result.readY(0)[10], -0.017195, 4)
+        self.assertAlmostEqual(result.readY(0)[80], -0.015001, 4)
+
+    def test_calibration_correction(self):
+        result = ILLLagrange(SampleRuns='012869:012871', CorrectionFile='correction-water-cu220-2020.txt')
+        self.check_result(result, "Energy", 276, 21.4992, 446.5527)
+
+        self.assertAlmostEqual(result.readY(0)[10], 0.014376, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 0.012939, 4)
+
+    def test_all_corrections(self):
+        result = ILLLagrange(SampleRuns='012869:012871',
+                             ContainerRuns='012882:012884',
+                             CorrectionFile='correction-water-cu220-2020.txt')
+        self.check_result(result, "Energy", 276, 21.4992, 446.5527)
+
+        self.assertAlmostEqual(result.readY(0)[10], -0.017252, 4)
+        self.assertAlmostEqual(result.readY(0)[80], -0.013009, 4)
+
+    def test_incident_energy(self):
+        result = ILLLagrange(SampleRuns='012869:012871', IncidentEnergy=True)
+
+        self.check_result(result, "Energy", 276, 25.9992, 451.0527)
+
+        self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
+
+    def test_convert_to_wavenumber(self):
+        result = ILLLagrange(SampleRuns='012869:012871', ConvertToWaveNumber=True)
+        self.check_result(result, "Energy_inWavenumber", 276, 173.4028, 3601.6907)
+
+        self.assertAlmostEqual(result.readY(0)[10], 0.014433, 4)
+        self.assertAlmostEqual(result.readY(0)[80], 0.010947, 4)
+
+    def check_result(self, ws, expected_unit, expected_bins, first_bin, last_bin):
         self.assertEqual(ws.getNumberHistograms(), 1)
-        self.assertEqual(ws.getNumberBins(0), 160)
-
-    def test_multiple_files_reduction(self):
-        sample_files = '012882:012884'
-        ILLLagrange(OutputWorkspace="out",
-                    SampleRuns=sample_files)
-
-        ws = mtd["out"]
-
-        self.assertEqual(ws.getNumberHistograms(), 1)
-        self.assertEqual(ws.getNumberBins(0), 430)
-
-    def test_reduction_single_monochromator(self):
-        """
-        Full reduction of data from a single monochromator
-        """
-        sample_files = '012882:012884'
-        water_correction = 'correction-water-cu220-2020.txt'
-        empty_cell = '012869:012871'
-
-        ILLLagrange(OutputWorkspace="out",
-                    SampleRuns=sample_files,
-                    CorrectionFile=water_correction,
-                    ContainerRuns=empty_cell)
-
-        ws = mtd["out"]
-
-        self.assertEqual(ws.getNumberHistograms(), 1)
-        self.assertEqual(ws.getNumberBins(0), 430)
+        self.assertEqual(ws.getNumberBins(), expected_bins)
+        self.assertEqual(ws.getAxis(0).getUnit().unitID(), expected_unit)
+        self.assertAlmostEqual(ws.getAxis(0).extractValues()[0], first_bin, 4)
+        self.assertAlmostEqual(ws.getAxis(0).extractValues()[-1], last_bin, 4)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()
