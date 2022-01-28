@@ -281,8 +281,12 @@ class SPowderSemiEmpiricalCalculator:
                              'powder averaging.'.format(self._instrument.get_name()))
 
     def _calculate_s_powder_2d(self, isotropic_fundamentals: bool = False) -> SData:
-        return self._calculate_s_powder_over_k_and_q(
+        s_data = self._calculate_s_powder_over_k_and_q(
             isotropic_fundamentals=isotropic_fundamentals)
+
+        s_data.apply_kinematic_constraints(self._instrument)
+
+        return s_data
 
     def _calculate_s_powder_1d(self, isotropic_fundamentals=False) -> SData:
         """

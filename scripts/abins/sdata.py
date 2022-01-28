@@ -14,6 +14,7 @@ from scipy.signal import convolve
 from mantid.kernel import logger as mantid_logger
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
+from abins.instruments.directinstrument import DirectInstrument
 import abins.parameters
 
 # Type annotation for atom items e.g. data['atom_1']
@@ -187,6 +188,13 @@ class SData(collections.abc.Sequence):
             return None
         else:
             return self._q_bins.copy()
+
+    def get_q_bin_centres(self) -> np.ndarray:
+        q_bins = self.get_q_bins()
+        if q_bins is None:
+            raise ValueError("No q_bins on this SData")
+        else:
+            return (q_bins[1:] + q_bins[:-1]) / 2.
 
     def set_q_bins(self, q_bins: np.ndarray) -> None:
         """Update q-bins stored on SData
@@ -421,6 +429,27 @@ class SData(collections.abc.Sequence):
             return warning_cases
         else:
             return None
+
+    def apply_kinematic_constraints(self, instrument: DirectInstrument) -> None:
+        """Replace inaccessible intensity bins with NaN
+
+        This passes frequencies to instrument.get_abs_q_limits() method to get
+        accessible q-range at each energy, and masks out other bins with NaN.
+        Data must be 2-D and q_bins must be available.
+
+        Values will be modified in-place.
+
+        Args:
+            instrument - this must have the get_abs_q_limits() method
+                (i.e. inherit DirectInstrument).
+        """
+        q_lower, q_upper = instrument.get_abs_q_limits(self.get_frequencies())
+        q_values = self.get_q_bin_centres()
+        mask = np.logical_or(q_values[:, np.newaxis] < q_lower[np.newaxis, :],
+                             q_values[:, np.newaxis] > q_upper[np.newaxis, :])
+        for atom_data in self:
+            for _, order_data in atom_data.items():
+                order_data[mask] = float('nan')
 
     def __mul__(self, other: np.ndarray) -> 'SData':
         """Multiply S data by an array over energies and orders
