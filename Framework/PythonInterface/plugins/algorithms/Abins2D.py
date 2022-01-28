@@ -14,7 +14,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 from mantid.kernel import logger
 
 # noinspection PyProtectedMember
-from mantid.simpleapi import ConvertUnits, GroupWorkspaces
+from mantid.simpleapi import GroupWorkspaces
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -138,12 +138,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
             self.create_total_workspace(workspaces)
             prog_reporter.report("Workspace with total S has been constructed.")
 
-        gws = GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
-
-        # 7) Convert units
-        if self._energy_units == 'meV':
-            # Ok, EMode isn't really Indirect but that enables Mantid to do the conversion
-            ConvertUnits(InputWorkspace=gws, OutputWorkspace=gws, EMode='Indirect', Target='DeltaE')
+        GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
 
         # 8) save workspaces to ascii_file
         if self._save_ascii:
@@ -202,6 +197,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
     def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         from mantid.api import NumericAxis
+        from abins.constants import MILLI_EV_TO_WAVENUMBER
 
         if protons_number is not None:
             s_points = s_points *  self.get_cross_section(scattering=self._scale_by_cross_section,
@@ -212,23 +208,27 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         n_q_bins = self._q_bins.size
         assert n_q_values + 1 == n_q_bins
 
+        if self._energy_units == 'meV':
+            energy_bins = self._bins / MILLI_EV_TO_WAVENUMBER
+        else:
+            energy_bins = self._bins
+
         wrk = WorkspaceFactory.create("Workspace2D", NVectors=n_freq_bins, XLength=n_q_bins, YLength=n_q_values)
 
         freq_axis = NumericAxis.create(n_freq_bins)
 
         # q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
 
-        freq_offset = (self._bins[1] - self._bins[0]) / 2
-        for i, freq in enumerate(self._bins[1:]):
+        freq_offset = (energy_bins[1] - energy_bins[0]) / 2
+        for i, freq in enumerate(energy_bins[1:]):
             wrk.setX(i, self._q_bins)
             wrk.setY(i, s_points[:, i].T)
             freq_axis.setValue(i, freq + freq_offset)
-        freq_axis.setUnit("Energy_inWavenumber")
         wrk.replaceAxis(1, freq_axis)
 
         AnalysisDataService.addOrReplace(workspace, wrk)
 
-        self.set_workspace_units(workspace, layout="2D")
+        self.set_workspace_units(workspace, layout="2D", energy_units=self._energy_units)
 
     def _check_advanced_parameter(self):
         """
