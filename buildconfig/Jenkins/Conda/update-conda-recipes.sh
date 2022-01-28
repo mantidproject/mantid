@@ -10,6 +10,9 @@
 GITHUB_ACCESS_TOKEN=$1
 GITHUB_USER_NAME=$2
 
+# Checkout correct branch
+git checkout release-next
+
 # Generate the latest version number
 LATEST_GIT_SHA_DATE=$(command git log -1 --format=format:%ci)
 echo $LATEST_GIT_SHA_DATE
