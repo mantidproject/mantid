@@ -262,6 +262,7 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
   double sumF = 0.0;
   double Fmin = 0.0;
   double Fmax = 0.0;
+  double Fnor = 0.0;
   auto is_distrib = inSpec.yMode() == HistogramData::Histogram::YMode::Frequencies;
   if (distmax <= distmin) {
     sumY = 0.;
@@ -270,6 +271,9 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
     if (Fin) {
       // Workspace has fractional area information, need to take into account
       sumF = std::accumulate(Fin->begin() + distmin, Fin->begin() + distmax, 0.0);
+      // Need to normalise by the number of non-NaN bins - see issue #33407 for details
+      Fnor = static_cast<double>(
+          std::count_if(Fin->begin() + distmin, Fin->begin() + distmax, [](double i) { return i != 0.; }));
       if (distmin > 0)
         Fmin = (*Fin)[distmin - 1];
       Fmax = (*Fin)[static_cast<std::size_t>(distmax) < Fin->size() ? distmax : Fin->size() - 1];
@@ -307,6 +311,8 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
       sumE += eval * eval * fraction * fraction;
       if (Fin) {
         sumF += Fmin * fraction;
+        if (Fmin != 0.0)
+          Fnor += fraction;
       }
     } else {
       if (distmin > 0) {
@@ -322,6 +328,8 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
         sumE += eval * eval * fraction * fraction;
         if (Fin) {
           sumF += Fmin * fraction;
+          if (Fmin != 0.0)
+            Fnor += fraction;
         }
       }
       if (highit < X.end() - 1) {
@@ -336,6 +344,8 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
         sumE += eval * eval * fraction * fraction;
         if (Fin) {
           sumF += Fmax * fraction;
+          if (Fmax != 0.0)
+            Fnor += fraction;
         }
       }
     }
@@ -347,7 +357,7 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
   outSpec.mutableY()[0] = sumY;
   outSpec.mutableE()[0] = sqrt(sumE); // Propagate Gaussian error
   if (Fout) {
-    (*Fout)[0] = sumF;
+    (*Fout)[0] = sumF / Fnor;
   }
 }
 
