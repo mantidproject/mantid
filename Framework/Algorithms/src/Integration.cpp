@@ -273,7 +273,7 @@ void Integration::integrateSpectrum(const API::ISpectrum &inSpec, API::ISpectrum
       sumF = std::accumulate(Fin->begin() + distmin, Fin->begin() + distmax, 0.0);
       // Need to normalise by the number of non-NaN bins - see issue #33407 for details
       Fnor = static_cast<double>(
-          std::count_if(Fin->begin() + distmin, Fin->begin() + distmax, [](double i) { return i != 0.; }));
+          std::count_if(Fin->begin() + distmin, Fin->begin() + distmax, [](double f) { return f != 0.; }));
       if (distmin > 0)
         Fmin = (*Fin)[distmin - 1];
       Fmax = (*Fin)[static_cast<std::size_t>(distmax) < Fin->size() ? distmax : Fin->size() - 1];
