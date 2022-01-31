@@ -23,4 +23,4 @@ resolution, flux = PyChop2.calculate(inst='maps', chtyp='a', freq=500, ei=600, e
 PyChop2.showGUI()
 """
 
-from pychop.Instruments import Instrument as PyChop2  # noqa: F401
+from .Instruments import Instrument as PyChop2  # noqa: F401

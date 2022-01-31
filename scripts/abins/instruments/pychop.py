@@ -4,7 +4,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 import mantid.kernel
-from mantidqtinterfaces.PyChop import Instruments as pychop_instruments
+from pychop import Instruments as pychop_instruments
 
 from abins.constants import MILLI_EV_TO_WAVENUMBER
 from .directinstrument import DirectInstrument
