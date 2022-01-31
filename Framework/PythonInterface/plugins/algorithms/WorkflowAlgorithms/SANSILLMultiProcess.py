@@ -948,7 +948,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def rename_tr(self, tr):
         '''Renames the transmission workspace'''
         out = self.getPropertyValue('OutputWorkspace')
-        wavelength = mtd[tr].getRun()['wavelength'].value
+        wavelength = 0.
+        if mtd[tr].getRun().hasProperty('wavelength'):
+            wavelength = mtd[tr].getRun()['wavelength'].value
         name = f'{out}_transmissions_w{wavelength:.1f}A'
         RenameWorkspace(tr, name)
         tr_ws = mtd[name]
