@@ -103,7 +103,6 @@ fi
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     if [[ $OSTYPE == "msys"* ]]; then
         rm -rf $userconfig_dir/Mantid.user.properties
-        rm -rf $userconfig_dir/Mantid.properties
     else
         rm -fr $userconfig_dir
     fi
