@@ -154,7 +154,7 @@ class SANSILLReduction(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc='The name of the input empty beam flux workspace.')
 
-        self.setPropertySettings('FluxWorkspace', water_solvent_sample)
+        self.setPropertySettings('FluxWorkspace', EnabledWhenProperty(water_solvent_sample, transmission, LogicOperator.Or))
 
         self.declareProperty(MatrixWorkspaceProperty(name='TransmissionWorkspace',
                                                      defaultValue='',

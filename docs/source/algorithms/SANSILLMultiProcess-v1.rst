@@ -15,7 +15,7 @@ The sample measurements will be corrected for all the instrumental effects and c
 Optionally, it can also perform anisotropic integration with azimuthal wedges or hand-drawn sectors in the instrument viewer.
 If requested, it can also produce separate :math:`I(Q)` curves per detector panel.
 It supports standard monochromatic, kinetic and rebinned event modes.
-Makes use of :ref:`SANSILLRedcution <algm-SANSILLReduction-v2>` and :ref:`SANSILLIntegration <algm-SANSILLIntegration>`.
+Makes use of :ref:`SANSILLReduction <algm-SANSILLReduction-v2>` and :ref:`SANSILLIntegration <algm-SANSILLIntegration>`.
 
 Output
 ------
