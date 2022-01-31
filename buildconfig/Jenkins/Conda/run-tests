@@ -59,7 +59,6 @@ function onexit {
 if [[ $OSTYPE == "msys"* ]]; then
     userconfig_dir=$WORKSPACE/build/bin/Release
     rm -rf $userconfig_dir/Mantid.user.properties
-    rm -rf $userconfig_dir/Mantid.properties
 else
     userconfig_dir=$HOME/.mantid
     rm -fr $userconfig_dir
