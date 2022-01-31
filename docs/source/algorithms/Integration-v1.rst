@@ -79,7 +79,7 @@ the same :math:`y` values.
 Note that the un-integrated axis (say the :math:`x` axis) may still be binned,
 in which case the result of integrating distribution vs non-distribution data will not be equivalent.
 That is, integrating a distribution will create a new distribution where the internal :math:`y`
-values represent the summed counts per :math:`x`-bin-width, whereas
+values represent the summed counts per :math:`x`-bin-width. Whereas,
 integrating a non-distribution workspace will yield the same internal :math:`y` values but
 these now represent counts (not counts per :math:`x`-bin-width).
 
