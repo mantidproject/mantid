@@ -12,5 +12,6 @@ New and Improved
 Bugfixes
 --------
 - In DrILL interface, scrolling down in the settings dialog no longer affects the comboxes
+- Cleaned up the appearance of the main window and the Indirect, Reflectometry, and Engineering GUIs on macOS.
 
 :ref:`Release 6.4.0 <v6.4.0>`
