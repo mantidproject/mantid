@@ -69,7 +69,7 @@ If this does not work, try launching with:
 
 	cd C:\MantidInstall\bin
 	set QT_PLUGIN_PATH=%CD%\..\plugins\qt5
-	export PYTHONPATH=%CD%;%PYTHONPATH%
+	set PYTHONPATH=%CD%;%PYTHONPATH%
 	python -m workbench.app.main
 
 
