@@ -27,8 +27,8 @@ instruments = {
         'q_size': 200,  # Number of q slices in output plot
         'q_range': (0, 20),  # Lower and upper limits of measurement q sampling
         'e_init': 4100.0,  # Incident energies in cm-1
-        'settings_default': 'A',
-        'settings': {'A': {'chopper': 'A'}},
+        'settings_default': '',
+        'settings': {'': {'chopper': 'A'}},
         'chopper_allowed_frequencies': list(range(50, 601, 50)),
         'min_wavenumber': 0.,
         'max_wavenumber': 4100.0
@@ -36,8 +36,8 @@ instruments = {
     'PANTHER' : {
         'q_size': 100,
         'e_init': 150 * MILLI_EV_TO_WAVENUMBER,
-        'settings_default': 'G004',
-        'settings': {'G_004': {'chopper': 'G004'}},
+        'settings_default': '',
+        'settings': {'': {'chopper': 'G004'}},
         'angle_range': (5, 140),
         'chopper_frequency_default': 400,
         'chopper_allowed_frequencies': list(range(50, 601, 50)),
