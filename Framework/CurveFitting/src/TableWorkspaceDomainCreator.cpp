@@ -486,7 +486,6 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
         E[k] = s;
       }
 
-      double chi2Reduced = function->getReducedChiSquared();
       size_t dof = nData - nParams;
       auto &yValues = ws->mutableY(wsIndex);
       auto &eValues = ws->mutableE(wsIndex);
@@ -497,7 +496,7 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
       }
       for (size_t i = 0; i < nData; i++) {
         yValues[i] = resultValues->getCalculated(i);
-        eValues[i] = T * std::sqrt(E[i] * chi2Reduced);
+        eValues[i] = T * std::sqrt(E[i]);
       }
 
     } else {
