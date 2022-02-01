@@ -67,7 +67,7 @@ class SANSDirectBeamTransmission(PythonAlgorithm):
         empty_file = self.getPropertyValue("EmptyDataFilename")
 
         property_manager_name = self.getProperty("ReductionProperties").value
-        property_manager = PropertyManagerDataService.retrieve(property_manager_name)
+        property_manager = PropertyManagerDataService[property_manager_name]
 
         # Build the name we are going to give the transmission workspace
         sample_basename = os.path.basename(sample_file)
