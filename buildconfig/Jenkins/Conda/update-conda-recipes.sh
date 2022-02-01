@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 
 # Update the https://github.com/mantidproject/conda-recipes repository with the latest changes from the currently
 # checked out branch.
@@ -64,10 +64,20 @@ input_data recipes/mantid/meta.yaml
 input_data recipes/mantidqt/meta.yaml
 input_data recipes/mantidworkbench/meta.yaml
 
-git config user.name ${GITHUB_USER_NAME}
-git config user.email ${GITHUB_USER_NAME}@mantidproject.org
-git add recipes/*/meta.yaml
-git commit -m "Update version and git sha" --no-verify --signoff
-git pull --ff
+git diff --exit-code
+if [ $? -ne 0 ]; then
+    git config user.name ${GITHUB_USER_NAME}
+    git config user.email ${GITHUB_USER_NAME}@mantidproject.org
+    git add recipes/*/meta.yaml
+    git commit -m "Update version and git sha" --no-verify --signoff
+    git pull --ff
+    git push
+else
+    echo "No changes to commit"
+fi
 
-git push
+# Cleanup cloned repository
+cd ..
+rm -rf conda-recipes
+
+exit 0
