@@ -23,7 +23,7 @@ class Row;
 
     The Group model holds information about a group of rows in the runs table.
  */
-class MANTIDQT_ISISREFLECTOMETRY_DLL Group : public IGroup {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Group final : public IGroup {
 public:
   explicit Group(std::string name);
   Group(std::string name, std::vector<boost::optional<Row>> rows);
@@ -31,11 +31,11 @@ public:
   ~Group() = default;
 
   Group(Group &&group) noexcept;
-
   Group(const Group &old_group);
+  Group &operator=(Group &&) noexcept;
+  Group &operator=(Group const &);
 
-  Group &operator=(Group);
-
+  // copy-and-swap idiom.
   friend void swap(Group &first, Group &second) {
     std::swap(first.m_name, second.m_name);
     std::swap(first.m_rows, second.m_rows);
@@ -86,8 +86,6 @@ private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
-
-  void setAllRowParentsImpl();
 
   friend class Encoder;
   friend class Decoder;
