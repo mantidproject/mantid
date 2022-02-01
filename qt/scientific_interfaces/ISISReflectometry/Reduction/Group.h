@@ -84,6 +84,8 @@ public:
 
   void setChildrenSuccess();
 
+  bool allChildRowsSucceeded() const;
+
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;

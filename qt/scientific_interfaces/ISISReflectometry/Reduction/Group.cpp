@@ -86,8 +86,7 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
     return false;
 
   // If all rows are valid and complete then we're ready to postprocess
-  return std::all_of(m_rows.cbegin(), m_rows.cend(),
-                     [](boost::optional<Row> const &row) { return row && row->success(); });
+  return allChildRowsSucceeded();
 }
 
 std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
@@ -248,8 +247,7 @@ void Group::setAllRowParents() {
 }
 
 void Group::updateParent() {
-  if (!m_rows.empty() &&
-      std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); })) {
+  if (!m_rows.empty() && allChildRowsSucceeded()) {
     setChildrenSuccess();
   } else {
     resetState(false);
@@ -257,6 +255,10 @@ void Group::updateParent() {
 }
 
 void Group::setChildrenSuccess() { m_itemState.setChildrenSuccess(); }
+
+bool Group::allChildRowsSucceeded() const {
+  return std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); });
+}
 
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 
