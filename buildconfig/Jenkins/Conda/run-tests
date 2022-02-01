@@ -56,15 +56,25 @@ function onexit {
 
 # Clean up prior to testing
 # Prevent race conditions when creating the user config directory
-userconfig_dir=$HOME/.mantid
+if [[ $OSTYPE == "msys"* ]]; then
+    userconfig_dir=$APPDATA/mantidproject/mantid
+    userprops=$WORKSPACE/build/bin/Release/Mantid.user.properties
+    workbench_ini=$APPDATA/mantidproject/mantidworkbench.ini
+else
+    userconfig_dir=$HOME/.mantid
+    userprops=$userconfig_dir/Mantid.user.properties
+    workbench_ini=~/.config/mantidproject/mantidworkbench.ini
+fi
+
 rm -fr $userconfig_dir
+rm -fr $userprops
+mkdir -p $userconfig_dir
 
 # Remove GUI qsettings files
-rm -f ~/.config/mantidproject/mantidworkbench.ini
+rm -f $workbench_ini
 
-mkdir -p $userconfig_dir
 # use a fixed number of openmp threads to avoid overloading the system
-echo MultiThreaded.MaxCores=2 > $userconfig_dir/Mantid.user.properties
+echo MultiThreaded.MaxCores=2 > $userprops
 
 # Setup core dumping
 trap onexit INT TERM EXIT
@@ -96,11 +106,10 @@ fi
 
 if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     rm -fr $userconfig_dir
-    rm -f ~/.config/mantidproject/mantidworkbench.ini
+    rm -f $workbench_ini
 
     # Turn off any auto updating on startup
     mkdir -p $userconfig_dir
-    userprops=$userconfig_dir/Mantid.user.properties
     echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
     echo "usagereports.enabled = 0" >> $userprops
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
