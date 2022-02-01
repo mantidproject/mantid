@@ -141,7 +141,7 @@ fi
 # For pull requests decide on what to build based on changeset and Jenkins
 # parameters.
 DO_BUILD_CODE=true
-DO_UNITTESTS=true
+DO_UNITTESTS=false
 DO_DOCTESTS_USER=true
 DO_BUILD_DEVDOCS=true
 DO_BUILD_PKG=true
