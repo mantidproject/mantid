@@ -90,6 +90,6 @@ Bugfixes
 - Transposing data (i.e. swapping x and y axes) of ``2D MD`` workspace, now works without error.
 - Fixed issues with the colorbar autoscale not updating correctly on zoom.
 - Stopped the ROI rectangle selection extents jumping discontinuously when the user tries to resize beyond the extent of the colorfill axes towards the line plot axes.
-- :ref:`SliceViewer` will no longer dynamically rebin when viewing an ``MDHisto`` workspace that has been modified by a binary operation (e.g. MinusMD).
+- :ref:`SliceViewer` will no longer dynamically rebin when viewing an ``MDHisto`` workspace that has been modified by a binary operation (e.g. :ref:`MinusMD<algm-MinusMD>`).
 
 :ref:`Release 6.3.0 <v6.3.0>`
