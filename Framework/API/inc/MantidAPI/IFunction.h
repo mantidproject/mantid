@@ -263,7 +263,17 @@ public:
     /// Evaluates the validator associated with this attribute. Returns error as a string.
     void evaluateValidator() const;
     /// Evaluates the validator associated with this attribute with regards to input value. Returns error as a string.
-    template <typename T> void evaluateValidator(T &input) const;
+    template <typename T> void evaluateValidator(T &inputData) const {
+      std::string error;
+
+      if (m_validator != Kernel::IValidator_sptr()) {
+        error = m_validator->isValid(inputData);
+      }
+
+      if (error != "") {
+        throw std::runtime_error("Attribute " + m_name + ": " + error);
+      }
+    }
 
     /// Returns type of the attribute
     std::string type() const;
@@ -299,9 +309,10 @@ public:
     void setBool(const bool &);
     /// Sets new value if attribute is a vector
     void setVector(const std::vector<double> &);
-    template <typename T>
     // Set value
-    void setValue(const T &v) {
+    template <typename T> void setValue(const T &v) {
+      evaluateValidator(v);
+
       m_data = v;
     }
     /// Set value from a string.

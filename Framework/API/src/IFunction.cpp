@@ -957,22 +957,6 @@ void IFunction::Attribute::evaluateValidator() const {
   }
 }
 
-/**
- *  Evaluates the validator associated with this attribute.
- *  @param inputData :: the data to be evaluated against the associated validator.
- */
-template <typename T> void IFunction::Attribute::evaluateValidator(T &inputData) const {
-  std::string error;
-
-  if (m_validator != Kernel::IValidator_sptr()) {
-    error = m_validator->isValid(inputData);
-  }
-
-  if (error != "") {
-    throw std::runtime_error("Attribute " + m_name + ": " + error);
-  }
-}
-
 /// Value of i-th active parameter. Override this method to make fitted
 /// parameters different from the declared
 double IFunction::activeParameter(size_t i) const {
