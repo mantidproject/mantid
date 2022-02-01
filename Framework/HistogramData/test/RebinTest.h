@@ -72,7 +72,7 @@ public:
   }
 
   void testRebinFailsInputBinEdgesInvalid() {
-    std::vector<double> binEdges{1, 2, 3, 3, 5, 7};
+    std::vector<double> binEdges{1, 2, 3, 2, 5, 7};
     Histogram hist(BinEdges(std::move(binEdges)), Counts(5, 10));
     BinEdges edges{1, 2, 3, 4, 5, 6};
 
