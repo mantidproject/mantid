@@ -195,8 +195,8 @@ StringList WorkspaceTreeWidget::getSelectedWorkspaceNames() const {
   auto items = m_tree->selectedItems();
   StringList names;
   names.reserve(static_cast<size_t>(items.size()));
-  for (auto &item : items)
-    names.emplace_back(item->text(0).toStdString());
+  std::transform(items.cbegin(), items.cend(), std::back_inserter(names),
+                 [](auto const &item) { return item->text(0).toStdString(); });
 
   return names;
 }
@@ -483,7 +483,7 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
           // I am a workspace
           if (item->text(0).contains(filterRegEx)) {
             // my name does match the filter
-            if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)) {
+            if (workspace->isGroup()) {
               // I am a group, I will want my children to be visible
               // but I cannot do that until this iterator has finished
               // store this pointer in a list for processing later
