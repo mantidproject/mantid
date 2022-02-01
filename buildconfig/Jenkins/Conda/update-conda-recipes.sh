@@ -75,3 +75,9 @@ if [ $? -ne 0 ]; then
 else
     echo "No changes to commit"
 fi
+
+# Cleanup cloned repository
+cd ..
+rm -rf conda-recipes
+
+exit 0
