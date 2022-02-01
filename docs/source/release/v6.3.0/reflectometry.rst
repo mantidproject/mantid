@@ -10,7 +10,6 @@ Improvements
 
 - Increased the size of the run(s) column for ease of use.
 - ``MagnetismReflectometryReduction`` will raise a value error when none of the input list can be processed.
-- Groups are now highlighted complete when all subtasks are completed independently.
 
 Bugfixes
 --------
