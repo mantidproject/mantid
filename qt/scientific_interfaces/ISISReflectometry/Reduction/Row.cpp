@@ -99,6 +99,33 @@ int Row::completedItems() const {
   return 0;
 }
 
+void Row::resetState(bool resetChildren) {
+  UNUSED_ARG(resetChildren);
+  resetOutputs();
+  m_itemState.reset();
+  updateParent();
+}
+
+void Row::setStarting() {
+  m_itemState.setStarting();
+  updateParent();
+}
+
+void Row::setRunning() {
+  m_itemState.setRunning();
+  updateParent();
+}
+
+void Row::setSuccess() {
+  m_itemState.setSuccess();
+  updateParent();
+}
+
+void Row::setError(std::string const &msg) {
+  m_itemState.setError(msg);
+  updateParent();
+}
+
 bool operator!=(Row const &lhs, Row const &rhs) { return !(lhs == rhs); }
 
 bool operator==(Row const &lhs, Row const &rhs) {

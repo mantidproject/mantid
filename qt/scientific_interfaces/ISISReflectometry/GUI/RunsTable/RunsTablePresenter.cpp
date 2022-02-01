@@ -733,7 +733,6 @@ void RunsTablePresenter::notifyRowStateChanged() {
 
   int groupIndex = 0;
   for (auto &group : m_model.mutableReductionJobs().mutableGroups()) {
-    group.updateParent();
     auto groupLocation = MantidWidgets::Batch::RowLocation({groupIndex});
     setRowStylingForItem(groupLocation, group);
 

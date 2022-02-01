@@ -59,6 +59,12 @@ public:
   int totalItems() const override;
   int completedItems() const override;
 
+  void resetState(bool resetChildren = true) override;
+  void setStarting() override;
+  void setRunning() override;
+  void setSuccess() override;
+  void setError(const std::string &msg) override;
+
 private:
   std::vector<std::string> m_runNumbers;
   double m_theta;
