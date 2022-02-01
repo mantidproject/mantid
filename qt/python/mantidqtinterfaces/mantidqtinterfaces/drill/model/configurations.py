@@ -27,9 +27,9 @@ class RundexSettings(object):
     POWDER = "Powder diffraction"
 
     # acquisition modes
-    SANS_ACQ =     "SANS"
+    SANS_ACQ =     "SANS v1"
     SANS_PSCAN =   "Sample scan"
-    SANS_MULTI =   "Kinetic SANS"
+    SANS_MULTI =   "SANS v2"
     REFL_POL =     "Polarized"
     REFL_NPOL =    "Unpolarized"
     POWDER_DSCAN = "Detector scan"
