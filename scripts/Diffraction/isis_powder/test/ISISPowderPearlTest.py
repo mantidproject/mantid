@@ -15,13 +15,19 @@ class ISISPowderPearlTest(unittest.TestCase):
 
     @patch("isis_powder.routines.focus.focus")
     def test_long_mode_on(self, mock_focus):
-        def check_long_mode_on_inst(*args, **kwargs):
-            inst = kwargs.get("instrument")
-            self.assertEqual(inst._inst_settings.long_mode, True)
-            self.assertEqual(inst._inst_settings.raw_data_crop_vals,
-                             pearl_advanced_config.long_mode_on_params["raw_data_tof_cropping"])
+        def generate_long_mode_checker(expected_value):
+            if expected_value:
+                long_mode_params = pearl_advanced_config.long_mode_on_params["raw_data_tof_cropping"]
+            else:
+                long_mode_params = pearl_advanced_config.long_mode_off_params["raw_data_tof_cropping"]
 
-        mock_focus.side_effect = check_long_mode_on_inst
+            def check_long_mode(*args, **kwargs):
+                inst = kwargs.get("instrument")
+                self.assertEqual(inst._inst_settings.long_mode, expected_value)
+                self.assertEqual(inst._inst_settings.raw_data_crop_vals, long_mode_params)
+            return check_long_mode
+
+        mock_focus.side_effect = generate_long_mode_checker(True)
         # firstly set long_mode as default in the Pearl object
         inst_obj = Pearl(user_name="PEARL", calibration_directory="dummy", output_directory="dummy",
                          do_absorb_corrections=False, perform_attenuation=False, vanadium_normalisation=False, long_mode=True)
@@ -29,10 +35,19 @@ class ISISPowderPearlTest(unittest.TestCase):
         mock_focus.assert_called_once()
 
         # now activate it in the call to focus
+        mock_focus.reset_mock()
         inst_obj = Pearl(user_name="PEARL", calibration_directory="dummy", output_directory="dummy",
                          do_absorb_corrections=False, perform_attenuation=False, vanadium_normalisation=False, long_mode=False)
         inst_obj.focus(run_number=999, long_mode=True)
-        self.assertEqual(mock_focus.call_count, 2)
+        mock_focus.assert_called_once()
+
+        # deactivate it in the call to focus
+        mock_focus.reset_mock()
+        mock_focus.side_effect = generate_long_mode_checker(False)
+        inst_obj = Pearl(user_name="PEARL", calibration_directory="dummy", output_directory="dummy",
+                         do_absorb_corrections=False, perform_attenuation=False, vanadium_normalisation=False, long_mode=True)
+        inst_obj.focus(run_number=999, long_mode=False)
+        mock_focus.assert_called_once()
 
 
 if __name__ == '__main__':
