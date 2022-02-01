@@ -12,11 +12,9 @@ import sys
 from threading import Thread
 from unittest.mock import patch
 
-import matplotlib as mpl
 from matplotlib.colors import Normalize
 from numpy import hstack
 
-mpl.use('Agg')
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
 from mantidqt.widgets.sliceviewer.view import SCALENORM  # noqa: E402
 from mantid.simpleapi import (  # noqa: E402
@@ -24,11 +22,10 @@ from mantid.simpleapi import (  # noqa: E402
     ConvertToDistribution, Scale,
     SetUB, RenameWorkspace, ClearUB)
 from mantid.api import AnalysisDataService  # noqa: E402
-from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
+from mantidqt.utils.qt.testing import get_application
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
 from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
 from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
-from qtpy.QtWidgets import QApplication  # noqa: E402
 from math import inf  # noqa: E402
 from numpy.testing import assert_allclose  # noqa: E402
 
@@ -46,44 +43,57 @@ class MockConfig(object):
             return True
 
 
-@start_qapplication
+def create_histo_ws():
+    histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
+                                      Extents='-3,3,-10,10,-1,1',
+                                      SignalInput=range(100),
+                                      ErrorInput=range(100),
+                                      NumberOfBins='5,5,4',
+                                      Names='Dim1,Dim2,Dim3',
+                                      Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                      OutputWorkspace='ws_MD_2d')
+    return histo_ws
+
+
+def create_histo_ws_positive():
+    histo_ws_positive = CreateMDHistoWorkspace(Dimensionality=3,
+                                               Extents='-3,3,-10,10,-1,1',
+                                               SignalInput=range(1, 101),
+                                               ErrorInput=range(100),
+                                               NumberOfBins='5,5,4',
+                                               Names='Dim1,Dim2,Dim3',
+                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
+                                               OutputWorkspace='ws_MD_2d_pos')
+    return histo_ws_positive
+
+
+def create_hkl_ws():
+    hkl_ws = CreateMDWorkspace(Dimensions=3,
+                               Extents='-10,10,-9,9,-8,8',
+                               Names='A,B,C',
+                               Units='r.l.u.,r.l.u.,r.l.u.',
+                               Frames='HKL,HKL,HKL',
+                               OutputWorkspace='hkl_ws')
+    expt_info = CreateSampleWorkspace()
+    hkl_ws.addExperimentInfo(expt_info)
+    SetUB(hkl_ws, 1, 1, 1, 90, 90, 90)
+    return hkl_ws
+
+
 class HelperTestingClass(QtWidgetFinder):
     """
     A system test for testing sliceviewer integration with qt and matplotlib.
     """
     def __init__(self):
-        self.histo_ws = CreateMDHistoWorkspace(Dimensionality=3,
-                                               Extents='-3,3,-10,10,-1,1',
-                                               SignalInput=range(100),
-                                               ErrorInput=range(100),
-                                               NumberOfBins='5,5,4',
-                                               Names='Dim1,Dim2,Dim3',
-                                               Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                               OutputWorkspace='ws_MD_2d')
-        self.histo_ws_positive = CreateMDHistoWorkspace(Dimensionality=3,
-                                                        Extents='-3,3,-10,10,-1,1',
-                                                        SignalInput=range(1, 101),
-                                                        ErrorInput=range(100),
-                                                        NumberOfBins='5,5,4',
-                                                        Names='Dim1,Dim2,Dim3',
-                                                        Units='MomentumTransfer,EnergyTransfer,Angstrom',
-                                                        OutputWorkspace='ws_MD_2d_pos')
-        self.hkl_ws = CreateMDWorkspace(Dimensions=3,
-                                        Extents='-10,10,-9,9,-8,8',
-                                        Names='A,B,C',
-                                        Units='r.l.u.,r.l.u.,r.l.u.',
-                                        Frames='HKL,HKL,HKL',
-                                        OutputWorkspace='hkl_ws')
-        expt_info = CreateSampleWorkspace()
-        self.hkl_ws.addExperimentInfo(expt_info)
-        SetUB('hkl_ws', 1, 1, 1, 90, 90, 90)
+        self._qapp = get_application()
 
     def cleanup(self):
-        for ii in QApplication.topLevelWidgets():
+        for ii in self._qapp.topLevelWidgets():
             ii.close()
-        QApplication.sendPostedEvents()
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
+        self._qapp.sendPostedEvents()
         self.assert_no_toplevel_widgets()
+        self._qapp = None
 
     # private methods
     def _assertNoErrorInADSHandlerFromSeparateThread(self, operation):
@@ -108,13 +118,13 @@ class HelperTestingClass(QtWidgetFinder):
 class SliceViewerTestDeleteOnClose(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
-        pres = SliceViewer(self.histo_ws)
+        histo_ws = create_histo_ws()
+        pres = SliceViewer(histo_ws)
         self.assert_widget_created()
         pres.view.close()
 
-        QApplication.sendPostedEvents()
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
@@ -123,15 +133,15 @@ class SliceViewerTestDeleteOnClose(systemtesting.MantidSystemTest, HelperTesting
 class SliceViewerTestNonorthogonalViewDisablesLineplots(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
-        pres = SliceViewer(self.hkl_ws)
+        hkl_ws = create_hkl_ws()
+        pres = SliceViewer(hkl_ws)
         line_plots_action, region_sel_action, non_ortho_action = toolbar_actions(
             pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION, ToolItemText.NONORTHOGONAL_AXES))
         line_plots_action.trigger()
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         non_ortho_action.trigger()
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assertTrue(non_ortho_action.isChecked())
         self.assertFalse(line_plots_action.isChecked())
@@ -145,14 +155,13 @@ class SliceViewerTestNonorthogonalViewDisablesLineplots(systemtesting.MantidSyst
 class SliceViewerTestNonorthogonalViewDisabledWhenEaxisViewed(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws_4D = CreateMDWorkspace(Dimensions=4, Extents=[-1, 1, -1, 1, -1, 1, -1, 1], Names="E,H,K,L",
                                   Frames='General Frame,HKL,HKL,HKL', Units='meV,r.l.u.,r.l.u.,r.l.u.')
         expt_info_4D = CreateSampleWorkspace()
         ws_4D.addExperimentInfo(expt_info_4D)
         SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
         pres = SliceViewer(ws_4D)
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         non_ortho_action = toolbar_actions(pres, [ToolItemText.NONORTHOGONAL_AXES])[0]
         self.assertFalse(non_ortho_action.isEnabled())
@@ -163,15 +172,15 @@ class SliceViewerTestNonorthogonalViewDisabledWhenEaxisViewed(systemtesting.Mant
 class SliceViewerTestRegionSelectorDisabledWithLineplots(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
-        pres = SliceViewer(self.hkl_ws)
+        hkl_ws = create_hkl_ws()
+        pres = SliceViewer(hkl_ws)
         line_plots_action, region_sel_action = toolbar_actions(pres, (ToolItemText.LINEPLOTS, ToolItemText.REGIONSELECTION))
         line_plots_action.trigger()
         region_sel_action.trigger()
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         line_plots_action.trigger()
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assertFalse(line_plots_action.isChecked())
         self.assertFalse(region_sel_action.isChecked())
@@ -182,8 +191,8 @@ class SliceViewerTestRegionSelectorDisabledWithLineplots(systemtesting.MantidSys
 class SliceViewerTestClimPreventsNegativeValuesIfLognorm(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
-        pres = SliceViewer(self.histo_ws)
+        histo_ws = create_histo_ws()
+        pres = SliceViewer(histo_ws)
         colorbar = pres.view.data_view.colorbar
         colorbar.autoscale.setChecked(False)
         colorbar.norm.setCurrentText("Log")
@@ -202,15 +211,16 @@ class SliceViewerTestClimPreventsNegativeValuesIfLognorm(systemtesting.MantidSys
 class SliceViewerTestNormSwitchesIfContainsNonPositiveData(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         conf = MockConfig()
-        pres = SliceViewer(self.histo_ws, conf=conf)
+        histo_ws = create_histo_ws()
+        pres = SliceViewer(histo_ws, conf=conf)
         colorbar = pres.view.data_view.colorbar
         self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
         pres.view.close()
 
     def test_changing_norm_updates_clim_validators(self):
-        pres = SliceViewer(self.histo_ws_positive)
+        histo_ws_positive = create_histo_ws_positive()
+        pres = SliceViewer(histo_ws_positive)
         colorbar = pres.view.data_view.colorbar
         colorbar.autoscale.setChecked(False)
 
@@ -226,8 +236,8 @@ class SliceViewerTestNormSwitchesIfContainsNonPositiveData(systemtesting.MantidS
 class SliceViewerTestUpdatePlotDataUpdatesAxesLimits(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
-        pres = SliceViewer(self.hkl_ws)
+        hkl_ws = create_hkl_ws()
+        pres = SliceViewer(hkl_ws)
 
         # not transpose
         pres.view.data_view.dimensions.transpose = False
@@ -251,12 +261,11 @@ class SliceViewerTestUpdatePlotDataUpdatesAxesLimits(systemtesting.MantidSystemT
 class SliceViewerTestViewClosedOnWorkspaceDeleted(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         DeleteWorkspace(ws)
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
@@ -265,13 +274,12 @@ class SliceViewerTestViewClosedOnWorkspaceDeleted(systemtesting.MantidSystemTest
 class SliceViewerTestViewNotClosedOnOtherWorkspaceDeleted(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         other_ws = CreateSampleWorkspace()
         DeleteWorkspace(other_ws)
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         # Strange behaviour between tests where views don't close properly means
         # we cannot use self.assert_widget_exists, as many instances of SliceViewerView
@@ -285,12 +293,11 @@ class SliceViewerTestViewNotClosedOnOtherWorkspaceDeleted(systemtesting.MantidSy
 class SliceViewerTestViewClosedOnReplaceWhenModelPropertiesChange(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         ConvertToDistribution(ws)
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
@@ -307,7 +314,7 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMatrixWs(s
         pres = SliceViewer(ws)
         self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
         self.assertNotEqual(pres.ads_observer, None)
@@ -331,7 +338,7 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMDEventWs(
         pres = SliceViewer(ws)
         self._assertNoErrorInADSHandlerFromSeparateThread(partial(scale_ws, ws))
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
         self.assertNotEqual(pres.ads_observer, None)
@@ -342,14 +349,13 @@ class SliceViewerTestViewUpdatedOnReplaceWhenModelPropertiesNotChangedMDEventWs(
 class SliceViewerTestViewTitleOnWorkspaceRename(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         old_title = pres.model.get_title()
 
         renamed = RenameWorkspace(ws)  # noqa F841
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         # View didn't close
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
@@ -365,7 +371,6 @@ class SliceViewerTestViewTitleOnWorkspaceRename(systemtesting.MantidSystemTest, 
 class SliceViewerTestViewTitleNotChangedOnOtherWorkspaceRename(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         title = pres.model.get_title()
@@ -379,12 +384,11 @@ class SliceViewerTestViewTitleNotChangedOnOtherWorkspaceRename(systemtesting.Man
 class SliceViewerTestViewClosedOnADSCleared(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         SliceViewer(ws)
         AnalysisDataService.clear()
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
 
@@ -392,7 +396,6 @@ class SliceViewerTestViewClosedOnADSCleared(systemtesting.MantidSystemTest, Help
 class SliceViewerTestClosedOnReplaceWhenChangedNonorthogonalTransformSupport(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws_non_ortho = CreateMDWorkspace(Dimensions='3', Extents='-6,6,-4,4,-0.5,0.5',
                                          Names='H,K,L', Units='r.l.u.,r.l.u.,r.l.u.',
                                          Frames='HKL,HKL,HKL',
@@ -403,7 +406,7 @@ class SliceViewerTestClosedOnReplaceWhenChangedNonorthogonalTransformSupport(sys
         pres = SliceViewer(ws_non_ortho)
         ClearUB(ws_non_ortho)
 
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
         self.assertEqual(pres.ads_observer, None)
@@ -412,7 +415,6 @@ class SliceViewerTestClosedOnReplaceWhenChangedNonorthogonalTransformSupport(sys
 class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         xmin = 5000
         xmax = 10000
         ws = CreateSampleWorkspace(NumBanks=1, NumMonitors=1, BankPixelWidth=1, XMin=xmin, XMax=xmax)
@@ -446,14 +448,13 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest
 class SliceViewerTestCloseEvent(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         ws = CreateSampleWorkspace()
         pres = SliceViewer(ws)
         self.assert_widget_created()
 
         pres.view.close()
         pres = None
-        QApplication.sendPostedEvents()
+        self._qapp.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()
 
@@ -461,7 +462,6 @@ class SliceViewerTestCloseEvent(systemtesting.MantidSystemTest, HelperTestingCla
 class SliceViewerTestAxesLimitsRespectNonorthogonalTransform(systemtesting.MantidSystemTest, HelperTestingClass):
     def runTest(self):
         HelperTestingClass.__init__(self)
-
         limits = (-10.0, 10.0, -9.0, 9.0)
         ws_nonrotho = CreateMDWorkspace(Dimensions=3,
                                         Extents=','.join([str(lim) for lim in limits]) + ',-8,8',
