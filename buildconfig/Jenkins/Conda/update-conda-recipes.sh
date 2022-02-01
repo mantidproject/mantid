@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -x
 
 # Update the https://github.com/mantidproject/conda-recipes repository with the latest changes from the currently
 # checked out branch.
@@ -75,3 +75,9 @@ if [ $? -ne 0 ]; then
 else
     echo "No changes to commit"
 fi
+
+# Cleanup cloned repository
+cd ..
+rm -rf conda-recipes
+
+exit 0

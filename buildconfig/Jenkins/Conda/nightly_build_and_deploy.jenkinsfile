@@ -89,18 +89,27 @@ pipeline {
             parallel {
                 stage('conda-build Linux') {
                     agent { label 'conda-build-linux' }
+                    environment {
+                        CONDA_BLD_PATH = "${WORKSPACE}/conda-bld"
+                    }
                     steps {
                         conda_build_linux()
                     }
                 }
                 stage('conda-build Windows') {
                     agent { label 'conda-build-win' }
+                    environment {
+                        CONDA_BLD_PATH = "${WORKSPACE}/conda-bld"
+                    }
                     steps {
                         conda_build_win()
                     }
                 }
                 stage('conda-build MacOSX') {
                     agent { label 'conda-build-osx' }
+                    environment {
+                        CONDA_BLD_PATH = "${WORKSPACE}/conda-bld"
+                    }
                     steps {
                         conda_build_macos()
                     }
