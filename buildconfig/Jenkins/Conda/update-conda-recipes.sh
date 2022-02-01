@@ -64,10 +64,14 @@ input_data recipes/mantid/meta.yaml
 input_data recipes/mantidqt/meta.yaml
 input_data recipes/mantidworkbench/meta.yaml
 
-git config user.name ${GITHUB_USER_NAME}
-git config user.email ${GITHUB_USER_NAME}@mantidproject.org
-git add recipes/*/meta.yaml
-git commit -m "Update version and git sha" --no-verify --signoff
-git pull --ff
-
-git push
+git diff --exit-code
+if [ $? -ne 0 ]; then
+    git config user.name ${GITHUB_USER_NAME}
+    git config user.email ${GITHUB_USER_NAME}@mantidproject.org
+    git add recipes/*/meta.yaml
+    git commit -m "Update version and git sha" --no-verify --signoff
+    git pull --ff
+    git push
+else
+    echo "No changes to commit"
+fi

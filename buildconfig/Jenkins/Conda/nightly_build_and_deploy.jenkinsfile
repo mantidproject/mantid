@@ -2,6 +2,7 @@
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 // ANACONDA_CHANNEL - The channel to publish to on Anaconda.org
+// CONDA_BLD_PATH - The path to where conda-build will construct the packages, needed for windows due to path length.
 
 def build_and_test_linux() {
     sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE linux-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
@@ -21,20 +22,27 @@ def conda_build_UNIX(){
 
 def conda_build_linux() {
     conda_build_UNIX()
-    archive:
-        includes: "mambaforge/envs/mantid-conda-build-env/conda-bld/linux-64/*.tar.bz2"
+    archive_conda_build("linux-64")
 }
 
 def conda_build_macos() {
     conda_build_UNIX()
-    archive:
-        includes: "mambaforge/envs/mantid-conda-build-env/conda-bld/osx-64/*.tar.bz2"
+    archive_conda_build("osx-64")
 }
 
 def conda_build_win(){
     bat "\"C:\\Program Files\\git\\bin\\bash.exe\" -c \"C:/Jenkins/workspace/$JOB_NAME/buildconfig/Jenkins/Conda/conda-build-recipes C:/Jenkins/workspace/$JOB_NAME --build-mantid --build-qt --build-workbench\""
-    archive:
-        includes: "mambaforge/envs/mantid-conda-build-env/conda-bld/win-64/*.tar.bz2"
+    archive_conda_build("win-64")
+}
+
+def archive_conda_build(build_name) {
+    if (env.CONDA_BLD_PATH != null) {
+        archive:
+            includes: "$CONDA_BLD_PATH/$build_name/*.tar.bz2"
+    } else {
+        archive:
+            includes: "mambaforge/envs/mantid-conda-build-env/conda-bld/$build_name/*.tar.bz2"
+    }
 }
 
 pipeline {
@@ -42,7 +50,7 @@ pipeline {
     stages {
         stage('Build and Test'){
             parallel {
-                stage('Build and Test on Ubuntu'){
+                stage('Build and Test on Ubuntu') {
                     agent { label 'ubuntu-18.04-build' }
                     steps {
                         build_and_test_linux()
@@ -74,7 +82,7 @@ pipeline {
                 GITHUB_ACCESS_TOKEN = credentials("${GITHUB_TOKEN_CREDENTIAL_ID}")
             }
             steps {
-                sh '$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
+               sh '$WORKSPACE/buildconfig/Jenkins/Conda/update-conda-recipes.sh $GITHUB_ACCESS_TOKEN $GITHUB_USER_NAME'
             }
         }
         stage('Package and Test') {
