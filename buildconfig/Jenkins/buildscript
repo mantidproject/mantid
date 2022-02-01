@@ -155,7 +155,7 @@ if [[ ${PRBUILD} == true ]]; then
     DO_DOCTESTS_USER=false
     DO_BUILD_DEVDOCS=false
     DO_BUILD_PKG=${BUILD_PACKAGE:-false}
-    DO_SYSTEMTESTS=false
+    DO_SYSTEMTESTS=${RUN_SYSTEMTESTS:-false}
 
     if [[ ${ON_RHEL7} == true ]]; then
         # rhel does system testing if there are any non-doc or gui changes
