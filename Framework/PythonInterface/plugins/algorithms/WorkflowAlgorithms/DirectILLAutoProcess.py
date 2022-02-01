@@ -234,8 +234,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('DirectILLCollectData', common.PROP_FLAT_BKG_SCALING)
 
-        self.declareProperty(common.PROP_ABSOLUTE_UNITS, False,
-                             doc='Enable or disable normalisation to absolute units.')
+        self.copyProperties('DirectILLReduction', common.PROP_ABSOLUTE_UNITS)
 
         additional_inputs_group = 'Corrections'
         self.setPropertyGroup('VanadiumWorkspace', additional_inputs_group)
@@ -775,6 +774,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
                 IntegratedVanadiumWorkspace=vanadium_integral,
                 DiagnosticsWorkspace=vanadium_diagnostics,
+                AbsoluteUnitsNormalisation=self.getProperty(common.PROP_ABSOLUTE_UNITS).value,
                 **optional_parameters
             )
         if len(to_remove) > 0 and self.clear_cache:
