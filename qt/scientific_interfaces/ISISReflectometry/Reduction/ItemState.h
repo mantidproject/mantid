@@ -19,7 +19,8 @@ enum class State {
   ITEM_RUNNING = 2,
   ITEM_COMPLETE = 3,
   ITEM_ERROR = 4,
-  ITEM_WARNING = 5
+  ITEM_WARNING = 5,
+  ITEM_CHILDREN_SUCCESS = 6
 };
 
 /** @class ItemState
@@ -42,6 +43,7 @@ public:
   void setSuccess();
   void setWarning(std::string const &message);
   void setError(std::string const &message);
+  void setChildrenSuccess();
   void reset();
 
 private:

@@ -43,6 +43,8 @@ void ItemState::setError(std::string const &message) {
   m_message = message;
 }
 
+void ItemState::setChildrenSuccess() { m_state = State::ITEM_CHILDREN_SUCCESS; }
+
 void ItemState::reset() {
   m_state = State::ITEM_NOT_STARTED;
   m_message = std::string();

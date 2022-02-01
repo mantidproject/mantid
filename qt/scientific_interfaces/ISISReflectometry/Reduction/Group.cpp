@@ -250,11 +250,13 @@ void Group::setAllRowParents() {
 void Group::updateParent() {
   if (!m_rows.empty() &&
       std::all_of(m_rows.cbegin(), m_rows.cend(), [](auto const &row) { return row && row->success(); })) {
-    setSuccess();
+    setChildrenSuccess();
   } else {
     resetState(false);
   }
 }
+
+void Group::setChildrenSuccess() { m_itemState.setChildrenSuccess(); }
 
 bool operator!=(Group const &lhs, Group const &rhs) { return !(lhs == rhs); }
 

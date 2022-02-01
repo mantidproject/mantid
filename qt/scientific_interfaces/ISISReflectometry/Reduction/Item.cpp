@@ -51,9 +51,10 @@ bool Item::requiresProcessing(bool reprocessFailed) const {
   case State::ITEM_NOT_STARTED:
     return true;
   case State::ITEM_STARTING:
-  case State::ITEM_RUNNING:  // fall through
-  case State::ITEM_COMPLETE: // fall through
-  case State::ITEM_WARNING:  // fall through
+  case State::ITEM_RUNNING:          // fall through
+  case State::ITEM_COMPLETE:         // fall through
+  case State::ITEM_WARNING:          // fall through
+  case State::ITEM_CHILDREN_SUCCESS: // fall through
     return false;
   case State::ITEM_ERROR:
     return reprocessFailed;

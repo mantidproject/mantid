@@ -43,6 +43,10 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell, std::string cons
   cell.setToolTip(errorMessage);
 }
 
+void applyChildSuccessStateStyling(MantidWidgets::Batch::Cell &cell) {
+  cell.setBackgroundColor(Colour::CHILDREN_SUCCESS);
+}
+
 /** Check if a group name exists in the given model.
  * @param groupName : the name to check
  * @param jobs : the model to compare against
@@ -713,6 +717,9 @@ void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowLocation 
     break;
   case State::ITEM_WARNING:
     forAllCellsAt(rowLocation, applyWarningStateStyling, item.message());
+    break;
+  case State::ITEM_CHILDREN_SUCCESS:
+    forAllCellsAt(rowLocation, applyChildSuccessStateStyling);
     break;
   };
 }

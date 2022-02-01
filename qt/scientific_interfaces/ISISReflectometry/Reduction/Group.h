@@ -82,6 +82,8 @@ public:
 
   void setAllRowParents() override;
 
+  void setChildrenSuccess();
+
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
