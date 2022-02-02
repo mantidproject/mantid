@@ -34,7 +34,7 @@ public:
     auto mockGroup = MockGroup();
     auto row = makeEmptyRow();
     row.setParent(&mockGroup);
-    EXPECT_CALL(mockGroup, updateParent()).Times(1);
+    EXPECT_CALL(mockGroup, notifyChildStateChanged()).Times(1);
 
     row.updateParent();
   }

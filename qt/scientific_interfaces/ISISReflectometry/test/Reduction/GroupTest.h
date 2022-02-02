@@ -553,7 +553,7 @@ public:
   void test_update_parent_when_all_rows_complete() {
     auto group = makeGroupWithTwoCompleteRows();
     group.notifyChildStateChanged();
-    TS_ASSERT_EQUALS(group.state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
   }
 
   void test_update_parent_when_some_rows_complete() {

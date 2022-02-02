@@ -19,7 +19,7 @@ public:
   MOCK_METHOD(void, setOutputNames, (std::vector<std::string> const &), (override));
   MOCK_METHOD(int, totalItems, (), (const, override));
   MOCK_METHOD(int, completedItems, (), (const, override));
-  MOCK_METHOD(void, updateParent, (), (override));
+  MOCK_METHOD(void, notifyChildStateChanged, (), (override));
 
   // Mock methods overridden from IGroup
   MOCK_METHOD(std::string const &, name, (), (const, override));
