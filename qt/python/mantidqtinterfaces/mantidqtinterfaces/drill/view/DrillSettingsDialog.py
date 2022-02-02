@@ -26,10 +26,7 @@ class MouseScrollEventFilter(QObject):
         super(MouseScrollEventFilter, self).__init__()
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.Wheel:
-            return True
-        else:
-            return False
+        return event.type() == QEvent.Wheel
 
 
 class DrillSetting(QObject):
