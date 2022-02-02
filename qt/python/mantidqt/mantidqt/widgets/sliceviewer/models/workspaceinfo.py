@@ -36,8 +36,11 @@ class WorkspaceInfo:
         Check if the given workspace can multiple BinMD calls.
         """
         ws_type = WorkspaceInfo.get_ws_type(workspace)
-        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH and workspace.hasOriginalWorkspace(
-            0) and workspace.getOriginalWorkspace(0).getNumDims() == workspace.getNumDims())
+
+        return ws_type == WS_TYPE.MDE or \
+            (ws_type == WS_TYPE.MDH
+             and workspace.hasOriginalWorkspace(0)
+             and workspace.getOriginalWorkspace(0).getNumDims() == workspace.getNumDims())
 
     @staticmethod
     def display_indices(slicepoint: Sequence[Optional[float]], transpose: bool = False):
