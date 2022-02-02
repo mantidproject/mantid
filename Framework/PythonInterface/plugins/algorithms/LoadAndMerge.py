@@ -9,7 +9,7 @@ from mantid.kernel import Direction, StringContainsValidator, StringListValidato
     EnabledWhenProperty, PropertyCriterion
 from mantid.api import AlgorithmFactory, AlgorithmManager, MultipleFileProperty, \
     WorkspaceProperty, PythonAlgorithm, FileLoaderRegistry, Progress
-from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, ConjoinXRuns, mtd
+from mantid.simpleapi import MergeRuns, RenameWorkspace, DeleteWorkspace, GroupWorkspaces, ConjoinXRuns, ConvertToPointData, mtd
 
 
 class LoadAndMerge(PythonAlgorithm):
@@ -156,6 +156,9 @@ class LoadAndMerge(PythonAlgorithm):
                 GroupWorkspaces(InputWorkspaces=to_group, OutputWorkspace=output)
             else:
                 log_as_x = self.getPropertyValue('SampleLogAsXAxis')
+                # first ensure point data before attempting conjoin, as it is undefined for histograms
+                for ws in to_group:
+                    ConvertToPointData(InputWorkspace=ws, OutputWorkspace=ws)
                 if log_as_x:
                     ConjoinXRuns(InputWorkspaces=to_group, OutputWorkspace=output, SampleLogAsXAxis=log_as_x)
                 else:

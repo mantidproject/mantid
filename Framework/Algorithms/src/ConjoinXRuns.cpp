@@ -228,7 +228,7 @@ std::string ConjoinXRuns::checkLogEntry(const MatrixWorkspace_sptr &ws) const {
 //----------------------------------------------------------------------------------------------
 /** Return the to-be axis of the workspace dependent on the log entry
  * @param ws : the input workspace
- * @param xstart : the starting x in case linearized axis is requested
+ * @param xstart : the starting x in case linearized axis is requested; this is an in/out parameter, passed by reference
  * @return : the x-axis to use for the output workspace
  */
 std::vector<double> ConjoinXRuns::getXAxis(const MatrixWorkspace_sptr &ws, double &xstart) const {
