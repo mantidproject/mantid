@@ -12,7 +12,7 @@ from qtpy.QtCore import Qt
 from mantid.kernel import Logger, SpecialCoordinateSystem
 
 # local imports
-from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
+from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
@@ -21,9 +21,9 @@ from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserve
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
 from mantidqt.interfacemanager import InterfaceManager
-from ..models.dimensions import Dimensions
-from ..models.workspaceinfo import WorkspaceInfo
-from ..views.dataviewsubscriber import IDataViewSubscriber
+from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
+from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
+from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 
 
 class SliceViewer(ObservingPresenter, IDataViewSubscriber):
@@ -39,8 +39,8 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
         :param view: A view to display the operations. If None uses SliceViewerView
         """
         self._logger = Logger("SliceViewer")
-        self._peaks_presenter = None
-        self.model = model if model else SliceViewerModel(ws)
+        self._peaks_presenter: PeaksViewerCollectionPresenter = None
+        self.model: SliceViewerModel = model if model else SliceViewerModel(ws)
         self.conf = conf
 
         # Acts as a 'time capsule' to the properties of the model at this
@@ -206,7 +206,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        ws_type = self.model.get_ws_type()
+        ws_type = WorkspaceInfo.get_ws_type(self.model.get_ws())
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
             if self.model.get_number_dimensions() > 2 and \
                     sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
@@ -239,7 +239,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
             limits = ((x0, x1), (y0, y1))
         else:
             # otherwise query data model based on slice info and transpose
-            limits = self.model.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose)
+            limits = self._dimensions.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose)
         self.set_axes_limits(*limits)
 
     def set_axes_limits(self, xlim, ylim, auto_transform=True):
@@ -467,7 +467,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
                 self._logger.debug(f"Coordinates selected x={event.xdata} y={event.ydata} z={sliceinfo.z_value}")
                 pos = sliceinfo.inverse_transform([event.xdata, event.ydata, sliceinfo.z_value])
                 self._logger.debug(f"Coordinates transformed into {self.get_frame()} frame, pos={pos}")
-                self._peaks_presenter.mpl_button_clicked(pos)
+                self._peaks_presenter.add_delete_peak(pos)
                 self.view.data_view.canvas.draw_idle()
 
     def deactivate_zoom_pan(self):
