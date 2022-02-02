@@ -23,11 +23,8 @@ MatrixWorkspace
 
 Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and a Workspace2D (e.g. ``MAR11060.raw``) from the `TrainingCourseData <https://download.mantidproject.org/>`_.
 
-1. Load the workspace and open in sliceviewer
-2. Confirm that for MatrixWorkspaces the :ref`Peak overlay<mantid:sliceviewer_roi>` and :ref`Nonorthogonal view<mantid:sliceviewer_nonortho>` buttons should be disabled (greyed out).
-
-
-
+1. Load the workspace and open in sliceviewer (right-click on the workspace in the ADS > Show Slice Viewer).
+2. Confirm that for MatrixWorkspaces the :ref:`Peak overlay<mantid:sliceviewer_roi>` and :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>` buttons should be disabled (greyed out).
 3. Check the other toolbar buttons.
 
     a. Pan and Zoom (use mouse scroll and magnifying glass tool) and Home
@@ -64,7 +61,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     g.  Disable the ROI tool
 
-        * This should automatically disable the line plot tool and the axes will be removed.
+        * The line plot tool should remain enabled.
 
 4. Try saving the figure (with and without ROI/lineplots).
 5. Test the colorbar and colorscale
@@ -75,8 +72,9 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     b. Change the scale type to e.g. Log
 
-        * In Log scale pixels with 0 counts should appear white
-        * When you zoom to a region with no data it will set the color axis limits to (0,0) and force the scale ot be linear
+        * In Log scale bins with 0 counts should appear white
+        * When you zoom in to a region comprising only of bins with 0 counts it will set the color axis limits to (0,0) and force the scale to be linear
+        * Zoom in to a region outside the extent of the data, check the Log colorscale option is disabled.
 
     c. Change colormap
     d. Reverse colormap
@@ -88,7 +86,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
 7. Test transposing axes
 
-    a. Click the Y button to the right of the Time-of-flight label (top left corner) - the image should transposed and the axes labels updated.
+    a. Click the Y button to the right of the Time-of-flight label (top left corner) - the image should be transposed and the axes labels updated.
     b. Repeat the test for the cursor info table.
 
 8. Resize the sliceviewer window, check the widgets, buttons etc. are still visible and clear for reasonable aspect ratios.
@@ -96,9 +94,9 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 MD Workspaces
 #############
 
-MD workspaces are hold multi-dimensional data (typically 2-4D) and come in two forms: :ref:`MDEventWorkspace <MDWorkspace>`, :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
+MD workspaces hold multi-dimensional data (typically 2-4D) and come in two forms: :ref:`MDEventWorkspace <MDWorkspace>`, :ref:`MDHistoWorkspace <MDHistoWorkspace>`.
 In terms of sliceviewer functionality, the key difference is that MDHistoWorkspace have binned the events onto a regular grid and cannot be dynamically rebinned unless the original MDWorkspace
-(that holds the events) exists in the ADS (and the MDHistoWorkspace has not been altered by a binary operation).
+(that holds the events) exists in the ADS (and the MDHistoWorkspace has not been altered by a binary operation e.g. ``MinusMD``).
 
 MDWorkspace (with events)
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,7 +132,7 @@ MDWorkspace (with events)
     - This workspace should be dynamically rebinned - i.e. the number of bins within the view limits along each axis should be preserved when zooming.
 
 3. Change the number of bins along one of the viewing axes (easier to pick a small number e.g. 2)
-4. Change the integration width along the non-viewed axes.
+4. Change the integration-width/slice-thickness (spinbox to the left of the word `thick`) along the non-viewed axes.
 
     - Increasing the width should improve the stats on the uniform background and the color limit should increase (event counts are summed not averaged).
 
@@ -143,7 +141,7 @@ MDWorkspace (with events)
     a. Confirm the slider moves when the spinbox value is updated.
     b. Confirm moving the slider updates the spinbox.
 
-Test the :ref`Nonorthogonal view<mantid:sliceviewer_nonortho>`
+Test the :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>`
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-nonorthobutton.png
    :class: screenshot
@@ -172,7 +170,7 @@ Test the :ref`Nonorthogonal view<mantid:sliceviewer_nonortho>`
 
             - The nonorthogonal view should be automatically re-enabled.
 
-Test the :ref`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
+Test the :ref:`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-peaksbutton.png
    :class: screenshot
@@ -181,7 +179,7 @@ Test the :ref`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
 1. Click to peak overlay button in the toolbar
 2. Check the `Overlay?` box next to ``peaks``
 
-    - This should open a table (peak viewer) on the RHS of the sliceviewer window - it should have a two rows corresponding to peaks at HKL = (1,0,1) and (1,0,0).
+    - This should open a table (peak viewer) on the RHS of the sliceviewer window - it should have two rows corresponding to peaks at HKL = (1,0,1) and (1,0,0).
 
 3. Double click a row
 
@@ -204,7 +202,7 @@ Test the :ref`Peak Overlay<mantid:sliceviewer_peaks_overlay>`
 MDHistoWorkspace
 ~~~~~~~~~~~~~~~~
 
-1. Make a 2D and 3D MDHistoWorkspaces
+1. Make a 3D MDHistoWorkspace
 
 .. code-block:: python
 
@@ -213,7 +211,7 @@ MDHistoWorkspace
 2. Open ``md_3D_histo`` in sliceviewer it should not support dynamic rebinning (can't change number of bins).
 3. Test the toolbar buttons pan, zoom, line plots, ROI as in step 3 of the :ref:`toolbar-checklist` instructions.
 4. Test changing/swapping viewing axes
-5. Test the :ref`Nonorthogonal view<mantid:sliceviewer_nonortho>` as above
+5. Test the :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>` as above
 6. Open ``md_4D_svrebinned`` in sliceviewer (should be in the ADS after preceding tests).
 
     - It should support dynamic rebinning (i.e. will be able to change number of bins along each axis).
@@ -305,9 +303,9 @@ Keep the three peak workspaces overlain for the next test.
 3. ADS observer for workspace
 #############################
 
-With ``MD_3D`` open in sliceviewer
+With ``md_3D`` open in sliceviewer
 
-1. Rename ``MD_3D`` to e.g. ``MD_3Dim``
+1. Rename ``md_3D`` to e.g. ``md_3Dim``
 
     - The workspace name in the  title of the sliceviewer window should have updated
     - Zoom to check dynamic rebinning still works
@@ -325,17 +323,17 @@ With ``MD_3D`` open in sliceviewer
 
 .. code-block:: python
 
-    CloneWorkspace(InputWorkspace='MD_3Dim', OutputWorkspace='MD_3D')
+    CloneWorkspace(InputWorkspace='md_3Dim', OutputWorkspace='md_3D')
 
-4. Delete ``MD_3Dim`` in the ADS
+4. Delete ``md_3Dim`` in the ADS
 
     - The sliceviewer window should close
 
 4. ADS observer for support for nonorthogonal view
 ##################################################
 
-1. Open ``MD_3D`` in sliceviewer
-2. Run ``ClearUB`` algorithm on ``MD_3D``
+1. Open ``md_3D`` in sliceviewer
+2. Run ``ClearUB`` algorithm on ``md_3D``
 
     - Sliceviewer window should close with message
     ``Closing Sliceviewer as the underlying workspace was changed: The property supports_nonorthogonal_axes is different on the new workspace.``
@@ -420,5 +418,6 @@ Check that the non-orthogonal view is disabled for non-Q axes such as energy
     ws_4D.addExperimentInfo(expt_info_4D)
     SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
 
-2. Confirm that when the Energy axis is viewed (as X or Y) the non-orthogonal view is disabled.
-3. The button should be re-enabled when you view two Q-axes e.g. H and K.
+2. Open `` ws_4D`` in sliceviewer.
+3. Confirm that when the Energy axis is viewed (as X or Y) the non-orthogonal view is disabled.
+4. The button should be re-enabled when you view two Q-axes e.g. H and K.
