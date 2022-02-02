@@ -125,6 +125,8 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
     mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
     mantidqt/widgets/samplematerialdialog/test/test_samplematerial_presenter.py
+    mantidqt/widgets/regionselector/test/test_presenter.py
+    mantidqt/widgets/sliceviewer/test/test_base_presenter.py
     mantidqt/widgets/sliceviewer/test/test_dimensions.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
     mantidqt/widgets/sliceviewer/test/test_sliceviewer_imageinfowidget.py

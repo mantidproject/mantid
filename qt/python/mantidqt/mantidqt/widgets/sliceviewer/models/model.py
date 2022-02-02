@@ -12,6 +12,8 @@ from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
+
+from .base_model import SliceViewerBaseModel
 from .workspaceinfo import WorkspaceInfo, WS_TYPE
 
 import numpy as np
@@ -26,12 +28,12 @@ LOG_GET_WS_MDE_ALGORITHM_CALLS = False
 MIN_WIDTH = 1e-5
 
 
-class SliceViewerModel:
+class SliceViewerModel(SliceViewerBaseModel):
     """Store the workspace to be plotted. Can be MatrixWorkspace, MDEventWorkspace or MDHistoWorkspace"""
 
     def __init__(self, ws):
         # reference to the workspace requested to be viewed
-        self._ws = ws
+        super().__init__(ws)
         self.set_ws_name(ws.name())
 
         if isinstance(ws, MatrixWorkspace):
@@ -194,12 +196,6 @@ class SliceViewerModel:
         else:
             return np.ma.masked_invalid(
                 self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze())
-
-    def is_ragged_matrix_plotted(self):
-        """
-        :return: bool for if workspace is matrix workspace with non common bins
-        """
-        return WorkspaceInfo.get_ws_type(self._get_ws()) == WS_TYPE.MATRIX and not self._get_ws().isCommonBins()
 
     def get_properties(self):
         """

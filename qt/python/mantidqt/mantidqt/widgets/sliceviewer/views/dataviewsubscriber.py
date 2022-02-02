@@ -18,9 +18,13 @@ class IDataViewSubscriber(ABC):
         pass
 
     @abstractmethod
-    def mpl_button_clicked(self, event) -> None:
+    def canvas_clicked(self, event) -> None:
         pass
 
     @abstractmethod
     def zoom_pan_clicked(self, active) -> None:
+        pass
+
+    @abstractmethod
+    def show_all_data_clicked(self) -> None:
         pass

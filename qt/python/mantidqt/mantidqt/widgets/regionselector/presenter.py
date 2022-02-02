@@ -7,23 +7,36 @@
 from .view import RegionSelectorView
 from ..observers.observing_presenter import ObservingPresenter
 from ..sliceviewer.models.dimensions import Dimensions
-from ..sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
+from ..sliceviewer.models.workspaceinfo import WorkspaceInfo, WS_TYPE
+from ..sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 
 
-class RegionSelector(ObservingPresenter, IDataViewSubscriber):
+class RegionSelector(ObservingPresenter, SliceViewerBasePresenter):
     def __init__(self, ws, parent=None, view=None):
-        super().__init__()
-        self._dimensions = Dimensions(ws)
-        self.view = view if view else RegionSelectorView(self, parent, dims_info=self._dimensions.get_dimensions_info())
+        if WorkspaceInfo.get_ws_type(ws) != WS_TYPE.MATRIX:
+            raise NotImplementedError("Only Matrix Workspaces are currently supported by the region selector.")
+
+        self.view = view if view else RegionSelectorView(self, parent,
+                                                         dims_info=Dimensions.get_dimensions_info(ws))
+        super().__init__(ws, self.view._data_view)
+
+        # TODO clear up private access
+        self.view._data_view.create_axes_orthogonal(
+            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(ws))
+        self.view._data_view.image_info_widget.setWorkspace(ws)
+        self.new_plot()
 
     def dimensions_changed(self) -> None:
-        pass
+        self.new_plot()
 
     def slicepoint_changed(self) -> None:
         pass
 
-    def mpl_button_clicked(self, event) -> None:
+    def canvas_clicked(self, event) -> None:
         pass
 
     def zoom_pan_clicked(self, active) -> None:
         pass
+
+    def new_plot(self, *args, **kwargs):
+        self.new_plot_matrix()
