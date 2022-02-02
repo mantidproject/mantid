@@ -50,10 +50,6 @@ public:
   virtual void setSuccess();
   virtual void setError(std::string const &msg);
 
-  virtual void updateParent() {
-    throw Mantid::Kernel::Exception::NotImplementedError("This method should be overridden if it is used.");
-  }
-
   bool complete() const;
   bool success() const;
 

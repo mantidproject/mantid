@@ -73,7 +73,7 @@ IGroup *Row::getParent() const { return m_parent; }
 
 void Row::updateParent() {
   if (m_parent) {
-    m_parent->updateParent();
+    m_parent->notifyChildStateChanged();
   }
 }
 

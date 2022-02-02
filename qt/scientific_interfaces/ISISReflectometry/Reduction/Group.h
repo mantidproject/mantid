@@ -54,7 +54,7 @@ public:
   int completedItems() const override;
   void resetState(bool resetChildren = true) override;
   void renameOutputWorkspace(std::string const &oldName, std::string const &newName) override;
-  void updateParent() override;
+  void notifyChildStateChanged() override;
 
   // Overrides from IGroup
   std::string const &name() const override;

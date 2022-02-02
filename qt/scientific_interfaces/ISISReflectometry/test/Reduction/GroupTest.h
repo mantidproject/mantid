@@ -552,20 +552,20 @@ public:
 
   void test_update_parent_when_all_rows_complete() {
     auto group = makeGroupWithTwoCompleteRows();
-    group.updateParent();
+    group.notifyChildStateChanged();
     TS_ASSERT_EQUALS(group.state(), State::ITEM_COMPLETE);
   }
 
   void test_update_parent_when_some_rows_complete() {
     auto group = makeGroupWithTwoRows();
     group.mutableRows()[0]->setSuccess();
-    group.updateParent();
+    group.notifyChildStateChanged();
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
   }
 
   void test_update_parent_when_no_rows_complete() {
     auto group = makeGroupWithTwoRows();
-    group.updateParent();
+    group.notifyChildStateChanged();
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
   }
 

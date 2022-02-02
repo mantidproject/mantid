@@ -52,7 +52,7 @@ public:
 
   void setParent(IGroup *parent) const;
   IGroup *getParent() const;
-  void updateParent() override;
+  void updateParent();
 
   Row withExtraRunNumbers(std::vector<std::string> const &runNumbers) const;
 

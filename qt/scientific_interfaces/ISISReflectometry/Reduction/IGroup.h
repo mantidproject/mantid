@@ -41,5 +41,7 @@ public:
   virtual boost::optional<Item &> getItemWithOutputWorkspaceOrNone(std::string const &wsName) = 0;
 
   virtual void setAllRowParents() = 0;
+
+  virtual void notifyChildStateChanged() = 0;
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

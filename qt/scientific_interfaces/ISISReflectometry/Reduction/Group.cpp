@@ -126,7 +126,7 @@ void Group::appendRow(boost::optional<Row> const &row) {
     row->setParent(this);
   }
   m_rows.emplace_back(row);
-  updateParent();
+  notifyChildStateChanged();
 }
 
 void Group::setOutputNames(std::vector<std::string> const &outputNames) {
@@ -141,7 +141,7 @@ void Group::resetOutputs() { m_postprocessedWorkspaceName = ""; }
 void Group::appendEmptyRow() {
   Item::resetState();
   m_rows.emplace_back(boost::none);
-  updateParent();
+  notifyChildStateChanged();
 }
 
 void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
@@ -150,7 +150,7 @@ void Group::insertRow(boost::optional<Row> const &row, int beforeRowAtIndex) {
     row->setParent(this);
   }
   m_rows.insert(m_rows.begin() + beforeRowAtIndex, row);
-  updateParent();
+  notifyChildStateChanged();
 }
 
 /** Insert a row into a group and sort rows by the angle column. If the
@@ -165,7 +165,7 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
   // If the row is not sortable, or there is nothing in the list yet, append it
   if (!row.is_initialized() || m_rows.size() == 0) {
     appendRow(row);
-    updateParent();
+    notifyChildStateChanged();
     return static_cast<int>(m_rows.size() - 1);
   }
 
@@ -182,14 +182,14 @@ int Group::insertRowSortedByAngle(boost::optional<Row> const &row) {
     row->setParent(this);
   }
   m_rows.insert(insertIter, row); // invalidates iterator
-  updateParent();
+  notifyChildStateChanged();
   return static_cast<int>(insertedRowIndex);
 }
 
 void Group::removeRow(int rowIndex) {
   Item::resetState();
   m_rows.erase(m_rows.begin() + rowIndex);
-  updateParent();
+  notifyChildStateChanged();
 }
 
 void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
@@ -201,7 +201,7 @@ void Group::updateRow(int rowIndex, boost::optional<Row> const &row) {
     row->setParent(this);
   }
   m_rows[rowIndex] = row;
-  updateParent();
+  notifyChildStateChanged();
 }
 
 boost::optional<Row> const &Group::operator[](int rowIndex) const { return m_rows[rowIndex]; }
@@ -251,7 +251,7 @@ void Group::setAllRowParents() {
   });
 }
 
-void Group::updateParent() {
+void Group::notifyChildStateChanged() {
   if (!m_rows.empty() && allChildRowsSucceeded()) {
     setChildrenSuccess();
   } else {
