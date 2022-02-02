@@ -16,14 +16,14 @@ from mantidqt.widgets.filefinderwidget import FileFinderWidget
 from mantidqt.widgets.workspaceselector import WorkspaceSelector
 
 
-class MouseScrollEater(QObject):
+class MouseScrollEventFilter(QObject):
     """
     Event filter to eat the scroll event. This is used on comboboxes that appear
     in potential scroll area to avoid scrolling the combobox while scrolling in
     the dialog.
     """
     def __init__(self):
-        super(MouseScrollEater, self).__init__()
+        super(MouseScrollEventFilter, self).__init__()
 
     def eventFilter(self, obj, event):
         if event.type() == QEvent.Wheel:
@@ -80,7 +80,7 @@ class DrillSetting(QObject):
 
         elif (settingType == "combobox"):
             self._widget = QComboBox()
-            self._widgetEventFilter = MouseScrollEater()
+            self._widgetEventFilter = MouseScrollEventFilter()
             self._widget.installEventFilter(self._widgetEventFilter)
             self._widget.addItems(values)
             self._widget.currentTextChanged.connect(
