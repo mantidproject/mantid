@@ -500,6 +500,15 @@ void RunsTablePresenter::applyGroupStylingToRow(MantidWidgets::Batch::RowLocatio
   }
 }
 
+void RunsTablePresenter::applyStylingToParent(const boost::optional<Item const &> &item) {
+  auto const row = dynamic_cast<const Row &>(item.get());
+  auto *parent = row.getParent();
+  if (parent) {
+    auto const parentLocation = m_model.reductionJobs().getLocation(*parent);
+    setRowStylingForItem(parentLocation, *parent);
+  }
+}
+
 void RunsTablePresenter::notifyRowInserted(MantidWidgets::Batch::RowLocation const &newRowLocation) {
   if (newRowLocation.depth() > DEPTH_LIMIT) {
     m_view->jobs().removeRowAt(newRowLocation);
@@ -759,14 +768,10 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
   updateProgressBar();
   auto const location = m_model.reductionJobs().getLocation(item.get());
   setRowStylingForItem(location, item.get());
-  if (!item->isGroup()) {
-    auto const row = dynamic_cast<const Row &>(item.get());
-    auto *parent = row.getParent();
-    if (parent) {
-      auto const parentLocation = m_model.reductionJobs().getLocation(*parent);
-      setRowStylingForItem(parentLocation, *parent);
-    }
+  if (item->isGroup()) {
+    return;
   }
+  applyStylingToParent(item);
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {
