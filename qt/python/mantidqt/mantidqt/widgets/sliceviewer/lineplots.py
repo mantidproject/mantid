@@ -20,8 +20,8 @@ import numpy as np
 
 # local imports
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from .cursor import (CursorTracker, MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft,
-                     MoveMouseCursorRight)
+from mantidqt.widgets.sliceviewer.views.cursor import (CursorTracker, MoveMouseCursorUp, MoveMouseCursorDown, MoveMouseCursorLeft,
+                                                       MoveMouseCursorRight)
 
 # Limits for X/Y axes
 Limits = Tuple[Tuple[float, float], Tuple[float, float]]

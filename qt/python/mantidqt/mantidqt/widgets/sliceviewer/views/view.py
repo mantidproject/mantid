@@ -24,19 +24,19 @@ from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayo
 # local imports
 from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
-from mantidqt.widgets.sliceviewer.dimensionwidget import DimensionWidget
-from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
-from .lineplots import LinePlots
-from .toolbar import SliceViewerNavigationToolbar, ToolItemText
-from .peaksviewer.workspaceselection import \
+from mantidqt.widgets.sliceviewer.views.dimensionwidget import DimensionWidget
+from mantidqt.widgets.sliceviewer.imageinfowidget import ImageInfoWidget, ImageInfoTracker
+from mantidqt.widgets.sliceviewer.lineplots import LinePlots
+from mantidqt.widgets.sliceviewer.views.toolbar import SliceViewerNavigationToolbar, ToolItemText
+from mantidqt.widgets.sliceviewer.peaksviewer.workspaceselection import \
     (PeaksWorkspaceSelectorModel, PeaksWorkspaceSelectorPresenter,
      PeaksWorkspaceSelectorView)
-from .peaksviewer.view import PeaksViewerCollectionView
-from .peaksviewer.representation.painter import MplPainter
-from .zoom import ScrollZoomMixin
+from mantidqt.widgets.sliceviewer.peaksviewer.view import PeaksViewerCollectionView
+from mantidqt.widgets.sliceviewer.peaksviewer.representation.painter import MplPainter
+from mantidqt.widgets.sliceviewer.zoom import ScrollZoomMixin
 
 # Constants
-from ..observers.observing_view import ObservingView
+from mantidqt.widgets.observers.observing_view import ObservingView
 
 DBLMAX = sys.float_info.max
 

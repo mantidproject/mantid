@@ -10,8 +10,8 @@ import unittest
 from unittest.mock import MagicMock, patch
 
 from matplotlib.image import AxesImage
-from mantidqt.widgets.sliceviewer.cursor import (MoveMouseCursorUp, MoveMouseCursorDown,
-                                                 MoveMouseCursorLeft, MoveMouseCursorRight)
+from mantidqt.widgets.sliceviewer.views.cursor import (MoveMouseCursorUp, MoveMouseCursorDown,
+                                                       MoveMouseCursorLeft, MoveMouseCursorRight)
 from qtpy.QtCore import QPoint
 
 
