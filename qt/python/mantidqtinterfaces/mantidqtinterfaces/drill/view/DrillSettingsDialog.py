@@ -26,6 +26,13 @@ class MouseScrollEventFilter(QObject):
         super(MouseScrollEventFilter, self).__init__()
 
     def eventFilter(self, obj, event):
+        """
+        Override QObject::eventFilter
+
+        Args:
+            obj (QObject): object on which the event is called
+            event (QEvent): event received
+        """
         return event.type() == QEvent.Wheel
 
 
