@@ -93,7 +93,7 @@ class SliceViewerDataView(QWidget):
         self.fig.set_facecolor(self.palette().window().color().getRgbF())
         self.canvas = SliceViewerCanvas(self.fig)
         self.canvas.mpl_connect('button_release_event', self.mouse_release)
-        self.canvas.mpl_connect('button_press_event', self.presenter.mpl_button_clicked)
+        self.canvas.mpl_connect('button_press_event', self.presenter.canvas_clicked)
 
         self.colorbar_label = QLabel("Colormap")
         self.colorbar_layout.addWidget(self.colorbar_label)
@@ -393,7 +393,7 @@ class SliceViewerDataView(QWidget):
 
     def on_home_clicked(self):
         """Reset the view to encompass all of the data"""
-        self.presenter.show_all_data_requested()
+        self.presenter.show_all_data_clicked()
 
     def on_line_plots_toggle(self, state):
         """Switch state of the line plots"""

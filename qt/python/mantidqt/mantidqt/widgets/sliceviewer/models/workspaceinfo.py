@@ -38,9 +38,9 @@ class WorkspaceInfo:
         ws_type = WorkspaceInfo.get_ws_type(workspace)
 
         return ws_type == WS_TYPE.MDE or \
-            (ws_type == WS_TYPE.MDH
-             and workspace.hasOriginalWorkspace(0)
-             and workspace.getOriginalWorkspace(0).getNumDims() == workspace.getNumDims())
+               (ws_type == WS_TYPE.MDH
+                and workspace.hasOriginalWorkspace(0)
+                and workspace.getOriginalWorkspace(0).getNumDims() == workspace.getNumDims())
 
     @staticmethod
     def display_indices(slicepoint: Sequence[Optional[float]], transpose: bool = False):
@@ -57,3 +57,11 @@ class WorkspaceInfo:
             return yindex, xindex
         else:
             return xindex, yindex
+
+    @staticmethod
+    def is_ragged_matrix_workspace(workspace):
+        """
+        :return: bool for if workspace is matrix workspace with non common bins
+        """
+        return WorkspaceInfo.get_ws_type(workspace) == WS_TYPE.MATRIX \
+            and not workspace.isCommonBins()

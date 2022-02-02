@@ -5,27 +5,26 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from qtpy.QtCore import Qt
+from typing import Callable, Tuple
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
+from qtpy.QtCore import Qt
 
-# local imports
-from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, RectangleSelectionLinePlot
+from mantidqt.interfacemanager import InterfaceManager
+from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
+from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserver
+from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
+from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
+from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
+from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
+from mantidqt.widgets.sliceviewer.presenters.lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
-from mantidqt.widgets.sliceviewer.models.adsobsever import SliceViewerADSObserver
-from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
-from mantidqt.widgets.observers.observing_presenter import ObservingPresenter
-from mantidqt.interfacemanager import InterfaceManager
-from mantidqt.widgets.sliceviewer.models.dimensions import Dimensions
-from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
-from mantidqt.widgets.sliceviewer.views.dataviewsubscriber import IDataViewSubscriber
 
 
-class SliceViewer(ObservingPresenter, IDataViewSubscriber):
+class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
     TEMPORARY_STATUS_TIMEOUT = 2000
 
     def __init__(self, ws, parent=None, window_flags=Qt.Window, model=None, view=None, conf=None):
@@ -37,26 +36,26 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
         :param model: A model to define slicing operations. If None uses SliceViewerModel
         :param view: A view to display the operations. If None uses SliceViewerView
         """
+        model: SliceViewerModel = model if model else SliceViewerModel(ws)
+        self.view = view if view else SliceViewerView(self,
+                                                      Dimensions.get_dimensions_info(ws),
+                                                      model.can_normalize_workspace(), parent,
+                                                      window_flags, conf)
+        super().__init__(ws, self.view.data_view, model)
+
         self._logger = Logger("SliceViewer")
         self._peaks_presenter: PeaksViewerCollectionPresenter = None
-        self.model: SliceViewerModel = model if model else SliceViewerModel(ws)
         self.conf = conf
 
         # Acts as a 'time capsule' to the properties of the model at this
         # point in the execution. By the time the ADS observer calls self.replace_workspace,
         # the workspace associated with self.model has already been changed.
-        self.initial_model_properties = self.model.get_properties()
+        self.initial_model_properties = model.get_properties()
+        self._new_plot_method, self.update_plot_data = self._decide_plot_update_methods()
 
-        self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
-        self.normalization = False
-
-        self._dimensions = Dimensions(ws)
-        self.view = view if view else SliceViewerView(self, self._dimensions.get_dimensions_info(),
-                                                      self.model.can_normalize_workspace(), parent,
-                                                      window_flags, conf)
         self.view.setWindowTitle(self.model.get_title())
         self.view.data_view.create_axes_orthogonal(
-            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(self.model._get_ws()))
+            redraw_on_zoom=not WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws))
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -87,7 +86,10 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
         # NOTE: This workaround solve the problem, but it leads to a failure in
         #       projectroot.qt.python.mantidqt_qt5.test_sliceviewer_presenter.test_sliceviewer_presenter
         #       Given that this issue is not of high priority, we are leaving it as is for now.
-        # self.show_all_data_requested()
+        # self.show_all_data_clicked()
+
+    def new_plot(self, *args, **kwargs):
+        self._new_plot_method(*args, **kwargs)
 
     def new_plot_MDH(self, dimensions_transposing=False, dimensions_changing=False):
         """
@@ -96,7 +98,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
         data_view = self.view.data_view
         limits = data_view.get_axes_limits()
 
-        if limits is None or not WorkspaceInfo.can_support_dynamic_rebinning(self.model._get_ws()):
+        if limits is None or not WorkspaceInfo.can_support_dynamic_rebinning(self.model.ws):
             data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
             self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
         else:
@@ -127,10 +129,6 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
                                   limits=limits,
                                   dimension_indices=dimension_indices))
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
-
-    def new_plot_matrix(self):
-        """Tell the view to display a new plot of an MatrixWorkspace"""
-        self.view.data_view.plot_matrix(self.model.get_ws(), distribution=not self.normalization)
 
     def update_plot_data_MDH(self):
         """
@@ -177,20 +175,9 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
                          qflags=dimensions.qflags,
                          axes_angles=axes_angles)
 
-    def get_slicepoint(self):
-        """Returns the current slicepoint as a list of 3 elements.
-           None indicates that dimension is being displayed"""
-        return self.view.data_view.dimensions.get_slicepoint()
-
-    def set_slicepoint(self, value):
-        """Set the slicepoint
-        :param value: The value of the slice point
-        """
-        self.view.data_view.dimensions.set_slicepoint(value)
-
     def dimensions_changed(self):
         """Indicates that the dimensions have changed"""
-        data_view = self.view.data_view
+        data_view = self._data_view
         sliceinfo = self.get_sliceinfo()
         if data_view.nonorthogonal_mode:
             if sliceinfo.can_support_nonorthogonal_axes():
@@ -205,7 +192,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
             else:
                 data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        ws_type = WorkspaceInfo.get_ws_type(self.model.get_ws())
+        ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
         if ws_type == WS_TYPE.MDH or ws_type == WS_TYPE.MDE:
             if self.model.get_number_dimensions() > 2 and \
                     sliceinfo.slicepoint[data_view.dimensions.get_previous_states().index(None)] is None:
@@ -221,42 +208,6 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
         self._call_peaks_presenter_if_created("notify",
                                               PeaksViewerPresenter.Event.SlicePointChanged)
         self.update_plot_data()
-
-    def data_limits_changed(self):
-        """Notify data limits on image axes have changed"""
-        data_view = self.view.data_view
-        if WorkspaceInfo.can_support_dynamic_rebinning(self.model._get_ws()):
-            self.new_plot()  # automatically uses current display limits
-        else:
-            data_view.draw_plot()
-
-    def show_all_data_requested(self):
-        """Instructs the view to show all data"""
-        if self.model.is_ragged_matrix_plotted():
-            # get limits from full extent of image (which was calculated by looping over all spectra excl. monitors)
-            x0, x1, y0, y1 = self.view.data_view.get_full_extent()
-            limits = ((x0, x1), (y0, y1))
-        else:
-            # otherwise query data model based on slice info and transpose
-            limits = self._dimensions.get_dim_limits(self.get_slicepoint(), self.view.data_view.dimensions.transpose)
-        self.set_axes_limits(*limits)
-
-    def set_axes_limits(self, xlim, ylim, auto_transform=True):
-        """Set the axes limits on the view.
-        :param xlim: Limits on the X axis in image coordinates
-        :param ylim: Limits on the Y axis in image coordinates
-        :param auto_transform: If True transform the given limits to the rectilinear
-        coordinate before passing to the view
-        """
-        data_view = self.view.data_view
-        if auto_transform and data_view.nonorthogonal_mode:
-            to_display = data_view.nonortho_transform.tr
-            xmin_p, ymin_p = to_display(xlim[0], ylim[0])
-            xmax_p, ymax_p = to_display(xlim[1], ylim[1])
-            xlim, ylim = (xmin_p, xmax_p), (ymin_p, ymax_p)
-
-        data_view.set_axes_limits(xlim, ylim)
-        self.data_limits_changed()
 
     def line_plots(self, state):
         """
@@ -365,7 +316,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
             # set transform from sliceinfo but ignore view as non-ortho state not set yet
             data_view.create_axes_nonorthogonal(self.get_sliceinfo(force_nonortho_mode=True).get_northogonal_transform())
-            self.show_all_data_requested()
+            self.show_all_data_clicked()
         else:
             data_view.create_axes_orthogonal()
             data_view.enable_tool_button(ToolItemText.LINEPLOTS)
@@ -433,7 +384,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
 
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
-        ws = self.model._get_ws()
+        ws = self.model.ws
         ws.readLock()
         try:
             self.view.data_view.image_info_widget.setWorkspace(ws)
@@ -460,7 +411,7 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
         if self._peaks_presenter is not None:
             self._peaks_presenter.clear_observer()
 
-    def mpl_button_clicked(self, event):
+    def canvas_clicked(self, event):
         if self._peaks_presenter is not None:
             if event.inaxes:
                 sliceinfo = self.get_sliceinfo()
@@ -509,14 +460,14 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
 
         return current_workspaces
 
-    def _decide_plot_update_methods(self):
+    def _decide_plot_update_methods(self) -> Tuple[Callable, Callable]:
         """
         Checks the type of workspace in self.model and decides which of the
         new_plot and update_plot_data methods to use
         :return: the new_plot method to use
         """
         # TODO get rid of private access here
-        ws_type = WorkspaceInfo.get_ws_type(self.model._get_ws())
+        ws_type = WorkspaceInfo.get_ws_type(self.model.ws)
         if ws_type == WS_TYPE.MDH:
             return self.new_plot_MDH, self.update_plot_data_MDH
         elif ws_type == WS_TYPE.MDE:

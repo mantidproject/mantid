@@ -22,9 +22,7 @@ class TestDimensions(unittest.TestCase):
         xdim, ydim = mock.Mock(), mock.Mock(),
         self._mock_ws.getDimension.side_effect = [xdim, ydim]
 
-        model = Dimensions(self._mock_ws)
-
-        limits = model.get_dim_limits(slicepoint=(None, None), transpose=False)
+        limits = Dimensions.get_dim_limits(self._mock_ws, slicepoint=(None, None), transpose=False)
         self._mock_ws.getDimension.assert_any_call(xindex)
         self._mock_ws.getDimension.assert_any_call(yindex)
         self.assertEqual(2, self._mock_ws.getDimension.call_count)
@@ -36,8 +34,7 @@ class TestDimensions(unittest.TestCase):
     def test_get_dim_info(self, mock_ws_info):
         num = mock.NonCallableMock()
 
-        model = Dimensions(self._mock_ws)
-        result = model.get_dim_info(num)
+        result = Dimensions.get_dim_info(self._mock_ws, num)
         dim = self._mock_ws.getDimension.return_value
 
         self._mock_ws.getDimension.assert_called_once_with(num)
@@ -55,18 +52,18 @@ class TestDimensions(unittest.TestCase):
         self.assertEqual(dim.getMDFrame().isQ(), result['qdim'])
 
     def test_get_dimensions_info(self):
-        model = Dimensions(self._mock_ws)
-        model.get_dim_info = mock.Mock()
-        expected_num = 3
-        self._mock_ws.getNumDims.return_value = expected_num
-        expected_results = [mock.NonCallableMock() for _ in range(expected_num)]
-        model.get_dim_info.side_effect = expected_results
+        with mock.patch("mantidqt.widgets.sliceviewer.test.test_dimensions.Dimensions.get_dim_info") \
+                as mock_get_dim_info:
+            expected_num = 3
+            self._mock_ws.getNumDims.return_value = expected_num
+            expected_results = [mock.NonCallableMock() for _ in range(expected_num)]
+            mock_get_dim_info.side_effect = expected_results
 
-        result = model.get_dimensions_info()
+            result = Dimensions.get_dimensions_info(self._mock_ws)
 
-        calls = [mock.call(i) for i in range(expected_num)]
-        model.get_dim_info.assert_has_calls(calls)
-        self.assertEqual(expected_results, result)
+            calls = [mock.call(self._mock_ws, i) for i in range(expected_num)]
+            mock_get_dim_info.assert_has_calls(calls)
+            self.assertEqual(expected_results, result)
 
 
 if __name__ == '__main__':
