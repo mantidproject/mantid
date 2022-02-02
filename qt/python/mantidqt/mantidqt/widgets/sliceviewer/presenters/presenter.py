@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-# 3rdparty imports
 from qtpy.QtCore import Qt
 
 from mantid.kernel import Logger, SpecialCoordinateSystem
@@ -452,7 +451,8 @@ class SliceViewer(ObservingPresenter, IDataViewSubscriber):
             self.view.emit_close()
 
     def ADS_cleared(self):
-        self.view.emit_close()
+        if self.view:
+            self.view.emit_close()
 
     def clear_observer(self):
         """Called by ObservingView on close event"""
