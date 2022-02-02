@@ -309,8 +309,8 @@ class SliceViewerTest(unittest.TestCase):
 
         new_plot_mock.assert_not_called()
 
-    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceViewer.new_plot_MDH")
-    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewer.new_plot_MDH")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_dimensions_changed_when_transpose_2D_MD_workspace(self, mock_sliceinfo_cls, mock_new_plot):
         presenter, data_view_mock = _create_presenter(self.model,
                                                       self.view,
@@ -341,7 +341,7 @@ class SliceViewerTest(unittest.TestCase):
         data_view_mock.create_axes_orthogonal.assert_called_once()
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
 
-    @mock.patch("mantidqt.widgets.sliceviewer.presenter.SliceInfo")
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(
             self, mock_sliceinfo_cls):
         presenter, data_view_mock = _create_presenter(self.model,
@@ -481,21 +481,6 @@ class SliceViewerTest(unittest.TestCase):
         self.view.data_view.image_info_widget.setWorkspace.assert_has_calls(calls)
         self.view.setWindowTitle.assert_called_with(self.model.get_title())
         presenter.new_plot.assert_called_once()
-
-    def test_refresh_view_does_nothing_when_view_deleted(self):
-        presenter, _ = _create_presenter(self.model,
-                                         self.view,
-                                         mock.MagicMock(),
-                                         enable_nonortho_axes=False,
-                                         supports_nonortho=False)
-        presenter.new_plot = mock.Mock()
-        presenter.view = None
-
-        presenter.refresh_view()
-
-        # There is just one call to setWorkspace from the constructor
-        self.view.data_view.image_info_widget.setWorkspace.assert_called_once()
-        presenter.new_plot.assert_not_called()
 
     def test_clear_observer_peaks_presenter_not_none(self):
         presenter, _ = _create_presenter(self.model,
