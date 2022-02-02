@@ -123,7 +123,7 @@ pipeline {
             steps{
                 // Copy all artifacts into $WORKSPACE from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
                 copyArtifacts fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
-                sh '$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $WORKSPACE/mantid-*.tar.bz2 $WORKSPACE/mantidqt-*.tar.bz2 $WORKSPACE/mantidworkbench-*.tar.bz2'
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $WORKSPACE/conda-bld/linux-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/linux-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/linux-64/mantidworkbench-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantidworkbench-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantidworkbench-*.tar.bz2'
             }
         }
     }
