@@ -15,19 +15,19 @@ from unittest.mock import patch
 from matplotlib.colors import Normalize
 from numpy import hstack
 
-from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE  # noqa: E402
-from mantidqt.widgets.sliceviewer.view import SCALENORM  # noqa: E402
-from mantid.simpleapi import (  # noqa: E402
+from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
+from mantidqt.widgets.sliceviewer.view import SCALENORM
+from mantid.simpleapi import (
     CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, DeleteWorkspace, FakeMDEventData,
     ConvertToDistribution, Scale,
     SetUB, RenameWorkspace, ClearUB)
-from mantid.api import AnalysisDataService  # noqa: E402
+from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
-from math import inf  # noqa: E402
-from numpy.testing import assert_allclose  # noqa: E402
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer
+from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
+from math import inf
+from numpy.testing import assert_allclose
 
 
 class MockConfig(object):
