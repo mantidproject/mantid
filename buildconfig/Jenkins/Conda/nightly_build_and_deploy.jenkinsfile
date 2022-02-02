@@ -119,8 +119,8 @@ pipeline {
             }
             agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
             steps{
-                // Copy all artifacts including mantid, ending with .tar.bz2 into $WORKSPACE from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
-                copyArtifacts filter: 'mantid*.tar.bz2', fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
+                // Copy all artifacts into $WORKSPACE from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
+                copyArtifacts fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
                 sh '$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $WORKSPACE/mantid-*.tar.bz2 $WORKSPACE/mantidqt-*.tar.bz2 $WORKSPACE/mantidworkbench-*.tar.bz2'
             }
         }
