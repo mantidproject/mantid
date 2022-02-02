@@ -46,17 +46,19 @@ Bugfixes
 * Empty group workspaces can now be deleted rather than needing to be ungrouped.
 * Fixed a bug in :ref:`Project Recovery<Project Recovery>` when attempting to remove non-empty directories and raising the error reporter.
 * Users are no longer able to add a peak to the Fit Property Browser by clicking with the interactive tool outside of the axes (which would cause an error).
+* An unhandled exeception no longer occurs when attempting to open the Fit Property Browser on a bin plot.
 
 InstrumentViewer
 ----------------
 New features
 ############
-- **In the pick tab, a new panel allowing for direct rebinning of the workspace now exists.**
+- **In the** :ref:`Pick Tab<instrumentviewer_pick_tab>` **, a new panel allowing for direct rebinning of the workspace now exists.**
 .. figure:: ../../images/iview_insitu_rebin.png
      :width: 500px
      :align: center
 - The ability to rotate Ellipse and Rectangle shapes has been added.
 - The integration slider now supports discrete steps when the axis has discrete values.
+- A new button has been added to the :ref:`Pick Tab<instrumentviewer_pick_tab>` to allow all of the detectors in the instrument to be summed in the miniplot without having to draw a shape.
 
 Improvements
 ############
@@ -66,6 +68,7 @@ Improvements
 
 Bugfixes
 ########
+- Fixed a memory leak when closing the :ref:`InstrumentViewer` window.
 - Fixed a bug where folding the :ref:`Pick Tab<instrumentviewer_pick_tab>` crashed Mantid.
 - Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
 - Getter for the :ref:`InstrumentViewer` will return a fully constructed instance to avoid a segmentation fault.
@@ -73,7 +76,6 @@ Bugfixes
 
 SliceViewer
 -----------
-
 Bugfixes
 ########
 - Fixed the ``out-of-range`` error when trying to access the projection matrix for a workspace with a non-Q axis before other Q axes.
