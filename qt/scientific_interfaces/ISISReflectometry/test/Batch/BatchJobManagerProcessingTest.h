@@ -234,7 +234,7 @@ public:
     EXPECT_CALL(*m_jobAlgorithm, updateItem()).Times(1);
 
     jobManager.algorithmComplete(m_jobAlgorithm);
-    TS_ASSERT_EQUALS(row.state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row.state(), State::ITEM_SUCCESS);
     verifyAndClear();
   }
 
@@ -264,7 +264,7 @@ public:
 
     jobManager.algorithmComplete(m_jobAlgorithm);
 
-    TS_ASSERT_EQUALS(row->state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
 
     verifyAndClear();
@@ -281,14 +281,14 @@ public:
 
     jobManager.algorithmComplete(m_jobAlgorithm);
 
-    TS_ASSERT_EQUALS(row1->state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(row2->state(), State::ITEM_NOT_STARTED);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
 
     jobManager.algorithmComplete(m_jobAlgorithm);
 
-    TS_ASSERT_EQUALS(row1->state(), State::ITEM_COMPLETE);
-    TS_ASSERT_EQUALS(row2->state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
 
     verifyAndClear();
@@ -312,7 +312,7 @@ public:
     jobManager.algorithmComplete(m_jobAlgorithm);
 
     TS_ASSERT_EQUALS(row1->state(), State::ITEM_ERROR);
-    TS_ASSERT_EQUALS(row2->state(), State::ITEM_COMPLETE);
+    TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
 
     verifyAndClear();

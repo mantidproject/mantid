@@ -718,7 +718,7 @@ void RunsTablePresenter::setRowStylingForItem(MantidWidgets::Batch::RowLocation 
   case State::ITEM_RUNNING:
     forAllCellsAt(rowLocation, applyRunningStateStyling);
     break;
-  case State::ITEM_COMPLETE:
+  case State::ITEM_SUCCESS:
     forAllCellsAt(rowLocation, applyCompletedStateStyling);
     break;
   case State::ITEM_ERROR:
@@ -812,7 +812,7 @@ void RunsTablePresenter::notifyPlotSelectedPressed() {
   const auto rows = m_model.selectedRows();
 
   for (const auto &row : rows) {
-    if (row.state() == State::ITEM_COMPLETE)
+    if (row.state() == State::ITEM_SUCCESS)
       workspaces.emplace_back(row.reducedWorkspaceNames().iVsQBinned());
   }
 
@@ -827,7 +827,7 @@ void RunsTablePresenter::notifyPlotSelectedStitchedOutputPressed() {
   const auto groups = m_model.selectedGroups();
 
   for (const auto *group : groups) {
-    if (group->state() == State::ITEM_COMPLETE)
+    if (group->state() == State::ITEM_SUCCESS)
       workspaces.emplace_back(group->postprocessedWorkspaceName());
   }
 
