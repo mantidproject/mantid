@@ -15,8 +15,8 @@ from mantid.kernel import Logger, SpecialCoordinateSystem
 from .lineplots import PixelLinePlot, RectangleSelectionLinePlot
 from .model import SliceViewerModel, WS_TYPE
 from .sliceinfo import SliceInfo
-from .toolbar import ToolItemText
-from .view import SliceViewerView
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
+from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
 from .adsobsever import SliceViewerADSObserver
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from ..observers.observing_presenter import ObservingPresenter
