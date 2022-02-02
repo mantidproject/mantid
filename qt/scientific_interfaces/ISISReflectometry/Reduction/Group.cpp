@@ -226,24 +226,22 @@ int Group::totalItems() const {
   // Include the group if postprocessing is applicable
   auto initCount = hasPostprocessing() ? 1 : 0;
   // Include all valid rows
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount,
-                         [](int const &count, boost::optional<Row> const &row) {
-                           if (row.is_initialized())
-                             return count + 1;
-                           return count;
-                         });
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](auto count, auto const &row) {
+    if (row.is_initialized())
+      return count + 1;
+    return count;
+  });
 }
 
 int Group::completedItems() const {
   // Include the group if it has been postprocessing
   auto initCount = complete() ? 1 : 0;
   // Include all valid rows that have been processed
-  return std::accumulate(rows().cbegin(), rows().cend(), initCount,
-                         [](int const &count, boost::optional<Row> const &row) {
-                           if (row.is_initialized() && row->complete())
-                             return count + 1;
-                           return count;
-                         });
+  return std::accumulate(rows().cbegin(), rows().cend(), initCount, [](auto count, auto const &row) {
+    if (row.is_initialized() && row->complete())
+      return count + 1;
+    return count;
+  });
 }
 
 void Group::setAllRowParents() {
