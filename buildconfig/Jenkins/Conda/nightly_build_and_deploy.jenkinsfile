@@ -2,7 +2,7 @@
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 // ANACONDA_CHANNEL - The channel to publish to on Anaconda.org
-// CONDA_BLD_PATH - The path to where conda-build will construct the packages, needed for windows due to path length.
+// CONDA_BLD_PATH - The path to where conda-build will construct the packages, needed for windows due to path length. Must be inside the Workspace ending with conda-bld, equivelant to $WORKSPACE/conda-bld. Due to limitations with jenkins archiving of artifacts.
 
 def build_and_test_linux() {
     sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-buildscript $WORKSPACE linux-ci --enable-systemtests --enable-doctests --clean-build --clean-external-projects"
@@ -17,6 +17,7 @@ def build_and_test_win(){
 }
 
 def conda_build_UNIX(){
+    sh "rm -rf $CONDA_BLD_PATH"
     sh "$WORKSPACE/buildconfig/Jenkins/Conda/conda-build-recipes $WORKSPACE --build-mantid --build-qt --build-workbench"
 }
 
@@ -31,18 +32,16 @@ def conda_build_macos() {
 }
 
 def conda_build_win(){
+    sh "rmdir /S /Q $CONDA_BLD_PATH"
     bat "\"C:\\Program Files\\git\\bin\\bash.exe\" -c \"C:/Jenkins/workspace/$JOB_NAME/buildconfig/Jenkins/Conda/conda-build-recipes C:/Jenkins/workspace/$JOB_NAME --build-mantid --build-qt --build-workbench\""
     archive_conda_build("win-64")
 }
 
 def archive_conda_build(build_name) {
-    if (env.CONDA_BLD_PATH != null) {
-        archive:
-            includes: "$CONDA_BLD_PATH/$build_name/*.tar.bz2"
-    } else {
-        archive:
-            includes: "mambaforge/envs/mantid-conda-build-env/conda-bld/$build_name/*.tar.bz2"
-    }
+    archiveArtifacts artifacts: "conda-bld/$build_name/*.tar.bz2",
+                allowEmptyArchive: false,
+                fingerprint: true,
+                onlyIfSuccessful: true
 }
 
 pipeline {
@@ -122,9 +121,9 @@ pipeline {
             }
             agent { label 'conda-build-linux' } // Use linux for simplicity with shell scripts
             steps{
-                // Copy all artifacts including mantid, ending with .tar.bz2 into $WORKSPACE from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
-                copyArtifacts filter: 'mantid*.tar.bz2', fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
-                sh "$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $WORKSPACE/mantid-*.tar.bz2 $WORKSPACE/mantidqt-*.tar.bz2 $WORKSPACE/mantidworkbench-*.tar.bz2"
+                // Copy all artifacts into $WORKSPACE from the current job, using ${JOB_NAME} and the current ${BUILD_NUMBER}
+                copyArtifacts fingerprintArtifacts: true, projectName: '${JOB_NAME}', selector: specific('${BUILD_NUMBER}')
+                sh '$WORKSPACE/buildconfig/Jenkins/Conda/publish-to-anaconda $WORKSPACE $ANACONDA_TOKEN $ANACONDA_CHANNEL $WORKSPACE/conda-bld/linux-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/linux-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/linux-64/mantidworkbench-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/osx-64/mantidworkbench-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantid-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantidqt-*.tar.bz2 $WORKSPACE/conda-bld/win-64/mantidworkbench-*.tar.bz2'
             }
         }
     }
