@@ -365,8 +365,12 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def validateInputs(self):
         '''Validates all the inputs, one by one. Returns at first failure.'''
         issues = dict()
-        self._setup_light()
-        issues = self._check_sample_runs_dimensions()
+        try:
+            self._setup_light()
+        except RuntimeError as re:
+            issues['SampleRunsD1'] = 'Unable to configure the algorithm: '+str(re)
+        if not issues:
+            issues = self._check_sample_runs_dimensions()
         if not issues:
             issues = self._check_tr_runs_dimensions()
         if not issues:
@@ -422,7 +426,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def _set_n_samples(self):
         '''Sets the number of samples based on the inputs of the sample runs in the first non-empty distance'''
-        for d in range(self.rank):
+        for d in range(N_DISTANCES):
             if self.getPropertyValue(f'SampleRunsD{d+1}'):
                 self.n_samples = self.getPropertyValue(f'SampleRunsD{d+1}').count(',') + 1
                 self.log().notice(f'Set number of samples to {self.n_samples}')
