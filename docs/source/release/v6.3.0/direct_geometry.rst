@@ -18,7 +18,8 @@ Improvements
 Bugfixes
 ########
 - :ref:`DirectILLReduction <algm-DirectILLReduction>` is fixed to handle the ``AbsoluteUnitsNormalisation`` option.
-- Updated instrument created by :ref:`LoadNXSPE <algm-LoadNXSPE>` is viewable in instrument 3D view.
+- Updated instrument created by :ref:`LoadNXSPE <algm-LoadNXSPE>` is now viewable in instrument 3D view.
+- :ref:`LoadNXSPE <algm-LoadNXSPE>` now creates workspaces with the correct detector sizes, which was previously causing aliasing issues in :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` for small q-bin sizes.
 
 Interfaces
 ----------

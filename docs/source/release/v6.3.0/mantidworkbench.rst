@@ -69,6 +69,7 @@ Bugfixes
 - Fixed a bug where folding the :ref:`Pick Tab<instrumentviewer_pick_tab>` crashed Mantid.
 - Fixed a crash on the :ref:`Draw Tab <instrumentviewer_draw_tab>` when trying to sum detectors on a workspace which doesn't have common bin edges across all spectra.
 - Getter for the :ref:`InstrumentViewer` will return a fully constructed instance to avoid a segmentation fault.
+- Opening the :ref:`InstrumentViewer` while a workspace is being reloaded will no longer cause a crash.
 
 SliceViewer
 -----------
@@ -89,5 +90,6 @@ Bugfixes
 - Transposing data (i.e. swapping x and y axes) of ``2D MD`` workspace, now works without error.
 - Fixed issues with the colorbar autoscale not updating correctly on zoom.
 - Stopped the ROI rectangle selection extents jumping discontinuously when the user tries to resize beyond the extent of the colorfill axes towards the line plot axes.
+- :ref:`SliceViewer` will no longer dynamically rebin when viewing an ``MDHisto`` workspace that has been modified by a binary operation (e.g. :ref:`MinusMD<algm-MinusMD>`).
 
 :ref:`Release 6.3.0 <v6.3.0>`
