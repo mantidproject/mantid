@@ -82,7 +82,7 @@ def create_hkl_ws():
 
 class HelperTestingClass(QtWidgetFinder):
     """
-    A system test for testing sliceviewer integration with qt and matplotlib.
+    Base class for system tests for testing sliceviewer integration with qt and matplotlib.
     """
     def __init__(self):
         self._qapp = get_application()
@@ -218,7 +218,10 @@ class SliceViewerTestNormSwitchesIfContainsNonPositiveData(systemtesting.MantidS
         self.assertTrue(isinstance(colorbar.get_norm(), Normalize))
         pres.view.close()
 
-    def test_changing_norm_updates_clim_validators(self):
+
+class SliceViewerTestChangingNormUpdatesClimValidators(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
         histo_ws_positive = create_histo_ws_positive()
         pres = SliceViewer(histo_ws_positive)
         colorbar = pres.view.data_view.colorbar
@@ -427,13 +430,10 @@ class SliceViewerTestPlotMatrixXlimitsIgnoresMonitors(systemtesting.MantidSystem
 
 
 class SliceViewerTestPlotMatrixXlimitsIgnoresNans(systemtesting.MantidSystemTest, HelperTestingClass):
-    def runTest(self):
-        HelperTestingClass.__init__(self)
-        self.test_plot_matrix_xlimits_ignores_nans()
-
+    # need to mock update slider as doesn't handle inf when initialising SliceViewer in this manner
     @patch("mantidqt.widgets.sliceviewer.dimensionwidget.Dimension.update_slider")
-    def test_plot_matrix_xlimits_ignores_nans(self, mock_update_slider):
-        # need to mock update slider as doesn't handle inf when initialising SliceViewer in this manner
+    def runTest(self, mock_update_slider):
+        HelperTestingClass.__init__(self)
         xmin = 5000
         xmax = 10000
         ws = CreateSampleWorkspace(NumBanks=2, BankPixelWidth=2, XMin=xmin, XMax=xmax)  # two non-monitor spectra
