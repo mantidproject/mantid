@@ -145,16 +145,16 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI 
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
-  int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << '\n';
+  const auto retStatus = static_cast<HTTPStatus>(m_response->getStatus());
+  g_log.debug() << "Answer from web: " << static_cast<int>(retStatus) << " " << m_response->getReason() << '\n';
 
-  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTPStatus::OK || (retStatus == HTTPStatus::CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
     else
       g_log.warning("Response is null pointer");
-    return retStatus;
+    return static_cast<int>(retStatus);
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
   } else {
@@ -314,8 +314,8 @@ void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse & /*un
 state.
 */
 int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url) {
-  int retStatus = res.getStatus();
-  g_log.debug() << "Answer from web: " << res.getStatus() << " " << res.getReason() << '\n';
+  const auto retStatus = static_cast<HTTPStatus>(res.getStatus());
+  g_log.debug() << "Answer from web: " << static_cast<int>(res.getStatus()) << " " << res.getReason() << '\n';
 
   // get github api rate limit information if available;
   int rateLimitRemaining;
@@ -327,30 +327,31 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::
     rateLimitRemaining = -1;
   }
 
-  if (retStatus == HTTP_OK) {
+  if (retStatus == HTTPStatus::OK) {
     throw Exception::InternetError("Response was ok, processing should never "
                                    "have entered processErrorStates",
-                                   retStatus);
-  } else if (retStatus == HTTP_FOUND) {
+                                   static_cast<int>(retStatus));
+  } else if (retStatus == HTTPStatus::FOUND) {
     throw Exception::InternetError("Response was HTTP_FOUND, processing should "
                                    "never have entered processErrorStates",
-                                   retStatus);
-  } else if (retStatus == HTTP_MOVED_PERMANENTLY) {
+                                   static_cast<int>(retStatus));
+  } else if (retStatus == HTTPStatus::MOVED_PERMANENTLY) {
     throw Exception::InternetError("Response was HTTP_MOVED_PERMANENTLY, "
                                    "processing should never have entered "
                                    "processErrorStates",
-                                   retStatus);
-  } else if (retStatus == HTTP_NOT_MODIFIED) {
-    throw Exception::InternetError("Not modified since provided date" + rateLimitReset.toSimpleString(), retStatus);
-  } else if ((retStatus == HTTP_FORBIDDEN) && (rateLimitRemaining == 0)) {
+                                   static_cast<int>(retStatus));
+  } else if (retStatus == HTTPStatus::NOT_MODIFIED) {
+    throw Exception::InternetError("Not modified since provided date" + rateLimitReset.toSimpleString(),
+                                   static_cast<int>(retStatus));
+  } else if ((retStatus == HTTPStatus::FORBIDDEN) && (rateLimitRemaining == 0)) {
     throw Exception::InternetError("The Github API rate limit has been reached, try again after " +
                                        rateLimitReset.toSimpleString() + " GMT",
-                                   retStatus);
+                                   static_cast<int>(retStatus));
   } else {
     std::stringstream info;
     std::stringstream ss;
     Poco::StreamCopier::copyStream(rs, ss);
-    if (retStatus == HTTP_NOT_FOUND)
+    if (retStatus == HTTPStatus::NOT_FOUND)
       info << "Failed to download " << url << " with the link "
            << "<a href=\"" << url << "\">.\n"
            << "Hint. Check that link is correct</a>";
@@ -360,7 +361,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::
       info << ss.str();
       g_log.debug() << ss.str();
     }
-    throw Exception::InternetError(info.str() + ss.str(), retStatus);
+    throw Exception::InternetError(info.str() + ss.str(), static_cast<int>(retStatus));
   }
 }
 
@@ -418,9 +419,9 @@ void InternetHelper::setTimeout(int seconds) {
 /// Checks the HTTP status to decide if this is a relocation
 /// @param response the HTTP status
 /// @returns true if the return code is considered a relocation
-bool InternetHelper::isRelocated(const int response) {
-  return ((response == HTTP_FOUND) || (response == HTTP_MOVED_PERMANENTLY) || (response == HTTP_TEMPORARY_REDIRECT) ||
-          (response == HTTP_SEE_OTHER));
+bool InternetHelper::isRelocated(const HTTPStatus &response) {
+  return ((response == HTTPStatus::FOUND) || (response == HTTPStatus::MOVED_PERMANENTLY) ||
+          (response == HTTPStatus::TEMPORARY_REDIRECT) || (response == HTTPStatus::SEE_OTHER));
 }
 
 /// Throw an exception occurs when the computer

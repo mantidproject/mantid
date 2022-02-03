@@ -178,18 +178,18 @@ int GitHubApiHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI
   session.sendRequest(*m_request) << m_body;
 
   std::istream &rs = session.receiveResponse(*m_response);
-  int retStatus = m_response->getStatus();
-  g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason() << "\n";
+  const auto retStatus = static_cast<HTTPStatus>(m_response->getStatus());
+  g_log.debug() << "Answer from web: " << static_cast<int>(retStatus) << " " << m_response->getReason() << "\n";
 
-  if (retStatus == HTTP_OK || (retStatus == HTTP_CREATED && m_method == HTTPRequest::HTTP_POST)) {
+  if (retStatus == HTTPStatus::OK || (retStatus == HTTPStatus::CREATED && m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     if (m_response)
       processResponseHeaders(*m_response);
     else
       g_log.warning("Response is null pointer");
-    return retStatus;
-  } else if ((retStatus == HTTP_FORBIDDEN && isAuthenticated()) || (retStatus == HTTP_UNAUTHORIZED) ||
-             (retStatus == HTTP_NOT_FOUND)) {
+    return static_cast<int>(retStatus);
+  } else if ((retStatus == HTTPStatus::FORBIDDEN && isAuthenticated()) || (retStatus == HTTPStatus::UNAUTHORIZED) ||
+             (retStatus == HTTPStatus::NOT_FOUND)) {
     // If authentication fails you can get HTTP_UNAUTHORIZED or HTTP_NOT_FOUND
     // If the limit runs out you can get HTTP_FORBIDDEN
     return this->processAnonymousRequest(uri, responseStream);

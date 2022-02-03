@@ -182,7 +182,7 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   try {
     doDownloadFile(gitHubInstrumentRepoUrl, gitHubJson.toString(), headers);
   } catch (Exception::InternetError &ex) {
-    if (ex.errorCode() == InternetHelper::HTTP_NOT_MODIFIED) {
+    if (ex.errorCode() == static_cast<int>(InternetHelper::HTTPStatus::NOT_MODIFIED)) {
       // No changes since last time
       return fileMap;
     } else {
