@@ -14,7 +14,6 @@ New Features
 Improvements
 ############
 - The default value of monitor peak width multiplier (``MonitorPeakWidthInSigmas``) has been changed from 3 to 7 in :ref:`DirectILLCollectData <algm-DirectILLCollectData>` .
-- :ref:`DirectILLCollectData <algm-DirectILLCollectData>` has two new properties: `GroupDetHorizontallyBy` and `GroupDetVerticallyBy` which allow for averaging pixel counts between the tubes and inside them, respectively, of for flat background calculation
 
 Bugfixes
 ########
