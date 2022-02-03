@@ -1,22 +1,38 @@
 .. _v6.3.0:
 
+.. include:: <isonum.txt>
+
 ===========================
 Mantid 6.3.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/engggui_texture.png
    :class: screenshot
-   :width: 385px
+   :width: 350px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
 
 We are proud to announce version 6.3.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+Much of this version provides improvements for users, building on exisiting algorithms and GUIs. Plotting has also seen a number of updates and users will benefit from improved documentation too.
+
+In addition to many improvements we are delighted to announce some new features including:
+
+- The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now supports two texture groupings, ``Texture20`` and ``Texture30`` (see image above).
+- The Error Reporter can now remember and prefill the user's name and e-mail address.
+- The :ref:`InstrumentViewer` :ref:`Pick Tab<instrumentviewer_pick_tab>` has a new panel for allowing the rebinning of workspaces.
+- In the :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` and the :ref:`Muon Analysis <Muon_Analysis-ref>` GUIs the confidence interval of a fit, previously shown as an error bar, is now represented by a shaded region.
+- Several new fitting functions for Muons have been provided.
+
+
+.. figure:: https://camo.githubusercontent.com/fcbeed317b55a6e451772fe75f8894b2e5f5889eba9566b31f78a1215527916f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f636f6e64612d6465762f636f6e64615f6c6f676f2e737667
+   :align: center
+   :width: 300px
+
+   |copy| 2017 Continuum Analytics, Inc. (dba Anaconda, Inc.). https://www.anaconda.com. All Rights Reserved
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
