@@ -480,6 +480,10 @@ fi
 ###############################################################################
 if [[ ${DO_SYSTEMTESTS} == true ]]; then
     if [[ ${PRBUILD} == true ]]; then
+        # Don't run installer tests if package isn't built.
+		if [[ ${DO_BUILD_PKG} == false ]]; then
+		    RUN_INSTALLER_TESTS=false
+		fi
         EXTRA_ARGS="--exclude-in-pull-requests" $SCRIPT_DIR/systemtests
     else
         $SCRIPT_DIR/systemtests

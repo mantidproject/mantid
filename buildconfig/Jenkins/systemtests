@@ -45,6 +45,14 @@ if [ -z "$EXTRA_ARGS" ]; then
 fi
 
 ###############################################################################
+# Check whether we want to run installer tests or just system tests.
+# Default is true to preserve oringinal behaviour of the script.
+###############################################################################
+if [ -z "$RUN_INSTALLER_TESTS" ]; then
+  RUN_INSTALLER_TESTS=true
+fi
+
+###############################################################################
 # Create the build directory if it doesn't exist
 ###############################################################################
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
@@ -103,5 +111,10 @@ BUILD_THREADS=${BUILD_THREADS:-1}
 SYSTEST_NPROCS=${SYSTEST_NPROCS:-$BUILD_THREADS}
 echo "The list of system tests will be split and executed over ${SYSTEST_NPROCS} processes."
 
+if [[ ${RUN_INSTALLER_TESTS} == true ]]; then
+  TEST_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py
+else
+  TEST_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/runSystemTests.py
+
 PKGDIR=${WORKSPACE}/build
-${X11_RUNNER} "${X11_RUNNER_ARGS}" python3 $WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
+${X11_RUNNER} "${X11_RUNNER_ARGS}" python3 $TEST_SCRIPT -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
