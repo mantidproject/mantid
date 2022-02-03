@@ -21,9 +21,6 @@ public:
   const std::string summary() const override;
   const std::vector<std::string> seeAlso() const override;
 
-protected:
-  std::vector<API::MatrixWorkspace_sptr> getWorkspaces() const override;
-
 private:
   double getStartX(std::size_t index) const;
   double getEndX(std::size_t index) const;

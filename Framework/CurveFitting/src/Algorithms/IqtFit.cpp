@@ -17,46 +17,6 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
 
-MatrixWorkspace_sptr cropWorkspace(const MatrixWorkspace_sptr &workspace, double startX, double endX) {
-  auto cropper = AlgorithmManager::Instance().create("CropWorkspace");
-  cropper->setLogging(false);
-  cropper->setAlwaysStoreInADS(false);
-  cropper->setProperty("InputWorkspace", workspace);
-  cropper->setProperty("OutputWorkspace", "__cropped");
-  cropper->setProperty("XMin", startX);
-  cropper->setProperty("XMax", endX);
-  cropper->execute();
-  return cropper->getProperty("OutputWorkspace");
-}
-
-MatrixWorkspace_sptr convertToHistogram(const MatrixWorkspace_sptr &workspace) {
-  auto converter = AlgorithmManager::Instance().create("ConvertToHistogram");
-  converter->setLogging(false);
-  converter->setAlwaysStoreInADS(false);
-  converter->setProperty("InputWorkspace", workspace);
-  converter->setProperty("OutputWorkspace", "__converted");
-  converter->execute();
-  return converter->getProperty("OutputWorkspace");
-}
-
-struct HistogramConverter {
-  explicit HistogramConverter() : m_converted() {}
-
-  MatrixWorkspace_sptr operator()(const MatrixWorkspace_sptr &workspace, double startX, double endX) const {
-    auto it = m_converted.find(workspace.get());
-    if (it != m_converted.end())
-      return it->second;
-    else {
-      auto histogram = convertToHistogram(cropWorkspace(workspace, startX, endX));
-      m_converted[workspace.get()] = histogram;
-      return histogram;
-    }
-  }
-
-private:
-  mutable std::unordered_map<MatrixWorkspace *, MatrixWorkspace_sptr> m_converted;
-};
-
 std::string getPropertySuffix(std::size_t index) { return index == 0 ? "" : "_" + std::to_string(index); }
 } // namespace
 
@@ -120,15 +80,6 @@ template <typename Base> bool IqtFit<Base>::isFitParameter(const std::string &na
 }
 
 template <typename Base> bool IqtFit<Base>::throwIfElasticQConversionFails() const { return true; }
-
-template <typename Base> std::vector<API::MatrixWorkspace_sptr> IqtFit<Base>::getWorkspaces() const {
-  auto workspaces = Base::getWorkspaces();
-  HistogramConverter convert;
-
-  for (std::size_t i = 0; i < workspaces.size(); ++i)
-    workspaces[i] = convert(workspaces[i], getStartX(i), getEndX(i));
-  return workspaces;
-}
 
 template <> double IqtFit<QENSFitSimultaneous>::getStartX(std::size_t index) const {
   return QENSFitSimultaneous::getProperty("StartX" + getPropertySuffix(index));

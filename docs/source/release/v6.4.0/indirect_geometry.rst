@@ -16,3 +16,8 @@ Changes
 #######
 
 - In Indirect Data analysis the button for fitting the currently plotted spectra has been renamed and rescaled to fit the interface.
+
+Bugfixes
+########
+
+- A bug has been fixed in IqtFit where the first value would be ignored when a fit was performed.
