@@ -14,6 +14,7 @@
 
 #include <QDebug>
 #include <QFileInfo>
+#include <QRegExpValidator>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -50,7 +51,8 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppCalibration->watchADS(false);
   m_uiForm.ppResolution->watchADS(false);
-
+  m_uiForm.leScale->setValidator(new QRegExpValidator(QRegExp("\\d+(\\.\\d*)?")));
+  m_uiForm.leResolutionScale->setValidator(new QRegExpValidator(QRegExp("\\d+(\\.\\d*)?")));
   auto *doubleEditorFactory = new DoubleEditorFactory();
 
   // CAL PROPERTY TREE
@@ -130,10 +132,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   // SIGNAL/SLOT CONNECTIONS
   // Update instrument information when a new instrument config is selected
   connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
-
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-  connect(resPeak, SIGNAL(rangeChanged(double, double)), resBackground, SLOT(setRange(double, double)));
-#endif
 
   // Update property map when a range selector is moved
   connect(calPeak, SIGNAL(minValueChanged(double)), this, SLOT(calMinChanged(double)));
@@ -690,7 +688,7 @@ IAlgorithm_sptr ISISCalibration::calibrationAlgorithm(const QString &inputFiles)
   calibrationAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
 
   calibrationAlg->setProperty("ScaleByFactor", m_uiForm.ckScale->isChecked());
-  calibrationAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+  calibrationAlg->setProperty("ScaleFactor", m_uiForm.leScale->text().toDouble());
   return calibrationAlg;
 }
 
@@ -707,7 +705,7 @@ IAlgorithm_sptr ISISCalibration::resolutionAlgorithm(const QString &inputFiles) 
   resAlg->setProperty("LoadLogFiles", m_uiForm.ckLoadLogFiles->isChecked());
 
   if (m_uiForm.ckResolutionScale->isChecked())
-    resAlg->setProperty("ScaleFactor", m_uiForm.spScale->value());
+    resAlg->setProperty("ScaleFactor", m_uiForm.leResolutionScale->text().toDouble());
 
   if (m_uiForm.ckSmoothResolution->isChecked())
     resAlg->setProperty("OutputWorkspace", m_outputResolutionName.toStdString() + "_pre_smooth");
