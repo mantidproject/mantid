@@ -51,7 +51,7 @@ Furthermore, the traditional monolithic package has been split into 3 packages i
 - ``mantid``: Access to the algorithms and workspace from Python (no GUI components).
 
 - ``mantidqt``: Access to custom-made Qt widgets built on top of mantid functionality,
-  e.g. instrument viewer, slice viewer.
+  e.g. InstrumentViewer, SliceViewer.
 
 - ``mantidworkbench``: A package shippping the traditional Workbench application.
 
@@ -60,10 +60,10 @@ For instructions on how to access these packages please see the `conda installat
 Future Packaging Changes
 ------------------------
 
-In future releases we will be reworking the internals of how our installer packages are constructed so that we can replace an
+In future releases we will be reworking how our installer packages are constructed so that we can replace an
 aging system that is hard to maintain and keep up to date.
 
-For Windows & macOS users should see no change in how these packages function and are used but the version of Python bundled
+For Windows & macOS, users should see no change in how these packages function and are used. However, the version of Python bundled
 internally will start to change more regularly, at a frequency yet undefined, to keep up with external developments.
 
 For Linux we intend to primarily push users towards the conda distribution packages but we will work with users
