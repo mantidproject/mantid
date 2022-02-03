@@ -650,17 +650,39 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
  */
 class SetAttribute : public Mantid::API::IFunction::AttributeVisitor<> {
 public:
-  SetAttribute(FitPropertyBrowser *browser, QtProperty *prop) : m_browser(browser), m_prop(prop) {}
+  SetAttribute(FitPropertyBrowser *browser, QtProperty *prop,
+               Mantid::Kernel::IValidator_sptr validator = Mantid::Kernel::IValidator_sptr())
+      : m_browser(browser), m_prop(prop), m_validator(validator) {}
 
 protected:
   /// Create string property
-  void apply(std::string &str) const override { str = m_browser->getStringPropertyValue(m_prop).toStdString(); }
+  void apply(std::string &str) const override {
+    std::string propValue = m_browser->getStringPropertyValue(m_prop).toStdString();
+
+    evaluateValidator(propValue);
+    str = propValue;
+  }
   /// Create double property
-  void apply(double &d) const override { d = m_browser->m_doubleManager->value(m_prop); }
+  void apply(double &d) const override {
+    double propValue = m_browser->m_doubleManager->value(m_prop);
+
+    evaluateValidator(propValue);
+    d = propValue;
+  }
   /// Create int property
-  void apply(int &i) const override { i = m_browser->m_intManager->value(m_prop); }
+  void apply(int &i) const override {
+    int propValue = m_browser->m_intManager->value(m_prop);
+
+    evaluateValidator(propValue);
+    i = propValue;
+  }
   /// Create bool property
-  void apply(bool &b) const override { b = m_browser->m_boolManager->value(m_prop); }
+  void apply(bool &b) const override {
+    bool propValue = m_browser->m_boolManager->value(m_prop);
+
+    evaluateValidator(propValue);
+    b = propValue;
+  }
   /// Create vector property
   void apply(std::vector<double> &v) const override {
     QList<QtProperty *> members = m_prop->subProperties();
@@ -668,12 +690,25 @@ protected:
       v.clear();
       return;
     }
+
     int newSize = m_browser->m_vectorSizeManager->value(members[0]);
-    v.resize(newSize);
     int vectorSize = members.size() - 1;
     if (vectorSize > newSize) {
       vectorSize = newSize;
     }
+
+    // if there is a validator, construct new vector for validator evaluation
+    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
+      std::vector<double> newVec(newSize);
+      for (int i = 1; i < vectorSize + 1; ++i) {
+        newVec[i - 1] = m_browser->m_vectorDoubleManager->value(members[i]);
+      }
+
+      evaluateValidator(newVec);
+    }
+
+    v.resize(newSize);
+
     for (int i = 1; i < vectorSize + 1; ++i) {
       v[i - 1] = m_browser->m_vectorDoubleManager->value(members[i]);
     }
@@ -682,6 +717,20 @@ protected:
 private:
   FitPropertyBrowser *m_browser;
   QtProperty *m_prop;
+  Mantid::Kernel::IValidator_sptr m_validator;
+
+  /// Evaluates the validator associated with attribute this visitor is to visit.
+  template <typename T> void evaluateValidator(T &inputData) const {
+    std::string error;
+
+    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
+      error = m_validator->isValid(inputData);
+    }
+
+    if (error != "") {
+      throw std::runtime_error("Set Attribute Error: " + error);
+    }
+  }
 };
 
 /**
@@ -740,9 +789,10 @@ private:
 bool PropertyHandler::setAttribute(QtProperty *prop, bool resetProperties) {
   if (m_attributes.contains(prop)) {
     QString attName = prop->propertyName();
+
     try {
       Mantid::API::IFunction::Attribute att = m_fun->getAttribute(attName.toStdString());
-      SetAttribute tmp(m_browser, prop);
+      SetAttribute tmp(m_browser, prop, att.getValidator());
       att.apply(tmp);
       m_fun->setAttribute(attName.toStdString(), att);
       m_browser->compositeFunction()->checkFunction();

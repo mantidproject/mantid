@@ -79,6 +79,25 @@ private:
   }
 };
 
+// Simple Attribute Visitor for Test
+class SetAttribute : public Mantid::API::IFunction::AttributeVisitor<> {
+public:
+  SetAttribute() : m_dbl(0) {}
+  double m_dbl;
+
+protected:
+  /// Create string property
+  void apply(std::string &str) const override { return; }
+  /// Create double property
+  void apply(double &d) const override { d = m_dbl; }
+  /// Create int property
+  void apply(int &i) const override { return; }
+  /// Create bool property
+  void apply(bool &b) const override { return; }
+  /// Create vector property
+  void apply(std::vector<double> &v) const override { return; }
+};
+
 DECLARE_FUNCTION(FAVT_Funct)
 } // namespace detail
 
@@ -140,7 +159,27 @@ public:
     TS_ASSERT_THROWS(att.setVector(v), const std::runtime_error &);
   }
 
+  void test_double_attribute_visitor() {
+    detail::FAVT_Funct f;
+    IFunction::Attribute att = f.getAttribute("DAttr");
+
+    // Test visitor change within validator restrictions
+    double dbl = 75;
+
+    detail::SetAttribute att_visitor;
+    att_visitor.m_dbl = dbl;
+
+    att.apply(att_visitor);
+    TS_ASSERT(att.asDouble() == dbl);
+
+    // Test visitor change outside of validator restrictions
+    dbl = 150;
+    att_visitor.m_dbl = dbl;
+
+    TS_ASSERT_THROWS(att.apply(att_visitor), const std::runtime_error &);
+  }
+
   // void test_factory_creation() {
-  // Will need to test factory creation.
+  // Need to test factory creation?
   //}
 };

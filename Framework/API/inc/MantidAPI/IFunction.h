@@ -274,6 +274,8 @@ public:
         throw std::runtime_error("Attribute " + m_name + ": " + error);
       }
     }
+    /// Return a clone of the attribute validator;
+    Kernel::IValidator_sptr getValidator() { return m_validator; }
 
     /// Returns type of the attribute
     std::string type() const;
@@ -607,6 +609,9 @@ protected:
   /// Declare a single attribute with validator
   void declareAttribute(const std::string &name, const API::IFunction::Attribute &defaultValue,
                         const Kernel::IValidator &validator);
+  /// Check Attribute to declare does not already exist.
+  void checkAttributeName(const std::string &name);
+  /// Return a clone of the attribute validator
 
   /// Store an attribute's value
   void storeAttributeValue(const std::string &name, const API::IFunction::Attribute &value);

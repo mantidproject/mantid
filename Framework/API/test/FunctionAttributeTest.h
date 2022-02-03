@@ -31,6 +31,8 @@ public:
     v[1] = 2;
     v[2] = 3;
     declareAttribute("VAttr1", Attribute(v));
+    // Test duplicate attribute causes error.
+    TS_ASSERT_THROWS(declareAttribute("DAttr", Attribute(0.0)), std::invalid_argument)
   }
 
   std::string name() const override { return "IFT_Funct"; }
