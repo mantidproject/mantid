@@ -33,7 +33,7 @@ def conda_build_macos() {
 }
 
 def conda_build_win(){
-    sh "rmdir /S /Q $CONDA_BLD_PATH"
+    bat "IF EXIST $CONDA_BLD_PATH RMDIR /S /Q $CONDA_BLD_PATH"
     bat "\"C:\\Program Files\\git\\bin\\bash.exe\" -c \"C:/Jenkins/workspace/$JOB_NAME/buildconfig/Jenkins/Conda/conda-build-recipes C:/Jenkins/workspace/$JOB_NAME --build-mantid --build-qt --build-workbench\""
     archive_conda_build("win-64")
 }
