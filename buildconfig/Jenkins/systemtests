@@ -115,6 +115,7 @@ if [[ ${RUN_INSTALLER_TESTS} == true ]]; then
   TEST_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/InstallerTests.py
 else
   TEST_SCRIPT=$WORKSPACE/Testing/SystemTests/scripts/runSystemTests.py
+fi
 
 PKGDIR=${WORKSPACE}/build
 ${X11_RUNNER} "${X11_RUNNER_ARGS}" python3 $TEST_SCRIPT -o -d $PKGDIR -j ${SYSTEST_NPROCS} $EXTRA_ARGS
