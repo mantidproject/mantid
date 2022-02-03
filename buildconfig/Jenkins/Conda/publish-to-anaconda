@@ -14,6 +14,13 @@
 #
 
 WORKSPACE=$1
+shift
+TOKEN=$1
+shift
+CHANNEL=$1
+shift
+LABEL=$1
+shift
 EXPECTED_MAMBAFORGE_PATH=$WORKSPACE/mambaforge # Install into the WORKSPACE_DIR
 if [[ $OSTYPE == "msys" ]]; then
     EXPECTED_CONDA_PATH=$EXPECTED_MAMBAFORGE_PATH/condabin/mamba.bat
@@ -40,9 +47,9 @@ conda activate $CONDA_ENV_NAME
 for package in "$@"
 do
     # Skip the Workspace, Token, and Channel args, then upload every other package to the given User
-    if [ $package != $1 ] && [ $package != $2 ] && [ $package != $3 ] && [ $package != $4 ] && [[ $package == *"mantid"* ]]
+    if [[ $package == *"mantid"* ]]
     then
         echo "Uploading $package"
-        anaconda -t $2 upload -u $3 $package --label $4
+        anaconda -t $TOKEN upload -u $CHANNEL $package --label $LABEL
     fi
 done
