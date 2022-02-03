@@ -9,7 +9,8 @@
 #                 not use \\ or \ in the path.
 #   2. TOKEN: Token for uploading to anaconda.org
 #   3. CHANNEL: Channel to upload to
-#   4. PACKAGES: A list of args that will be uploaded to anaconda cloud.
+#   4. LABEL: The label used when uploading to anaconda
+#   5. PACKAGES: A list of args that will be uploaded to anaconda cloud.
 #
 
 WORKSPACE=$1
@@ -39,9 +40,9 @@ conda activate $CONDA_ENV_NAME
 for package in "$@"
 do
     # Skip the Workspace, Token, and Channel args, then upload every other package to the given User
-    if [ $package != $1 ] && [ $package != $2 ] && [ $package != $3 ] && [[ $package == *"mantid"* ]]
+    if [ $package != $1 ] && [ $package != $2 ] && [ $package != $3 ] && [ $package != $4 ] && [[ $package == *"mantid"* ]]
     then
         echo "Uploading $package"
-        anaconda -t $2 upload -u $3 $package
+        anaconda -t $2 upload -u $3 $package --label $4
     fi
 done
