@@ -26,50 +26,64 @@ ProcessAs
 ---------
 Different input properties can be specified depending on the value of **ProcessAs**, as summarized in the table:
 
-+------------------+------------------------------+-----------------------------------+
-| ProcessAs        | Input Workspace Properties   | Other Input Properties            |
-+==================+==============================+===================================+
-| Cadmium          |                              |                                   |
-+------------------+------------------------------+-----------------------------------+
-| Empty            |                              | * FlatBackgroundSource            |
-|                  |                              | * FlatBackgroundScaling           |
-|                  |                              | * FlatBkgAveragingWindow          |
-|                  |                              | * GroupDetHorizontallyBy          |
-|                  |                              | * GroupDetVerticallyBy            |
-|                  |                              | * DetectorGrouping                |
-|                  |                              | * GroupDetBy                      |
-+------------------+------------------------------+-----------------------------------+
-| Vanadium         | * CadmiumWorkspace           | * all from Empty, and:            |
-|                  | * EmptyContainerWorkspace    | * AbsorptionCorrection            |
-|                  | * MaskWorkspace              | * SelfAttenuationMethod           |
-|                  |                              | * SampleMaterial                  |
-|                  |                              | * SampleGeometry                  |
-|                  |                              | * ContainerMaterial               |
-|                  |                              | * ContainerGeometry               |
-|                  |                              | * EnergyExchangeBinning           |
-|                  |                              | * MomentumTransferBinning         |
-|                  |                              | * GroupingAngleStep               |
-|                  |                              | * GroupingBehaviour               |
-+------------------+------------------------------+-----------------------------------+
-| Sample           | * CadmiumWorkspace           | * same as for Vanadium            |
-|                  | * EmptyContainerWorkspace    |                                   |
-|                  | * VanadiumWorkspace          |                                   |
-|                  | * MaskWorkspace              |                                   |
-+------------------+------------------------------+-----------------------------------+
++------------------+------------------------------+------------------------------+
+| ProcessAs        | Input Workspace Properties   | Other Input Properties       |
++==================+==============================+==============================+
+| Cadmium          |                              |                              |
++------------------+------------------------------+------------------------------+
+| Empty            |                              | * FlatBackgroundSource       |
+|                  |                              | * FlatBackgroundScaling      |
+|                  |                              | * FlatBkgAveragingWindow     |
+|                  |                              | * GroupDetHorizontallyBy     |
+|                  |                              | * GroupDetVerticallyBy       |
+|                  |                              | * DetectorGrouping           |
+|                  |                              | * GroupDetBy                 |
+|                  |                              | * IncidentEnergyCalibration  |
+|                  |                              | * ElasticChannel             |
+|                  |                              | * IncidentEnergy             |
+|                  |                              | * ElasticChannel             |
+|                  |                              | * EPPCreationMethod          |
+|                  |                              | * ElasticChannelIndex        |
++------------------+------------------------------+------------------------------+
+| Vanadium         | * CadmiumWorkspace           | * all from Empty, and:       |
+|                  | * EmptyContainerWorkspace    | * AbsorptionCorrection       |
+|                  | * MaskWorkspace              | * SelfAttenuationMethod      |
+|                  |                              | * SampleMaterial             |
+|                  |                              | * SampleGeometry             |
+|                  |                              | * ContainerMaterial          |
+|                  |                              | * ContainerGeometry          |
+|                  |                              | * EnergyExchangeBinning      |
+|                  |                              | * MomentumTransferBinning    |
+|                  |                              | * GroupingAngleStep          |
+|                  |                              | * GroupingBehaviour          |
++------------------+------------------------------+------------------------------+
+| Sample           | * CadmiumWorkspace           | * all from Vanadium, and     |
+|                  | * EmptyContainerWorkspace    | * SampleAngleOffset          |
+|                  | * VanadiumWorkspace          |                              |
+|                  | * MaskWorkspace              |                              |
++------------------+------------------------------+------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
 For example, if processing as sample, if an empty container and cadmium absorber inputs are specified, subtraction of these workspaces will be performed,
 while if not, this step will be skipped.
 
-On top of the input properties, there are also switches that control the workflow and which corrections are to be performed. For example, the initial
-energy calibration is performed when `IncidentEnergyCalibration` is switched.
+On top of the input properties, there are also switches that control the workflow and which corrections are to be performed. For example, the sample
+is going to be normalised to absolute units with vanadium if `AbsoluteUnitsNormalisation` is set to "Absolute Units ON". There is also a number of parameters
+that allow creating bespoke masking, these include:
+
+- `MaskWorkspace` - custom mask workspace
+- `MaskedTubes` - list of tubes to be masked
+- `MaskThresholdMin`, `MaskThresholdMax` - minimum and maximum threshold values of normalised counts to be masked
+- `MaskedAngles` - range of 2theta angles to be masked
+- `MaskWithVanadium` - whether to use Vanadium-derived diagnostics to mask data
+
 
 ReductionType
 -------------
 
 There are two supported reduction types available: `Powder` and `SingleCrystal`. The choice impacts the reduction workflow of the `Sample` process, as can
-be seen in the diagrams below. The `SingleCrystal` reduction exists the chain earlier and saves the output to be processed externally to Mantid, while
-`Powder` continues to the call to :ref:`DirectILLReduction <algm-DirectILLReduction>`
+be seen in the diagrams below. The `SingleCrystal` reduction exits the reduction earlier and saves the output to be processed externally to Mantid, while
+`Powder` continues to the call to :ref:`DirectILLReduction <algm-DirectILLReduction>`, and then saves its output.
 
 
 Caching with ADS
@@ -92,6 +106,28 @@ a sum of the relevant sample log and user-defined `SampleAngleOffset` property. 
 as regular .nxs.
 
 
+Workflows
+---------
+
+Empty container
+###############
+
+.. diagram:: DirectILLAutoProcess-v1_empty_wkflw.dot
+
+Vanadium
+########
+
+.. diagram:: DirectILLAutoProcess-v1_vanadium_wkflw.dot
+
+Sample, powder
+##############
+
+.. diagram:: DirectILLAutoProcess-v1_sample_powder_wkflw.dot
+
+Sample, single crystal
+######################
+
+.. diagram:: DirectILLAutoProcess-v1_sample_sx_wkflw.dot
 
 .. include:: ../usagedata-note.txt
 
