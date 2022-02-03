@@ -14,10 +14,13 @@ Mantid 6.3.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
+Summary
+-------
 
 We are proud to announce version 6.3.0 of Mantid.
 
-Much of this version provides improvements for users, building on exisiting algorithms and GUIs. Plotting has also seen a number of updates and users will benefit from improved documentation too.
+Much of this version provides improvements for users, building on exisiting algorithms and GUIs.
+Plotting has also seen a number of updates and users will benefit from improved documentation too.
 
 In addition to many improvements we are delighted to announce some new features including:
 
@@ -28,11 +31,46 @@ In addition to many improvements we are delighted to announce some new features 
 - Several new fitting functions for Muons have been provided.
 
 
-.. figure:: https://camo.githubusercontent.com/fcbeed317b55a6e451772fe75f8894b2e5f5889eba9566b31f78a1215527916f/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f636f6e64612d6465762f636f6e64615f6c6f676f2e737667
-   :align: center
-   :width: 300px
+Conda
+-----
 
-   |copy| 2017 Continuum Analytics, Inc. (dba Anaconda, Inc.). https://www.anaconda.com. All Rights Reserved
+.. figure:: ../../images/conda_logo.svg
+   :align: right
+   :width: 400px
+
+   |copy| 2017 Continuum Analytics, Inc. (dba Anaconda, Inc.).
+
+   https://www.anaconda.com. All Rights Reserved
+
+
+We are excited to announce the release of brand-new packages built for the `conda package manager <https://docs.conda.io/en/latest/>`__.
+Up until this release only a single ``mantid-framework`` package has been available for Linux but
+this release sees full support for our standard platforms (Linux, Windows, macOS).
+Furthermore, the traditional monolithic package has been split into 3 packages in the conda world:
+
+- ``mantid``: Access to the algorithms and workspace from Python (no GUI components).
+
+- ``mantidqt``: Access to custom-made Qt widgets built on top of mantid functionality,
+  e.g. instrument viewer, slice viewer.
+
+- ``mantidworkbench``: A package shippping the traditional Workbench application.
+
+For instructions on how to access these packages please see the `conda installation instructions <https://download.mantidproject.org/conda.html>`__.
+
+Future Packaging Changes
+------------------------
+
+In future releases we will be reworking the internals of how our installer packages are constructed so that we can replace an
+aging system that is hard to maintain and keep up to date.
+
+For Windows & macOS users should see no change in how these packages function and are used but the version of Python bundled
+internally will start to change more regularly, at a frequency yet undefined, to keep up with external developments.
+
+For Linux we intend to primarily push users towards the conda distribution packages but we will work with users
+to find a solution that works for all.
+
+Further Information
+-------------------
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
