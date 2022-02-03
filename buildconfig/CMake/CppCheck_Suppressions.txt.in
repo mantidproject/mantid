@@ -76,7 +76,7 @@ useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSerie
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:129
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:101
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:111
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:444
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:445
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Interpolation.cpp:31
 useInitializationList:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:38
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InstrumentInfo.cpp:166
