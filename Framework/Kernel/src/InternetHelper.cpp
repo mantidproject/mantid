@@ -139,7 +139,8 @@ void InternetHelper::createRequest(Poco::URI &uri) {
   }
 }
 
-int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri, std::ostream &responseStream) {
+InternetHelper::HTTPStatus InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI &uri,
+                                                                 std::ostream &responseStream) {
   // create a request
   this->createRequest(uri);
   session.sendRequest(*m_request) << m_body;
@@ -154,7 +155,7 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI 
       processResponseHeaders(*m_response);
     else
       g_log.warning("Response is null pointer");
-    return static_cast<int>(retStatus);
+    return retStatus;
   } else if (isRelocated(retStatus)) {
     return this->processRelocation(*m_response, responseStream);
   } else {
@@ -163,14 +164,15 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session, Poco::URI 
   }
 }
 
-int InternetHelper::processRelocation(const HTTPResponse &response, std::ostream &responseStream) {
+InternetHelper::HTTPStatus InternetHelper::processRelocation(const HTTPResponse &response,
+                                                             std::ostream &responseStream) {
   std::string newLocation = response.get("location", "");
   if (!newLocation.empty()) {
     g_log.information() << "url relocated to " << newLocation << "\n";
     return this->sendRequest(newLocation, responseStream);
   } else {
     g_log.warning("Apparent relocation did not give new location\n");
-    return response.getStatus();
+    return static_cast<HTTPStatus>(response.getStatus());
   }
 }
 
@@ -178,19 +180,17 @@ int InternetHelper::processRelocation(const HTTPResponse &response, std::ostream
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendRequest(const std::string &url, std::ostream &responseStream) {
+InternetHelper::HTTPStatus InternetHelper::sendRequest(const std::string &url, std::ostream &responseStream) {
 
   // send the request
   Poco::URI uri(url);
   if (uri.getPath().empty())
     uri = url + "/";
-  int retval;
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
-    retval = sendHTTPSRequest(uri.toString(), responseStream);
+    return static_cast<HTTPStatus>(sendHTTPSRequest(uri.toString(), responseStream));
   } else {
-    retval = sendHTTPRequest(uri.toString(), responseStream);
+    return static_cast<HTTPStatus>(sendHTTPRequest(uri.toString(), responseStream));
   }
-  return retval;
 }
 
 /**
@@ -216,9 +216,8 @@ void InternetHelper::logDebugRequestSending(const std::string &schemeName, const
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
-  int retStatus = 0;
-
+InternetHelper::HTTPStatus InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &responseStream) {
+  InternetHelper::HTTPStatus retStatus{InternetHelper::HTTPStatus::BAD_REQUEST};
   logDebugRequestSending("http", url);
 
   Poco::URI uri(url);
@@ -244,8 +243,8 @@ int InternetHelper::sendHTTPRequest(const std::string &url, std::ostream &respon
  * @param url the address to the network resource
  * @param responseStream The stream to fill with the reply on success
  **/
-int InternetHelper::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
-  int retStatus = 0;
+InternetHelper::HTTPStatus InternetHelper::sendHTTPSRequest(const std::string &url, std::ostream &responseStream) {
+  InternetHelper::HTTPStatus retStatus{InternetHelper::HTTPStatus::BAD_REQUEST};
 
   logDebugRequestSending("https", url);
 
@@ -302,7 +301,7 @@ void InternetHelper::setProxy(const Kernel::ProxyInfo &proxy) {
 /** Process any headers from the response stream
 Basic implementation does nothing.
 */
-void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse & /*unused*/) {}
+void InternetHelper::processResponseHeaders(const HTTPResponse & /*unused*/) {}
 
 /** Process any HTTP errors states.
 
@@ -313,7 +312,8 @@ void InternetHelper::processResponseHeaders(const Poco::Net::HTTPResponse & /*un
 @exception Mantid::Kernel::Exception::InternetError : Coded for the failure
 state.
 */
-int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url) {
+InternetHelper::HTTPStatus InternetHelper::processErrorStates(const HTTPResponse &res, std::istream &rs,
+                                                              const std::string &url) {
   const auto retStatus = static_cast<HTTPStatus>(res.getStatus());
   g_log.debug() << "Answer from web: " << static_cast<int>(res.getStatus()) << " " << res.getReason() << '\n';
 
@@ -363,6 +363,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res, std::
     }
     throw Exception::InternetError(info.str() + ss.str(), static_cast<int>(retStatus));
   }
+  return retStatus; // must return to follow contract
 }
 
 /** Download a url and fetch it inside the local path given.
@@ -385,13 +386,12 @@ url_file.
 @exception Mantid::Kernel::Exception::InternetError : For any unexpected
 behaviour.
 */
-int InternetHelper::downloadFile(const std::string &urlFile, const std::string &localFilePath) {
-  int retStatus = 0;
+InternetHelper::HTTPStatus InternetHelper::downloadFile(const std::string &urlFile, const std::string &localFilePath) {
   g_log.debug() << "DownloadFile from \"" << urlFile << "\" to file: \"" << localFilePath << "\"\n";
 
   Poco::TemporaryFile tempFile;
   Poco::FileStream tempFileStream(tempFile.path());
-  retStatus = sendRequest(urlFile, tempFileStream);
+  const auto retStatus = sendRequest(urlFile, tempFileStream);
   tempFileStream.close();
 
   // if there have been no errors move it to the final location, and turn off
@@ -536,7 +536,9 @@ const std::string &InternetHelper::getBody() { return m_body; }
 /** Gets the body set for future requests
  * @returns A string of the content type
  **/
-int InternetHelper::getResponseStatus() { return m_response->getStatus(); }
+InternetHelper::HTTPStatus InternetHelper::getResponseStatus() {
+  return static_cast<HTTPStatus>(m_response->getStatus());
+}
 
 /** Gets the body set for future requests
  * @returns A string of the content type

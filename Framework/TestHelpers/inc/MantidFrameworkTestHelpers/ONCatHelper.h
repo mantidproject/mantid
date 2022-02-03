@@ -21,12 +21,13 @@ using Mantid::Catalog::OAuth::IOAuthTokenStore;
 using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
 using Mantid::Catalog::OAuth::OAuthToken;
 using Mantid::Catalog::ONCat::ONCat;
+using Mantid::Kernel::InternetHelper;
 using Mantid::Kernel::Exception::InternetError;
 
 namespace Mantid {
 namespace FrameworkTestHelpers {
 
-using MockResponseMap = std::map<std::string, std::pair<int, std::string>>;
+using MockResponseMap = std::map<std::string, std::pair<InternetHelper::HTTPStatus, std::string>>;
 using MockResponseCallCounts = std::map<std::string, unsigned int>;
 using MockResponseCallMapping = std::pair<const std::basic_string<char>, unsigned int>;
 
@@ -40,8 +41,8 @@ public:
   bool allResponsesCalled() const;
 
 protected:
-  int sendHTTPRequest(const std::string &url, std::ostream &responseStream) override;
-  int sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override;
+  InternetHelper::HTTPStatus sendHTTPRequest(const std::string &url, std::ostream &responseStream) override;
+  InternetHelper::HTTPStatus sendHTTPSRequest(const std::string &url, std::ostream &responseStream) override;
 
 private:
   MockResponseMap m_responseMap;

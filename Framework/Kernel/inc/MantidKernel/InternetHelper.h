@@ -105,7 +105,7 @@ public:
   void setBody(Poco::Net::HTMLForm &form);
   const std::string &getBody();
 
-  int getResponseStatus();
+  HTTPStatus getResponseStatus();
   const std::string &getResponseReason();
 
   void addHeader(const std::string &key, const std::string &value);
@@ -121,20 +121,20 @@ public:
   void setProxy(const Kernel::ProxyInfo &proxy);
 
   // Execute call methods
-  virtual int downloadFile(const std::string &urlFile, const std::string &localFilePath = "");
-  virtual int sendRequest(const std::string &url, std::ostream &responseStream);
+  virtual HTTPStatus downloadFile(const std::string &urlFile, const std::string &localFilePath = "");
+  virtual HTTPStatus sendRequest(const std::string &url, std::ostream &responseStream);
 
 protected:
-  virtual int sendHTTPSRequest(const std::string &url, std::ostream &responseStream);
-  virtual int sendHTTPRequest(const std::string &url, std::ostream &responseStream);
+  virtual HTTPStatus sendHTTPSRequest(const std::string &url, std::ostream &responseStream);
+  virtual HTTPStatus sendHTTPRequest(const std::string &url, std::ostream &responseStream);
   virtual void processResponseHeaders(const Poco::Net::HTTPResponse &res);
-  virtual int processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url);
-  virtual int sendRequestAndProcess(Poco::Net::HTTPClientSession &session, Poco::URI &uri,
-                                    std::ostream &responseStream);
+  virtual HTTPStatus processErrorStates(const Poco::Net::HTTPResponse &res, std::istream &rs, const std::string &url);
+  virtual HTTPStatus sendRequestAndProcess(Poco::Net::HTTPClientSession &session, Poco::URI &uri,
+                                           std::ostream &responseStream);
 
   void setupProxyOnSession(Poco::Net::HTTPClientSession &session, const std::string &proxyUrl);
   void createRequest(Poco::URI &uri);
-  int processRelocation(const Poco::Net::HTTPResponse &response, std::ostream &responseStream);
+  InternetHelper::HTTPStatus processRelocation(const Poco::Net::HTTPResponse &response, std::ostream &responseStream);
   bool isRelocated(const HTTPStatus &response);
   void throwNotConnected(const std::string &url, const Poco::Net::HostNotFoundException &ex);
 
