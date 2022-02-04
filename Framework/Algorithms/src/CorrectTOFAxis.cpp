@@ -341,8 +341,8 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
   const double l1 = spectrumInfo.l1();
   auto l2 = 0.0;
   auto epp = 0.0;
-  auto const elasticBinIndexOffset =
-      static_cast<double>(getProperty(PropertyNames::ELASTIC_BIN_INDEX)) - static_cast<int>(m_elasticBinIndex);
+  auto const fractionalBinIndex = static_cast<double>(getProperty(PropertyNames::ELASTIC_BIN_INDEX));
+  auto const elasticBinIndexOffset = fractionalBinIndex - floor(fractionalBinIndex);
   auto eppOffset = 0.0;
   if (m_eppTable) {
     averageL2AndEPP(spectrumInfo, l2, epp);
