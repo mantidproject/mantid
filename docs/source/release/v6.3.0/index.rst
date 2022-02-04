@@ -66,8 +66,9 @@ aging system that is hard to maintain and keep up to date.
 Windows & macOS users should see no change in how these packages function and are used. However, the version of Python bundled
 internally will start to change more regularly, at a frequency yet undefined, to keep up with external developments.
 
-For Linux we intend to primarily push users towards the Conda distribution packages but we will work with users
-to find a solution that works for all.
+We plan to push Linux users towards the Conda distribution packages and dropping package (.deb and .rpm) builds in the future.
+This would Mantid easier to install on different distros (though support would be unofficial).
+We're open to feedback and suggestions on this direction.
 
 Further Information
 -------------------
