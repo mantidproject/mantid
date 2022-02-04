@@ -7,7 +7,6 @@
 #pragma once
 #include "Common/DllConfig.h"
 #include "ItemState.h"
-#include "MantidKernel/Exception.h"
 #include <string>
 #include <vector>
 

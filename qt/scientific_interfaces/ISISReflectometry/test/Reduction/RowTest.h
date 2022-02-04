@@ -30,17 +30,48 @@ public:
     TS_ASSERT_EQUALS(&mockGroup, row.getParent());
   }
 
-  void test_update_parent_notifies_group() {
+  void test_setting_success_state_updates_parent() {
     auto mockGroup = MockGroup();
     auto row = makeEmptyRow();
     row.setParent(&mockGroup);
     EXPECT_CALL(mockGroup, notifyChildStateChanged()).Times(1);
 
-    row.updateParent();
+    row.setSuccess();
   }
 
-  void test_update_parent_with_null_parent_does_not_error() {
+  void test_setting_error_state_updates_parent() {
+    auto mockGroup = MockGroup();
     auto row = makeEmptyRow();
-    row.updateParent();
+    row.setParent(&mockGroup);
+    EXPECT_CALL(mockGroup, notifyChildStateChanged()).Times(1);
+
+    row.setError("failed");
+  }
+
+  void test_setting_running_state_updates_parent() {
+    auto mockGroup = MockGroup();
+    auto row = makeEmptyRow();
+    row.setParent(&mockGroup);
+    EXPECT_CALL(mockGroup, notifyChildStateChanged()).Times(1);
+
+    row.setRunning();
+  }
+
+  void test_setting_starting_state_updates_parent() {
+    auto mockGroup = MockGroup();
+    auto row = makeEmptyRow();
+    row.setParent(&mockGroup);
+    EXPECT_CALL(mockGroup, notifyChildStateChanged()).Times(1);
+
+    row.setStarting();
+  }
+
+  void test_resetting_state_updates_parent() {
+    auto mockGroup = MockGroup();
+    auto row = makeEmptyRow();
+    row.setParent(&mockGroup);
+    EXPECT_CALL(mockGroup, notifyChildStateChanged()).Times(1);
+
+    row.resetState();
   }
 };

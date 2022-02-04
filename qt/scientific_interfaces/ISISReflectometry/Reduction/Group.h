@@ -84,16 +84,16 @@ public:
 
   void setChildrenSuccess();
 
-  bool allChildRowsSucceeded() const;
-
 private:
   std::string m_name;
   std::string m_postprocessedWorkspaceName;
   std::vector<boost::optional<Row>> m_rows;
-
   friend class Encoder;
+
   friend class Decoder;
   friend class CoderCommonTester;
+
+  bool allChildRowsSucceeded() const;
 };
 
 template <typename ModificationListener>

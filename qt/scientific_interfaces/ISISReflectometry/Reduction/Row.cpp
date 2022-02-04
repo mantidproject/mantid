@@ -100,29 +100,27 @@ int Row::completedItems() const {
 }
 
 void Row::resetState(bool resetChildren) {
-  UNUSED_ARG(resetChildren);
-  resetOutputs();
-  m_itemState.reset();
+  Item::resetState(resetChildren);
   updateParent();
 }
 
 void Row::setStarting() {
-  m_itemState.setStarting();
+  Item::setStarting();
   updateParent();
 }
 
 void Row::setRunning() {
-  m_itemState.setRunning();
+  Item::setRunning();
   updateParent();
 }
 
 void Row::setSuccess() {
-  m_itemState.setSuccess();
+  Item::setSuccess();
   updateParent();
 }
 
 void Row::setError(std::string const &msg) {
-  m_itemState.setError(msg);
+  Item::setError(msg);
   updateParent();
 }
 
