@@ -652,7 +652,9 @@ class SetAttribute : public Mantid::API::IFunction::AttributeVisitor<> {
 public:
   SetAttribute(FitPropertyBrowser *browser, QtProperty *prop,
                Mantid::Kernel::IValidator_sptr validator = Mantid::Kernel::IValidator_sptr())
-      : m_browser(browser), m_prop(prop), m_validator(validator) {}
+      : m_browser(browser), m_prop(prop) {
+    m_validator = validator;
+  }
 
 protected:
   /// Create string property
@@ -717,20 +719,6 @@ protected:
 private:
   FitPropertyBrowser *m_browser;
   QtProperty *m_prop;
-  Mantid::Kernel::IValidator_sptr m_validator;
-
-  /// Evaluates the validator associated with attribute this visitor is to visit.
-  template <typename T> void evaluateValidator(T &inputData) const {
-    std::string error;
-
-    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
-      error = m_validator->isValid(inputData);
-    }
-
-    if (error != "") {
-      throw std::runtime_error("Set Attribute Error: " + error);
-    }
-  }
 };
 
 /**

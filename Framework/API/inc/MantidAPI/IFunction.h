@@ -195,6 +195,22 @@ public:
     virtual T apply(bool &) const = 0;
     /// Implement this mathod to access attribute as vector
     virtual T apply(std::vector<double> &) const = 0;
+
+    /// Evaluates the validator associated with attribute this visitor is to visit.
+    template <typename T> void evaluateValidator(T &inputData) const {
+      std::string error;
+
+      if (m_validator != Mantid::Kernel::IValidator_sptr()) {
+        error = m_validator->isValid(inputData);
+      }
+
+      if (error != "") {
+        throw std::runtime_error("Set Attribute Error: " + error);
+      }
+    }
+
+    /// Validator against which to evaluate attribute value to set.
+    Mantid::Kernel::IValidator_sptr m_validator = Mantid::Kernel::IValidator_sptr();
   };
 
   /**

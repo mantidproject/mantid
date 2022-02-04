@@ -82,14 +82,17 @@ private:
 // Simple Attribute Visitor for Test
 class SetAttribute : public Mantid::API::IFunction::AttributeVisitor<> {
 public:
-  SetAttribute() : m_dbl(0) {}
+  SetAttribute(Mantid::Kernel::IValidator_sptr validator) : m_dbl(0) { m_validator = validator; }
   double m_dbl;
 
 protected:
   /// Create string property
   void apply(std::string &str) const override { return; }
   /// Create double property
-  void apply(double &d) const override { d = m_dbl; }
+  void apply(double &d) const override {
+    evaluateValidator(m_dbl);
+    d = m_dbl;
+  }
   /// Create int property
   void apply(int &i) const override { return; }
   /// Create bool property
@@ -162,11 +165,11 @@ public:
   void test_double_attribute_visitor() {
     detail::FAVT_Funct f;
     IFunction::Attribute att = f.getAttribute("DAttr");
+    detail::SetAttribute att_visitor(att.getValidator());
 
     // Test visitor change within validator restrictions
     double dbl = 75;
 
-    detail::SetAttribute att_visitor;
     att_visitor.m_dbl = dbl;
 
     att.apply(att_visitor);
@@ -177,6 +180,18 @@ public:
     att_visitor.m_dbl = dbl;
 
     TS_ASSERT_THROWS(att.apply(att_visitor), const std::runtime_error &);
+  }
+
+  void test_double_attribute_from_string() {
+    detail::FAVT_Funct f;
+    IFunction::Attribute att = f.getAttribute("DAttr");
+
+    // Test visitor change within validator restrictions
+    att.fromString("65.0");
+    TS_ASSERT(att.asDouble() == 65.0);
+
+    // Test visitor change outside of validator restrictions
+    TS_ASSERT_THROWS(att.fromString("150.0"), const std::runtime_error &);
   }
 
   // void test_factory_creation() {

@@ -887,30 +887,56 @@ protected:
   }
   /// Apply if double
   void apply(double &d) const override {
+    double tempd;
+
     std::istringstream istr(m_value + " ");
-    istr >> d;
+    istr >> tempd;
+
     if (!istr.good())
       throw std::invalid_argument("Failed to set double attribute "
                                   "from string " +
                                   m_value);
+    evaluateValidator(tempd);
+    d = tempd;
   }
   /// Apply if bool
-  void apply(bool &b) const override { b = (m_value == "true" || m_value == "TRUE" || m_value == "1"); }
+  void apply(bool &b) const override {
+    bool tempb;
+
+    tempb = (m_value == "true" || m_value == "TRUE" || m_value == "1");
+    evaluateValidator(tempb);
+
+    b = (m_value == "true" || m_value == "TRUE" || m_value == "1");
+  }
   /// Apply if vector
   void apply(std::vector<double> &v) const override {
     if (m_value.empty() || m_value == "EMPTY") {
       v.clear();
       return;
     }
+
     if (m_value.size() > 2) {
-      // check if the value is in barckets (...)
+      // check if the value is in brackets (...)
       if (m_value.front() == '(' && m_value.back() == ')') {
         m_value.erase(0, 1);
         m_value.erase(m_value.size() - 1);
       }
     }
     Kernel::StringTokenizer tokenizer(m_value, ",", Kernel::StringTokenizer::TOK_TRIM);
-    v.resize(tokenizer.count());
+
+    int newSize = tokenizer.count();
+
+    // if visitor has an associated validator, first populate temp vec and evaluate against validator.
+    if (m_validator != Mantid::Kernel::IValidator_sptr()) {
+      std::vector<double> tempVec(newSize);
+
+      for (size_t i = 0; i < tempVec.size(); ++i) {
+        tempVec[i] = boost::lexical_cast<double>(tokenizer[i]);
+      }
+      evaluateValidator(tempVec);
+    }
+
+    v.resize(newSize);
     for (size_t i = 0; i < v.size(); ++i) {
       v[i] = boost::lexical_cast<double>(tokenizer[i]);
     }
