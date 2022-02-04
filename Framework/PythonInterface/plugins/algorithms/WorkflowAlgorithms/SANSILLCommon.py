@@ -220,11 +220,7 @@ def main_detector_distance(run, instrument):
         return run['Detector 1.det1_calc'].value
     if instrument == 'D33':
         return run['Detector.det2_calc'].value
-    # fall back case for any other instrument
-    if 'L2' in run:
-        return run['L2'].value
-    else:
-        raise RuntimeError('Unable to find the main detector distance, is the instrument supported?')
+    raise RuntimeError('Unable to find the main detector distance, is the instrument supported?')
 
 
 def get_vertical_grouping_pattern(ws):

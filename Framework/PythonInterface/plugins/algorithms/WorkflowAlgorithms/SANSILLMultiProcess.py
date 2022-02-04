@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSILLCommon import *
 from mantid.api import DataProcessorAlgorithm, WorkspaceGroupProperty, MultipleFileProperty, FileAction, WorkspaceGroup, \
-    TextAxis, Progress
+    TextAxis, Progress, FileFinder
 from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty, StringArrayProperty, IntArrayProperty, \
     IntBoundedValidator, StringListValidator
 from mantid.simpleapi import *
@@ -362,6 +362,40 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues['OutputPanels'] = "Panels cannot be calculated together with the wedges, please choose one or the other."
         return issues
 
+    def _check_sample_runs_filling_order(self):
+        '''Makes sure that the sample runs are filled in from D1 onwards with no gaps'''
+        issues = dict()
+        is_empty = False
+        for d in range(N_DISTANCES):
+            prop = f'SampleRunsD{d+1}'
+            if is_empty and self.getPropertyValue(prop):
+                issues[prop] = f'Samples have to be filled from D1 onwards: found {d+1} non-empty, while another distance before was empty.'
+            if not self.getPropertyValue(prop):
+                is_empty = True
+        return issues
+
+    def _check_tr_runs_filling_order(self):
+        '''Makes sure that the transmission runs are filled in from W1 onwards'''
+        issues = dict()
+        if not self.getPropertyValue('SampleTrRunsW1') and self.getPropertyValue('SampleTrRunsW2'):
+            issues['SampleTrRunsW1'] = f'If there is one wavelength, transmissions must be filled in W1.'
+        return issues
+
+    def _check_optional_files_exist(self):
+        '''Checks if the requested calibration workspaces/files exist'''
+        issues = dict()
+        props = ['SensitivityMap', 'DefaultMask', 'BeamStopMasks', 'FlatFields', 'Solvents']
+        for prop in props:
+            value = self.getPropertyValue(prop)
+            if value:
+                for item in value.split(','):
+                    if not mtd.doesExist(item):
+                        try:
+                            FileFinder.Instance().findRuns(item)
+                        except RuntimeError as re:
+                            issues[prop] = re
+        return issues
+
     def validateInputs(self):
         '''Validates all the inputs, one by one. Returns at first failure.'''
         issues = dict()
@@ -369,6 +403,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             self._setup_light()
         except RuntimeError as re:
             issues['SampleRunsD1'] = 'Unable to configure the algorithm: '+str(re)
+        if not issues:
+            issues = self._check_sample_runs_filling_order()
+        if not issues:
+            issues = self._check_tr_runs_filling_order()
         if not issues:
             issues = self._check_sample_runs_dimensions()
         if not issues:
@@ -391,6 +429,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             issues = self._check_output_name()
         if not issues:
             issues = self._check_wedges_panels_mutex()
+        if not issues:
+            issues = self._check_optional_files_exist()
         return issues
 
     #================================CONFIGURING LOGIC================================#
