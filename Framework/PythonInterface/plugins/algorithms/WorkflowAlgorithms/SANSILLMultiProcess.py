@@ -185,11 +185,6 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                              doc='Whether the sensitivity data has been measured with different horizontal offsets (D22 only).')
         self.setPropertyGroup('SensitivityWithOffsets', 'Parameters')
 
-        self.declareProperty(name='OutputType', defaultValue='I(Q)',
-                             validator=StringListValidator(['None', 'I(Q)']),
-                             doc='The type of the integration to perform.')
-        self.setPropertyGroup('OutputType', 'Parameters')
-
         self.declareProperty(IntArrayProperty(name='DistancesAtWavelength2', values=[]),
                              doc='Defines which distance indices (starting from 0) match to the 2nd wavelength')
         self.setPropertyGroup('DistancesAtWavelength2', 'Parameters')
@@ -523,15 +518,14 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             if len(sample_ws) > 1:
                 # if there is a 2nd output, it must be sensitivity
                 outputs['Sensitivity'] = sample_ws[1]
-            if self.getPropertyValue('OutputType') != 'None':
-                integrated_ws = self.integrate(d, sample_ws)
-                # set distribution to false since stitch doesn't deal with frequencies
-                self.set_distribution(integrated_ws, False)
-                outputs['IQ'] = integrated_ws[0]
-                if len(integrated_ws) > 1:
-                    # if there is a second output from integration, it must be either the panels or the wedges
-                    key = 'IQP' if self.getProperty('OutputPanels').value else 'IQW'
-                    outputs[key] = integrated_ws[1]
+            integrated_ws = self.integrate(d, sample_ws)
+            # set distribution to false since stitch doesn't deal with frequencies
+            self.set_distribution(integrated_ws, False)
+            outputs['IQ'] = integrated_ws[0]
+            if len(integrated_ws) > 1:
+                # if there is a second output from integration, it must be either the panels or the wedges
+                key = 'IQP' if self.getProperty('OutputPanels').value else 'IQW'
+                outputs[key] = integrated_ws[1]
             all_outputs.append(outputs)
         return all_outputs
 
@@ -822,7 +816,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         kwargs['OutputWorkspace'] = sample_ws[0] + '_iq'
         results.append(kwargs['OutputWorkspace'])
         # for the moment only I(Q) is supported, since with the workspace containing all the samples,
-        # I(Phi,Q) and I(Qx,Qy) will need to be reworked to become MDHistoWorkspace
+        # I(Phi,Q) and I(Qx,Qy) will need to be reworked to become MDHistoWorkspace, if they are required
         kwargs['OutputType'] = 'I(Q)'
         props = ['CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'NumberOfWedges', 'WedgeAngle',
                  'WedgeOffset', 'AsymmetricWedges', 'WavelengthRange', 'ShapeTable']
