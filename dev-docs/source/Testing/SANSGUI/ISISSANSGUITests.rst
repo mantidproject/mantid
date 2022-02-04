@@ -163,9 +163,10 @@ Beam centre finder
 
 In the ``Beam centre`` tab:
 
-#. Check that detector is set to ``main-detector`` and click run
-#. Check the values in the first row (Centre Position - Rear) have changed on completion
-#. Change the detector to ``Hab`` and re-run ensuring only the values for the front has changed
+#. Make a note of the four values representing the front/main detector centre positions.
+#. Check that detector is set to ``main-detector`` and click run.
+#. Check the values in the first row (Centre Position - Rear) have changed on completion.
+#. Change the detector to ``Hab`` and re-run ensuring only the values for the front has changed.
 #. For both a plot should appear, as the centre finder is running  with four lines.
 #. The four lines should gradually get closer together.
 
