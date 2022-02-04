@@ -181,6 +181,128 @@ public:
   }
 
   //-------------------------------------------------------------------------------
+  /** Setup simple algorithm*/
+  static void simpleRun(bool shouldPass, size_t numberValuesPeakRadius, size_t numberValuesBkgInnerRadius,
+                        size_t numberValuesBkgOuterRadius, bool cyl = false, bool ellip = false) {
+    createMDEW();
+    /* Create 3 overlapping shells so that density goes like this:
+     * r < 1 : density 1.0
+     * 1 < r < 2 : density 1/2
+     * 2 < r < 3 : density 1/3
+     */
+    addPeak(1000, 0., 0., 0., 1.0);
+    addPeak(1000 * 4, 0., 0., 0.,
+            2.0); // 8 times the volume / 4 times the counts = 1/2 density
+    addPeak(1000 * 9, 0., 0., 0.,
+            3.0); // 27 times the volume / 9 times the counts = 1/3 density
+
+    // --- Make a fake PeaksWorkspace ---
+    PeaksWorkspace_sptr peakWS(new PeaksWorkspace());
+    Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
+    peakWS->addPeak(Peak(inst, 1, 1.0, V3D(0., 0., 0.)));
+    TS_ASSERT_EQUALS(peakWS->getPeak(0).getIntensity(), 0.0);
+    AnalysisDataService::Instance().addOrReplace("IntegratePeaksMD2Test_peaks", peakWS);
+
+    std::vector<double> peakRadius(numberValuesPeakRadius, 1.0);
+    std::vector<double> bkgInnerRadius(numberValuesBkgInnerRadius, 1.1);
+    std::vector<double> bkgOuterRadius(numberValuesBkgOuterRadius, 2.0);
+
+    IntegratePeaksMD2 alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "IntegratePeaksMD2Test_MDEWS"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("PeakRadius", peakRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeaksWorkspace", "IntegratePeaksMD2Test_peaks"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "IntegratePeaksMD2Test_Output"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundInnerRadius", bkgInnerRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("BackgroundOuterRadius", bkgOuterRadius));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Ellipsoid", ellip));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Cylinder", cyl));
+    if (shouldPass) {
+      TS_ASSERT_THROWS_NOTHING(alg.execute());
+    } else {
+      TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
+    }
+    AnalysisDataService::Instance().remove("IntegratePeaksMD2Test_peaks");
+  }
+  /** In the following validation tests, three validation principles must be met:
+      (where radius can be peak/BackgroundInner/BackgroundOuter)
+   A) radius vector has 1 or 3 values
+   B) radius vector has 1 value for sphere/cylinder/ellipsoid, 3 values only for ellipsoid
+      (sphere implied when ellipsoid=false and cylinder=false)
+   C) ellipsoid and cylinder cannot both be true
+   */
+  /// Peak Radius
+  void test_validationPeak1ValueSphere() { simpleRun(true, 1, 1, 1, false, false); }
+  void test_validationPeak1ValueCylinder() { simpleRun(true, 1, 1, 1, true, false); }
+  void test_validationPeak1ValueEllipsoid() { simpleRun(true, 1, 3, 3, false, true); }
+  void test_validationPeak1ValueEllipsoidAndCylinder() { simpleRun(false, 1, 1, 1, true, true); } // fail C
+
+  void test_validationPeak2ValuesSphere() { simpleRun(false, 2, 1, 1, false, false); }             // fail A
+  void test_validationPeak2ValuesCylinder() { simpleRun(false, 2, 1, 1, true, false); }            // fail A
+  void test_validationPeak2ValuesEllipsoid() { simpleRun(false, 2, 3, 3, false, true); }           // fail A
+  void test_validationPeak2ValuesEllipsoidAndCylinder() { simpleRun(false, 2, 1, 1, true, true); } // fail A + C
+
+  void test_validationPeak3ValuesSphere() { simpleRun(false, 3, 1, 1, false, false); }  // fail B
+  void test_validationPeak3ValuesCylinder() { simpleRun(false, 3, 1, 1, true, false); } // fail B
+  void test_validationPeak3ValuesEllipsoid() { simpleRun(true, 3, 3, 3, false, true); }
+  void test_validationPeak3ValuesEllipsoidAndCylinder() { simpleRun(false, 3, 1, 1, true, true); } // fail C
+
+  void test_validationPeak4ValuesSphere() { simpleRun(false, 4, 1, 1, false, false); }             // fail A
+  void test_validationPeak4ValuesCylinder() { simpleRun(false, 4, 1, 1, true, false); }            // fail A
+  void test_validationPeak4ValuesEllipsoid() { simpleRun(false, 4, 3, 3, false, true); }           // fail A
+  void test_validationPeak4ValuesEllipsoidAndCylinder() { simpleRun(false, 4, 1, 1, true, true); } // fail A + C
+
+  /// Background Inner Radius
+  // test_validationBkgInner1ValueSphere() { simpleRun(true, 1,1,1, false, false); }
+  //  would duplicate  test_validationPeak1ValueSphere()
+  // test_validationBkgInner1ValueCylinder() { simpleRun(true, 1,1,1, true, false); }
+  //  would duplicate test_validationPeak1ValueCylinder()
+  void test_validationBkgInner1ValueEllipsoid() { simpleRun(true, 3, 1, 3, false, true); }
+  // test_validationBkgInner1ValueEllipsoidAndCylinder() { simpleRun(false, 1,1,1, true, true); } // fail C
+  //  would duplicate test_validationPeak1ValueEllipsoidAndCylinder()
+
+  void test_validationBkgInner2ValuesSphere() { simpleRun(false, 1, 2, 1, false, false); }             // fail A
+  void test_validationBkgInner2ValuesCylinder() { simpleRun(false, 1, 2, 1, true, false); }            // fail A
+  void test_validationBkgInner2ValuesEllipsoid() { simpleRun(false, 3, 2, 3, false, true); }           // fail A
+  void test_validationBkgInner2ValuesEllipsoidAndCylinder() { simpleRun(false, 1, 2, 1, true, true); } // fail A + C
+
+  void test_validationBkgInner3ValuesSphere() { simpleRun(false, 1, 3, 1, false, false); }  // fail B
+  void test_validationBkgInner3ValuesCylinder() { simpleRun(false, 1, 3, 1, true, false); } // fail B
+  //  test_validationBkgInner3ValuesEllipsoid() { simpleRun(true, 3,3,3, false, true); }
+  // would duplicate test_validationPeak3ValuesEllipsoid()
+  void test_validationBkgInner3ValuesEllipsoidAndCylinder() { simpleRun(false, 1, 3, 1, true, true); } // fail C
+
+  void test_validationBkgInner4ValuesSphere() { simpleRun(false, 1, 4, 1, false, false); }             // fail A
+  void test_validationBkgInner4ValuesCylinder() { simpleRun(false, 1, 4, 1, true, false); }            // fail A
+  void test_validationBkgInner4ValuesEllipsoid() { simpleRun(false, 3, 4, 3, false, true); }           // fail A
+  void test_validationBkgInner4ValuesEllipsoidAndCylinder() { simpleRun(false, 1, 4, 1, true, true); } // fail A + C
+
+  // Background Outer Radius
+  // test_validationBkgOuter1ValueSphere() { simpleRun(true, 1,1,1, false, false); }
+  //  would duplicate test_validationPeak1ValueSphere()
+  // test_validationBkgOuter1ValueCylinder() { simpleRun(true, 1,1,1, true, false); }
+  //  would duplicate test_validationPeak1ValueCylinder()
+  void test_validationBkgOuter1ValueEllipsoid() { simpleRun(true, 3, 3, 1, false, true); }
+  // test_validationBkgOuter1ValueEllipsoidAndCylinder() { simpleRun(false, 1,1,1, true, true); } // fail C
+  //  would duplicate test_validationPeak1ValueEllipsoidAndCylinder()
+
+  void test_validationBkgOuter2ValuesSphere() { simpleRun(false, 1, 1, 2, false, false); }             // fail A
+  void test_validationBkgOuter2ValuesCylinder() { simpleRun(false, 1, 1, 2, true, false); }            // fail A
+  void test_validationBkgOuter2ValuesEllipsoid() { simpleRun(false, 3, 3, 2, false, true); }           // fail A
+  void test_validationBkgOuter2ValuesEllipsoidAndCylinder() { simpleRun(false, 1, 1, 2, true, true); } // fail A + C
+
+  void test_validationBkgOuter3ValuesSphere() { simpleRun(false, 1, 1, 3, false, false); }  // fail B
+  void test_validationBkgOuter3ValuesCylinder() { simpleRun(false, 1, 1, 3, true, false); } // fail B
+  // test_validationBkgOuter3ValuesEllipsoid() { simpleRun(true, 3,3,3, false, true); }
+  //  would duplicate test_validationPeak3ValuesEllipsoid()
+  void test_validationBkgOuter3ValuesEllipsoidAndCylinder() { simpleRun(false, 1, 1, 3, true, true); } // fail C
+
+  void test_validationBkgOuter4ValuesSphere() { simpleRun(false, 1, 1, 4, false, false); }             // fail A
+  void test_validationBkgOuter4ValuesCylinder() { simpleRun(false, 1, 1, 4, true, false); }            // fail A
+  void test_validationBkgOuter4ValuesEllipsoid() { simpleRun(false, 3, 3, 4, false, true); }           // fail A
+  void test_validationBkgOuter4ValuesEllipsoidAndCylinder() { simpleRun(false, 1, 1, 4, true, true); } // fail A + C
+  //-------------------------------------------------------------------------------
   /** Full test using faked-out peak data */
   void test_exec() {
     // --- Fake workspace with 3 peaks ------
