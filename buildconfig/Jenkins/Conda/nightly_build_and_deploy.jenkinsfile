@@ -1,8 +1,8 @@
 // This script expects the following environment variables to be set by the Jenkins job:
+// GITHUB_USER_NAME - The name of the user, being used with pushing/pulling from conda-recipes whilst updating it.
 // GITHUB_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for cloning and pushing to the conda-recipes repo
 // ANACONDA_TOKEN_CREDENTIAL_ID - The name of the credentials token in Jenkins that you want to use for publishing conda packages
 // ANACONDA_CHANNEL - The channel to publish to on Anaconda.org
-// CONDA_BLD_PATH - The path to where conda-build will construct the packages, needed for windows due to path length. Must be inside the Workspace ending with conda-bld, equivelant to $WORKSPACE/conda-bld. Due to limitations with jenkins archiving of artifacts.
 // ANACONDA_CHANNEL_LABEL - This will be used as the label for the channel, otherwise no label will be set.
 
 def build_and_test_linux() {
@@ -99,7 +99,7 @@ pipeline {
                 stage('conda-build Windows') {
                     agent { label 'conda-build-win' }
                     environment {
-                        CONDA_BLD_PATH = "${WORKSPACE}/conda-bld"
+                        CONDA_BLD_PATH = "${WORKSPACE}\\conda-bld"
                     }
                     steps {
                         conda_build_win()
