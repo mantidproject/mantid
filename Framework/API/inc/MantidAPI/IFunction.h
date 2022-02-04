@@ -163,6 +163,14 @@ template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<T
 class MANTID_API_DLL IFunction {
 public:
   /**
+   * Simple Exception Struct to differentiate validation error from other exceptions.
+   */
+  struct validationException : public std::runtime_error {
+  public:
+    validationException(std::string ErrorMsg) : std::runtime_error(ErrorMsg) {}
+  };
+
+  /**
    * Atribute visitor class. It provides a separate access method
    * for each attribute type. When applied to a particular attribue
    * the appropriate method will be used. The child classes must
@@ -205,7 +213,7 @@ public:
       }
 
       if (error != "") {
-        throw std::runtime_error("Set Attribute Error: " + error);
+        throw IFunction::validationException("Set Attribute Error: " + error);
       }
     }
 
@@ -242,6 +250,22 @@ public:
     virtual T apply(const bool &i) const = 0;
     /// Implement this mathod to access attribute as vector
     virtual T apply(const std::vector<double> &) const = 0;
+
+    /// Evaluates the validator associated with attribute this visitor is to visit.
+    template <typename T> void evaluateValidator(T &inputData) const {
+      std::string error;
+
+      if (m_validator != Mantid::Kernel::IValidator_sptr()) {
+        error = m_validator->isValid(inputData);
+      }
+
+      if (error != "") {
+        throw IFunction::validationException("Set Attribute Error: " + error);
+      }
+    }
+
+    /// Validator against which to evaluate attribute value to set.
+    Mantid::Kernel::IValidator_sptr m_validator = Mantid::Kernel::IValidator_sptr();
   };
 
   /// Attribute is a non-fitting parameter.
@@ -287,7 +311,7 @@ public:
       }
 
       if (error != "") {
-        throw std::runtime_error("Attribute " + m_name + ": " + error);
+        throw IFunction::validationException("Attribute " + m_name + ": " + error);
       }
     }
     /// Return a clone of the attribute validator;

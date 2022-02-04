@@ -1284,7 +1284,7 @@ void FitPropertyBrowser::boolChanged(QtProperty *prop) {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
-    h->setAttribute(prop);
+    enactAttributeChange(prop, h);
   }
 }
 
@@ -1330,7 +1330,7 @@ void FitPropertyBrowser::intChanged(QtProperty *prop) {
     PropertyHandler *h = getHandler()->findHandler(prop);
     if (!h)
       return;
-    h->setAttribute(prop);
+    enactAttributeChange(prop, h);
   }
 }
 
@@ -1373,8 +1373,18 @@ void FitPropertyBrowser::doubleChanged(QtProperty *prop) {
         h->addConstraint(parProp, false, true, 0, upBound);
       }
     } else { // it could be an attribute
-      h->setAttribute(prop);
+      enactAttributeChange(prop, h);
     }
+  }
+}
+
+void FitPropertyBrowser::enactAttributeChange(QtProperty *prop, PropertyHandler *h) {
+  try {
+    h->setAttribute(prop);
+  } catch (IFunction::validationException &ve) {
+    std::stringstream err_str;
+    err_str << prop->propertyName().toStdString() << " - " << ve.what();
+    g_log.warning(err_str.str());
   }
 }
 
