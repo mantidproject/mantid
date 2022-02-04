@@ -7,6 +7,8 @@ Indirect Geometry Changes
 
 New Features
 ------------
+- The Bayes Fortran libraries have been moved to a separate ``quasielasticbayes`` package.
+  This allows hose on non-Windows platforms to install them with  ``pip``: ``python -m pip install --user quasielasticbayes``.
 - In :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` fitting tabs, a button has been added that will unify the fit range for all spectra selected.
 - :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` now allows defining constraints for more than two masses using the ``ConstraintsProfile`` .
 
@@ -19,6 +21,7 @@ Improvements
   from CASTEP or Phonopy calculations, then sample an appropriate q-point mesh on-the-fly to create a phonon DOS. This feature requires the Euphonic library to be installed. This library is
   included in the Windows package, but for other platforms an installer is provided in the Script Repository.
 - In Inelastic Data Analysis the :ref:`Elwin Tab <Elwin-iqt-ref>` has had its UI updated to be more user friendly.
+- :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>` excludes back scattering spectra for now to avoid problems with the analysis.
 - Updated documentation for :ref:`VesuvioAnalysis <algm-VesuvioAnalysis>`.
 
 Bugfixes

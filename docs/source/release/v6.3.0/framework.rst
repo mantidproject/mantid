@@ -44,6 +44,7 @@ Bugfixes
 - Fixed a bug in :ref:`LoadEventNexus <algm-LoadEventNexus>` in checking valid event ID's and to make sure to always exclude data in ``error`` and ``unmapped`` banks.
 - Fixed a bug in :ref:`MonteCarloAbsorption <algm-MonteCarloAbsorption>`. If the algorithm was run with the Sparse Workspace feature enabled on a workspace containing spectra
   that didn't have any detectors, it failed with an error.
+- Fixed a bug in :ref:`Integration <algm-Integration>` when using it with a ``RebinnedOutput`` workspace (e.g from :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`) where the output was not correctly normalised.
 - Fixed a bug in :ref:`SaveNexus <algm-SaveNexus>` - ragged workspace x-values are now saved correctly when workspace indices are supplied.
 
 
@@ -61,6 +62,12 @@ Fit Functions
 New Features
 ############
 - Fixed a bug in :ref:`UserFunction<func-UserFunction>` where the view would not be updated with the parameters in the formula entered.
+
+Fitting
+-------
+Bugfixes
+########
+- The errors/confidence-bounds on a fitted curve are determined using the covariance matrix without scaling (since v6.0 the matrix was scaled by the reduced chi-squared). This change makes them consistent with the errors on the best fit parameters.
 
 Geometry
 ---------
