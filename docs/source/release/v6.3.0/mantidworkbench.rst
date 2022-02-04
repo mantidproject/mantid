@@ -52,7 +52,7 @@ InstrumentViewer
 ----------------
 New features
 ############
-- **In the** :ref:`Pick Tab<instrumentviewer_pick_tab>` **, a new panel allowing for direct rebinning of the workspace now exists.**
+- **In the** :ref:`Pick Tab<instrumentviewer_pick_tab>` **, a new panel allowing users to directly rebin their workspace now exists.**
 .. figure:: ../../images/iview_insitu_rebin.png
      :width: 500px
      :align: center

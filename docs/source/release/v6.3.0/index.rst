@@ -43,19 +43,19 @@ Conda
    https://www.anaconda.com. All Rights Reserved
 
 
-We are excited to announce the release of brand-new packages built for the `conda package manager <https://docs.conda.io/en/latest/>`__.
+We are excited to announce the release of brand-new packages built for the `Conda package manager <https://docs.conda.io/en/latest/>`__.
 Up until this release only a single ``mantid-framework`` package has been available for Linux but
 this release sees full support for our standard platforms (Linux, Windows, macOS).
-Furthermore, the traditional monolithic package has been split into 3 packages in the conda world:
+Furthermore, the traditional monolithic package has been split into 3 packages in the Conda world:
 
 - ``mantid``: Access to the algorithms and workspace from Python (no GUI components).
 
-- ``mantidqt``: Access to custom-made Qt widgets built on top of mantid functionality,
+- ``mantidqt``: Access to custom-made Qt widgets built on top of Mantid functionality,
   e.g. InstrumentViewer, SliceViewer.
 
 - ``mantidworkbench``: A package shippping the traditional Workbench application.
 
-For instructions on how to access these packages please see the `conda installation instructions <https://download.mantidproject.org/conda.html>`__.
+For instructions on how to access these packages please see the `Conda installation instructions <https://download.mantidproject.org/conda.html>`__.
 
 Future Packaging Changes
 ------------------------
@@ -63,10 +63,10 @@ Future Packaging Changes
 In future releases we will be reworking how our installer packages are constructed so that we can replace an
 aging system that is hard to maintain and keep up to date.
 
-For Windows & macOS, users should see no change in how these packages function and are used. However, the version of Python bundled
+Windows & macOS users should see no change in how these packages function and are used. However, the version of Python bundled
 internally will start to change more regularly, at a frequency yet undefined, to keep up with external developments.
 
-For Linux we intend to primarily push users towards the conda distribution packages but we will work with users
+For Linux we intend to primarily push users towards the Conda distribution packages but we will work with users
 to find a solution that works for all.
 
 Further Information
