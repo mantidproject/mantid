@@ -167,7 +167,7 @@ public:
    */
   struct validationException : public std::runtime_error {
   public:
-    validationException(std::string ErrorMsg) : std::runtime_error(ErrorMsg) {}
+    validationException(const std::string &ErrorMsg) : std::runtime_error(ErrorMsg) {}
   };
 
   /**
