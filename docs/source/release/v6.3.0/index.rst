@@ -31,18 +31,16 @@ In addition to many improvements we are delighted to announce some new features 
 - In the :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` and the :ref:`Muon Analysis <Muon_Analysis-ref>` GUIs the confidence interval of a fit, previously shown as an error bar, is now represented by a shaded region.
 - Several new fitting functions for Muons have been provided.
 
-Conda
------
 
+|
 .. figure:: ../../images/conda_logo.svg
-   :align: right
+   :align: center
    :width: 400px
 
-   |copy| 2017 Continuum Analytics, Inc. (dba Anaconda, Inc.).
+   |copy| 2017 Continuum Analytics, Inc. (dba Anaconda, Inc.). https://www.anaconda.com. All Rights Reserved
 
-   https://www.anaconda.com. All Rights Reserved
-
-
+Conda
+-----
 We are excited to announce the release of brand-new packages built for the `Conda package manager <https://docs.conda.io/en/latest/>`__.
 Up until this release only a single ``mantid-framework`` package has been available for Linux but
 this release sees full support for our standard platforms (Linux, Windows, macOS).
