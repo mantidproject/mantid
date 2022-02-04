@@ -24,12 +24,12 @@ Plotting has also seen a number of updates and users will benefit from improved 
 
 In addition to many improvements we are delighted to announce some new features including:
 
+- Full cross-platform support for Conda packages. See Conda_ for further details.
 - The :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` now supports two texture groupings, ``Texture20`` and ``Texture30`` (see image above).
 - The Error Reporter can now remember and prefill the user's name and e-mail address.
 - The :ref:`InstrumentViewer` :ref:`Pick Tab<instrumentviewer_pick_tab>` has a new panel for allowing the rebinning of workspaces.
 - In the :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis-ref>` and the :ref:`Muon Analysis <Muon_Analysis-ref>` GUIs the confidence interval of a fit, previously shown as an error bar, is now represented by a shaded region.
 - Several new fitting functions for Muons have been provided.
-
 
 Conda
 -----
