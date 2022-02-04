@@ -27,6 +27,10 @@
     <parameter name="tau" type="number">
       <value val="0.0000015" />
     </parameter>
+    <!-- Logs to list when conjoining the runs -->
+    <parameter name="conjoin_sample_logs_list" type="string" visible="false">
+      <value val="sample.thickness, sample_description, run_number" />
+    </parameter>
     <!-- The pixel sizes [mm] used by SolidAngle, resolution and default Q binning calculations.
     Note that for the panels, often pixels have transposed shape, but the surface is the same.
     Q binning is based on the maximum of the 2 dimensions, so it is also invariant.-->

@@ -502,7 +502,10 @@ class SANSILLReduction(PythonAlgorithm):
             Scale(InputWorkspace=ws, Factor=1/thicknesses[0], OutputWorkspace=ws)
         else:
             if thicknesses[0] < 0:
-                thicknesses = mtd[ws].getRun()['SampleThickness'].value.split(',')
+                if 'sample.thickness' in mtd[ws].getRun():
+                    thicknesses = mtd[ws].getRun()['sample.thickness'].value.split(',')
+                else:
+                    raise RuntimeError('Unable to find sample thickness from files, consider providing them manually.')
             thick_ws = ws + '_thickness'
             CreateWorkspace(NSpec=1, OutputWorkspace=thick_ws,
                             DataY=np.array(thicknesses),
