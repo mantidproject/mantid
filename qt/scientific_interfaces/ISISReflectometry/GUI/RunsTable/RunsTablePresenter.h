@@ -92,7 +92,7 @@ public:
 
 private:
   void applyGroupStylingToRow(MantidWidgets::Batch::RowLocation const &location);
-  void applyStylingToParent(const boost::optional<Item const &> &item);
+  void applyStylingToParent(Row const &row);
   void clearInvalidCellStyling(std::vector<MantidQt::MantidWidgets::Batch::Cell> &cells);
   void clearInvalidCellStyling(MantidQt::MantidWidgets::Batch::Cell &cell);
   void applyInvalidCellStyling(MantidQt::MantidWidgets::Batch::Cell &cell);

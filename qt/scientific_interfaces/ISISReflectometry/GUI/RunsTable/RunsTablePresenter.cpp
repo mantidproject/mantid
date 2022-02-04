@@ -500,8 +500,7 @@ void RunsTablePresenter::applyGroupStylingToRow(MantidWidgets::Batch::RowLocatio
   }
 }
 
-void RunsTablePresenter::applyStylingToParent(const boost::optional<Item const &> &item) {
-  auto const row = dynamic_cast<const Row &>(item.get());
+void RunsTablePresenter::applyStylingToParent(Row const &row) {
   auto *parent = row.getParent();
   if (parent) {
     auto const parentLocation = m_model.reductionJobs().getLocation(*parent);
@@ -771,7 +770,8 @@ void RunsTablePresenter::notifyRowStateChanged(boost::optional<Item const &> ite
   if (item->isGroup()) {
     return;
   }
-  applyStylingToParent(item);
+  auto const &row = dynamic_cast<const Row &>(item.get());
+  applyStylingToParent(row);
 }
 
 void RunsTablePresenter::notifyRowOutputsChanged() {
