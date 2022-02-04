@@ -95,7 +95,10 @@ class VesuvioAnalysis(PythonAlgorithm):
                              validator=IntListValidator([0,1,2,3,4]))
         self.declareProperty("OutputName", "polyethylene",doc="The base name for the outputs." )
         self.declareProperty("Runs", "38898-38906", doc="List of Vesuvio run numbers (e.g. 20934-20937, 30924)")
-        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last).")
+        self.declareProperty(IntArrayProperty("Spectra",[135,182]), doc="Range of spectra to be analysed (first, last). Please note that "
+                                                                         "spectra with a number lower than 135 are treated as back "
+                                                                         "scattering spectra and are therefore not considered valid input "
+                                                                         "as this algorithm is only for forward scattering data.")
         self.declareProperty(FloatArrayProperty("TOFRangeVector", [110.,1.5,460.]),
                              doc="In micro seconds (lower bound, binning, upper bound).")
         self.declareProperty(
