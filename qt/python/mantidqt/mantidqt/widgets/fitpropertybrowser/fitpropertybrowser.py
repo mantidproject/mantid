@@ -117,12 +117,16 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
                     # we don't want to include the fit workspace in our selection
                     if ws_name in output_wsnames:
                         continue
-                    spectrum_list = [artist.spec_num for artist in artists]
-                    spectrum_list = sorted(list(set(spectrum_list)))
-                    allowed_spectra[ws_name] = spectrum_list
+                    #loop through arists and get relevant spec numbers if spec_num represents a spectrum as opposed to a bin axes.
+                    spectrum_list = [artist.spec_num for artist in artists if artist.is_spec]
+
+                    if spectrum_list:
+                        spectrum_list = sorted(list(set(spectrum_list)))
+                        allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
         self.allowed_spectra = allowed_spectra
+
         return allowed_spectra
 
     def _get_table_workspace(self):

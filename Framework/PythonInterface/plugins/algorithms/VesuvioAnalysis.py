@@ -179,6 +179,9 @@ class VesuvioAnalysis(PythonAlgorithm):
         spectra = self.getProperty("Spectra").value
         if len(spectra) != 2:
             issues["Spectra"] = "Spectra should be of the form [first, last]"
+        # exclude backscattering spectra for now
+        if spectra[0] < 135 or spectra[1] < 135:
+            issues["Spectra"] = "Analysis not available for backscattering spectra at the moment."
 
         run_string = self.getProperty("Runs").value
         for ch in run_string:

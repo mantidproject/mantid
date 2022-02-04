@@ -697,8 +697,8 @@ useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/BankRenderingH
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/DetXMLFile.cpp:24
 constParameter:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ObserverPattern.h:65
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetDecoder.cpp:186
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1622
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1655
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1638
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/InstrumentWidgetPickTab.cpp:1671
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/PanelsSurface.cpp:178
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/Projection3D.cpp:248
 useInitializationList:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/src/UnwrappedDetector.cpp:16

@@ -17,4 +17,10 @@ New
 - :ref:`ParallaxCorrection <algm-ParallaxCorrection>` will now accept optional angle offsets per detector bank, to be subtracted from the scattering angles before evaluating the formulae.
 - :ref:`ApplyTransmissionCorrection <algm-ApplyTransmissionCorrection>` no longer requires the input workspace to be histogram data in wavelengths.
 
+Bugfixes
+--------
+
+- The ISIS SANS row copy, cut and paste has been overhauled fixing numerous edge-cases. These include: the paste order being reversed, unexpected rows appearing or clearing whilst pasting and blank rows appearing randomly.
+
+
 :ref:`Release 6.4.0 <v6.4.0>`
