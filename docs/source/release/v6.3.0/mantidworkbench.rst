@@ -9,6 +9,7 @@ New features
 ------------
 - Table workspaces can now have read-only columns added to them (``ws.addReadOnlyColumn(<TYPE>, <NAME>)``). Existing columns can also be set to be read-only (``ws.setColumnReadOnly(<INDEX>, <TRUE/FALSE>)``).
 - **The Error Reporter can now remember and prefill the user's name and email.**
+
 .. image::  ../../images/ErrorReporter_RememberMe.png
     :align: center
 
@@ -41,8 +42,8 @@ Bugfixes
 * The instrument and facility combo-boxes are now always appropriately sized on the ``About Mantid`` page on macOS.
 * Fixed a bug where copying data from a table displaying a matrix workspace was not working.
 * Workbench will no longer hang if an algorithm was running when Workbench was closed.
-* Fixed a bug in the editor where uncommenting using 'ctrl+/' wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
-* Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``# `` will be inserted at the position of the first non-whitespace character in the line).
+* Fixed a bug in the editor where uncommenting using ``ctrl+/`` wasn't working correctly for lines of the form ``<optional whitespace>#code_here # inline comment``.
+* Commenting code in the editor using ``ctrl+/`` will preserve indenting (i.e. ``#`` will be inserted at the position of the first non-whitespace character in the line).
 * Empty group workspaces can now be deleted rather than needing to be ungrouped.
 * Fixed a bug in :ref:`Project Recovery<Project Recovery>` when attempting to remove non-empty directories and raising the error reporter.
 * Users are no longer able to add a peak to the Fit Property Browser by clicking with the interactive tool outside of the axes (which would cause an error).
@@ -53,9 +54,11 @@ InstrumentViewer
 New features
 ############
 - **In the** :ref:`Pick Tab<instrumentviewer_pick_tab>` **, a new panel allowing users to directly rebin their workspace now exists.**
+
 .. figure:: ../../images/iview_insitu_rebin.png
      :width: 500px
      :align: center
+
 - The ability to rotate Ellipse and Rectangle shapes has been added.
 - The integration slider now supports discrete steps when the axis has discrete values.
 - A new button has been added to the :ref:`Pick Tab<instrumentviewer_pick_tab>` to allow all of the detectors in the instrument to be summed in the miniplot without having to draw a shape.
