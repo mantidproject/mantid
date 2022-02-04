@@ -344,7 +344,6 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
   auto const elasticBinIndexOffset =
       static_cast<double>(getProperty(PropertyNames::ELASTIC_BIN_INDEX)) - static_cast<int>(m_elasticBinIndex);
   auto eppOffset = 0.0;
-  g_log.information() << "EPP: " << epp << ".\n";
   if (m_eppTable) {
     averageL2AndEPP(spectrumInfo, l2, epp);
   } else {
@@ -354,6 +353,7 @@ void CorrectTOFAxis::correctManually(const API::MatrixWorkspace_sptr &outputWs) 
     const double l2Property = getProperty(PropertyNames::L2);
     l2 = l2Property == EMPTY_DBL() ? averageL2(spectrumInfo) : l2Property;
   }
+  g_log.information() << "EPP: " << epp << ".\n";
   double Ei = getProperty(PropertyNames::FIXED_ENERGY);
   if (Ei == EMPTY_DBL()) {
     Ei = m_inputWs->run().getPropertyAsSingleValue(SampleLog::INCIDENT_ENERGY);
