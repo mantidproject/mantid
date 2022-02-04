@@ -15,6 +15,10 @@ Concepts
 Algorithms
 ----------
 
+Instrument Definition Files
+---------------------------
+- The NOMAD instrument geometry was updated
+
 Data Objects
 ------------
 
