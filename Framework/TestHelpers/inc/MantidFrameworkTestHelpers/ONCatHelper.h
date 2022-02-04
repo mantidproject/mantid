@@ -13,10 +13,6 @@
 #include <map>
 #include <memory>
 
-#include <Poco/Net/HTTPResponse.h>
-
-using Poco::Net::HTTPResponse;
-
 using Mantid::Catalog::OAuth::IOAuthTokenStore;
 using Mantid::Catalog::OAuth::IOAuthTokenStore_uptr;
 using Mantid::Catalog::OAuth::OAuthToken;
