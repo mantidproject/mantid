@@ -37,7 +37,7 @@ class CalculateFlux(PythonAlgorithm):
 
     def PyExec(self):
         input_ws = self.getProperty('InputWorkspace').value
-        if input_ws.getAxis(0).getUnit().unitID() == 'Wavelength' and not input_ws.isCommonBins():
+        if input_ws.getAxis(0).getUnit().unitID() != 'Empty' and not input_ws.isCommonBins():
             wavelengths = input_ws.extractX().flatten()
             min_wavelength = np.min(wavelengths)
             max_wavelength = np.max(wavelengths)
