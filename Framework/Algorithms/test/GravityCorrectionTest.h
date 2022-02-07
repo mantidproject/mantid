@@ -10,9 +10,9 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/GravityCorrection.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidHistogramData/LinearGenerator.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::Algorithms;
