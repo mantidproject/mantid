@@ -66,7 +66,6 @@ New features
 Improvements
 ############
 - In the :ref:`Pick Tab<instrumentviewer_pick_tab>` integration is now by default over the entire detector unless some other curve is requested (such as by drawing a shape or picking a detector).
-- The instrument is now loaded in a background thread when opening the :ref:`InstrumentViewer` which prevents running scripts from hanging.
 - The Y-position of the HKL labels on the miniplot is now fixed in Axes coordinates so that the label remains visible as the zoom level changes.
 
 Bugfixes
