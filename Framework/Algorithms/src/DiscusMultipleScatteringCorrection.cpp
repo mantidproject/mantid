@@ -184,7 +184,7 @@ void DiscusMultipleScatteringCorrection::getXMinMax(Mantid::API::MatrixWorkspace
 
   // determine the data range - only return min > 0. Bins with x=0 will be skipped later on
   for (size_t workspaceIndex = 0; workspaceIndex < numberOfSpectra; workspaceIndex++) {
-    const auto &dataX = ws.x(workspaceIndex);
+    const auto &dataX = ws.points(workspaceIndex);
     const double xfront = dataX.front();
     const double xback = dataX.back();
     if (std::isnormal(xfront) && std::isnormal(xback)) {
@@ -427,8 +427,7 @@ void DiscusMultipleScatteringCorrection::exec() {
   }
 }
 
-std::unique_ptr<Mantid::HistogramData::Histogram>
-DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
+std::unique_ptr<Mantid::HistogramData::Histogram> DiscusMultipleScatteringCorrection::prepareQSQ(double kmax) {
   std::vector<double> qValues = m_SQHist->readX();
   std::vector<double> SQValues = m_SQHist->readY();
   // add terminating points at 0 and 2k before multiplying by Q so no extrapolation problems
