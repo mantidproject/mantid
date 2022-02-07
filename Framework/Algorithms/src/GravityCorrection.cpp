@@ -235,7 +235,7 @@ map<string, string> GravityCorrection::validateInputs() {
   // iterator to first occurence of the algorithm name
   const auto it =
       find_if(histories.cbegin(), histories.cend(),
-              [this](const boost::shared_ptr<Mantid::API::AlgorithmHistory> &i) { return i->name() == this->name(); });
+              [this](const std::shared_ptr<Mantid::API::AlgorithmHistory> &i) { return i->name() == this->name(); });
   if (it != histories.end())
     result["InputWorkspace"] = "GravityCorrection did already execute "
                                "(check workspace history).";
